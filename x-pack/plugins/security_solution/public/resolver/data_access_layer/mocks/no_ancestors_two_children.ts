@@ -57,7 +57,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
           events: [
             mockEndpointEvent({
               entityID,
-              name: 'event',
+              processName: 'event',
               timestamp: 0,
             }),
           ],

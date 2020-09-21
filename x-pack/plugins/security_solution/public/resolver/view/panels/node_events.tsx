@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import { ResolverNodeStats, SafeResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
@@ -25,7 +25,7 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
   const relatedEventsStats = useSelector((state: ResolverState) =>
     selectors.relatedEventsStats(state)(nodeID)
   );
-  if (processEvent === null || relatedEventsStats === undefined) {
+  if (processEvent === null || relatedEventsStats === undefined || nodeID) {
     return (
       <StyledPanel>
         <PanelLoading />
@@ -34,7 +34,11 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
   } else {
     return (
       <StyledPanel>
-        <EventCountsForProcess processEvent={processEvent} relatedStats={relatedEventsStats} />
+        <EventCountsForProcess
+          nodeID={nodeID}
+          processEvent={processEvent}
+          relatedStats={relatedEventsStats}
+        />
       </StyledPanel>
     );
   }
@@ -53,9 +57,11 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  */
 const EventCountsForProcess = memo(function ({
   processEvent,
+  nodeID,
   relatedStats,
 }: {
-  processEvent: ResolverEvent;
+  nodeID: string;
+  processEvent: SafeResolverEvent;
   relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {
@@ -63,8 +69,7 @@ const EventCountsForProcess = memo(function ({
     count: number;
   }
 
-  const nodeName = processEvent && event.processName(processEvent);
-  const nodeID = event.entityId(processEvent);
+  const nodeName = event.processNameSafeVersion(processEvent);
 
   const eventLinkNavProps = useLinkProps({
     panelView: 'nodes',

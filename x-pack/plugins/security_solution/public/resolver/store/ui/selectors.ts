@@ -8,7 +8,7 @@ import { decode, encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { isPanelViewAndParameters } from '../../models/location_search';
 import { eventID } from '../../../../common/endpoint/models/event';
 
@@ -124,9 +124,9 @@ export const relatedEventDetailHrefs: (
 ) => (
   category: string,
   nodeID: string,
-  events: ResolverEvent[]
+  events: SafeResolverEvent[]
 ) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
-  return (category: string, nodeID: string, events: ResolverEvent[]) => {
+  return (category: string, nodeID: string, events: SafeResolverEvent[]) => {
     const hrefsByEntityID = new Map<string, string | undefined>();
     events.map((event) => {
       const entityID = String(eventID(event));

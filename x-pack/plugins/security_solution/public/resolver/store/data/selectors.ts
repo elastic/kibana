@@ -20,7 +20,6 @@ import {
   isGraphableProcess,
   isTerminatedProcess,
   uniquePidForProcess,
-  uniqueParentPidForProcess,
 } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -98,7 +97,7 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
       .lifecycleEvents(tree)
       .filter(isTerminatedProcess)
       .map((terminatedEvent) => {
-        return uniquePidForProcess(terminatedEvent);
+        return eventModel.entityIDSafeVersion(terminatedEvent);
       })
   );
 });
@@ -121,12 +120,14 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
   // Keep track of the last process event (in array order) for each entity ID
-  const events: Map<string, ResolverEvent> = new Map();
+  const events: Map<string, SafeResolverEvent> = new Map();
   if (tree) {
     for (const event of resolverTreeModel.lifecycleEvents(tree)) {
       if (isGraphableProcess(event)) {
-        const entityID = uniquePidForProcess(event);
-        events.set(entityID, event);
+        const entityID = eventModel.entityIDSafeVersion(event);
+        if (entityID !== undefined) {
+          events.set(entityID, event);
+        }
       }
     }
     return [...events.values()];
@@ -188,16 +189,16 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
 
 export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
   // A map of nodeID to a map of eventID to events. Lazily populated.
-  const memo = new Map<string, Map<string | number, ResolverEvent>>();
+  const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
   return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
     const eventsWrapper = relatedEvents.get(nodeID);
     if (!eventsWrapper) {
       return undefined;
     }
     if (!memo.has(nodeID)) {
-      const map = new Map<string | number, ResolverEvent>();
+      const map = new Map<string | number, SafeResolverEvent>();
       for (const event of eventsWrapper.events) {
-        const id = eventModel.eventID(event);
+        const id = eventModel.eventIDSafeVersion(event);
         if (id !== undefined) {
           map.set(id, event);
         }
@@ -256,7 +257,7 @@ const objectToDescriptionListEntries = function* (
  */
 export const relatedEventsByCategory: (
   state: DataState
-) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
+) => (entityID: string) => (ecsCategory: string) => SafeResolverEvent[] = createSelector(
   relatedEventsByEntityId,
   function (
     /* eslint-disable no-shadow */
@@ -271,10 +272,8 @@ export const relatedEventsByCategory: (
           return [];
         }
         return relatedById.events.reduce(
-          (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
-            if (
-              [candidate && eventModel.allEventCategories(candidate)].flat().includes(ecsCategory)
-            ) {
+          (eventsByCategory: SafeResolverEvent[], candidate: SafeResolverEvent) => {
+            if ([candidate && eventModel.eventCategory(candidate)].flat().includes(ecsCategory)) {
               eventsByCategory.push(candidate);
             }
             return eventsByCategory;
@@ -376,12 +375,12 @@ export const relatedEventInfoByEntityId: (
        *
        * @param eventCategory {string} The ECS category like 'file','dns',etc.
        */
-      const unmemoizedMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+      const unmemoizedMatchingEventsForCategory = (eventCategory: string): SafeResolverEvent[] => {
         if (!eventsResponseForThisEntry) {
           return [];
         }
         return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [eventModel.allEventCategories(resolverEvent)].flat()) {
+          for (const category of [eventModel.eventCategory(resolverEvent)].flat()) {
             if (category === eventCategory) {
               return true;
             }
@@ -508,10 +507,10 @@ export const layout = createSelector(
  */
 export const processEventForID: (
   state: DataState
-) => (nodeID: string) => ResolverEvent | null = createSelector(
+) => (nodeID: string) => SafeResolverEvent | null = createSelector(
   tree,
   (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
 );
 
 /**
@@ -522,7 +521,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   processEventForID,
   ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
     const node = processEventGetter(nodeID);
-    return node ? ariaLevels.get(node as SafeResolverEvent) ?? null : null;
+    return node ? ariaLevels.get(node) ?? null : null;
   }
 );
 
@@ -557,7 +556,7 @@ export const ariaFlowtoCandidate: (
        * Getting the following sibling of a node has an `O(n)` time complexity where `n` is the number of children the parent of the node has.
        * For this reason, we calculate the following siblings of the node and all of its siblings at once and cache them.
        */
-      const nodeEvent: ResolverEvent | null = eventGetter(nodeID);
+      const nodeEvent: SafeResolverEvent | null = eventGetter(nodeID);
 
       if (!nodeEvent) {
         // this should never happen.
@@ -567,23 +566,30 @@ export const ariaFlowtoCandidate: (
       // nodes with the same parent ID
       const children = indexedProcessTreeModel.children(
         indexedProcessTree,
-        uniqueParentPidForProcess(nodeEvent)
+        eventModel.parentEntityIDSafeVersion(nodeEvent)
       );
 
-      let previousChild: ResolverEvent | null = null;
+      let previousChild: SafeResolverEvent | null = null;
       // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child as ResolverEvent));
+          const previousChildEntityID = eventModel.entityIDSafeVersion(previousChild);
+          const followingSiblingEntityID = eventModel.entityIDSafeVersion(child);
+          if (previousChildEntityID !== undefined && followingSiblingEntityID !== undefined) {
+            memo.set(previousChildEntityID, followingSiblingEntityID);
+          }
         }
         // Set the child as the previous child.
-        previousChild = child as ResolverEvent;
+        previousChild = child;
       }
 
       if (previousChild) {
         // if there is a previous child, it has no following sibling.
-        memo.set(uniquePidForProcess(previousChild), null);
+        const entityID = eventModel.entityIDSafeVersion(previousChild);
+        if (entityID !== undefined) {
+          memo.set(entityID, null);
+        }
       }
 
       return memoizedGetter(nodeID);

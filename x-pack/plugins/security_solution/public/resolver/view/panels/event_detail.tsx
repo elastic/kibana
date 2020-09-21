@@ -23,7 +23,7 @@ import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -108,12 +108,12 @@ const EventDetailContents = memo(function ({
   processEvent,
 }: {
   nodeID: string;
-  event: ResolverEvent;
+  event: SafeResolverEvent;
   /**
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: ResolverEvent;
+  processEvent: SafeResolverEvent;
 }) {
   const formattedDate = useMemo(() => {
     const timestamp = eventModel.timestampSafeVersion(event);
@@ -126,7 +126,7 @@ const EventDetailContents = memo(function ({
     <StyledPanel>
       <EventDetailBreadcrumbs
         nodeID={nodeID}
-        nodeName={processEvent ? eventModel.processName(processEvent) : null}
+        nodeName={eventModel.processNameSafeVersion(processEvent)}
         event={event}
         breadcrumbEventCategory={eventType}
       />
@@ -137,7 +137,7 @@ const EventDetailContents = memo(function ({
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
               category: eventType,
-              eventType: String(eventModel.ecsEventType(event)),
+              eventType: String(eventModel.eventType(event)),
             }}
             defaultMessage="{category} {eventType}"
           />
@@ -162,7 +162,7 @@ const EventDetailContents = memo(function ({
   );
 });
 
-function EventDetailFields({ event }: { event: ResolverEvent }) {
+function EventDetailFields({ event }: { event: SafeResolverEvent }) {
   const sections = useMemo(() => {
     const returnValue: Array<{
       namespace: React.ReactNode;
@@ -262,8 +262,8 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory,
 }: {
   nodeID: string;
-  nodeName: string | null;
-  event: ResolverEvent;
+  nodeName?: string;
+  event: SafeResolverEvent;
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>

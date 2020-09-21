@@ -9,11 +9,11 @@ import { FormattedMessage } from 'react-intl';
 import React from 'react';
 
 import {
-  isLegacyEvent,
-  processName,
-  entityId as entityID,
+  isLegacyEventSafeVersion,
+  processNameSafeVersion,
+  entityIDSafeVersion,
 } from '../../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 /**
  * Based on the ECS category of the event, attempt to provide a more descriptive name
@@ -25,19 +25,16 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
  * @param event The ResolverEvent to get the descriptive name for
  */
-export function DescriptiveName({ event }: { event: ResolverEvent }) {
-  if (isLegacyEvent(event)) {
+export function DescriptiveName({ event }: { event: SafeResolverEvent }) {
+  if (isLegacyEventSafeVersion(event)) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.legacyEventLabel"
         defaultMessage="{ processName }"
-        values={{ processName: processName(event) }}
+        values={{ processName: processNameSafeVersion(event) }}
       />
     );
   }
-
-  type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
-  const partialEvent: DeepPartial<ResolverEvent> = event;
 
   /**
    * This list of attempts can be expanded/adjusted as the underlying model changes over time:
@@ -45,62 +42,62 @@ export function DescriptiveName({ event }: { event: ResolverEvent }) {
 
   // Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
 
-  if (partialEvent.network?.forwarded_ip) {
+  if (event.network?.forwarded_ip) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.networkEventLabel"
         defaultMessage="{ networkDirection } { forwardedIP }"
         values={{
-          forwardedIP: String(partialEvent.network?.forwarded_ip),
-          networkDirection: String(partialEvent.network?.direction),
+          forwardedIP: String(event.network?.forwarded_ip),
+          networkDirection: String(event.network?.direction),
         }}
       />
     );
   }
 
-  if (partialEvent.file?.path) {
+  if (event.file?.path) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.fileEventLabel"
         defaultMessage="{ filePath }"
         values={{
-          filePath: String(partialEvent.file?.path),
+          filePath: String(event.file?.path),
         }}
       />
     );
   }
 
-  if (partialEvent.registry?.path) {
+  if (event.registry?.path) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.registryPathLabel"
         defaultMessage="{ registryPath }"
         values={{
-          registryPath: String(partialEvent.registry?.path),
+          registryPath: String(event.registry?.path),
         }}
       />
     );
   }
 
-  if (partialEvent.registry?.key) {
+  if (event.registry?.key) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.registryKeyLabel"
         defaultMessage="{ registryKey }"
         values={{
-          registryKey: String(partialEvent.registry?.key),
+          registryKey: String(event.registry?.key),
         }}
       />
     );
   }
 
-  if (partialEvent.dns?.question?.name) {
+  if (event.dns?.question?.name) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.resolver.eventDescription.dnsQuestionNameLabel"
         defaultMessage="{ dnsQuestionName }"
         values={{
-          dnsQuestionName: String(partialEvent.dns?.question?.name),
+          dnsQuestionName: String(event.dns?.question?.name),
         }}
       />
     );
@@ -110,7 +107,7 @@ export function DescriptiveName({ event }: { event: ResolverEvent }) {
       id="xpack.securitySolution.resolver.eventDescription.entityIDLabel"
       defaultMessage="{ entityID }"
       values={{
-        entityID: entityID(event),
+        entityID: entityIDSafeVersion(event),
       }}
     />
   );

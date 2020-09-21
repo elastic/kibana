@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ResolverState } from '../types';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import * as selectors from '../store/selectors';
 
 /**
@@ -20,7 +20,7 @@ export function useRelatedEventDetailNavigation({
 }: {
   nodeID: string;
   category: string;
-  events: ResolverEvent[];
+  events: SafeResolverEvent[];
 }) {
   const relatedEventDetailUrls = useSelector((state: ResolverState) =>
     selectors.relatedEventDetailHrefs(state)(category, nodeID, events)

@@ -104,8 +104,8 @@ export function timestampAsDateSafeVersion(event: TimestampFields): Date | undef
   }
 }
 
-export function eventTimestamp(event: ResolverEvent): string | undefined | number {
-  return event['@timestamp'];
+export function eventTimestamp(event: SafeResolverEvent): string | undefined | number {
+  return firstNonNullValue(event['@timestamp']);
 }
 
 /**
@@ -130,11 +130,10 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
   }
 }
 
-export function eventID(event: ResolverEvent): number | undefined | string {
-  if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id;
-  }
-  return event.event.id;
+export function eventID(event: SafeResolverEvent): number | undefined | string {
+  return firstNonNullValue(
+    isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
+  );
 }
 
 /**
@@ -307,34 +306,12 @@ export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): s
 }
 
 /**
- * @param event The event to get the category for
- */
-export function primaryEventCategory(event: ResolverEvent): string | undefined {
-  if (isLegacyEvent(event)) {
-    const legacyFullType = event.endgame.event_type_full;
-    if (legacyFullType) {
-      return legacyFullType;
-    }
-  } else {
-    const eventCategories = event.event.category;
-    const category = typeof eventCategories === 'string' ? eventCategories : eventCategories[0];
-
-    return category;
-  }
-}
-
-/**
  * @param event The event to get the full ECS category for
  */
-export function allEventCategories(event: ResolverEvent): string | string[] | undefined {
-  if (isLegacyEvent(event)) {
-    const legacyFullType = event.endgame.event_type_full;
-    if (legacyFullType) {
-      return legacyFullType;
-    }
-  } else {
-    return event.event.category;
-  }
+export function eventCategory(event: SafeResolverEvent): string[] {
+  return values(
+    isLegacyEventSafeVersion(event) ? event.endgame.event_type_full : event.event?.category
+  );
 }
 
 /**
@@ -342,9 +319,19 @@ export function allEventCategories(event: ResolverEvent): string | string[] | un
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-event.html
  * @param event The ResolverEvent to get the ecs type for
  */
-export function ecsEventType(event: ResolverEvent): Array<string | undefined> {
-  if (isLegacyEvent(event)) {
-    return [event.endgame.event_subtype_full];
+export function eventType(event: SafeResolverEvent): string[] {
+  return values(
+    isLegacyEventSafeVersion(event) ? event.endgame.event_subtype_full : event.event?.type
+  );
+}
+
+/**
+ * event.kind as an array.
+ */
+export function eventKind(event: SafeResolverEvent): string[] {
+  if (isLegacyEventSafeVersion(event)) {
+    return [];
+  } else {
+    return values(event.event?.kind);
   }
-  return typeof event.event.type === 'string' ? [event.event.type] : event.event.type;
 }

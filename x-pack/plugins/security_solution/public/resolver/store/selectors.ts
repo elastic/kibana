@@ -9,7 +9,7 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
@@ -73,7 +73,7 @@ export const eventByID = composeSelectors(dataStateSelector, dataSelectors.event
  */
 export const processEventForID: (
   state: ResolverState
-) => (nodeID: string) => ResolverEvent | null = composeSelectors(
+) => (nodeID: string) => SafeResolverEvent | null = composeSelectors(
   dataStateSelector,
   dataSelectors.processEventForID
 );

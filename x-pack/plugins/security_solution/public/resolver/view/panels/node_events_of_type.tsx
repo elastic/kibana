@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-duplicate-imports */
+
 /* eslint-disable react/display-name */
 
 import React, { memo, useMemo, useEffect, Fragment, ReactNode } from 'react';
@@ -11,11 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { StyledPanel } from '../styles';
 import { formatDate, BoldCode, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
@@ -49,11 +52,7 @@ const NodeCategoryEntries = memo(function ({
   eventType,
   nodeID,
 }: {
-  crumbs: Array<{
-    text: string | JSX.Element | null;
-    onClick: (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => void;
-    href?: string;
-  }>;
+  crumbs: EuiBreadcrumb[];
   matchingEventEntries: MatchingEventEntry[];
   eventType: string;
   nodeID: string;
@@ -139,12 +138,12 @@ const NodeEventList = memo(function ({
   eventCount,
   nodeID,
 }: {
-  processEvent: ResolverEvent | null;
+  processEvent: SafeResolverEvent;
   eventType: string;
   eventCount: number;
   nodeID: string;
 }) {
-  const processName = processEvent && event.processName(processEvent);
+  const processName = event.processNameSafeVersion(processEvent);
 
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -189,7 +188,7 @@ const NodeEventList = memo(function ({
       return {
         formattedDate,
         eventCategory: `${eventType}`,
-        eventType: `${event.ecsEventType(resolverEvent)}`,
+        eventType: `${event.eventType(resolverEvent)}`,
         name: <DescriptiveName event={resolverEvent} />,
         setQueryParams: () => relatedEventDetailNavigation(entityId),
       };
