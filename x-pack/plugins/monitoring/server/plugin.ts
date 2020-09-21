@@ -21,6 +21,7 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -245,6 +246,7 @@ export class Plugin {
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
         defaultMessage: 'Stack Monitoring',
       }),
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'monitoringApp',
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],

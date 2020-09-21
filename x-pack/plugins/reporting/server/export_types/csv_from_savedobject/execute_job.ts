@@ -48,9 +48,8 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
     const savedObjectsClient = context.core.savedObjects.client;
-
-    const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiConfig);
+    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiSettingsClient);
 
     const elasticsearch = reporting.getElasticsearchService();
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
@@ -58,7 +57,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
-      uiConfig,
+      uiSettingsClient,
       callAsCurrentUser,
       new CancellationToken() // can not be cancelled
     );
