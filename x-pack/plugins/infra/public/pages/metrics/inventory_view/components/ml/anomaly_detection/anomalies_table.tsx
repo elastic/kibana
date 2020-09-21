@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { useState } from 'react';
-import moment from 'moment';
+// import { useState } from 'react';
+// import moment from 'moment';
 // import { useMetricsHostsAnomaliesResults } from '../../../hooks/use_metrics_hosts_anomalies';
 // import { useMetricsK8sAnomaliesResults } from '../../../hooks/use_metrics_k8s_anomalies';
 
