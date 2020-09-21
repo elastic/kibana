@@ -10,8 +10,8 @@ import {
   RequestHandler,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  LegacyAPICaller,
 } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { TRANSFORM_STATE } from '../../../common/constants';
@@ -394,7 +394,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
 const getTransforms = async (
   options: { transformId?: string },
-  callAsCurrentUser: CallCluster
+  callAsCurrentUser: LegacyAPICaller
 ): Promise<GetTransformsResponseSchema> => {
   return await callAsCurrentUser('transform.getTransforms', options);
 };
@@ -570,7 +570,7 @@ const startTransformsHandler: RequestHandler<
 
 async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
-  callAsCurrentUser: CallCluster
+  callAsCurrentUser: LegacyAPICaller
 ) {
   const results: StartTransformsResponseSchema = {};
 
@@ -612,7 +612,7 @@ const stopTransformsHandler: RequestHandler<
 
 async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,
-  callAsCurrentUser: CallCluster
+  callAsCurrentUser: LegacyAPICaller
 ) {
   const results: StopTransformsResponseSchema = {};
 
