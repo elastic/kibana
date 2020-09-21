@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { formatApiName } from './format_api_name';
+import { formatApiName } from '.';
 
 describe('formatApiName', () => {
   it('will format an api name', () => {

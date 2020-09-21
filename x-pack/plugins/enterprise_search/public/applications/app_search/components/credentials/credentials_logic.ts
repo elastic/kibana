@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { formatApiName } from '../../utils';
+import { formatApiName } from '../../utils/format_api_name';
 import { ADMIN, PRIVATE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
