@@ -114,7 +114,7 @@ export const ColumnHeadersComponent = ({
   timelineId,
   toggleColumn,
 }: Props) => {
-  const [draggingIndex, setDraggingIndex] = useState(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
     timelineFullScreen,
     setTimelineFullScreen,
