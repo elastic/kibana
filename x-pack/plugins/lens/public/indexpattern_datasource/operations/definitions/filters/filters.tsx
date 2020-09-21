@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../../state_helpers';
 import { OperationDefinition } from '../index';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
 import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
@@ -61,7 +61,7 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
   }
 };
 
-export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: 'filters';
   params: {
     filters: Filter[];
@@ -72,20 +72,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   type: 'filters',
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
-  getPossibleOperationForField: ({ type }) => {
-    if (type === 'document') {
-      return {
-        dataType: 'string',
-        isBucketed: true,
-        scale: 'ordinal',
-      };
-    }
-  },
-  isTransferable: () => false,
 
-  onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
+  input: 'none',
+  isTransferable: () => true,
 
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ suggestedPriority, previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -108,8 +99,15 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       scale: 'ordinal',
       suggestedPriority,
       isBucketed: true,
-      sourceField: field.name,
       params,
+    };
+  },
+
+  getPossibleOperation() {
+    return {
+      dataType: 'string',
+      isBucketed: true,
+      scale: 'ordinal',
     };
   },
 

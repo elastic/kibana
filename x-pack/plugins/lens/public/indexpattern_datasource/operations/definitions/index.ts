@@ -139,40 +139,71 @@ interface BaseBuildColumnArgs {
  * indicates a field based column, `getPossibleOperationForField` has to be
  * specified, otherwise `getPossibleOperationForDocument` has to be defined.
  */
-export interface OperationDefinition<C extends BaseIndexPatternColumn>
-  extends BaseOperationDefinitionProps<C> {
-  /**
-   * Returns the meta data of the operation if applied to the given field. Undefined
-   * if the field is not applicable to the operation.
-   */
-  getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
-  /**
-   * Builds the column object for the given parameters. Should include default p
-   */
-  buildColumn: (
-    arg: BaseBuildColumnArgs & {
-      field: IndexPatternField;
-      previousColumn?: IndexPatternColumn;
-    }
-  ) => C;
-  /**
-   * This method will be called if the user changes the field of an operation.
-   * You must implement it and return the new column after the field change.
-   * The most simple implementation will just change the field on the column, and keep
-   * the rest the same. Some implementations might want to change labels, or their parameters
-   * when changing the field.
-   *
-   * This will only be called for switching the field, not for initially selecting a field.
-   *
-   * See {@link OperationDefinition#transfer} for controlling column building when switching an
-   * index pattern not just a field.
-   *
-   * @param oldColumn The column before the user changed the field.
-   * @param indexPattern The index pattern that field is on.
-   * @param field The field that the user changed to.
-   */
-  onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
-}
+
+// interface SharedOperationDefinition<C extends BaseIndexPatternColumn>
+//   extends BaseOperationDefinitionProps<C> {
+//   /**
+//    * Builds the column object for the given parameters. Should include default p
+//    */
+//   buildColumn: (
+//     arg: BaseBuildColumnArgs & {
+//       field?: IndexPatternField;
+//       previousColumn?: IndexPatternColumn;
+//     }
+//   ) => C;
+// }
+
+export type OperationDefinition<C extends BaseIndexPatternColumn> =
+  | (BaseOperationDefinitionProps<C> & {
+      input: 'none';
+      /**
+       * Builds the column object for the given parameters. Should include default p
+       */
+      buildColumn: (
+        arg: BaseBuildColumnArgs & {
+          previousColumn?: IndexPatternColumn;
+        }
+      ) => C;
+      /**
+       * Returns the meta data of the operation if applied. Undefined
+       * if the field is not applicable.
+       */
+      getPossibleOperation: () => OperationMetadata | undefined;
+    })
+  | (BaseOperationDefinitionProps<C> & {
+      input: 'field';
+      /**
+       * Returns the meta data of the operation if applied to the given field. Undefined
+       * if the field is not applicable to the operation.
+       */
+      getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
+      /**
+       * Builds the column object for the given parameters. Should include default p
+       */
+      buildColumn: (
+        arg: BaseBuildColumnArgs & {
+          field: IndexPatternField;
+          previousColumn?: IndexPatternColumn;
+        }
+      ) => C;
+      /**
+       * This method will be called if the user changes the field of an operation.
+       * You must implement it and return the new column after the field change.
+       * The most simple implementation will just change the field on the column, and keep
+       * the rest the same. Some implementations might want to change labels, or their parameters
+       * when changing the field.
+       *
+       * This will only be called for switching the field, not for initially selecting a field.
+       *
+       * See {@link OperationDefinition#transfer} for controlling column building when switching an
+       * index pattern not just a field.
+       *
+       * @param oldColumn The column before the user changed the field.
+       * @param indexPattern The index pattern that field is on.
+       * @param field The field that the user changed to.
+       */
+      onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
+    });
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.

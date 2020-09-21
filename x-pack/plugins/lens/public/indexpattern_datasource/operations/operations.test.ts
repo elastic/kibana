@@ -182,7 +182,7 @@ describe('getOperationTypesForField', () => {
       },
     };
 
-    it('should build a column for the given operation type if it is passed in', () => {
+    it('should build a column for the given field-based operation type if it is passed in', () => {
       const column = buildColumn({
         layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
@@ -192,6 +192,17 @@ describe('getOperationTypesForField', () => {
         field: documentField,
       });
       expect(column.operationType).toEqual('count');
+    });
+
+    it('should build a column for the given no-input operation type if it is passed in', () => {
+      const column = buildColumn({
+        layerId: 'first',
+        indexPattern: expectedIndexPatterns[1],
+        columns: state.layers.first.columns,
+        suggestedPriority: 0,
+        op: 'filters',
+      });
+      expect(column.operationType).toEqual('filters');
     });
 
     it('should build a column for the given operation type and field if it is passed in', () => {
@@ -222,9 +233,27 @@ describe('getOperationTypesForField', () => {
       );
     });
 
-    it('should list out all field-operation tuples for different operation meta data', () => {
+    it('should list out all operation tuples', () => {
       expect(getAvailableOperationsByMetadata(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "operationMetaData": Object {
+              "dataType": "string",
+              "isBucketed": true,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "operationType": "filters",
+                "type": "none",
+              },
+              Object {
+                "field": "source",
+                "operationType": "terms",
+                "type": "field",
+              },
+            ],
+          },
           Object {
             "operationMetaData": Object {
               "dataType": "number",
@@ -234,20 +263,6 @@ describe('getOperationTypesForField', () => {
             "operations": Array [
               Object {
                 "field": "bytes",
-                "operationType": "terms",
-                "type": "field",
-              },
-            ],
-          },
-          Object {
-            "operationMetaData": Object {
-              "dataType": "string",
-              "isBucketed": true,
-              "scale": "ordinal",
-            },
-            "operations": Array [
-              Object {
-                "field": "source",
                 "operationType": "terms",
                 "type": "field",
               },

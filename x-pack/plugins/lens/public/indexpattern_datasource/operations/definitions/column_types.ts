@@ -14,7 +14,6 @@ import { Operation, DimensionPriority } from '../../../types';
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
-  sourceField: string;
   suggestedPriority?: DimensionPriority;
   customLabel?: boolean;
 }
@@ -49,5 +48,6 @@ export type ParameterlessIndexPatternColumn<
 > = TBase & { operationType: TOperationType };
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
+  sourceField: string;
   suggestedPriority?: DimensionPriority;
 }

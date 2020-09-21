@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -21,7 +21,9 @@ function ofName(name: string) {
   });
 }
 
-export interface CardinalityIndexPatternColumn extends FormattedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn
+  extends FormattedIndexPatternColumn,
+    FieldBasedIndexPatternColumn {
   operationType: 'cardinality';
 }
 
@@ -30,6 +32,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&

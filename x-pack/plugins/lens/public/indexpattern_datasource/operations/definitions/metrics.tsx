@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-type MetricColumn<T> = FormattedIndexPatternColumn & {
-  operationType: T;
-};
+type MetricColumn<T> = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: T;
+  };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -27,6 +28,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     type,
     priority,
     displayName,
+    input: 'field',
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&

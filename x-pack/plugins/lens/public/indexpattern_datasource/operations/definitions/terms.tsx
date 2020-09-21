@@ -54,6 +54,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     defaultMessage: 'Top values',
   }),
   priority: 3, // Higher than any metric
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&

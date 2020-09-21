@@ -23,6 +23,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
+  input: 'field',
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,

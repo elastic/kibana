@@ -43,6 +43,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     defaultMessage: 'Date histogram',
   }),
   priority: 3, // Higher than any metric
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&

@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // legend item(s), so we're using a class selector here.
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
+
     it('should create an xy visualization with filters aggregation', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
