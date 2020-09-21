@@ -110,12 +110,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const configIndexNamesSelectedSelector = useMemo(
-      () => sourcererSelectors.configIndexPatternsSelector(),
+    const existingIndexNamesSelector = useMemo(
+      () => sourcererSelectors.getAllExistingIndexNamesSelector(),
       []
     );
-    const configIndexNames = useSelector<State, string[]>(
-      configIndexNamesSelectedSelector,
+    const existingIndexNames = useSelector<State, string[]>(
+      existingIndexNamesSelector,
       shallowEqual
     );
 
@@ -205,7 +205,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           createNewTimeline({
             id: TimelineId.active,
             columns: defaultHeaders,
-            indexNames: configIndexNames,
+            indexNames: existingIndexNames,
             show: false,
           });
         }
@@ -220,7 +220,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
         refetch();
       },
-      [apolloClient, createNewTimeline, configIndexNames, refetch, timeline]
+      [apolloClient, createNewTimeline, existingIndexNames, refetch, timeline]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

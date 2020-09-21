@@ -122,10 +122,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    signalIndexName !== null ? [signalIndexName] : []
+    memoSignalIndexName
   );
-
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const onError = useCallback(

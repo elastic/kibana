@@ -28,6 +28,7 @@ import { ExceptionListItemSchema } from '../../../../../../lists/common';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
@@ -60,8 +61,8 @@ describe('When the add exception modal is opened', () => {
       signalIndexName: 'mock-siem-signals-index',
     }));
     (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
       {
-        isLoading: false,
         indexPatterns: stubIndexPattern,
       },
     ]);
@@ -78,8 +79,8 @@ describe('When the add exception modal is opened', () => {
     beforeEach(() => {
       // Mocks one of the hooks as loading
       (useFetchIndex as jest.Mock).mockImplementation(() => [
+        true,
         {
-          isLoading: true,
           indexPatterns: stubIndexPattern,
         },
       ]);
@@ -245,8 +246,8 @@ describe('When the add exception modal is opened', () => {
     beforeEach(() => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       (useFetchIndex as jest.Mock).mockImplementation(() => [
+        false,
         {
-          isLoading: false,
           indexPatterns: {
             ...stubIndexPattern,
             fields: [

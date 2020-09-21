@@ -50,8 +50,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
   }, []);
-  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex);
-
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),

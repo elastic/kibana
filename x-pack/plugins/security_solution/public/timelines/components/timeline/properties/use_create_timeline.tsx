@@ -29,14 +29,11 @@ export const useCreateTimelineButton = ({
   closeGearMenu?: () => void;
 }) => {
   const dispatch = useDispatch();
-  const configIndexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.configIndexPatternsSelector(),
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
     []
   );
-  const configIndexNames = useSelector<State, string[]>(
-    configIndexNamesSelectedSelector,
-    shallowEqual
-  );
+  const existingIndexNames = useSelector<State, string[]>(existingIndexNamesSelector, shallowEqual);
   const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
   const globalTimeRange = useSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
@@ -47,7 +44,7 @@ export const useCreateTimelineButton = ({
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: configIndexNames,
+          selectedPatterns: existingIndexNames,
         })
       );
       dispatch(
@@ -56,7 +53,7 @@ export const useCreateTimelineButton = ({
           columns: defaultHeaders,
           show,
           timelineType,
-          indexNames: configIndexNames,
+          indexNames: existingIndexNames,
         })
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
@@ -78,7 +75,7 @@ export const useCreateTimelineButton = ({
       }
     },
     [
-      configIndexNames,
+      existingIndexNames,
       dispatch,
       globalTimeRange,
       setTimelineFullScreen,

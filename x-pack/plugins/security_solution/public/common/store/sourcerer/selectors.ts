@@ -51,6 +51,36 @@ export const getIndexNamesSelectedSelector = () => {
   return mapStateToProps;
 };
 
+export const getAllExistingIndexNamesSelector = () => {
+  const getSignalIndexNameSelector = signalIndexNameSelector();
+  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
+
+  const mapStateToProps = (state: State): string[] => {
+    const signalIndexName = getSignalIndexNameSelector(state);
+    const configIndexPatterns = getConfigIndexPatternsSelector(state);
+
+    return signalIndexName != null
+      ? [...configIndexPatterns, signalIndexName]
+      : configIndexPatterns;
+  };
+
+  return mapStateToProps;
+};
+
+export const defaultIndexNamesSelector = () => {
+  const getScopesSelector = scopesSelector();
+  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
+
+  const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
+    const scope = getScopesSelector(state)[scopeId];
+    const configIndexPatterns = getConfigIndexPatternsSelector(state);
+
+    return scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns;
+  };
+
+  return mapStateToProps;
+};
+
 export const getSourcererScopeSelector = () => {
   const getScopesSelector = scopesSelector();
 

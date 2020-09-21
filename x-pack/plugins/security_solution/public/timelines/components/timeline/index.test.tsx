@@ -6,15 +6,10 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import {
-  mockBrowserFields,
-  mockDocValueFields,
-  mocksSource,
-} from '../../../common/containers/source/mock';
+import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 
 import {
   mockIndexNames,
@@ -25,39 +20,12 @@ import {
 
 import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
-import { mockPatterns } from '../../../common/containers/sourcerer/mocks';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
-
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        uiSettings: {
-          get: jest.fn(),
-        },
-        data: {
-          search: {
-            search: jest.fn().mockImplementation(() => ({
-              subscribe: jest.fn().mockImplementation(() => ({
-                error: jest.fn(),
-                next: jest.fn(),
-              })),
-            })),
-          },
-        },
-        notifications: {},
-      },
-    }),
-    useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -94,8 +62,6 @@ describe('StatefulTimeline', () => {
     usersViewing: [],
   };
 
-  const mocks = mocksSource;
-
   beforeEach(() => {
     (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
   });
@@ -103,9 +69,7 @@ describe('StatefulTimeline', () => {
   test('renders ', () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mocks} addTypename={false}>
-          <StatefulTimeline {...props} />
-        </MockedProvider>
+        <StatefulTimeline {...props} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();

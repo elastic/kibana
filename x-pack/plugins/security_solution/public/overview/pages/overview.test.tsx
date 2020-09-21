@@ -57,9 +57,12 @@ const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 describe('Overview', () => {
   beforeEach(() => {
-    mockUseFetchIndex.mockReturnValue({
-      indicesExist: true,
-    });
+    mockUseFetchIndex.mockReturnValue([
+      false,
+      {
+        indexExists: true,
+      },
+    ]);
   });
   describe('rendering', () => {
     test('it DOES NOT render the Getting started text when an index is available', () => {
@@ -85,9 +88,12 @@ describe('Overview', () => {
     });
 
     test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
-      mockUseFetchIndex.mockReturnValue({
-        indicesExist: false,
-      });
+      mockUseFetchIndex.mockReturnValue([
+        false,
+        {
+          indexExists: false,
+        },
+      ]);
       mockUseSourcererScope.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
@@ -110,17 +116,17 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', () => {
-      mockUseSourcererScope
-        .mockReturnValueOnce({
-          selectedPatterns: [],
-          indicesExist: true,
-          indexPattern: {},
-        })
-        .mockReturnValueOnce({
-          selectedPatterns: [],
-          indicesExist: false,
-          indexPattern: {},
-        });
+      mockUseFetchIndex.mockReturnValue([
+        false,
+        {
+          indexExists: false,
+        },
+      ]);
+      mockUseSourcererScope.mockReturnValueOnce({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
       mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
@@ -140,7 +146,7 @@ describe('Overview', () => {
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
       mockUseSourcererScope.mockReturnValue({
         selectedPatterns: [],
-        indicesExist: true,
+        indexExists: true,
         indexPattern: {},
       });
 
@@ -176,6 +182,7 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      wrapper.update();
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
       wrapper.unmount();
     });

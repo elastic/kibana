@@ -91,7 +91,7 @@ const missingFields: FieldDescriptor[] = [
     type: 'string',
     searchable: true,
     aggregatable: false,
-    readFromDocValues: true,
+    readFromDocValues: false,
     esTypes: [],
   },
   {
@@ -99,7 +99,7 @@ const missingFields: FieldDescriptor[] = [
     type: 'string',
     searchable: true,
     aggregatable: true,
-    readFromDocValues: true,
+    readFromDocValues: false,
     esTypes: [],
   },
 ];

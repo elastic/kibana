@@ -34,7 +34,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 }));
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
-jest.mock('../../../common/containers/source');
+jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({

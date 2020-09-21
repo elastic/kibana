@@ -26,6 +26,7 @@ import * as builder from '../builder';
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
+jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../builder');
@@ -51,8 +52,8 @@ describe('When the edit exception modal is opened', () => {
       jest.fn(),
     ]);
     (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
       {
-        isLoading: false,
         indexPatterns: stubIndexPatternWithFields,
       },
     ]);
@@ -68,8 +69,8 @@ describe('When the edit exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       (useFetchIndex as jest.Mock).mockImplementation(() => [
+        true,
         {
-          isLoading: true,
           indexPatterns: stubIndexPattern,
         },
       ]);
