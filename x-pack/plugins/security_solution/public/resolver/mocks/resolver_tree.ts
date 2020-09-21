@@ -110,15 +110,6 @@ export function mockTreeWithAllProcessesTerminated({
 }
 
 /**
- * A valid category for a related event. E.g. "registry", "network", "file"
- */
-type RelatedEventCategory = string;
-/**
- * A valid type for a related event. E.g. "start", "end", "access"
- */
-type RelatedEventType = string;
-
-/**
  * Add/replace related event info (on origin node) for any mock ResolverTree
  *
  * @param treeToAddRelatedEventsTo the ResolverTree to modify
@@ -126,7 +117,20 @@ type RelatedEventType = string;
  */
 function withRelatedEventsOnOrigin(
   treeToAddRelatedEventsTo: ResolverTree,
-  relatedEventsToAddByCategoryAndType: Iterable<[RelatedEventCategory, RelatedEventType]>
+  relatedEventsToAddByCategoryAndType: Iterable<
+    [
+      /**
+       * A category for a related event. E.g. "registry", "network", "file"
+       */
+
+      relatedEventCategory: string,
+
+      /**
+       * A type for a related event. E.g. "start", "end", "access"
+       */
+      relatedEventType: string
+    ]
+  >
 ): ResolverTree {
   const events: SafeResolverEvent[] = [];
   const byCategory: Record<string, number> = {};

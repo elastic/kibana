@@ -125,6 +125,7 @@ const EventCountsForProcess = memo(function ({
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.count', {
           defaultMessage: 'Count',
         }),
+        dataTestSubj: 'resolver:panel:node-events:event-type-count',
         width: '20%',
         sortable: true,
       },
@@ -171,5 +172,9 @@ function NodeEventsLink({
       eventType,
     },
   });
-  return <EuiButtonEmpty {...props}>{children}</EuiButtonEmpty>;
+  return (
+    <EuiButtonEmpty data-test-subj="resolver:panel:node-events:event-type-link" {...props}>
+      {children}
+    </EuiButtonEmpty>
+  );
 }

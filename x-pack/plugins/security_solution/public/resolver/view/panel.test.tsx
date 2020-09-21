@@ -59,6 +59,26 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     simulatorInstance = undefined;
   });
 
+  describe('when the URL query string is ?', () => {
+    it('should show the node list', async () => {
+      await expect(
+        simulator().map(() => {
+          return {
+            eventTypeCountLength: simulator().testSubject(
+              'resolver:panel:node-events:event-type-count'
+            ).length,
+            eventTypeLinkLength: simulator().testSubject(
+              'resolver:panel:node-events:event-type-link'
+            ).length,
+          };
+        })
+      ).toYieldEqualTo({
+        eventTypeCountLength: 2,
+        eventTypeLinkLength: 2,
+      });
+    });
+  });
+
   const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
     panelParameters: { nodeID: 'origin' },
     panelView: 'nodeDetail',
