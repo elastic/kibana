@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils';
-import { ADMIN, PRIVATE } from '../../constants/credentials';
+import { ADMIN, PRIVATE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
 import { IApiToken, IEngine, ICredentialsDetails } from '../../../../../common/types/app_search';

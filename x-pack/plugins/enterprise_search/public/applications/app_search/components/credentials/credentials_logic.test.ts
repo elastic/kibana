@@ -7,7 +7,7 @@
 import { resetContext } from 'kea';
 
 import { CredentialsLogic } from './credentials_logic';
-import { ADMIN, PRIVATE } from '../../constants/credentials';
+import { ADMIN, PRIVATE } from './constants';
 
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
