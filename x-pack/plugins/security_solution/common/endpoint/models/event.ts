@@ -120,6 +120,55 @@ export function processName(event: ResolverEvent): string {
 }
 
 /**
+ * First non-null value in the `user.name` field.
+ */
+export function userName(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return undefined;
+  } else {
+    return firstNonNullValue(event.user?.name);
+  }
+}
+
+/**
+ * Returns the process event's parent PID
+ */
+export function parentPID(event: SafeResolverEvent): number | undefined {
+  return firstNonNullValue(
+    isLegacyEventSafeVersion(event) ? event.endgame.ppid : event.process?.parent?.pid
+  );
+}
+
+/**
+ * First non-null value for the `process.hash.md5` field.
+ */
+export function md5HashForProcess(event: SafeResolverEvent): string | undefined {
+  return firstNonNullValue(isLegacyEventSafeVersion(event) ? undefined : event.process?.hash?.md5);
+}
+
+/**
+ * First non-null value for the `event.process.args` field.
+ */
+export function argsForProcess(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    // There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return firstNonNullValue(event.process?.args);
+}
+
+/**
+ * First non-null value in the `user.name` field.
+ */
+export function userDomain(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return undefined;
+  } else {
+    return firstNonNullValue(event.user?.domain);
+  }
+}
+
+/**
  * Find the name of the related process.
  */
 export function processNameSafeVersion(event: SafeResolverEvent): string | undefined {
@@ -280,18 +329,14 @@ export function ancestryArray(event: AncestryArrayFields): string[] | undefined 
 /**
  * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
  */
-type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
+type AncestryFields = AncestryArrayFields & ParentEntityIDFields;
 
 /**
  * Returns an array of strings representing the ancestry for a process.
  *
  * @param event an ES document
  */
-export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
-  if (!event) {
-    return [];
-  }
-
+export function ancestry(event: AncestryFields): string[] {
   const ancestors = ancestryArray(event);
   if (ancestors) {
     return ancestors;

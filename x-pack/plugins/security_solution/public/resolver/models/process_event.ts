@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { firstNonNullValue } from '../../../common/endpoint/models/ecs_safety_helpers';
+
 import * as eventModel from '../../../common/endpoint/models/event';
 import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { ResolverProcessType } from '../types';
@@ -90,12 +92,10 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 /**
  * Returns the PID for the process on the host
  */
-export function processPid(passedEvent: ResolverEvent): number | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    return passedEvent.endgame.pid;
-  } else {
-    return passedEvent.process.pid;
-  }
+export function processPID(event: SafeResolverEvent): number | undefined {
+  return firstNonNullValue(
+    eventModel.isLegacyEventSafeVersion(event) ? event.endgame.pid : event.process?.pid
+  );
 }
 
 /**
@@ -110,25 +110,14 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
 }
 
 /**
- * Returns the process event's parent PID
- */
-export function processParentPid(passedEvent: ResolverEvent): number | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    return passedEvent.endgame.ppid;
-  } else {
-    return passedEvent.process.parent?.pid;
-  }
-}
-
-/**
  * Returns the process event's path on its host
  */
-export function processPath(passedEvent: ResolverEvent): string | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    return passedEvent.endgame.process_path;
-  } else {
-    return passedEvent.process.executable;
-  }
+export function processPath(passedEvent: SafeResolverEvent): string | undefined {
+  return firstNonNullValue(
+    eventModel.isLegacyEventSafeVersion(passedEvent)
+      ? passedEvent.endgame.process_path
+      : passedEvent.process?.executable
+  );
 }
 
 /**
@@ -138,19 +127,6 @@ export function userInfoForProcess(
   passedEvent: ResolverEvent
 ): { name?: string; domain?: string } | undefined {
   return passedEvent.user;
-}
-
-/**
- * Returns the MD5 hash for the `passedEvent` parameter, or undefined if it can't be located
- * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the MD5 value for
- * @returns {string | undefined} The MD5 string for the event
- */
-export function md5HashForProcess(passedEvent: ResolverEvent): string | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    // There is not currently a key for this on Legacy event types
-    return undefined;
-  }
-  return passedEvent?.process?.hash?.md5;
 }
 
 /**
