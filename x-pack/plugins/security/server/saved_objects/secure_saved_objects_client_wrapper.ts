@@ -13,10 +13,10 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -148,13 +148,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     if (status === 'unauthorized') {
-      // return empty result
-      return Promise.resolve({
-        page: options.page ?? 1,
-        per_page: options.perPage ?? 20,
-        total: 0,
-        saved_objects: [],
-      } as SavedObjectsFindResponse<T>);
+      // return empty response
+      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
     }
 
     const typesAndNamespacesMap = Array.from(typeMap).reduce<Map<string, string[] | undefined>>(

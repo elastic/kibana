@@ -14,10 +14,10 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsUtils,
   ISavedObjectTypeRegistry,
 } from 'src/core/server';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
@@ -166,12 +166,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     let namespaces = options.namespaces;
     if (namespaces) {
       const spacesClient = await this.getSpacesClient;
-      const emptyResult = Promise.resolve({
-        page: options.page ?? 1,
-        per_page: options.perPage ?? 20,
-        total: 0,
-        saved_objects: [],
-      } as SavedObjectsFindResponse<T>);
+      const emptyResponse = SavedObjectsUtils.createEmptyFindResponse<T>(options);
 
       try {
         const availableSpaces = await spacesClient.getAll('findSavedObjects');
@@ -183,13 +178,13 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
           );
         }
         if (namespaces.length === 0) {
-          // return empty result, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return emptyResult;
+          // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
+          return emptyResponse;
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-          // return empty result, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return emptyResult;
+          // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
+          return emptyResponse;
         }
         throw err;
       }

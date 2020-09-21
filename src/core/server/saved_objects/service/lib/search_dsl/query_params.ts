@@ -168,9 +168,11 @@ export function getQueryParams({
   // since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
   // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
   // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
-  const normalizeNamespaces = (array?: string[]) =>
-    array
-      ? Array.from(new Set(array.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x))))
+  const normalizeNamespaces = (namespacesToNormalize?: string[]) =>
+    namespacesToNormalize
+      ? Array.from(
+          new Set(namespacesToNormalize.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x)))
+        )
       : undefined;
 
   const bool: any = {
