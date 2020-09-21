@@ -31,8 +31,8 @@ export interface FilterValue {
   label: string;
 }
 
-const customQueryLabel = i18n.translate('xpack.lens.indexPattern.customQuery', {
-  defaultMessage: 'Custom query',
+const filtersLabel = i18n.translate('xpack.lens.indexPattern.filters', {
+  defaultMessage: 'Filters',
 });
 
 export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
@@ -70,7 +70,7 @@ export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn 
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
   type: 'filters',
-  displayName: customQueryLabel,
+  displayName: filtersLabel,
   priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ type }) => {
     if (type === 'document') {
@@ -102,7 +102,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     }
 
     return {
-      label: customQueryLabel,
+      label: filtersLabel,
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
@@ -223,8 +223,8 @@ export const FilterList = ({
                 defaultMessage: 'This query is invalid',
               })}
               onRemoveClick={() => onRemoveFilter(filter.id)}
-              removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeCustomQuery', {
-                defaultMessage: 'Remove custom query',
+              removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
+                defaultMessage: 'Remove a filter',
               })}
               isNotRemovable={localFilters.length === 1}
             >
@@ -260,8 +260,8 @@ export const FilterList = ({
           onAddFilter();
           setIsOpenByCreation(true);
         }}
-        label={i18n.translate('xpack.lens.indexPattern.filters.addCustomQuery', {
-          defaultMessage: 'Add a custom query',
+        label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
+          defaultMessage: 'Add a filter',
         })}
       />
     </>

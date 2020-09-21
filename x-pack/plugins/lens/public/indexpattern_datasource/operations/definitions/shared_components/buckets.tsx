@@ -20,7 +20,12 @@ import {
 } from '@elastic/eui';
 
 export const NewBucketButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
-  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={onClick}>
+  <EuiButtonEmpty
+    data-test-subj="lns-newBucket-add"
+    size="xs"
+    iconType="plusInCircle"
+    onClick={onClick}
+  >
     {label}
   </EuiButtonEmpty>
 );

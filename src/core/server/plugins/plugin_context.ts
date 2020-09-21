@@ -179,6 +179,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
     },
+    metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
@@ -191,6 +195,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       set: deps.status.plugins.set.bind(null, plugin.name),
       dependencies$: deps.status.plugins.getDependenciesStatus$(plugin.name),
       derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
+      isStatusPageAnonymous: deps.status.isStatusPageAnonymous,
     },
     uiSettings: {
       register: deps.uiSettings.register,
