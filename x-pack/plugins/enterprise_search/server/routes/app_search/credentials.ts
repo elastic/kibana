@@ -45,7 +45,7 @@ export function registerCredentialsRoutes({
     },
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/credentials/credentials/${request.params.name}`,
+        path: `/as/credentials/${request.params.name}`,
       })(context, request, response);
     }
   );

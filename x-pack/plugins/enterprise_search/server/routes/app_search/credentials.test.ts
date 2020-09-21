@@ -84,7 +84,7 @@ describe('credentials routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/credentials/credentials/abc123',
+        path: '/as/credentials/abc123',
       });
     });
   });
