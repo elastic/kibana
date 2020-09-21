@@ -60,19 +60,43 @@ export async function installLatestPackage(options: {
   }
 }
 
+function isBulkInstallError(resp: BulkInstallResponse): resp is IBulkInstallPackageError {
+  return 'error' in resp && resp.error !== undefined;
+}
+
+async function getInstallationAndName(
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string
+) {
+  return {
+    pkgName,
+    installation: await getInstallation({ savedObjectsClient, pkgName }),
+  };
+}
+
+type GetInstallationReturnType = UnwrapPromise<ReturnType<typeof getInstallationAndName>>;
 export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-): Promise<Installation[]> {
+): Promise<GetInstallationReturnType[]> {
   const installations = [];
-  for (const pkgName in DefaultPackages) {
-    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    const installation = ensureInstalledPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    installations.push(installation);
+  const bulkResponse = await bulkInstallPackages({
+    savedObjectsClient,
+    packagesToUpgrade: Object.values(DefaultPackages),
+    callCluster,
+  });
+
+  for (const resp of bulkResponse) {
+    if (isBulkInstallError(resp)) {
+      if (resp.error instanceof Error) {
+        throw resp.error;
+      } else {
+        throw new Error(resp.error);
+      }
+    } else {
+      const installation = getInstallationAndName(savedObjectsClient, resp.name);
+      installations.push(installation);
+    }
   }
 
   return Promise.all(installations);

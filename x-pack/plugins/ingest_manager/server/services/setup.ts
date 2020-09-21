@@ -79,7 +79,11 @@ async function createSetupSideEffects(
   ) {
     throw new Error('Policy not found');
   }
-  for (const installedPackage of installedPackages) {
+  for (const installedPackageInfo of installedPackages) {
+    const installedPackage = installedPackageInfo.installation;
+    if (!installedPackage) {
+      throw new Error(`could not get installation ${installedPackageInfo.pkgName} during setup`);
+    }
     const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
       (packageName) => installedPackage.name === packageName
     );
