@@ -7,19 +7,17 @@
 /* eslint-disable react/display-name */
 
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
   EuiHealth,
   EuiToolTip,
-  EuiBadgeGroup,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import styled from 'styled-components';
+import { TagOverflow } from '../../../../../common/components/tag_overflow';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -48,7 +46,6 @@ export const getActions = (
   reFetchRules: (refreshPrePackagedRule?: boolean) => void
 ) => [
   {
-    'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
@@ -100,10 +97,6 @@ interface GetColumns {
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
 }
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
-`;
 
 export const getColumns = ({
   dispatch,
@@ -212,31 +205,16 @@ export const getColumns = ({
         );
       },
       truncateText: true,
-      width: '10%',
+      width: '8%',
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: Rule['tags']) => {
-        if (value != null && value.length > 0) {
-          return (
-            <TagWrapper data-test-subj="tags">
-              {value.map((tag: string, i: number) => (
-                <EuiBadge
-                  color="hollow"
-                  key={`${tag}-${i}`}
-                  data-test-subj={`rules-table-column-tags-${i}`}
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </TagWrapper>
-          );
-        }
-        return getEmptyTagValue();
+        return value == null ? getEmptyTagValue() : <TagOverflow tags={value} />;
       },
       truncateText: true,
-      width: '14%',
+      width: '20%',
     },
     {
       align: 'center',

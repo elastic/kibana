@@ -5,13 +5,16 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow, mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
+
+const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -65,7 +68,7 @@ jest.mock('./reducer', () => {
           risk_score: 73,
           rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
           severity: 'high',
-          tags: ['Elastic', 'Endpoint'],
+          tags: mockTags,
           threat: [],
           throttle: null,
           to: 'now',
@@ -111,7 +114,7 @@ jest.mock('../../../../containers/detection_engine/rules', () => {
             risk_score: 73,
             rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
             severity: 'high',
-            tags: ['Elastic', 'Endpoint'],
+            tags: mockTags,
             threat: [],
             throttle: null,
             to: 'now',
@@ -179,27 +182,40 @@ describe('AllRules', () => {
     expect(wrapper.find('[title="All rules"]')).toHaveLength(1);
   });
 
-  it('renders rules tab', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
+  describe('rules tab', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      wrapper = mount(
+        <TestProviders>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
+    });
 
-    await waitFor(() => {
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+    it('renders correctly', async () => {
+      await act(async () => {
+        await waitFor(() => {
+          expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+          expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+        });
+      });
+    });
+
+    it('visibly renders all tags', () => {
+      for (let i = 0; i < mockTags.length; i++) {
+        expect(wrapper.exists(`[data-test-subj="rules-table-column-tags-${i}"]`)).toBeTruthy();
+      }
     });
   });
 
