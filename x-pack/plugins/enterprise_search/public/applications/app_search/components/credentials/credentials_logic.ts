@@ -64,8 +64,6 @@ export interface ICredentialsLogicActions {
   fetchCredentials(page?: number): number;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
-  onApiTokenChange(): { value: boolean };
-  onEngineSelect(engineName: string): string;
 }
 
 export interface ICredentialsLogicValues {
@@ -114,8 +112,6 @@ export const CredentialsLogic = kea<
     fetchCredentials: (page) => page,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
-    onApiTokenChange: true,
-    onEngineSelect: (engineName) => engineName,
   }),
   reducers: () => ({
     apiTokens: [
@@ -273,5 +269,6 @@ export const CredentialsLogic = kea<
       // TODO handle errors - see ent-search
     },
     // TODO onApiTokenChange from ent-search
+    // TODO onEngineSelect from ent-search
   }),
 });

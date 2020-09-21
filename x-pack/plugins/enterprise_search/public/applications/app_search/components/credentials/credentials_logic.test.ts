@@ -1000,12 +1000,4 @@ describe('CredentialsLogic', () => {
       // TODO when error handler is available
     });
   });
-
-  describe('onApiTokenChange', () => {
-    // TODO when onApiTokenChange is implemented
-  });
-
-  describe('onEngineSelect', () => {
-    // TODO when onEngineSelect is implemented
-  });
 });
