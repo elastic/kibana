@@ -142,7 +142,12 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
       popoverButton={
-        <EuiHeaderSectionItemButton aria-label="Site-wide search">
+        <EuiHeaderSectionItemButton
+          aria-label={i18n.translate(
+            'xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel',
+            { defaultMessage: 'Site-wide search' }
+          )}
+        >
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }
