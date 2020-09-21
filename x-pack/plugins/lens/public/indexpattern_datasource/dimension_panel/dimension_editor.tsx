@@ -364,7 +364,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFormRow>
         ) : null}
 
-        {!incompatibleSelectedOperationType && ParamEditor && (
+        {!incompatibleSelectedOperationType && selectedColumn && ParamEditor && (
           <>
             <EuiSpacer size="s" />
             <ParamEditor

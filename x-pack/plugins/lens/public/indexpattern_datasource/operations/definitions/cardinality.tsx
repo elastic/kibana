@@ -27,7 +27,7 @@ export interface CardinalityIndexPatternColumn
   operationType: 'cardinality';
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn> = {
+export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
@@ -43,7 +43,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const c = column as CardinalityIndexPatternColumn;
+    const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
 
     return Boolean(
       newField &&
@@ -75,13 +76,13 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     type: OPERATION_TYPE,
     schema: 'metric',
     params: {
-      field: column.sourceField,
+      field: (column as CardinalityIndexPatternColumn).sourceField,
       missing: 0,
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...oldColumn,
+      ...(oldColumn as CardinalityIndexPatternColumn),
       label: ofName(field.displayName),
       sourceField: field.name,
     };

@@ -27,21 +27,6 @@ import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../..
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 
-// List of all operation definitions registered to this data source.
-// If you want to implement a new operation, add the definition to this array and
-// the column type to the `IndexPatternColumn` union type below.
-const internalOperationDefinitions = [
-  filtersOperation,
-  termsOperation,
-  dateHistogramOperation,
-  minOperation,
-  maxOperation,
-  averageOperation,
-  cardinalityOperation,
-  sumOperation,
-  countOperation,
-];
-
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
  * withing the indexpattern data source it should be typed as `IndexPatternColumn` to make
@@ -58,6 +43,23 @@ export type IndexPatternColumn =
   | SumIndexPatternColumn
   | CountIndexPatternColumn;
 
+export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
+
+// List of all operation definitions registered to this data source.
+// If you want to implement a new operation, add the definition to this array and
+// the column type to the `IndexPatternColumn` union type below.
+const internalOperationDefinitions = [
+  filtersOperation,
+  termsOperation,
+  dateHistogramOperation,
+  minOperation,
+  maxOperation,
+  averageOperation,
+  cardinalityOperation,
+  sumOperation,
+  countOperation,
+];
+
 export { termsOperation } from './terms';
 export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
@@ -67,8 +69,8 @@ export { countOperation } from './count';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
-  currentColumn: C;
+export interface ParamEditorProps {
+  currentColumn: IndexPatternColumn;
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
   columnId: string;
@@ -101,30 +103,34 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * return an updated column. If not implemented, the `id` function is used instead.
    */
   onOtherColumnChanged?: (
-    currentColumn: C,
+    currentColumn: IndexPatternColumn,
     columns: Partial<Record<string, IndexPatternColumn>>
   ) => C;
   /**
    * React component for operation specific settings shown in the popover editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  paramEditor?: React.ComponentType<ParamEditorProps>;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsConfig: (
+    column: IndexPatternColumn,
+    columnId: string,
+    indexPattern: IndexPattern
+  ) => unknown;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
    * for a layer
    */
-  isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
+  isTransferable: (column: IndexPatternColumn, newIndexPattern: IndexPattern) => boolean;
   /**
    * Transfering a column to another index pattern. This can be used to
    * adjust operation specific settings such as reacting to aggregation restrictions
    * present on the new index pattern.
    */
-  transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  transfer?: (column: IndexPatternColumn, newIndexPattern: IndexPattern) => C;
 }
 
 interface BaseBuildColumnArgs {
@@ -134,76 +140,76 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
+interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'none';
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      previousColumn?: IndexPatternColumn;
+    }
+  ) => C;
+  /**
+   * Returns the meta data of the operation if applied. Undefined
+   * if the field is not applicable.
+   */
+  getPossibleOperation: () => OperationMetadata | undefined;
+}
+
+interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'field';
+  /**
+   * Returns the meta data of the operation if applied to the given field. Undefined
+   * if the field is not applicable to the operation.
+   */
+  getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      field: IndexPatternField;
+      previousColumn?: IndexPatternColumn;
+    }
+  ) => C;
+  /**
+   * This method will be called if the user changes the field of an operation.
+   * You must implement it and return the new column after the field change.
+   * The most simple implementation will just change the field on the column, and keep
+   * the rest the same. Some implementations might want to change labels, or their parameters
+   * when changing the field.
+   *
+   * This will only be called for switching the field, not for initially selecting a field.
+   *
+   * See {@link OperationDefinition#transfer} for controlling column building when switching an
+   * index pattern not just a field.
+   *
+   * @param oldColumn The column before the user changed the field.
+   * @param indexPattern The index pattern that field is on.
+   * @param field The field that the user changed to.
+   */
+  onFieldChange: (
+    oldColumn: FieldBasedIndexPatternColumn,
+    indexPattern: IndexPattern,
+    field: IndexPatternField
+  ) => C;
+}
+
+interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
+  field: FieldBasedOperationDefinition<C>;
+  none: FieldlessOperationDefinition<C>;
+}
+
 /**
  * Shape of an operation definition. If the type parameter of the definition
  * indicates a field based column, `getPossibleOperationForField` has to be
- * specified, otherwise `getPossibleOperationForDocument` has to be defined.
+ * specified, otherwise `getPossibleOperation` has to be defined.
  */
-
-// interface SharedOperationDefinition<C extends BaseIndexPatternColumn>
-//   extends BaseOperationDefinitionProps<C> {
-//   /**
-//    * Builds the column object for the given parameters. Should include default p
-//    */
-//   buildColumn: (
-//     arg: BaseBuildColumnArgs & {
-//       field?: IndexPatternField;
-//       previousColumn?: IndexPatternColumn;
-//     }
-//   ) => C;
-// }
-
-export type OperationDefinition<C extends BaseIndexPatternColumn> =
-  | (BaseOperationDefinitionProps<C> & {
-      input: 'none';
-      /**
-       * Builds the column object for the given parameters. Should include default p
-       */
-      buildColumn: (
-        arg: BaseBuildColumnArgs & {
-          previousColumn?: IndexPatternColumn;
-        }
-      ) => C;
-      /**
-       * Returns the meta data of the operation if applied. Undefined
-       * if the field is not applicable.
-       */
-      getPossibleOperation: () => OperationMetadata | undefined;
-    })
-  | (BaseOperationDefinitionProps<C> & {
-      input: 'field';
-      /**
-       * Returns the meta data of the operation if applied to the given field. Undefined
-       * if the field is not applicable to the operation.
-       */
-      getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
-      /**
-       * Builds the column object for the given parameters. Should include default p
-       */
-      buildColumn: (
-        arg: BaseBuildColumnArgs & {
-          field: IndexPatternField;
-          previousColumn?: IndexPatternColumn;
-        }
-      ) => C;
-      /**
-       * This method will be called if the user changes the field of an operation.
-       * You must implement it and return the new column after the field change.
-       * The most simple implementation will just change the field on the column, and keep
-       * the rest the same. Some implementations might want to change labels, or their parameters
-       * when changing the field.
-       *
-       * This will only be called for switching the field, not for initially selecting a field.
-       *
-       * See {@link OperationDefinition#transfer} for controlling column building when switching an
-       * index pattern not just a field.
-       *
-       * @param oldColumn The column before the user changed the field.
-       * @param indexPattern The index pattern that field is on.
-       * @param field The field that the user changed to.
-       */
-      onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
-    });
+export type OperationDefinition<
+  C extends BaseIndexPatternColumn,
+  Input extends keyof OperationDefinitionMap<C>
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
@@ -215,7 +221,13 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
-export type GenericOperationDefinition = OperationDefinition<IndexPatternColumn>;
+export type GenericOperationDefinition =
+  | OperationDefinition<IndexPatternColumn, 'field'>
+  | OperationDefinition<IndexPatternColumn, 'none'>;
+
+export type OperationTypeFromDefinition<
+  GenericOperationDefinition
+> = GenericOperationDefinition extends BaseOperationDefinitionProps<infer P> ? P : never;
 
 /**
  * List of all available operation definitions
@@ -235,5 +247,5 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  */
 export const operationDefinitionMap = internalOperationDefinitions.reduce(
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  {}
-) as Record<OperationType, GenericOperationDefinition>;
+  {} as Record<OperationType, typeof internalOperationDefinitions[number]>
+);

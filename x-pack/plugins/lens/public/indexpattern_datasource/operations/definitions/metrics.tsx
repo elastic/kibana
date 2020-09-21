@@ -43,7 +43,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+      const c = column as T;
+      const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
 
       return Boolean(
         newField &&
@@ -76,11 +77,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       type: column.operationType,
       schema: 'metric',
       params: {
-        field: column.sourceField,
+        field: (column as T).sourceField,
         missing: 0,
       },
     }),
-  } as OperationDefinition<T>;
+  } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;

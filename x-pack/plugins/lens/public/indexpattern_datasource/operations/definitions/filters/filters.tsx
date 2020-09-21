@@ -68,7 +68,7 @@ export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   };
 }
 
-export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
+export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
   type: 'filters',
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
@@ -112,7 +112,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   },
 
   toEsAggsConfig: (column, columnId, indexPattern) => {
-    const validFilters = column.params.filters?.filter((f: Filter) =>
+    const validFilters = (column as FiltersIndexPatternColumn).params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
     return {
@@ -128,7 +128,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
 
   paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const filters = currentColumn.params.filters;
+    const filters = (currentColumn as FiltersIndexPatternColumn).params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
       setState(

@@ -63,7 +63,7 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
   return operationDefinitions
     .filter(
       (operationDefinition) =>
-        'getPossibleOperationForField' in operationDefinition &&
+        operationDefinition.input === 'field' &&
         operationDefinition.getPossibleOperationForField(field)
     )
     .sort(getSortScoreByPriority)
@@ -184,13 +184,13 @@ export function changeField(
 ) {
   const operationDefinition = operationDefinitionMap[column.operationType];
 
-  if (!('onFieldChange' in operationDefinition)) {
+  if (operationDefinition.input === 'field' && 'sourceField' in column) {
+    return operationDefinition.onFieldChange(column, indexPattern, newField);
+  } else {
     throw new Error(
       "Invariant error: Cannot change field if operation isn't a field based operaiton"
     );
   }
-
-  return operationDefinition.onFieldChange(column, indexPattern, newField);
 }
 
 /**

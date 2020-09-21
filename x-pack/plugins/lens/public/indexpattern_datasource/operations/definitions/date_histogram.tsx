@@ -37,7 +37,10 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   };
 }
 
-export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatternColumn> = {
+export const dateHistogramOperation: OperationDefinition<
+  DateHistogramIndexPatternColumn,
+  'field'
+> = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date histogram',
@@ -79,7 +82,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const c = column as DateHistogramIndexPatternColumn;
+    const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
 
     return Boolean(
       newField &&
@@ -89,7 +93,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     );
   },
   transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const col = column as DateHistogramIndexPatternColumn;
+    const newField = newIndexPattern.fields.find((field) => field.name === col.sourceField);
     if (
       newField &&
       newField.aggregationRestrictions &&
@@ -98,9 +103,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       const restrictions = newField.aggregationRestrictions.date_histogram;
 
       return {
-        ...column,
+        ...col,
         params: {
-          ...column.params,
+          ...col.params,
           timeZone: restrictions.time_zone,
           // TODO this rewrite logic is simplified - if the current interval is a multiple of
           // the restricted interval, we could carry it over directly. However as the current
@@ -111,43 +116,45 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       };
     }
 
-    return column;
+    return col;
   },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...oldColumn,
+      ...(oldColumn as DateHistogramIndexPatternColumn),
       label: field.displayName,
       sourceField: field.name,
     };
   },
   toEsAggsConfig: (column, columnId, indexPattern) => {
-    const usedField = indexPattern.fields.find((field) => field.name === column.sourceField);
+    const c = column as DateHistogramIndexPatternColumn;
+    const usedField = indexPattern.fields.find((field) => field.name === c.sourceField);
     return {
       id: columnId,
       enabled: true,
       type: 'date_histogram',
       schema: 'segment',
       params: {
-        field: column.sourceField,
-        time_zone: column.params.timeZone,
+        field: c.sourceField,
+        time_zone: c.params.timeZone,
         useNormalizedEsInterval: !usedField || !usedField.aggregationRestrictions?.date_histogram,
-        interval: column.params.interval,
+        interval: c.params.interval,
         drop_partials: false,
         min_doc_count: 0,
         extended_bounds: {},
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
+    const column = currentColumn as DateHistogramIndexPatternColumn;
     const field =
-      currentColumn &&
+      column &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
-        (currentField) => currentField.name === currentColumn.sourceField
+        (currentField) => currentField.name === column.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const interval = parseInterval(currentColumn.params.interval);
+    const interval = parseInterval(column.params.interval);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -188,13 +195,13 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
-              checked={currentColumn.params.interval !== autoInterval}
+              checked={column.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
               compressed
             />
           </EuiFormRow>
         )}
-        {currentColumn.params.interval !== autoInterval && (
+        {column.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
@@ -207,7 +214,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
                 defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
                 values={{
-                  intervalValue: currentColumn.params.interval,
+                  intervalValue: column.params.interval,
                 }}
               />
             ) : (
