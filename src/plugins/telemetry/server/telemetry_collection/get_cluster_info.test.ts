@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 

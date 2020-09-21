@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
 
 let cachedLicense: ESLicense | undefined;
@@ -35,7 +35,8 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
     // Fetching the license from the local node is cheaper than getting it from the master node and good enough
     const { body } = await esClient.license.get<{ license: ESLicense }>({
       local: true,
-      accept_enterprise: true,
+      // @ts-ignore this should be a boolean
+      accept_enterprise: 'true',
     });
     cachedLicense = body.license;
     response = body.license;
@@ -45,7 +46,8 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
       try {
         const { body } = await esClient.license.get<{ license: ESLicense }>({
           local: false,
-          accept_enterprise: true,
+          // @ts-ignore this should be a boolean
+          accept_enterprise: 'true',
         });
         cachedLicense = body.license;
         response = body.license;

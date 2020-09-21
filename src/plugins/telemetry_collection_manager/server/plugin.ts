@@ -144,7 +144,6 @@ export class TelemetryCollectionManagerPlugin
     const esClient = config.unencrypted
       ? collectionEsClient.asScoped(config.request).asCurrentUser
       : collectionEsClient.asInternalUser;
-
     return { callCluster, start, end, usageCollection, esClient };
   }
 
