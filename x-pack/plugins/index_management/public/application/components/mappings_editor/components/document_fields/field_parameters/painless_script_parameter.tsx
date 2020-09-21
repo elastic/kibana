@@ -21,7 +21,7 @@ export const PainlessScriptParameter = () => {
           <>
             {isInvalid && (
               <>
-                <EuiCallOut color="danger" title={error} />
+                <EuiCallOut size="s" color="danger" title={error} />
                 <EuiSpacer />
               </>
             )}
