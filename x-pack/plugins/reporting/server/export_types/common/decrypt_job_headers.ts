@@ -11,7 +11,6 @@ interface HasEncryptedHeaders {
   headers?: string;
 }
 
-// TODO merge functionality with CSV execute job
 export const decryptJobHeaders = async <
   JobParamsType,
   TaskPayloadType extends HasEncryptedHeaders

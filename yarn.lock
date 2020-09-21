@@ -1253,10 +1253,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@28.4.0":
-  version "28.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.4.0.tgz#6b3b6b5e8b602d009410a97c26e22093846f708a"
-  integrity sha512-4iXo5fNx4qqeI+Tj5EJ0qHRhyi8KTLaqeQJCWg9Vy7N83ap6kp6s7X6D6qYUHqdmOdJH9QZYuYIpRUi3TQEJNg==
+"@elastic/eui@29.0.0":
+  version "29.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.0.0.tgz#1c8d822c62ad5e29298a3a36f5b02fd9b32a5550"
+  integrity sha512-YsDjtN/nRA4vvWukg5FDN4iPQgHUVxDwn/JZ1mArCeMe34JwzYJlEkk6Z/+iNbJOZQNHngmV8I2TStcP8k82gg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -9977,6 +9977,11 @@ cypress-multi-reporters@^1.2.3:
   dependencies:
     debug "^4.1.1"
     lodash "^4.17.11"
+
+cypress-promise@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
+  integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
 
 cypress@5.0.0:
   version "5.0.0"
