@@ -6,7 +6,7 @@
 
 import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
-import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ShareOptions, SpaceTarget } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -42,20 +42,18 @@ export const ShareToSpaceForm = (props: Props) => {
         >
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.shareWarningBody"
-            defaultMessage="To edit in only one space, make a copy instead."
+            defaultMessage="To edit in only one space, {makeACopyLink} instead."
+            values={{
+              makeACopyLink: (
+                <EuiLink data-test-subj="sts-copy-link" onClick={() => props.makeCopy()}>
+                  <FormattedMessage
+                    id="xpack.spaces.management.shareToSpace.shareWarningLink"
+                    defaultMessage="make a copy"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
-          <EuiSpacer size="s" />
-          <EuiButton
-            onClick={() => props.makeCopy()}
-            color="warning"
-            data-test-subj="sts-copy-button"
-            size="s"
-          >
-            <FormattedMessage
-              id="xpack.spaces.management.shareToSpace.shareWarningButton"
-              defaultMessage="Make a copy"
-            />
-          </EuiButton>
         </EuiCallOut>
 
         <EuiHorizontalRule margin="m" />

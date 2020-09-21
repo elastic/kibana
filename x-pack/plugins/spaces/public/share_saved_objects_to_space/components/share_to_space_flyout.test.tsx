@@ -178,7 +178,7 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
-    const copyButton = findTestSubject(wrapper, 'sts-copy-button'); // this button is only present in the warning callout
+    const copyButton = findTestSubject(wrapper, 'sts-copy-link'); // this link is only present in the warning callout
 
     await act(async () => {
       copyButton.simulate('click');
