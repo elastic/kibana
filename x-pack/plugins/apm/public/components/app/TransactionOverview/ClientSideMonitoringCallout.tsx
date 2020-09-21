@@ -18,7 +18,7 @@ export function ClientSideMonitoringCallout() {
       iconType="cheer"
       title={i18n.translate(
         'xpack.apm.transactionOverview.clientSideMonitoring.calloutTitle',
-        { defaultMessage: 'New app: Client Side Monitoring' }
+        { defaultMessage: 'Introducing: Client Side Monitoring' }
       )}
     >
       <EuiText>
@@ -26,7 +26,7 @@ export function ClientSideMonitoringCallout() {
           'xpack.apm.transactionOverview.clientSideMonitoring.calloutText',
           {
             defaultMessage:
-              'We are introducing a new app which contains breakdown information around browser and location by page load.',
+              'We are beyond excited to introduce a new experience for analyzing the user experience metrics specifically for your RUM services. It provides insights into the core vitals and visitor breakdown by browser and location. The app is always available in the left sidebar among the other Observability views.',
           }
         )}
       </EuiText>
@@ -34,7 +34,7 @@ export function ClientSideMonitoringCallout() {
       <EuiButton href={clientSideMonitoringHref}>
         {i18n.translate(
           'xpack.apm.transactionOverview.clientSideMonitoring.linkLabel',
-          { defaultMessage: 'Learn more' }
+          { defaultMessage: 'Take me there' }
         )}
       </EuiButton>
     </EuiCallOut>
