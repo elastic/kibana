@@ -71,19 +71,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   } else {
     // default to "Documents" tab
     tabContent = (
-      <Form
+      <DocumentsTab
         form={form}
-        data-test-subj="testPipelineForm"
-        isInvalid={form.isSubmitted && !form.isValid}
-        onSubmit={validateAndTestPipeline}
-        error={form.getErrors()}
-      >
-        <DocumentsTab
-          validateAndTestPipeline={validateAndTestPipeline}
-          isRunningTest={isRunningTest}
-          isSubmitButtonDisabled={form.isSubmitted && !form.isValid}
-        />
-      </Form>
+        validateAndTestPipeline={validateAndTestPipeline}
+        isRunningTest={isRunningTest}
+      />
     );
   }
 
