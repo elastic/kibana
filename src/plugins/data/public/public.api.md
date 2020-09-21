@@ -1020,11 +1020,10 @@ export interface IFieldType {
 export interface IIndexPattern {
     // (undocumented)
     [key: string]: any;
+    // Warning: (ae-forgotten-export) The symbol "SerializedFieldFormat" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    fieldFormatMap?: Record<string, {
-        id: string;
-        params: unknown;
-    }>;
+    fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
@@ -1096,20 +1095,22 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
     // (undocumented)
-    addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
-    // (undocumented)
-    fieldFormatMap: any;
+    fieldFormatMap: Record<string, any>;
     // (undocumented)
     fields: IIndexPatternFieldList & {
         toSpec: () => IndexPatternFieldMap;
     };
     // (undocumented)
-    flattenHit: any;
+    flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
     // (undocumented)
-    formatField: any;
+    formatField: FormatField;
     // (undocumented)
-    formatHit: any;
+    formatHit: {
+        (hit: Record<string, any>, type?: string): any;
+        formatField: FormatField;
+    };
     // (undocumented)
     getAggregationRestrictions(): Record<string, Record<string, {
         agg?: string | undefined;
@@ -1119,7 +1120,6 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
-    // (undocumented)
     getAsSavedObjectBody(): {
         title: string;
         timeFieldName: string | undefined;
@@ -1141,17 +1141,21 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
-    // (undocumented)
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
-    // (undocumented)
     getOriginalSavedObjectBody: () => {
-        [x: string]: any;
+        title?: string | undefined;
+        timeFieldName?: string | undefined;
+        intervalName?: string | undefined;
+        fields?: string | undefined;
+        sourceFilters?: string | undefined;
+        fieldFormatMap?: string | undefined;
+        typeMeta?: string | undefined;
+        type?: string | undefined;
     };
     // (undocumented)
     getScriptedFields(): IndexPatternField[];
-    // (undocumented)
     getSourceFiltering(): {
         excludes: any[];
     };
@@ -1171,9 +1175,7 @@ export class IndexPattern implements IIndexPattern {
     metaFields: string[];
     // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
-    // (undocumented)
     removeScriptedField(fieldName: string): void;
-    // (undocumented)
     resetOriginalSavedObjectBody: () => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
@@ -1234,10 +1236,8 @@ export class IndexPatternField implements IFieldType {
     constructor(spec: FieldSpec, displayName: string);
     // (undocumented)
     get aggregatable(): boolean;
-    // (undocumented)
     get conflictDescriptions(): Record<string, string[]> | undefined;
     set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
-    // (undocumented)
     get count(): number;
     set count(count: number);
     // (undocumented)
@@ -1246,14 +1246,12 @@ export class IndexPatternField implements IFieldType {
     get esTypes(): string[] | undefined;
     // (undocumented)
     get filterable(): boolean;
-    // (undocumented)
     get lang(): string | undefined;
     set lang(lang: string | undefined);
     // (undocumented)
     get name(): string;
     // (undocumented)
     get readFromDocValues(): boolean;
-    // (undocumented)
     get script(): string | undefined;
     set script(script: string | undefined);
     // (undocumented)
@@ -2218,6 +2216,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/match_all_filter.ts:28:3 - (ae-forgotten-export) The symbol "MatchAllFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:69:5 - (ae-forgotten-export) The symbol "FormatField" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:98:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FilterLabel" needs to be exported by the entry point index.d.ts

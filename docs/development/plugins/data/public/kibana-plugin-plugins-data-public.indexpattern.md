@@ -20,16 +20,16 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>any</code> |  |
+|  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
-|  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>any</code> |  |
-|  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>any</code> |  |
-|  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>any</code> |  |
-|  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: any;</code><br/><code>    }</code> |  |
+|  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>(hit: Record&lt;string, any&gt;, deep?: boolean) =&gt; Record&lt;string, any&gt;</code> |  |
+|  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>FormatField</code> |  |
+|  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>{</code><br/><code>        (hit: Record&lt;string, any&gt;, type?: string): any;</code><br/><code>        formatField: FormatField;</code><br/><code>    }</code> |  |
+|  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> |  |
+|  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> | Reset last saved saved object fields. used after saving |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
@@ -41,20 +41,20 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  |  |
+|  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
-|  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  |  |
+|  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
-|  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  |  |
+|  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
-|  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
+|  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
-|  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
+|  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

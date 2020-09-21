@@ -35,6 +35,9 @@ export class IndexPatternField implements IFieldType {
   }
 
   // writable attrs
+  /**
+   * Count is used for field popularity
+   */
   public get count() {
     return this.spec.count || 0;
   }
@@ -43,6 +46,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.count = count;
   }
 
+  /**
+   * Script field code
+   */
   public get script() {
     return this.spec.script;
   }
@@ -51,6 +57,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.script = script;
   }
 
+  /**
+   * Script field language
+   */
   public get lang() {
     return this.spec.lang;
   }
@@ -59,6 +68,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  /**
+   * Description of field type conflicts across different indices in the same index pattern
+   */
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }

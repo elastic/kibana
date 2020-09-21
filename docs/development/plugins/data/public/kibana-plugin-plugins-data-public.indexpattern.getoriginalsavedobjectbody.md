@@ -4,10 +4,19 @@
 
 ## IndexPattern.getOriginalSavedObjectBody property
 
+Get last saved saved object fields
+
 <b>Signature:</b>
 
 ```typescript
 getOriginalSavedObjectBody: () => {
-        [x: string]: any;
+        title?: string | undefined;
+        timeFieldName?: string | undefined;
+        intervalName?: string | undefined;
+        fields?: string | undefined;
+        sourceFilters?: string | undefined;
+        fieldFormatMap?: string | undefined;
+        typeMeta?: string | undefined;
+        type?: string | undefined;
     };
 ```

@@ -42,24 +42,40 @@ interface IndexPatternDeps {
   metaFields: string[];
 }
 
+interface SavedObjectBody {
+  title?: string;
+  timeFieldName?: string;
+  intervalName?: string;
+  fields?: string;
+  sourceFilters?: string;
+  fieldFormatMap?: string;
+  typeMeta?: string;
+  type?: string;
+}
+
+type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
+
 export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
-  public fieldFormatMap: any;
+  public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   public intervalName: string | undefined;
   public type: string | undefined;
-  public formatHit: any;
-  public formatField: any;
-  public flattenHit: any;
+  public formatHit: {
+    (hit: Record<string, any>, type?: string): any;
+    formatField: FormatFieldFn;
+  };
+  public formatField: FormatFieldFn;
+  public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
   // savedObject version
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];
-  private originalSavedObjectBody: { [key: string]: any } = {};
+  private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
 
@@ -105,12 +121,22 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
+  /**
+   * Get last saved saved object fields
+   */
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
 
+  /**
+   * Reset last saved saved object fields. used after saving
+   */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
+  /**
+   * TODO
+   * @param mapping
+   */
   private deserializeFieldFormatMap(mapping: any) {
     try {
       return this.fieldFormats.getInstance(mapping.id, mapping.params);
@@ -123,6 +149,10 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  /**
+   * Extracts FieldFormatMap from FieldSpec map
+   * @param fldList FieldSpec map
+   */
   private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = {}) =>
     Object.values(fldList).reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
       if (fieldSpec.format) {
@@ -186,14 +216,29 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  // Get the source filtering configuration for that index.
+  /**
+   * Get the source filtering configuration for that index.
+   */
   getSourceFiltering() {
     return {
       excludes: (this.sourceFilters && this.sourceFilters.map((filter: any) => filter.value)) || [],
     };
   }
 
-  async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
+  /**
+   * Add scripted field to field list
+   *
+   * @param name field name
+   * @param script script code
+   * @param fieldType
+   * @param lang
+   */
+  async addScriptedField(
+    name: string,
+    script: string,
+    fieldType: string = 'string',
+    lang: string = 'painless'
+  ) {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
 
@@ -213,6 +258,11 @@ export class IndexPattern implements IIndexPattern {
       readFromDocValues: false,
     });
   }
+
+  /**
+   * Remove scripted field from field list
+   * @param fieldName
+   */
 
   removeScriptedField(fieldName: string) {
     const field = this.fields.getByName(fieldName);
@@ -289,12 +339,22 @@ export class IndexPattern implements IIndexPattern {
     return this.typeMeta?.aggs;
   }
 
+  /**
+   * Does this index pattern title include a '*'
+   */
   private isWildcard() {
     return _.includes(this.title, '*');
   }
 
+  /**
+   * Returns index pattern as saved object body for saving
+   */
   getAsSavedObjectBody() {
-    const serializeFieldFormatMap = (flat: any, format: string, field: string | undefined) => {
+    const serializeFieldFormatMap = (
+      flat: any,
+      format: FieldFormat | undefined,
+      field: string | undefined
+    ) => {
       if (format && field) {
         flat[field] = format;
       }
@@ -313,6 +373,11 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
     };
   }
+
+  /**
+   * Provide a field, get its formatter
+   * @param field
+   */
 
   getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
     return (

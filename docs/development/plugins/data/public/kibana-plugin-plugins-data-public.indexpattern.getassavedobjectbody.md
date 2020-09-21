@@ -4,6 +4,8 @@
 
 ## IndexPattern.getAsSavedObjectBody() method
 
+Returns index pattern as saved object body for saving
+
 <b>Signature:</b>
 
 ```typescript

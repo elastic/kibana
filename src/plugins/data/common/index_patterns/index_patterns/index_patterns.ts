@@ -94,6 +94,9 @@ export class IndexPatternsService {
     );
   }
 
+  /**
+   * Refresh cache of index pattern ids and titles
+   */
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
@@ -102,6 +105,10 @@ export class IndexPatternsService {
     });
   }
 
+  /**
+   * Get list of index pattern ids
+   * @param refresh Force refresh of index pattern list
+   */
   getIds = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
@@ -112,6 +119,10 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.id);
   };
 
+  /**
+   * Get list of index pattern titles
+   * @param refresh Force refresh of index pattern list
+   */
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
@@ -122,6 +133,10 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  /**
+   * Clear index pattern list cache
+   * @param id optionally clear a single id
+   */
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
@@ -138,6 +153,9 @@ export class IndexPatternsService {
     return this.savedObjectsCache;
   };
 
+  /**
+   * Get default index pattern
+   */
   getDefault = async () => {
     const defaultIndexPatternId = await this.config.get('defaultIndex');
     if (defaultIndexPatternId) {
@@ -147,6 +165,11 @@ export class IndexPatternsService {
     return null;
   };
 
+  /**
+   * Optionally set default index pattern, unless force = true
+   * @param id
+   * @param force
+   */
   setDefault = async (id: string, force = false) => {
     if (force || !this.config.get('defaultIndex')) {
       await this.config.set('defaultIndex', id);
@@ -169,6 +192,10 @@ export class IndexPatternsService {
     });
   }
 
+  /**
+   * Get field list by providing { pattern }
+   * @param options
+   */
   getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
@@ -179,6 +206,10 @@ export class IndexPatternsService {
     });
   };
 
+  /**
+   * Get field list by providing an index patttern (or spec)
+   * @param options
+   */
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
     options: GetFieldsOptions = {}
@@ -190,13 +221,23 @@ export class IndexPatternsService {
       params: indexPattern.typeMeta && indexPattern.typeMeta.params,
     });
 
-  // grab fields, grab scripted fields, mash together
+  /**
+   * Refresh field list for a given index pattern
+   * @param indexPattern
+   */
   refreshFields = async (indexPattern: IndexPattern) => {
     const fields = await this.getFieldsForIndexPattern(indexPattern);
     const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
     indexPattern.fields.replaceAll([...fields, ...scripted]);
   };
 
+  /**
+   * Refreshes a field list from a spec before an index pattern instance is created
+   * @param fields
+   * @param id
+   * @param title
+   * @param options
+   */
   private refreshFieldSpecMap = async (
     fields: IndexPatternFieldMap,
     id: string,
@@ -223,6 +264,11 @@ export class IndexPatternsService {
     return fields;
   };
 
+  /**
+   * Applies a set of formats to a set of fields
+   * @param fieldSpecs
+   * @param fieldFormatMap
+   */
   private mergeFieldsAndFormats = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
     Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
       const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
@@ -232,11 +278,20 @@ export class IndexPatternsService {
     });
   };
 
+  /**
+   * Converts field array to map
+   * @param fields
+   */
   fieldArrayToMap = (fields: FieldSpec[]) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
       collector[field.name] = field;
       return collector;
     }, {});
+
+  /**
+   * Converts index pattern saved object to index pattern spec
+   * @param savedObject
+   */
 
   savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
     const {
@@ -272,6 +327,11 @@ export class IndexPatternsService {
       type,
     };
   };
+
+  /**
+   * Get an index pattern by id. Cache optimized
+   * @param id
+   */
 
   get = async (id: string): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
@@ -353,6 +413,11 @@ export class IndexPatternsService {
     return indexPattern;
   };
 
+  /**
+   * Create a new index pattern instance
+   * @param spec
+   * @param skipFetchFields
+   */
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -372,12 +437,25 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
+  /**
+   * Create a new index pattern and save it right away
+   * @param spec
+   * @param override Overwrite if existing index pattern exists
+   * @param skipFetchFields
+   */
+
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
   }
+
+  /**
+   * Save a new index pattern
+   * @param indexPattern
+   * @param override Overwrite if existing index pattern exists
+   */
 
   async createSavedObject(indexPattern: IndexPattern, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
@@ -398,6 +476,12 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
+  /**
+   * Save existing index pattern. Will attempt to merge differences if there are conflicts
+   * @param indexPattern
+   * @param saveAttempts
+   */
+
   async updateSavedObject(
     indexPattern: IndexPattern,
     saveAttempts: number = 0
@@ -411,7 +495,7 @@ export class IndexPatternsService {
     // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== originalBody[key]) {
+      if (value !== (originalBody as any)[key]) {
         originalChangedKeys.push(key);
       }
     });
@@ -435,7 +519,7 @@ export class IndexPatternsService {
 
           const serverChangedKeys: string[] = [];
           Object.entries(updatedBody).forEach(([key, value]) => {
-            if (value !== (body as any)[key] && value !== originalBody[key]) {
+            if (value !== (body as any)[key] && value !== (originalBody as any)[key]) {
               serverChangedKeys.push(key);
             }
           });

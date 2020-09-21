@@ -4,6 +4,8 @@
 
 ## IndexPattern.getFormatterForField() method
 
+Provide a field, get its formatter
+
 <b>Signature:</b>
 
 ```typescript

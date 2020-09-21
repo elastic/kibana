@@ -4,6 +4,8 @@
 
 ## IndexPattern.resetOriginalSavedObjectBody property
 
+Reset last saved saved object fields. used after saving
+
 <b>Signature:</b>
 
 ```typescript
