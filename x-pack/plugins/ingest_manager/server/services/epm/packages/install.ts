@@ -59,7 +59,7 @@ export async function installLatestPackage(options: {
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    return installPackage({ savedObjectsClient, pkgkey, callCluster });
+    return installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
   }
@@ -155,7 +155,7 @@ export async function handleInstallPackageFailure({
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
       logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
-      await installPackage({
+      await installPackageFromRegistry({
         savedObjectsClient,
         pkgkey: prevVersion,
         callCluster,
@@ -193,7 +193,7 @@ export async function upgradePackage({
     });
 
     try {
-      const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
+      const assets = await installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
       return {
         name: pkgToUpgrade,
         newVersion: latestPkg.version,
@@ -232,7 +232,7 @@ interface InstallPackageParams {
   force?: boolean;
 }
 
-export async function installPackage({
+export async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   callCluster,
@@ -477,7 +477,7 @@ export async function ensurePackagesCompletedInstall(
     const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
     // reinstall package
     if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-      acc.push(installPackage({ savedObjectsClient, pkgkey, callCluster }));
+      acc.push(installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster }));
     }
     return acc;
   }, []);

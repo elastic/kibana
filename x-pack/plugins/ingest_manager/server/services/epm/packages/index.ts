@@ -28,7 +28,7 @@ export {
 export {
   BulkInstallResponse,
   handleInstallPackageFailure,
-  installPackage,
+  installPackageFromRegistry,
   IBulkInstallPackageError,
   ensureInstalledPackage,
 } from './install';

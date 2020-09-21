@@ -35,8 +35,8 @@ import {
   getFile,
   getPackageInfo,
   handleInstallPackageFailure,
-  installPackage,
   isBulkInstallError,
+  installPackageFromRegistry,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
@@ -148,7 +148,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
-    const res = await installPackage({
+    const res = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       callCluster,
