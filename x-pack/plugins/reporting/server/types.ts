@@ -8,7 +8,9 @@ import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { CancellationToken } from '../../../plugins/reporting/common';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { JobStatus } from '../common/types';
@@ -52,6 +54,7 @@ export interface BasePayload<JobParamsType> {
   jobParams: JobParamsType;
   title: string;
   type: string;
+  spaceId?: string;
 }
 
 export interface JobSource<JobParamsType> {
@@ -92,7 +95,9 @@ export interface ConditionalHeaders {
 
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -119,7 +124,6 @@ export interface BaseParams {
 }
 
 export interface BaseParamsEncryptedFields extends BaseParams {
-  basePath?: string; // for screenshot type reports
   headers: string; // encrypted headers
 }
 
