@@ -43,10 +43,9 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const kibana = useKibana();
+  const { application } = useKibana().services;
   const subPluginId = useRef<string>('');
 
-  const { application } = kibana.services;
   application.currentAppId$.subscribe((appId) => {
     subPluginId.current = appId ?? '';
   });
