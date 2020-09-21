@@ -5,6 +5,7 @@
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { AppCategory } from 'src/core/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
@@ -28,6 +29,13 @@ export interface KibanaFeatureConfig {
    * This will be displayed to end-users, so a translatable string is advised for i18n.
    */
   name: string;
+
+  /**
+   * The category for this feature.
+   * This will be used to organize the list of features for display within the
+   * Spaces and Roles management screens.
+   */
+  category: AppCategory;
 
   /**
    * An ordinal used to sort features relative to one another for display.
@@ -156,6 +164,10 @@ export class KibanaFeature {
 
   public get order() {
     return this.config.order;
+  }
+
+  public get category() {
+    return this.config.category;
   }
 
   public get navLinkId() {
