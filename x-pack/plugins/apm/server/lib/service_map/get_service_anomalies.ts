@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../../../common/transaction_types';
 import {
   ServiceAnomalyStats,
+  getSeverity,
   ML_ERRORS,
 } from '../../../common/anomaly_detection';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
@@ -130,13 +132,19 @@ function transformResponseToServiceAnomalies(
     response.aggregations?.services.buckets ?? []
   ).reduce(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
+      const anomalyScore = topScoreAgg.hits.hits[0]?.sort?.[0];
+
+      const severity = getSeverity(anomalyScore);
+      const healthStatus = getServiceHealthStatus({ severity });
+
       return {
         ...statsByServiceName,
         [serviceName]: {
           transactionType: topScoreAgg.hits.hits[0]?._source?.by_field_value,
-          anomalyScore: topScoreAgg.hits.hits[0]?.sort?.[0],
+          anomalyScore,
           actualValue: topScoreAgg.hits.hits[0]?._source?.actual?.[0],
           jobId: topScoreAgg.hits.hits[0]?._source?.job_id,
+          healthStatus,
         },
       };
     },
