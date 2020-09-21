@@ -53,7 +53,7 @@ export const ImportDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocume
 
   return (
     <EuiAccordion
-      id="addDocumentsAccordion"
+      id="importDocumentsAccordion"
       buttonContent={i18nTexts.addDocumentsButton}
       paddingSize="s"
       data-test-subj="importDocumentsAccordion"

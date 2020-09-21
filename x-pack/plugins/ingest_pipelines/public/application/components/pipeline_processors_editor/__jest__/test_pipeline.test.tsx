@@ -172,6 +172,67 @@ describe('Test pipeline', () => {
       expect(exists('pipelineExecutionError')).toBe(true);
       expect(find('pipelineExecutionError').text()).toContain(error.message);
     });
+
+    describe('Import indexed documents', () => {
+      test('should successfully import an index document', async () => {
+        const { actions, form } = testBed;
+
+        const { _index: index, _id: documentId } = DOCUMENTS[0];
+
+        httpRequestsMockHelpers.setFetchDocumentsResponse(DOCUMENTS[0]);
+
+        // Open flyout
+        actions.clickAddDocumentsButton();
+
+        // Open documents accordion, click run without required fields, and verify error messages
+        await actions.toggleDocumentsAccordion();
+        await actions.clickImportButton();
+        expect(form.getErrorsMessages()).toEqual([
+          'An index name is required.',
+          'A document ID is required.',
+        ]);
+
+        // Add required fields, and click run
+        form.setInputValue('indexField.input', index);
+        form.setInputValue('idField.input', documentId);
+        await actions.clickImportButton();
+
+        // Verify request
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(latestRequest.status).toEqual(200);
+        expect(latestRequest.url).toEqual(`/api/ingest_pipelines/documents/${index}/${documentId}`);
+      });
+
+      test('should surface API errors from the request', async () => {
+        const { actions, form, exists, find } = testBed;
+
+        const nonExistentDoc = {
+          index: 'foo',
+          id: '1',
+        };
+
+        const error = {
+          status: 404,
+          error: 'Not found',
+          message: '[index_not_found_exception] no such index',
+        };
+
+        httpRequestsMockHelpers.setFetchDocumentsResponse(undefined, { body: error });
+
+        // Open flyout
+        actions.clickAddDocumentsButton();
+
+        // Open documents accordion, add required fields, and click run
+        await actions.toggleDocumentsAccordion();
+        form.setInputValue('indexField.input', nonExistentDoc.index);
+        form.setInputValue('idField.input', nonExistentDoc.id);
+        await actions.clickImportButton();
+
+        // Verify error rendered
+        expect(exists('importDocumentError')).toBe(true);
+        expect(find('importDocumentError').text()).toContain(error.message);
+      });
+    });
   });
 
   describe('Processors', () => {

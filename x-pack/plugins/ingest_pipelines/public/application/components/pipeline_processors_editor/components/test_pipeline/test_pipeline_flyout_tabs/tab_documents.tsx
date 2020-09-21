@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -37,18 +37,13 @@ export const DocumentsTab: FunctionComponent<Props> = ({
 }) => {
   const { services } = useKibana();
 
-  const documentsStateRef = useRef<any[]>([]);
-
   const [, formatData] = useFormData({ form });
 
   const onAddDocumentHandler = useCallback(
     (document) => {
-      const existingDocuments = [...documentsStateRef.current, document];
-      documentsStateRef.current = existingDocuments;
+      const { documents: existingDocuments } = formatData();
 
-      const { documents } = formatData();
-
-      form.reset({ defaultValue: { documents: [...existingDocuments, ...documents] } });
+      form.reset({ defaultValue: { documents: [...existingDocuments, document] } });
     },
     [form, formatData]
   );

@@ -112,6 +112,7 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
 
     if (isValid) {
       setIsLoadingDocument(true);
+      setLoadingDocumentError(undefined);
 
       const { error, data: document } = await services.api.loadDocument(index, id);
 
@@ -135,7 +136,7 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
             title={i18nTexts.importDocumentErrorMessage}
             color="danger"
             iconType="alert"
-            data-test-subj="pipelineExecutionError"
+            data-test-subj="importDocumentError"
           >
             <p>{loadingDocumentError.message}</p>
           </EuiCallOut>
@@ -147,18 +148,32 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
       <EuiPanel paddingSize="m">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <UseField path="index" component={TextField} config={fieldsConfig.index} />
+            <UseField
+              path="index"
+              component={TextField}
+              config={fieldsConfig.index}
+              componentProps={{
+                ['data-test-subj']: 'indexField',
+              }}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <UseField path="id" component={TextField} config={fieldsConfig.id} />
+            <UseField
+              path="id"
+              component={TextField}
+              config={fieldsConfig.id}
+              componentProps={{
+                ['data-test-subj']: 'idField',
+              }}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiButton
                 onClick={submitForm}
-                data-test-subj="addDocumentButton"
+                data-test-subj="importDocumentButton"
                 isLoading={isLoadingDocument}
               >
                 {i18nTexts.importDocumentButton}
