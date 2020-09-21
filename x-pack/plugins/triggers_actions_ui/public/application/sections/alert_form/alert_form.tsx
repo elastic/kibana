@@ -244,10 +244,11 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <Suspense fallback={CenterJustifiedSpinner}>
+        <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
             alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
             errors={errors}
             setAlertParams={setAlertParams}
             setAlertProperty={setAlertProperty}
