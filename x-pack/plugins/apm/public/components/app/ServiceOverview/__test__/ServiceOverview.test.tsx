@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import React, { FunctionComponent, ReactChild } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { ServiceOverview } from '..';
 import { EuiThemeProvider } from '../../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
@@ -114,7 +115,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 200,
           avgResponseTime: 300,
           environments: ['test', 'dev'],
-          severity: 1,
+          healthStatus: ServiceHealthStatus.warning,
         },
         {
           serviceName: 'My Go Service',
@@ -123,7 +124,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 500,
           avgResponseTime: 600,
           environments: [],
-          severity: 10,
+          severity: ServiceHealthStatus.healthy,
         },
       ],
     });
@@ -252,7 +253,7 @@ describe('Service Overview -> View', () => {
             errorsPerMinute: 200,
             avgResponseTime: 300,
             environments: ['test', 'dev'],
-            severity: 1,
+            healthStatus: ServiceHealthStatus.warning,
           },
         ],
       });
