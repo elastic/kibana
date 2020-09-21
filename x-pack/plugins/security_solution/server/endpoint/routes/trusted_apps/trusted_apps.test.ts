@@ -290,7 +290,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
         field: 'process.hash.*',
-        value: 'XXXXXYYYYZZZZZ',
+        value: '741462AB431A22233C787BAAB9B653C7',
         operator: 'included',
         type: 'match',
       });
@@ -304,8 +304,74 @@ describe('when invoking endpoint trusted apps route handlers', () => {
           value: 'c:/programs files/Anti-Virus',
         },
         {
+          field: 'process.hash.md5',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect md5 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
           field: 'process.hash.*',
-          value: 'xxxxxyyyyzzzzz',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.md5',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect sha1 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
+          field: 'process.hash.*',
+          value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.sha1',
+          value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect sha256 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
+          field: 'process.hash.*',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.sha256',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
           operator: 'included',
           type: 'match',
         },

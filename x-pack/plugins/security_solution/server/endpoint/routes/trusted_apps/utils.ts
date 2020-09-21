@@ -62,6 +62,7 @@ export const newTrustedAppItemToExceptionItem = ({
 
       if (newEntry.field === 'process.hash.*') {
         newValue = newValue.toLowerCase();
+        newEntry.field = `process.hash.${hashType(newValue)}`;
       }
 
       return {
@@ -81,4 +82,15 @@ export const newTrustedAppItemToExceptionItem = ({
 
 const tagsListFromOs = (os: NewTrustedApp['os']): NewExceptionItem['_tags'] => {
   return [`os:${os}`];
+};
+
+const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
+  switch (hash.length) {
+    case 32:
+      return 'md5';
+    case 40:
+      return 'sha1';
+    case 64:
+      return 'sha256';
+  }
 };
