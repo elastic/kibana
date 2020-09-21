@@ -7,6 +7,7 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
+/src/plugins/charts/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
@@ -163,7 +164,6 @@
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
-/x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
@@ -281,7 +281,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Core design
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/legacy/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
 
