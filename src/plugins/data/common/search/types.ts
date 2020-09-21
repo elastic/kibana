@@ -17,6 +17,22 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common/search';
+
+export type ISearch = (
+  request: IKibanaSearchRequest,
+  options?: ISearchOptions
+) => Observable<IKibanaSearchResponse>;
+
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
+  options?: ISearchOptions
+) => Observable<SearchStrategyResponse>;
+
 export interface IKibanaSearchResponse {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
