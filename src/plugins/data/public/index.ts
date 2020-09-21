@@ -230,6 +230,8 @@ import {
   formatHitProvider,
 } from './index_patterns';
 
+export type { IndexPatternsService } from './index_patterns';
+
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
