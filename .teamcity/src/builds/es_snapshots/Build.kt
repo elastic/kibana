@@ -4,9 +4,10 @@ import addSlackNotifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import vcs.Elasticsearch
+import vcs.Kibana
 
 object ESSnapshotBuild : BuildType({
-  name = "Build Elasticsearch Snapshot"
+  name = "Build Snapshot"
   paused = true
 
   requirements {
@@ -14,10 +15,9 @@ object ESSnapshotBuild : BuildType({
   }
 
   vcs {
-    root(Elasticsearch)
-
-    checkoutDir = "elasticsearch"
-//    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"
+    root(Kibana, "+:. => kibana")
+    root(Elasticsearch, "+:. => elasticsearch")
+    checkoutDir = ""
   }
 
   steps {
