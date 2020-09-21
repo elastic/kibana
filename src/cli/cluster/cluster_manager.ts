@@ -224,7 +224,6 @@ export class ClusterManager {
       new Set(
         [
           fromRoot('src/core'),
-          fromRoot('src/legacy/core_plugins'),
           fromRoot('src/legacy/server'),
           fromRoot('src/legacy/ui'),
           fromRoot('src/legacy/utils'),

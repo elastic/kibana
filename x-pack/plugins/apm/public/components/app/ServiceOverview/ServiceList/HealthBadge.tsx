@@ -6,20 +6,22 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import {
-  getSeverityColor,
-  getSeverityLabel,
-  Severity,
-} from '../../../../../common/anomaly_detection';
+  getServiceHealthStatusColor,
+  getServiceHealthStatusLabel,
+  ServiceHealthStatus,
+} from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/useTheme';
 
-export function HealthBadge({ severity }: { severity?: Severity }) {
+export function HealthBadge({
+  healthStatus,
+}: {
+  healthStatus: ServiceHealthStatus;
+}) {
   const theme = useTheme();
 
-  const unknownColor = theme.eui.euiColorLightShade;
-
   return (
-    <EuiBadge color={getSeverityColor(theme, severity) ?? unknownColor}>
-      {getSeverityLabel(severity)}
+    <EuiBadge color={getServiceHealthStatusColor(theme, healthStatus)}>
+      {getServiceHealthStatusLabel(healthStatus)}
     </EuiBadge>
   );
 }

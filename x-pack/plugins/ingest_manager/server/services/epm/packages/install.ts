@@ -42,7 +42,6 @@ import {
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
-import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -371,8 +370,7 @@ export async function installPackage({
     registryPackageInfo,
     paths,
     callCluster,
-    savedObjectsClient,
-    appContextService.getLogger()
+    savedObjectsClient
   );
 
   // if this is an update or retrying an update, delete the previous version's pipelines
