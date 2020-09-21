@@ -114,34 +114,41 @@ describe('CaseView ', () => {
       expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
         data.title
       );
+
       expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
         data.status
       );
+
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-coke"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
           .first()
           .text()
       ).toEqual(data.tags[0]);
+
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-pepsi"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
           .first()
           .text()
       ).toEqual(data.tags[1]);
+
       expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
         data.createdBy.username
       );
+
       expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
+
       expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
         data.createdAt
       );
+
       expect(
         wrapper
           .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
           .first()
-          .prop('raw')
-      ).toEqual(data.description);
+          .text()
+      ).toBe(data.description);
     });
   });
 

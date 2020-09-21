@@ -5,7 +5,8 @@
  */
 
 import { ILegacyScopedClusterClient } from 'src/core/server';
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
