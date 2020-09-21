@@ -21,7 +21,7 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 import { VisTypeTimeseriesPlugin } from './plugin';
 
-export { VisTypeTimeseriesSetup, Framework } from './plugin';
+export { VisTypeTimeseriesSetup } from './plugin';
 
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   deprecations: ({ unused, renameFromRoot }) => [
@@ -39,10 +39,10 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
 
 export { ValidationTelemetryServiceSetup } from './validation_telemetry';
 
-// @ts-ignore
-export { AbstractSearchStrategy } from './lib/search_strategies/strategies/abstract_search_strategy';
-// @ts-ignore
-export { AbstractSearchRequest } from './lib/search_strategies/search_requests/abstract_request';
+export {
+  AbstractSearchStrategy,
+  ReqFacade,
+} from './lib/search_strategies/strategies/abstract_search_strategy';
 // @ts-ignore
 export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
 
