@@ -14,7 +14,7 @@ import { connectorsMock } from '../../containers/configure/mock';
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
   it('label title generated for update tags', () => {
-    const action = getUserAction(['title'], 'update');
+    const action = getUserAction(['tags'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
       connectors,
@@ -27,8 +27,11 @@ describe('User action tree helpers', () => {
       ` ${i18n.TAGS.toLowerCase()}`
     );
 
-    expect(wrapper.find(`[data-test-subj="ua-tag"]`).first().text()).toEqual(action.newValue);
+    expect(wrapper.find(`[data-test-subj="tag-${action.newValue}"]`).first().text()).toEqual(
+      action.newValue
+    );
   });
+
   it('label title generated for update title', () => {
     const action = getUserAction(['title'], 'update');
     const result: string | JSX.Element = getLabelTitle({
@@ -44,6 +47,7 @@ describe('User action tree helpers', () => {
       }"`
     );
   });
+
   it('label title generated for update description', () => {
     const action = getUserAction(['description'], 'update');
     const result: string | JSX.Element = getLabelTitle({
@@ -55,6 +59,7 @@ describe('User action tree helpers', () => {
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
   });
+
   it('label title generated for update status to open', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
     const result: string | JSX.Element = getLabelTitle({
@@ -66,6 +71,7 @@ describe('User action tree helpers', () => {
 
     expect(result).toEqual(`${i18n.REOPENED_CASE.toLowerCase()} ${i18n.CASE}`);
   });
+
   it('label title generated for update status to closed', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
     const result: string | JSX.Element = getLabelTitle({
@@ -77,6 +83,7 @@ describe('User action tree helpers', () => {
 
     expect(result).toEqual(`${i18n.CLOSED_CASE.toLowerCase()} ${i18n.CASE}`);
   });
+
   it('label title generated for update comment', () => {
     const action = getUserAction(['comment'], 'update');
     const result: string | JSX.Element = getLabelTitle({
@@ -88,6 +95,7 @@ describe('User action tree helpers', () => {
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`);
   });
+
   it('label title generated for pushed incident', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
@@ -105,6 +113,7 @@ describe('User action tree helpers', () => {
       JSON.parse(action.newValue).external_url
     );
   });
+
   it('label title generated for needs update incident', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
@@ -122,6 +131,7 @@ describe('User action tree helpers', () => {
       JSON.parse(action.newValue).external_url
     );
   });
+
   it('label title generated for update connector', () => {
     const action = getUserAction(['connector_id'], 'update');
     const result: string | JSX.Element = getLabelTitle({
@@ -136,6 +146,8 @@ describe('User action tree helpers', () => {
       ` ${i18n.TAGS.toLowerCase()}`
     );
 
-    expect(wrapper.find(`[data-test-subj="ua-tag"]`).first().text()).toEqual(action.newValue);
+    expect(wrapper.find(`[data-test-subj="tag-${action.newValue}"]`).first().text()).toEqual(
+      action.newValue
+    );
   });
 });

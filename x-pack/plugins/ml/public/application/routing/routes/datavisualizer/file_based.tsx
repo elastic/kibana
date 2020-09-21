@@ -24,12 +24,15 @@ import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const fileBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const fileBasedRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/filedatavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
         defaultMessage: 'File',
@@ -40,10 +43,13 @@ export const fileBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute =
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { redirectToMlAccessDeniedPage } = deps;
+
   const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkFindFileStructurePrivilege: checkFindFileStructurePrivilegeResolver,
+    checkFindFileStructurePrivilege: () =>
+      checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });
   return (
     <PageLoader context={context}>
