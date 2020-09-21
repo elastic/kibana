@@ -472,7 +472,7 @@ export const defaultEndpointExceptionItems = (
           ],
         },
         {
-          field: 'file.path.lower', // TODO: file.path.lower for windows, file.path otherwise?
+          field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: filePath ?? '',

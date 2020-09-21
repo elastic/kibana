@@ -141,16 +141,16 @@ export function translateToEndpointExceptions(
 
 function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.lower') || field.endsWith('.text')
+    ? field.endsWith('.caseless') || field.endsWith('.text')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.lower') || field.endsWith('.text')
+    : field.endsWith('.caseless') || field.endsWith('.text')
     ? 'exact_caseless'
     : 'exact_cased';
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.lower') || field.endsWith('.text')
+  return field.endsWith('.caseless') || field.endsWith('.text')
     ? field.substring(0, field.lastIndexOf('.'))
     : field;
 }

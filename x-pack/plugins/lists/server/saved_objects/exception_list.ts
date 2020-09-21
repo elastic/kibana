@@ -168,6 +168,7 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const exceptionListType: SavedObjectsType = {
   hidden: false,
   mappings: combinedMappings,
+  migrations,
   name: exceptionListSavedObjectType,
   namespaceType: 'single',
 };

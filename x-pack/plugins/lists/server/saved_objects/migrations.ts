@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from 'kibana/server';
 
+import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import {
   EntriesArray,
   ExceptionListSoSchema,
@@ -25,7 +26,7 @@ const migrateEntry = (entryToMigrate: EntryType): EntryType => {
       migrateEntry(nestedEntry)
     ) as NonEmptyNestedEntriesArray;
   }
-  newEntry.field = entryToMigrate.field.replace('.text', '.lower');
+  newEntry.field = entryToMigrate.field.replace('.text', '.caseless');
   return newEntry;
 };
 
@@ -45,7 +46,7 @@ export const migrations = {
       attributes: {
         ...doc.attributes,
         ...(doc.attributes.entries &&
-          doc.attributes.list_id === 'endpoint_list' && {
+          [ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID].includes(doc.attributes.list_id) && {
             entries: (doc.attributes.entries as EntriesArray).map<EntryType>(migrateEntry),
           }),
         ...(doc.attributes._tags &&
