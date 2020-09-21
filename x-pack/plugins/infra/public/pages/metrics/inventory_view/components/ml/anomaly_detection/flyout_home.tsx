@@ -157,6 +157,13 @@ const JobsEnabledCallout = (props: CalloutProps) => {
     });
   }
 
+  // const goToML = useCallback(() => {
+  // const manageJobsLinkProps = useLinkProps({
+  //   app: 'ml',
+  //   pathname: '/explorer',
+  // });
+  // }, [])
+
   return (
     <>
       <EuiCallOut

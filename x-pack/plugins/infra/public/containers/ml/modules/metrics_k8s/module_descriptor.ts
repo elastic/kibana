@@ -21,7 +21,7 @@ import {
   partitionField,
 } from '../../../../../common/infra_ml';
 
-const moduleId = 'metrics_k8s';
+const moduleId = 'metrics_ui_k8s';
 const moduleName = i18n.translate('xpack.infra.ml.metricsModuleName', {
   defaultMessage: 'Metrics anomanly detection',
 });
