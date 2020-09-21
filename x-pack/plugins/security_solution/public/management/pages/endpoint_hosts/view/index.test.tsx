@@ -129,10 +129,7 @@ describe('when on the list page', () => {
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
       });
-      // const adminSearchBar = await renderResult.findByTestId('adminSearchBar');
-      return renderResult.findByTestId('adminSearchBar').catch((e) => {
-        expect(e).not.toBeNull();
-      });
+      expect(renderResult.queryByTestId('adminSearchBar')).toBeNull();
     });
   });
 
