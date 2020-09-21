@@ -153,8 +153,8 @@ NodeList [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
-          title="Unknown"
+          style="background-color: rgb(214, 191, 87); color: rgb(0, 0, 0);"
+          title="Warning"
         >
           <span
             class="euiBadge__content"
@@ -162,7 +162,7 @@ NodeList [
             <span
               class="euiBadge__text"
             >
-              Unknown
+              Warning
             </span>
           </span>
         </span>
@@ -435,7 +435,7 @@ NodeList [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+          style="background-color: rgb(152, 162, 179); color: rgb(0, 0, 0);"
           title="Unknown"
         >
           <span

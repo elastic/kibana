@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface UrlDrilldownConfig {
+export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };
   openInNewTab: boolean;
-}
+};
 
 /**
  * URL drilldown has 3 sources for variables: global, context and event variables
