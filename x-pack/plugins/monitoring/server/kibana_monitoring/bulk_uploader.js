@@ -136,7 +136,6 @@ export class BulkUploader {
       }
       return;
     }
-    // TINA TODO: add the new client call in here.
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
     if (payload && payload.length > 0) {
