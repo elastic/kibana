@@ -50,11 +50,5 @@ export interface IEngine {
 }
 
 export interface ICredentialsDetails {
-  lmAccount: {
-    id: string;
-    key: string;
-  };
-  apiUrl: string;
-  apiTokens: IApiToken[];
   engines: IEngine[];
 }

@@ -46,12 +46,6 @@ const newToken: IApiToken = {
 };
 
 const credentialsDetails: ICredentialsDetails = {
-  lmAccount: {
-    id: '1',
-    key: '1234',
-  },
-  apiTokens: [],
-  apiUrl: 'http://example.com',
   engines: [
     { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
     { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
@@ -70,7 +64,6 @@ describe('CredentialsLogic', () => {
     activeApiTokenIsExisting: false,
     activeApiTokenRawName: '',
     apiTokens: [],
-    apiUrl: '',
     dataLoading: true,
     engines: [],
     formErrors: [],
@@ -500,23 +493,12 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('apiUrl', () => {
-      it('should set `engines` from the provided details object', () => {
-        mount({
-          apiUrl: '',
-        });
-        CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
-        expect(CredentialsLogic.values.apiUrl).toEqual('http://example.com');
-      });
-    });
-
     it('should not change any other values', () => {
       mount();
       CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
       expect(CredentialsLogic.values).toEqual({
         ...DEFAULT_VALUES,
         engines: expect.any(Array),
-        apiUrl: expect.any(String),
         isCredentialsDetailsComplete: expect.any(Boolean),
       });
     });

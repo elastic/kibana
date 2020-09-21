@@ -73,7 +73,6 @@ export interface ICredentialsLogicValues {
   activeApiTokenIsExisting: boolean;
   activeApiTokenRawName: string;
   apiTokens: IApiToken[];
-  apiUrl: string;
   dataLoading: boolean;
   engines: IEngine[];
   // TODO flashMessages from ent-search
@@ -162,12 +161,6 @@ export const CredentialsLogic = kea<
       false,
       {
         setNameInputBlurred: (_, nameInputBlurred) => nameInputBlurred,
-      },
-    ],
-    apiUrl: [
-      '',
-      {
-        setCredentialsDetails: (_, { apiUrl }) => apiUrl,
       },
     ],
     activeApiToken: [
