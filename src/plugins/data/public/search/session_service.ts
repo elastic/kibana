@@ -18,9 +18,7 @@
  */
 
 import uuid from 'uuid';
-import {
-  ISessionService,
-} from '../../common/search';
+import { ISessionService } from '../../common/search';
 
 export class SessionService implements ISessionService {
   private sessionId?: string;

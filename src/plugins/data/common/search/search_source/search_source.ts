@@ -319,12 +319,13 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, {
-      ...options,
-      sessionId: this.dependencies.session.get(),
-    }).pipe(
-      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
-    );
+    return search(
+      { params, indexType: searchRequest.indexType },
+      {
+        ...options,
+        sessionId: this.dependencies.session.get(),
+      }
+    ).pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)));
   }
 
   /**
