@@ -16,7 +16,7 @@ export interface ScreenshotObservableOpts {
   urls: string[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
-  browserTimezone: string;
+  browserTimezone?: string;
 }
 
 export interface AttributesMap {

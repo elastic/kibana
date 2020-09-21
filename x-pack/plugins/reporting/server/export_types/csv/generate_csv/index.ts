@@ -37,7 +37,7 @@ interface SearchRequest {
 }
 
 export interface GenerateCsvParams {
-  browserTimezone: string | undefined;
+  browserTimezone?: string;
   searchRequest: SearchRequest;
   indexPatternSavedObject: IndexPatternSavedObject;
   fields: string[];

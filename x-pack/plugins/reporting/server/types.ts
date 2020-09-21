@@ -48,7 +48,7 @@ export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface BaseParams {
-  browserTimezone: string;
+  browserTimezone?: string;
   layout?: LayoutParams;
   objectType: string;
   title: string;

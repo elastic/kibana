@@ -35,7 +35,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     logger: LevelLogger,
     title: string,
     urls: string[],
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string

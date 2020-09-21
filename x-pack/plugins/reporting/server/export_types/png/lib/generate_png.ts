@@ -19,7 +19,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
   return function generatePngObservable(
     logger: LevelLogger,
     url: string,
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
   ): Rx.Observable<{ base64: string | null; warnings: string[] }> {
