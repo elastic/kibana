@@ -23,7 +23,15 @@ export const exceptionItemToTrustedAppItem = (
   const { entries, description, created_by, created_at, name, _tags, id } = exceptionListItem;
   const os = osFromTagsList(_tags);
   return {
-    entries,
+    entries: entries.map((entry) => {
+      if (entry.field.startsWith('process.hash')) {
+        return {
+          ...entry,
+          field: 'process.hash.*',
+        };
+      }
+      return entry;
+    }),
     description,
     created_at,
     created_by,
