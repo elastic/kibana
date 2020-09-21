@@ -40,7 +40,7 @@ object KibanaTemplate : Template({
 
   requirements {
     // equals("system.cloud.profile_id", "kibana")
-    startsWith("teamcity.agent.name", "kibana-standard-4-", "RQ_AGENT_NAME")
+    startsWith("teamcity.agent.name", "kibana-standard-2-", "RQ_AGENT_NAME")
   }
 
   features {
