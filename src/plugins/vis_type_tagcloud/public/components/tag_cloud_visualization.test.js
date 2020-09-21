@@ -20,7 +20,7 @@
 import 'jest-canvas-mock';
 
 import { createTagCloudVisTypeDefinition } from '../tag_cloud_type';
-import { createTagCloudVisualization } from './tag_cloud_visualization';
+import { TagCloudVisualization } from './tag_cloud_visualization';
 import { setFormatService } from '../services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
@@ -52,11 +52,6 @@ describe('TagCloudVisualizationTest', () => {
       { 'col-0': 'BR', 'col-1': 3 },
     ],
   };
-  const TagCloudVisualization = createTagCloudVisualization({
-    colors: {
-      seedColors,
-    },
-  });
 
   const originTransformSVGElement = window.SVGElement.prototype.transform;
 
@@ -98,7 +93,9 @@ describe('TagCloudVisualizationTest', () => {
     });
 
     test('simple draw', async () => {
-      const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
+      const tagcloudVisualization = new TagCloudVisualization(domNode, {
+        seedColors,
+      });
 
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -113,7 +110,9 @@ describe('TagCloudVisualizationTest', () => {
     });
 
     test('with resize', async () => {
-      const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
+      const tagcloudVisualization = new TagCloudVisualization(domNode, {
+        seedColors,
+      });
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
@@ -135,7 +134,9 @@ describe('TagCloudVisualizationTest', () => {
     });
 
     test('with param change', async function () {
-      const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
+      const tagcloudVisualization = new TagCloudVisualization(domNode, {
+        seedColors,
+      });
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,

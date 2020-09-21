@@ -29,18 +29,17 @@ interface Arguments extends TagCloudVisParams {
   bucket?: any; // these aren't typed yet
 }
 
-interface RenderValue {
+export interface TagCloudVisRenderValue {
   visType: typeof name;
   visData: KibanaDatatable;
-  visConfig: Arguments;
-  params: any;
+  visParams: Arguments;
 }
 
 export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
   KibanaDatatable,
   Arguments,
-  Render<RenderValue>
+  Render<TagCloudVisRenderValue>
 >;
 
 export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
@@ -97,7 +96,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     },
   },
   fn(input, args) {
-    const visConfig = {
+    const visParams = {
       scale: args.scale,
       orientation: args.orientation,
       minFontSize: args.minFontSize,
@@ -107,19 +106,16 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     } as Arguments;
 
     if (args.bucket !== undefined) {
-      visConfig.bucket = args.bucket;
+      visParams.bucket = args.bucket;
     }
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'tagloud_vis',
       value: {
         visData: input,
         visType: name,
-        visConfig,
-        params: {
-          listenOnChange: true,
-        },
+        visParams,
       },
     };
   },
