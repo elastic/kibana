@@ -10,8 +10,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AbortError } from '../../../../../../../src/plugins/data/common';
-
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { PageInfoPaginated, UncommonProcessesEdges } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -48,6 +46,7 @@ interface UseUncommonProcesses {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -57,6 +56,7 @@ export const useUncommonProcesses = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -65,15 +65,14 @@ export const useUncommonProcesses = ({
   const { activePage, limit } = useSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [uncommonProcessesRequest, setUncommonProcessesRequest] = useState<
     HostUncommonProcessesRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.uncommonProcesses,
     filterQuery: createFilter(filterQuery),
@@ -181,7 +180,7 @@ export const useUncommonProcesses = ({
     setUncommonProcessesRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -197,7 +196,7 @@ export const useUncommonProcesses = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, skip, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);
