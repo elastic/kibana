@@ -23,13 +23,17 @@ import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './help
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { ALERT_MISSING_DATA, BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { AlertsBadge } from '../../../alerts/badge';
+
+const BEATS_PANEL_ALERTS = [ALERT_MISSING_DATA];
 
 export function BeatsPanel(props) {
-  const { setupMode } = props;
+  const { setupMode, alerts } = props;
   const beatsTotal = get(props, 'beats.total') || 0;
   // Do not show if we are not in setup mode
   if (beatsTotal === 0 && !setupMode.enabled) {
@@ -46,6 +50,16 @@ export function BeatsPanel(props) {
       badgeClickLink={getSafeForExternalLink('#/beats/beats')}
     />
   ) : null;
+
+  let beatsAlertsStatus = null;
+  if (shouldShowAlertBadge(alerts, BEATS_PANEL_ALERTS)) {
+    const alertsList = BEATS_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    beatsAlertsStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [
@@ -145,7 +159,12 @@ export function BeatsPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeMetricbeatMigrationTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeMetricbeatMigrationTooltip}
+                  {beatsAlertsStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">{beatTypes}</EuiDescriptionList>

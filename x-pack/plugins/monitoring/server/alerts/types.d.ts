@@ -27,6 +27,12 @@ export interface AlertCpuUsageState extends AlertState {
   nodeName: string;
 }
 
+export interface AlertMissingDataState extends AlertState {
+  stackProduct: string;
+  stackProductUuid: string;
+  gapDuration: number;
+}
+
 export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
@@ -75,6 +81,15 @@ export interface AlertCpuUsageNodeStats {
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
+  ccs: string | null;
+}
+
+export interface AlertMissingData {
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
+  clusterUuid: string;
+  gapDuration: number;
   ccs: string | null;
 }
 

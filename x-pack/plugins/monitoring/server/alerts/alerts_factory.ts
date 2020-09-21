@@ -6,6 +6,7 @@
 
 import {
   CpuUsageAlert,
+  MissingDataAlert,
   NodesChangedAlert,
   ClusterHealthAlert,
   LicenseExpirationAlert,
@@ -18,6 +19,7 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
+  ALERT_MISSING_DATA,
   ALERT_NODES_CHANGED,
   ALERT_LOGSTASH_VERSION_MISMATCH,
   ALERT_KIBANA_VERSION_MISMATCH,
@@ -29,6 +31,7 @@ export const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
+  [ALERT_MISSING_DATA]: MissingDataAlert,
   [ALERT_NODES_CHANGED]: NodesChangedAlert,
   [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,
   [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,

@@ -235,6 +235,7 @@ export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
 export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
 export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
 export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
+export const ALERT_MISSING_DATA = `${ALERT_PREFIX}alert_missing_data`;
 
 /**
  * A listing of all alert types
@@ -247,6 +248,7 @@ export const ALERTS = [
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_DATA,
 ];
 
 /**

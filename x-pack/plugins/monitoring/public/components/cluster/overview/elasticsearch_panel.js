@@ -41,6 +41,7 @@ import {
   ALERT_CPU_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_MISSING_DATA,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -158,6 +159,7 @@ const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_MISSING_DATA,
 ];
 
 export function ElasticsearchPanel(props) {

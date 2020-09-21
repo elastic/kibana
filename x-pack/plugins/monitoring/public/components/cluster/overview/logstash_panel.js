@@ -15,6 +15,7 @@ import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_DATA,
 } from '../../../../common/constants';
 
 import {
@@ -40,7 +41,7 @@ import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badg
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
+const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_DATA];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
