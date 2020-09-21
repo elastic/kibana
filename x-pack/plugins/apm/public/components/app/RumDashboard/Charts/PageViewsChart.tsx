@@ -68,15 +68,10 @@ export function PageViewsChart({ data, loading }: Props) {
     });
   };
 
-  let breakdownAccessors: Set<string> = new Set();
-  if (data && data.length > 0) {
-    data.forEach((item) => {
-      breakdownAccessors = new Set([
-        ...Array.from(breakdownAccessors),
-        ...Object.keys(item).filter((key) => key !== 'x'),
-      ]);
-    });
-  }
+  const breakdownAccessors =
+    data?.topItems?.length > 0 ? data?.topItems : ['y'];
+
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
     if (yAccessor === 'y') {
@@ -85,8 +80,6 @@ export function PageViewsChart({ data, loading }: Props) {
 
     return yAccessor;
   };
-
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
     <ChartWrapper loading={loading} height="250px">
@@ -115,7 +108,8 @@ export function PageViewsChart({ data, loading }: Props) {
             id="page_views"
             title={I18LABELS.pageViews}
             position={Position.Left}
-            tickFormat={(d) => numeral(d).format('0a')}
+            tickFormat={(d) => numeral(d).format('0')}
+            labelFormat={(d) => numeral(d).format('0a')}
           />
           <BarSeries
             id={I18LABELS.pageViews}
@@ -123,7 +117,8 @@ export function PageViewsChart({ data, loading }: Props) {
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={Array.from(breakdownAccessors)}
-            data={data ?? []}
+            stackAccessors={['x']}
+            data={data?.items ?? []}
             name={customSeriesNaming}
           />
         </Chart>
