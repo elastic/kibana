@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(entry.oldVersion).equal('0.1.0');
         expect(entry.newVersion).equal('0.3.0');
       });
-      it('should the same package multiple times for upgrade', async function () {
+      it('should handle the same package multiple times for upgrade', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
@@ -88,23 +88,6 @@ export default function (providerContext: FtrProviderContext) {
         const err = body.response[1] as IBulkInstallPackageError;
         expect(err.statusCode).equal(404);
         expect(body.response[1].name).equal('blahblah');
-      });
-      it('should upgrade multiple packages', async function () {
-        const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions', 'overrides'] })
-          .expect(200);
-        expect(body.response.length).equal(2);
-        expect(body.response[0].name).equal('multiple_versions');
-        let entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
-
-        entry = body.response[1] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal(null);
-        expect(entry.newVersion).equal('0.1.0');
-        expect(entry.name).equal('overrides');
       });
     });
 
