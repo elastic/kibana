@@ -22,7 +22,7 @@ describe('WorkplaceSearchHeaderActions', () => {
   });
 
   it('does not render without an Enterprise Search host URL set', () => {
-    const wrapper = shallow(<WorkplaceSearchHeaderActions externalUrl={{}} />);
+    const wrapper = shallow(<WorkplaceSearchHeaderActions externalUrl={{} as any} />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });
