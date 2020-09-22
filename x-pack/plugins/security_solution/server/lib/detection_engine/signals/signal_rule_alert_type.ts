@@ -33,7 +33,7 @@ import {
   MAX_RULE_GAP_RATIO,
   createErrorsFromShard,
   createSearchAfterReturnType,
-  mergeSearchAfterAndBulkCreate,
+  mergeReturns,
   createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
@@ -256,7 +256,7 @@ export const signalRulesAlertType = ({
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
-          result = mergeSearchAfterAndBulkCreate([
+          result = mergeReturns([
             result,
             createSearchAfterReturnType({
               success: success && anomalyResults._shards.failed === 0,
@@ -317,7 +317,7 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result = mergeSearchAfterAndBulkCreate([
+          result = mergeReturns([
             result,
             createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
             createSearchAfterReturnType({

@@ -496,7 +496,7 @@ export const createSearchAfterReturnType = ({
   };
 };
 
-export const mergeSearchAfterAndBulkCreate = (
+export const mergeReturns = (
   searchAfters: SearchAfterAndBulkCreateReturnType[]
 ): SearchAfterAndBulkCreateReturnType => {
   return searchAfters.reduce((prev, next) => {

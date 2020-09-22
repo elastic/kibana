@@ -12,7 +12,7 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createTotalHitsFromSearchResult,
   getSignalTimeTuples,
-  mergeSearchAfterAndBulkCreate,
+  mergeReturns,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
@@ -90,7 +90,7 @@ export const searchAfterAndBulkCreate = async ({
           pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
           timestampOverride: ruleParams.timestampOverride,
         });
-        toReturn = mergeSearchAfterAndBulkCreate([
+        toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({ searchResult }),
           createSearchAfterReturnType({
@@ -171,7 +171,7 @@ export const searchAfterAndBulkCreate = async ({
             tags,
             throttle,
           });
-          toReturn = mergeSearchAfterAndBulkCreate([
+          toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnType({
               success: bulkSuccess,
@@ -200,7 +200,7 @@ export const searchAfterAndBulkCreate = async ({
         }
       } catch (exc: unknown) {
         logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
-        return mergeSearchAfterAndBulkCreate([
+        return mergeReturns([
           toReturn,
           createSearchAfterReturnType({
             success: false,

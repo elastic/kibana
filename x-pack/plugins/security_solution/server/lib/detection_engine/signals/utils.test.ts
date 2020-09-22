@@ -28,7 +28,7 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
-  mergeSearchAfterAndBulkCreate,
+  mergeReturns,
   createTotalHitsFromSearchResult,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
@@ -967,12 +967,9 @@ describe('utils', () => {
     });
   });
 
-  describe('mergeSearchAfterAndBulkCreate', () => {
+  describe('mergeReturns', () => {
     test('it merges a default "prev" and "next" correctly ', () => {
-      const merged = mergeSearchAfterAndBulkCreate([
-        createSearchAfterReturnType(),
-        createSearchAfterReturnType(),
-      ]);
+      const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
@@ -985,7 +982,7 @@ describe('utils', () => {
     });
 
     test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterAndBulkCreate([
+      const { success } = mergeReturns([
         createSearchAfterReturnType({ success: false }),
         createSearchAfterReturnType(),
       ]);
@@ -993,7 +990,7 @@ describe('utils', () => {
     });
 
     test('it merges search in with two default search results where "next" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterAndBulkCreate([
+      const { success } = mergeReturns([
         createSearchAfterReturnType(),
         createSearchAfterReturnType({ success: false }),
       ]);
@@ -1001,7 +998,7 @@ describe('utils', () => {
     });
 
     test('it merges search where the lastLookBackDate is the "next" date when given', () => {
-      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate([
+      const { lastLookBackDate } = mergeReturns([
         createSearchAfterReturnType({
           lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
         }),
@@ -1013,7 +1010,7 @@ describe('utils', () => {
     });
 
     test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
-      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate([
+      const { lastLookBackDate } = mergeReturns([
         createSearchAfterReturnType({
           lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
         }),
@@ -1025,7 +1022,7 @@ describe('utils', () => {
     });
 
     test('it merges search where values from "next" and "prev" are computed together', () => {
-      const merged = mergeSearchAfterAndBulkCreate([
+      const merged = mergeReturns([
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
