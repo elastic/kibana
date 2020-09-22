@@ -115,13 +115,21 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Should throw Painless error on server error', async (done) => {
+    test('Should throw Painless error on server error with OSS format', async (done) => {
       const mockResponse: any = {
         result: 500,
         body: {
           attributes: {
             error: {
-              root_cause: [{ lang: 'painless' }],
+              failed_shards: [
+                {
+                  reason: {
+                    lang: 'painless',
+                    script_stack: ['a', 'b'],
+                    reason: 'banana',
+                  },
+                },
+              ],
             },
           },
         },

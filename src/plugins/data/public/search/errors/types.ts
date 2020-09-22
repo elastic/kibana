@@ -69,5 +69,5 @@ export interface EsError {
 }
 
 export function isEsError(e: any): e is EsError {
-  return !!e.body.attributes;
+  return !!e.body?.attributes;
 }
