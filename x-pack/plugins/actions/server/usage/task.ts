@@ -13,7 +13,7 @@ import {
 } from '../../../task_manager/server';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
-export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
+export const TELEMETRY_TASK_TYPE = 'actions_usage';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
 
@@ -38,7 +38,7 @@ function registerActionsTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Actions telemetry fetch task',
+      title: 'Actions usage fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),

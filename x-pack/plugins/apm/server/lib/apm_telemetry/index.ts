@@ -30,7 +30,7 @@ import {
 } from './collect_data_telemetry';
 import { APMDataTelemetry } from './types';
 
-const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
+const APM_TELEMETRY_TASK_NAME = 'apm-usage-task';
 
 export async function createApmTelemetry({
   core,
@@ -49,7 +49,7 @@ export async function createApmTelemetry({
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
-      title: 'Collect APM telemetry',
+      title: 'Collect APM usage',
       type: APM_TELEMETRY_TASK_NAME,
       createTaskRunner: () => {
         return {

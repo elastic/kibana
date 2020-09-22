@@ -14,7 +14,7 @@ import {
 
 import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 
-export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
+export const TELEMETRY_TASK_TYPE = 'alerting_usage';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
 
@@ -41,7 +41,7 @@ function registerAlertingTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Alerting telemetry fetch task',
+      title: 'Alerting usage fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),

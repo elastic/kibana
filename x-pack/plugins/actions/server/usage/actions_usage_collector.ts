@@ -39,7 +39,7 @@ export function createActionsUsageCollector(
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
-    const result = await taskManager.get('Actions-actions_telemetry');
+    const result = await taskManager.get('Actions-actions_usage');
     return result;
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();
