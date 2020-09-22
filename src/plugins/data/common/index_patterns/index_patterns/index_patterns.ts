@@ -226,9 +226,23 @@ export class IndexPatternsService {
    * @param indexPattern
    */
   refreshFields = async (indexPattern: IndexPattern) => {
-    const fields = await this.getFieldsForIndexPattern(indexPattern);
-    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-    indexPattern.fields.replaceAll([...fields, ...scripted]);
+    try {
+      const fields = await this.getFieldsForIndexPattern(indexPattern);
+      const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+      indexPattern.fields.replaceAll([...fields, ...scripted]);
+    } catch (err) {
+      if (err instanceof IndexPatternMissingIndices) {
+        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        return {};
+      }
+
+      this.onError(err, {
+        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          values: { id: indexPattern.id, title: indexPattern.title },
+        }),
+      });
+    }
   };
 
   /**
