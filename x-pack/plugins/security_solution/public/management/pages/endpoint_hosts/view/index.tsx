@@ -552,7 +552,7 @@ export const EndpointList = () => {
   const hasErrorFindingTotals = useMemo(() => {
     return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
-  
+
   const shouldShowKQLBar = useMemo(() => {
     return endpointsExist && !patternsError && isTransformEnabled;
   }, [endpointsExist, patternsError, isTransformEnabled]);
