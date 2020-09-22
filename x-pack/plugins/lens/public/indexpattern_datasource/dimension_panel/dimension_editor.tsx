@@ -26,7 +26,7 @@ import {
 } from '../operations';
 import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
 import { FieldSelect } from './field_select';
-import { hasField } from '../utils';
+import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -133,6 +133,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       'operationType'
     );
   }
+
+  const currentFieldIsInvalid =
+    !selectedColumn || fieldIsInvalid(selectedColumn, currentIndexPattern.id, state);
 
   const sideNavItems: EuiListGroupItemProps[] = getOperationTypes().map(
     ({ operationType, compatibleWithCurrentField }) => {
@@ -268,6 +271,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             selectedColumnSourceField={
               selectedColumn && hasField(selectedColumn) ? selectedColumn.sourceField : undefined
             }
+            fieldIsInvalid={currentFieldIsInvalid}
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {
               setState(
@@ -330,7 +334,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         </EuiFormRow>
 
-        {!incompatibleSelectedOperationType && ParamEditor && (
+        {!currentFieldIsInvalid && !incompatibleSelectedOperationType && ParamEditor && (
           <>
             <EuiSpacer size="s" />
             <ParamEditor

@@ -5,11 +5,13 @@
  */
 
 import { DataType } from '../types';
+import { IndexPatternPrivateState } from './types';
 import { DraggedField } from './indexpattern';
 import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -38,5 +40,27 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     fieldCandidate !== null &&
     'field' in fieldCandidate &&
     'indexPatternId' in fieldCandidate
+  );
+}
+
+export function hasInvalidReference(state: IndexPatternPrivateState) {
+  return Object.values(state.layers).some((layer) => {
+    return layer.columnOrder.some((columnId) => {
+      const column = layer.columns[columnId];
+      return fieldIsInvalid(column, layer.indexPatternId, state);
+    });
+  });
+}
+
+export function fieldIsInvalid(
+  column: IndexPatternColumn,
+  indexPatternId: string,
+  state: IndexPatternPrivateState
+) {
+  const indexPattern = state.indexPatterns[indexPatternId];
+  return !indexPattern.fields.some(
+    (field) =>
+      field.name === column.sourceField &&
+      operationDefinitionMap[column.operationType].getPossibleOperationForField(field) !== undefined
   );
 }

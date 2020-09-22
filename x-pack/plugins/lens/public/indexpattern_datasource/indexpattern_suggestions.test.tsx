@@ -147,7 +147,7 @@ function testInitialState(): IndexPatternPrivateState {
 
             // Private
             operationType: 'terms',
-            sourceField: 'op',
+            sourceField: 'dest',
             params: {
               size: 5,
               orderBy: { type: 'alphabetical' },
@@ -1115,7 +1115,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
                 // Private
                 operationType: 'terms',
-                sourceField: 'op',
+                sourceField: 'dest',
                 params: {
                   size: 5,
                   orderBy: { type: 'alphabetical' },
@@ -1615,7 +1615,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: true,
 
                 operationType: 'date_histogram',
-                sourceField: 'field2',
+                sourceField: 'timestamp',
                 params: {
                   interval: 'd',
                 },
@@ -1626,7 +1626,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: true,
 
                 operationType: 'terms',
-                sourceField: 'field1',
+                sourceField: 'dest',
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
               },
               id3: {
@@ -1635,7 +1635,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
 
                 operationType: 'avg',
-                sourceField: 'field1',
+                sourceField: 'bytes',
               },
             },
             columnOrder: ['id1', 'id2', 'id3'],
@@ -1651,6 +1651,38 @@ describe('IndexPattern Data Source suggestions', () => {
           }),
         })
       );
+    });
+
+    it('does not generate suggestions if invalid fields are referenced', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        currentIndexPatternId: '1',
+        indexPatterns: expectedIndexPatterns,
+        isFirstExistenceFetch: false,
+        layers: {
+          first: {
+            ...initialState.layers.first,
+            columns: {
+              ...initialState.layers.first.columns,
+              id2: {
+                label: 'Top 5',
+                dataType: 'string',
+                isBucketed: true,
+
+                operationType: 'terms',
+                sourceField: 'nonExistingField',
+                params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
+              },
+            },
+            columnOrder: ['id1', 'id2'],
+          },
+        },
+      };
+
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions).toEqual([]);
     });
   });
 });

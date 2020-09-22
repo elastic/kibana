@@ -41,6 +41,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  fieldIsInvalid: boolean;
 }
 
 export function FieldSelect({
@@ -53,6 +54,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  fieldIsInvalid,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationFieldSupportMatrix;
@@ -168,7 +170,12 @@ export function FieldSelect({
           ? selectedColumnSourceField
             ? [
                 {
-                  label: fieldMap[selectedColumnSourceField].displayName,
+                  label: fieldIsInvalid
+                    ? i18n.translate('xpack.lens.indexPattern.invalidField', {
+                        defaultMessage: 'Invalid field {field}',
+                        values: { field: selectedColumnSourceField },
+                      })
+                    : fieldMap[selectedColumnSourceField]?.displayName,
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]

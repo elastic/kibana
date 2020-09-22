@@ -822,6 +822,35 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
+    it('should render invalid field if field reference is broken', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...defaultProps.state,
+            layers: {
+              first: {
+                ...defaultProps.state.layers.first,
+                columns: {
+                  col1: {
+                    ...defaultProps.state.layers.first.columns.col1,
+                    sourceField: 'nonexistent',
+                  },
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
+        {
+          label: 'Invalid field nonexistent',
+          value: { type: 'field', field: 'nonexistent' },
+        },
+      ]);
+    });
+
     it('should support selecting the operation before the field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 

@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -22,7 +22,7 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { isDraggedField, hasField, fieldIsInvalid } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { DateRange } from '../../../common';
@@ -228,13 +228,47 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
 
-  const selectedColumn: IndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const layer = props.state.layers[layerId];
+
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
 
   const { columnId, uniqueLabel } = props;
   if (!selectedColumn) {
     return null;
   }
+
+  if (fieldIsInvalid(selectedColumn, layer.indexPatternId, props.state)) {
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+          defaultMessage: "The field {field} can't be used. Please adjust the configuration.",
+          values: {
+            field: selectedColumn.sourceField,
+          },
+        })}
+      >
+        <EuiLink
+          color="danger"
+          id={columnId}
+          className="lnsLayerPanel__triggerLink"
+          onClick={props.onClick}
+          data-test-subj="lns-dimensionTrigger"
+          aria-label={i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Edit configuration',
+          })}
+          title={i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Edit configuration',
+          })}
+        >
+          <EuiIcon type="alert" />
+          {i18n.translate('xpack.lens.configure.invalidConfig', {
+            defaultMessage: 'Configuration is invalid',
+          })}
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
+
   return (
     <EuiLink
       id={columnId}
