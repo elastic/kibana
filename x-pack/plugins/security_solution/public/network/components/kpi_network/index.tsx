@@ -14,7 +14,7 @@ import { NetworkKpiUniqueFlows } from './unique_flows';
 import { NetworkKpiUniquePrivateIps } from './unique_private_ips';
 import { NetworkKpiProps } from './types';
 
-export const KpiNetworkComponent = React.memo<NetworkKpiProps>(
+export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
@@ -83,4 +83,4 @@ export const KpiNetworkComponent = React.memo<NetworkKpiProps>(
   )
 );
 
-KpiNetworkComponent.displayName = 'KpiNetworkComponent';
+NetworkKpiComponent.displayName = 'NetworkKpiComponent';

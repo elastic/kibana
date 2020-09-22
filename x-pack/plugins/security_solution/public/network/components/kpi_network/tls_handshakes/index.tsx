@@ -8,7 +8,7 @@ import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiTlsHandshakes } from '../../../containers/kpi_network/tls_handshakes';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -43,7 +43,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

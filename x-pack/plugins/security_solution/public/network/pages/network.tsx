@@ -19,7 +19,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { SiemNavigation } from '../../common/components/navigation';
 
-import { KpiNetworkComponent } from '../components/kpi_network';
+import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useFullScreen } from '../../common/containers/use_full_screen';
@@ -129,7 +129,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
 
                 <EuiSpacer />
 
-                <KpiNetworkComponent
+                <NetworkKpiComponent
                   filterQuery={filterQuery}
                   from={from}
                   indexNames={selectedPatterns}

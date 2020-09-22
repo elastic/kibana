@@ -21,13 +21,12 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../common/components/navigation';
-import { KpiHostsComponent } from '../../components/kpi_hosts';
+import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../containers/hosts/details';
-import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -54,7 +53,6 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const HostOverviewManage = manageQuery(HostOverview);
-const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
@@ -168,28 +166,15 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
 
                 <EuiHorizontalRule />
 
-                <KpiHostDetailsQuery
-                  indexNames={selectedPatterns}
-                  sourceId="default"
+                <HostsDetailsKpiComponent
                   filterQuery={filterQuery}
+                  from={from}
+                  indexNames={selectedPatterns}
+                  setQuery={setQuery}
+                  to={to}
+                  narrowDateRange={narrowDateRange}
                   skip={isInitializing}
-                  startDate={from}
-                  endDate={to}
-                >
-                  {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                    <KpiHostDetailsManage
-                      data={kpiHostDetails}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostDetailsQuery>
+                />
 
                 <EuiSpacer />
 

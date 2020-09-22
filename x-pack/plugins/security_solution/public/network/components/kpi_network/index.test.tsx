@@ -17,9 +17,9 @@ import {
 } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { createStore, State } from '../../../common/store';
-import { KpiNetworkComponent } from '.';
+import { NetworkKpiComponent } from '.';
 
-describe('KpiNetwork Component', () => {
+describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;
   const props = {
     filterQuery: '',
@@ -54,11 +54,11 @@ describe('KpiNetwork Component', () => {
     test('it renders the default widget', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent {...props} />
+          <NetworkKpiComponent {...props} />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
+      expect(wrapper.find('NetworkKpiComponent')).toMatchSnapshot();
     });
   });
 });
