@@ -24,7 +24,7 @@ import { promisify } from 'util';
 
 import execa from 'execa';
 
-import { readYarnLock, YarnLock, resolveDepsForProject } from './yarn_lock';
+import { YarnLock, resolveDepsForProject } from './yarn_lock';
 import { ProjectMap } from '../utils/projects';
 import { Project } from '../utils/project';
 import { Kibana } from '../utils/kibana';
