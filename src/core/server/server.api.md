@@ -864,10 +864,6 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    // @internal @deprecated
-    app?: {
-        getId(): string;
-    };
     includeUserSettings?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
