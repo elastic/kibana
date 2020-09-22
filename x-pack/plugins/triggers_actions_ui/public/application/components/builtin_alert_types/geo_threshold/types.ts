@@ -15,7 +15,7 @@ export interface GeoThresholdAlertParams {
   geoField: string;
   entity: string;
   dateField: string;
-  trackingEvent: TrackingEvent;
+  trackingEvent: string;
   boundaryType: string;
   boundaryIndexTitle: string;
   boundaryIndexId: string;

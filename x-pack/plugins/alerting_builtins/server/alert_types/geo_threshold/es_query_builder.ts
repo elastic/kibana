@@ -5,6 +5,8 @@
  */
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
+import { Logger } from '../../types';
 
 export const OTHER_CATEGORY = 'other';
 
@@ -16,11 +18,11 @@ async function getShapesFilters(
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger
 ) {
-  const filters = {};
+  const filters: Record<string, unknown> = {};
   switch (boundaryType) {
     case 'entireIndex':
       // Get all shapes in index
-      const boundaryData = await callCluster('search', {
+      const boundaryData: SearchResponse<unknown> = await callCluster('search', {
         index: boundaryIndexTitle,
         body: {},
       });
@@ -74,11 +76,12 @@ export async function executeEsQueryFactory(
     log
   );
   return async (
-    gteDateTime: string | undefined,
-    ltDateTime: string, // 'less than' to prevent overlap between intervals
+    gteDateTime: Date | null,
+    ltDateTime: Date | null, // 'less than' to prevent overlap between intervals
     topHitsQty: number = 1
-  ) => {
-    const esQuery: unknown = {
+  ): Promise<SearchResponse<unknown> | undefined> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const esQuery: Record<string, any> = {
       index: indexTitle,
       body: {
         size: 0,
@@ -144,7 +147,7 @@ export async function executeEsQueryFactory(
       },
     };
 
-    let esResult;
+    let esResult: SearchResponse<unknown> | undefined;
     try {
       esResult = await callCluster('search', esQuery);
     } catch (err) {

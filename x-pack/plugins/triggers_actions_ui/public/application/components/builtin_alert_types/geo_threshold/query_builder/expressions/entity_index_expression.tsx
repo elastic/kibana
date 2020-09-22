@@ -42,7 +42,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   geoField,
 }) => {
   const { dataUi, dataIndexPatterns, http } = alertsContext;
-  const { IndexPatternSelect } = dataUi;
+  const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
 
   const indexPopover = (
     <Fragment>

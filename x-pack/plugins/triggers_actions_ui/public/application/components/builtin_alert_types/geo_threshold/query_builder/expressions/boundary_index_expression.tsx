@@ -34,7 +34,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   setBoundaryGeoField,
 }) => {
   const { dataUi, dataIndexPatterns, http } = alertsContext;
-  const { IndexPatternSelect } = dataUi;
+  const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
 
   const indexPopover = (

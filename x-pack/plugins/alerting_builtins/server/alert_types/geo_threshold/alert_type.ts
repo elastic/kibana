@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Service } from '../../types';
 import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
-import { AlertServices } from '../../../../alerts/server';
+import { ActionGroup, AlertServices, ActionVariable } from '../../../../alerts/server';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
@@ -69,6 +69,7 @@ export function getAlertType(
   service: Service
 ): {
   defaultActionGroupId: string;
+  actionGroups: ActionGroup[];
   executor: ({
     previousStartedAt: currIntervalStartTime,
     startedAt: currIntervalEndTime,
@@ -84,16 +85,39 @@ export function getAlertType(
       geoField: string;
       entity: string;
       dateField: string;
-      trackingEvent: TrackingEvent;
-      boundaryType: BoundaryType;
+      trackingEvent: string;
+      boundaryType: string;
       boundaryIndexTitle: string;
       boundaryIndexId: string;
       boundaryGeoField: string;
     };
   }) => Promise<void>;
+  validate?: {
+    params?: {
+      validate: (
+        object: unknown
+      ) => {
+        indexTitle: string;
+        indexId: string;
+        geoField: string;
+        entity: string;
+        dateField: string;
+        trackingEvent: string;
+        boundaryType: string;
+        boundaryIndexTitle: string;
+        boundaryIndexId: string;
+        boundaryGeoField: string;
+      };
+    };
+  };
   name: string;
   producer: string;
   id: string;
+  actionVariables?: {
+    context?: ActionVariable[];
+    state?: ActionVariable[];
+    params?: ActionVariable[];
+  };
 } {
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.geoThreshold.alertTypeTitle', {
     defaultMessage: 'Geo tracking threshold',
@@ -111,7 +135,6 @@ export function getAlertType(
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
-    actionVariables: [],
     executor: getGeoThresholdExecutor(service),
     producer: BUILT_IN_ALERTS_FEATURE_ID,
     validate: {

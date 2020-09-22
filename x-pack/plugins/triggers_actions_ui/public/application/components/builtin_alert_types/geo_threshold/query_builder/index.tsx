@@ -108,6 +108,9 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
       });
+      if (!alertsContext.dataIndexPatterns) {
+        return;
+      }
       if (indexId) {
         const _indexPattern = await alertsContext.dataIndexPatterns.get(indexId);
         setIndexPattern(_indexPattern);
@@ -183,7 +186,8 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                   (trackingEvent && trackingEvent) ||
                   (entity &&
                     setAlertParams('trackingEvent', conditionOptions[0].text) &&
-                    conditionOptions[0].text)
+                    conditionOptions[0].text) ||
+                  undefined
                 }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}

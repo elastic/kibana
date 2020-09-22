@@ -33,8 +33,8 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   capabilities: ApplicationStart['capabilities'];
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
   metadata?: MetaData;
-  dataUi: DataPublicPluginStartUi;
-  dataIndexPatterns: IndexPatternsContract;
+  dataUi?: DataPublicPluginStartUi;
+  dataIndexPatterns?: IndexPatternsContract;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

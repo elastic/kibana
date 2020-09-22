@@ -15,8 +15,8 @@ import { ES_GEO_FIELD_TYPES } from '../../types';
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
   value: string | undefined;
-  IndexPatternSelectComponent: unknown;
-  indexPatternService: IndexPatternsContract;
+  IndexPatternSelectComponent: any;
+  indexPatternService: IndexPatternsContract | undefined;
   http: HttpSetup;
 }
 
@@ -39,8 +39,8 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = async (indexPatternId: string) => {
-    if (!indexPatternId || indexPatternId.length === 0) {
+  _onIndexPatternSelect = async (indexPatternId: any) => {
+    if (!indexPatternId || indexPatternId.length === 0 || !this.props.indexPatternService) {
       return;
     }
 
@@ -117,7 +117,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
   }
 
   render() {
-    const IndexPatternSelect = this.props.IndexPatternSelectComponent;
+    const IndexPatternSelectComponent = this.props.IndexPatternSelectComponent;
     return (
       <>
         {this._renderNoIndexPatternWarning()}
@@ -127,20 +127,24 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             defaultMessage: 'Index pattern',
           })}
         >
-          <IndexPatternSelect
-            isDisabled={this.state.noGeoIndexPatternsExist}
-            indexPatternId={this.props.value}
-            onChange={this._onIndexPatternSelect}
-            placeholder={i18n.translate(
-              'xpack.triggersActionsUI.geoThreshold.indexPatternSelectPlaceholder',
-              {
-                defaultMessage: 'Select index pattern',
-              }
-            )}
-            fieldTypes={ES_GEO_FIELD_TYPES}
-            onNoIndexPatterns={this._onNoIndexPatterns}
-            isClearable={false}
-          />
+          {IndexPatternSelectComponent && this.props.value ? (
+            <IndexPatternSelectComponent
+              isDisabled={this.state.noGeoIndexPatternsExist}
+              indexPatternId={this.props.value}
+              onChange={this._onIndexPatternSelect}
+              placeholder={i18n.translate(
+                'xpack.triggersActionsUI.geoThreshold.indexPatternSelectPlaceholder',
+                {
+                  defaultMessage: 'Select index pattern',
+                }
+              )}
+              fieldTypes={ES_GEO_FIELD_TYPES}
+              onNoIndexPatterns={this._onNoIndexPatterns}
+              isClearable={false}
+            />
+          ) : (
+            <div />
+          )}
         </EuiFormRow>
       </>
     );
