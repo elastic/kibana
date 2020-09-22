@@ -790,6 +790,9 @@ export class IndexPatternsFetcher {
     getFieldsForWildcard(options: {
         pattern: string | string[];
         metaFields?: string[];
+        fieldCapsOptions?: {
+            allowNoIndices: boolean;
+        };
     }): Promise<FieldDescriptor[]>;
 }
 
