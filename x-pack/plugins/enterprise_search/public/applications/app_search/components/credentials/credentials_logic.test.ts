@@ -62,6 +62,20 @@ describe('CredentialsLogic', () => {
     CredentialsLogic.mount();
   };
 
+  function createExpectActionToChangeState(baseValues: object) {
+    return (action: () => any, beforeState: object, afterState: object) => {
+      mount({
+        ...beforeState,
+      });
+      action();
+      expect(CredentialsLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        ...baseValues,
+        ...afterState,
+      });
+    };
+  }
+
   const newToken: IApiToken = {
     id: 1,
     name: 'myToken',
@@ -89,164 +103,173 @@ describe('CredentialsLogic', () => {
   });
 
   describe('addEngineName', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       activeApiToken: expect.any(Object),
-    };
+    });
 
     describe('activeApiToken', () => {
       it("should add an engine to the active api token's engine list", () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            engines: ['someEngine'],
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.addEngineName('newEngine'),
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['someEngine'],
+            },
           },
-        });
-        CredentialsLogic.actions.addEngineName('newEngine');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, engines: ['someEngine', 'newEngine'] },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['someEngine', 'newEngine'],
+            },
+          }
+        );
       });
 
       it("should create a new engines list if one doesn't exist", () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            engines: undefined,
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.addEngineName('newEngine'),
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: undefined,
+            },
           },
-        });
-        CredentialsLogic.actions.addEngineName('newEngine');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, engines: ['newEngine'] },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['newEngine'],
+            },
+          }
+        );
       });
     });
   });
 
   describe('removeEngineName', () => {
     describe('activeApiToken', () => {
-      const values = {
-        ...DEFAULT_VALUES,
+      const expectActionToChangeState = createExpectActionToChangeState({
         activeApiToken: expect.any(Object),
-      };
+      });
 
       it("should remove an engine from the active api token's engine list", () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            engines: ['someEngine', 'anotherEngine'],
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.removeEngineName('someEngine'),
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['someEngine', 'anotherEngine'],
+            },
           },
-        });
-        CredentialsLogic.actions.removeEngineName('someEngine');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, engines: ['anotherEngine'] },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['anotherEngine'],
+            },
+          }
+        );
       });
 
       it('will not remove the engine if it is not found', () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            engines: ['someEngine', 'anotherEngine'],
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.removeEngineName('notfound'),
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['someEngine', 'anotherEngine'],
+            },
           },
-        });
-        CredentialsLogic.actions.removeEngineName('notfound');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, engines: ['someEngine', 'anotherEngine'] },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: ['someEngine', 'anotherEngine'],
+            },
+          }
+        );
       });
     });
   });
 
   describe('setAccessAllEngines', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       activeApiToken: expect.any(Object),
-    };
+    });
 
     describe('activeApiToken', () => {
       it('should set the value of access_all_engines and clear out engines list if true', () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            access_all_engines: false,
-            engines: ['someEngine', 'anotherEngine'],
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setAccessAllEngines(true),
+          {
+            activeApiToken: {
+              ...newToken,
+              access_all_engines: false,
+              engines: ['someEngine', 'anotherEngine'],
+            },
           },
-        });
-        CredentialsLogic.actions.setAccessAllEngines(true);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, engines: [], access_all_engines: true },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              engines: [],
+              access_all_engines: true,
+            },
+          }
+        );
       });
 
       it('should set the value of access_all_engines and but maintain engines list if false', () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            access_all_engines: true,
-            engines: ['someEngine', 'anotherEngine'],
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setAccessAllEngines(false),
+          {
+            activeApiToken: {
+              ...newToken,
+              access_all_engines: true,
+              engines: ['someEngine', 'anotherEngine'],
+            },
           },
-        });
-        CredentialsLogic.actions.setAccessAllEngines(false);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: {
-            ...newToken,
-            access_all_engines: false,
-            engines: ['someEngine', 'anotherEngine'],
-          },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              access_all_engines: false,
+              engines: ['someEngine', 'anotherEngine'],
+            },
+          }
+        );
       });
     });
   });
 
   describe('onApiKeyDelete', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       apiTokens: expect.any(Array),
-    };
+    });
 
     describe('apiTokens', () => {
       it('should remove specified token from apiTokens if name matches', () => {
-        mount({
-          apiTokens: [newToken],
-        });
-
-        CredentialsLogic.actions.onApiKeyDelete(newToken.name);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiKeyDelete(newToken.name),
+          { apiTokens: [newToken] },
+          { apiTokens: [] }
+        );
       });
 
       it('should not remove specified token from apiTokens if name does not match', () => {
-        mount({
-          apiTokens: [newToken],
-        });
-
-        CredentialsLogic.actions.onApiKeyDelete('foo');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [newToken],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiKeyDelete('foo'),
+          { apiTokens: [newToken] },
+          { apiTokens: [newToken] }
+        );
       });
     });
   });
 
   describe('onApiTokenCreateSuccess', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       apiTokens: expect.any(Array),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
       showCredentialsForm: expect.any(Boolean),
       formErrors: expect.any(Array),
-    };
+    });
 
     describe('apiTokens', () => {
       const existingToken = {
@@ -255,105 +278,79 @@ describe('CredentialsLogic', () => {
       };
 
       it('should add the provided token to the apiTokens list', () => {
-        mount({
-          apiTokens: [existingToken],
-        });
-
-        CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [existingToken, newToken],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenCreateSuccess(newToken),
+          { apiTokens: [existingToken] },
+          { apiTokens: [existingToken, newToken] }
+        );
       });
     });
 
     describe('activeApiToken', () => {
       // TODO It is weird that methods like this update activeApiToken but not activeApiTokenIsExisting...
       it('should reset to the default value, which effectively clears out the current form', () => {
-        mount({
-          activeApiToken: newToken,
-        });
-
-        CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: DEFAULT_VALUES.activeApiToken,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenCreateSuccess(newToken),
+          { activeApiToken: newToken },
+          { activeApiToken: DEFAULT_VALUES.activeApiToken }
+        );
       });
     });
 
     describe('activeApiTokenRawName', () => {
       it('should reset to the default value, which effectively clears out the current form', () => {
-        mount({
-          activeApiTokenRawName: 'foo',
-        });
-
-        CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenCreateSuccess(newToken),
+          { activeApiTokenRawName: 'foo' },
+          { activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName }
+        );
       });
     });
 
     describe('showCredentialsForm', () => {
       it('should reset to the default value, which closes the credentials form', () => {
-        mount({
-          showCredentialsForm: true,
-        });
-
-        CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          showCredentialsForm: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenCreateSuccess(newToken),
+          { showCredentialsForm: true },
+          { showCredentialsForm: false }
+        );
       });
     });
 
     describe('formErrors', () => {
       it('should reset `formErrors`', () => {
-        mount({
-          formErrors: ['I am an error'],
-        });
-
-        CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          formErrors: [],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenCreateSuccess(newToken),
+          { formErrors: ['I am an error'] },
+          { formErrors: [] }
+        );
       });
     });
   });
 
   describe('onApiTokenError', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       formErrors: expect.any(Array),
-    };
+    });
 
     describe('formErrors', () => {
       it('should set `formErrors`', () => {
-        mount({
-          formErrors: ['I am an error'],
-        });
-
-        CredentialsLogic.actions.onApiTokenError(['I am the NEW error']);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          formErrors: ['I am the NEW error'],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenError(['I am the NEW error']),
+          { formErrors: ['I am an error'] },
+          { formErrors: ['I am the NEW error'] }
+        );
       });
     });
   });
 
   describe('onApiTokenUpdateSuccess', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       apiTokens: expect.any(Array),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
       showCredentialsForm: expect.any(Boolean),
-    };
+    });
 
     describe('apiTokens', () => {
       const existingToken = {
@@ -362,78 +359,60 @@ describe('CredentialsLogic', () => {
       };
 
       it('should replace the existing token with the new token by name', () => {
-        mount({
-          apiTokens: [newToken, existingToken],
-        });
         const updatedExistingToken = {
           ...existingToken,
           type: ADMIN,
         };
 
-        CredentialsLogic.actions.onApiTokenUpdateSuccess(updatedExistingToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [newToken, updatedExistingToken],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenUpdateSuccess(updatedExistingToken),
+          { apiTokens: [newToken, existingToken] },
+          { apiTokens: [newToken, updatedExistingToken] }
+        );
       });
 
       // TODO Not sure if this is a good behavior or not
       it('if for some reason the existing token is not found, it adds a new token...', () => {
-        mount({
-          apiTokens: [newToken, existingToken],
-        });
         const brandNewToken = {
           name: 'brand new token',
           type: ADMIN,
         };
 
-        CredentialsLogic.actions.onApiTokenUpdateSuccess(brandNewToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [newToken, existingToken, brandNewToken],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenUpdateSuccess(brandNewToken),
+          { apiTokens: [newToken, existingToken] },
+          { apiTokens: [newToken, existingToken, brandNewToken] }
+        );
       });
     });
 
     describe('activeApiToken', () => {
       it('should reset to the default value, which effectively clears out the current form', () => {
-        mount({
-          activeApiToken: newToken,
-        });
-
-        CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: DEFAULT_VALUES.activeApiToken,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN }),
+          { activeApiToken: newToken },
+          { activeApiToken: DEFAULT_VALUES.activeApiToken }
+        );
       });
     });
 
     describe('activeApiTokenRawName', () => {
       it('should reset to the default value, which effectively clears out the current form', () => {
-        mount({
-          activeApiTokenRawName: 'foo',
-        });
-
-        CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN }),
+          { activeApiTokenRawName: 'foo' },
+          { activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName }
+        );
       });
     });
 
     describe('showCredentialsForm', () => {
       it('should reset to the default value, which closes the credentials form', () => {
-        mount({
-          showCredentialsForm: true,
-        });
-
-        CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          showCredentialsForm: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN }),
+          { showCredentialsForm: true },
+          { showCredentialsForm: false }
+        );
       });
     });
   });
@@ -448,167 +427,151 @@ describe('CredentialsLogic', () => {
       },
     };
 
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       apiTokens: expect.any(Array),
       meta: expect.any(Object),
       isCredentialsDataComplete: expect.any(Boolean),
-    };
+    });
 
     describe('apiTokens', () => {
       it('should be set', () => {
-        mount();
-        CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          apiTokens: [newToken, newToken],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]),
+          {},
+          { apiTokens: [newToken, newToken] }
+        );
       });
     });
 
     describe('meta', () => {
       it('should be set', () => {
-        mount();
-        CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          meta,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]),
+          {},
+          { meta }
+        );
       });
     });
 
     describe('isCredentialsDataComplete', () => {
       it('should be set to true so we know that data fetching has completed', () => {
-        mount({
-          isCredentialsDataComplete: false,
-        });
-        CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          isCredentialsDataComplete: true,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]),
+          { isCredentialsDataComplete: false },
+          { isCredentialsDataComplete: true }
+        );
       });
     });
   });
 
   describe('setCredentialsDetails', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       engines: expect.any(Array),
       isCredentialsDetailsComplete: expect.any(Boolean),
-    };
+    });
 
     describe('isCredentialsDataComplete', () => {
       it('should be set to true so that we know data fetching has been completed', () => {
-        mount({
-          isCredentialsDetailsComplete: false,
-        });
-        CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          isCredentialsDetailsComplete: true,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setCredentialsDetails(credentialsDetails),
+          { isCredentialsDetailsComplete: false },
+          { isCredentialsDetailsComplete: true }
+        );
       });
     });
 
     describe('engines', () => {
       it('should set `engines` from the provided details object', () => {
-        mount({
-          engines: [],
-        });
-        CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          engines: credentialsDetails.engines,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setCredentialsDetails(credentialsDetails),
+          { engines: [] },
+          { engines: credentialsDetails.engines }
+        );
       });
     });
   });
 
   describe('setNameInputBlurred', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       nameInputBlurred: expect.any(Boolean),
-    };
+    });
 
     describe('nameInputBlurred', () => {
       it('should set this value', () => {
-        mount({
-          nameInputBlurred: false,
-        });
-        CredentialsLogic.actions.setNameInputBlurred(true);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          nameInputBlurred: true,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setNameInputBlurred(true),
+          { nameInputBlurred: false },
+          { nameInputBlurred: true }
+        );
       });
     });
   });
 
   describe('setTokenReadWrite', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       activeApiToken: expect.any(Object),
-    };
+    });
 
     describe('activeApiToken', () => {
       it('should set "read" or "write" values', () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            read: false,
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setTokenReadWrite({ name: 'read', checked: true }),
+          {
+            activeApiToken: {
+              ...newToken,
+              read: false,
+            },
           },
-        });
-        CredentialsLogic.actions.setTokenReadWrite({ name: 'read', checked: true });
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: {
-            ...newToken,
-            read: true,
-          },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              read: true,
+            },
+          }
+        );
       });
     });
   });
 
   describe('setTokenName', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
-    };
+    });
 
     describe('activeApiToken', () => {
       it('update the name property on the activeApiToken, formatted correctly', () => {
-        mount({
-          activeApiToken: {
-            ...newToken,
-            name: 'bar',
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setTokenName('New Name'),
+          {
+            activeApiToken: {
+              ...newToken,
+              name: 'bar',
+            },
           },
-        });
-        CredentialsLogic.actions.setTokenName('New Name');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: { ...newToken, name: 'new-name' },
-        });
+          {
+            activeApiToken: {
+              ...newToken,
+              name: 'new-name',
+            },
+          }
+        );
       });
     });
 
     describe('activeApiTokenRawName', () => {
       it('updates the raw name, with no formatting applied', () => {
-        mount();
-        CredentialsLogic.actions.setTokenName('New Name');
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: 'New Name',
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.setTokenName('New Name'),
+          {},
+          { activeApiTokenRawName: 'New Name' }
+        );
       });
     });
   });
 
   describe('setTokenType', () => {
     const values = {
-      ...DEFAULT_VALUES,
       activeApiToken: {
         ...newToken,
         type: expect.any(String),
@@ -619,59 +582,65 @@ describe('CredentialsLogic', () => {
       },
     };
 
+    const expectActionToChangeState = createExpectActionToChangeState(values);
+
     describe('activeApiToken.access_all_engines', () => {
       describe('when value is ADMIN', () => {
         it('updates access_all_engines to false', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              access_all_engines: true,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(ADMIN),
+            {
+              activeApiToken: {
+                ...newToken,
+                access_all_engines: true,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(ADMIN);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              access_all_engines: false,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                access_all_engines: false,
+              },
+            }
+          );
         });
       });
 
       describe('when value is not ADMIN', () => {
         it('will maintain access_all_engines value when true', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              access_all_engines: true,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(PRIVATE),
+            {
+              activeApiToken: {
+                ...newToken,
+                access_all_engines: true,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(PRIVATE);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              access_all_engines: true,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                access_all_engines: true,
+              },
+            }
+          );
         });
 
         it('will maintain access_all_engines value when false', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              access_all_engines: false,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(PRIVATE),
+            {
+              activeApiToken: {
+                ...newToken,
+                access_all_engines: false,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(PRIVATE);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              access_all_engines: false,
-            },
-          });
+            {
+              ...values,
+              activeApiToken: {
+                ...values.activeApiToken,
+                access_all_engines: false,
+              },
+            }
+          );
         });
       });
     });
@@ -679,33 +648,41 @@ describe('CredentialsLogic', () => {
     describe('activeApiToken.engines', () => {
       describe('when value is ADMIN', () => {
         it('clears the array', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              engines: [{}, {}],
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(ADMIN),
+            {
+              activeApiToken: {
+                ...newToken,
+                engines: [{}, {}],
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(ADMIN);
-          expect(CredentialsLogic.values.activeApiToken.engines).toEqual([]);
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                engines: [],
+              },
+            }
+          );
         });
       });
 
       describe('when value is not ADMIN', () => {
         it('will maintain engines array', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              engines: [{}, {}],
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(PRIVATE),
+            {
+              activeApiToken: {
+                ...newToken,
+                engines: [{}, {}],
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(PRIVATE);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              engines: [{}, {}],
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                engines: [{}, {}],
+              },
+            }
+          );
         });
       });
     });
@@ -713,39 +690,41 @@ describe('CredentialsLogic', () => {
     describe('activeApiToken.write', () => {
       describe('when value is PRIVATE', () => {
         it('sets this to true', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              write: false,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(PRIVATE),
+            {
+              activeApiToken: {
+                ...newToken,
+                write: false,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(PRIVATE);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              write: true,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                write: true,
+              },
+            }
+          );
         });
       });
 
       describe('when value is not PRIVATE', () => {
         it('sets this to false', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              write: true,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(ADMIN),
+            {
+              activeApiToken: {
+                ...newToken,
+                write: true,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(ADMIN);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              write: false,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                write: false,
+              },
+            }
+          );
         });
       });
     });
@@ -753,124 +732,116 @@ describe('CredentialsLogic', () => {
     describe('activeApiToken.read', () => {
       describe('when value is PRIVATE', () => {
         it('sets this to true', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              read: false,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(PRIVATE),
+            {
+              activeApiToken: {
+                ...newToken,
+                read: false,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(PRIVATE);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              read: true,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                read: true,
+              },
+            }
+          );
         });
       });
 
       describe('when value is not PRIVATE', () => {
         it('sets this to false', () => {
-          mount({
-            activeApiToken: {
-              ...newToken,
-              read: true,
+          expectActionToChangeState(
+            () => CredentialsLogic.actions.setTokenType(ADMIN),
+            {
+              activeApiToken: {
+                ...newToken,
+                read: true,
+              },
             },
-          });
-          CredentialsLogic.actions.setTokenType(ADMIN);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            activeApiToken: {
-              ...values.activeApiToken,
-              read: false,
-            },
-          });
+            {
+              activeApiToken: {
+                ...values.activeApiToken,
+                read: false,
+              },
+            }
+          );
         });
       });
     });
 
     describe('activeApiToken.type', () => {
-      it('sets the type value', () => {
-        mount({
+      expectActionToChangeState(
+        () => CredentialsLogic.actions.setTokenType(PRIVATE),
+        {
           activeApiToken: {
             ...newToken,
             type: ADMIN,
           },
-        });
-        CredentialsLogic.actions.setTokenType(PRIVATE);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
+        },
+        {
           activeApiToken: {
             ...values.activeApiToken,
             type: PRIVATE,
           },
-        });
-      });
+        }
+      );
     });
   });
 
   describe('toggleCredentialsForm', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       activeApiTokenIsExisting: expect.any(Boolean),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
       formErrors: expect.any(Array),
       showCredentialsForm: expect.any(Boolean),
-    };
+    });
 
     describe('showCredentialsForm', () => {
-      it('should toggle `showCredentialsForm`', () => {
-        mount({
-          showCredentialsForm: false,
-        });
+      it('should toggle `showCredentialsForm` on', () => {
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          { showCredentialsForm: false },
+          { showCredentialsForm: true }
+        );
+      });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          showCredentialsForm: true,
-        });
-
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          showCredentialsForm: false,
-        });
+      it('should toggle `showCredentialsForm` off', () => {
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          { showCredentialsForm: true },
+          { showCredentialsForm: false }
+        );
       });
     });
 
     describe('formErrors', () => {
       it('should reset `formErrors`', () => {
-        mount({
-          formErrors: ['I am an error'],
-        });
-
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          formErrors: [],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          { formErrors: ['I am an error'] },
+          { formErrors: [] }
+        );
       });
     });
 
     describe('activeApiTokenRawName', () => {
       it('should set `activeApiTokenRawName` to the name of the provided token', () => {
-        mount();
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: 'myToken',
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(newToken),
+          {},
+          { activeApiTokenRawName: 'myToken' }
+        );
       });
 
       it('should set `activeApiTokenRawName` to the default value if no token is provided', () => {
-        mount();
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          {},
+          { activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName }
+        );
       });
 
       // TODO: This fails, is this an issue? Instead of reseting back to the default value, it sets it to the previously
@@ -888,142 +859,113 @@ describe('CredentialsLogic', () => {
 
     describe('activeApiToken', () => {
       it('should set `activeApiToken` to the provided token', () => {
-        mount();
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: newToken,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(newToken),
+          {},
+          { activeApiToken: newToken }
+        );
       });
 
       it('should set `activeApiToken` to the default value if no token is provided', () => {
-        mount({
-          activeApiToken: newToken,
-        });
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiToken: DEFAULT_VALUES.activeApiToken,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          { activeApiToken: newToken },
+          { activeApiToken: DEFAULT_VALUES.activeApiToken }
+        );
       });
     });
 
     // TODO: This should probably just be a selector...
     describe('activeApiTokenIsExisting', () => {
       it('should set `activeApiTokenIsExisting` to true when the provided token has an id', () => {
-        mount({
-          activeApiTokenIsExisting: false,
-        });
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenIsExisting: true,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(newToken),
+          { activeApiTokenIsExisting: false },
+          { activeApiTokenIsExisting: true }
+        );
       });
 
       it('should set `activeApiTokenIsExisting` to false when the provided token has no id', () => {
-        mount({
-          activeApiTokenIsExisting: true,
-        });
         const { id, ...newTokenWithoutId } = newToken;
-        CredentialsLogic.actions.toggleCredentialsForm(newTokenWithoutId);
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenIsExisting: false,
-        });
+
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(newTokenWithoutId),
+          { activeApiTokenIsExisting: true },
+          { activeApiTokenIsExisting: false }
+        );
       });
 
       it('should set `activeApiTokenIsExisting` to false when no token is provided', () => {
-        mount({
-          activeApiTokenIsExisting: true,
-        });
-        CredentialsLogic.actions.toggleCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenIsExisting: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.toggleCredentialsForm(),
+          { activeApiTokenIsExisting: true },
+          { activeApiTokenIsExisting: false }
+        );
       });
     });
   });
 
   describe('hideCredentialsForm', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       showCredentialsForm: expect.any(Boolean),
       activeApiTokenRawName: expect.any(String),
-    };
+    });
 
     describe('activeApiTokenRawName', () => {
       it('resets this value', () => {
-        mount({
-          activeApiTokenRawName: 'foo',
-        });
-        CredentialsLogic.actions.hideCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          activeApiTokenRawName: '',
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.hideCredentialsForm(),
+          { activeApiTokenRawName: 'foo' },
+          { activeApiTokenRawName: '' }
+        );
       });
     });
 
     describe('showCredentialsForm', () => {
       it('resets this value', () => {
-        mount({
-          showCredentialsForm: true,
-        });
-        CredentialsLogic.actions.hideCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          showCredentialsForm: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.hideCredentialsForm(),
+          { showCredentialsForm: true },
+          { showCredentialsForm: false }
+        );
       });
     });
   });
 
   describe('resetCredentials', () => {
-    const values = {
-      ...DEFAULT_VALUES,
+    const expectActionToChangeState = createExpectActionToChangeState({
       isCredentialsDetailsComplete: expect.any(Boolean),
       isCredentialsDataComplete: expect.any(Boolean),
       formErrors: expect.any(Array),
-    };
+    });
 
     describe('isCredentialsDetailsComplete', () => {
       it('should reset to false', () => {
-        mount({
-          isCredentialsDetailsComplete: true,
-        });
-        CredentialsLogic.actions.resetCredentials();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          isCredentialsDetailsComplete: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.resetCredentials(),
+          { isCredentialsDetailsComplete: true },
+          { isCredentialsDetailsComplete: false }
+        );
       });
     });
 
     describe('isCredentialsDataComplete', () => {
       it('should reset to false', () => {
-        mount({
-          isCredentialsDataComplete: true,
-        });
-        CredentialsLogic.actions.resetCredentials();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          isCredentialsDataComplete: false,
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.resetCredentials(),
+          { isCredentialsDataComplete: true },
+          { isCredentialsDataComplete: false }
+        );
       });
     });
 
     describe('formErrors', () => {
       it('should reset', () => {
-        mount({
-          formErrors: ['I am an error'],
-        });
-        CredentialsLogic.actions.resetCredentials();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          formErrors: [],
-        });
+        expectActionToChangeState(
+          () => CredentialsLogic.actions.resetCredentials(),
+          { formErrors: ['I am an error'] },
+          { formErrors: [] }
+        );
       });
     });
   });
