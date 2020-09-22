@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { asyncForEach } from './common';
+import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -17,10 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     { description: 'event_1', start_time: 1513641600000, end_time: 1513728000000 },
     { description: 'event_2', start_time: 1513814400000, end_time: 1513900800000 },
   ];
-  const jobConfigs = [
-    ml.commonConfig.getADFqMultiMetricJobConfig('test_calendar_ad_1'),
-    ml.commonConfig.getADFqSingleMetricJobConfig('test_calendar_ad_2'),
-  ];
+  const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
   const newJobGroups = ['farequote'];
 
   describe('calendar edit', function () {

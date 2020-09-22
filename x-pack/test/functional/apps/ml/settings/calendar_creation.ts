@@ -5,17 +5,14 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { asyncForEach } from './common';
+import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const esArchiver = getService('esArchiver');
 
   const calendarId = 'test_calendar_id';
-  const jobConfigs = [
-    ml.commonConfig.getADFqMultiMetricJobConfig('test_calendar_ad_1'),
-    ml.commonConfig.getADFqSingleMetricJobConfig('test_calendar_ad_2'),
-  ];
+  const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
 
   describe('calendar creation', function () {
     before(async () => {
