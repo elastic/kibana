@@ -257,12 +257,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return features;
   }
 
-  _addNonCompositeAggregationsToSearchSource(
-    searchSource,
-    indexPattern,
-    precision,
-    bufferedExtent
-  ) {
+  _addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
         geotile_grid: {
@@ -294,12 +289,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bufferedExtent,
   }) {
-    this._addNonCompositeAggregationsToSearchSource(
-      searchSource,
-      indexPattern,
-      precision,
-      bufferedExtent
-    );
+    this._addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent);
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
@@ -363,7 +353,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
-    this._addNonCompositeAggregationsToSearchSource(
+    this._addNonCompositeAggsToSearchSource(
       searchSource,
       indexPattern,
       null, // needs to be set server-side
