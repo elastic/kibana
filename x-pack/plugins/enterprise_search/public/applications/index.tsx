@@ -15,7 +15,7 @@ import { getContext, resetContext } from 'kea';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
-import { LicenseProvider } from './shared/licensing';
+import { mountLicensingLogic, LicensingProvider } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { IExternalUrl } from './shared/enterprise_search_url';
@@ -46,6 +46,10 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store as Store;
+
+  const unmountLicensingLogic = mountLicensingLogic({
+    license$: plugins.licensing.license$,
+  });
 
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
@@ -79,6 +83,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
   };

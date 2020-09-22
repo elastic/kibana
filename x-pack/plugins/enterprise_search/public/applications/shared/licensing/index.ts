@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { LicensingLogic, mountLicensingLogic } from './licensing_logic';
 export { LicenseContext, LicenseProvider, ILicenseContext } from './license_context';
 export { hasPlatinumLicense, hasGoldLicense } from './license_checks';
