@@ -47,6 +47,9 @@ object ESSnapshotManifest : BuildType({
       scriptContent =
         """#!/bin/bash
           echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > "${"$"}GOOGLE_APPLICATION_CREDENTIALS"
+          echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > test.json
+          ls -alh
+          gcloud info
         """.trimIndent()
     }
 
