@@ -17,8 +17,9 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
+  isTransformEnabled,
 } from './selectors';
-import { EndpointState } from '../types';
+import { EndpointState, PolicyIds } from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
@@ -70,24 +71,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
-      // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0) {
-        try {
-          const indexPatterns = await fetchIndexPatterns();
-          if (indexPatterns !== undefined) {
-            dispatch({
-              type: 'serverReturnedMetadataPatterns',
-              payload: indexPatterns,
-            });
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnMetadataPatterns',
-            payload: error,
-          });
-        }
-      }
-
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
@@ -105,15 +88,21 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
-          const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
             coreStart.http,
             endpointResponse.hosts,
             nonExistingPolicies(getState())
           );
-          if (missingPolicies !== undefined) {
+          if (ingestPolicies?.packagePolicy !== undefined) {
             dispatch({
               type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: missingPolicies,
+              payload: ingestPolicies.packagePolicy,
+            });
+          }
+          if (ingestPolicies?.agentPolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointAgentPolicies',
+              payload: ingestPolicies.agentPolicy,
             });
           }
         } catch (error) {
@@ -126,6 +115,24 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
+      }
+
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: indexPatterns,
+            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
+          });
+        }
       }
 
       // No endpoints, so we should check to see if there are policies for onboarding
@@ -202,15 +209,21 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           });
 
           try {
-            const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+            const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
               coreStart.http,
               response.hosts,
               nonExistingPolicies(getState())
             );
-            if (missingPolicies !== undefined) {
+            if (ingestPolicies?.packagePolicy !== undefined) {
               dispatch({
                 type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: missingPolicies,
+                payload: ingestPolicies.packagePolicy,
+              });
+            }
+            if (ingestPolicies?.agentPolicy !== undefined) {
+              dispatch({
+                type: 'serverReturnedEndpointAgentPolicies',
+                payload: ingestPolicies.agentPolicy,
               });
             }
           } catch (error) {
@@ -242,15 +255,21 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
-          const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
             coreStart.http,
             [response],
             nonExistingPolicies(getState())
           );
-          if (missingPolicies !== undefined) {
+          if (ingestPolicies !== undefined) {
             dispatch({
               type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: missingPolicies,
+              payload: ingestPolicies.packagePolicy,
+            });
+          }
+          if (ingestPolicies?.agentPolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointAgentPolicies',
+              payload: ingestPolicies.agentPolicy,
             });
           }
         } catch (error) {
@@ -284,11 +303,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   };
 };
 
-const getNonExistingPoliciesForEndpointsList = async (
+const getAgentAndPoliciesForEndpointsList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
   currentNonExistingPolicies: EndpointState['nonExistingPolicies']
-): Promise<EndpointState['nonExistingPolicies'] | undefined> => {
+): Promise<PolicyIds | undefined> => {
   if (hosts.length === 0) {
     return;
   }
@@ -318,29 +337,38 @@ const getNonExistingPoliciesForEndpointsList = async (
         )})`,
       },
     })
-  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentPolicy) => {
-    (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-      list[packagePolicy as string] = true;
-    });
-    return list;
-  }, {});
-
-  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
-    (list, policyId) => {
-      if (policiesFound[policyId]) {
-        return list;
-      }
-      list[policyId] = true;
+  ).items.reduce<PolicyIds>(
+    (list, agentPolicy) => {
+      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
+        list.packagePolicy[packagePolicy as string] = true;
+        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
+      });
       return list;
     },
-    {}
+    { packagePolicy: {}, agentPolicy: {} }
   );
 
-  if (Object.keys(nonExisting).length === 0) {
+  // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
+  const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
+    (list, policyId: string) => {
+      if (policiesFound.packagePolicy[policyId as string]) {
+        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
+        return list;
+      }
+      list.packagePolicy[policyId as string] = true;
+      return list;
+    },
+    { packagePolicy: {}, agentPolicy: {} }
+  );
+
+  if (
+    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0 &&
+    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.agentPolicy).length === 0
+  ) {
     return;
   }
 
-  return nonExisting;
+  return nonExistingPackagePoliciesAndExistingAgentPolicies;
 };
 
 const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {

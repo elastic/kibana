@@ -22,7 +22,7 @@ export const IntervalLabel = ({ intervalAsString }: Props) => {
       <p>
         <FormattedMessage
           id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-          defaultMessage="Last {duration} of data for the selected time"
+          defaultMessage="Last {duration} of data"
           values={{ duration: intervalAsString }}
         />
       </p>

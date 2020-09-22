@@ -40,7 +40,14 @@ export const epmRouteService = {
   },
 
   getInstallPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgkey}', pkgkey).replace(
+      /\/$/,
+      ''
+    ); // trim trailing slash
+  },
+
+  getBulkInstallPath: () => {
+    return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
   getRemovePath: (pkgkey: string) => {
@@ -124,8 +131,10 @@ export const agentRouteService = {
   getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
+  getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
+  getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
 };

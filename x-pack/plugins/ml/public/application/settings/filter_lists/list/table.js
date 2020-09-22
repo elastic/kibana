@@ -10,6 +10,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -17,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -26,6 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
@@ -61,10 +63,12 @@ UsedByIcon.propTypes = {
 };
 
 function NewFilterButton({ canCreateFilter }) {
+  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+
   return (
     <EuiButton
       key="new_filter_list"
-      href="#/settings/filter_lists/new_filter_list"
+      onClick={redirectToNewFilterListPage}
       isDisabled={canCreateFilter === false}
       data-test-subj="mlFilterListsButtonCreate"
     >
@@ -84,12 +88,9 @@ function getColumns() {
         defaultMessage: 'ID',
       }),
       render: (id) => (
-        <EuiLink
-          href={`#/settings/filter_lists/edit_filter_list/${id}`}
-          data-test-subj="mlEditFilterListLink"
-        >
+        <Link to={`/${ML_PAGES.FILTER_LISTS_EDIT}/${id}`} data-test-subj="mlEditFilterListLink">
           {id}
-        </EuiLink>
+        </Link>
       ),
       sortable: true,
       scope: 'row',
@@ -213,7 +214,7 @@ export function FilterListsTable({
             isSelectable={true}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
-              'data-test-subj': `mlCalendarListRow row-${item.filter_id}`,
+              'data-test-subj': `mlFilterListRow row-${item.filter_id}`,
             })}
           />
         </div>
