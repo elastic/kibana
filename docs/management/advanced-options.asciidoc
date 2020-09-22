@@ -162,7 +162,8 @@ example, show `f.b.baz` instead of `foo.bar.baz`.
 {ref}/search-request-body.html#request-body-search-sort[sort] parameter.
 
 [[state-storeinsessionstorage]]`state:storeInSessionStorage`::
-[experimental] Kibana tracks UI state in the URL, which can lead to problems
+experimental:[]
+Kibana tracks UI state in the URL, which can lead to problems
 when there is a lot of state information, and the URL gets very long. Enabling
 this setting stores part of the URL in your browser session to keep the URL
 short.
@@ -414,7 +415,8 @@ The default index when using the `.es()` query.
 The default field containing a timestamp when using the `.es()` query.
 
 [[timelion-graphite-url]]`timelion:graphite.url`::
-[experimental] Used with graphite queries, this is the URL of your graphite host
+experimental:[]
+Used with graphite queries, this is the URL of your graphite host
 in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
 be selected from an allow-list configured in the `kibana.yml` under
 `timelion.graphiteUrls`.
@@ -427,7 +429,8 @@ used for calculating automatic intervals in visualizations.
 The smallest interval to calculate when using "auto".
 
 [[timelion-quandlkey]]`timelion:quandl.key`::
-[experimental] Used with quandl queries, this is your API key from
+experimental:[]
+Used with quandl queries, this is your API key from
 https://www.quandl.com/[www.quandl.com].
 
 [[timelion-showtutorial]]`timelion:showTutorial`::
