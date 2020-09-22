@@ -137,7 +137,6 @@ test('handles dependencies of dependencies', async () => {
        info [foo] running yarn,
       "",
       "",
-       succ yarn.lock analysis completed without any issues,
     ]
   `);
 });
@@ -179,7 +178,6 @@ test('does not run installer if no deps in package', async () => {
        info [kibana] running yarn,
       "",
       "",
-       succ yarn.lock analysis completed without any issues,
     ]
   `);
 });
