@@ -17,6 +17,7 @@ import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
+import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
@@ -38,12 +39,15 @@ import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
+import { Logger } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Moment } from 'moment';
 import moment from 'moment';
 import { NameList } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
@@ -60,6 +64,7 @@ import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject } from 'src/core/server';
 import { SavedObject as SavedObject_3 } from 'src/core/public';
+import { SavedObjectReference as SavedObjectReference_2 } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
@@ -561,7 +566,7 @@ export const esFilters: {
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
-            value?: string | ((formatter?: import("../common").FilterValueFormatter | undefined) => string) | undefined;
+            value?: string | undefined;
         };
         $state?: import("../common").FilterState | undefined;
         query?: any;
@@ -647,13 +652,12 @@ export type ExistsFilter = Filter & {
 // @public (undocumented)
 export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => MappingObject;
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectReference" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "extractReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export const extractSearchSourceReferences: (state: SearchSourceFields) => [SearchSourceFields & {
     indexRefName?: string;
-}, SavedObjectReference[]];
+}, SavedObjectReference_2[]];
 
 // Warning: (ae-missing-release-tag) "FieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -787,18 +791,11 @@ export interface FieldMappingSpec {
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface Filter {
-    // Warning: (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
+export type Filter = {
     $state?: FilterState;
-    // Warning: (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     meta: FilterMeta;
-    // (undocumented)
     query?: any;
-}
+};
 
 // Warning: (ae-forgotten-export) The symbol "Props" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "FilterBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1374,7 +1371,7 @@ export interface IndexPatternTypeMeta {
 // @public (undocumented)
 export const injectSearchSourceReferences: (searchSourceFields: SearchSourceFields & {
     indexRefName: string;
-}, references: SavedObjectReference[]) => SearchSourceFields;
+}, references: SavedObjectReference_2[]) => SearchSourceFields;
 
 // Warning: (ae-missing-release-tag) "InputTimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1641,14 +1638,12 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 // Warning: (ae-missing-release-tag) "Query" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface Query {
-    // (undocumented)
-    language: string;
-    // (undocumented)
+export type Query = {
     query: string | {
         [key: string]: any;
     };
-}
+    language: string;
+};
 
 // Warning: (ae-forgotten-export) The symbol "QueryService" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "QueryStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2143,14 +2138,11 @@ export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface TimeRange {
-    // (undocumented)
+export type TimeRange = {
     from: string;
-    // (undocumented)
-    mode?: 'absolute' | 'relative';
-    // (undocumented)
     to: string;
-}
+    mode?: 'absolute' | 'relative';
+};
 
 // Warning: (ae-missing-release-tag) "UI_SETTINGS" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2193,6 +2185,8 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/exists_filter.ts:30:3 - (ae-forgotten-export) The symbol "ExistsFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/exists_filter.ts:31:3 - (ae-forgotten-export) The symbol "FilterExistsProperty" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/match_all_filter.ts:28:3 - (ae-forgotten-export) The symbol "MatchAllFilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:98:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
