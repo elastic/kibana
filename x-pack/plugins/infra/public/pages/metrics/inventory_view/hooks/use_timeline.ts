@@ -85,8 +85,8 @@ export function useTimeline(
     interval: displayInterval ?? '',
     to: currentTime + intervalInSeconds * 1000,
     from: currentTime - timeLength * 1000,
-    lookbackSize: 0,
     ignoreLookback: true,
+    forceInterval: true,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
