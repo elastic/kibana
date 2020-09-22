@@ -843,7 +843,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
-    advanced: AdvancedFields;
+    advanced?: AdvancedFields; // will be introduced in 7.11+
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -859,7 +859,7 @@ export interface PolicyConfig {
     };
   };
   mac: {
-    advanced: AdvancedFields;
+    advanced?: AdvancedFields;
     events: {
       file: boolean;
       process: boolean;
@@ -871,7 +871,7 @@ export interface PolicyConfig {
     };
   };
   linux: {
-    advanced: AdvancedFields;
+    advanced?: AdvancedFields;
     events: {
       file: boolean;
       process: boolean;
