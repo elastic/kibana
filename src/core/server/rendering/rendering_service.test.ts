@@ -72,13 +72,6 @@ describe('RenderingService', () => {
           registered: { name: 'title' },
         });
         render = (await service.setup(mockRenderingSetupDeps)).render;
-        await service.start({
-          legacy: {
-            legacyInternals: {
-              getVars: () => ({}),
-            },
-          },
-        } as any);
       });
 
       it('renders "core" page', async () => {

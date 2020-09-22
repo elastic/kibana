@@ -20,14 +20,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { take } from 'rxjs/operators';
-
 import { i18n } from '@kbn/i18n';
 
 import { UiPlugins } from '../plugins';
-import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
-import { LegacyService } from '../legacy';
 import {
   IRenderOptions,
   RenderingSetupDeps,
@@ -36,8 +33,7 @@ import {
 } from './types';
 
 /** @internal */
-export class RenderingService implements CoreService<InternalRenderingServiceSetup> {
-  private legacyInternals?: LegacyService['legacyInternals'];
+export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup({
@@ -51,9 +47,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
         uiSettings,
         { app = { getId: () => 'core' }, includeUserSettings = true, vars }: IRenderOptions = {}
       ) => {
-        if (!this.legacyInternals) {
-          throw new Error('Cannot render before "start"');
-        }
         const env = {
           mode: this.coreContext.env.mode,
           packageInfo: this.coreContext.env.packageInfo,
@@ -86,7 +79,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            vars: vars ?? (await this.legacyInternals!.getVars('core', request)),
+            vars: vars ?? {},
             uiPlugins: await Promise.all(
               [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
@@ -112,10 +105,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
         return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
       },
     };
-  }
-
-  public async start({ legacy }: { legacy: LegacyService }) {
-    this.legacyInternals = legacy.legacyInternals;
   }
 
   public async stop() {}

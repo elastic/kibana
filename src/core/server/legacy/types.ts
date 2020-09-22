@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
-
-import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
 import { InternalRenderingServiceSetup } from '../rendering';
@@ -50,33 +47,6 @@ export interface LegacyConfig {
 }
 
 /**
- * @internal
- * @deprecated
- */
-export interface VarsProvider {
-  fn: (server: Server, configValue: any) => LegacyVars;
-  pluginSpec: {
-    readConfigValue(config: any, key: string | string[]): any;
-  };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export type VarsInjector = () => LegacyVars;
-
-/**
- * @internal
- * @deprecated
- */
-export type VarsReplacer = (
-  vars: LegacyVars,
-  request: LegacyRequest,
-  server: Server
-) => LegacyVars | Promise<LegacyVars>;
-
-/**
  * @public
  * @deprecated
  */
@@ -102,29 +72,4 @@ export interface LegacyServiceStartDeps {
 export interface LegacyServiceSetupConfig {
   legacyConfig: LegacyConfig;
   settings: LegacyVars;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface ILegacyInternals {
-  /**
-   * Inject UI app vars for a particular plugin
-   */
-  injectUiAppVars(id: string, injector: VarsInjector): void;
-
-  /**
-   * Get all the merged injected UI app vars for a particular plugin
-   */
-  getInjectedUiAppVars(id: string): Promise<LegacyVars>;
-
-  /**
-   * Get the metadata vars for a particular plugin
-   */
-  getVars(
-    id: string,
-    request: KibanaRequest | LegacyRequest,
-    injected?: LegacyVars
-  ): Promise<LegacyVars>;
 }

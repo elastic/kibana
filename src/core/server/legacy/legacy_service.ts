@@ -31,14 +31,7 @@ import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import {
-  ILegacyInternals,
-  LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
-  LegacyConfig,
-  LegacyVars,
-} from './types';
-import { LegacyInternals } from './legacy_internals';
+import { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig, LegacyVars } from './types';
 import { CoreSetup, CoreStart } from '..';
 
 interface LegacyKbnServer {
@@ -81,7 +74,6 @@ export class LegacyService implements CoreService {
   private update$?: ConnectableObservable<[Config, PathConfigType]>;
   private legacyRawConfig?: LegacyConfig;
   private settings?: LegacyVars;
-  public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService } = coreContext;
@@ -140,7 +132,6 @@ export class LegacyService implements CoreService {
     this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
 
     this.setupDeps = setupDeps;
-    this.legacyInternals = new LegacyInternals();
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
@@ -315,7 +306,6 @@ export class LegacyService implements CoreService {
         uiPlugins: setupDeps.uiPlugins,
         elasticsearch: setupDeps.core.elasticsearch,
         rendering: setupDeps.core.rendering,
-        legacy: this.legacyInternals,
       },
       logger: this.coreContext.logger,
     });

@@ -187,14 +187,14 @@ export function uiRenderMixin(kbnServer, server, config) {
     const app = { getId: () => 'core' };
     const { http } = kbnServer.newPlatform.setup.core;
     const { savedObjects } = kbnServer.newPlatform.start.core;
-    const { rendering, legacy } = kbnServer.newPlatform.__internals;
+    const { rendering } = kbnServer.newPlatform.__internals;
     const req = KibanaRequest.from(h.request);
     const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
       savedObjects.getScopedClient(req)
     );
-    const vars = await legacy.getVars(app.getId(), h.request, {
+    const vars = {
       apmConfig: getApmConfig(h.request.path),
-    });
+    };
     const content = await rendering.render(h.request, uiSettings, {
       app,
       includeUserSettings: true,

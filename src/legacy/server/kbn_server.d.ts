@@ -29,7 +29,7 @@ import {
 } from '../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig, ILegacyInternals } from '../../core/server/legacy';
+import { LegacyConfig } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
 
@@ -59,7 +59,6 @@ export interface KibanaCore {
   __internals: {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-    legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
   };

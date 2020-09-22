@@ -248,10 +248,6 @@ export class Server {
 
     await this.http.start();
 
-    await this.rendering.start({
-      legacy: this.legacy,
-    });
-
     return this.coreStart;
   }
 
