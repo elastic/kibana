@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 
@@ -98,11 +98,11 @@ export class SearchTimeoutError extends KbnError {
         {actionText && (
           <>
             <EuiSpacer size="s" />
-            <div className="eui-textRight">
+            <EuiText textAlign="right">
               <EuiButton color="danger" onClick={() => this.onClick(application)} size="s">
                 {actionText}
               </EuiButton>
-            </div>
+            </EuiText>
           </>
         )}
       </>

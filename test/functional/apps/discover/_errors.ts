@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
         const toast = await toasts.getToastElement(1);
-        expect(toast).not.to.be(undefined);
+        const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
+        expect(painlessStackTrace).not.to.be(undefined);
       });
     });
   });

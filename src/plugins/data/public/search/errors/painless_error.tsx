@@ -19,23 +19,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
+import { EsError, isEsError } from './types';
 import { IEsSearchRequest } from '..';
 
 export class PainlessError extends KbnError {
-  constructor(err: Error, request: IEsSearchRequest) {
-    const rootCause = getRootCause(err);
-    const [{ script }] = rootCause;
+  painlessStack: any;
+  constructor(err: EsError, request: IEsSearchRequest) {
+    const rootCause = getRootCause(err as EsError);
 
     super(
       i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
         defaultMessage: "Error with Painless scripted field '{script}'.",
-        values: { script },
+        values: { script: rootCause?.script },
       })
     );
+    this.painlessStack = rootCause?.script_stack.join('\n');
   }
 
   public getErrorMessage(application: ApplicationStart) {
@@ -49,24 +51,37 @@ export class PainlessError extends KbnError {
       <>
         {this.message}
         <EuiSpacer size="s" />
-        <div className="eui-textRight">
+        <EuiSpacer size="s" />
+        <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
+          {this.painlessStack}
+        </EuiCodeBlock>
+        <EuiText textAlign="right">
           <EuiButton color="danger" onClick={onClick} size="s">
             <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
           </EuiButton>
-        </div>
+        </EuiText>
       </>
     );
   }
 }
 
-function getRootCause(err: Error) {
-  return (err as any).body?.attributes?.error?.root_cause;
+function getFailedShards(err: EsError) {
+  const failedShards =
+    err.body?.attributes?.error?.failed_shards ||
+    err.body?.attributes?.error?.caused_by?.failed_shards;
+  return failedShards ? failedShards[0] : undefined;
 }
 
-export function isPainlessError(err: Error) {
-  const rootCause = getRootCause(err);
+function getRootCause(err: EsError) {
+  return getFailedShards(err)?.reason;
+}
+
+export function isPainlessError(err: Error | EsError) {
+  if (!isEsError(err)) return false;
+
+  const rootCause = getRootCause(err as EsError);
   if (!rootCause) return false;
 
-  const [{ lang }] = rootCause;
+  const { lang } = rootCause;
   return lang === 'painless';
 }
