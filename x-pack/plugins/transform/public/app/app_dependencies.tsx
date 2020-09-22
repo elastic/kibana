@@ -11,6 +11,10 @@ import { ScopedHistory } from 'kibana/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
+import { getShared } from '../shared_imports';
+
+type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
+
 export interface AppDependencies {
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
@@ -23,6 +27,7 @@ export interface AppDependencies {
   storage: Storage;
   overlays: CoreStart['overlays'];
   history: ScopedHistory;
+  ml: ThenArg<ReturnType<typeof getShared>>;
 }
 
 export const useAppDependencies = () => {

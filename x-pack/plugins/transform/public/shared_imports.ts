@@ -13,21 +13,4 @@ export {
   useRequest,
 } from '../../../../src/plugins/es_ui_shared/public';
 
-export {
-  getFieldType,
-  extractErrorMessage,
-  formatHumanReadableDateTimeSeconds,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  multiColumnSortFactory,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  ChartData,
-  DataGrid,
-  EsSorting,
-  RenderCellValue,
-  UseDataGridReturnType,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../common/shared_imports';
+export { getShared, UseIndexDataReturnType, EsSorting, RenderCellValue } from '../../ml/public';

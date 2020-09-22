@@ -29,6 +29,17 @@ export type {
   JobStat,
   MlCapabilitiesResponse,
   MlSummaryJob,
+  UseIndexDataReturnType,
+  EsSorting,
+  RenderCellValue,
 } from './shared';
+
+// static exports
 export { getSeverityColor, getSeverityType } from '../common/util/anomaly_utils';
 export { ANOMALY_SEVERITY } from '../common';
+
+// bundled shared exports
+// exported this way so the code doesn't end up in ML's page load bundle
+export const getShared = async () => {
+  return await import('./shared');
+};
