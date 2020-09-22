@@ -36,11 +36,14 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageOutdatedError,
+  ingestErrorToResponseOptions,
+} from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
-import { formatBulkInstallError } from '../../../errors/handlers';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -159,11 +162,11 @@ function bulkInstallErrorToOptions({
   pkgToUpgrade: string;
   error: Error;
 }): IBulkInstallPackageError {
-  const { statusCode, error: err } = formatBulkInstallError(error);
+  const { statusCode, body } = ingestErrorToResponseOptions(error);
   return {
     name: pkgToUpgrade,
     statusCode,
-    error: err,
+    error: body.message,
   };
 }
 
