@@ -8,10 +8,9 @@ import React from 'react';
 import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
-  dashboardFactory,
   mockGetTriggerInfo,
   mockSupportedTriggers,
-  urlFactory,
+  mockActionFactories,
 } from '../../../components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -26,7 +25,7 @@ import { ActionFactory } from '../../../dynamic_actions';
 const storage = new Storage(new StubBrowserStorage());
 const toasts = coreMock.createStart().notifications.toasts;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  actionFactories: mockActionFactories,
   storage: new Storage(new StubBrowserStorage()),
   toastService: toasts,
   getTrigger: mockGetTriggerInfo,

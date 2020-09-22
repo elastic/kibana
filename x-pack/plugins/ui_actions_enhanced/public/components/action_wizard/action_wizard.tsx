@@ -31,7 +31,7 @@ import {
   txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 
 export interface ActionWizardProps<
@@ -57,12 +57,12 @@ export interface ActionWizardProps<
   /**
    * current config for currently selected action factory
    */
-  config?: object;
+  config?: BaseActionConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
@@ -219,9 +219,9 @@ interface SelectedActionFactoryProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   actionFactory: ActionFactory;
-  config: object;
+  config: BaseActionConfig;
   context: ActionFactoryContext;
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];

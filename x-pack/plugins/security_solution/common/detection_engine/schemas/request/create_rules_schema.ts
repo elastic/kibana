@@ -46,6 +46,12 @@ import {
   RiskScoreMapping,
   SeverityMapping,
 } from '../common/schemas';
+import {
+  threat_index,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+} from '../types/threat_mapping';
 
 import {
   DefaultStringArray,
@@ -112,6 +118,10 @@ export const createRulesSchema = t.intersection([
       note, // defaults to "undefined" if not set during decode
       version: DefaultVersionNumber, // defaults to 1 if not set during decode
       exceptions_list: DefaultListArray, // defaults to empty array if not set during decode
+      threat_mapping, // defaults to "undefined" if not set during decode
+      threat_query, // defaults to "undefined" if not set during decode
+      threat_filters, // defaults to "undefined" if not set during decode
+      threat_index, // defaults to "undefined" if not set during decode
     })
   ),
 ]);

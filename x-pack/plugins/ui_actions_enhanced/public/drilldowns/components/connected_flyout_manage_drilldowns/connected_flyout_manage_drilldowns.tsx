@@ -15,6 +15,7 @@ import { DrilldownListItem } from '../list_manage_drilldowns';
 import { insufficientLicenseLevel, invalidDrilldownType } from './i18n';
 import {
   ActionFactory,
+  BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
   SerializedEvent,
@@ -119,7 +120,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object,
+        actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
         selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };

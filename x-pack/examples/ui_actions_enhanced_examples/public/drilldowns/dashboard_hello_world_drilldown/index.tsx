@@ -17,9 +17,9 @@ import {
 
 export type ActionContext = ChartActionContext;
 
-export interface Config {
+export type Config = {
   name: string;
-}
+};
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 

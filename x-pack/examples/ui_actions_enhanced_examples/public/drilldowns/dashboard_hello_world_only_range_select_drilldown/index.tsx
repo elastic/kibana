@@ -13,9 +13,9 @@ import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/p
 import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 import { BaseActionFactoryContext } from '../../../../../plugins/ui_actions_enhanced/public/dynamic_actions';
 
-export interface Config {
+export type Config = {
   name: string;
-}
+};
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT =
   'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT';

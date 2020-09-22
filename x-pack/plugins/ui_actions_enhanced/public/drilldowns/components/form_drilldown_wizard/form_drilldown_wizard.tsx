@@ -10,7 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
@@ -28,8 +32,8 @@ export interface FormDrilldownWizardProps<
   onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
   actionFactoryContext: ActionFactoryContext;
 
-  actionConfig?: object;
-  onActionConfigChange?: (config: object) => void;
+  actionConfig?: BaseActionConfig;
+  onActionConfigChange?: (config: BaseActionConfig) => void;
 
   actionFactories?: ActionFactory[];
 
