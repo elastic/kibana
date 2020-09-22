@@ -14,7 +14,6 @@ import {
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { appContextService } from '../services';
 import { IngestManagerError, RegistryError, PackageNotFoundError } from './index';
-import { IBulkInstallPackageError } from '../../common';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
