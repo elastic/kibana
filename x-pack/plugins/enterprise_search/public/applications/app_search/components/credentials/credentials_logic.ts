@@ -12,6 +12,7 @@ import { ADMIN, PRIVATE } from './constants';
 import { HttpLogic } from '../../../shared/http';
 import { IApiToken, IEngine, ICredentialsDetails } from '../../../../../common/types/app_search';
 import { IMeta } from '../../../../../common/types';
+import { flashAPIErrors } from '../../../shared/flash_messages';
 
 const defaultApiToken: IApiToken = {
   name: '',
@@ -237,7 +238,6 @@ export const CredentialsLogic = kea<
         const { http } = HttpLogic.values;
         const query = { 'page[current]': page };
         const response = await http.get('/api/app_search/credentials', { query });
-
         actions.setCredentialsData(response.meta, response.results);
       } catch (e) {
         flashAPIErrors(e);
@@ -248,7 +248,7 @@ export const CredentialsLogic = kea<
         const { http } = HttpLogic.values;
         const response = await http.get('/api/app_search/credentials/details');
 
-        actions.setCredentialsDetails(response));
+        actions.setCredentialsDetails(response);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -258,7 +258,7 @@ export const CredentialsLogic = kea<
         const { http } = HttpLogic.values;
         await http.delete(`/api/app_search/credentials/${tokenName}`);
 
-        actions.onApiKeyDelete(tokenName));
+        actions.onApiKeyDelete(tokenName);
       } catch (e) {
         flashAPIErrors(e);
       }

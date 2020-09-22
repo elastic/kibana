@@ -13,8 +13,13 @@ jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
 }));
 import { HttpLogic } from '../../../shared/http';
+jest.mock('../../../shared/flash_messages', () => ({
+  flashAPIErrors: jest.fn(),
+}));
+import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IApiToken, ICredentialsDetails } from '../../../../../common/types/app_search';
 import { IMeta } from '../../../../../common/types';
+import { flushPromises } from '../../../../../common/__mocks__/flush_promises';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -47,7 +52,7 @@ describe('CredentialsLogic', () => {
         defaults: {
           enterprise_search: {
             app_search: {
-              credentials: {
+              credentials_logic: {
                 ...defaults,
               },
             },
@@ -924,6 +929,7 @@ describe('CredentialsLogic', () => {
 
   describe('initializeCredentialsData', () => {
     it('should call fetchCredentials and fetchDetails', () => {
+      mount();
       jest.spyOn(CredentialsLogic.actions, 'fetchCredentials').mockImplementationOnce(() => {});
       jest.spyOn(CredentialsLogic.actions, 'fetchDetails').mockImplementationOnce(() => {});
       CredentialsLogic.actions.initializeCredentialsData();
@@ -944,60 +950,81 @@ describe('CredentialsLogic', () => {
     const results: IApiToken[] = [];
 
     it('will call an API endpoint and set the results with the `setCredentialsData` action', async () => {
+      mount();
       jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
-      (HttpLogic.values.http.get as jest.Mock).mockReturnValue({
-        then: (fn: (response: { meta: IMeta; results: IApiToken[] }) => object) =>
-          fn({ meta, results }),
-      });
-      await CredentialsLogic.actions.fetchCredentials(2);
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve({ meta, results }));
+
+      CredentialsLogic.actions.fetchCredentials(2);
+
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
         query: {
           'page[current]': 2,
         },
       });
+      await flushPromises();
       expect(CredentialsLogic.actions.setCredentialsData).toHaveBeenCalledWith(meta, results);
     });
 
     it('handles errors', async () => {
-      // TODO when error handler is available
+      mount();
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.reject('An error occured'));
+
+      CredentialsLogic.actions.fetchCredentials(2);
+
+      await flushPromises();
+      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
   describe('fetchDetails', () => {
     it('will call an API endpoint and set the results with the `setCredentialsDetails` action', async () => {
+      mount();
       jest
         .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
         .mockImplementationOnce(() => {});
-      (HttpLogic.values.http.get as jest.Mock).mockReturnValue({
-        then: (fn: (response: ICredentialsDetails) => object) => fn(credentialsDetails),
-      });
-      await CredentialsLogic.actions.fetchDetails();
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve(credentialsDetails));
+      CredentialsLogic.actions.fetchDetails();
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
+      await flushPromises();
       expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
         credentialsDetails
       );
     });
 
     it('handles errors', async () => {
-      // TODO when error handler is available
+      mount();
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.reject('An error occured'));
+
+      CredentialsLogic.actions.fetchDetails();
+
+      await flushPromises();
+      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
   describe('deleteApiKey', () => {
     const tokenName = 'abc123';
 
     it('will call an API endpoint and set the results with the `onApiKeyDelete` action', async () => {
+      mount();
       jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
-      (HttpLogic.values.http.delete as jest.Mock).mockReturnValue({
-        then: (fn: () => object) => fn(),
-      });
-      await CredentialsLogic.actions.deleteApiKey(tokenName);
+      (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(Promise.resolve());
+      CredentialsLogic.actions.deleteApiKey(tokenName);
       expect(HttpLogic.values.http.delete).toHaveBeenCalledWith(
         `/api/app_search/credentials/${tokenName}`
       );
+      await flushPromises();
       expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
     });
 
     it('handles errors', async () => {
-      // TODO when error handler is available
+      mount();
+      (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(
+        Promise.reject('An error occured')
+      );
+
+      CredentialsLogic.actions.deleteApiKey(tokenName);
+
+      await flushPromises();
+      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
 });
