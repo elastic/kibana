@@ -203,7 +203,7 @@ export class TimeseriesVisualization extends Component {
       series
         .filter((r) => startsWith(r.id, seriesGroup.id))
         .forEach((seriesDataRow) => {
-          seriesDataRow.tickFormatter = seriesGroupTickFormatter;
+          seriesDataRow.tickFormat = seriesGroupTickFormatter;
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
