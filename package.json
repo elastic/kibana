@@ -90,16 +90,16 @@
   },
   "resolutions": {
     "**/@types/node": "10.12.27",
-    "@elastic/eui/lodash": "npm:@elastic/lodash@3.10.1-kibana4",
-    "**/cypress/lodash": "4.17.13",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
+    "**/cypress/lodash": "4.17.13",
     "**/grunt/js-yaml": "^3.13.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/js-yaml": "^3.13.1",
     "**/request": "^2.88.2",
+    "**/sass-graph/yargs/yargs-parser": "5.0.0-security.0",
     "**/serialize-javascript": "^2.1.1",
-    "@types/react": "16.3.14",
-    "**/sass-graph/yargs/yargs-parser": "5.0.0-security.0"
+    "@elastic/eui/lodash": "npm:@elastic/lodash@3.10.1-kibana4",
+    "@types/react": "16.3.14"
   },
   "workspaces": {
     "packages": [
