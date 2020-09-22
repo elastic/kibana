@@ -29,15 +29,9 @@ describe('source editor geo_grid_source', () => {
   });
 
   describe('should put limitations based on heatmap-rendering selection', () => {
-    test('should not allow super-fine option for heatmaps', async () => {
+    test('should not allow super-fine option for heatmaps and should not allow multiple metrics', async () => {
       const component = shallow(
         <UpdateSourceEditor {...defaultProps} currentLayerType={LAYER_TYPE.HEATMAP} />
-      );
-      expect(component).toMatchSnapshot();
-    });
-    test('should disable multiple metrics', async () => {
-      const component = shallow(
-        <UpdateSourceEditor {...defaultProps} renderAs={RENDER_AS.HEATMAP} />
       );
       expect(component).toMatchSnapshot();
     });

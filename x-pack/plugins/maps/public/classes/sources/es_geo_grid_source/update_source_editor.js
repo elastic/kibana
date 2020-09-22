@@ -6,7 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION, LAYER_TYPE } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -89,13 +89,13 @@ export class UpdateSourceEditor extends Component {
 
   _renderMetricsPanel() {
     const metricsFilter =
-      this.props.renderAs === RENDER_AS.HEATMAP
+      this.props.currentLayerType === LAYER_TYPE.HEATMAP
         ? (metric) => {
             //these are countable metrics, where blending heatmap color blobs make sense
             return isMetricCountable(metric.value);
           }
         : null;
-    const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
+    const allowMultipleMetrics = this.props.currentLayerType !== LAYER_TYPE.HEATMAP;
     return (
       <EuiPanel>
         <EuiTitle size="xs">
