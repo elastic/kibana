@@ -25,12 +25,13 @@ import {
 } from './i18n';
 import {
   ActionFactory,
+  BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
   SerializedAction,
   SerializedEvent,
 } from '../../../dynamic_actions';
-import { ExtraActionFactoryContext } from '../types';
+import { ActionFactoryPlaceContext } from '../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -47,7 +48,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
    */
-  extraContext?: ExtraActionFactoryContext<ActionFactoryContext>;
+  placeContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 }
 
 /**
@@ -64,6 +65,7 @@ export function createFlyoutManageDrilldowns({
   storage,
   toastService,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
 }: {
   actionFactories: ActionFactory[];
@@ -71,6 +73,7 @@ export function createFlyoutManageDrilldowns({
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
+  triggerPickerDocsLink?: string;
 }) {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
@@ -81,8 +84,8 @@ export function createFlyoutManageDrilldowns({
     const isCreateOnly = props.viewMode === 'create';
 
     const factoryContext: BaseActionFactoryContext = useMemo(
-      () => ({ ...props.extraContext, triggers: props.supportedTriggers }),
-      [props.extraContext, props.supportedTriggers]
+      () => ({ ...props.placeContext, triggers: props.supportedTriggers }),
+      [props.placeContext, props.supportedTriggers]
     );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -125,7 +128,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object,
+        actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
         selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };
@@ -137,7 +140,7 @@ export function createFlyoutManageDrilldowns({
     function mapToDrilldownToDrilldownListItem(drilldown: SerializedEvent): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       const drilldownFactoryContext: BaseActionFactoryContext = {
-        ...props.extraContext,
+        ...props.placeContext,
         triggers: drilldown.triggers as TriggerId[],
       };
       return {
@@ -161,6 +164,7 @@ export function createFlyoutManageDrilldowns({
         return (
           <FlyoutDrilldownWizard
             docsLink={docsLink}
+            triggerPickerDocsLink={triggerPickerDocsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}
@@ -204,7 +208,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            extraActionFactoryContext={props.extraContext}
+            actionFactoryPlaceContext={props.placeContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
             supportedTriggers={props.supportedTriggers}
             getTrigger={getTrigger}

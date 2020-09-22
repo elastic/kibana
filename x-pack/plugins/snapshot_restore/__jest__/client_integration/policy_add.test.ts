@@ -67,6 +67,11 @@ describe('<PolicyAdd />', () => {
       expect(find('nextButton').props().disabled).toBe(true);
     });
 
+    test('should not show repository-not-found warning', () => {
+      const { exists } = testBed;
+      expect(exists('repositoryNotFoundWarning')).toBe(false);
+    });
+
     describe('form validation', () => {
       describe('logistics (step 1)', () => {
         test('should require a policy name', async () => {

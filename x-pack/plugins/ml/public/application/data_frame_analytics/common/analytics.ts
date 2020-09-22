@@ -10,22 +10,24 @@ import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
   ClassificationAnalysis,
-  OutlierAnalysis,
+  DataFrameAnalysisConfigType,
   RegressionAnalysis,
 } from '../../../../common/types/data_frame_analytics';
-
+import {
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+  getPredictionFieldName,
+  getDependentVar,
+  getPredictedFieldName,
+} from '../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 export type IndexPattern = string;
-
-export enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-}
 
 export enum ANALYSIS_ADVANCED_FIELDS {
   ETA = 'eta',
@@ -156,23 +158,6 @@ export const getAnalysisType = (analysis: AnalysisConfig): string => {
   return 'unknown';
 };
 
-export const getDependentVar = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['dependent_variable']
-  | ClassificationAnalysis['classification']['dependent_variable'] => {
-  let depVar = '';
-
-  if (isRegressionAnalysis(analysis)) {
-    depVar = analysis.regression.dependent_variable;
-  }
-
-  if (isClassificationAnalysis(analysis)) {
-    depVar = analysis.classification.dependent_variable;
-  }
-  return depVar;
-};
-
 export const getTrainingPercent = (
   analysis: AnalysisConfig
 ):
@@ -188,24 +173,6 @@ export const getTrainingPercent = (
     trainingPercent = analysis.classification.training_percent;
   }
   return trainingPercent;
-};
-
-export const getPredictionFieldName = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['prediction_field_name']
-  | ClassificationAnalysis['classification']['prediction_field_name'] => {
-  // If undefined will be defaulted to dependent_variable when config is created
-  let predictionFieldName;
-  if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
-    predictionFieldName = analysis.regression.prediction_field_name;
-  } else if (
-    isClassificationAnalysis(analysis) &&
-    analysis.classification.prediction_field_name !== undefined
-  ) {
-    predictionFieldName = analysis.classification.prediction_field_name;
-  }
-  return predictionFieldName;
 };
 
 export const getNumTopClasses = (
@@ -236,35 +203,6 @@ export const getNumTopFeatureImportanceValues = (
     numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
   }
   return numTopFeatureImportanceValues;
-};
-
-export const getPredictedFieldName = (
-  resultsField: string,
-  analysis: AnalysisConfig,
-  forSort?: boolean
-) => {
-  // default is 'ml'
-  const predictionFieldName = getPredictionFieldName(analysis);
-  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
-  const predictedField = `${resultsField}.${
-    predictionFieldName ? predictionFieldName : defaultPredictionField
-  }`;
-  return predictedField;
-};
-
-export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
-};
-
-export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
-};
-
-export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
@@ -492,7 +430,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
 }
 
@@ -549,7 +487,7 @@ export const loadEvalData = async ({
     results.eval = evalResult;
     return results;
   } catch (e) {
-    results.error = getErrorMessage(e);
+    results.error = extractErrorMessage(e);
     return results;
   }
 };
@@ -606,4 +544,14 @@ export const loadDocsCount = async ({
       success: false,
     };
   }
+};
+
+export {
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+  getPredictionFieldName,
+  getDependentVar,
+  getPredictedFieldName,
+  ANALYSIS_CONFIG_TYPE,
 };

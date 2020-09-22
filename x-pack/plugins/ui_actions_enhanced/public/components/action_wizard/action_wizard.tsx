@@ -19,11 +19,19 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { txtChangeButton, txtTriggerPickerHelpText, txtTriggerPickerLabel } from './i18n';
+import {
+  txtBetaActionFactoryLabel,
+  txtBetaActionFactoryTooltip,
+  txtChangeButton,
+  txtTriggerPickerHelpText,
+  txtTriggerPickerLabel,
+  txtTriggerPickerHelpTooltip,
+} from './i18n';
 import './action_wizard.scss';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 
 export interface ActionWizardProps<
@@ -49,12 +57,12 @@ export interface ActionWizardProps<
   /**
    * current config for currently selected action factory
    */
-  config?: object;
+  config?: BaseActionConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
@@ -157,14 +165,17 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
+      data-test-subj={`triggerPicker`}
       legend={{
         children: (
           <EuiText size="s">
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
-              <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
-                {txtTriggerPickerHelpText}
-              </EuiLink>
+              <EuiToolTip content={txtTriggerPickerHelpTooltip}>
+                <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                  {txtTriggerPickerHelpText}
+                </EuiLink>
+              </EuiToolTip>
             </h5>
           </EuiText>
         ),
@@ -208,9 +219,9 @@ interface SelectedActionFactoryProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   actionFactory: ActionFactory;
-  config: object;
+  config: BaseActionConfig;
   context: ActionFactoryContext;
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];
@@ -247,7 +258,15 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.getDisplayName(context)}</h4>
+              <h4>
+                {actionFactory.getDisplayName(context)}{' '}
+                {actionFactory.isBeta && (
+                  <EuiBetaBadge
+                    label={txtBetaActionFactoryLabel}
+                    tooltipContent={txtBetaActionFactoryTooltip}
+                  />
+                )}
+              </h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
@@ -271,7 +290,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           />
         </>
       )}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <div>
         <actionFactory.ReactCollectConfig
           config={config}
@@ -342,6 +361,10 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
               disabled={!actionFactory.isCompatibleLicense()}
+              betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
+              betaBadgeTooltipContent={
+                actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
+              }
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />

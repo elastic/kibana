@@ -19,7 +19,7 @@ import {
 } from '../tasks/hosts/all_hosts';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import { createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
@@ -31,7 +31,7 @@ describe('timeline data providers', () => {
   });
 
   beforeEach(() => {
-    openTimeline();
+    openTimelineUsingToggle();
   });
 
   afterEach(() => {

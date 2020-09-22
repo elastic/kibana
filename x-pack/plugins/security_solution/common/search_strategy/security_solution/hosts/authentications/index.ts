@@ -19,14 +19,14 @@ import {
 } from '../../../common';
 import { RequestOptionsPaginated } from '../../';
 
-export interface AuthenticationsStrategyResponse extends IEsSearchResponse {
+export interface HostAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 
-export interface AuthenticationsRequestOptions extends RequestOptionsPaginated {
+export interface HostAuthenticationsRequestOptions extends RequestOptionsPaginated {
   defaultIndex: string[];
 }
 

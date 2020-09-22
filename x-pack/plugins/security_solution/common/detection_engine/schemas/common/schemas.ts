@@ -130,7 +130,7 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-export const language = t.keyof({ kuery: null, lucene: null });
+export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
 
 export const languageOrUndefined = t.union([language, t.undefined]);
@@ -283,6 +283,9 @@ export type Status = t.TypeOf<typeof status>;
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
+export const conflicts = t.keyof({ abort: null, proceed: null });
+export type Conflicts = t.TypeOf<typeof conflicts>;
+
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
@@ -291,10 +294,12 @@ export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
 export const type = t.keyof({
+  eql: null,
   machine_learning: null,
   query: null,
   saved_query: null,
   threshold: null,
+  threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
 
@@ -338,7 +343,7 @@ export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
 export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
 
 export const sort_order = t.keyof({ asc: null, desc: null });
-export type sortOrder = t.TypeOf<typeof sort_order>;
+export type SortOrder = t.TypeOf<typeof sort_order>;
 
 export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;

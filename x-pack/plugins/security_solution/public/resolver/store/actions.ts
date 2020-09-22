@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -89,19 +89,6 @@ interface UserSelectedResolverNode {
 }
 
 /**
- * This action should dispatch to indicate that the user chose to
- * focus on examining the related events of a particular ResolverEvent.
- * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
- */
-interface UserSelectedRelatedEventCategory {
-  readonly type: 'userSelectedRelatedEventCategory';
-  readonly payload: {
-    subject: SafeResolverEvent;
-    category?: string;
-  };
-}
-
-/**
  * Used by `useStateSyncingActions` hook.
  * This is dispatched when external sources provide new parameters for Resolver.
  * When the component receives a new 'databaseDocumentID' prop, this is fired.
@@ -115,7 +102,7 @@ interface AppReceivedNewExternalProperties {
     /**
      * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     /**
      * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
      */
@@ -125,6 +112,11 @@ interface AppReceivedNewExternalProperties {
      * The `search` part of the URL of this page.
      */
     locationSearch: string;
+
+    /**
+     * Indices that the backend will use to find the document.
+     */
+    indices: string[];
   };
 }
 
@@ -136,6 +128,5 @@ export type ResolverAction =
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
   | AppDetectedMissingEventData;

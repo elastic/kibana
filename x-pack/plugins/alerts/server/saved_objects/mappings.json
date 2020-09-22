@@ -76,6 +76,13 @@
       },
       "mutedInstanceIds": {
         "type": "keyword"
+      },
+      "meta": {
+        "properties": {
+          "versionApiKeyLastmodified": {
+            "type": "keyword"
+          }
+        }
       }
     }
   }

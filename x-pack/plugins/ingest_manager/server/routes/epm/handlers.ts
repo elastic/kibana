@@ -9,6 +9,7 @@ import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
+  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -19,7 +20,8 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
@@ -32,8 +34,9 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { IngestManagerError, getHTTPResponseCode } from '../../errors';
+import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
+import { getInstallType } from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -45,11 +48,8 @@ export const getCategoriesHandler: RequestHandler<
       response: res,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -69,11 +69,8 @@ export const getListHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -87,11 +84,8 @@ export const getLimitedListHandler: RequestHandler = async (context, request, re
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -112,11 +106,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       customResponseObj.headers = { 'Content-Type': contentType };
     }
     return response.custom(customResponseObj);
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -135,24 +126,23 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
       response: res,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
-export const installPackageHandler: RequestHandler<
-  TypeOf<typeof InstallPackageRequestSchema.params>,
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   undefined,
-  TypeOf<typeof InstallPackageRequestSchema.body>
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installType = getInstallType({ pkgVersion, installedPkg });
   try {
     const res = await installPackage({
       savedObjectsClient,
@@ -165,30 +155,45 @@ export const installPackageHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (e) {
+    // could have also done `return defaultIngestErrorHandler({ error: e, response })` at each of the returns,
+    // but doing it this way will log the outer/install errors before any inner/rollback errors
+    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
     if (e instanceof IngestManagerError) {
-      logger.error(e);
-      return response.customError({
-        statusCode: getHTTPResponseCode(e),
-        body: { message: e.message },
-      });
+      return defaultResult;
     }
 
-    // if there is an unknown server error, uninstall any package assets
+    // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
     try {
-      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-      const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-      if (!isUpdate) {
+      if (installType === 'install' || installType === 'reinstall') {
+        logger.error(`uninstalling ${pkgkey} after error installing`);
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
+      if (installType === 'update') {
+        // @ts-ignore getInstallType ensures we have installedPkg
+        const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
+        logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+        await installPackage({
+          savedObjectsClient,
+          pkgkey: prevVersion,
+          callCluster,
+        });
+      }
     } catch (error) {
-      logger.error(`could not remove failed installation ${error}`);
+      logger.error(`failed to uninstall or rollback package after installation error ${error}`);
     }
-    logger.error(e);
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultResult;
   }
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  const body: MessageResponse = {
+    response: 'package upload was received ok, but not installed (not implemented yet)',
+  };
+  return response.ok({ body });
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<
@@ -203,16 +208,7 @@ export const deletePackageHandler: RequestHandler<TypeOf<
       response: res,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

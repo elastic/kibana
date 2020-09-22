@@ -38,28 +38,19 @@ describe('callEnterpriseSearchConfigAPI', () => {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
       ilm_enabled: true,
+      is_federated_auth: false,
       configured_limits: {
-        max_document_byte_size: 102400,
-        max_engines_per_meta_engine: 15,
-      },
-      app_search: {
-        account_id: 'some-id-string',
-        onboarding_complete: true,
-      },
-      workplace_search: {
-        can_create_invitations: true,
-        is_federated_auth: false,
-        organization: {
-          name: 'ACME Donuts',
-          default_org_name: 'My Organization',
+        app_search: {
+          engine: {
+            document_size_in_bytes: 102400,
+            source_engines_per_meta_engine: 15,
+          },
         },
-        fp_account: {
-          id: 'some-id-string',
-          groups: ['Default', 'Cats'],
-          is_admin: true,
-          can_create_personal_sources: true,
-          is_curated: false,
-          viewed_onboarding_page: true,
+        workplace_search: {
+          custom_api_source: {
+            document_size_in_bytes: 102400,
+            total_fields: 64,
+          },
         },
       },
     },
@@ -69,17 +60,37 @@ describe('callEnterpriseSearchConfigAPI', () => {
         app_search: true,
         workplace_search: false,
       },
-      app_search_role: {
-        id: 'account_id:somestring|user_oid:somestring',
-        role_type: 'owner',
-        ability: {
-          access_all_engines: true,
-          destroy: ['session'],
-          manage: ['account_credentials', 'account_engines'], // etc
-          edit: ['LocoMoco::Account'], // etc
-          view: ['Engine'], // etc
-          credential_types: ['admin', 'private', 'search'],
-          available_role_types: ['owner', 'admin'],
+      app_search: {
+        account: {
+          id: 'some-id-string',
+          onboarding_complete: true,
+        },
+        role: {
+          id: 'account_id:somestring|user_oid:somestring',
+          role_type: 'owner',
+          ability: {
+            access_all_engines: true,
+            manage: ['account_credentials', 'account_engines'], // etc
+            edit: ['LocoMoco::Account'], // etc
+            view: ['Engine'], // etc
+            credential_types: ['admin', 'private', 'search'],
+            available_role_types: ['owner', 'admin'],
+          },
+        },
+      },
+      workplace_search: {
+        organization: {
+          name: 'ACME Donuts',
+          default_org_name: 'My Organization',
+        },
+        account: {
+          id: 'some-id-string',
+          groups: ['Default', 'Cats'],
+          is_admin: true,
+          can_create_personal_sources: true,
+          can_create_invitations: true,
+          is_curated: false,
+          viewed_onboarding_page: true,
         },
       },
     },
@@ -91,7 +102,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
   it('calls the config API endpoint', async () => {
     fetchMock.mockImplementationOnce((url: string) => {
-      expect(url).toEqual('http://localhost:3002/api/ent/v1/internal/client_config');
+      expect(url).toEqual('http://localhost:3002/api/ent/v2/internal/client_config');
       return Promise.resolve(new Response(JSON.stringify(mockResponse)));
     });
 
@@ -116,19 +127,29 @@ describe('callEnterpriseSearchConfigAPI', () => {
       publicUrl: undefined,
       readOnlyMode: false,
       ilmEnabled: false,
+      isFederatedAuth: false,
       configuredLimits: {
-        maxDocumentByteSize: undefined,
-        maxEnginesPerMetaEngine: undefined,
+        appSearch: {
+          engine: {
+            maxDocumentByteSize: undefined,
+            maxEnginesPerMetaEngine: undefined,
+          },
+        },
+        workplaceSearch: {
+          customApiSource: {
+            maxDocumentByteSize: undefined,
+            totalFields: undefined,
+          },
+        },
       },
       appSearch: {
         accountId: undefined,
-        onBoardingComplete: false,
+        onboardingComplete: false,
         role: {
           id: undefined,
           roleType: undefined,
           ability: {
             accessAllEngines: false,
-            destroy: [],
             manage: [],
             edit: [],
             view: [],
@@ -138,17 +159,16 @@ describe('callEnterpriseSearchConfigAPI', () => {
         },
       },
       workplaceSearch: {
-        canCreateInvitations: false,
-        isFederatedAuth: false,
         organization: {
           name: undefined,
           defaultOrgName: undefined,
         },
-        fpAccount: {
+        account: {
           id: undefined,
           groups: [],
           isAdmin: false,
           canCreatePersonalSources: false,
+          canCreateInvitations: false,
           isCurated: false,
           viewedOnboardingPage: false,
         },

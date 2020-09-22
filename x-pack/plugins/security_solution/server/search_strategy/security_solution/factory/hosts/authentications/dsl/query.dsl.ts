@@ -6,14 +6,14 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { AuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
+import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
-import { extendMap } from '../../../../../../lib/ecs_fields/extend_map';
 
-import { authenticationFields } from '../helpers';
+import { authenticationsFields } from '../helpers';
+import { extendMap } from '../../../../../../../common/ecs/ecs_fields/extend_map';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -31,8 +31,8 @@ export const buildQuery = ({
   pagination: { querySize },
   defaultIndex,
   docValueFields,
-}: AuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationFields, { ...hostFieldsMap, ...sourceFieldsMap });
+}: HostAuthenticationsRequestOptions) => {
+  const esFields = reduceFields(authenticationsFields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),

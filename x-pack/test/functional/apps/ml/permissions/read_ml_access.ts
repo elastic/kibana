@@ -408,16 +408,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should display elements on Stack Management ML page correctly', async () => {
             await ml.testExecution.logTestStep(
-              'should load the stack management with the ML menu item being present'
+              'should load the stack management with the ML menu item being absent'
             );
-            await ml.navigation.navigateToStackManagement();
-
-            await ml.testExecution.logTestStep(
-              'should display the access denied page in stack management'
-            );
-            await ml.navigation.navigateToStackManagementJobsListPage({
-              expectAccessDenied: true,
-            });
+            await ml.navigation.navigateToStackManagement({ expectMlLink: false });
           });
         });
       }

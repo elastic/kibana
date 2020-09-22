@@ -383,6 +383,22 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'eql': {
+      return [
+        {
+          title: label,
+          description: i18n.EQL_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'threat_match': {
+      return [
+        {
+          title: label,
+          description: i18n.THREAT_MATCH_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

@@ -3,15 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -21,21 +19,12 @@ export async function getPageViewTrends({
   setup: Setup & SetupTimeRange & SetupUIFilters;
   breakdowns?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
-  const breakdownAggs: AggregationInputMap = {};
+  let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
-    const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
-    breakdownList.forEach(({ name, type, fieldName }) => {
-      breakdownAggs[name] = {
-        terms: {
-          field: fieldName,
-          size: 9,
-          missing: 'Other',
-        },
-      };
-    });
+    breakdownItem = JSON.parse(breakdowns);
   }
 
   const params = mergeProjection(projection, {
@@ -50,7 +39,17 @@ export async function getPageViewTrends({
             field: '@timestamp',
             buckets: 50,
           },
-          aggs: breakdownAggs,
+          aggs: breakdownItem
+            ? {
+                breakdown: {
+                  terms: {
+                    field: breakdownItem.fieldName,
+                    size: 9,
+                    missing: 'Other',
+                  },
+                },
+              }
+            : undefined,
         },
       },
     },
@@ -68,19 +67,16 @@ export async function getPageViewTrends({
       x: xVal,
       y: bCount,
     };
-
-    Object.keys(breakdownAggs).forEach((bKey) => {
-      const categoryBuckets = (bucket[bKey] as any).buckets;
-      categoryBuckets.forEach(
-        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
-          if (key === 'Other') {
-            res[key + `(${bKey})`] = docCount;
-          } else {
-            res[key] = docCount;
-          }
+    if ('breakdown' in bucket) {
+      const categoryBuckets = bucket.breakdown.buckets;
+      categoryBuckets.forEach(({ key, doc_count: docCount }) => {
+        if (key === 'Other') {
+          res[key + `(${breakdownItem?.name})`] = docCount;
+        } else {
+          res[key] = docCount;
         }
-      );
-    });
+      });
+    }
 
     return res;
   });

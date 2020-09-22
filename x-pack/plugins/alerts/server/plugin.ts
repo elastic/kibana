@@ -38,7 +38,7 @@ import {
   findAlertRoute,
   getAlertRoute,
   getAlertStateRoute,
-  getAlertStatusRoute,
+  getAlertInstanceSummaryRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -109,6 +109,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
 
@@ -123,6 +124,7 @@ export class AlertingPlugin {
         map((config: SharedGlobalConfig) => config.kibana.index)
       )
       .toPromise();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public async setup(
@@ -193,7 +195,7 @@ export class AlertingPlugin {
     findAlertRoute(router, this.licenseState);
     getAlertRoute(router, this.licenseState);
     getAlertStateRoute(router, this.licenseState);
-    getAlertStatusRoute(router, this.licenseState);
+    getAlertInstanceSummaryRoute(router, this.licenseState);
     listAlertTypesRoute(router, this.licenseState);
     updateAlertRoute(router, this.licenseState);
     enableAlertRoute(router, this.licenseState);
@@ -241,6 +243,7 @@ export class AlertingPlugin {
       actions: plugins.actions,
       features: plugins.features,
       eventLog: plugins.eventLog,
+      kibanaVersion: this.kibanaVersion,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
