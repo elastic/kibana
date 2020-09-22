@@ -69,7 +69,11 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
-            <HttpProvider http={core.http} errorConnecting={errorConnecting} />
+            <HttpProvider
+              http={core.http}
+              errorConnecting={errorConnecting}
+              readOnlyMode={initialData.readOnlyMode}
+            />
             <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
@@ -83,4 +87,23 @@ export const renderApp = (
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
   };
+};
+
+/**
+ * Render function for Kibana's header action menu chrome -
+ * reusable by any Enterprise Search plugin simply by passing in
+ * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
+ * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ */
+interface IHeaderActionsProps {
+  externalUrl: IExternalUrl;
+}
+
+export const renderHeaderActions = (
+  HeaderActions: React.FC<IHeaderActionsProps>,
+  kibanaHeaderEl: HTMLElement,
+  externalUrl: IExternalUrl
+) => {
+  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
+  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };
