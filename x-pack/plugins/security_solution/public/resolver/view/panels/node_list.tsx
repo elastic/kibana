@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+/* eslint-disable no-duplicate-imports */
+
+import { useDispatch } from 'react-redux';
+
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useContext } from 'react';
 import {
   EuiBasicTableColumn,
   EuiBadge,
@@ -16,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import { SideEffectContext } from '../side_effect_context';
 import { StyledPanel } from '../styles';
 import {
   StyledLabelTitle,
@@ -23,22 +30,24 @@ import {
   StyledLabelContainer,
   StyledButtonTextContainer,
 } from './styles';
-import * as event from '../../../../common/endpoint/models/event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { formatter } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverAction } from '../../store/actions';
 
 interface ProcessTableView {
   name?: string;
   timestamp?: Date;
+  nodeID: string;
   event: SafeResolverEvent;
-  href: string | undefined;
+  // TODO, use event, and side effect context to trigger userBroughtProcessInto view from the link click
 }
 
 /**
@@ -57,8 +66,8 @@ export const NodeList = memo(() => {
         ),
         sortable: true,
         truncateText: true,
-        render(name: string, item: ProcessTableView) {
-          return <NodeDetailLink name={name} item={item} />;
+        render(name: string | undefined, item: ProcessTableView) {
+          return <NodeDetailLink name={name} event={item.event} nodeID={item.nodeID} />;
         },
       },
       {
@@ -93,22 +102,16 @@ export const NodeList = memo(() => {
   const processTableView: ProcessTableView[] = useSelector(
     useCallback((state: ResolverState) => {
       const { processNodePositions } = selectors.layout(state);
-      const relativeHref = selectors.relativeHref(state);
       const view: ProcessTableView[] = [];
       for (const processEvent of processNodePositions.keys()) {
-        const name = event.processNameSafeVersion(processEvent);
-        const nodeID = event.entityIDSafeVersion(processEvent);
+        const name = eventModel.processNameSafeVersion(processEvent);
+        const nodeID = eventModel.entityIDSafeVersion(processEvent);
         if (nodeID !== undefined) {
           view.push({
             name,
-            timestamp: event.timestampAsDateSafeVersion(processEvent),
+            timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
+            nodeID,
             event: processEvent,
-            href: relativeHref({
-              panelView: 'nodeDetail',
-              panelParameters: {
-                nodeID,
-              },
-            }),
           });
         }
       }
@@ -148,16 +151,40 @@ export const NodeList = memo(() => {
   );
 });
 
-function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }) {
-  const entityID = event.entityIDSafeVersion(item.event);
-  const originID = useSelector(selectors.originID);
-  const isOrigin = originID === entityID;
+function NodeDetailLink({
+  name,
+  nodeID,
+  event,
+}: {
+  name?: string;
+  nodeID: string;
+  event: SafeResolverEvent;
+}) {
+  const isOrigin = useSelector((state: ResolverState) => {
+    return selectors.originID(state) === nodeID;
+  });
   const isTerminated = useSelector((state: ResolverState) =>
-    entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
+    nodeID === undefined ? false : selectors.isProcessTerminated(state)(nodeID)
   );
   const { descriptionText } = useColors();
+  const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
+  const dispatch: (action: ResolverAction) => void = useDispatch();
+  const { timestamp } = useContext(SideEffectContext);
+  const handleOnClick = useCallback(
+    (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
+      linkProps.onClick(mouseEvent);
+      dispatch({
+        type: 'userBroughtProcessIntoView',
+        payload: {
+          process: event,
+          time: timestamp(),
+        },
+      });
+    },
+    [timestamp, linkProps, dispatch, event]
+  );
   return (
-    <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href })}>
+    <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
       {name === '' ? (
         <EuiBadge color="warning">
           {i18n.translate(

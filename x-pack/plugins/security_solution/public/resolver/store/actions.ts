@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
+ * @deprecated Use `appReceivedNewExternalProperties` instead.
  */
 interface UserBroughtProcessIntoView {
   readonly type: 'userBroughtProcessIntoView';
@@ -16,25 +17,7 @@ interface UserBroughtProcessIntoView {
     /**
      * Used to identify the process node that should be brought into view.
      */
-    readonly process: ResolverEvent;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
-
-/**
- * When an examination of query params in the UI indicates that state needs to
- * be updated to reflect the new selection
- */
-interface AppDetectedNewIdFromQueryParams {
-  readonly type: 'appDetectedNewIdFromQueryParams';
-  readonly payload: {
-    /**
-     * Used to identify the process the process that should be synced with state.
-     */
-    readonly process: ResolverEvent;
+    readonly process: SafeResolverEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -118,5 +101,4 @@ export type ResolverAction =
   | UserBroughtProcessIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | UserRequestedRelatedEventData
-  | AppDetectedNewIdFromQueryParams;
+  | UserRequestedRelatedEventData;
