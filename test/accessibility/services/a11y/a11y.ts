@@ -104,9 +104,6 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           'scrollable-region-focusable': {
             selector: '[data-skip-axe="scrollable-region-focusable"]',
           },
-          'aria-required-children': {
-            selector: '[data-skip-axe="aria-required-children"] > *',
-          },
         },
       };
 
