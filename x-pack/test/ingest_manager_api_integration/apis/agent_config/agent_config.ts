@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return a 500 with invalid source config', async () => {
+      it('should return a 404 with invalid source config', async () => {
         await supertest
           .post(`/api/ingest_manager/agent_configs/INVALID_CONFIG_ID/copy`)
           .set('kbn-xsrf', 'xxxx')
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'Copied config',
             description: '',
           })
-          .expect(500);
+          .expect(404);
       });
 
       it('should return a 400 with invalid payload', async () => {
