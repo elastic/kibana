@@ -421,16 +421,7 @@ module.exports = {
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui'],
-
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: false,
-            rootPackageName: 'kibana',
-            kibanaPath: '.',
-            pluginMap: {},
-          },
-        },
+        'import/core-modules': ['plugins'],
       },
     },
 
