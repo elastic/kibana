@@ -285,7 +285,10 @@ describe('ranges', () => {
 
         act(() => {
           // minus button
-          instance.find(EuiButtonEmpty).first().prop('onClick')!({} as ReactMouseEvent);
+          instance
+            .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
+            .find('button')
+            .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(setStateSpy).toHaveBeenCalledWith({
@@ -308,7 +311,10 @@ describe('ranges', () => {
           });
 
           // plus button
-          instance.find(EuiButtonEmpty).at(1).prop('onClick')!({} as ReactMouseEvent);
+          instance
+            .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
+            .find('button')
+            .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(setStateSpy).toHaveBeenCalledWith({

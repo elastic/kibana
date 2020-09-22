@@ -49,6 +49,7 @@ const BaseRangeEditor = ({
             <EuiButtonEmpty
               size="xs"
               iconType="minusInCircle"
+              data-test-subj="lns-indexPattern-range-maxBars-minus"
               onClick={() =>
                 setMaxBarsValue('' + Math.max(Number(maxBarsValue) - step, MIN_HISTOGRAM_BARS))
               }
@@ -69,6 +70,7 @@ const BaseRangeEditor = ({
             <EuiButtonEmpty
               size="xs"
               iconType="plusInCircle"
+              data-test-subj="lns-indexPattern-range-maxBars-plus"
               onClick={() =>
                 setMaxBarsValue('' + Math.min(Number(maxBarsValue) + step, maxHistogramBars))
               }
