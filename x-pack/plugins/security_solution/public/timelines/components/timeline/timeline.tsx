@@ -239,7 +239,7 @@ export const TimelineComponent: React.FC<Props> = ({
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',
     startDate: start,
-    skip: canQueryTimeline,
+    skip: !canQueryTimeline,
     sort: timelineQuerySortField,
   });
 

@@ -15,7 +15,8 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../common/containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
-import { KqlMode, EventType } from '../../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
@@ -47,7 +48,7 @@ interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  eventType: EventType;
+  eventType: TimelineEventsType;
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
@@ -66,7 +67,7 @@ interface Props {
   savedQueryId: string | null;
   to: string;
   toStr: string;
-  updateEventTypeAndIndexesName: (eventType: EventType, indexNames: string[]) => void;
+  updateEventTypeAndIndexesName: (eventType: TimelineEventsType, indexNames: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 

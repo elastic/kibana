@@ -24,8 +24,9 @@ import {
   inputsModel,
   inputsSelectors,
 } from '../../../../common/store';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { KqlMode, TimelineModel, EventType } from '../../../../timelines/store/timeline/model';
+import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
@@ -114,7 +115,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     const handleUpdateEventTypeAndIndexesName = useCallback(
-      (newEventType: EventType, indexNames: string[]) =>
+      (newEventType: TimelineEventsType, indexNames: string[]) =>
         updateEventTypeAndIndexesName({
           id: timelineId,
           eventType: newEventType,
@@ -220,7 +221,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     indexNames,
   }: {
     id: string;
-    eventType: EventType;
+    eventType: TimelineEventsType;
     indexNames: string[];
   }) => {
     dispatch(timelineActions.updateEventType({ id, eventType }));

@@ -13,7 +13,7 @@ import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { allEvents, defaultOptions } from './helpers';
 import { TopN } from './top_n';
-import { EventType } from '../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
@@ -106,7 +106,7 @@ describe('TopN', () => {
   const query = { query: '', language: 'kuery' };
 
   const toggleTopN = jest.fn();
-  const eventTypes: { [id: string]: EventType } = {
+  const eventTypes: { [id: string]: TimelineEventsType } = {
     raw: 'raw',
     alert: 'alert',
     all: 'all',

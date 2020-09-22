@@ -172,7 +172,7 @@ describe('alert actions', () => {
             deletedEventIds: [],
             description: 'This is a sample rule description',
             eventIdToNoteIds: {},
-            eventType: 'alert',
+            eventType: 'all',
             excludedRowRendererIds: [],
             filters: [
               {

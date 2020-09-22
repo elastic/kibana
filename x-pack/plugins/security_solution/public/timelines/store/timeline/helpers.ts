@@ -22,6 +22,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
+  TimelineEventsType,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -29,7 +30,7 @@ import {
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
+import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -670,7 +671,7 @@ export const updateTimelineTitle = ({
 
 interface UpdateTimelineEventTypeParams {
   id: string;
-  eventType: EventType;
+  eventType: TimelineEventsType;
   timelineById: TimelineById;
 }
 

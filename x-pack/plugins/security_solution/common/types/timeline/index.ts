@@ -399,3 +399,5 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 );
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
+
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';

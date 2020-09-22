@@ -22,13 +22,17 @@ import deepEqual from 'fast-deep-equal';
 import debounce from 'lodash/debounce';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { EventType } from '../../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
+
+const PopoverContent = styled.div`
+  width: 600px;
+`;
 
 const AllEuiHealth = styled(EuiHealth)`
   margin-left: -2px;
@@ -51,9 +55,7 @@ const WarningEuiHealth = styled(EuiHealth)`
 `;
 
 const AdvancedSettings = styled(EuiText)`
-  ${({ theme }) => css`
-    color: ${theme.eui.euiColorPrimary};
-  `}
+  color: ${({ theme }) => theme.eui.euiColorPrimary};
 `;
 
 const ConfigHelper = styled(EuiText)`
@@ -99,8 +101,8 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
 ];
 
 interface PickEventTypeProps {
-  eventType: EventType;
-  onChangeEventTypeAndIndexesName: (value: EventType, indexNames: string[]) => void;
+  eventType: TimelineEventsType;
+  onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
 }
 
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
@@ -109,7 +111,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [showAdvanceSettings, setAdvanceSettings] = useState(false);
-  const [filterEventType, setFilterEventType] = useState<EventType>(eventType);
+  const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
@@ -224,7 +226,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setPopover(false);
   }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
-  const toggleAdvancedSettings = useCallback((isOpen: boolean) => setAdvanceSettings(isOpen), []);
+  const handleComboBoxChange = useMemo(
+    () =>
+      debounce(onChangeCombo, 500, {
+        leading: true,
+        trailing: false,
+      }),
+    [onChangeCombo]
+  );
 
   const comboBox = useMemo(
     () => (
@@ -233,14 +242,11 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={debounce(onChangeCombo, 600, {
-          leading: true,
-          trailing: false,
-        })}
+        onChange={handleComboBoxChange}
         renderOption={renderOption}
       />
     ),
-    [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
+    [handleComboBoxChange, indexesPatternOptions, renderOption, selectedOptions]
   );
 
   const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
@@ -273,14 +279,34 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     );
   }, [filterEventType, sourcererScope.loading, togglePopover]);
 
+  const tooltipContent = useMemo(
+    () =>
+      selectedOptions
+        .map((so) => so.label)
+        .sort()
+        .join(', '),
+    [selectedOptions]
+  );
+
+  const ButtonContent = useMemo(
+    () => (
+      <AdvancedSettings>
+        {showAdvanceSettings
+          ? i18n.HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS
+          : i18n.SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS}
+      </AdvancedSettings>
+    ),
+    [showAdvanceSettings]
+  );
+
   useEffect(() => {
-    const newSelecteOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
+    const newSelectedOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
       label: indexSelected,
       value: indexSelected,
     }));
     setSelectedOptions((prevSelectedOptions) => {
-      if (!deepEqual(newSelecteOptions, prevSelectedOptions)) {
-        return newSelecteOptions;
+      if (!deepEqual(newSelectedOptions, prevSelectedOptions)) {
+        return newSelectedOptions;
       }
       return prevSelectedOptions;
     });
@@ -292,13 +318,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   return (
     <PickEventContainer>
-      <EuiToolTip
-        position="top"
-        content={selectedOptions
-          .map((so) => so.label)
-          .sort()
-          .join(', ')}
-      >
+      <EuiToolTip position="top" content={tooltipContent}>
         <EuiPopover
           id="popover"
           ownFocus
@@ -306,7 +326,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
-          <div style={{ width: '600px' }}>
+          <PopoverContent>
             <EuiPopoverTitle>
               <>{i18n.SELECT_INDEX_PATTERNS}</>
             </EuiPopoverTitle>
@@ -315,14 +335,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             <EuiSpacer size="m" />
             <EuiAccordion
               id="accordion1"
-              buttonContent={
-                <AdvancedSettings>
-                  {showAdvanceSettings
-                    ? i18n.HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS
-                    : i18n.SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS}
-                </AdvancedSettings>
-              }
-              onToggle={toggleAdvancedSettings}
+              buttonContent={ButtonContent}
+              onToggle={setAdvanceSettings}
             >
               <>
                 <EuiSpacer size="s" />
@@ -347,7 +361,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             >
               {i18n.SAVE_INDEX_PATTERNS}
             </EuiButton>
-          </div>
+          </PopoverContent>
         </EuiPopover>
       </EuiToolTip>
     </PickEventContainer>

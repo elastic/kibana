@@ -56,7 +56,6 @@ interface UseTimelineEventsProps {
   limit: number;
   sort: SortField;
   startDate: string;
-  canQueryTimeline?: boolean;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -77,7 +76,7 @@ export const useTimelineEvents = ({
     field: '@timestamp',
     direction: Direction.asc,
   },
-  canQueryTimeline = true,
+  skip = false,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
   const { data, notifications } = useKibana().services;
@@ -85,25 +84,29 @@ export const useTimelineEvents = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [activePage, setActivePage] = useState(0);
-  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions>({
-    fields,
-    fieldRequested: fields,
-    filterQuery: createFilter(filterQuery),
-    id,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    pagination: {
-      activePage,
-      querySize: limit,
-    },
-    sort,
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: TimelineEventsQueries.all,
-  });
+  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
+    !skip
+      ? {
+          fields,
+          fieldRequested: fields,
+          filterQuery: createFilter(filterQuery),
+          id,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          pagination: {
+            activePage,
+            querySize: limit,
+          },
+          sort,
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: TimelineEventsQueries.all,
+        }
+      : null
+  );
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -138,7 +141,11 @@ export const useTimelineEvents = ({
   });
 
   const timelineSearch = useCallback(
-    (request: TimelineEventsAllRequestOptions) => {
+    (request: TimelineEventsAllRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -195,17 +202,18 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (
-      !canQueryTimeline ||
-      skipQueryForDetectionsPage(id, indexNames) ||
-      indexNames.length === 0
-    ) {
+    if (skip || skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
     setTimelineRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {
+          fields,
+          fieldRequested: fields,
+          id,
+          factoryQueryType: TimelineEventsQueries.all,
+        }),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
@@ -221,7 +229,7 @@ export const useTimelineEvents = ({
         sort,
       };
       if (
-        canQueryTimeline &&
+        !skip &&
         !skipQueryForDetectionsPage(id, indexNames) &&
         !deepEqual(prevRequest, myRequest)
       ) {
@@ -235,11 +243,12 @@ export const useTimelineEvents = ({
     endDate,
     filterQuery,
     startDate,
-    canQueryTimeline,
     id,
     activePage,
     limit,
     sort,
+    skip,
+    fields,
   ]);
 
   useEffect(() => {

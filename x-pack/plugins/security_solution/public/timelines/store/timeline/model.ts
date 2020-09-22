@@ -12,6 +12,7 @@ import { PinnedEvent } from '../../../graphql/types';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 import type {
+  TimelineEventsType,
   TimelineType,
   TimelineStatus,
   RowRendererId,
@@ -19,7 +20,6 @@ import type {
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -52,7 +52,7 @@ export interface TimelineModel {
   /** A summary of the events and notes in this timeline */
   description: string;
   /** Typoe of event you want to see in this timeline */
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */

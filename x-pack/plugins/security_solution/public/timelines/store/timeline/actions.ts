@@ -15,9 +15,13 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 
-import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
+import {
+  TimelineEventsType,
+  TimelineTypeLiteral,
+  RowRendererId,
+} from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
@@ -265,7 +269,7 @@ export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
 
-export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
+export const updateEventType = actionCreator<{ id: string; eventType: TimelineEventsType }>(
   'UPDATE_EVENT_TYPE'
 );
 
