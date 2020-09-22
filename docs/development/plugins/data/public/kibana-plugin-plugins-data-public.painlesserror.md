@@ -20,7 +20,7 @@ export declare class PainlessError extends KbnError
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [painlessStack](./kibana-plugin-plugins-data-public.painlesserror.painlessstack.md) |  | <code>any</code> |  |
+|  [painlessStack](./kibana-plugin-plugins-data-public.painlesserror.painlessstack.md) |  | <code>string</code> |  |
 
 ## Methods
 

@@ -27,7 +27,7 @@ import { EsError, isEsError } from './types';
 import { IEsSearchRequest } from '..';
 
 export class PainlessError extends KbnError {
-  painlessStack: any;
+  painlessStack?: string;
   constructor(err: EsError, request: IEsSearchRequest) {
     const rootCause = getRootCause(err as EsError);
 
@@ -37,7 +37,7 @@ export class PainlessError extends KbnError {
         values: { script: rootCause?.script },
       })
     );
-    this.painlessStack = rootCause?.script_stack.join('\n');
+    this.painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
   }
 
   public getErrorMessage(application: ApplicationStart) {
@@ -52,9 +52,11 @@ export class PainlessError extends KbnError {
         {this.message}
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
-        <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
-          {this.painlessStack}
-        </EuiCodeBlock>
+        {this.painlessStack ? (
+          <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
+            {this.painlessStack}
+          </EuiCodeBlock>
+        ) : null}
         <EuiText textAlign="right">
           <EuiButton color="danger" onClick={onClick} size="s">
             <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />

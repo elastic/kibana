@@ -1593,7 +1593,7 @@ export class PainlessError extends KbnError {
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
-    painlessStack: any;
+    painlessStack?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "parseEsInterval" needs to be exported by the entry point index.d.ts

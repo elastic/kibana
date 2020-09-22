@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-painlessStack: any;
+painlessStack?: string;
 ```
