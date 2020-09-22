@@ -277,6 +277,13 @@ Array [
         "services": Object {
           "aggs": Object {
             "outcomes": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
               "terms": Object {
                 "field": "event.outcome",
               },
@@ -284,6 +291,13 @@ Array [
             "timeseries": Object {
               "aggs": Object {
                 "outcomes": Object {
+                  "aggs": Object {
+                    "count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                  },
                   "terms": Object {
                     "field": "event.outcome",
                   },
