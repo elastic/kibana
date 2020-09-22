@@ -41,11 +41,8 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
 };
 
 interface FieldValidationState {
-  /**
-   * has user visited (aka: tabbed/clicked into the) field.
-   * Should only be set once the user exists the field (`onblur`)
-   */
-  wasVisited: boolean;
+  /** If this fields state is invalid. Drives display of errors on the UI */
+  isInvalid: boolean;
   errors: string[];
   warnings: string[];
 }
@@ -69,12 +66,13 @@ const addResultToValidation = (
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
-      wasVisited: false,
+      isInvalid: false,
       errors: [],
       warnings: [],
     };
   }
   validation.result[field]![type].push(resultValue);
+  validation.result[field]!.isInvalid = true;
 };
 
 const validateFormValues = (values: NewTrustedApp): ValidationResult => {
@@ -113,7 +111,7 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
     isValid = false;
     addResultToValidation(
       validation,
-      'os',
+      'entries',
       'errors',
       i18n.translate('xpack.securitySolution.trustedapps.create.conditionRequiredMsg', {
         defaultMessage: 'At least one Field definition is required',
@@ -125,7 +123,7 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
         isValid = false;
         addResultToValidation(
           validation,
-          'os',
+          'entries',
           'errors',
           i18n.translate(
             'xpack.securitySolution.trustedapps.create.conditionFieldValueRequiredMsg',
@@ -174,6 +172,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       entries: [generateNewEntry()],
       description: '',
     });
+    const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
+      validateFormValues(formValues)
+    );
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
         if (dataTestSubj) {
@@ -284,13 +285,18 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       []
     );
 
+    // Anytime the form values change, re-validate
+    useEffect(() => {
+      setValidationResult(validateFormValues(formValues));
+    }, [formValues]);
+
     // Anytime the form values change - validate and notify
     useEffect(() => {
       onChange({
-        isValid: validateFormValues(formValues).isValid,
+        isValid: validationResult.isValid,
         item: formValues,
       });
-    }, [formValues, onChange]);
+    }, [formValues, onChange, validationResult.isValid]);
 
     return (
       <EuiForm {...formProps} component="div">
@@ -300,12 +306,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           })}
           fullWidth={fullWidth}
           data-test-subj={getTestId('nameRow')}
+          isInvalid={validationResult.result.name?.isInvalid}
+          error={validationResult.result.name?.errors}
         >
           <EuiFieldText
             name="name"
             value={formValues.name}
             onChange={handleDomChangeEvents}
             fullWidth
+            required
             data-test-subj={getTestId('nameTextField')}
           />
         </EuiFormRow>
@@ -315,6 +324,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           })}
           fullWidth={fullWidth}
           data-test-subj={getTestId('OsRow')}
+          isInvalid={validationResult.result.os?.isInvalid}
+          error={validationResult.result.os?.errors}
         >
           <EuiSuperSelect
             name="os"
@@ -325,7 +336,12 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('osSelectField')}
           />
         </EuiFormRow>
-        <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('conditionsRow')}>
+        <EuiFormRow
+          fullWidth={fullWidth}
+          data-test-subj={getTestId('conditionsRow')}
+          isInvalid={validationResult.result.entries?.isInvalid}
+          error={validationResult.result.entries?.errors}
+        >
           <LogicalConditionBuilder
             entries={formValues.entries}
             os={formValues.os}
