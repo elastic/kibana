@@ -24,7 +24,7 @@ Then(`it displays top pages in the suggestion popover`, () => {
     listOfUrls.should('have.length', 5);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 109 ms Select',
+      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 109 ms ',
       'http://opbeans-node:3000/ordersPage views: 14Page load duration: 72 ms',
     ];
 
@@ -41,7 +41,7 @@ When(`a user enters a query in url search field`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
   cy.get('[data-cy=csmUrlFilter]').within(() => {
-    cy.get('input.euiSelectableTemplateSitewide__search').type('cus');
+    cy.get('input.euiSelectableSearch').type('cus');
   });
 
   cy.get('kbnLoadingIndicator').should('not.be.visible');
@@ -55,7 +55,7 @@ Then(`it should filter results based on query`, () => {
     listOfUrls.should('have.length', 1);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76 ms Select',
+      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76 ms ',
     ];
 
     cy.get('li.euiSelectableListItem')

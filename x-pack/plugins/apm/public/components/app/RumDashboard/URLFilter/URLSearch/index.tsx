@@ -4,17 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectableTemplateSitewide,
-  EuiSelectableTemplateSitewideOption,
-  EuiTitle,
-  EuiLoadingSpinner,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -23,6 +13,8 @@ import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
+import { SelectableUrlList } from './SelectableUrlList';
+import { UrlOption } from './RenderOption';
 
 interface Props {
   onChange: (value: string[]) => void;
@@ -36,24 +28,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   const { start, end, serviceName } = urlParams;
   const [searchValue, setSearchValue] = useState('');
 
-  const [forceClosePopover, setForceClosePopover] = useState(false);
-
   const [debouncedValue, setDebouncedValue] = useState('');
-
-  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
-
-  const onInputFocus = () => {
-    setForceClosePopover(false);
-  };
-
-  useEffect(() => {
-    if (searchRef) {
-      searchRef.addEventListener('focus', onInputFocus);
-    }
-    return () => {
-      searchRef?.removeEventListener('focus', onInputFocus);
-    };
-  }, [searchRef]);
 
   useDebounce(
     () => {
@@ -105,7 +80,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(uiFilters.transactionUrl || []);
   }, [uiFilters]);
 
-  const onChange = (updatedOptions: EuiSelectableTemplateSitewideOption[]) => {
+  const onChange = (updatedOptions: UrlOption[]) => {
     const clickedItems = updatedOptions.filter(
       (option) => option.checked === 'on'
     );
@@ -113,27 +88,16 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(clickedItems.map((item) => item.url));
   };
 
-  // @ts-expect-error
-  const items: EuiSelectableTemplateSitewideOption[] = (data?.items ?? []).map(
-    (item) => ({
-      label: item.url,
-      key: item.url,
-      meta: [
-        {
-          text: I18LABELS.pageViews + ': ' + item.count,
-          type: 'deployment',
-          highlightSearchString: false,
-        },
-        {
-          text: I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld),
-          type: 'deployment',
-          highlightSearchString: false,
-        },
-      ],
-      url: item.url,
-      checked: checkedUrls?.includes(item.url) ? 'on' : null,
-    })
-  );
+  const items: UrlOption[] = (data?.items ?? []).map((item) => ({
+    label: item.url,
+    key: item.url,
+    meta: [
+      I18LABELS.pageViews + ': ' + item.count,
+      I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld),
+    ],
+    url: item.url,
+    checked: checkedUrls?.includes(item.url) ? 'on' : undefined,
+  }));
 
   const onInputChange = (e: FormEvent<HTMLInputElement>) => {
     setDebouncedValue(e.currentTarget.value);
@@ -141,68 +105,27 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const isLoading = status !== 'success';
 
-  const titleText = searchValue
-    ? I18LABELS.getSearchResultsLabel(data?.total ?? 0)
-    : I18LABELS.topPages;
+  const onTermChange = () => {
+    updateSearchTerm(searchValue);
+  };
 
-  function PopOverTitle() {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {isLoading ? <EuiLoadingSpinner /> : titleText}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            disabled={searchValue === ''}
-            onClick={() => {
-              updateSearchTerm(searchValue);
-              setForceClosePopover(true);
-            }}
-          >
-            {I18LABELS.matchThisQuery}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const onClose = () => {
+    onFilterChange(checkedUrls);
+  };
 
   return (
     <>
       <EuiTitle size="xxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
-      <EuiSelectableTemplateSitewide
-        data-test-subj="csmSearchFieldSuggestion"
-        singleSelection={false}
-        isLoading={isLoading}
+      <SelectableUrlList
+        loading={isLoading}
+        onInputChange={onInputChange}
+        onTermChange={onTermChange}
+        data={{ items, total: data?.total ?? 0 }}
         onChange={onChange}
-        options={items}
-        popoverButtonBreakpoints={['xs', 's']}
-        popoverButton={
-          <EuiHeaderSectionItemButton aria-label={I18LABELS.searchByUrl}>
-            <EuiIcon type="search" size="m" />
-          </EuiHeaderSectionItemButton>
-        }
-        searchProps={{
-          placeholder: I18LABELS.searchByUrl,
-          onInput: onInputChange,
-          inputRef: setSearchRef,
-        }}
-        popoverProps={{
-          closePopover: () => {
-            onFilterChange(checkedUrls);
-          },
-          ...(forceClosePopover ? { isOpen: false } : {}),
-        }}
-        popoverTitle={<PopOverTitle />}
-        listProps={{
-          showIcons: true,
-          onFocusBadge: {
-            iconSide: 'right',
-            children: I18LABELS.select,
-          },
-        }}
+        onClose={onClose}
+        searchValue={searchValue}
       />
     </>
   );
