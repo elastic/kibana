@@ -32,6 +32,7 @@ export async function sendUpgradeAgentAction({
     type: 'UPGRADE',
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+    upgraded_at: undefined,
     upgrade_started_at: now,
   });
 }
