@@ -53,6 +53,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   return (
     <PageLoader context={context}>
+      {/* No fallback yet, we don't show a loading spinner on an outer level until context is available either. */}
       <Suspense fallback={null}>
         <OverviewPage />
       </Suspense>
