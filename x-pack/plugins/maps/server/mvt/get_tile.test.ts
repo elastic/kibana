@@ -5,11 +5,11 @@
  */
 
 import { getGridTile, getTile } from './get_tile';
-import { TILE_SEARCHES, TILE_GRIDAGGS } from './__tests__/tile_es_responses';
+import { TILE_GRIDAGGS, TILE_SEARCHES } from './__tests__/tile_es_responses';
 import { Logger } from 'src/core/server';
 import * as path from 'path';
 import * as fs from 'fs';
-import { RENDER_AS } from '../../common/constants';
+import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../common/constants';
 
 describe('getTile', () => {
   const mockCallElasticsearch = jest.fn();
@@ -112,6 +112,7 @@ describe('getGridTile', () => {
       } as unknown) as Logger,
       callElasticsearch: mockCallElasticsearch,
       requestType: RENDER_AS.POINT,
+      geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
     });
 
     compareTiles('./__tests__/pbf/0_0_0_grid.pbf', tile);
