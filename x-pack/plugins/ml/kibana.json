@@ -37,6 +37,7 @@
     "home"
   ],
   "extraPublicDirs": [
-    "common"
+    "common",
+    "public_shared"
   ]
 }

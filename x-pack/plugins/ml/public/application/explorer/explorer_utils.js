@@ -8,9 +8,9 @@
  * utils for Anomaly Explorer.
  */
 
-import chain from 'lodash/chain';
 import get from 'lodash/get';
 import union from 'lodash/union';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 import moment from 'moment-timezone';
 
@@ -281,18 +281,17 @@ export function getViewBySwimlaneOptions({
 }) {
   const selectedJobIds = selectedJobs.map((d) => d.id);
 
-  // Unique influencers for the selected job(s).
-  const viewByOptions = chain(
-    mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-      if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
-        return reducedViewByOptions.concat(job.analysis_config.influencers || []);
-      }
-      return reducedViewByOptions;
-    }, [])
-  )
-    .uniq()
-    .sortBy((fieldName) => fieldName.toLowerCase())
-    .value();
+  const viewByOptions = sortBy(
+    uniq(
+      mlJobService.jobs.reduce((reducedViewByOptions, job) => {
+        if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
+          return reducedViewByOptions.concat(job.analysis_config.influencers || []);
+        }
+        return reducedViewByOptions;
+      }, [])
+    ),
+    (fieldName) => fieldName.toLowerCase()
+  );
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
   let viewBySwimlaneOptions = viewByOptions;
