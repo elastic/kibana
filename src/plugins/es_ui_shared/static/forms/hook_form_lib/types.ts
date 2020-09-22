@@ -136,7 +136,6 @@ export interface FieldHook<T = unknown> {
 }
 
 export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
-  readonly path?: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
