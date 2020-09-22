@@ -28,10 +28,13 @@ let cachedLicense: ESLicense | undefined;
  * This is the equivalent of GET /_license?local=true&accept_enterprise=true .
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
+ *
+ * In OSS we'll get a 400 response using the nwe client and need to catch that error too
  */
 async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClient) {
   let response;
   try {
+    // TODO: extract the call into it's own function that accepts the flag for local
     // Fetching the license from the local node is cheaper than getting it from the master node and good enough
     const { body } = await esClient.license.get<{ license: ESLicense }>({
       local: true,
@@ -52,7 +55,7 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
         cachedLicense = body.license;
         response = body.license;
       } catch (masterError) {
-        if (masterError.statusCode === 404) {
+        if ([400, 404].includes(masterError.statusCode)) {
           // the master node doesn't have a license and we assume there isn't a license
           cachedLicense = undefined;
           response = undefined;
@@ -61,7 +64,7 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
         }
       }
     }
-    if (err.statusCode === 404) {
+    if ([400, 404].includes(err.statusCode)) {
       cachedLicense = undefined;
     } else {
       throw err;
