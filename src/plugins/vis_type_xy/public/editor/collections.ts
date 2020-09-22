@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { Fit, Position } from '@elastic/charts';
 
 import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle, ScaleType } from '../types';
 import { ChartType } from '../../common/types';
@@ -198,6 +198,40 @@ export const getRotateOptions = () => [
   },
 ];
 
+export const getFittingFunctions = () =>
+  [
+    {
+      value: Fit.None,
+      text: i18n.translate('visTypeXy.fittingFunctionsTitle.none', {
+        defaultMessage: 'Hide (Do not fill gaps)',
+      }),
+    },
+    {
+      value: Fit.Zero,
+      text: i18n.translate('visTypeXy.fittingFunctionsTitle.zero', {
+        defaultMessage: 'Zero (Fill gaps with zeros)',
+      }),
+    },
+    {
+      value: Fit.Linear,
+      text: i18n.translate('visTypeXy.fittingFunctionsTitle.linear', {
+        defaultMessage: 'Linear (Fill gaps with a line)',
+      }),
+    },
+    {
+      value: Fit.Carry,
+      text: i18n.translate('visTypeXy.fittingFunctionsTitle.carry', {
+        defaultMessage: 'Last (Fill gaps with the last value)',
+      }),
+    },
+    {
+      value: Fit.Lookahead,
+      text: i18n.translate('visTypeXy.fittingFunctionsTitle.lookahead', {
+        defaultMessage: 'Next (Fill gaps with the next value)',
+      }),
+    },
+  ] as const;
+
 export const getConfigCollections = () => ({
   legendPositions: getPositions(),
   positions: getPositions(),
@@ -207,4 +241,5 @@ export const getConfigCollections = () => ({
   chartModes: getChartModes(),
   interpolationModes: getInterpolationModes(),
   thresholdLineStyles: getThresholdLineStyles(),
+  fittingFunctions: getFittingFunctions(),
 });

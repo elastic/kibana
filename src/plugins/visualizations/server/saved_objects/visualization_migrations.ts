@@ -775,7 +775,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             params: {
               ...visState.params,
               isVislibVis: true,
-              detailedTooltip: false,
+              detailedTooltip: true,
             },
           }),
         },

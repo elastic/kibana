@@ -34,6 +34,7 @@ interface EndzonesProps {
   domainMin: number;
   domainMax: number;
   groupId?: string;
+  hideTooltips?: boolean;
 }
 
 export const Endzones: FC<EndzonesProps> = ({
@@ -44,6 +45,7 @@ export const Endzones: FC<EndzonesProps> = ({
   domainMin,
   domainMax,
   groupId,
+  hideTooltips = true,
 }) => {
   const rectAnnotationStyle = useMemo(
     () => ({
@@ -76,7 +78,8 @@ export const Endzones: FC<EndzonesProps> = ({
     <RectAnnotation
       id="__endzones__"
       groupId={groupId}
-      hideTooltips
+      hideTooltips={hideTooltips}
+      customTooltipDetails={Prompt}
       zIndex={2}
       dataValues={rectAnnotations}
       style={rectAnnotationStyle}
@@ -133,42 +136,51 @@ export const getAdjustedInterval = (
   }, Number.MAX_SAFE_INTEGER);
 };
 
+const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {
+  defaultMessage:
+    'The selected time range does not include this entire bucket, it may contain partial data.',
+});
+
+const Prompt = () => (
+  <EuiFlexGroup
+    alignItems="center"
+    className="dscHistogram__header--partial"
+    responsive={false}
+    gutterSize="xs"
+  >
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="iInCircle" />
+    </EuiFlexItem>
+    <EuiFlexItem>{partialDataText}</EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const renderEndzoneTooltip = (
   xInterval?: number,
   domainStart?: number,
   domainEnd?: number,
-  formatter?: (v: any) => string
+  formatter?: (v: any) => string,
+  renderValue = true
 ) => (headerData: TooltipValue): JSX.Element | string => {
   const headerDataValue = headerData.value;
   const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
-
-  const partialDataText = i18n.translate('discover.histogram.partialData.bucketTooltipText', {
-    defaultMessage:
-      'The selected time range does not include this entire bucket, it may contain partial data.',
-  });
 
   if (
     (!isUndefined(domainStart) && headerDataValue < domainStart) ||
     (!isUndefined(domainEnd) && !isUndefined(xInterval) && headerDataValue + xInterval > domainEnd)
   ) {
     return (
-      <React.Fragment>
-        <EuiFlexGroup
-          alignItems="center"
-          className="dscHistogram__header--partial"
-          responsive={false}
-          gutterSize="xs"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="iInCircle" />
-          </EuiFlexItem>
-          <EuiFlexItem>{partialDataText}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <p>{formattedValue}</p>
-      </React.Fragment>
+      <>
+        <Prompt />
+        {renderValue && (
+          <>
+            <EuiSpacer size="xs" />
+            <p>{formattedValue}</p>
+          </>
+        )}
+      </>
     );
   }
 
-  return formattedValue;
+  return renderValue ? formattedValue : null;
 };

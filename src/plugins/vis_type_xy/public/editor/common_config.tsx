@@ -26,7 +26,7 @@ import { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common';
 
-export function getOptionTabs() {
+export function getOptionTabs(showElasticChartsOptions = false) {
   return [
     {
       name: 'advanced',
@@ -43,7 +43,13 @@ export function getOptionTabs() {
         defaultMessage: 'Panel settings',
       }),
       editor: (props: VisOptionsProps<VisParams>) => (
-        <ValidationWrapper {...props} component={PointSeriesOptions} />
+        <ValidationWrapper
+          {...props}
+          extraProps={{
+            showElasticChartsOptions,
+          }}
+          component={PointSeriesOptions}
+        />
       ),
     },
   ];

@@ -228,6 +228,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
           groupId={config.yAxes[0]?.groupId}
           isDarkMode={isDarkMode}
           domain={xDomain}
+          hideTooltips={!config.detailedTooltip}
           adjustedDomain={adjustedXDomain}
         />
         <XYAxis {...config.xAxis} />

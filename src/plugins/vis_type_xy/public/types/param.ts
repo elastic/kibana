@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Position } from '@elastic/charts';
+import { Fit, Position } from '@elastic/charts';
 
 import { ColorSchemas, Style, Labels } from '../../../charts/public';
 import { SchemaConfig } from '../../../visualizations/public';
@@ -164,4 +164,5 @@ export interface VisParams {
    * Add for detailed tooltip option
    */
   detailedTooltip?: boolean;
+  fittingFunction?: Exclude<Fit, 'explicit'>;
 }

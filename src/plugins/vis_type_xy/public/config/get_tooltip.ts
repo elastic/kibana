@@ -17,29 +17,19 @@
  * under the License.
  */
 
-import { TooltipProps, TooltipType, TooltipValueFormatter, TickFormatter } from '@elastic/charts';
+import { TooltipType, TickFormatter } from '@elastic/charts';
+import { getDetailedTooltip } from '../components/detailed_tooltip';
 
-import { VisParams } from '../types';
+import { Aspects, VisParams, TooltipConfig } from '../types';
 
 export function getTooltip(
+  aspects: Aspects,
   { addTooltip, detailedTooltip }: VisParams,
   formatter?: TickFormatter
-): TooltipProps {
-  // let type: TooltipType = TooltipType.None;
-  // if (addTooltip) {
-  //   if (detailedTooltip) {
-  //     type = TooltipType.Follow;
-  //   } else {
-  //     type = TooltipType.VerticalCursor;
-  //   }
-  // }
-  const type = addTooltip ? TooltipType.VerticalCursor : TooltipType.None;
-  const headerFormatter: TooltipValueFormatter | undefined = formatter
-    ? ({ value }) => formatter(value)
-    : undefined;
-
+): TooltipConfig {
   return {
-    type,
-    headerFormatter,
+    type: addTooltip ? TooltipType.VerticalCursor : TooltipType.None,
+    headerFormatter: formatter ? ({ value }) => formatter(value) : undefined,
+    detailedTooltip: detailedTooltip ? getDetailedTooltip(aspects) : undefined,
   };
 }

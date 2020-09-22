@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { isNil } from 'lodash';
+
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
 import {
@@ -140,21 +142,17 @@ function getAxisDomain<S extends XScaleType | YScaleType>(
   const fit = defaultYExtents;
   const padding = boundsMargin;
 
-  if (isDefined(min) && isDefined(max)) {
+  if (!isNil(min) && !isNil(max)) {
     return { fit, padding, min, max };
   }
 
-  if (isDefined(min)) {
+  if (!isNil(min)) {
     return { fit, padding, min };
   }
 
-  if (isDefined(max)) {
+  if (!isNil(max)) {
     return { fit, padding, max };
   }
 
   return { fit, padding };
-}
-
-function isDefined<T>(value: T): value is NonNullable<T> {
-  return value !== undefined && value !== null;
 }

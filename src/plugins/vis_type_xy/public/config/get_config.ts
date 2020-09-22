@@ -28,10 +28,18 @@ import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
 
 export function getConfig(table: KibanaDatatable, params: VisParams): VisConfig {
-  const { thresholdLine, orderBucketsBySum, addTimeMarker, radiusRatio, labels } = params;
+  const {
+    thresholdLine,
+    orderBucketsBySum,
+    addTimeMarker,
+    radiusRatio,
+    labels,
+    fittingFunction,
+    detailedTooltip,
+  } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const xAxis = getAxis<XScaleType>(params.categoryAxes[0], params.grid, aspects.x);
-  const tooltip = getTooltip(params, xAxis.ticks?.formatter);
+  const tooltip = getTooltip(aspects, params, xAxis.ticks?.formatter);
   const enableHistogramMode = ['date_histogram', 'histogram'].includes(
     params.dimensions.x?.aggType ?? ''
   );
@@ -53,6 +61,8 @@ export function getConfig(table: KibanaDatatable, params: VisParams): VisConfig 
   return {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
+    fittingFunction,
+    detailedTooltip,
     orderBucketsBySum,
     isTimeChart,
     showCurrentTime: addTimeMarker && isTimeChart,

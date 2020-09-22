@@ -1,0 +1,41 @@
+.detailedTooltip {
+  @include euiToolTipStyle('s');
+  pointer-events: none;
+  max-width: $euiSizeXL * 10;
+  overflow: hidden;
+  padding: 0;
+
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
+
+  > * {
+    margin: $euiSizeS $euiSizeS 0;
+  }
+
+  table {
+    td,
+    th {
+      text-align: left;
+      padding: $euiSizeXS;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  }
+}
+
+.detailedTooltip__header {
+  margin: 0 0 $euiSizeS;
+  padding: $euiSizeXS $euiSizeS;
+}
+
+.detailedTooltip__labelContainer,
+.detailedTooltip__valueContainer {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.detailedTooltip__label {
+  font-weight: $euiFontWeightMedium;
+  color: shade($euiColorGhost, 20%);
+}

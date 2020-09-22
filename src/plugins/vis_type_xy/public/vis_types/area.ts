@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
-import { Position } from '@elastic/charts';
+import { Fit, Position } from '@elastic/charts';
 
 import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
@@ -121,6 +121,7 @@ export const areaVisTypeDefinition: XyVisTypeDefinition = {
       detailedTooltip: false,
       addLegend: true,
       legendPosition: Position.Right,
+      fittingFunction: Fit.Linear,
       times: [],
       addTimeMarker: false,
       radiusRatio: 9,
@@ -139,7 +140,7 @@ export const areaVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(),
+    optionTabs: getOptionTabs(true),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,

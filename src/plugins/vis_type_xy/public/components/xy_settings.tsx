@@ -28,7 +28,7 @@ import {
   ElementClickListener,
   BrushEndListener,
   LegendAction,
-  LegendColorPicker,
+  LegendColorPicker,, TooltipProps
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
@@ -51,7 +51,7 @@ type XYSettingsProps = Pick<
   showLegend: boolean;
   onElementClick: ElementClickListener;
   onBrushEnd: BrushEndListener;
-  legendAction: LegendAction;
+  legendAction?: LegendAction;
   legendColorPicker: LegendColorPicker;
   legendPosition: Position;
 };
@@ -87,6 +87,21 @@ export const XYSettings: FC<XYSettingsProps> = ({
             right: 10,
           },
   };
+  const headerFormatter = isTimeChart
+    ? renderEndzoneTooltip(
+        adjustedXDomain.minInterval,
+        'min' in xDomain ? xDomain.min : undefined,
+        'max' in xDomain ? xDomain.max : undefined,
+        xAxis.ticks?.formatter,
+        !tooltip.detailedTooltip
+      )
+    : undefined;
+  const tooltipProps: TooltipProps = tooltip.detailedTooltip
+    ? {
+        customTooltip: tooltip.detailedTooltip(headerFormatter ?? xAxis.ticks?.formatter),
+        headerFormatter: undefined,
+      }
+    : { headerFormatter };
 
   return (
     <Settings
@@ -104,17 +119,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       onElementClick={onElementClick}
       onBrushEnd={onBrushEnd}
       legendAction={legendAction}
-      tooltip={{
-        ...tooltip,
-        headerFormatter: isTimeChart
-          ? renderEndzoneTooltip(
-              adjustedXDomain.minInterval,
-              'min' in xDomain ? xDomain.min : undefined,
-              'max' in xDomain ? xDomain.max : undefined,
-              xAxis.ticks?.formatter
-            )
-          : undefined,
-      }}
+      tooltip={tooltipProps}
       orderOrdinalBinsBy={
         orderBucketsBySum
           ? {

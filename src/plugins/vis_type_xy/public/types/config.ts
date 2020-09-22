@@ -19,12 +19,15 @@
 
 import {
   AxisSpec,
+  CustomTooltip,
+  Fit,
   GridLineStyle,
   Position,
   Rotation,
   SeriesScales,
   TickFormatter,
   TooltipProps,
+  TooltipValueFormatter,
   YDomainRange,
 } from '@elastic/charts';
 
@@ -103,9 +106,13 @@ export type ThresholdLineConfig = Omit<ThresholdLine, 'style'> & {
   groupId?: string;
 };
 
+export type TooltipConfig = Omit<TooltipProps, 'customTooltip'> & {
+  detailedTooltip?: (headerFormatter?: TooltipValueFormatter) => CustomTooltip;
+};
+
 export interface VisConfig {
   legend: LegendOptions;
-  tooltip: TooltipProps;
+  tooltip: TooltipConfig;
   xAxis: AxisConfig<XScaleType>;
   yAxes: Array<AxisConfig<YScaleType>>;
   aspects: Aspects;
@@ -117,4 +124,6 @@ export interface VisConfig {
   markSizeRatio: number;
   showValueLabel: boolean;
   enableHistogramMode: boolean;
+  fittingFunction?: Exclude<Fit, 'explicit'>;
+  detailedTooltip?: boolean;
 }

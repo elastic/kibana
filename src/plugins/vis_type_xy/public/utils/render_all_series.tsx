@@ -26,7 +26,6 @@ import {
   BarSeries,
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
-  Fit,
   SeriesName,
 } from '@elastic/charts';
 
@@ -59,7 +58,7 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
  * @param getSeriesColor
  */
 export const renderAllSeries = (
-  { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode }: VisConfig,
+  { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode, fittingFunction }: VisConfig,
   seriesParams: SeriesParam[],
   data: KibanaDatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
@@ -133,7 +132,7 @@ export const renderAllSeries = (
             <AreaSeries
               key={id}
               id={id}
-              fit={Fit.Linear}
+              fit={fittingFunction}
               color={getSeriesColor}
               tickFormat={yAspect.formatter}
               name={getSeriesName}

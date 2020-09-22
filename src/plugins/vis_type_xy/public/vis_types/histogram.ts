@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
-import { Position } from '@elastic/charts';
+import { Fit, Position } from '@elastic/charts';
 
 import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
@@ -33,6 +33,7 @@ import {
   AxisMode,
   ThresholdLineStyle,
   XyVisTypeDefinition,
+  InterpolationMode,
 } from '../types';
 import { VisComponent } from '../vis_component';
 import { toExpression } from '../to_expression';
@@ -111,6 +112,7 @@ export const histogramVisTypeDefinition: XyVisTypeDefinition = {
             label: defaultCountLabel,
             id: '1',
           },
+          interpolate: InterpolationMode.Linear,
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
@@ -122,6 +124,7 @@ export const histogramVisTypeDefinition: XyVisTypeDefinition = {
       detailedTooltip: false,
       addLegend: true,
       legendPosition: Position.Right,
+      fittingFunction: Fit.Linear,
       times: [],
       addTimeMarker: false,
       labels: {
@@ -141,7 +144,7 @@ export const histogramVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(),
+    optionTabs: getOptionTabs(true),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
