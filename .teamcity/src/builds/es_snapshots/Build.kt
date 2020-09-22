@@ -32,7 +32,7 @@ object ESSnapshotBuild : BuildType({
     }
   }
 
-  artifactRules = "+:../es-build/**/*"
+  artifactRules = "+:es-build/**/*"
 
   addSlackNotifications()
 })
