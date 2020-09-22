@@ -24,7 +24,7 @@ import { Subject, Subscription } from './lib';
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
 type Required<T> = T extends FormData ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
 
-export interface FormHook<T extends FormData = FormData> {
+export interface FormHook<T extends FormData = FormData, I extends FormData = T> {
   /**  Flag that indicates if the form has been submitted at least once. It is set to `true` when we call `submit()`. */
   readonly isSubmitted: boolean;
   /** Flag that indicates if the form is being submitted. */
@@ -73,12 +73,12 @@ export type FormSchema<T extends FormData = FormData> = {
   [K in keyof T]: FieldConfig<T, T[K]> | FormSchema<T[K]>;
 };
 
-export interface FormConfig<T extends FormData = FormData> {
+export interface FormConfig<T extends FormData = FormData, I extends FormData = T> {
   onSubmit?: FormSubmitHandler<T>;
-  schema?: FormSchema<T>;
+  schema?: FormSchema<I>;
   defaultValue?: Partial<T>;
-  serializer?: SerializerFunc<T>;
-  deserializer?: SerializerFunc;
+  serializer?: SerializerFunc<T, I>;
+  deserializer?: SerializerFunc<I, T>;
   options?: FormOptions;
   id?: string;
 }

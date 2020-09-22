@@ -29,13 +29,13 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends FormData> {
-  form: FormHook<T>;
+interface UseFormReturn<T extends FormData, I extends FormData> {
+  form: FormHook<T, I>;
 }
 
-export function useForm<T extends FormData = FormData>(
-  formConfig?: FormConfig<T>
-): UseFormReturn<T> {
+export function useForm<T extends FormData = FormData, I extends FormData = T>(
+  formConfig?: FormConfig<T, I>
+): UseFormReturn<T, I> {
   const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
     formConfig ?? {};
 
@@ -47,9 +47,9 @@ export function useForm<T extends FormData = FormData>(
 
       const filtered = Object.entries(_defaultValue as object)
         .filter(({ 1: value }) => value !== undefined)
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
 
-      return deserializer ? (deserializer(filtered) as any) : filtered;
+      return deserializer ? deserializer(filtered) : filtered;
     },
     [deserializer]
   );
@@ -143,7 +143,7 @@ export function useForm<T extends FormData = FormData>(
         });
         const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
         return serializer
-          ? (serializer(unflattenObject(fieldsValue)) as T)
+          ? (serializer(unflattenObject(fieldsValue) as I) as T)
           : (unflattenObject(fieldsValue) as T);
       }
 
