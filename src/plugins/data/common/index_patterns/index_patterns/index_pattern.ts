@@ -134,12 +134,12 @@ export class IndexPattern implements IIndexPattern {
   };
 
   /**
-   * TODO
+   * Converts field format spec to field format instance
    * @param mapping
    */
-  private deserializeFieldFormatMap(mapping: any) {
+  private deserializeFieldFormatMap(mapping: SerializedFieldFormat<Record<string, any>>) {
     try {
-      return this.fieldFormats.getInstance(mapping.id, mapping.params);
+      return this.fieldFormats.getInstance(mapping.id as string, mapping.params);
     } catch (err) {
       if (err instanceof FieldFormatNotFoundError) {
         return undefined;

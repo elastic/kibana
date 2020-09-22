@@ -269,7 +269,7 @@ export class IndexPatternsService {
    * @param fieldSpecs
    * @param fieldFormatMap
    */
-  private mergeFieldsAndFormats = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
+  private addFormatsToFields = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
     Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
       const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
       if (field) {
@@ -314,7 +314,7 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
 
-    this.mergeFieldsAndFormats(parsedFields, parsedFieldFormatMap);
+    this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {
       id,
       version,
