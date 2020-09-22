@@ -20,7 +20,6 @@
 import React, { lazy, Suspense } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { get } from 'lodash';
 
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
@@ -42,7 +41,7 @@ export const getTagCloudVisRenderer: (
     });
 
     render(
-      <VisualizationContainer showNoResults={config.visData?.rows?.length === 0}>
+      <VisualizationContainer>
         <Suspense fallback={<EuiLoadingSpinner />}>
           <TagCloudChart
             {...config}
