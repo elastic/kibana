@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function formatApiName(rawName: string) {
-  return rawName
+export const formatApiName = (rawName: string) =>
+  rawName
     .trim()
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^[^a-zA-Z0-9]+/, '')
-    .replace(/[^a-zA-Z0-9]+$/, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-') // Replace all special/non-alphanumerical characters with dashes
+    .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
     .toLowerCase();
-}
