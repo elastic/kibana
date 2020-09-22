@@ -39,7 +39,7 @@ interface ThroughputManagerOpts {
   logger: Logger;
 }
 
-export class ThroughputManagerReactive {
+export class ThroughputManager {
   private throughputCheckSubcription?: Subscription;
   private readonly throughputCheck$: Observable<number>;
   private readonly logger: Logger;
