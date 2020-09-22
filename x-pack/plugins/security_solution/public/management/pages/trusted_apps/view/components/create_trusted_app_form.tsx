@@ -40,37 +40,109 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   };
 };
 
-interface ValidationResult {
-  isValid: boolean;
-  errors: Partial<{ [k in keyof NewTrustedApp]: string }>;
+interface FieldValidationState {
+  /**
+   * has user visited (aka: tabbed/clicked into the) field.
+   * Should only be set once the user exists the field (`onblur`)
+   */
+  wasVisited: boolean;
+  errors: string[];
+  warnings: string[];
 }
-const validateFormValues = (values: NewTrustedApp): ValidationResult => {
-  const errors: ValidationResult['errors'] = {};
+interface ValidationResult {
+  /** Overall indicator if form is valid */
+  isValid: boolean;
 
+  /** Individual form field validations */
+  result: Partial<
+    {
+      [key in keyof NewTrustedApp]: FieldValidationState;
+    }
+  >;
+}
+
+const addResultToValidation = (
+  validation: ValidationResult,
+  field: keyof NewTrustedApp,
+  type: 'warnings' | 'errors',
+  resultValue: string
+) => {
+  if (!validation.result[field]) {
+    validation.result[field] = {
+      wasVisited: false,
+      errors: [],
+      warnings: [],
+    };
+  }
+  validation.result[field]![type].push(resultValue);
+};
+
+const validateFormValues = (values: NewTrustedApp): ValidationResult => {
+  let isValid: ValidationResult['isValid'] = true;
+  const validation: ValidationResult = {
+    isValid,
+    result: {},
+  };
+
+  // Name field
   if (!values.name.trim()) {
-    errors.name = 'Name is required';
+    isValid = false;
+    addResultToValidation(
+      validation,
+      'name',
+      'errors',
+      i18n.translate('xpack.securitySolution.trustedapps.create.nameRequiredMsg', {
+        defaultMessage: 'Name is required',
+      })
+    );
   }
 
   if (!values.os) {
-    errors.os = 'OS is required';
+    isValid = false;
+    addResultToValidation(
+      validation,
+      'os',
+      'errors',
+      i18n.translate('xpack.securitySolution.trustedapps.create.osRequiredMsg', {
+        defaultMessage: 'Operating System is required',
+      })
+    );
   }
 
   if (!values.entries.length) {
-    errors.entries = 'At least one Field definition is required';
+    isValid = false;
+    addResultToValidation(
+      validation,
+      'os',
+      'errors',
+      i18n.translate('xpack.securitySolution.trustedapps.create.conditionRequiredMsg', {
+        defaultMessage: 'At least one Field definition is required',
+      })
+    );
   } else {
     values.entries.some((entry, index) => {
       if (!entry.field || !entry.value.trim()) {
-        errors.entries = `Field entry ${index + 1} must have a value`;
+        isValid = false;
+        addResultToValidation(
+          validation,
+          'os',
+          'errors',
+          i18n.translate(
+            'xpack.securitySolution.trustedapps.create.conditionFieldValueRequiredMsg',
+            {
+              defaultMessage: '[{row}] Field entry must have a value',
+              values: { row: index + 1 },
+            }
+          )
+        );
         return true;
       }
       return false;
     });
   }
 
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-  };
+  validation.isValid = isValid;
+  return validation;
 };
 
 export interface TrustedAppFormState {
