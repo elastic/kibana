@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
+import moment from 'moment';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import { SubscriptionSplashContent } from './subscription_splash_content';
 import {
@@ -21,6 +22,7 @@ import {
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPage } from '../../../../../../components/loading_page';
+import { useLinkProps } from '../../../../../../hooks/use_link_props';
 
 interface Props {
   hasSetupCapabilities: boolean;
@@ -58,9 +60,14 @@ export const FlyoutHome = (props: Props) => {
     setTab('jobs');
   }, []);
 
-  const goToAnomalies = useCallback(() => {
-    setTab('anomalies');
-  }, []);
+  const jobIds = [
+    ...(k8sJobSummaries || []).map((k) => k.id),
+    ...(hostJobSummaries || []).map((h) => h.id),
+  ];
+  const anomaliesUrl = useLinkProps({
+    app: 'ml',
+    pathname: `/explorer?_g=${createResultsUrl(jobIds)}`,
+  });
 
   useEffect(() => {
     if (hasInfraMLReadCapabilities) {
@@ -105,7 +112,11 @@ export const FlyoutHome = (props: Props) => {
                 id="xpack.infra.ml.anomalyFlyout.jobsTabLabel"
               />
             </EuiTab>
-            <EuiTab isSelected={tab === 'anomalies'} onClick={goToAnomalies}>
+            <EuiTab
+              disabled={jobIds.length === 0}
+              isSelected={tab === 'anomalies'}
+              {...anomaliesUrl}
+            >
               <FormattedMessage
                 defaultMessage="Anomalies"
                 id="xpack.infra.ml.anomalyFlyout.anomaliesTabLabel"
@@ -122,13 +133,15 @@ export const FlyoutHome = (props: Props) => {
               <EuiSpacer size="l" />
             </>
           )}
-          <CreateJobTab
-            hasHostJobs={hostJobSummaries.length > 0}
-            hasK8sJobs={k8sJobSummaries.length > 0}
-            hasSetupCapabilities={props.hasSetupCapabilities}
-            createHosts={createHosts}
-            createK8s={createK8s}
-          />
+          {tab === 'jobs' && (
+            <CreateJobTab
+              hasHostJobs={hostJobSummaries.length > 0}
+              hasK8sJobs={k8sJobSummaries.length > 0}
+              hasSetupCapabilities={props.hasSetupCapabilities}
+              createHosts={createHosts}
+              createK8s={createK8s}
+            />
+          )}
         </EuiFlyoutBody>
       </>
     );
@@ -157,12 +170,10 @@ const JobsEnabledCallout = (props: CalloutProps) => {
     });
   }
 
-  // const goToML = useCallback(() => {
-  // const manageJobsLinkProps = useLinkProps({
-  //   app: 'ml',
-  //   pathname: '/explorer',
-  // });
-  // }, [])
+  const manageJobsLinkProps = useLinkProps({
+    app: 'ml',
+    pathname: '/jobs',
+  });
 
   return (
     <>
@@ -179,7 +190,7 @@ const JobsEnabledCallout = (props: CalloutProps) => {
         iconType="check"
       />
       <EuiSpacer size="l" />
-      <EuiButton>
+      <EuiButton {...manageJobsLinkProps}>
         <FormattedMessage
           defaultMessage="Manage Jobs"
           id="xpack.infra.ml.anomalyFlyout.manageJobs"
@@ -302,3 +313,21 @@ const CreateJobTab = (props: CreateJobTab) => {
     </>
   );
 };
+
+function createResultsUrl(jobIds: string[], mode = 'absolute') {
+  const idString = jobIds.map((j) => `'${j}'`).join(',');
+  let path = '';
+
+  const from = moment().subtract(4, 'weeks').toISOString();
+  const to = moment().toISOString();
+
+  path += `(ml:(jobIds:!(${idString}))`;
+  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,to:'${to}'`;
+  if (mode === 'invalid') {
+    path += `,mode:invalid`;
+  }
+  path += "))&_a=(query:(query_string:(analyze_wildcard:!t,query:'*')))";
+
+  return path;
+}

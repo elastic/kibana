@@ -147,7 +147,7 @@ export const JobSetupScreen = (props: Props) => {
           <>
             <FormattedMessage
               id="xpack.infra.ml.steps.setupProcess.failureText"
-              defaultMessage="Something went wrong creating the necessary ML jobs. Please ensure all selected log indices exist."
+              defaultMessage="Something went wrong creating the necessary ML jobs."
             />
             <EuiSpacer />
             <EuiButton fill onClick={createJobs}>
