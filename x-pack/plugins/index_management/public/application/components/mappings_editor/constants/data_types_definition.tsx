@@ -719,6 +719,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  histogram: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.histogramDescription', {
+      defaultMessage: 'Histogram',
+    }),
+    value: 'histogram',
+    documentation: {
+      main: '/histogram.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.histogramLongDescription"
+          defaultMessage="Histogram fields store pre-aggregated numerical data representing a histogram, and are intended for use with aggregations."
+        />
+      </p>
+    ),
+  },
   join: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.joinDescription', {
       defaultMessage: 'Join',
@@ -804,6 +821,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  point: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
+      defaultMessage: 'Point',
+    }),
+    value: 'point',
+    documentation: {
+      main: '/point.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.pointLongDescription"
+          defaultMessage="Point fields enable searching of {code} pairs that fall in a 2-dimensional planar coordinate system."
+          values={{
+            code: <EuiCode inline>{'x,y'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
   wildcard: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
       defaultMessage: 'Wildcard',
@@ -863,7 +900,9 @@ export const MAIN_TYPES: MainType[] = [
   'shape',
   'text',
   'token_count',
+  'histogram',
   'wildcard',
+  'point',
   'other',
 ];
 

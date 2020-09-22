@@ -21,6 +21,7 @@ describe('features', () => {
         icon: 'arrowDown',
         navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
         management: {
           foo: ['management-1', 'management-2'],
@@ -66,6 +67,7 @@ describe('features', () => {
         name: 'Foo KibanaFeature',
         icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -165,6 +167,7 @@ describe('features', () => {
         name: 'Foo KibanaFeature',
         icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       }),
     ];
@@ -207,6 +210,7 @@ describe('features', () => {
           icon: 'arrowDown',
           navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -327,6 +331,7 @@ describe('features', () => {
           icon: 'arrowDown',
           navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -409,6 +414,7 @@ describe('features', () => {
           icon: 'arrowDown',
           navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -467,6 +473,7 @@ describe('features', () => {
           icon: 'arrowDown',
           navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -532,6 +539,7 @@ describe('features', () => {
           icon: 'arrowDown',
           navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -602,6 +610,7 @@ describe('reserved', () => {
         icon: 'arrowDown',
         navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
         management: {
           foo: ['management-1', 'management-2'],
@@ -644,6 +653,7 @@ describe('reserved', () => {
         name: 'Foo KibanaFeature',
         icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           privileges: [
@@ -708,6 +718,7 @@ describe('reserved', () => {
         name: 'Foo KibanaFeature',
         icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -749,6 +760,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -876,6 +888,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -1075,6 +1088,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
           privileges: {
             all: {
@@ -1216,6 +1230,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -1379,6 +1394,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
           privileges: {
             all: {
@@ -1508,6 +1524,7 @@ describe('subFeatures', () => {
           name: 'Foo KibanaFeature',
           icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {

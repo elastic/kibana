@@ -59,6 +59,8 @@ export type MainType =
   | 'geo_point'
   | 'geo_shape'
   | 'token_count'
+  | 'point'
+  | 'histogram'
   | 'constant_keyword'
   | 'wildcard'
   /**
@@ -108,6 +110,7 @@ export type ParameterName =
   | 'null_value_boolean'
   | 'null_value_geo_point'
   | 'null_value_ip'
+  | 'null_value_point'
   | 'copy_to'
   | 'dynamic'
   | 'dynamic_toggle'

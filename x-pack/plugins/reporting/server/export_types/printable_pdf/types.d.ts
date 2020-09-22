@@ -16,7 +16,6 @@ export interface JobParamsPDF extends BaseParams {
 
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPDF extends BasePayload<JobParamsPDF> {
-  basePath?: string;
   browserTimezone: string;
   forceNow?: string;
   layout: LayoutParams;
