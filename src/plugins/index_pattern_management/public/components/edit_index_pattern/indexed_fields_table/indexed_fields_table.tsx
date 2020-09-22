@@ -19,23 +19,19 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import {
-  IndexPatternField,
-  IIndexPattern,
-  IFieldType,
-} from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
 import { getFieldFormat } from './lib';
 import { IndexedFieldItem } from './types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: Function;
-    getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType) => string[];
+    redirectToRoute: (obj: any) => void;
+    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }

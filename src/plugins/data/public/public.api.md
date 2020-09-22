@@ -1005,14 +1005,14 @@ export interface IFieldType {
 // @public (undocumented)
 export interface IIndexPattern {
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     fieldFormatMap?: Record<string, {
         id: string;
         params: unknown;
     }>;
     // (undocumented)
     fields: IFieldType[];
+    // (undocumented)
+    getFormatterForField?: (field: IndexPatternField | IndexPatternField['spec'] | IFieldType) => FieldFormat;
     // (undocumented)
     getTimeField?(): IFieldType | undefined;
     // (undocumented)
@@ -1123,7 +1123,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     // (undocumented)
-    getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
+    getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     // (undocumented)
     getIndex(): string;
     // (undocumented)
@@ -1290,24 +1290,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     toSpec({ getFormatterForField, }?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: {
-            id: any;
-            params: any;
-        } | undefined;
-    };
+    }): FieldSpec;
     // (undocumented)
     get type(): string;
     // (undocumented)

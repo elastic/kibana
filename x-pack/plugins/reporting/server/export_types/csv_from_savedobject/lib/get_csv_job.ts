@@ -6,13 +6,8 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/server';
-import { TimeRangeParams } from '../../../types';
+import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/server';
+import { TimeRangeParams } from '../../common';
 import { GenerateCsvParams } from '../../csv/generate_csv';
 import {
   DocValueFields,
@@ -126,7 +121,9 @@ export const getGenerateCsvParams = async (
       _source: { includes },
       docvalue_fields: docValueFields,
       query: esQuery.buildEsQuery(
-        indexPatternSavedObject as IIndexPattern,
+        // compromise made while factoring out IIndexPattern type
+        // @ts-expect-error
+        indexPatternSavedObject,
         (searchSourceQuery as unknown) as Query,
         (combinedFilter as unknown) as Filter,
         esQueryConfig
