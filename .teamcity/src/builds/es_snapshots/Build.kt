@@ -32,7 +32,7 @@ object ESSnapshotBuild : BuildType({
     }
   }
 
-//  artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
+  artifactRules = "+:../es-build/**/*"
 
   addSlackNotifications()
 })
