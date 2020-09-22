@@ -20,5 +20,7 @@ test('MLLink produces the correct URL', async () => {
     } as Location
   );
 
-  expect(href).toMatchInlineSnapshot(`""`);
+  expect(href).toMatchInlineSnapshot(
+    `"/app/ml/jobs?mlManagement=(groupIds:!(apm),jobId:!(something))"`
+  );
 });

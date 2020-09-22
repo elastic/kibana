@@ -9,6 +9,7 @@ import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
+import { MlUrlGenerator } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -80,9 +81,10 @@ const mockConfig: ConfigSchema = {
 
 const mockPlugin = {
   ml: {
-    urlGenerator: {
-      createUrl: (params: any) => '',
-    },
+    urlGenerator: new MlUrlGenerator({
+      appBasePath: '/app/ml',
+      useHash: false,
+    }),
   },
 };
 export const mockApmPluginContextValue = {

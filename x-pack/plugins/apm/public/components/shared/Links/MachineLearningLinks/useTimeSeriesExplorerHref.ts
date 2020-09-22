@@ -24,7 +24,7 @@ export function useTimeSeriesExplorerHref({
     core,
     plugins: { ml },
   } = useApmPluginContext();
-  const [mlADLink, setMlADLink] = useState(
+  const [mlAnomalyDetectionHref, setMlAnomalyDetectionHref] = useState(
     core.http.basePath.prepend('/app/ml/jobs')
   );
   const location = useLocation();
@@ -52,7 +52,7 @@ export function useTimeSeriesExplorerHref({
           },
         });
         if (!isCancelled) {
-          setMlADLink(href);
+          setMlAnomalyDetectionHref(href);
         }
       }
     };
@@ -62,5 +62,5 @@ export function useTimeSeriesExplorerHref({
     };
   }, [ml?.urlGenerator, location.search, jobId, serviceName, transactionType]);
 
-  return mlADLink;
+  return mlAnomalyDetectionHref;
 }

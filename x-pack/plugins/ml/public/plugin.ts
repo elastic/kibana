@@ -34,7 +34,7 @@ import { registerFeature } from './register_feature';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { MlUrlGenerator } from './ml_url_generator';
+import { registerUrlGenerator } from './ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { registerEmbeddables } from './embeddables';
 import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
@@ -105,13 +105,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const managementApp = registerManagementSection(pluginsSetup.management, core);
     if (pluginsSetup.share) {
-      const baseUrl = core.http.basePath.prepend('/app/ml');
-      this.urlGenerator = pluginsSetup.share.urlGenerators.registerUrlGenerator(
-        new MlUrlGenerator({
-          appBasePath: baseUrl,
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
-      );
+      this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));

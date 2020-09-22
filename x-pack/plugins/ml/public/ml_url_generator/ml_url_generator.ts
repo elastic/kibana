@@ -106,7 +106,7 @@ export function registerUrlGenerator(
   core: CoreSetup<MlStartDependencies>
 ) {
   const baseUrl = core.http.basePath.prepend('/app/ml');
-  share.urlGenerators.registerUrlGenerator(
+  return share.urlGenerators.registerUrlGenerator(
     new MlUrlGenerator({
       appBasePath: baseUrl,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
