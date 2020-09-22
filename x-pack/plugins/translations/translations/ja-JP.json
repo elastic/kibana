@@ -1465,7 +1465,6 @@
     "discover.uninitializedText": "クエリを作成、フィルターを追加、または［更新］をクリックして、現在のクエリの結果を取得します。",
     "discover.uninitializedTitle": "検索開始",
     "discover.valueIsNotConfiguredIndexPatternIDWarningTitle": "{stateVal}は設定されたインデックスパターンIDではありません",
-    "embeddableApi.actions.applyFilterActionTitle": "現在のビューにフィルターを適用",
     "embeddableApi.addPanel.createNewDefaultOption": "新規作成...",
     "embeddableApi.addPanel.displayName": "パネルの追加",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりませんでした。",
