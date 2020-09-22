@@ -24,7 +24,6 @@ import { IInitialAppData } from '../../common/types';
 export interface IKibanaContext {
   config: { host?: string };
   externalUrl: IExternalUrl;
-  http: HttpSetup;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -61,7 +60,6 @@ export const renderApp = (
         value={{
           config,
           externalUrl,
-          http: core.http,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
