@@ -40,6 +40,10 @@ export type SearchTypes =
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
+  datastream?: {
+    [key: string]: SearchTypes;
+    dataset?: string;
+  };
   cluster_name?: string;
   cluster_uuid?: string;
   file?: {
