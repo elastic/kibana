@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
@@ -72,9 +72,31 @@ const Wrapper = styled.div`
 
 const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
   const { jobs } = useSecurityJobs(false);
-  const jobUrl = useKibana().services.application.getUrlForApp(
-    `ml#/jobs?mlManagement=(jobId:${encodeURI(jobId)})`
-  );
+  const {
+    services: { http, ml },
+  } = useKibana();
+  const [jobUrl, setJobUrl] = useState(http.basePath.prepend('/app/ml/jobs'));
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      if (ml?.urlGenerator !== undefined) {
+        const href = await ml.urlGenerator.createUrl({
+          page: 'jobs',
+          pageState: {
+            jobId: [jobId],
+          },
+        });
+        if (!isCancelled) {
+          setJobUrl(href);
+        }
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [ml?.urlGenerator, jobId]);
+
   const job = jobs.find(({ id }) => id === jobId);
 
   const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;

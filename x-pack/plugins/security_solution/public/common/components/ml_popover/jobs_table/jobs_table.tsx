@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { useBasePath } from '../../../lib/kibana';
+import { useBasePath, useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SecurityJob } from '../types';
@@ -36,6 +36,52 @@ JobNameWrapper.displayName = 'JobNameWrapper';
 // TODO: Use SASS mixin @include EuiTextTruncate when we switch from styled components
 const truncateThreshold = 200;
 
+interface JobNameProps {
+  id: string;
+  description: string;
+  basePath: string;
+}
+
+const JobName = ({ id, description, basePath }: JobNameProps) => {
+  const [jobUrl, setJobUrl] = useState(`${basePath}/app/ml/jobs`);
+  const {
+    services: { ml },
+  } = useKibana();
+
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      if (ml?.urlGenerator !== undefined) {
+        const href = await ml.urlGenerator.createUrl({
+          page: 'jobs',
+          pageState: {
+            jobId: id,
+          },
+        });
+        if (!isCancelled) {
+          setJobUrl(href);
+        }
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [ml?.urlGenerator, id]);
+
+  return (
+    <JobNameWrapper>
+      <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
+        <EuiText size="s">{id}</EuiText>
+      </EuiLink>
+      <EuiText color="subdued" size="xs">
+        {description.length > truncateThreshold
+          ? `${description.substring(0, truncateThreshold)}...`
+          : description}
+      </EuiText>
+    </JobNameWrapper>
+  );
+};
 const getJobsTableColumns = (
   isLoading: boolean,
   onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
@@ -44,20 +90,7 @@ const getJobsTableColumns = (
   {
     name: i18n.COLUMN_JOB_NAME,
     render: ({ id, description }: SecurityJob) => (
-      <JobNameWrapper>
-        <EuiLink
-          data-test-subj="jobs-table-link"
-          href={`${basePath}/app/ml#/jobs?mlManagement=(jobId:${encodeURI(id)})`}
-          target="_blank"
-        >
-          <EuiText size="s">{id}</EuiText>
-        </EuiLink>
-        <EuiText color="subdued" size="xs">
-          {description.length > truncateThreshold
-            ? `${description.substring(0, truncateThreshold)}...`
-            : description}
-        </EuiText>
-      </JobNameWrapper>
+      <JobName id={id} description={description} basePath={basePath} />
     ),
   },
   {
@@ -141,22 +174,49 @@ export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 
-export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => (
-  <EuiEmptyPrompt
-    title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
-    titleSize="xs"
-    actions={
-      <EuiButton
-        href={`${basePath}/app/ml#/jobs/new_job/step/index_or_search`}
-        iconType="popout"
-        iconSide="right"
-        size="s"
-        target="_blank"
-      >
-        {i18n.CREATE_CUSTOM_JOB}
-      </EuiButton>
-    }
-  />
-));
+export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => {
+  const {
+    services: { ml },
+  } = useKibana();
+
+  const [createNewAnomalyDetectionJoUrl, setCreateNewAnomalyDetectionJoUrl] = useState(
+    `${basePath}/app/ml/jobs/new_job/step/index_or_search`
+  );
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      if (ml?.urlGenerator !== undefined) {
+        const href = await ml.urlGenerator.createUrl({
+          page: 'jobs/new_job/step/index_or_search',
+        });
+        if (!isCancelled) {
+          setCreateNewAnomalyDetectionJoUrl(href);
+        }
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [ml?.urlGenerator]);
+
+  return (
+    <EuiEmptyPrompt
+      title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
+      titleSize="xs"
+      actions={
+        <EuiButton
+          href={createNewAnomalyDetectionJoUrl}
+          iconType="popout"
+          iconSide="right"
+          size="s"
+          target="_blank"
+        >
+          {i18n.CREATE_CUSTOM_JOB}
+        </EuiButton>
+      }
+    />
+  );
+});
 
 NoItemsMessage.displayName = 'NoItemsMessage';
