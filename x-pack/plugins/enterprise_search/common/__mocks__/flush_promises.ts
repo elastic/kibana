@@ -19,6 +19,6 @@
  *   // Make assertions
  *   expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
  */
-export function flushPromises() {
+export const flushPromises = () => {
   return new Promise((resolve) => setImmediate(resolve));
-}
+};
