@@ -10527,8 +10527,6 @@
     "xpack.ml.calendarsList.deleteCalendars.deletingCalendarSuccessNotificationMessage": "{messageId} が選択されました",
     "xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel": "キャンセル",
     "xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel": "削除",
-    "xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarsDescription": "{calendarsCount, plural, one {このカレンダー} other {これらのカレンダー}}を削除しますか？{calendarsList}",
-    "xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle": "カレンダーの削除",
     "xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage": "カレンダーのリストの読み込み中にエラーが発生しました。",
     "xpack.ml.calendarsList.table.allJobsLabel": "すべてのジョブに適用",
     "xpack.ml.calendarsList.table.deleteButtonLabel": "削除",
