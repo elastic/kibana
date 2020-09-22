@@ -8,13 +8,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 
-import { RangeType, UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/index';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 
+type RangeType = Omit<Range, 'type'>;
 export type RangeTypeLens = RangeType & { label: string };
 
 export type MODES_TYPES = typeof MODES[keyof typeof MODES];
