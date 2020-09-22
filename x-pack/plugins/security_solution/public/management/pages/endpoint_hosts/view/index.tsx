@@ -139,6 +139,7 @@ export const EndpointList = () => {
     areEndpointsEnrolling,
     agentsWithEndpointsTotalError,
     endpointsTotalError,
+    isTransformEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -537,8 +538,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist]);
+    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist, isTransformEnabled]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -551,6 +552,10 @@ export const EndpointList = () => {
   const hasErrorFindingTotals = useMemo(() => {
     return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
+  
+  const shouldShowKQLBar = useMemo(() => {
+    return endpointsExist && !patternsError && isTransformEnabled;
+  }, [endpointsExist, patternsError, isTransformEnabled]);
 
   return (
     <AdministrationListPage
@@ -586,7 +591,7 @@ export const EndpointList = () => {
           </>
         )}
         <EuiFlexGroup>
-          {endpointsExist && !patternsError && (
+          {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />
             </EuiFlexItem>
