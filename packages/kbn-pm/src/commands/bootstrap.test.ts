@@ -19,6 +19,7 @@
 
 jest.mock('../utils/scripts');
 jest.mock('../utils/link_project_executables');
+jest.mock('../utils/validate_yarn_lock');
 
 import { resolve } from 'path';
 
@@ -136,6 +137,7 @@ test('handles dependencies of dependencies', async () => {
        info [foo] running yarn,
       "",
       "",
+       succ yarn.lock analysis completed without any issues,
     ]
   `);
 });
@@ -177,6 +179,7 @@ test('does not run installer if no deps in package', async () => {
        info [kibana] running yarn,
       "",
       "",
+       succ yarn.lock analysis completed without any issues,
     ]
   `);
 });
