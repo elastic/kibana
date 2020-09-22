@@ -79,7 +79,6 @@ export class DynamicActionManager {
 
     const actionId = this.generateActionId(eventId);
 
-
     if (!uiActions.hasActionFactory(action.factoryId)) {
       // eslint-disable-next-line no-console
       console.warn(
