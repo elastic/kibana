@@ -5,21 +5,9 @@
  */
 
 import { TriggerId } from '../../../../../src/plugins/ui_actions/public';
+import { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
 
-export interface SerializedAction<Config = unknown> {
-  readonly factoryId: string;
-  readonly name: string;
-  readonly config: Config;
-}
-
-/**
- * Serialized representation of a triggers-action pair, used to persist in storage.
- */
-export interface SerializedEvent {
-  eventId: string;
-  triggers: string[];
-  action: SerializedAction;
-}
+export { SerializedAction, SerializedEvent, BaseActionConfig };
 
 /**
  * Action factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType
