@@ -15,9 +15,9 @@ object ESSnapshotBuild : BuildType({
   }
 
   vcs {
-    root(Kibana, "+:. => kibana")
-    root(Elasticsearch, "+:. => elasticsearch")
-    checkoutDir = ""
+    root(Kibana)
+    root(Elasticsearch, "+:. => ../elasticsearch")
+    checkoutDir = "kibana"
   }
 
   steps {
