@@ -5734,6 +5734,7 @@ exports[`Header renders 1`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
@@ -5943,12 +5944,9 @@ exports[`Header renders 1`] = `
                       ]
                     }
                   >
-                    <EuiCollapsibleNavGroup
-                      className="eui-showFor--l eui-showFor--xl"
-                      key=".0"
-                    >
+                    <EuiCollapsibleNavGroup>
                       <div
-                        className="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
+                        className="euiCollapsibleNavGroup"
                         id="mockId"
                       >
                         <div

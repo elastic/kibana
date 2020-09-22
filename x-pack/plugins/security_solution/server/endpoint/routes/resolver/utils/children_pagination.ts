@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { eventSequence, timestampSafeVersion } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { urlEncodeCursor, SortFields, urlDecodeCursor } from './pagination';
+import { ChildEvent } from '../queries/children';
 
 /**
  * Pagination information for the children class.
@@ -65,7 +65,7 @@ export class ChildrenPaginationBuilder {
    *
    * @param results the events that were returned by the ES query
    */
-  static buildCursor(results: SafeResolverEvent[]): string | null {
+  static buildCursor(results: ChildEvent[]): string | null {
     const lastResult = results[results.length - 1];
     const sequence = eventSequence(lastResult);
     const cursor = {

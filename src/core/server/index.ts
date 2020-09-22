@@ -60,7 +60,7 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceStart } from './metrics';
+import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
@@ -320,8 +320,10 @@ export {
   OpsServerMetrics,
   OpsProcessMetrics,
   MetricsServiceSetup,
+  MetricsServiceStart,
 } from './metrics';
 
+export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
@@ -414,6 +416,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */

@@ -177,11 +177,16 @@ export class ManageSpacePage extends Component<Props, State> {
   };
 
   public getFormHeading = () => (
-    <EuiTitle size="m">
-      <h1>
-        {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
-      </h1>
-    </EuiTitle>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="m">
+          <h1 className="eui-displayInlineBlock">{this.getTitle()}</h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ReservedSpaceBadge space={this.state.space as Space} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   public getTitle = () => {
