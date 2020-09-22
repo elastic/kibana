@@ -181,13 +181,15 @@ export const getTopNavConfig = (
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
+  const navigateToOriginatingApp = () => {
+    if (originatingApp) {
+      application.navigateToApp(originatingApp);
+    }
+  };
+
   const confirmModal = (
     <ConfirmModal
-      onConfirm={() => {
-        if (originatingApp) {
-          application.navigateToApp(originatingApp);
-        }
-      }}
+      onConfirm={navigateToOriginatingApp}
       onCancel={() => {}}
       title={i18n.translate('visualize.confirmModal.title', {
         defaultMessage: 'Unsaved changes',
@@ -202,7 +204,11 @@ export const getTopNavConfig = (
     if (!originatingApp) {
       return;
     }
-    showConfirmModal(confirmModal, I18nContext);
+    if (hasUnappliedChanges || hasUnsavedChanges) {
+      showConfirmModal(confirmModal, I18nContext);
+    } else {
+      navigateToOriginatingApp();
+    }
   };
 
   const topNavMenu: TopNavMenuData[] = [
@@ -351,7 +357,6 @@ export const getTopNavConfig = (
                 });
               }
             },
-            disableButton: !hasUnappliedChanges && !hasUnsavedChanges,
             run: async () => {
               return cancelAndReturn();
             },

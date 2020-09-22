@@ -80,22 +80,21 @@ export default function ({ getService, getPageObjects }) {
       await createMarkdownVis(title);
 
       await editMarkdownVis();
-      await PageObjects.visualize.cancelAndReturn();
+      await PageObjects.visualize.cancelAndReturn(true);
 
       const markdownText = await testSubjects.find('markdownBody');
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
     });
 
-    it('cancel button is disabled if there are no changes to apply', async () => {
+    it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const disabled = await testSubjects.getAttribute(
-        'visualizeCancelAndReturnButton',
-        'disabled'
-      );
-      expect(disabled).to.eql('true');
+      await PageObjects.visualize.cancelAndReturn(false);
+
+      const markdownText = await testSubjects.find('markdownBody');
+      expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
     });
   });
 }
