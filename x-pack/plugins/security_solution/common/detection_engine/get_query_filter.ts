@@ -123,7 +123,14 @@ export const buildEqlSearchRequest = (
             lte: to,
           },
         },
-        bool: exceptionFilter?.query.bool,
+        bool:
+          exceptionFilter !== undefined
+            ? {
+                must_not: {
+                  bool: exceptionFilter?.query.bool,
+                },
+              }
+            : undefined,
       },
     },
   };
