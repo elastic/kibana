@@ -53,8 +53,13 @@ exports[`Home component should render services 1`] = `
       },
       "plugins": Object {
         "ml": Object {
-          "urlGenerator": Object {
+          "urlGenerator": MlUrlGenerator {
             "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
           },
         },
       },
@@ -120,8 +125,13 @@ exports[`Home component should render traces 1`] = `
       },
       "plugins": Object {
         "ml": Object {
-          "urlGenerator": Object {
+          "urlGenerator": MlUrlGenerator {
             "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
           },
         },
       },
