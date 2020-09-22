@@ -14,6 +14,11 @@ import { IMeta } from '../../../../../common/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IApiToken, ICredentialsDetails, IEngine } from '../../types';
 
+interface ITokenReadWrite {
+  name: 'read' | 'write';
+  checked: boolean;
+}
+
 const defaultApiToken: IApiToken = {
   name: '',
   type: PRIVATE,
@@ -35,17 +40,7 @@ export interface ICredentialsLogicActions {
   setCredentialsData(meta: IMeta, apiTokens: IApiToken[]): { meta: IMeta; apiTokens: IApiToken[] };
   setCredentialsDetails(details: ICredentialsDetails): ICredentialsDetails;
   setNameInputBlurred(isBlurred: boolean): boolean;
-  setTokenReadWrite({
-    name,
-    checked,
-  }: {
-    name: string;
-    checked: boolean;
-  }): {
-    name: string;
-    checked: boolean;
-  };
-
+  setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
   setTokenName(name: string): string;
   setTokenType(tokenType: string): string;
   toggleCredentialsForm(apiToken?: IApiToken): IApiToken;
@@ -92,7 +87,6 @@ export const CredentialsLogic = kea<
       name,
       checked,
     }),
-    // TODO setFlashMessages from ent-search
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
     toggleCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,

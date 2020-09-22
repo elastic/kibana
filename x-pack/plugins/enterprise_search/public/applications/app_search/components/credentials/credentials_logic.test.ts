@@ -17,9 +17,9 @@ jest.mock('../../../shared/flash_messages', () => ({
   flashAPIErrors: jest.fn(),
 }));
 import { flashAPIErrors } from '../../../shared/flash_messages';
-import { IApiToken, ICredentialsDetails } from '../../../../../common/types/app_search';
 import { IMeta } from '../../../../../common/types';
 import { flushPromises } from '../../../../../common/__mocks__/flush_promises';
+import { IApiToken, ICredentialsDetails } from '../../types';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -532,25 +532,24 @@ describe('CredentialsLogic', () => {
 
   describe('setTokenReadWrite', () => {
     describe('activeApiToken', () => {
-      // TODO should probably have a more specific behavior
-      it('sets an arbitrary key and boolean value on the activeApiToken', () => {
+      it('should set "read" or "write" values', () => {
         mount({
           activeApiToken: {
             ...newToken,
-            foo: 'bar',
+            read: false,
           },
         });
-        CredentialsLogic.actions.setTokenReadWrite({ name: 'foo', checked: true });
+        CredentialsLogic.actions.setTokenReadWrite({ name: 'read', checked: true });
         expect(CredentialsLogic.values.activeApiToken).toEqual({
           ...newToken,
-          foo: true,
+          read: true,
         });
       });
     });
 
     it('should not change any other values', () => {
       mount();
-      CredentialsLogic.actions.setTokenReadWrite({ name: 'foo', checked: true });
+      CredentialsLogic.actions.setTokenReadWrite({ name: 'read', checked: true });
       expect(CredentialsLogic.values).toEqual({
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
