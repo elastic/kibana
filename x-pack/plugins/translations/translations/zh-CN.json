@@ -10545,8 +10545,6 @@
     "xpack.ml.calendarsList.deleteCalendars.deletingCalendarSuccessNotificationMessage": "已删除 {messageId}",
     "xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel": "取消",
     "xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel": "删除",
-    "xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarsDescription": "是否删除{calendarsCount, plural, one {此日历} other {这些日历}}？{calendarsList}",
-    "xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle": "删除日历",
     "xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage": "加载日历列表时出错。",
     "xpack.ml.calendarsList.table.allJobsLabel": "应用到所有作业",
     "xpack.ml.calendarsList.table.deleteButtonLabel": "删除",
