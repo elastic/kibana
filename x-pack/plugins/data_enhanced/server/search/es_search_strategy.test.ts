@@ -80,18 +80,54 @@ describe('ES search strategy', () => {
     expect(typeof esSearch.search).toBe('function');
   });
 
-  it('makes a POST request to async search with params when no ID is provided', async () => {
+  it('makes a POST request to async search with params when no ID is provided, no polling', async (done) => {
     mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+    mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    esSearch.search((mockContext as unknown) as RequestHandlerContext, { params }).subscribe({
+      complete: () => {
+        expect(mockSubmitCaller).toBeCalled();
+        expect(mockGetCaller).not.toBeCalled();
+        const request = mockSubmitCaller.mock.calls[0][0];
+        expect(request.index).toEqual(params.index);
+        expect(request.body).toEqual(params.body);
+        done();
+      },
+    });
+  });
 
-    expect(mockSubmitCaller).toBeCalled();
-    const request = mockSubmitCaller.mock.calls[0][0];
-    expect(request.index).toEqual(params.index);
-    expect(request.body).toEqual(params.body);
+  it('makes a POST request to async search with params when no ID is provided, with polling', async (done) => {
+    mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+    mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+    const params = { index: 'logstash-*', body: { query: {} } };
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+    esSearch
+      .search(
+        (mockContext as unknown) as RequestHandlerContext,
+        { params },
+        { waitForCompletion: true }
+      )
+      .subscribe({
+        complete: () => {
+          expect(mockSubmitCaller).toBeCalled();
+          expect(mockGetCaller).toBeCalled();
+
+          const request = mockSubmitCaller.mock.calls[0][0];
+          expect(request.index).toEqual(params.index);
+          expect(request.body).toEqual(params.body);
+
+          const getRequest = mockGetCaller.mock.calls[0][0];
+          expect(getRequest.index).toEqual(params.index);
+          expect(getRequest.body).toEqual(params.body);
+
+          done();
+        },
+      });
   });
 
   it('makes a GET request to async search with ID when ID is provided', async () => {
@@ -100,7 +136,9 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
+    await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params })
+      .toPromise();
 
     expect(mockGetCaller).toBeCalled();
     const request = mockGetCaller.mock.calls[0][0];
@@ -115,10 +153,12 @@ describe('ES search strategy', () => {
     const params = { index: 'foo-程', body: {} };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
-      indexType: 'rollup',
-      params,
-    });
+    await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, {
+        indexType: 'rollup',
+        params,
+      })
+      .toPromise();
 
     expect(mockApiCaller).toBeCalled();
     const { method, path } = mockApiCaller.mock.calls[0][0];
@@ -132,7 +172,9 @@ describe('ES search strategy', () => {
     const params = { index: 'foo-*', body: {} };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, { params })
+      .toPromise();
 
     expect(mockSubmitCaller).toBeCalled();
     const request = mockSubmitCaller.mock.calls[0][0];

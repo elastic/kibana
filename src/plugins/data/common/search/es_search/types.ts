@@ -31,6 +31,8 @@ export interface ISearchOptions {
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  waitForCompletion?: boolean;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

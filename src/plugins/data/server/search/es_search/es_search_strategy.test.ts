@@ -61,7 +61,9 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*' };
     const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, { params })
+      .toPromise();
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -75,7 +77,9 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, { params })
+      .toPromise();
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -88,13 +92,14 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*' };
     const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
-    const response = await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
-      params,
-    });
+    const response = await esSearch
+      .search((mockContext as unknown) as RequestHandlerContext, {
+        params,
+      })
+      .toPromise();
 
     expect(response.isRunning).toBe(false);
     expect(response.isPartial).toBe(false);
-    expect(response).toHaveProperty('loaded');
     expect(response).toHaveProperty('rawResponse');
   });
 });

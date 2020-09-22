@@ -14,8 +14,11 @@ import {
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
-import { IAsyncSearchOptions } from '.';
-import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
+import {
+  IAsyncSearchRequest,
+  IAsyncSearchOptions,
+  ENHANCED_ES_SEARCH_STRATEGY,
+} from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { RequestHandlerContext } from '../../../../core/server';
 import { ISearchOptions } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
@@ -66,9 +67,9 @@ export interface ISearchStart<
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
-    request: IEsSearchRequest,
+    request: SearchStrategyRequest,
     options: ISearchOptions
-  ) => Promise<IEsSearchResponse>;
+  ) => Observable<SearchStrategyResponse>;
 }
 
 /**
@@ -83,6 +84,6 @@ export interface ISearchStrategy<
     context: RequestHandlerContext,
     request: SearchStrategyRequest,
     options?: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
+  ) => Observable<SearchStrategyResponse>;
   cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
 }

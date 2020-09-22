@@ -7,5 +7,6 @@
 export {
   IEnhancedEsSearchRequest,
   IAsyncSearchRequest,
+  IAsyncSearchOptions,
   ENHANCED_ES_SEARCH_STRATEGY,
 } from './search';

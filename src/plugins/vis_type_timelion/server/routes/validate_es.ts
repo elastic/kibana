@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { IRouter, CoreSetup } from 'kibana/server';
-import { ES_SEARCH_STRATEGY } from '../../../data/server';
 import { TimelionPluginStartDeps } from '../plugin';
 
 export function validateEsRoute(router: IRouter, core: CoreSetup) {
@@ -57,9 +56,11 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
 
       let resp;
       try {
-        resp = await deps.data.search.search(context, body, {
-          strategy: ES_SEARCH_STRATEGY,
-        });
+        resp = await deps.data.search
+          .search(context, body, {
+            waitForCompletion: true,
+          })
+          .toPromise();
         resp = resp.rawResponse;
       } catch (errResp) {
         resp = errResp;

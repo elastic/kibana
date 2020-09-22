@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchRequest } from '../../../../../src/plugins/data/common';
+import { IEsSearchRequest, ISearchOptions } from '../../../../../src/plugins/data/common';
 
 export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 
@@ -13,6 +13,13 @@ export interface IAsyncSearchRequest extends IEsSearchRequest {
    * The ID received from the response from the initial request
    */
   id?: string;
+}
+
+export interface IAsyncSearchOptions extends ISearchOptions {
+  /**
+   * The number of milliseconds to wait between receiving a response and sending another request
+   */
+  pollInterval?: number;
 }
 
 export interface IEnhancedEsSearchRequest extends IEsSearchRequest {

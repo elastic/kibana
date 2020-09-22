@@ -9,7 +9,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 
-import { EnhancedSearchInterceptor } from './search/search_interceptor';
+import { EnhancedSearchInterceptor } from './search';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
