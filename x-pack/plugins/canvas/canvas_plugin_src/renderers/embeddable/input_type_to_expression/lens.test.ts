@@ -63,11 +63,5 @@ describe('toExpression', () => {
     const ast = fromExpression(expression);
 
     expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
-    expect(ast.chain[0].arguments).toHaveProperty('timerange');
-
-    const timerangeExpression = ast.chain[0].arguments.timerange[0] as Ast;
-    expect(timerangeExpression.chain[0].function).toBe('timerange');
-    expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.timeRange?.from);
-    expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
   });
 });
