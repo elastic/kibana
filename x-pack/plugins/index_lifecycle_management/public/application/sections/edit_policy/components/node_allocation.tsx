@@ -20,7 +20,7 @@ import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
-import { ColdPhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
+import { PhaseWithAllocationAction, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const learnMoreLink = (
@@ -38,21 +38,21 @@ const learnMoreLink = (
   </Fragment>
 );
 
-interface Props<T extends Phase> {
+interface Props<T extends PhaseWithAllocationAction> {
   phase: keyof Phases & string;
   errors?: PhaseValidationErrors<T>;
   phaseData: T;
   setPhaseData: (dataKey: keyof T & string, value: string) => void;
   isShowingErrors: boolean;
 }
-export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
+export const NodeAllocation = <T extends PhaseWithAllocationAction>({
   phase,
   setPhaseData,
   errors,
   phaseData,
   isShowingErrors,
 }: React.PropsWithChildren<Props<T>>) => {
-  const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
+  const { isLoading, data: nodes, error, resendRequest } = useLoadNodes();
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
@@ -84,7 +84,7 @@ export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
           <p>
             {message} ({statusCode})
           </p>
-          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
               defaultMessage="Try again"

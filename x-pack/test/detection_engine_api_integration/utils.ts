@@ -56,10 +56,12 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
+ * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): CreateRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
+  enabled,
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
@@ -360,9 +362,9 @@ export const deleteSignalsIndex = async (
  * for testing uploads.
  * @param ruleIds Array of strings of rule_ids
  */
-export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
+export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled = false): Buffer => {
   const stringOfRules = ruleIds.map((ruleId) => {
-    const simpleRule = getSimpleRule(ruleId);
+    const simpleRule = getSimpleRule(ruleId, enabled);
     return JSON.stringify(simpleRule);
   });
   return Buffer.from(stringOfRules.join('\n'));
@@ -555,6 +557,49 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   version: 1,
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
+});
+
+export const getWebHookAction = () => ({
+  actionTypeId: '.webhook',
+  config: {
+    method: 'post',
+    url: 'http://localhost',
+  },
+  secrets: {
+    user: 'example',
+    password: 'example',
+  },
+  name: 'Some connector',
+});
+
+export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
+  ...getSimpleRule(),
+  throttle: 'rule',
+  actions: [
+    {
+      group: 'default',
+      id,
+      params: {
+        body: '{}',
+      },
+      action_type_id: '.webhook',
+    },
+  ],
+});
+
+export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
+  ...getSimpleRuleOutput(),
+  throttle: 'rule',
+  actions: [
+    {
+      action_type_id: '.webhook',
+      group: 'default',
+      id: actionId,
+      params: {
+        body: '{}',
+      },
+    },
+  ],
 });
 
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor

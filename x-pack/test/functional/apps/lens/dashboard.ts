@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const security = getService('security');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -24,8 +25,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('lens dashboard tests', () => {
-    it('metric should be embeddable', async () => {
+    before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
+      await security.testUser.setRoles(['global_dashboard_all', 'test_logstash_reader'], false);
+    });
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
+    it('metric should be embeddable', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');

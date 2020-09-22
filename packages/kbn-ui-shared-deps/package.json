@@ -9,8 +9,8 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "19.8.1",
-    "@elastic/eui": "27.4.1",
+    "@elastic/charts": "21.1.2",
+    "@elastic/eui": "28.4.0",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/monaco": "1.0.0",
@@ -19,7 +19,6 @@
     "compression-webpack-plugin": "^4.0.0",
     "core-js": "^3.6.4",
     "custom-event-polyfill": "^0.3.0",
-    "elasticsearch-browser": "^16.7.0",
     "jquery": "^3.5.0",
     "mini-css-extract-plugin": "0.8.0",
     "moment": "^2.24.0",

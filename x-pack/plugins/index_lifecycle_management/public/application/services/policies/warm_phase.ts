@@ -5,8 +5,8 @@
  */
 
 import { isEmpty } from 'lodash';
+import { AllocateAction, WarmPhase, SerializedWarmPhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
-import { AllocateAction, WarmPhase, SerializedWarmPhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 
 import {

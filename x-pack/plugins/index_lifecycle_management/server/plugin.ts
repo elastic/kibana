@@ -15,16 +15,21 @@ import {
   LegacyAPICaller,
 } from 'src/core/server';
 
+import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
+import { Index, IndexLifecyclePolicy } from '../common/types';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
 import { isEsError } from './shared_imports';
 
-const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: LegacyAPICaller) => {
+const indexLifecycleDataEnricher = async (
+  indicesList: IndexWithoutIlm[],
+  callAsCurrentUser: LegacyAPICaller
+): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
-    return;
+    return [];
   }
 
   const params = {
@@ -32,9 +37,11 @@ const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: L
     method: 'GET',
   };
 
-  const { indices: ilmIndicesData } = await callAsCurrentUser('transport.request', params);
+  const { indices: ilmIndicesData } = await callAsCurrentUser<{
+    indices: { [indexName: string]: IndexLifecyclePolicy };
+  }>('transport.request', params);
 
-  return indicesList.map((index: any): any => {
+  return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
       ilm: { ...(ilmIndicesData[index.name] || {}) },
@@ -53,7 +60,10 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     this.license = new License();
   }
 
-  async setup({ http }: CoreSetup, { licensing, indexManagement }: Dependencies): Promise<void> {
+  async setup(
+    { http }: CoreSetup,
+    { licensing, indexManagement, features }: Dependencies
+  ): Promise<void> {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -70,6 +80,19 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: 'index_lifecycle_management',
+      management: {
+        data: ['index_lifecycle_management'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage_ilm'],
+          ui: [],
+        },
+      ],
+    });
 
     registerApiRoutes({
       router,

@@ -18,6 +18,8 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 import {
   LearnMoreLink,
   ActiveBadge,
@@ -27,10 +29,8 @@ import {
   SetPriorityInput,
   NodeAllocation,
   MinAgeInput,
+  Forcemerge,
 } from '../components';
-
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const shrinkLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
   defaultMessage: 'Shrink index',
@@ -43,13 +43,8 @@ const moveToWarmPhaseOnRolloverLabel = i18n.translate(
   }
 );
 
-const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
-  defaultMessage: 'Force merge data',
-});
-
-const warmProperty = propertyof<Phases>('warm');
-const phaseProperty = (propertyName: keyof WarmPhaseInterface) =>
-  propertyof<WarmPhaseInterface>(propertyName);
+const warmProperty: keyof Phases = 'warm';
+const phaseProperty = (propertyName: keyof WarmPhaseInterface) => propertyName;
 
 interface Props {
   setPhaseData: (key: keyof WarmPhaseInterface & string, value: boolean | string) => void;
@@ -264,64 +259,13 @@ export class WarmPhase extends PureComponent<Props> {
                 </div>
               </Fragment>
             </EuiDescribedFormGroup>
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
-                    defaultMessage="Force merge"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
-                    defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
-                  />{' '}
-                  <LearnMoreLink docPath="indices-forcemerge.html" />
-                </EuiTextColor>
-              }
-              titleSize="xs"
-              fullWidth
-            >
-              <EuiSwitch
-                data-test-subj="forceMergeSwitch"
-                label={forcemergeLabel}
-                aria-label={forcemergeLabel}
-                checked={phaseData.forceMergeEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('forceMergeEnabled'), e.target.checked);
-                }}
-                aria-controls="forcemergeContent"
-              />
-
-              <EuiSpacer />
-              <div id="forcemergeContent" aria-live="polite" role="region">
-                {phaseData.forceMergeEnabled ? (
-                  <ErrableFormRow
-                    id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                    label={i18n.translate(
-                      'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                      {
-                        defaultMessage: 'Number of segments',
-                      }
-                    )}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors?.selectedForceMergeSegments}
-                  >
-                    <EuiFieldNumber
-                      id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                      value={phaseData.selectedForceMergeSegments}
-                      onChange={(e) => {
-                        setPhaseData(phaseProperty('selectedForceMergeSegments'), e.target.value);
-                      }}
-                      min={1}
-                    />
-                  </ErrableFormRow>
-                ) : null}
-              </div>
-            </EuiDescribedFormGroup>
+            <Forcemerge
+              phase={'warm'}
+              phaseData={phaseData}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+            />
             <SetPriorityInput<WarmPhaseInterface>
               errors={errors}
               phaseData={phaseData}

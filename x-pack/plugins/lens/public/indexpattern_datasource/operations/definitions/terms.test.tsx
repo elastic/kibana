@@ -13,7 +13,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from './index';
-import { IndexPatternPrivateState } from '../../types';
+import { IndexPatternPrivateState, IndexPattern } from '../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -69,7 +69,8 @@ describe('terms', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = termsOperation.toEsAggsConfig(
         state.layers.first.columns.col1 as TermsIndexPatternColumn,
-        'col1'
+        'col1',
+        {} as IndexPattern
       );
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
@@ -344,7 +345,7 @@ describe('terms', () => {
     });
   });
 
-  describe('popover param editor', () => {
+  describe('param editor', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

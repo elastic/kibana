@@ -4,28 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
 import { ReportingConfig } from '../../';
 import { ReportingCore } from '../../core';
-import { createMockReportingCore } from '../../test_helpers';
-import { ScheduledTaskParams } from '../../types';
-import { ScheduledTaskParamsPDF } from '../printable_pdf/types';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../test_helpers';
+import { BasePayload } from '../../types';
+import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './';
 
 let mockConfig: ReportingConfig;
 let mockReportingPlugin: ReportingCore;
 
-const getMockConfig = (mockConfigGet: sinon.SinonStub) => ({
-  get: mockConfigGet,
-  kbnConfig: { get: mockConfigGet },
-});
-
 beforeEach(async () => {
-  const mockConfigGet = sinon
-    .stub()
-    .withArgs('kibanaServer', 'hostname')
-    .returns('custom-hostname');
-  mockConfig = getMockConfig(mockConfigGet);
+  const reportingConfig = { kibanaServer: { hostname: 'custom-hostname' } };
+  const mockSchema = createMockConfigSchema(reportingConfig);
+  mockConfig = createMockConfig(mockSchema);
   mockReportingPlugin = await createMockReportingCore(mockConfig);
 });
 
@@ -37,7 +33,7 @@ describe('conditions', () => {
     };
 
     const conditionalHeaders = await getConditionalHeaders({
-      job: {} as ScheduledTaskParams<any>,
+      job: {} as BasePayload<any>,
       filteredHeaders: permittedHeaders,
       config: mockConfig,
     });
@@ -64,14 +60,14 @@ test('uses basePath from job when creating saved object service', async () => {
     baz: 'quix',
   };
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as ScheduledTaskParams<any>,
+    job: {} as BasePayload<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
   const jobBasePath = '/sbp/s/marketing';
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: { basePath: jobBasePath } as ScheduledTaskParamsPDF,
+    job: { basePath: jobBasePath } as TaskPayloadPDF,
     conditionalHeaders,
     config: mockConfig,
   });
@@ -84,24 +80,23 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   const mockGetSavedObjectsClient = jest.fn();
   mockReportingPlugin.getSavedObjectsClient = mockGetSavedObjectsClient;
 
-  const mockConfigGet = sinon.stub();
-  mockConfigGet.withArgs('kibanaServer', 'hostname').returns('localhost');
-  mockConfigGet.withArgs('server', 'basePath').returns('/sbp');
-  mockConfig = getMockConfig(mockConfigGet);
+  const reportingConfig = { kibanaServer: { hostname: 'localhost' }, server: { basePath: '/sbp' } };
+  const mockSchema = createMockConfigSchema(reportingConfig);
+  mockConfig = createMockConfig(mockSchema);
 
   const permittedHeaders = {
     foo: 'bar',
     baz: 'quix',
   };
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as ScheduledTaskParams<any>,
+    job: {} as BasePayload<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
 
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: {} as ScheduledTaskParamsPDF,
+    job: {} as TaskPayloadPDF,
     conditionalHeaders,
     config: mockConfig,
   });
@@ -134,25 +129,12 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
 });
 
 describe('config formatting', () => {
-  test(`lowercases server.host`, async () => {
-    const mockConfigGet = sinon.stub().withArgs('server', 'host').returns('COOL-HOSTNAME');
-    mockConfig = getMockConfig(mockConfigGet);
-
-    const conditionalHeaders = await getConditionalHeaders({
-      job: {} as ScheduledTaskParams<any>,
-      filteredHeaders: {},
-      config: mockConfig,
-    });
-    expect(conditionalHeaders.conditions.hostname).toEqual('cool-hostname');
-  });
-
   test(`lowercases kibanaServer.hostname`, async () => {
-    const mockConfigGet = sinon
-      .stub()
-      .withArgs('kibanaServer', 'hostname')
-      .returns('GREAT-HOSTNAME');
-    mockConfig = getMockConfig(mockConfigGet);
-    const conditionalHeaders = await getConditionalHeaders({
+    const reportingConfig = { kibanaServer: { hostname: 'GREAT-HOSTNAME' } };
+    const mockSchema = createMockConfigSchema(reportingConfig);
+    mockConfig = createMockConfig(mockSchema);
+
+    const conditionalHeaders = getConditionalHeaders({
       job: {
         title: 'cool-job-bro',
         type: 'csv',

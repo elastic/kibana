@@ -23,14 +23,6 @@ const BetaHeader = styled(`header`)`
   margin-bottom: 1em;
 `;
 
-/**
- * The two query parameters we read/write on to control which view the table presents:
- */
-export interface CrumbInfo {
-  crumbId: string;
-  crumbEvent: string;
-}
-
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
   &.euiBreadcrumbs {
     background-color: ${(props) => props.background};
@@ -50,6 +42,38 @@ const betaBadgeLabel = i18n.translate(
     defaultMessage: 'BETA',
   }
 );
+
+/**
+ * A component that renders an element with breaking opportunities (`<wbr>`s)
+ * spliced into text children at word boundaries.
+ */
+export const GeneratedText = React.memo(function ({ children }) {
+  return <>{processedValue()}</>;
+
+  function processedValue() {
+    return React.Children.map(children, (child) => {
+      if (typeof child === 'string') {
+        const valueSplitByWordBoundaries = child.split(/\b/);
+
+        if (valueSplitByWordBoundaries.length < 2) {
+          return valueSplitByWordBoundaries[0];
+        }
+
+        return [
+          valueSplitByWordBoundaries[0],
+          ...valueSplitByWordBoundaries
+            .splice(1)
+            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value, index) {
+              return [...generatedTextMemo, value, <wbr />];
+            }, []),
+        ];
+      } else {
+        return child;
+      }
+    });
+  }
+});
+GeneratedText.displayName = 'GeneratedText';
 
 /**
  * A component to keep time representations in blocks so they don't wrap

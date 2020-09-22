@@ -65,10 +65,10 @@ export default function spaceSelectorFunctonalTests({
       const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
-        copied: 3,
+        success: 3,
+        pending: 0,
         skipped: 0,
         errors: 0,
-        overwrite: undefined,
       });
 
       await PageObjects.copySavedObjectsToSpace.finishCopy();
@@ -93,23 +93,23 @@ export default function spaceSelectorFunctonalTests({
       const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
-        copied: 2,
+        success: 0,
+        pending: 2,
         skipped: 1,
         errors: 0,
-        overwrite: undefined,
       });
 
       // Mark conflict for overwrite
       await testSubjects.click(`cts-space-result-${destinationSpaceId}`);
-      await testSubjects.click(`cts-overwrite-conflict-logstash-*`);
+      await testSubjects.click(`cts-overwrite-conflict-index-pattern:logstash-*`);
 
       // Verify summary changed
-      const updatedSummaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts(true);
+      const updatedSummaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(updatedSummaryCounts).to.eql({
-        copied: 2,
+        success: 0,
+        pending: 3,
         skipped: 0,
-        overwrite: 1,
         errors: 0,
       });
 

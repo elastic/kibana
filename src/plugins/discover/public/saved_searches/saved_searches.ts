@@ -22,11 +22,7 @@ import { createSavedSearchClass } from './_saved_search';
 
 export function createSavedSearchesLoader(services: SavedObjectKibanaServices) {
   const SavedSearchClass = createSavedSearchClass(services);
-  const savedSearchLoader = new SavedObjectLoader(
-    SavedSearchClass,
-    services.savedObjectsClient,
-    services.chrome
-  );
+  const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, services.savedObjectsClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',

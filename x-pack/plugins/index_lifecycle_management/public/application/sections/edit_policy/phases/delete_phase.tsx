@@ -8,8 +8,8 @@ import React, { PureComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { DeletePhase as DeletePhaseInterface, Phases } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { DeletePhase as DeletePhaseInterface, Phases } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
   ActiveBadge,
@@ -20,9 +20,8 @@ import {
   SnapshotPolicies,
 } from '../components';
 
-const deleteProperty = propertyof<Phases>('delete');
-const phaseProperty = (propertyName: keyof DeletePhaseInterface) =>
-  propertyof<DeletePhaseInterface>(propertyName);
+const deleteProperty: keyof Phases = 'delete';
+const phaseProperty = (propertyName: keyof DeletePhaseInterface) => propertyName;
 
 interface Props {
   setPhaseData: (key: keyof DeletePhaseInterface & string, value: string | boolean) => void;

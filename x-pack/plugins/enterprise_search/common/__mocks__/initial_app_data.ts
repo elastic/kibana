@@ -7,9 +7,20 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
+  isFederatedAuth: false,
   configuredLimits: {
-    maxDocumentByteSize: 102400,
-    maxEnginesPerMetaEngine: 15,
+    appSearch: {
+      engine: {
+        maxDocumentByteSize: 102400,
+        maxEnginesPerMetaEngine: 15,
+      },
+    },
+    workplaceSearch: {
+      customApiSource: {
+        maxDocumentByteSize: 102400,
+        totalFields: 64,
+      },
+    },
   },
   appSearch: {
     accountId: 'some-id-string',
@@ -33,11 +44,12 @@ export const DEFAULT_INITIAL_APP_DATA = {
       name: 'ACME Donuts',
       defaultOrgName: 'My Organization',
     },
-    fpAccount: {
+    account: {
       id: 'some-id-string',
       groups: ['Default', 'Cats'],
       isAdmin: true,
       canCreatePersonalSources: true,
+      canCreateInvitations: true,
       isCurated: false,
       viewedOnboardingPage: true,
     },

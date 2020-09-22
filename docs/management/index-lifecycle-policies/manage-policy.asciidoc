@@ -25,4 +25,10 @@ created index. For more information, see {ref}/indices-templates.html[Index temp
 * *Delete a policy.* You can’t delete a policy that is currently in use or 
 recover a deleted index.
 
+[float]
+=== Required permissions
+
+The `manage_ilm` cluster privilege is required to access *Index lifecycle policies*.
+
+You can add these privileges in *Stack Management > Security > Roles*.
 

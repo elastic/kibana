@@ -43,6 +43,36 @@ export interface FindTestCase {
   };
 }
 
+// additional sharedtype objects that exist but do not have common test cases defined
+const CONFLICT_1_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_1',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_2A_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_2a',
+  originId: 'conflict_2',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_2B_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_2b',
+  originId: 'conflict_2',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_3_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_3',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+const CONFLICT_4A_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'conflict_4a',
+  originId: 'conflict_4',
+  namespaces: ['default', 'space_1', 'space_2'],
+});
+
 const TEST_CASES = [
   { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespaces: ['default'] },
   { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespaces: ['space_1'] },
@@ -110,7 +140,13 @@ export const getTestCases = (
       query: `type=sharedtype&fields=title${namespacesQueryParam}`,
       successResult: {
         // expected depends on which spaces the user is authorized against...
-        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype').concat(
+          CONFLICT_1_OBJ,
+          CONFLICT_2A_OBJ,
+          CONFLICT_2B_OBJ,
+          CONFLICT_3_OBJ,
+          CONFLICT_4A_OBJ
+        ),
       },
     } as FindTestCase,
     namespaceAgnosticType: {

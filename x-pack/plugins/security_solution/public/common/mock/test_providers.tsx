@@ -23,7 +23,7 @@ import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
-import { FieldHook, useForm } from '../../shared_imports';
+import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
@@ -77,18 +77,15 @@ const TestProvidersComponent: React.FC<Props> = ({
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
-  const { form } = useForm();
-
+export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
   return {
     path: 'path',
     type: 'type',
-    value: [],
+    value: ('mockedValue' as unknown) as T,
     isPristine: false,
     isValidating: false,
     isValidated: false,
     isChangingValue: false,
-    form,
     errors: [],
     isValid: true,
     getErrorsMessages: jest.fn(),
@@ -98,7 +95,8 @@ export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
     clearErrors: jest.fn(),
     validate: jest.fn(),
     reset: jest.fn(),
-    __serializeOutput: jest.fn(),
+    __isIncludedInOutput: true,
+    __serializeValue: jest.fn(),
     ...options,
   };
 };

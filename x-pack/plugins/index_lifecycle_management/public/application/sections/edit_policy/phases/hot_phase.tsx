@@ -18,8 +18,8 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
-import { HotPhase as HotPhaseInterface, Phases } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { HotPhase as HotPhaseInterface, Phases } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
   LearnMoreLink,
@@ -27,6 +27,7 @@ import {
   PhaseErrorMessage,
   ErrableFormRow,
   SetPriorityInput,
+  Forcemerge,
 } from '../components';
 
 const maxSizeStoredUnits = [
@@ -112,9 +113,8 @@ const maxAgeUnits = [
     }),
   },
 ];
-const hotProperty = propertyof<Phases>('hot');
-const phaseProperty = (propertyName: keyof HotPhaseInterface) =>
-  propertyof<HotPhaseInterface>(propertyName);
+const hotProperty: keyof Phases = 'hot';
+const phaseProperty = (propertyName: keyof HotPhaseInterface) => propertyName;
 
 interface Props {
   errors?: PhaseValidationErrors<HotPhaseInterface>;
@@ -314,6 +314,15 @@ export class HotPhase extends PureComponent<Props> {
             </Fragment>
           ) : null}
         </EuiDescribedFormGroup>
+        {phaseData.rolloverEnabled ? (
+          <Forcemerge
+            phase={'hot'}
+            phaseData={phaseData}
+            setPhaseData={setPhaseData}
+            isShowingErrors={isShowingErrors}
+            errors={errors}
+          />
+        ) : null}
         <SetPriorityInput<HotPhaseInterface>
           errors={errors}
           phaseData={phaseData}

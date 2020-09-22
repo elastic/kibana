@@ -40,4 +40,4 @@ export const configSchema = schema.object({
   }),
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export type MapsLegacyConfig = TypeOf<typeof configSchema>;

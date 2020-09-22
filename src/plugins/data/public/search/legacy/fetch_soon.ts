@@ -19,9 +19,9 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { callClient } from './call_client';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
+import { FetchHandlers } from '../fetch/types';
 import { SearchRequest } from '../index';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS, ISearchOptions } from '../../../common';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
@@ -29,10 +29,10 @@ import { UI_SETTINGS } from '../../../common';
  */
 export async function fetchSoon(
   request: SearchRequest,
-  options: FetchOptions,
+  options: ISearchOptions,
   fetchHandlers: FetchHandlers
 ) {
-  const msToDelay = fetchHandlers.config.get(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
+  const msToDelay = fetchHandlers.getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
   return delayedFetch(request, options, fetchHandlers, msToDelay);
 }
 
@@ -51,7 +51,7 @@ function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
 
 // The current batch/queue of requests to fetch
 let requestsToFetch: SearchRequest[] = [];
-let requestOptions: FetchOptions[] = [];
+let requestOptions: ISearchOptions[] = [];
 
 // The in-progress fetch (if there is one)
 let fetchInProgress: any = null;
@@ -65,7 +65,7 @@ let fetchInProgress: any = null;
  */
 async function delayedFetch(
   request: SearchRequest,
-  options: FetchOptions,
+  options: ISearchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
 ): Promise<SearchResponse<any>> {

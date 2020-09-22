@@ -12,6 +12,7 @@ import {
 import {
   TRANSACTION_NAME,
   PARENT_ID,
+  TRANSACTION_ROOT,
 } from '../../common/elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
 import { getTransactionsProjection } from './transactions';
@@ -29,18 +30,27 @@ export function getTransactionGroupsProjection({
     ...(omit(options, 'type') as Omit<typeof options, 'type'>),
   });
 
-  const bool =
-    options.type === 'top_traces'
-      ? {
-          must_not: [{ exists: { field: PARENT_ID } }],
-        }
-      : {};
+  if (options.type === 'top_traces') {
+    if (options.searchAggregatedTransactions) {
+      transactionsProjection.body.query.bool.filter.push({
+        term: {
+          [TRANSACTION_ROOT]: true,
+        },
+      });
+    } else {
+      // @ts-expect-error: Property 'must_not' does not exist on type '{ filter: ESFilter[]; }'.
+      transactionsProjection.body.query.bool.must_not = [
+        {
+          exists: {
+            field: PARENT_ID,
+          },
+        },
+      ];
+    }
+  }
 
   return mergeProjection(transactionsProjection, {
     body: {
-      query: {
-        bool,
-      },
       aggs: {
         transactions: {
           terms: {

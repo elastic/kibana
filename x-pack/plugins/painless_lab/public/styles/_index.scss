@@ -41,10 +41,10 @@ $bottomBarHeight: $euiSize * 3;
 }
 
 // This value is calculated to static value using SCSS because calc in calc has issues in IE11
-$headerHeightOffset: $euiHeaderHeightCompensation * 2;
+$headerOffset: $euiHeaderHeightCompensation * 3;
 
 .painlessLabMainContainer {
-  height: calc(100vh - #{$headerHeightOffset} - #{$bottomBarHeight});
+  height: calc(100vh - #{$headerOffset} - #{$bottomBarHeight});
 }
 
 .painlessLabPanelsContainer {

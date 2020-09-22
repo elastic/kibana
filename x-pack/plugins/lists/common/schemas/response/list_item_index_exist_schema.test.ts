@@ -25,6 +25,7 @@ describe('list_item_index_exist_schema', () => {
 
   test('it should NOT accept an undefined for "list_index"', () => {
     const payload = getListItemIndexExistSchemaResponseMock();
+    // @ts-expect-error
     delete payload.list_index;
     const decoded = listItemIndexExistSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -38,6 +39,7 @@ describe('list_item_index_exist_schema', () => {
 
   test('it should NOT accept an undefined for "list_item_index"', () => {
     const payload = getListItemIndexExistSchemaResponseMock();
+    // @ts-expect-error
     delete payload.list_item_index;
     const decoded = listItemIndexExistSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -15,17 +15,18 @@ import {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { screenshotsObservableFactory } from './lib/screenshots';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
+import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
+  features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
@@ -98,6 +99,26 @@ export class ReportingCore {
   public setConfig(config: ReportingConfig) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Registers reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles.
+   */
+  public registerFeature() {
+    const config = this.getConfig();
+    const allowedRoles = ['superuser', ...(config.get('roles')?.allow ?? [])];
+    this.getPluginSetupDeps().features.registerElasticsearchFeature({
+      id: 'reporting',
+      catalogue: ['reporting'],
+      management: {
+        insightsAndAlerting: ['reporting'],
+      },
+      privileges: allowedRoles.map((role) => ({
+        requiredClusterPrivileges: [],
+        requiredRoles: [role],
+        ui: [],
+      })),
+    });
   }
 
   /*

@@ -49,6 +49,7 @@ describe('prepackaged_rule_schema', () => {
 
   test('it should NOT validate a rule with a deleted value', () => {
     const rule = getRulesSchemaMock();
+    // @ts-expect-error
     delete rule.name;
     const payload: RulesBulkSchema = [rule];
     const decoded = rulesBulkSchema.decode(payload);
@@ -64,6 +65,7 @@ describe('prepackaged_rule_schema', () => {
 
   test('it should NOT validate an invalid error message with a deleted value', () => {
     const error = getErrorSchemaMock('fake id');
+    // @ts-expect-error
     delete error.error;
     const payload: RulesBulkSchema = [error];
     const decoded = rulesBulkSchema.decode(payload);

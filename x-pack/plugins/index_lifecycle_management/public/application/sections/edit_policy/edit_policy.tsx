@@ -5,7 +5,9 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -25,10 +27,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
 import { toasts } from '../../services/notification';
 
-import { Policy, PolicyFromES } from '../../services/policies/types';
+import { Phases, Policy, PolicyFromES } from '../../../../common/types';
 import {
   validatePolicy,
   ValidationErrors,
@@ -42,7 +43,7 @@ import {
 } from '../../services/policies/policy_serialization';
 
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
-import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
+import { ColdPhase, DeletePhase, FrozenPhase, HotPhase, WarmPhase } from './phases';
 
 interface Props {
   policies: PolicyFromES[];
@@ -54,7 +55,7 @@ interface Props {
       absolute?: boolean;
     }
   ) => string;
-  history: any;
+  history: RouteComponentProps['history'];
 }
 export const EditPolicy: React.FunctionComponent<Props> = ({
   policies,
@@ -118,7 +119,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
 
-  const setPhaseData = (phase: 'hot' | 'warm' | 'cold' | 'delete', key: string, value: any) => {
+  const setPhaseData = (phase: keyof Phases, key: string, value: any) => {
     setPolicy({
       ...policy,
       phases: {
@@ -303,6 +304,16 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
             <EuiHorizontalRule />
 
+            <FrozenPhase
+              errors={errors?.frozen}
+              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.frozen).length > 0}
+              setPhaseData={(key, value) => setPhaseData('frozen', key, value)}
+              phaseData={policy.phases.frozen}
+              hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
+            />
+
+            <EuiHorizontalRule />
+
             <DeletePhase
               errors={errors?.delete}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.delete).length > 0}
@@ -352,7 +363,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={togglePolicyJsonFlyout}>
+                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
                   {isShowingPolicyJsonFlyout ? (
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
@@ -371,6 +382,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             {isShowingPolicyJsonFlyout ? (
               <PolicyJsonFlyout
                 policyName={policy.name || ''}
+                existingPolicy={existingPolicy}
                 policy={policy}
                 close={() => setIsShowingPolicyJsonFlyout(false)}
               />

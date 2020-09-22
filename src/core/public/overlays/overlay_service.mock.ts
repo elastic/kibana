@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';

@@ -55,15 +55,27 @@ export async function loadIndexPatterns({
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
         .map(
-          (field): IndexPatternField => ({
-            name: field.name,
-            displayName: field.displayName,
-            type: field.type,
-            aggregatable: field.aggregatable,
-            searchable: field.searchable,
-            scripted: field.scripted,
-            esTypes: field.esTypes,
-          })
+          (field): IndexPatternField => {
+            // Convert the getters on the index pattern service into plain JSON
+            const base = {
+              name: field.name,
+              displayName: field.displayName,
+              type: field.type,
+              aggregatable: field.aggregatable,
+              searchable: field.searchable,
+              esTypes: field.esTypes,
+              scripted: field.scripted,
+            };
+
+            // Simplifies tests by hiding optional properties instead of undefined
+            return base.scripted
+              ? {
+                  ...base,
+                  lang: field.lang,
+                  script: field.script,
+                }
+              : base;
+          }
         )
         .concat(documentField);
 
@@ -91,6 +103,7 @@ export async function loadIndexPatterns({
         timeFieldName,
         fieldFormatMap,
         fields: newFields,
+        hasRestrictions: !!typeMeta?.aggs,
       };
 
       return {
@@ -334,6 +347,7 @@ export async function syncExistingFields({
     title: string;
     fields: IndexPatternField[];
     timeFieldName?: string | null;
+    hasRestrictions: boolean;
   }>;
   fetchJson: HttpSetup['post'];
   setState: SetState;
@@ -343,6 +357,12 @@ export async function syncExistingFields({
   showNoDataPopover: () => void;
 }) {
   const existenceRequests = indexPatterns.map((pattern) => {
+    if (pattern.hasRestrictions) {
+      return {
+        indexPatternTitle: pattern.title,
+        existingFieldNames: pattern.fields.map((field) => field.name),
+      };
+    }
     const body: Record<string, string | object> = {
       dslQuery,
       fromDate: dateRange.fromDate,

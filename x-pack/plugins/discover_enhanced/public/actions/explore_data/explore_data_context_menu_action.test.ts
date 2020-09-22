@@ -140,6 +140,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable does not have index patterns', async () => {
       const { action, output, context } = setup();
+      // @ts-expect-error
       delete output.indexPatterns;
 
       const isCompatible = await action.isCompatible(context);

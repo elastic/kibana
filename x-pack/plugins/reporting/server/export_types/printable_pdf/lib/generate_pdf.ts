@@ -10,7 +10,8 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutInstance, LayoutParams } from '../../../lib/layouts';
-import { ConditionalHeaders, ScreenshotResults } from '../../../types';
+import { ScreenshotResults } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 import { getTracker } from './tracker';

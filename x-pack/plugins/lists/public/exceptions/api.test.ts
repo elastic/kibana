@@ -89,6 +89,7 @@ describe('Exceptions Lists API', () => {
     test('it returns error if response payload fails decode', async () => {
       const payload = getCreateExceptionListSchemaMock();
       const badPayload = getExceptionListSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -150,6 +151,7 @@ describe('Exceptions Lists API', () => {
     test('it returns error if response payload fails decode', async () => {
       const payload = getCreateExceptionListItemSchemaMock();
       const badPayload = getExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -196,6 +198,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error and does not make request if request payload fails decode', async () => {
       const payload = getUpdateExceptionListSchemaMock();
+      // @ts-expect-error
       delete payload.description;
 
       await expect(
@@ -210,6 +213,7 @@ describe('Exceptions Lists API', () => {
     test('it returns error if response payload fails decode', async () => {
       const payload = getUpdateExceptionListSchemaMock();
       const badPayload = getExceptionListSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -256,6 +260,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error and does not make request if request payload fails decode', async () => {
       const payload = getUpdateExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete payload.description;
 
       await expect(
@@ -270,6 +275,7 @@ describe('Exceptions Lists API', () => {
     test('it returns error if response payload fails decode', async () => {
       const payload = getUpdateExceptionListItemSchemaMock();
       const badPayload = getExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -329,6 +335,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -368,6 +375,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single,single',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -399,6 +408,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -430,6 +441,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -461,6 +474,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -493,6 +508,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -532,6 +549,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -599,6 +617,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -659,6 +678,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 
@@ -719,6 +739,7 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListItemSchemaMock();
+      // @ts-expect-error
       delete badPayload.id;
       httpMock.fetch.mockResolvedValue(badPayload);
 

@@ -89,7 +89,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   }
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}/${newSection}`);
+    history.push(encodeURI(`${BASE_PATH}/${encodeURIComponent(newSection)}`));
   };
 
   // Set breadcrumb and page title
