@@ -16,6 +16,7 @@ import { SpacesManager } from '../spaces_manager';
 import { getSpaceColor } from '..';
 
 const SPACES_DISPLAY_COUNT = 5;
+const ALL_SPACES_ID = '*';
 const UNKNOWN_SPACE = '?';
 
 type SpaceMap = Map<string, SpaceTarget>;
@@ -31,59 +32,76 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
     return null;
   }
 
-  const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
-  const authorizedSpaceTargets: SpaceTarget[] = [];
-  authorized.forEach((namespace) => {
-    const spaceTarget = data.get(namespace);
-    if (spaceTarget === undefined) {
-      // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
-      authorizedSpaceTargets.push({ id: namespace, name: namespace, isActiveSpace: false });
-    } else if (!spaceTarget.isActiveSpace) {
-      authorizedSpaceTargets.push(spaceTarget);
-    }
-  });
+  const isSharedToAllSpaces = namespaces?.includes(ALL_SPACES_ID);
   const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
     .length;
-  const unauthorizedTooltip = i18n.translate(
-    'xpack.spaces.management.shareToSpace.columnUnauthorizedLabel',
-    { defaultMessage: `You don't have permission to view these spaces.` }
-  );
+  let displayedSpaces: SpaceTarget[];
+  let button: ReactNode = null;
 
-  const displayedSpaces = isExpanded
-    ? authorizedSpaceTargets
-    : authorizedSpaceTargets.slice(0, SPACES_DISPLAY_COUNT);
-  const showButton = authorizedSpaceTargets.length > SPACES_DISPLAY_COUNT;
+  if (isSharedToAllSpaces) {
+    displayedSpaces = [
+      {
+        id: ALL_SPACES_ID,
+        name: i18n.translate('xpack.spaces.management.shareToSpace.allSpacesLabel', {
+          defaultMessage: `* All spaces`,
+        }),
+        isActiveSpace: false,
+        color: '#D3DAE6',
+      },
+    ];
+  } else {
+    const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
+    const authorizedSpaceTargets: SpaceTarget[] = [];
+    authorized.forEach((namespace) => {
+      const spaceTarget = data.get(namespace);
+      if (spaceTarget === undefined) {
+        // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
+        authorizedSpaceTargets.push({ id: namespace, name: namespace, isActiveSpace: false });
+      } else if (!spaceTarget.isActiveSpace) {
+        authorizedSpaceTargets.push(spaceTarget);
+      }
+    });
+    displayedSpaces = isExpanded
+      ? authorizedSpaceTargets
+      : authorizedSpaceTargets.slice(0, SPACES_DISPLAY_COUNT);
+
+    if (authorizedSpaceTargets.length > SPACES_DISPLAY_COUNT) {
+      button = isExpanded ? (
+        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.showLessSpacesLink"
+            defaultMessage="show less"
+          />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.showMoreSpacesLink"
+            defaultMessage="+{count} more"
+            values={{
+              count: authorizedSpaceTargets.length + unauthorizedCount - displayedSpaces.length,
+            }}
+          />
+        </EuiButtonEmpty>
+      );
+    }
+  }
 
   const unauthorizedCountBadge =
-    (isExpanded || !showButton) && unauthorizedCount > 0 ? (
+    !isSharedToAllSpaces && (isExpanded || button === null) && unauthorizedCount > 0 ? (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={unauthorizedTooltip}>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.spaces.management.shareToSpace.columnUnauthorizedLabel"
+              defaultMessage="You don't have permission to view these spaces."
+            />
+          }
+        >
           <EuiBadge color="#DDD">+{unauthorizedCount}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
-
-  let button: ReactNode = null;
-  if (showButton) {
-    button = isExpanded ? (
-      <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
-        <FormattedMessage
-          id="xpack.spaces.management.shareToSpace.showLessSpacesLink"
-          defaultMessage="show less"
-        />
-      </EuiButtonEmpty>
-    ) : (
-      <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
-        <FormattedMessage
-          id="xpack.spaces.management.shareToSpace.showMoreSpacesLink"
-          defaultMessage="+{count} more"
-          values={{
-            count: authorizedSpaceTargets.length + unauthorizedCount - displayedSpaces.length,
-          }}
-        />
-      </EuiButtonEmpty>
-    );
-  }
 
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">

@@ -50,6 +50,7 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
    * This node displays up to five named spaces (and an indicator for any number of unauthorized spaces) by default. The active space is
    * omitted from this list. If more than five named spaces would be displayed, the extras (along with the unauthorized spaces indicator, if
    * present) are hidden behind a button.
+   * If '*' (aka "All spaces") is present, it supersedes all of the above and just displays a single badge without a button.
    */
   describe('#euiColumn.render', () => {
     describe('with only the active space', () => {
@@ -175,6 +176,30 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
         button.simulate('click');
         badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
         expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', '+2']);
+      });
+    });
+
+    describe('with only "all spaces"', () => {
+      const wrapper = createColumn([], ['*']);
+
+      it('shows one badge without button', async () => {
+        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
+        expect(badgeText).toEqual(['* All spaces']);
+        const button = wrapper.find('EuiButtonEmpty');
+        expect(button).toHaveLength(0);
+      });
+    });
+
+    describe('with "all spaces", the active space, six inactive spaces, and one unauthorized space', () => {
+      // same as assertions 'with only "all spaces"' test case; if "all spaces" is present, it supersedes everything else
+      const { spaceTargets, namespaces } = getSpaceData(6);
+      const wrapper = createColumn(spaceTargets, ['*', ...namespaces, '?']);
+
+      it('shows one badge without button', async () => {
+        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
+        expect(badgeText).toEqual(['* All spaces']);
+        const button = wrapper.find('EuiButtonEmpty');
+        expect(button).toHaveLength(0);
       });
     });
   });
