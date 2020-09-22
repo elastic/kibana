@@ -24,76 +24,93 @@ const webpack = require('webpack');
 const Stats = require('webpack/lib/Stats');
 const del = require('del');
 
-const { getWebpackConfig } = require('../webpack.config');
+const { getWebpackConfigs } = require('../webpack.config');
+
+async function runCompiler({ log, config, watch }) {
+  const compiler = webpack(config);
+
+  const onCompilationComplete = (_stats) => {
+    const multiStats = Array.isArray(_stats.stats) ? _stats : { stats: [_stats] };
+
+    for (const stats of multiStats.stats) {
+      const name = stats.compilation.entries.length === 1 ? 'dll compiler' : 'main compiler';
+      const took = Math.round((stats.endTime - stats.startTime) / 1000);
+
+      if (stats.hasErrors() || stats.hasWarnings()) {
+        throw createFailError(
+          `[${name}] failure in about ${took} seconds\n${stats.toString({
+            colors: true,
+            ...Stats.presetToOptions('minimal'),
+          })}`
+        );
+      }
+
+      log.success(`[${name}] completed in about ${took} seconds`);
+    }
+  };
+
+  if (watch) {
+    compiler.hooks.done.tap('report on stats', (stats) => {
+      try {
+        onCompilationComplete(stats);
+      } catch (error) {
+        log.error(error.message);
+      }
+    });
+
+    compiler.hooks.watchRun.tap('report on start', () => {
+      if (process.stdout.isTTY) {
+        process.stdout.cursorTo(0, 0);
+        process.stdout.clearScreenDown();
+      }
+
+      log.info('running webpack compilation...');
+    });
+
+    compiler.watch({}, (error) => {
+      if (error) {
+        log.error('fatal webpack error');
+        log.error(error);
+        process.exit(1);
+      }
+    });
+
+    return;
+  }
+
+  onCompilationComplete(
+    await new Promise((resolve, reject) => {
+      compiler.run((error, stats) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(stats);
+        }
+      });
+    })
+  );
+}
 
 run(
   async ({ log, flags }) => {
     log.info('cleaning previous build output');
     await del(Path.resolve(__dirname, '../target'));
 
-    const compiler = webpack(
-      getWebpackConfig({
-        dev: flags.dev,
-      })
-    );
+    const { mainConfig, dllConfig } = getWebpackConfigs({
+      dev: flags.dev,
+    });
 
-    /** @param {webpack.Stats} stats */
-    const onCompilationComplete = (stats) => {
-      const took = Math.round((stats.endTime - stats.startTime) / 1000);
+    await runCompiler({
+      log,
+      config: dllConfig,
+      watch: false,
+    });
 
-      if (!stats.hasErrors() && !stats.hasWarnings()) {
-        log.success(`webpack completed in about ${took} seconds`);
-        return;
-      }
-
-      throw createFailError(
-        `webpack failure in about ${took} seconds\n${stats.toString({
-          colors: true,
-          ...Stats.presetToOptions('minimal'),
-        })}`
-      );
-    };
-
-    if (flags.watch) {
-      compiler.hooks.done.tap('report on stats', (stats) => {
-        try {
-          onCompilationComplete(stats);
-        } catch (error) {
-          log.error(error.message);
-        }
-      });
-
-      compiler.hooks.watchRun.tap('report on start', () => {
-        if (process.stdout.isTTY) {
-          process.stdout.cursorTo(0, 0);
-          process.stdout.clearScreenDown();
-        }
-
-        log.info('Running webpack compilation...');
-      });
-
-      compiler.watch({}, (error) => {
-        if (error) {
-          log.error('Fatal webpack error');
-          log.error(error);
-          process.exit(1);
-        }
-      });
-
-      return;
-    }
-
-    onCompilationComplete(
-      await new Promise((resolve, reject) => {
-        compiler.run((error, stats) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(stats);
-          }
-        });
-      })
-    );
+    await runCompiler({
+      log,
+      config: flags.watch ? [mainConfig, dllConfig] : mainConfig,
+      watch: flags.watch,
+    });
   },
   {
     description: 'build @kbn/ui-shared-deps',

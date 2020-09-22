@@ -150,6 +150,17 @@ export function isExternalModule(module: any): module is WebpackExternalModule {
 }
 
 /** module replacing imports for webpack externals */
+export interface WebpackDelegatedModule {
+  type: string;
+  id: string;
+  [key: string]: unknown;
+}
+
+export function isDelegatedModule(module: any): module is WebpackDelegatedModule {
+  return module?.constructor?.name === 'DelegatedModule';
+}
+
+/** module replacing imports for webpack externals */
 export interface WebpackConcatenatedModule {
   type: string;
   id: number;

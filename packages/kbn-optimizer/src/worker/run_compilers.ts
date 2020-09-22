@@ -42,6 +42,7 @@ import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
   isExternalModule,
+  isDelegatedModule,
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
@@ -159,7 +160,7 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module)) {
+        if (isExternalModule(module) || isIgnoredModule(module) || isDelegatedModule(module)) {
           continue;
         }
 

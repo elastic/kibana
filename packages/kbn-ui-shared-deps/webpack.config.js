@@ -25,93 +25,14 @@ const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
 
 const UiSharedDeps = require('./index');
+const Dll = require('./dll');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
-exports.getWebpackConfig = ({ dev = false } = {}) => ({
-  mode: dev ? 'development' : 'production',
-  entry: {
-    'kbn-ui-shared-deps': './entry.js',
-    'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-    'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
-    'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
-    'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
-  },
-  context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
-  output: {
-    path: UiSharedDeps.distDir,
-    filename: '[name].js',
-    sourceMapFilename: '[file].map',
-    devtoolModuleFilenameTemplate: (info) =>
-      `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
-    library: '__kbnSharedDeps__',
-  },
+exports.getWebpackConfigs = ({ dev = false } = {}) => {
+  const mode = dev ? 'development' : 'production';
 
-  module: {
-    noParse: [MOMENT_SRC],
-    rules: [
-      {
-        include: [require.resolve('./entry.js')],
-        use: [
-          {
-            loader: UiSharedDeps.publicPathLoader,
-            options: {
-              key: 'kbn-ui-shared-deps',
-            },
-          },
-        ],
-      },
-      {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
-      },
-      {
-        include: [require.resolve('./theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
-          },
-        ],
-      },
-    ],
-  },
-
-  resolve: {
-    alias: {
-      moment: MOMENT_SRC,
-    },
-    extensions: ['.js', '.ts'],
-  },
-
-  optimization: {
-    noEmitOnErrors: true,
-    splitChunks: {
-      cacheGroups: {
-        'kbn-ui-shared-deps.@elastic': {
-          name: 'kbn-ui-shared-deps.@elastic',
-          test: (m) => m.resource && m.resource.includes('@elastic'),
-          chunks: 'all',
-          enforce: true,
-        },
-      },
-    },
-  },
-
-  performance: {
-    // NOTE: we are disabling this as those hints
-    // are more tailored for the final bundles result
-    // and not for the webpack compilations performance itself
-    hints: false,
-  },
-
-  plugins: [
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
+  const optimizationPlugins = () => [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',
     }),
@@ -131,5 +52,120 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             cache: false,
           }),
         ]),
-  ],
-});
+  ];
+
+  return {
+    mainConfig: {
+      mode,
+      entry: {
+        'kbn-ui-shared-deps': './entry.js',
+        'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
+        'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
+        'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
+        'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
+      },
+      context: __dirname,
+      devtool: dev ? '#cheap-source-map' : false,
+      output: {
+        path: UiSharedDeps.distDir,
+        filename: '[name].js',
+        sourceMapFilename: '[file].map',
+        devtoolModuleFilenameTemplate: (info) =>
+          `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+        library: '__kbnSharedDeps__',
+      },
+
+      module: {
+        noParse: [MOMENT_SRC],
+        rules: [
+          {
+            include: [require.resolve('./entry.js')],
+            use: [
+              {
+                loader: UiSharedDeps.publicPathLoader,
+                options: {
+                  key: 'kbn-ui-shared-deps',
+                },
+              },
+            ],
+          },
+          {
+            test: /\.css$/,
+            use: [MiniCssExtractPlugin.loader, 'css-loader'],
+          },
+          {
+            include: [require.resolve('./theme.ts')],
+            use: [
+              {
+                loader: 'babel-loader',
+                options: {
+                  presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+                },
+              },
+            ],
+          },
+        ],
+      },
+
+      resolve: {
+        alias: {
+          moment: MOMENT_SRC,
+        },
+        extensions: ['.js', '.ts'],
+      },
+
+      optimization: {
+        noEmitOnErrors: true,
+        splitChunks: {
+          cacheGroups: {
+            'kbn-ui-shared-deps.@elastic': {
+              name: 'kbn-ui-shared-deps.@elastic',
+              test: (m) => m.resource && m.resource.includes('@elastic'),
+              chunks: 'all',
+              enforce: true,
+            },
+          },
+        },
+      },
+
+      performance: {
+        // NOTE: we are disabling this as those hints
+        // are more tailored for the final bundles result
+        // and not for the webpack compilations performance itself
+        hints: false,
+      },
+
+      plugins: [
+        new MiniCssExtractPlugin({
+          filename: '[name].css',
+        }),
+        Dll.getReferencePlugin(),
+        ...optimizationPlugins(),
+      ],
+    },
+    dllConfig: {
+      mode,
+      context: REPO_ROOT,
+      entry: [
+        require.resolve('css-loader/dist/runtime/api'),
+        require.resolve('style-loader/dist/runtime/injectStylesIntoStyleTag'),
+      ],
+      output: {
+        path: UiSharedDeps.distDir,
+        filename: UiSharedDeps.dllFilename,
+        sourceMapFilename: '[file].map',
+        devtoolModuleFilenameTemplate: (info) =>
+          `kbn-ui-shared-deps-dll/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+        library: Dll.name,
+      },
+      plugins: [
+        ...optimizationPlugins(),
+        new webpack.DllPlugin({
+          name: Dll.name,
+          context: REPO_ROOT,
+          path: Dll.path,
+        }),
+      ],
+    },
+  };
+};

@@ -28,6 +28,7 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import * as UiSharedDepsDll from '@kbn/ui-shared-deps/dll';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
@@ -71,6 +72,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      UiSharedDepsDll.getReferencePlugin(),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 

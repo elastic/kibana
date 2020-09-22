@@ -20,13 +20,18 @@
 const Path = require('path');
 
 exports.distDir = Path.resolve(__dirname, 'target');
-exports.jsDepFilenames = ['kbn-ui-shared-deps.@elastic.js'];
+
+exports.dllManifestFilename = 'kbn-ui-shared-deps.dll-manifest.json';
+exports.dllFilename = 'kbn-ui-shared-deps.dll.js';
+
+exports.jsDepFilenames = [exports.dllFilename, 'kbn-ui-shared-deps.@elastic.js'];
 exports.jsFilename = 'kbn-ui-shared-deps.js';
 exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
 exports.lightCssDistFilename = 'kbn-ui-shared-deps.v7.light.css';
 exports.lightV8CssDistFilename = 'kbn-ui-shared-deps.v8.light.css';
 exports.darkCssDistFilename = 'kbn-ui-shared-deps.v7.dark.css';
 exports.darkV8CssDistFilename = 'kbn-ui-shared-deps.v8.dark.css';
+
 exports.externals = {
   // stateful deps
   angular: '__kbnSharedDeps__.Angular',

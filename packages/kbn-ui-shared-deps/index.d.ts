@@ -58,6 +58,16 @@ export const lightCssDistFilename: string;
 export const lightV8CssDistFilename: string;
 
 /**
+ * Filename of the manifest json file in the distributable directory
+ */
+export const dllManifestFilename: string;
+
+/**
+ * Filename of the manifest js file in the distributable directory
+ */
+export const dllFilename: string;
+
+/**
  * Externals mapping inteded to be used in a webpack config
  */
 export const externals: {
