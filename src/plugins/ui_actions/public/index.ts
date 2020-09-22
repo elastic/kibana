@@ -34,7 +34,10 @@ export {
   ActionDefinitionContext as UiActionsActionDefinitionContext,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { Presentable as UiActionsPresentable } from './util';
+export {
+  Presentable as UiActionsPresentable,
+  PresentableGrouping as UiActionsPresentableGrouping,
+} from './util';
 export {
   Trigger,
   TriggerContext,

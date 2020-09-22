@@ -19,7 +19,6 @@
 import { UiActionsSetup } from '../../ui_actions/public';
 import {
   contextMenuTrigger,
-  createFilterAction,
   panelBadgeTrigger,
   EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
@@ -29,8 +28,6 @@ import {
   ACTION_INSPECT_PANEL,
   REMOVE_PANEL_ACTION,
   ACTION_EDIT_PANEL,
-  FilterActionContext,
-  ACTION_APPLY_FILTER,
   panelNotificationTrigger,
   PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
@@ -49,7 +46,6 @@ declare module '../../ui_actions/public' {
     [ACTION_INSPECT_PANEL]: EmbeddableContext;
     [REMOVE_PANEL_ACTION]: EmbeddableContext;
     [ACTION_EDIT_PANEL]: EmbeddableContext;
-    [ACTION_APPLY_FILTER]: FilterActionContext;
   }
 }
 
@@ -62,6 +58,5 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(panelNotificationTrigger);
 
-  uiActions.registerAction(createFilterAction());
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, new CopyPngAction());
 };
