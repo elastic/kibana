@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, BulkResponse, BulkItem } from '../types';
+import {
+  SignalSourceHit,
+  SignalSearchResponse,
+  BulkResponse,
+  BulkItem,
+  RuleAlertAttributes,
+} from '../types';
 import {
   Logger,
   SavedObject,
@@ -60,6 +66,30 @@ export const sampleRuleAlertParams = (
   version: 1,
   exceptionsList: getListArrayMock(),
 });
+
+export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
+  return {
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    type: 'alert',
+    version: '1',
+    updated_at: '2020-03-27T22:55:59.577Z',
+    attributes: {
+      actions: [],
+      enabled: true,
+      name: 'rule-name',
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      createdBy: 'sample user',
+      createdAt: '2020-03-27T22:55:59.577Z',
+      updatedBy: 'sample user',
+      schedule: {
+        interval: '5m',
+      },
+      throttle: 'no_actions',
+      params: sampleRuleAlertParams(),
+    },
+    references: [],
+  };
+};
 
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
