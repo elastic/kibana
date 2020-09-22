@@ -6,8 +6,13 @@
 
 import React from 'react';
 
-import { RuntimeTypeParameter } from '../../../field_parameters';
+import { RuntimeTypeParameter, PainlessScriptParameter } from '../../../field_parameters';
 
 export const RuntimeTypeRequiredParameters = () => {
-  return <RuntimeTypeParameter />;
+  return (
+    <>
+      <RuntimeTypeParameter />
+      <PainlessScriptParameter />
+    </>
+  );
 };

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 import { CodeEditor, UseField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
@@ -18,35 +18,26 @@ export const PainlessScriptParameter = () => {
         const isInvalid = error ? Boolean(error.length) : false;
 
         return (
-          <>
-            {isInvalid && (
-              <>
-                <EuiCallOut size="s" color="danger" title={error} />
-                <EuiSpacer />
-              </>
-            )}
-
-            <EuiFormRow label={scriptField.label} error={error} isInvalid={isInvalid} fullWidth>
-              <CodeEditor
-                languageId="painless"
-                // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
-                width="99%"
-                height="800px"
-                value={scriptField.value as string}
-                onChange={scriptField.setValue}
-                options={{
-                  fontSize: 12,
-                  minimap: {
-                    enabled: false,
-                  },
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  wrappingIndent: 'indent',
-                  automaticLayout: true,
-                }}
-              />
-            </EuiFormRow>
-          </>
+          <EuiFormRow label={scriptField.label} error={error} isInvalid={isInvalid} fullWidth>
+            <CodeEditor
+              languageId="painless"
+              // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+              width="99%"
+              height="400px"
+              value={scriptField.value as string}
+              onChange={scriptField.setValue}
+              options={{
+                fontSize: 12,
+                minimap: {
+                  enabled: false,
+                },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                automaticLayout: true,
+              }}
+            />
+          </EuiFormRow>
         );
       }}
     </UseField>
