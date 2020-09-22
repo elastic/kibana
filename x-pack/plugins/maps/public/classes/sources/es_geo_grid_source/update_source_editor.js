@@ -68,11 +68,8 @@ export class UpdateSourceEditor extends Component {
       this.props.currentLayerType === LAYER_TYPE.VECTOR ||
       this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
     ) {
-      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-        newLayerType = LAYER_TYPE.TILED_VECTOR;
-      } else {
-        newLayerType = LAYER_TYPE.VECTOR;
-      }
+      newLayerType =
+        resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
     } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
       if (resolution === GRID_RESOLUTION.SUPER_FINE) {
         throw new Error('Heatmap does not support SUPER_FINE resolution');

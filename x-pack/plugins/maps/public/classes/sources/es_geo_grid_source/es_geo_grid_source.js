@@ -111,10 +111,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     ];
   }
 
-  getMetricFields() {
-    return super.getMetricFields();
-  }
-
   getFieldNames() {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
@@ -139,11 +135,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   getGeoGridPrecision(zoom) {
-    const delta = this._getGeoGridPrecisionResolutionDelta();
-    if (delta === null) {
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // The target-precision needs to be determined server side.
       return NaN;
     }
-    const targetGeotileLevel = Math.ceil(zoom) + delta;
+
+    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
@@ -158,11 +155,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
       return 4;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      // The target-precision needs to be determined server side.
-      return null;
     }
 
     throw new Error(
@@ -267,7 +259,9 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   _addNonCompositeAggregationsToSearchSource(
     searchSource,
-    { indexPattern, precision, bufferedExtent }
+    indexPattern,
+    precision,
+    bufferedExtent
   ) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
@@ -300,11 +294,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bufferedExtent,
   }) {
-    this._addNonCompositeAggregationsToSearchSource(searchSource, {
+    this._addNonCompositeAggregationsToSearchSource(
+      searchSource,
       indexPattern,
       precision,
-      bufferedExtent,
-    });
+      bufferedExtent
+    );
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
@@ -368,11 +363,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
-    this._addNonCompositeAggregationsToSearchSource(searchSource, {
+    this._addNonCompositeAggregationsToSearchSource(
+      searchSource,
       indexPattern,
-      precision: -1, // This needs to be set server-side
-      bufferedExtent: null, //this needs to be stripped server-side
-    });
+      null, // needs to be set server-side
+      null // needs to be stripped server-side
+    );
 
     const dsl = await searchSource.getSearchRequestBody();
 

@@ -18,11 +18,11 @@ const defaultProps = {
 };
 
 describe('resolution editor', () => {
-  test('should omit super-fine option', async () => {
+  test('should omit super-fine option', () => {
     const component = shallow(<ResolutionEditor {...defaultProps} />);
     expect(component).toMatchSnapshot();
   });
-  test('should add super-fine option', async () => {
+  test('should add super-fine option', () => {
     const component = shallow(<ResolutionEditor {...defaultProps} includeSuperFine={true} />);
     expect(component).toMatchSnapshot();
   });

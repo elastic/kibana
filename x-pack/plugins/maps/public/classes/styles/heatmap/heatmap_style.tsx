@@ -85,9 +85,8 @@ export class HeatmapStyle implements IStyle {
       radius = 64;
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
-    } else if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-      radius = 8;
     } else {
+      // SUPER_FINE or any other is not supported.
       const errorMessage = i18n.translate('xpack.maps.style.heatmap.resolutionStyleErrorMessage', {
         defaultMessage: `Resolution param not recognized: {resolution}`,
         values: { resolution },
