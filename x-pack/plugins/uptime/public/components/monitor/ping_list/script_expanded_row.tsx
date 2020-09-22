@@ -16,8 +16,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIntersection } from 'react-use';
 import { Ping } from '../../../../common/runtime_types';
 import { UptimeThemeContext } from '../../../contexts';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
@@ -26,14 +27,60 @@ import { journeySelector } from '../../../state/selectors';
 interface ScreenshotDisplayProps {
   isLoading: boolean;
   screenshot: string;
+  stepIndex: number;
+  fetchScreenshot: (stepIndex: number) => void;
 }
 
 const THUMBNAIL_WIDTH = 320;
 const THUMBNAIL_HEIGHT = 180;
 
-const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({ isLoading, screenshot }) => {
-  if (isLoading) {
-    return <EuiLoadingSpinner size="l" />;
+const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = (props) => {
+  const imgRef = useRef(null);
+
+  return (
+    <div ref={imgRef}>
+      <ScreenshotDisplayContent {...props} imgRef={imgRef} />
+    </div>
+  );
+};
+
+type ScreenshotDisplayContentProps = ScreenshotDisplayProps & {
+  imgRef: React.MutableRefObject<any>;
+};
+
+const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
+  isLoading,
+  screenshot,
+  stepIndex,
+  fetchScreenshot,
+  imgRef,
+}) => {
+  const intersection = useIntersection(imgRef, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
+  useEffect(() => {
+    if (!screenshot && intersection && intersection.isIntersecting) {
+      fetchScreenshot(stepIndex);
+    }
+  }, [fetchScreenshot, intersection, screenshot, stepIndex]);
+  console.log('int:', intersection);
+  // need to render container for intersection ref
+  if (screenshot) {
+    return (
+      <img
+        ref={imgRef}
+        style={{
+          width: THUMBNAIL_WIDTH,
+          height: THUMBNAIL_HEIGHT,
+          objectFit: 'cover',
+          objectPosition: 'center top',
+        }}
+        src={`data:image/png;base64,${screenshot}`}
+        alt="stuff"
+      />
+    );
   } else if (isLoading === false && !screenshot) {
     return (
       <EuiIcon
@@ -42,19 +89,10 @@ const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({ isLoading, screen
         style={{ width: THUMBNAIL_WIDTH, height: THUMBNAIL_HEIGHT }}
       />
     );
+  } else if (isLoading) {
+    return <EuiLoadingSpinner size="l" />;
   }
-  return (
-    <img
-      style={{
-        width: THUMBNAIL_WIDTH,
-        height: THUMBNAIL_HEIGHT,
-        objectFit: 'cover',
-        objectPosition: 'center top',
-      }}
-      src={`data:image/png;base64,${screenshot}`}
-      alt="stuff"
-    />
-  );
+  return null;
 };
 
 interface ScriptExpandedRowProps {
@@ -98,16 +136,12 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
   console.log('the check grou', checkGroup);
   console.log('journeys', f);
   const journey = f.journeys.find((j) => j.checkGroup === checkGroup);
-  const stepIndices =
-    JSON.stringify(journey?.steps.map((s) => s.synthetics.step.index).sort()) ?? '[]';
-  useEffect(() => {
-    const parsedIndices = JSON.parse(stepIndices);
-    if (parsedIndices.length) {
-      parsedIndices.forEach((i: number) =>
-        dispatch(getStepScreenshot({ checkGroup: checkGroup!, stepIndex: i }))
-      );
-    }
-  }, [checkGroup, dispatch, stepIndices]);
+  const fetchScreenshot = useCallback(
+    (stepIndex: number) => {
+      dispatch(getStepScreenshot({ checkGroup: checkGroup!, stepIndex }));
+    },
+    [checkGroup, dispatch]
+  );
   if (!journey) {
     return <div>this probably shouldn't happen, but there's no info for this check group</div>;
   }
@@ -156,12 +190,11 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
                     <ScreenshotDisplay
                       isLoading={step.screenshotLoading}
                       screenshot={step.screenshot}
+                      stepIndex={step.synthetics.step.index}
+                      fetchScreenshot={fetchScreenshot}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {/* <div>
-                      <EuiButton>Step details</EuiButton>
-                    </div> */}
                     {step?.synthetics?.payload?.source && (
                       <EuiAccordion
                         id={step.synthetics.step.name + index}

@@ -30,7 +30,9 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     return response.ok({
       body: result,
       headers: {
-        // 'cache-control': 'max-age=600000000',
+        // these images should be cached aggressively to prevent
+        // costly repeat network requests
+        'cache-control': 'max-age=600000000',
       },
     });
   },
