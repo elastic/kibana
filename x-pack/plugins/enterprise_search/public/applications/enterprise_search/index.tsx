@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useValues } from 'kea';
 import {
   EuiPage,
@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { KibanaContext, IKibanaContext } from '../index';
 import { IInitialAppData } from '../../../common/types';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 
@@ -35,9 +36,9 @@ import './index.scss';
 
 export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
   const { errorConnecting } = useValues(HttpLogic);
-  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
+  const { config } = useContext(KibanaContext) as IKibanaContext;
 
-  return errorConnecting ? (
+  return config.host && errorConnecting ? (
     <ErrorConnecting />
   ) : (
     <EuiPage restrictWidth className="enterpriseSearchOverview">
@@ -65,16 +66,12 @@ export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => 
         </EuiPageHeader>
         <EuiPageContentBody>
           <EuiFlexGroup justifyContent="center" gutterSize="xl">
-            {hasAppSearchAccess && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
-              </EuiFlexItem>
-            )}
-            {hasWorkplaceSearchAccess && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+              <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+              <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
         </EuiPageContentBody>

@@ -28,7 +28,28 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
+  const {
+    http,
+    config: { host },
+  } = useContext(KibanaContext) as IKibanaContext;
+
+  const LAUNCH_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.launchButton',
+    {
+      defaultMessage: `Launch {productName}`,
+      values: { productName: product.NAME },
+    }
+  );
+
+  const SETUP_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.setupButton',
+    {
+      defaultMessage: `Setup {productName}`,
+      values: { productName: product.NAME },
+    }
+  );
+
+  const TEST_SUBJ_PREFIX = host ? 'Launch' : 'Setup';
 
   return (
     <EuiCard
@@ -58,12 +79,9 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
               metric: snakeCase(product.ID),
             })
           }
-          data-test-subj={`Launch${upperFirst(product.ID)}Button`}
+          data-test-subj={`${TEST_SUBJ_PREFIX}${upperFirst(product.ID)}Button`}
         >
-          {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
-            defaultMessage: `Launch {productName}`,
-            values: { productName: product.NAME },
-          })}
+          {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
       }
     />
