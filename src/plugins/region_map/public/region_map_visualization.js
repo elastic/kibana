@@ -22,7 +22,6 @@ import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_se
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN } from '../../maps_legacy/public';
-import _ from 'lodash';
 
 export function createRegionMapVisualization({
   regionmapsConfig,
@@ -96,6 +95,8 @@ export function createRegionMapVisualization({
       // Do not use the selectedLayer from the visState.
       // These settings are stored in the URL and can be used to inject dirty display content.
 
+      const { escape } = await import('lodash');
+
       if (
         fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
         (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
@@ -113,7 +114,7 @@ export function createRegionMapVisualization({
       if (configuredLayer) {
         return {
           ...configuredLayer,
-          attribution: _.escape(configuredLayer.attribution ? configuredLayer.attribution : ''),
+          attribution: escape(configuredLayer.attribution ? configuredLayer.attribution : ''),
         };
       }
 
