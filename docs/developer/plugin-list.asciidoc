@@ -98,6 +98,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
 
+|{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
+|An overview page highlighting Kibana apps
+
+
 |{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
 |Tools for building React applications in Kibana.
 
