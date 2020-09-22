@@ -166,7 +166,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     let namespaces = options.namespaces;
     if (namespaces) {
       const spacesClient = await this.getSpacesClient;
-      const emptyResponse = SavedObjectsUtils.createEmptyFindResponse<T>(options);
 
       try {
         const availableSpaces = await spacesClient.getAll('findSavedObjects');
@@ -179,12 +178,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         }
         if (namespaces.length === 0) {
           // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return emptyResponse;
+          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
           // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return emptyResponse;
+          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
         }
         throw err;
       }
