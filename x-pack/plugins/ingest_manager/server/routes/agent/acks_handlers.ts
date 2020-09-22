@@ -10,6 +10,7 @@ import { RequestHandler } from 'kibana/server';
 import { AcksService } from '../../services/agents';
 import { AgentEvent } from '../../../common/types/models';
 import { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentAcksHandlerBuilder = function (
   ackService: AcksService
@@ -43,18 +44,8 @@ export const postAgentAcksHandlerBuilder = function (
       };
 
       return response.ok({ body });
-    } catch (e) {
-      if (e.isBoom) {
-        return response.customError({
-          statusCode: e.output.statusCode,
-          body: { message: e.message },
-        });
-      }
-
-      return response.customError({
-        statusCode: 500,
-        body: { message: e.message },
-      });
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
   };
 };
