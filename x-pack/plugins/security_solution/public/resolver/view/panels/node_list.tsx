@@ -124,7 +124,6 @@ export const NodeList = memo(() => {
         text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
           defaultMessage: 'All Process Events',
         }),
-        onClick: () => {},
       },
     ];
   }, []);

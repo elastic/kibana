@@ -16,16 +16,11 @@ import {
   VisibleEntites,
   TreeFetcherParameters,
 } from '../../types';
-import {
-  isGraphableProcess,
-  isTerminatedProcess,
-  uniquePidForProcess,
-} from '../../models/process_event';
+import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
 import {
-  ResolverEvent,
   ResolverTree,
   ResolverNodeStats,
   ResolverRelatedEvents,
@@ -40,15 +35,15 @@ import * as vector2 from '../../models/vector2';
  * If there is currently a request.
  */
 export function isTreeLoading(state: DataState): boolean {
-  return state.tree.pendingRequestParameters !== undefined;
+  return state.tree?.pendingRequestParameters !== undefined;
 }
 
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */
 export function hadErrorLoadingTree(state: DataState): boolean {
-  if (state.tree.lastResponse) {
-    return !state.tree.lastResponse.successful;
+  if (state.tree?.lastResponse) {
+    return !state.tree?.lastResponse.successful;
   }
   return false;
 }
@@ -65,7 +60,7 @@ export function resolverComponentInstanceID(state: DataState): string {
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
-  return state.tree.lastResponse?.successful ? state.tree.lastResponse.result : undefined;
+  return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
 /**
@@ -303,15 +298,6 @@ export const relatedEventCountByType: (
 );
 
 /**
- * returns a map of entity_ids to booleans indicating if it is waiting on related event
- * A value of `undefined` can be interpreted as `not yet requested`
- * @deprecated
- */
-export function relatedEventsReady(data: DataState): Map<string, boolean> {
-  return data.relatedEventsReady;
-}
-
-/**
  * `true` if there were more children than we got in the last request.
  * @deprecated
  */
@@ -444,14 +430,14 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
    * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
    */
   if (
-    state.tree.currentParameters !== undefined &&
+    state.tree?.currentParameters !== undefined &&
     !treeFetcherParametersModel.equal(
-      state.tree.currentParameters,
-      state.tree.lastResponse?.parameters
+      state.tree?.currentParameters,
+      state.tree?.lastResponse?.parameters
     ) &&
     !treeFetcherParametersModel.equal(
-      state.tree.currentParameters,
-      state.tree.pendingRequestParameters
+      state.tree?.currentParameters,
+      state.tree?.pendingRequestParameters
     )
   ) {
     return state.tree.currentParameters;
@@ -690,10 +676,10 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
    * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.tree.pendingRequestParameters !== undefined &&
+    state.tree?.pendingRequestParameters !== undefined &&
     !treeFetcherParametersModel.equal(
-      state.tree.pendingRequestParameters,
-      state.tree.currentParameters
+      state.tree?.pendingRequestParameters,
+      state.tree?.currentParameters
     )
   ) {
     return state.tree.pendingRequestParameters;

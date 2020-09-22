@@ -12,6 +12,7 @@ import * as selectors from '../store/selectors';
 
 /**
  * @deprecated
+ * TODO, delete
  */
 export function useRelatedEventDetailNavigation({
   nodeID,

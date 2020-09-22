@@ -14,7 +14,7 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe(`Resolver: when analyzing a tree with no ancestors and two children, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -194,21 +194,25 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           nodeEventsListLink.simulate('click', { button: 0 });
         }
       });
-      it('should be cool', async () => {
+      it('should show a link to view 2 registry events', async () => {
         await expect(
           simulator().map(() => {
+            // The link text is split across two columns. The first column is the count and the second column has the type.
+            const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
+            const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
             return {
-              eventTypeCountLength: simulator().testSubject(
-                'resolver:panel:node-events:event-type-count'
-              ).length,
-              eventTypeLinkLength: simulator().testSubject(
-                'resolver:panel:node-events:event-type-link'
-              ).length,
+              typeLength: type.length,
+              linkLength: link.length,
+              typeText: type.text(),
+              linkText: link.text(),
             };
           })
         ).toYieldEqualTo({
-          eventTypeCountLength: 2,
-          eventTypeLinkLength: 2,
+          typeLength: 1,
+          linkLength: 1,
+          linkText: 'registry',
+          // EUI's Table adds the column name to the value.
+          typeText: 'Count2',
         });
       });
     });

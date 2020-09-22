@@ -211,9 +211,8 @@ export interface TreeFetcherParameters {
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-  readonly relatedEventsReady: Map<string, boolean>;
 
-  readonly tree: {
+  readonly tree?: {
     /**
      * The parameters passed from the resolver properties
      */

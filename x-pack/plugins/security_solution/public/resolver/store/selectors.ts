@@ -158,15 +158,6 @@ export const relatedEventsByCategory = composeSelectors(
 );
 
 /**
- * Entity ids to booleans for waiting status
- * @deprecated
- */
-export const relatedEventsReady = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsReady
-);
-
-/**
  * Business logic lookup functions by ECS category by entity id.
  * Example usage:
  * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
