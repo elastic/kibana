@@ -33,7 +33,6 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
-  FeatureCatalogueRegistryStart,
   TutorialService,
   TutorialServiceSetup,
 } from './services';
@@ -168,9 +167,6 @@ export class HomePublicPlugin
 
 /** @public */
 export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
-
-/** @public */
-export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
 
 /** @public */
 export type EnvironmentSetup = EnvironmentServiceSetup;
