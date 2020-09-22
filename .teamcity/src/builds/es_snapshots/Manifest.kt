@@ -51,18 +51,21 @@ object ESSnapshotManifest : BuildType({
           ls -alh
           export GOOGLE_APPLICATION_CREDENTIALS="${"$"}(pwd)/gcp-credentials.json"
           gcloud info
+          cat test.json
         """.trimIndent()
     }
 
-    script {
-      name = "Create Snapshot Manifest"
-      scriptContent =
-        """#!/bin/bash
-          cd kibana
-          node ./.ci/teamcity/es_snapshots/create_manifest.js "$(cd ../es-build && pwd)"
-        """.trimIndent()
-    }
+//    script {
+//      name = "Create Snapshot Manifest"
+//      scriptContent =
+//        """#!/bin/bash
+//          cd kibana
+//          node ./.ci/teamcity/es_snapshots/create_manifest.js "$(cd ../es-build && pwd)"
+//        """.trimIndent()
+//    }
   }
+
+  artifactRules = "+:./*.json"
 
   dependencies{
     dependency(ESSnapshotBuild) {
