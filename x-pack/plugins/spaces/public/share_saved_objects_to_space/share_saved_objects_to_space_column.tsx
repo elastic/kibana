@@ -10,15 +10,13 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
+import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
 import { SpaceTarget } from './types';
 import { SpacesManager } from '../spaces_manager';
 import { getSpaceColor } from '..';
 
 const SPACES_DISPLAY_COUNT = 5;
+const UNKNOWN_SPACE = '?';
 
 type SpaceMap = Map<string, SpaceTarget>;
 interface ColumnDataProps {
@@ -33,23 +31,19 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
     return null;
   }
 
-  const authorized = namespaces?.filter((namespace) => namespace !== '?') ?? [];
+  const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
   const authorizedSpaceTargets: SpaceTarget[] = [];
   authorized.forEach((namespace) => {
     const spaceTarget = data.get(namespace);
     if (spaceTarget === undefined) {
       // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
-      authorizedSpaceTargets.push({
-        id: namespace,
-        name: namespace,
-        disabledFeatures: [],
-        isActiveSpace: false,
-      });
+      authorizedSpaceTargets.push({ id: namespace, name: namespace, isActiveSpace: false });
     } else if (!spaceTarget.isActiveSpace) {
       authorizedSpaceTargets.push(spaceTarget);
     }
   });
-  const unauthorizedCount = (namespaces?.filter((namespace) => namespace === '?') ?? []).length;
+  const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
+    .length;
   const unauthorizedTooltip = i18n.translate(
     'xpack.spaces.management.shareToSpace.columnUnauthorizedLabel',
     { defaultMessage: `You don't have permission to view these spaces.` }
@@ -117,7 +111,7 @@ export class ShareToSpaceSavedObjectsManagementColumn
     description: i18n.translate('xpack.spaces.management.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
-    render: (namespaces: string[] | undefined, _object: SavedObjectsManagementRecord) => (
+    render: (namespaces: string[] | undefined) => (
       <ColumnDisplay namespaces={namespaces} data={this.data} />
     ),
   };
