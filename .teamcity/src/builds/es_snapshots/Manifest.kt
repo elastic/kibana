@@ -16,6 +16,11 @@ object ESSnapshotManifest : BuildType({
     checkoutDir = ""
   }
 
+  params {
+    param("env.GOOGLE_APPLICATION_CREDENTIALS", "%teamcity.build.workingDir%/gcp-credentials.json")
+    password("env.GOOGLE_APPLICATION_CREDENTIALS_JSON", "credentialsJSON:6e0acb7c-f89c-4225-84b8-4fc102f1a5ef", display = ParameterDisplay.HIDDEN)
+  }
+
   steps {
     script {
       name = "Setup Environment"
@@ -34,6 +39,14 @@ object ESSnapshotManifest : BuildType({
                 #!/bin/bash
                 cd kibana
                 ./.ci/teamcity/setup_node.sh
+        """.trimIndent()
+    }
+
+    script {
+      name = "Setup Google Cloud Credentials"
+      scriptContent =
+        """#!/bin/bash
+          echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > "${"$"}GOOGLE_APPLICATION_CREDENTIALS"
         """.trimIndent()
     }
 
