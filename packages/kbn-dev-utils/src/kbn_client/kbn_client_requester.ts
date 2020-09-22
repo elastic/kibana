@@ -60,7 +60,6 @@ export interface ReqOptions {
   path: string;
   query?: Record<string, any>;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  headers?: Record<string, string>;
   body?: any;
   retries?: number;
 }
