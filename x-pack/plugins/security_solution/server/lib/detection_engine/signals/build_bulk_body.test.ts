@@ -12,7 +12,7 @@ import {
   sampleDocWithAncestors,
   sampleRuleSO,
 } from './__mocks__/es_results';
-import { buildBulkBody, buildSignalFromSequence } from './build_bulk_body';
+import { buildBulkBody, buildSignalFromSequence, buildSignalFromEvent } from './build_bulk_body';
 import { SignalHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
@@ -479,6 +479,98 @@ describe('buildSignalFromSequence', () => {
             index: 'myFakeSignalIndex',
             depth: 1,
           },
+          {
+            id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
+            id: sampleIdGuid,
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
+        status: 'open',
+        rule: {
+          actions: [],
+          author: ['Elastic'],
+          building_block_type: 'default',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          rule_id: 'rule-1',
+          false_positives: [],
+          max_signals: 10000,
+          risk_score: 50,
+          risk_score_mapping: [],
+          output_index: '.siem-signals',
+          description: 'Detecting root and admin users',
+          from: 'now-6m',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          language: 'kuery',
+          license: 'Elastic License',
+          name: 'rule-name',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://google.com'],
+          severity: 'high',
+          severity_mapping: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
+          type: 'query',
+          to: 'now',
+          note: '',
+          enabled: true,
+          created_by: 'sample user',
+          updated_by: 'sample user',
+          version: 1,
+          updated_at: ruleSO.updated_at ?? '',
+          created_at: ruleSO.attributes.createdAt,
+          throttle: 'no_actions',
+          exceptions_list: getListArrayMock(),
+        },
+        depth: 2,
+      },
+    };
+    expect(signal).toEqual(expected);
+  });
+});
+
+describe('buildSignalFromEvent', () => {
+  test('builds a basic signal from a single event', () => {
+    const ancestor = sampleDocWithAncestors().hits.hits[0];
+    delete ancestor._source.source;
+    const ruleSO = sampleRuleSO();
+    const signal = buildSignalFromEvent(ancestor, ruleSO);
+    // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
+    delete signal['@timestamp'];
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
+      someKey: 'someValue',
+      event: {
+        kind: 'signal',
+      },
+      signal: {
+        original_time: '2020-04-20T21:27:45+0000',
+        parent: {
+          id: sampleIdGuid,
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          type: 'signal',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+        parents: [
+          {
+            id: sampleIdGuid,
+            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+        ],
+        ancestors: [
           {
             id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
             type: 'event',
