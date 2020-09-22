@@ -48,7 +48,7 @@ export function useTimeSeriesExplorerHref({
                     'transaction.type': transactionType,
                   },
                 }
-              : null),
+              : {}),
           },
         });
         if (!isCancelled) {
