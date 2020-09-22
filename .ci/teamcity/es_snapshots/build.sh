@@ -39,8 +39,7 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 tc_end_block "Create docker image archives"
 
-find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
-ls -alh "$destination"
-
 cd "$destination"
 
+find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
+ls -alh "$destination"

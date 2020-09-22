@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { execSync } = require('child_process');
 
 (async () => {
   const destination = process.argv[2] || __dirname + '/test';
@@ -12,8 +13,8 @@ const fs = require('fs');
   let DESTINATION = '';
 
   const now = new Date()
-  // now.format("yyyyMMdd-HHmmss");
 
+  // format: yyyyMMdd-HHmmss
   const date = [
     now.getFullYear(),
     (now.getMonth()+1).toString().padStart(2, '0'),
@@ -23,8 +24,6 @@ const fs = require('fs');
     now.getMinutes().toString().padStart(2, '0'),
     now.getSeconds().toString().padStart(2, '0'),
   ].join('')
-
-  console.log(date);
 
   try {
     const files = fs.readdirSync(destination);
@@ -41,7 +40,7 @@ const fs = require('fs');
         return {
           filename: filename,
           checksum: filename + '.sha512',
-          url: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${DESTINATION}/${filename}`,
+          url: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/${filename}`,
           version: parts[1],
           platform: parts[3],
           architecture: parts[4].split('.')[0],
@@ -50,7 +49,7 @@ const fs = require('fs');
       });
 
     const manifest = {
-      bucket: `kibana-ci-es-snapshots-daily/${DESTINATION}`.toString(),
+      bucket: `kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}`.toString(),
       branch: ES_BRANCH,
       sha: GIT_COMMIT,
       sha_short: GIT_COMMIT_SHORT,
@@ -61,6 +60,15 @@ const fs = require('fs');
 
     const manifestJSON = JSON.stringify(manifest, null, 2);
     fs.writeFileSync(`${destination}/manifest.json`, manifestJSON);
+
+    execSync(`
+      set -euo pipefail
+      cd "${destination}"
+      gsutil -m cp -r *.* gs://kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}
+      cp manifest.json manifest-latest.json
+      gsutil cp manifest-latest.json gs://kibana-ci-es-snapshots-daily-teamcity/${VERSION}
+      tc_set_env ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json'
+    `);
   } catch (ex) {
     console.error(ex);
     process.exit(1);
