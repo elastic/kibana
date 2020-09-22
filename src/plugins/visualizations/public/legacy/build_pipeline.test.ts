@@ -201,28 +201,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
     });
 
-    describe('handles tagcloud function', () => {
-      it('without buckets', () => {
-        const actual = buildPipelineVisFunction.tagcloud({}, schemasDef, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const schemas = {
-          ...schemasDef,
-          segment: [{ accessor: 1 }],
-        };
-        const actual = buildPipelineVisFunction.tagcloud({}, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with boolean param showLabel', () => {
-        const params = { showLabel: false };
-        const actual = buildPipelineVisFunction.tagcloud(params, schemasDef, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-    });
-
     describe('handles region_map function', () => {
       it('without buckets', () => {
         const params = { metric: {} };
