@@ -49,6 +49,12 @@ export const TestPipelineActions: FunctionComponent = () => {
     });
   };
 
+  const stopPipelineSimulation = () => {
+    setCurrentTestPipelineData({
+      type: 'reset',
+    });
+  };
+
   const openFlyout = (activeTab: TestPipelineFlyoutTab) => {
     setOpenTestPipelineFlyout(true);
     setActiveFlyoutTab(activeTab);
@@ -71,6 +77,7 @@ export const TestPipelineActions: FunctionComponent = () => {
               documents={documents}
               selectedDocumentIndex={selectedDocumentIndex}
               updateSelectedDocument={updateSelectedDocument}
+              stopPipelineSimulation={stopPipelineSimulation}
               openFlyout={openFlyout}
             />
           ) : (

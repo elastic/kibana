@@ -21,6 +21,8 @@ import { Document } from '../../../types';
 
 import { TestPipelineFlyoutTab } from '../test_pipeline_flyout_tabs';
 
+import { ResetDocumentsModal } from './reset_documents_modal';
+
 import './documents_dropdown.scss';
 
 const i18nTexts = {
@@ -31,9 +33,15 @@ const i18nTexts = {
     }
   ),
   addDocumentsButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.buttonLabel',
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.addDocumentsButtonLabel',
     {
       defaultMessage: 'Add documents',
+    }
+  ),
+  resetButtonLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.resetButtonLabel',
+    {
+      defaultMessage: 'Reset',
     }
   ),
   popoverTitle: i18n.translate(
@@ -49,15 +57,18 @@ interface Props {
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
+  stopPipelineSimulation: () => void;
 }
 
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
+  stopPipelineSimulation,
   openFlyout,
 }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
+  const [showResetModal, setShowResetModal] = useState<boolean>(false);
 
   const managePipelineButton = (
     <EuiButtonEmpty
@@ -76,63 +87,95 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiPopover
-      isOpen={showPopover}
-      closePopover={() => setShowPopover(false)}
-      button={managePipelineButton}
-      panelPaddingSize="none"
-      withTitle
-      repositionOnScroll
-      data-test-subj="documentsDropdown"
-      panelClassName="documentsDropdownPanel"
-    >
-      <EuiSelectable
-        singleSelection
-        options={documents.map((doc, index) => ({
-          key: index.toString(),
-          checked: selectedDocumentIndex === index ? 'on' : undefined,
-          label: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel', {
-            defaultMessage: 'Document {documentNumber}',
-            values: {
-              documentNumber: index + 1,
-            },
-          }),
-        }))}
-        onChange={(newOptions) => {
-          const selectedOption = newOptions.find((option) => option.checked === 'on');
-          if (selectedOption) {
-            updateSelectedDocument(Number(selectedOption.key!));
-          }
-
-          setShowPopover(false);
-        }}
+    <>
+      <EuiPopover
+        isOpen={showPopover}
+        closePopover={() => setShowPopover(false)}
+        button={managePipelineButton}
+        panelPaddingSize="none"
+        withTitle
+        repositionOnScroll
+        data-test-subj="documentsDropdown"
+        panelClassName="documentsDropdownPanel"
       >
-        {(list, search) => (
-          <div>
-            <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
+        <EuiSelectable
+          singleSelection
+          options={documents.map((doc, index) => ({
+            key: index.toString(),
+            checked: selectedDocumentIndex === index ? 'on' : undefined,
+            label: i18n.translate(
+              'xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel',
+              {
+                defaultMessage: 'Document {documentNumber}',
+                values: {
+                  documentNumber: index + 1,
+                },
+              }
+            ),
+          }))}
+          onChange={(newOptions) => {
+            const selectedOption = newOptions.find((option) => option.checked === 'on');
+            if (selectedOption) {
+              updateSelectedDocument(Number(selectedOption.key!));
+            }
 
-      <EuiHorizontalRule margin="xs" />
+            setShowPopover(false);
+          }}
+        >
+          {(list) => (
+            <div>
+              <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
+              {list}
+            </div>
+          )}
+        </EuiSelectable>
 
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            onClick={() => {
-              openFlyout('documents');
-              setShowPopover(false);
-            }}
-            data-test-subj="addDocumentsButton"
-          >
-            {i18nTexts.addDocumentsButtonLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
 
-      <EuiSpacer size="s" />
-    </EuiPopover>
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup justifyContent="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              onClick={() => {
+                openFlyout('documents');
+                setShowPopover(false);
+              }}
+              data-test-subj="addDocumentsButton"
+            >
+              {i18nTexts.addDocumentsButtonLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              color="danger"
+              onClick={() => {
+                setShowResetModal(true);
+                setShowPopover(false);
+              }}
+              data-test-subj="resetButton"
+            >
+              {i18nTexts.resetButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+      </EuiPopover>
+
+      {showResetModal && (
+        <ResetDocumentsModal
+          stopPipelineSimulation={stopPipelineSimulation}
+          closeModal={() => setShowResetModal(false)}
+        />
+      )}
+    </>
   );
 };

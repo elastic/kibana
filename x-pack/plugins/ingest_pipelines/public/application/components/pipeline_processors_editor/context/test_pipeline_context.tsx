@@ -50,6 +50,9 @@ type Action =
   | {
       type: 'updateIsExecutingPipeline';
       payload: Pick<TestPipelineData, 'isExecutingPipeline'>;
+    }
+  | {
+      type: 'reset';
     };
 
 export interface TestPipelineContext {
@@ -119,6 +122,10 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
       ...state,
       isExecutingPipeline: action.payload.isExecutingPipeline,
     };
+  }
+
+  if (action.type === 'reset') {
+    return DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData;
   }
 
   return state;
