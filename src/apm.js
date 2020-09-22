@@ -22,7 +22,7 @@ const { name, build } = require('../package.json');
 const { loadConfiguration } = require('@kbn/apm-config-loader');
 
 const ROOT_DIR = join(__dirname, '..');
-const apmConfig = loadConfiguration(ROOT_DIR);
+let apmConfig;
 
 /**
  * Flag to disable APM RUM support on all kibana builds by default
@@ -34,9 +34,20 @@ module.exports = function (serviceName = name) {
     return;
   }
 
+  apmConfig = loadConfiguration(ROOT_DIR);
   const conf = apmConfig.getConfig(serviceName);
   require('elastic-apm-node').start(conf);
 };
 
-module.exports.getConfig = apmConfig.getConfig;
+module.exports.getConfig = (serviceName) => {
+  // integration test runner starts a kibana server that import the module without initializing APM.
+  // so we need to check initialization of the config.
+  // note that we can't just load the configuration during this module's import
+  // because jest IT are ran with `--config path-to-jest-config.js` which conflicts with the CLI's `config` arg
+  // causing the config loader to try to load the jest js config as yaml and throws.
+  if (apmConfig) {
+    return apmConfig.getConfig(serviceName);
+  }
+  return {};
+};
 module.exports.isKibanaDistributable = isKibanaDistributable;
