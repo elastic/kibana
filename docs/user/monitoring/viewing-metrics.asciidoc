@@ -25,10 +25,7 @@ clusters. For more information about the recommended configuration, see
 . Identify where to retrieve monitoring data from.
 +
 --
-The cluster that contains the monitoring data is referred to
-as the _monitoring cluster_.
-
-TIP: If the monitoring data is stored on a *dedicated* monitoring cluster, it is
+If the monitoring data is stored on a dedicated monitoring cluster, it is
 accessible even when the cluster you're monitoring is not. If you have at least
 a gold license, you can send data from multiple clusters to the same monitoring
 cluster and view them all through the same instance of {kib}.
