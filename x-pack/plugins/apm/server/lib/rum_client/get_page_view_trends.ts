@@ -67,7 +67,7 @@ export async function getPageViewTrends({
       x: xVal,
       y: bCount,
     };
-    if (breakdownItem) {
+    if ('breakdown' in bucket) {
       const categoryBuckets = bucket.breakdown.buckets;
       categoryBuckets.forEach(({ key, doc_count: docCount }) => {
         if (key === 'Other') {
