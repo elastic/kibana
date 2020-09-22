@@ -99,7 +99,7 @@ export async function fetchMissingData(
   size: number
 ): Promise<AlertMissingData[]> {
   const endMs = +new Date();
-  const startMs = endMs - limit;
+  const startMs = endMs - limit - limit * 0.25; // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 
   const nameFields = [
     'source_node.name',
@@ -256,9 +256,7 @@ export async function fetchMissingData(
         const stackProductUuid = uuidBucket.key;
         const stackProduct = getStackProductFromIndex(indexBucket.key, clusterBucket);
         let differenceInMs = -1;
-        if (uuidBucket.top.hits.hits.length === 0) {
-          differenceInMs = -2;
-        } else if (uuidBucket.top.hits.hits.length === 1) {
+        if (uuidBucket.top.hits.hits.length === 1) {
           differenceInMs = moment().diff(moment(uuidBucket.top.hits.hits[0]._source.timestamp));
         } else {
           const first = moment(uuidBucket.top.hits.hits[0]._source.timestamp);

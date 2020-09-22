@@ -16,7 +16,11 @@ import template from './index.html';
 import { Legacy } from '../../../../legacy_shims';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
-import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+  ALERT_MISSING_DATA,
+} from '../../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -65,7 +69,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [ALERT_CPU_USAGE, ALERT_MISSING_DATA],
             filters: [
               {
                 nodeUuid: nodeName,

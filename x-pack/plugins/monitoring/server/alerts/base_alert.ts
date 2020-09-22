@@ -197,7 +197,18 @@ export class BaseAlert {
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
         if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
-          accum[instanceId] = alertInstance;
+          accum[instanceId] = {
+            ...alertInstance,
+            state: alertInstance.state
+              ? {
+                  alertStates: (alertInstance.state as AlertInstanceState).alertStates.filter(
+                    (alertState: AlertState) => {
+                      return this.filterAlertState(alertState, filters);
+                    }
+                  ),
+                }
+              : alertInstance.state,
+          };
         }
         return accum;
       },
@@ -206,6 +217,10 @@ export class BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return true;
+  }
+
+  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
     return true;
   }
 

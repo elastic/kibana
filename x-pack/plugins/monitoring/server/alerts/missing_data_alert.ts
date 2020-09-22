@@ -16,7 +16,7 @@ import {
   AlertMissingData,
   AlertMessageTimeToken,
   AlertInstanceState,
-  AlertMessageDocLinkToken,
+  AlertMessageLinkToken,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import { INDEX_PATTERN, ALERT_MISSING_DATA } from '../../common/constants';
@@ -24,13 +24,22 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
-import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
+import {
+  CommonAlertFilter,
+  CommonAlertParams,
+  CommonAlertParamDetail,
+  CommonAlertStackProductFilter,
+  CommonAlertNodeUuidFilter,
+} from '../../common/types';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingData } from '../lib/alerts/fetch_missing_data';
+import { getTypeLabelForStackProduct } from '../lib/alerts/get_type_label_for_stack_product';
+import { getListingLinkForStackProduct } from '../lib/alerts/get_listing_link_for_stack_product';
+import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
 
-// const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
-//   defaultMessage: 'resolved',
-// });
+const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
+  defaultMessage: 'resolved',
+});
 const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
   defaultMessage: 'firing',
 });
@@ -159,33 +168,55 @@ export class MissingDataAlert extends BaseAlert {
       return {
         instanceKey: `${missing.clusterUuid}:${missing.stackProduct}:${missing.stackProductUuid}`,
         clusterUuid: missing.clusterUuid,
-        shouldFire: missing.gapDuration > duration,
+        shouldFire: missing.gapDuration > duration && missing.gapDuration <= limit,
         severity: AlertSeverity.Danger,
-        meta: missing,
+        meta: { missing, limit },
         ccs: missing.ccs,
       };
     });
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    // const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
-    // if (filters && filters.length) {
-    //   for (const _filter of filters) {
-    //     const filter = _filter as CommonAlertCpuUsageFilter;
-    //     if (filter && filter.nodeUuid) {
-    //       let nodeExistsInStates = false;
-    //       for (const state of alertInstanceState.alertStates) {
-    //         if ((state as AlertMissingDataState).nodeId === filter.nodeUuid) {
-    //           nodeExistsInStates = true;
-    //           break;
-    //         }
-    //       }
-    //       if (!nodeExistsInStates) {
-    //         return false;
-    //       }
-    //     }
-    //   }
-    // }
+    const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
+    if (filters && filters.length) {
+      for (const filter of filters) {
+        const stackProductFilter = filter as CommonAlertStackProductFilter;
+        if (stackProductFilter && stackProductFilter.stackProduct) {
+          let existsInState = false;
+          for (const state of alertInstanceState.alertStates) {
+            if ((state as AlertMissingDataState).stackProduct === stackProductFilter.stackProduct) {
+              existsInState = true;
+              break;
+            }
+          }
+          if (!existsInState) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
+    const state = alertState as AlertMissingDataState;
+    if (filters && filters.length) {
+      for (const filter of filters) {
+        const stackProductFilter = filter as CommonAlertStackProductFilter;
+        if (stackProductFilter && stackProductFilter.stackProduct) {
+          if (state.stackProduct !== stackProductFilter.stackProduct) {
+            return false;
+          }
+        }
+
+        const nodeUuidFilter = filter as CommonAlertNodeUuidFilter;
+        if (nodeUuidFilter && nodeUuidFilter.nodeUuid) {
+          if (state.stackProductUuid !== nodeUuidFilter.nodeUuid) {
+            return false;
+          }
+        }
+      }
+    }
     return true;
   }
 
@@ -201,13 +232,30 @@ export class MissingDataAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const missing = item.meta as AlertMissingData;
+    const { missing, limit } = item.meta as { missing: AlertMissingData; limit: number };
+    const globalState = [`cluster_uuid:${item.clusterUuid}`];
+    if (item.ccs) {
+      globalState.push(`ccs:${item.ccs}`);
+    }
     if (!alertState.ui.isFiring) {
+      if (missing.gapDuration > limit) {
+        return {
+          text: i18n.translate('xpack.monitoring.alerts.missingData.ui.notQuiteResolvedMessage', {
+            defaultMessage: `We are still not seeing monitoring data for the {stackProduct} {type}: {stackProductName} and will stop trying. To change this, configure the alert to look farther back for data.`,
+            values: {
+              stackProduct: getStackProductLabel(missing.stackProduct),
+              type: getTypeLabelForStackProduct(missing.stackProduct, false),
+              stackProductName: missing.stackProductName,
+            },
+          }),
+        };
+      }
       return {
         text: i18n.translate('xpack.monitoring.alerts.missingData.ui.resolvedMessage', {
-          defaultMessage: `We are no longer detecting that monitoring data is missing for {stackProduct}:{stackProductName}, as of #resolved`,
+          defaultMessage: `We are now seeing monitoring data for the {stackProduct} {type}: {stackProductName}, as of #resolved`,
           values: {
-            stackProduct: missing.stackProduct,
+            stackProduct: getStackProductLabel(missing.stackProduct),
+            type: getTypeLabelForStackProduct(missing.stackProduct, false),
             stackProductName: missing.stackProductName,
           },
         }),
@@ -224,39 +272,41 @@ export class MissingDataAlert extends BaseAlert {
     }
     return {
       text: i18n.translate('xpack.monitoring.alerts.missingData.ui.firingMessage', {
-        defaultMessage: `For the past {gapDuration}, we have not detected any monitoring data from {stackProduct}:{stackProductName}, starting at #absolute`,
+        defaultMessage: `For the past {gapDuration}, we have not detected any monitoring data from the {stackProduct} {type}: {stackProductName}, starting at #absolute`,
         values: {
           gapDuration: moment.duration(missing.gapDuration, 'milliseconds').humanize(),
-          stackProduct: missing.stackProduct,
+          stackProduct: getStackProductLabel(missing.stackProduct),
+          type: getTypeLabelForStackProduct(missing.stackProduct, false),
           stackProductName: missing.stackProductName,
         },
       }),
       nextSteps: [
         {
           text: i18n.translate('xpack.monitoring.alerts.missingData.ui.nextSteps.hotThreads', {
-            defaultMessage: `#start_linkCheck hot threads#end_link`,
+            defaultMessage: `#start_linkView all {stackProduct} {type}#end_link`,
+            values: {
+              type: getTypeLabelForStackProduct(missing.stackProduct),
+              stackProduct: getStackProductLabel(missing.stackProduct),
+            },
           }),
           tokens: [
             {
               startToken: '#start_link',
               endToken: '#end_link',
-              type: AlertMessageTokenType.DocLink,
-              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`,
-            } as AlertMessageDocLinkToken,
+              type: AlertMessageTokenType.Link,
+              url: `${getListingLinkForStackProduct(missing.stackProduct)}?_g=(${globalState.join(
+                ','
+              )})`,
+            } as AlertMessageLinkToken,
           ],
         },
         {
           text: i18n.translate('xpack.monitoring.alerts.missingData.ui.nextSteps.runningTasks', {
-            defaultMessage: `#start_linkCheck long running tasks#end_link`,
+            defaultMessage: `Verify monitoring settings on the {type}`,
+            values: {
+              type: getTypeLabelForStackProduct(missing.stackProduct, false),
+            },
           }),
-          tokens: [
-            {
-              startToken: '#start_link',
-              endToken: '#end_link',
-              type: AlertMessageTokenType.DocLink,
-              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`,
-            } as AlertMessageDocLinkToken,
-          ],
         },
       ],
       tokens: [
@@ -294,7 +344,10 @@ export class MissingDataAlert extends BaseAlert {
       .filter((_state) => (_state as AlertMissingDataState).ui.isFiring)
       .map((_state) => {
         const state = _state as AlertMissingDataState;
-        return `${state.stackProduct}:${state.stackProductUuid}`;
+        return `${getStackProductLabel(state.stackProduct)} ${getTypeLabelForStackProduct(
+          state.stackProduct,
+          false
+        )}: ${state.stackProductName}`;
       })
       .join(',');
     if (firingCount > 0) {
@@ -314,7 +367,7 @@ export class MissingDataAlert extends BaseAlert {
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalShortMessage',
         {
-          defaultMessage: `We are not detecting monitoring data for {count} stack product(s) in cluster: {clusterName}. {shortActionText}`,
+          defaultMessage: `We have not detect any monitoring data for {count} stack product(s) in cluster: {clusterName}. {shortActionText}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -325,7 +378,7 @@ export class MissingDataAlert extends BaseAlert {
       const internalFullMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalFullMessage',
         {
-          defaultMessage: `We are not detecting monitoring data for {count} stack product(s) in cluster: {clusterName}. {action}`,
+          defaultMessage: `We have not detect any monitoring data for {count} stack product(s) in cluster: {clusterName}. {action}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -344,44 +397,47 @@ export class MissingDataAlert extends BaseAlert {
         actionPlain: shortActionText,
       });
     } else {
-      // const resolvedCount = instanceState.alertStates.filter(
-      //   (alertState) => !alertState.ui.isFiring
-      // ).length;
-      // const resolvedNodes = instanceState.alertStates
-      //   .filter((_state) => !(_state as AlertMissingDataState).ui.isFiring)
-      //   .map((_state) => {
-      //     const state = _state as AlertMissingDataState;
-      //     return `${state.stackProduct}:${state.stackProductUuid}`;
-      //   })
-      //   .join(',');
-      // if (resolvedCount > 0) {
-      //   instance.scheduleActions('default', {
-      //     internalShortMessage: i18n.translate(
-      //       'xpack.monitoring.alerts.missingData.resolved.internalShortMessage',
-      //       {
-      //         defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-      //         values: {
-      //           count: resolvedCount,
-      //           clusterName: cluster.clusterName,
-      //         },
-      //       }
-      //     ),
-      //     internalFullMessage: i18n.translate(
-      //       'xpack.monitoring.alerts.missingData.resolved.internalFullMessage',
-      //       {
-      //         defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-      //         values: {
-      //           count: resolvedCount,
-      //           clusterName: cluster.clusterName,
-      //         },
-      //       }
-      //     ),
-      //     state: RESOLVED,
-      //     nodes: resolvedNodes,
-      //     count: resolvedCount,
-      //     clusterName: cluster.clusterName,
-      //   });
-      // }
+      const resolvedCount = instanceState.alertStates.filter(
+        (alertState) => !alertState.ui.isFiring
+      ).length;
+      const resolvedStackProducts = instanceState.alertStates
+        .filter((_state) => !(_state as AlertMissingDataState).ui.isFiring)
+        .map((_state) => {
+          const state = _state as AlertMissingDataState;
+          return `${getStackProductLabel(state.stackProduct)} ${getTypeLabelForStackProduct(
+            state.stackProduct,
+            false
+          )}: ${state.stackProductName}`;
+        })
+        .join(',');
+      if (resolvedCount > 0) {
+        instance.scheduleActions('default', {
+          internalShortMessage: i18n.translate(
+            'xpack.monitoring.alerts.missingData.resolved.internalShortMessage',
+            {
+              defaultMessage: `We are now seeing monitoring data for {count} stack product(s) in cluster: {clusterName}.`,
+              values: {
+                count: resolvedCount,
+                clusterName: cluster.clusterName,
+              },
+            }
+          ),
+          internalFullMessage: i18n.translate(
+            'xpack.monitoring.alerts.missingData.resolved.internalFullMessage',
+            {
+              defaultMessage: `We are now seeing monitoring data for {count} stack product(s) in cluster {clusterName}.`,
+              values: {
+                count: resolvedCount,
+                clusterName: cluster.clusterName,
+              },
+            }
+          ),
+          state: RESOLVED,
+          stackProducts: resolvedStackProducts,
+          count: resolvedCount,
+          clusterName: cluster.clusterName,
+        });
+      }
     }
   }
 
@@ -398,7 +454,7 @@ export class MissingDataAlert extends BaseAlert {
       }
 
       const firingInstances = stackProducts.reduce((list: string[], stackProduct) => {
-        const missing = stackProduct.meta as AlertMissingData;
+        const { missing } = stackProduct.meta as { missing: AlertMissingData; limit: number };
         if (stackProduct.shouldFire) {
           list.push(`${missing.stackProduct}:${missing.stackProductUuid}`);
         }
@@ -413,15 +469,14 @@ export class MissingDataAlert extends BaseAlert {
       };
       let shouldExecuteActions = false;
       for (const stackProduct of stackProducts) {
-        const missing = stackProduct.meta as AlertMissingData;
+        const { missing } = stackProduct.meta as { missing: AlertMissingData; limit: number };
         let state: AlertMissingDataState;
         const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
           const _alertState = alertState as AlertMissingDataState;
           return (
             _alertState.cluster.clusterUuid === cluster.clusterUuid &&
-            _alertState.stackProduct === (stackProduct.meta as AlertMissingData).stackProduct &&
-            _alertState.stackProductUuid ===
-              (stackProduct.meta as AlertMissingData).stackProductUuid
+            _alertState.stackProduct === missing.stackProduct &&
+            _alertState.stackProductUuid === missing.stackProductUuid
           );
         });
         if (indexInState > -1) {
@@ -432,6 +487,7 @@ export class MissingDataAlert extends BaseAlert {
 
         state.stackProduct = missing.stackProduct;
         state.stackProductUuid = missing.stackProductUuid;
+        state.stackProductName = missing.stackProductName;
         state.gapDuration = missing.gapDuration;
 
         if (stackProduct.shouldFire) {

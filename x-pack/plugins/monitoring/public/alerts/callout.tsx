@@ -32,9 +32,10 @@ const TYPES = [
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
+  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true } = props;
+  const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
 
   const callouts = TYPES.map((type) => {
     const list = [];
@@ -49,18 +50,18 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
 
     if (list.length) {
       return (
-        <Fragment>
+        <div key={type}>
           <EuiCallOut title={type.label} color={type.severity} iconType="bell">
             <ul>
               {list.map((state, index) => {
                 const nextStepsUi =
                   state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
                     <ul>
-                      {state.ui.message.nextSteps.map(
-                        (step: AlertMessage, nextStepIndex: number) => (
+                      {state.ui.message.nextSteps
+                        .filter(nextStepsFilter)
+                        .map((step: AlertMessage, nextStepIndex: number) => (
                           <li key={nextStepIndex}>{replaceTokens(step)}</li>
-                        )
-                      )}
+                        ))}
                     </ul>
                   ) : null;
 
@@ -74,7 +75,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             </ul>
           </EuiCallOut>
           <EuiSpacer />
-        </Fragment>
+        </div>
       );
     }
   });

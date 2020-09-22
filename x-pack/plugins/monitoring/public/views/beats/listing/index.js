@@ -14,7 +14,7 @@ import template from './index.html';
 import React, { Fragment } from 'react';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID, ALERT_MISSING_DATA } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
@@ -42,14 +42,22 @@ uiRoutes.when('/beats/beats', {
         reactNodeId: 'monitoringBeatsInstancesApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_DATA],
+            filters: [
+              {
+                stackProduct: BEATS_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
-
-      //Bypassing super.updateData, since this controller loads its own data
-      this._isDataInitialized = true;
 
       $scope.$watch(
         () => this.data,
@@ -70,6 +78,7 @@ uiRoutes.when('/beats/beats', {
               <Listing
                 stats={this.data.stats}
                 data={this.data.listing}
+                alerts={this.alerts}
                 setupMode={setupMode}
                 sorting={this.sorting || sorting}
                 pagination={this.pagination || pagination}

@@ -30,6 +30,7 @@ export interface AlertCpuUsageState extends AlertState {
 export interface AlertMissingDataState extends AlertState {
   stackProduct: string;
   stackProductUuid: string;
+  stackProductName: string;
   gapDuration: number;
 }
 

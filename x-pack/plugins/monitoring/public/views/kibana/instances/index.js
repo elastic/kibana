@@ -16,6 +16,7 @@ import {
   KIBANA_SYSTEM_ID,
   CODE_PATH_KIBANA,
   ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_MISSING_DATA,
 } from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
@@ -40,7 +41,12 @@ uiRoutes.when('/kibana/instances', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_DATA],
+            filters: [
+              {
+                stackProduct: KIBANA_SYSTEM_ID,
+              },
+            ],
           },
         },
       });

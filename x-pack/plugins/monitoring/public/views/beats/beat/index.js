@@ -11,7 +11,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { CODE_PATH_BEATS } from '../../../../common/constants';
+import { CODE_PATH_BEATS, ALERT_MISSING_DATA, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beat/:beatUuid', {
   template,
@@ -43,6 +43,17 @@ uiRoutes.when('/beats/beat/:beatUuid', {
         getPageData,
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_DATA],
+            filters: [
+              {
+                stackProduct: BEATS_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       this.data = pageData;
