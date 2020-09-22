@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
-import { eqlValidationSchema, EqlValidationSchemaDecoded } from './eql_validation_schema';
+import { eqlValidationSchema, EqlValidationSchema } from './eql_validation_schema';
 import { getEqlValidationSchemaMock } from './eql_validation_schema.mock';
 
 describe('EQL validation schema', () => {
@@ -48,7 +48,7 @@ describe('EQL validation schema', () => {
     const decoded = eqlValidationSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    const expected: EqlValidationSchemaDecoded = {
+    const expected: EqlValidationSchema = {
       index: ['index-123'],
       query: 'process where process.name == "regsvr32.exe"',
     };

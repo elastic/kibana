@@ -5,10 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import {
-  eqlValidationSchema,
-  EqlValidationSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/eql_validation_schema';
+import { eqlValidationSchema } from '../../../../../common/detection_engine/schemas/request/eql_validation_schema';
 import { DETECTION_ENGINE_EQL_VALIDATION_URL } from '../../../../../common/constants';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformError, buildSiemResponse } from '../utils';
@@ -19,9 +16,7 @@ export const eqlValidationRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_EQL_VALIDATION_URL,
       validate: {
-        body: buildRouteValidation<typeof eqlValidationSchema, EqlValidationSchemaDecoded>(
-          eqlValidationSchema
-        ),
+        body: buildRouteValidation(eqlValidationSchema),
       },
       options: {
         tags: ['access:securitySolution'],
