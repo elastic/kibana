@@ -64,7 +64,11 @@ describe('getConnections', () => {
         environment
       );
 
-      expect(connections).toMatchSnapshot();
+      expect(
+        connections.every(
+          (conn) => conn.source['service.environment'] === environment
+        )
+      ).toBeTruthy();
     });
 
     it('filters by environment not defined', () => {
