@@ -139,7 +139,7 @@ export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
-  readonly type?: HTMLInputElement['type'];
+  readonly type?: string;
   readonly defaultValue?: ValueType;
   readonly validations?: Array<ValidationConfig<T, string, ValueType>>;
   readonly formatters?: FormatterFunc[];
