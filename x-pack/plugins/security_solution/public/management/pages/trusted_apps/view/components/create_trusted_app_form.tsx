@@ -147,6 +147,7 @@ export interface TrustedAppFormState {
   isValid: boolean;
   item: NewTrustedApp;
 }
+
 export type CreateTrustedAppFormProps = Pick<
   EuiFormProps,
   'className' | 'data-test-subj' | 'isInvalid' | 'error' | 'invalidCallout'
@@ -158,6 +159,7 @@ export type CreateTrustedAppFormProps = Pick<
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
   ({ fullWidth, onChange, ...formProps }) => {
     const dataTestSubj = formProps['data-test-subj'];
+
     const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
       return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
         return {
@@ -166,15 +168,26 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         };
       });
     }, []);
+
     const [formValues, setFormValues] = useState<NewTrustedApp>({
       name: '',
       os: 'windows',
       entries: [generateNewEntry()],
       description: '',
     });
+
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateFormValues(formValues)
     );
+
+    const [wasVisited, setWasVisited] = useState<
+      Partial<
+        {
+          [key in keyof NewTrustedApp]: boolean;
+        }
+      >
+    >({});
+
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
         if (dataTestSubj) {
@@ -183,6 +196,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       },
       [dataTestSubj]
     );
+
     const handleAndClick = useCallback(() => {
       setFormValues(
         (prevState): NewTrustedApp => {
@@ -205,6 +219,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         }
       );
     }, [setFormValues]);
+
     const handleDomChangeEvents = useCallback<
       ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     >(({ target: { name, value } }) => {
@@ -217,6 +232,19 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         }
       );
     }, []);
+
+    const handleDomBlurEvents = useCallback<ChangeEventHandler<HTMLInputElement>>(
+      ({ target: { name } }) => {
+        setWasVisited((prevState) => {
+          return {
+            ...prevState,
+            [name]: true,
+          };
+        });
+      },
+      []
+    );
+
     const handleOsChange = useCallback<(v: string) => void>((newOsValue) => {
       setFormValues(
         (prevState): NewTrustedApp => {
@@ -243,7 +271,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           return prevState;
         }
       );
+      setWasVisited((prevState) => {
+        return {
+          ...prevState,
+          os: true,
+        };
+      });
     }, []);
+
     const handleEntryRemove = useCallback((entry: NewTrustedApp['entries'][0]) => {
       setFormValues(
         (prevState): NewTrustedApp => {
@@ -254,6 +289,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         }
       );
     }, []);
+
     const handleEntryChange = useCallback<LogicalConditionBuilderProps['onEntryChange']>(
       (newEntry, oldEntry) => {
         setFormValues(
@@ -306,13 +342,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           })}
           fullWidth={fullWidth}
           data-test-subj={getTestId('nameRow')}
-          isInvalid={validationResult.result.name?.isInvalid}
+          isInvalid={wasVisited?.name && validationResult.result.name?.isInvalid}
           error={validationResult.result.name?.errors}
         >
           <EuiFieldText
             name="name"
             value={formValues.name}
             onChange={handleDomChangeEvents}
+            onBlur={handleDomBlurEvents}
             fullWidth
             required
             data-test-subj={getTestId('nameTextField')}
@@ -324,7 +361,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           })}
           fullWidth={fullWidth}
           data-test-subj={getTestId('OsRow')}
-          isInvalid={validationResult.result.os?.isInvalid}
+          isInvalid={wasVisited?.os && validationResult.result.os?.isInvalid}
           error={validationResult.result.os?.errors}
         >
           <EuiSuperSelect
@@ -339,7 +376,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         <EuiFormRow
           fullWidth={fullWidth}
           data-test-subj={getTestId('conditionsRow')}
-          isInvalid={validationResult.result.entries?.isInvalid}
+          isInvalid={wasVisited?.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
         >
           <LogicalConditionBuilder
