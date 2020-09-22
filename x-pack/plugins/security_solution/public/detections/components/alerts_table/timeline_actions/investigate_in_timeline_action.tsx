@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
@@ -15,7 +15,6 @@ import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { CreateTimelineProps } from '../types';
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -34,9 +33,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
 
-  const signalIndexNameSelector = useMemo(() => sourcererSelectors.signalIndexNameSelector(), []);
-  const signalIndexName = useSelector(signalIndexNameSelector);
-
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
@@ -52,14 +48,15 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         notes: [],
         timeline: {
           ...timeline,
-          ...(signalIndexName != null ? { indexNames: [signalIndexName] } : {}),
+          // by setting as an empty array, it will default to all in the reducer because of the event type
+          indexNames: [],
           show: true,
         },
         to: toTimeline,
         ruleNote,
       })();
     },
-    [dispatch, signalIndexName, updateTimelineIsLoading]
+    [dispatch, updateTimelineIsLoading]
   );
 
   const investigateInTimelineAlertClick = useCallback(

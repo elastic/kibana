@@ -381,6 +381,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     sourcererActions.setSelectedIndexPatterns({
       id: SourcererScopeName.timeline,
       selectedPatterns: timeline.indexNames,
+      eventType: timeline.eventType,
     })
   );
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));

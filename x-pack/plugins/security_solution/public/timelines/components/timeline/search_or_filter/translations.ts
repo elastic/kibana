@@ -91,25 +91,24 @@ export const DETECTION_ALERTS_EVENT = i18n.translate(
   }
 );
 
-export const KIBANA_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.timeline.searchOrFilter.eventTypeKibanaEvent',
+export const CUSTOM_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.customeIndexNames',
   {
-    defaultMessage: 'Index patterns',
+    defaultMessage: 'Custom',
   }
 );
 
 export const SELECT_INDEX_PATTERNS = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.help',
   {
-    defaultMessage: 'Select index patterns',
+    defaultMessage: 'Data sources selection',
   }
 );
 
 export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.configure',
   {
-    defaultMessage:
-      'Configure additional Kibana index patterns to see them become available in the Security Solution',
+    defaultMessage: 'View data sources associated with each of the above selections',
   }
 );
 
@@ -117,5 +116,19 @@ export const SAVE_INDEX_PATTERNS = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.save',
   {
     defaultMessage: 'Save',
+  }
+);
+
+export const SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.showAdvancedSettings',
+  {
+    defaultMessage: 'Show Advanced',
+  }
+);
+
+export const HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.hideAdvancedSettings',
+  {
+    defaultMessage: 'Hide Advanced',
   }
 );

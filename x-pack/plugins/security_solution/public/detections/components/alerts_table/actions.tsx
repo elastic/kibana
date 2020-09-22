@@ -219,7 +219,7 @@ export const sendAlertToTimelineAction = async ({
             templateTimelineId: null,
             status: TimelineStatus.draft,
             dataProviders,
-            eventType: 'alert',
+            eventType: 'all',
             filters,
             dateRange: {
               start: from,

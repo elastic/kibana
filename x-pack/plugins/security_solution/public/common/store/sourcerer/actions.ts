@@ -5,6 +5,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import { EventType } from '../../../timelines/store/timeline/model';
 
 import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
 
@@ -31,4 +32,5 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
 export const setSelectedIndexPatterns = actionCreator<{
   id: SourcererScopeName;
   selectedPatterns: string[];
+  eventType?: EventType;
 }>('SET_SELECTED_INDEX_PATTERNS');

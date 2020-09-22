@@ -21,11 +21,11 @@ export const useInitSourcerer = (
   const dispatch = useDispatch();
 
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-  const getKibanaIndexPatternsSelector = useMemo(
-    () => sourcererSelectors.kibanaIndexPatternsSelector(),
+  const getConfigIndexPatternsSelector = useMemo(
+    () => sourcererSelectors.configIndexPatternsSelector(),
     []
   );
-  const kibanaIndexPatterns = useSelector(getKibanaIndexPatternsSelector, isEqual);
+  const ConfigIndexPatterns = useSelector(getConfigIndexPatternsSelector, isEqual);
 
   useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
@@ -35,6 +35,18 @@ export const useInitSourcerer = (
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [dispatch, loadingSignalIndex, signalIndexName]);
+
+  // Related to timeline
+  useEffect(() => {
+    if (!loadingSignalIndex && signalIndexName != null) {
+      dispatch(
+        sourcererActions.setSelectedIndexPatterns({
+          id: SourcererScopeName.timeline,
+          selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
+        })
+      );
+    }
+  }, [ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
 
   // Related to the detection page
   useEffect(() => {
@@ -50,7 +62,7 @@ export const useInitSourcerer = (
         })
       );
     }
-  }, [dispatch, kibanaIndexPatterns, isSignalIndexExists, scopeId, signalIndexName]);
+  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {

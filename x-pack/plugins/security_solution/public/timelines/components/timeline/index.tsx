@@ -25,7 +25,6 @@ import {
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useIndexFields } from '../../../common/containers/source';
 
 export interface OwnProps {
   id: string;
@@ -68,7 +67,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     upsertColumn,
     usersViewing,
   }) => {
-    useIndexFields(SourcererScopeName.timeline);
     const {
       browserFields,
       docValueFields,

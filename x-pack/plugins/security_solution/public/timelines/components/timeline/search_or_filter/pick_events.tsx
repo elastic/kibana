@@ -5,24 +5,24 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
-  EuiButtonGroup,
+  EuiRadioGroup,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiHealth,
   EuiIcon,
-  EuiIconTip,
   EuiPopover,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import debounce from 'lodash/debounce';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -50,10 +50,18 @@ const WarningEuiHealth = styled(EuiHealth)`
   }
 `;
 
-const FilterGroup = styled(EuiButtonGroup)`
-  .euiHealth {
-    display: flex;
-  }
+const AdvancedSettings = styled(EuiText)`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiColorPrimary};
+  `}
+`;
+
+const ConfigHelper = styled(EuiText)`
+  margin-left: 4px;
+`;
+
+const Filter = styled(EuiRadioGroup)`
+  margin-left: 4px;
 `;
 
 const PickEventContainer = styled.div`
@@ -66,7 +74,7 @@ const PickEventContainer = styled.div`
   }
 `;
 
-const toggleEventType = [
+const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
   {
     id: 'all',
     label: (
@@ -84,12 +92,9 @@ const toggleEventType = [
     label: <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>,
   },
   {
-    id: 'kibana',
-    label: (
-      <>
-        <EuiIcon type="logoKibana" size="s" /> {i18n.KIBANA_INDEX_PATTERNS}
-      </>
-    ),
+    id: 'custom',
+    label: <>{i18n.CUSTOM_INDEX_PATTERNS}</>,
+    disabled: isCustomDisabled,
   },
 ];
 
@@ -103,6 +108,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   onChangeEventTypeAndIndexesName,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [showAdvanceSettings, setAdvanceSettings] = useState(false);
   const [filterEventType, setFilterEventType] = useState<EventType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
@@ -146,10 +152,26 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [kibanaIndexPatterns]
   );
 
-  const onChangeCombo = useCallback((newSelectedOptions) => {
-    setFilterEventType('custom');
-    setSelectedOptions(newSelectedOptions);
-  }, []);
+  const onChangeCombo = useCallback(
+    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
+      if (
+        localSelectedPatterns.sort().join() ===
+        [...configIndexPatterns, signalIndexName].sort().join()
+      ) {
+        setFilterEventType('all');
+      } else if (localSelectedPatterns.sort().join() === configIndexPatterns.sort().join()) {
+        setFilterEventType('raw');
+      } else if (localSelectedPatterns.sort().join() === signalIndexName) {
+        setFilterEventType('alert');
+      } else {
+        setFilterEventType('custom');
+      }
+
+      setSelectedOptions(newSelectedOptions);
+    },
+    [configIndexPatterns, signalIndexName]
+  );
 
   const onChangeFilter = useCallback(
     (filter) => {
@@ -202,6 +224,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setPopover(false);
   }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
+  const toggleAdvancedSettings = useCallback((isOpen: boolean) => setAdvanceSettings(isOpen), []);
+
   const comboBox = useMemo(
     () => (
       <EuiComboBox
@@ -219,32 +243,35 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
   );
 
+  const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
+    filterEventType,
+  ]);
+
   const filter = useMemo(
     () => (
-      <FilterGroup
-        options={toggleEventType}
+      <Filter
+        options={filterOptions}
         idSelected={filterEventType}
         onChange={onChangeFilter}
-        buttonSize="compressed"
-        isFullWidth
+        name="data sources"
       />
     ),
-    [filterEventType, onChangeFilter]
+    [filterEventType, filterOptions, onChangeFilter]
   );
 
-  const button = useMemo(
-    () => (
+  const button = useMemo(() => {
+    const options = getEventTypeOptions();
+    return (
       <EuiButton
         iconType="arrowDown"
         iconSide="right"
         isLoading={sourcererScope.loading}
         onClick={togglePopover}
       >
-        {i18n.KIBANA_INDEX_PATTERNS}
+        {options.find((opt) => opt.id === filterEventType)?.label}
       </EuiButton>
-    ),
-    [sourcererScope.loading, togglePopover]
-  );
+    );
+  }, [filterEventType, sourcererScope.loading, togglePopover]);
 
   useEffect(() => {
     const newSelecteOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
@@ -281,26 +308,45 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         >
           <div style={{ width: '600px' }}>
             <EuiPopoverTitle>
-              <>
-                {i18n.SELECT_INDEX_PATTERNS}
-                <EuiIconTip position="right" content={i18n.CONFIGURE_INDEX_PATTERNS} />
-              </>
+              <>{i18n.SELECT_INDEX_PATTERNS}</>
             </EuiPopoverTitle>
+            <EuiSpacer size="s" />
             {filter}
-            <EuiSpacer size="s" />
-            {comboBox}
-            <EuiSpacer size="s" />
-            <EuiPopoverFooter>
-              <EuiButton
-                onClick={handleSaveIndices}
-                data-test-subj="add-index"
-                fill
-                fullWidth
-                size="s"
-              >
-                {i18n.SAVE_INDEX_PATTERNS}
-              </EuiButton>
-            </EuiPopoverFooter>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id="accordion1"
+              buttonContent={
+                <AdvancedSettings>
+                  {showAdvanceSettings
+                    ? i18n.HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS
+                    : i18n.SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS}
+                </AdvancedSettings>
+              }
+              onToggle={toggleAdvancedSettings}
+            >
+              <>
+                <EuiSpacer size="s" />
+                {comboBox}
+              </>
+            </EuiAccordion>
+            {!showAdvanceSettings && (
+              <>
+                <EuiSpacer size="s" />
+                <ConfigHelper size="s" color="subdued">
+                  {i18n.CONFIGURE_INDEX_PATTERNS}
+                </ConfigHelper>
+              </>
+            )}
+            <EuiSpacer size="m" />
+            <EuiButton
+              onClick={handleSaveIndices}
+              data-test-subj="add-index"
+              fill
+              fullWidth
+              size="s"
+            >
+              {i18n.SAVE_INDEX_PATTERNS}
+            </EuiButton>
           </div>
         </EuiPopover>
       </EuiToolTip>

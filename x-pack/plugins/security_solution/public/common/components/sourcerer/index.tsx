@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiTextColor,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
@@ -120,7 +120,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         data-test-subj="sourcerer-trigger"
         flush="left"
         iconSide="right"
-        iconType="indexSettings"
+        iconType="arrowDown"
         isLoading={loading}
         onClick={setPopoverIsOpenCb}
         size="l"
@@ -178,7 +178,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
           <EuiSpacer size="s" />
-          <EuiTextColor color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiTextColor>
+          <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
           <EuiSpacer size="xs" />
           {comboBox}
           <EuiSpacer size="s" />

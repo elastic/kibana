@@ -14,7 +14,7 @@ import {
   setSignalIndexName,
   setSource,
 } from './actions';
-import { initialSourcererState, SourcererModel } from './model';
+import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 
 export type SourcererState = SourcererModel;
 
@@ -38,7 +38,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSelectedIndexPatterns, (state, { id, selectedPatterns }) => {
+  .case(setSelectedIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
     const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
     const newSelectedPatterns = selectedPatterns.filter(
       (sp) =>
@@ -46,6 +46,21 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         kibanaIndexPatterns.includes(sp) ||
         (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
     );
+    let defaultIndexPatterns = state.configIndexPatterns;
+    if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
+      if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
+        defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
+      } else if (eventType === 'raw') {
+        defaultIndexPatterns = state.configIndexPatterns;
+      } else if (
+        !isEmpty(state.signalIndexName) &&
+        (eventType === 'signal' || eventType === 'alert')
+      ) {
+        defaultIndexPatterns = [state.signalIndexName ?? ''];
+      }
+    } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
+      defaultIndexPatterns = [state.signalIndexName ?? ''];
+    }
     return {
       ...state,
       sourcererScopes: {
@@ -53,7 +68,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           selectedPatterns: isEmpty(newSelectedPatterns)
-            ? state.configIndexPatterns
+            ? defaultIndexPatterns
             : newSelectedPatterns,
         },
       },
