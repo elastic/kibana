@@ -60,7 +60,7 @@ exports[`source editor geo_grid_source default vector layer config should allow 
 </Fragment>
 `;
 
-exports[`source editor geo_grid_source should put limitations based on heatmap-rendering selection should disable multiple metrics 1`] = `
+exports[`source editor geo_grid_source should put limitations based on heatmap-rendering selection should not allow super-fine option for heatmaps and should not allow multiple metrics 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -82,66 +82,6 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
       fields={null}
       metrics={Array []}
       metricsFilter={[Function]}
-      onChange={[Function]}
-    />
-  </EuiPanel>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiPanel>
-    <EuiTitle
-      size="xs"
-    >
-      <h6>
-        <FormattedMessage
-          defaultMessage="Grid parameters"
-          id="xpack.maps.source.esGrid.geoTileGridLabel"
-          values={Object {}}
-        />
-      </h6>
-    </EuiTitle>
-    <EuiSpacer
-      size="m"
-    />
-    <ResolutionEditor
-      includeSuperFine={true}
-      onChange={[Function]}
-      resolution="COARSE"
-    />
-    <RenderAsSelect
-      isColumnCompressed={true}
-      onChange={[Function]}
-      renderAs="heatmap"
-    />
-  </EuiPanel>
-  <EuiSpacer
-    size="s"
-  />
-</Fragment>
-`;
-
-exports[`source editor geo_grid_source should put limitations based on heatmap-rendering selection should not allow super-fine option for heatmaps 1`] = `
-<Fragment>
-  <EuiPanel>
-    <EuiTitle
-      size="xs"
-    >
-      <h6>
-        <FormattedMessage
-          defaultMessage="Metrics"
-          id="xpack.maps.source.esGrid.metricsLabel"
-          values={Object {}}
-        />
-      </h6>
-    </EuiTitle>
-    <EuiSpacer
-      size="m"
-    />
-    <MetricsEditor
-      allowMultipleMetrics={true}
-      fields={null}
-      metrics={Array []}
-      metricsFilter={null}
       onChange={[Function]}
     />
   </EuiPanel>
