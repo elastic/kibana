@@ -15,9 +15,9 @@ object ESSnapshotBuild : BuildType({
   }
 
   vcs {
-    root(Kibana)
-    root(Elasticsearch, "+:. => ../elasticsearch")
-    checkoutDir = "kibana"
+    root(Kibana, "+:. => kibana")
+    root(Elasticsearch, "+:. => elasticsearch")
+    checkoutDir = ""
   }
 
   steps {
@@ -26,6 +26,7 @@ object ESSnapshotBuild : BuildType({
       scriptContent =
         """
           #!/bin/bash
+          cd kibana
           ./.ci/teamcity/es_snapshots/build.sh
         """.trimIndent()
     }
