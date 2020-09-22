@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -133,6 +134,8 @@ function statusMessage(count: StepStatusCount) {
   return `${count.succeeded + count.failed} Steps - ${count.succeeded} succeeded`;
 }
 
+const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
+
 export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -218,9 +221,13 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
                     )}
                     {step?.synthetics?.payload?.error && (
                       <EuiAccordion id={`${step.synthetics.step.name}_error`} buttonContent="Error">
-                        <EuiCode style={{ whiteSpace: 'pre-wrap' }} language="html">
+                        <EuiCodeBlock
+                          isCopyable={true}
+                          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+                          language="html"
+                        >
                           {step.synthetics.payload.error.message}
-                        </EuiCode>
+                        </EuiCodeBlock>
                       </EuiAccordion>
                     )}
                     {step?.synthetics?.payload?.error?.stack && (
@@ -228,9 +235,13 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
                         id={`${step.synthetics.step.name}_stack`}
                         buttonContent="Stack trace"
                       >
-                        <EuiCode style={{ whiteSpace: 'pre-wrap' }} language="html">
+                        <EuiCodeBlock
+                          isCopyable={true}
+                          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+                          language="html"
+                        >
                           {step.synthetics.payload.error.stack}
-                        </EuiCode>
+                        </EuiCodeBlock>
                       </EuiAccordion>
                     )}
                   </EuiFlexItem>
