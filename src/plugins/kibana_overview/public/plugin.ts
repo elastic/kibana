@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject, Subscription, from } from 'rxjs';
+import { from } from 'rxjs';
 import { distinct, map, switchMap } from 'rxjs/operators';
 import {
   AppMountParameters,
@@ -27,7 +27,6 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
   AppNavLinkStatus,
-  AppUpdater,
 } from '../../../../src/core/public';
 import {
   KibanaOverviewPluginSetup,
@@ -35,7 +34,7 @@ import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
 import { setServices } from './kibana_services';
 
 export class KibanaOverviewPlugin
@@ -75,6 +74,7 @@ export class KibanaOverviewPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
+      euiIconType: PLUGIN_ICON,
       order: 1,
       updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
