@@ -358,7 +358,7 @@
     "proper-lockfile": "^3.2.0",
     "puid": "1.0.7",
     "puppeteer-core": "^1.19.0",
-    "query-string": "5.1.1",
+    "query-string": "^6.13.2",
     "raw-loader": "3.1.0",
     "react": "^16.12.0",
     "react-datetime": "^2.14.0",
