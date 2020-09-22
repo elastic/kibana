@@ -21,6 +21,7 @@ import {
   ElasticsearchAssetType,
   InstallType,
 } from '../../../types';
+import { appContextService } from '../../index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
