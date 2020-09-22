@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import ChoroplethLayer from './choropleth_layer';
 import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
@@ -70,7 +69,7 @@ export function createRegionMapVisualization({
         return;
       }
 
-      this._updateChoroplethLayerForNewMetrics(
+      await this._updateChoroplethLayerForNewMetrics(
         selectedLayer.name,
         selectedLayer.attribution,
         this._params.showAllShapes,
@@ -134,7 +133,7 @@ export function createRegionMapVisualization({
         return;
       }
 
-      this._updateChoroplethLayerForNewProperties(
+      await this._updateChoroplethLayerForNewProperties(
         selectedLayer.name,
         selectedLayer.attribution,
         this._params.showAllShapes
@@ -152,24 +151,24 @@ export function createRegionMapVisualization({
       );
     }
 
-    _updateChoroplethLayerForNewMetrics(name, attribution, showAllData, newMetrics) {
+    async _updateChoroplethLayerForNewMetrics(name, attribution, showAllData, newMetrics) {
       if (
         this._choroplethLayer &&
         this._choroplethLayer.canReuseInstanceForNewMetrics(name, showAllData, newMetrics)
       ) {
         return;
       }
-      return this._recreateChoroplethLayer(name, attribution, showAllData);
+      await this._recreateChoroplethLayer(name, attribution, showAllData);
     }
 
-    _updateChoroplethLayerForNewProperties(name, attribution, showAllData) {
+    async _updateChoroplethLayerForNewProperties(name, attribution, showAllData) {
       if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(name, showAllData)) {
         return;
       }
-      return this._recreateChoroplethLayer(name, attribution, showAllData);
+      await this._recreateChoroplethLayer(name, attribution, showAllData);
     }
 
-    _recreateChoroplethLayer(name, attribution, showAllData) {
+    async _recreateChoroplethLayer(name, attribution, showAllData) {
       if (!this._leaflet) {
         return;
       }
@@ -186,6 +185,7 @@ export function createRegionMapVisualization({
           this._serviceSettings
         );
       } else {
+        const { ChoroplethLayer } = await import('./choropleth_layer');
         this._choroplethLayer = new ChoroplethLayer(
           name,
           attribution,

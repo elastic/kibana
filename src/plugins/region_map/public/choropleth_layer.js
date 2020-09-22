@@ -33,7 +33,7 @@ const EMPTY_STYLE = {
   fillOpacity: 0,
 };
 
-export default class ChoroplethLayer extends KibanaMapLayer {
+export class ChoroplethLayer extends KibanaMapLayer {
   static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
     let j = 0;
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {

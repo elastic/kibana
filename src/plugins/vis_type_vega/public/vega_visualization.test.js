@@ -70,6 +70,10 @@ describe('VegaVisualizations', () => {
     mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
   };
 
+  const mockGetServiceSettings = async () => {
+    return {};
+  };
+
   beforeEach(() => {
     setInjectedVars({
       emsTileLayerId: {},
@@ -84,6 +88,7 @@ describe('VegaVisualizations', () => {
       plugins: {
         data: dataPluginMock.createSetupContract(),
       },
+      getServiceSettings: mockGetServiceSettings,
     };
 
     vegaVisType = createVegaTypeDefinition(vegaVisualizationDependencies);
@@ -120,7 +125,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);
@@ -147,7 +155,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
 
@@ -168,7 +179,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
 
