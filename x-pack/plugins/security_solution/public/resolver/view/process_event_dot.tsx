@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -12,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
@@ -239,7 +241,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const dispatch = useResolverDispatch();
 
-    const processDetailNavProps = useLinkProps({
+    const nodeDetailLinkProps = useLinkProps({
       panelView: 'nodeDetail',
       panelParameters: { nodeID },
     });
@@ -251,25 +253,20 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const handleClick = useCallback(
+    const handleOnClick = useCallback(
       (clickEvent) => {
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
-        dispatch({
-          type: 'userSelectedResolverNode',
-          payload: nodeID,
-        });
-        processDetailNavProps.onClick(clickEvent);
+        nodeDetailLinkProps.onClick(clickEvent);
       },
-      [animationTarget, dispatch, nodeID, processDetailNavProps]
+      [animationTarget, nodeDetailLinkProps]
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.relatedEventTotalForProcess(state)(event)
     );
 
-    /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
      * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
      */
@@ -295,7 +292,7 @@ const UnstyledProcessEventDot = React.memo(
           onClick={
             (clickEvent) => {
               handleFocus();
-              handleClick(clickEvent);
+              handleOnClick(clickEvent);
             } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
@@ -384,7 +381,6 @@ const UnstyledProcessEventDot = React.memo(
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
             id={labelHTMLID}
-            onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
             style={{
@@ -394,6 +390,8 @@ const UnstyledProcessEventDot = React.memo(
             }}
           >
             <EuiButton
+              href={nodeDetailLinkProps.href}
+              onClick={handleOnClick}
               color={labelButtonFill}
               fill={isLabelFilled}
               size="s"
@@ -406,11 +404,7 @@ const UnstyledProcessEventDot = React.memo(
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
-              <span className="euiButton__content">
-                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.processNameSafeVersion(event)}
-                </span>
-              </span>
+              {eventModel.processNameSafeVersion(event)}
             </EuiButton>
           </div>
           <EuiFlexGroup
@@ -437,7 +431,6 @@ const UnstyledProcessEventDot = React.memo(
         </StyledActionsContainer>
       </div>
     );
-    /* eslint-enable jsx-a11y/click-events-have-key-events */
   }
 );
 

@@ -79,6 +79,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            time: 0,
           },
         },
       ];
@@ -140,6 +141,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            time: 0,
           },
         },
         {
@@ -205,6 +207,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            time: 0,
           },
         },
         // this happens when the middleware starts the request
@@ -221,6 +224,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            time: 0,
           },
         },
       ];
@@ -320,6 +324,8 @@ describe('data state', () => {
           }),
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });
@@ -348,6 +354,8 @@ describe('data state', () => {
           }),
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });
@@ -372,6 +380,8 @@ describe('data state', () => {
           result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });
@@ -403,6 +413,8 @@ describe('data state', () => {
           result: tree,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });
@@ -434,6 +446,8 @@ describe('data state', () => {
           result: tree,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });
@@ -450,6 +464,8 @@ describe('data state', () => {
           result: tree,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
+          // this value doesn't matter
+          time: 0,
         },
       });
     });

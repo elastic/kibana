@@ -45,6 +45,8 @@ describe('resolver selectors', () => {
             }),
             // this value doesn't matter
             parameters: mockTreeFetcherParameters(),
+            // this value doesn't matter
+            time: 0,
           },
         });
       });
@@ -79,6 +81,8 @@ describe('resolver selectors', () => {
             result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
             // this value doesn't matter
             parameters: mockTreeFetcherParameters(),
+            // this value doesn't matter
+            time: 0,
           },
         });
       });

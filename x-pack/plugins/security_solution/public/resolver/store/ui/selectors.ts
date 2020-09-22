@@ -24,17 +24,6 @@ export const ariaActiveDescendant = createSelector(
 );
 
 /**
- * id of the currently "selected" tree node
- */
-export const selectedNode = createSelector(
-  (uiState: ResolverUIState) => uiState,
-  /* eslint-disable no-shadow */
-  ({ selectedNode }: ResolverUIState) => {
-    return selectedNode;
-  }
-);
-
-/**
  * Which view should show in the panel, as well as what parameters should be used.
  * Calculated using the query string
  */

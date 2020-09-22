@@ -70,6 +70,7 @@ export const eventByID = composeSelectors(dataStateSelector, dataSelectors.event
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
+ * @deprecated Use nodeID's directly
  */
 export const processEventForID: (
   state: ResolverState
@@ -177,11 +178,6 @@ export const ariaActiveDescendant = composeSelectors(
 );
 
 /**
- * Returns the nodeID of the selected node
- */
-export const selectedNode = composeSelectors(uiStateSelector, uiSelectors.selectedNode);
-
-/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
@@ -279,6 +275,28 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
   dataSelectors.originID
 );
 
+export const panelViewAndParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.panelViewAndParameters
+);
+
+/**
+ * Returns the nodeID of the selected node
+ */
+export const selectedNode = createSelector(
+  panelViewAndParameters,
+  originID,
+  (panelParams, origin) => {
+    // If the query string specifies a selection, use that.
+    if ('panelParameters' in panelParams) {
+      return panelParams.panelParameters.nodeID;
+    } else {
+      // otherwise select the origin
+      return origin;
+    }
+  }
+);
+
 /**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
@@ -313,11 +331,6 @@ export const ariaFlowtoNodeID: (
       };
     });
   }
-);
-
-export const panelViewAndParameters = composeSelectors(
-  uiStateSelector,
-  uiSelectors.panelViewAndParameters
 );
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
