@@ -14,7 +14,6 @@ import {
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { appContextService } from '../services';
 import { IngestManagerError, RegistryError, PackageNotFoundError } from './index';
-import { IBulkInstallPackageError } from '../../common';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
@@ -57,9 +56,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   return 400; // Bad Request
 };
 
-export function formatBulkInstallError(
-  error: IngestManagerError | Boom | Error
-): Pick<IBulkInstallPackageError, 'statusCode' | 'error'> {
+export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
   if (isLegacyESClientError(error)) {
     // there was a problem communicating with ES (e.g. via `callCluster`)
@@ -74,7 +71,7 @@ export function formatBulkInstallError(
 
     return {
       statusCode: error?.statusCode || error.status,
-      error: message,
+      body: { message },
     };
   }
 
@@ -84,7 +81,7 @@ export function formatBulkInstallError(
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
-      error: error.message,
+      body: { message: error.message },
     };
   }
 
@@ -94,7 +91,7 @@ export function formatBulkInstallError(
     logger.error(error.output.payload.message);
     return {
       statusCode: error.output.statusCode,
-      error: error.output.payload.message,
+      body: { message: error.output.payload.message },
     };
   }
 
@@ -102,7 +99,7 @@ export function formatBulkInstallError(
   logger.error(error);
   return {
     statusCode: 500,
-    error,
+    body: { message: error.message },
   };
 }
 
@@ -110,48 +107,6 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const logger = appContextService.getLogger();
-  if (isLegacyESClientError(error)) {
-    // there was a problem communicating with ES (e.g. via `callCluster`)
-    // only log the message
-    const message =
-      error?.path && error?.response
-        ? // if possible, return the failing endpoint and its response
-          `${error.message} response from ${error.path}: ${error.response}`
-        : error.message;
-
-    logger.error(message);
-
-    return response.customError({
-      statusCode: error?.statusCode || error.status,
-      body: { message },
-    });
-  }
-
-  // our "expected" errors
-  if (error instanceof IngestManagerError) {
-    // only log the message
-    logger.error(error.message);
-    return response.customError({
-      statusCode: getHTTPResponseCode(error),
-      body: { message: error.message },
-    });
-  }
-
-  // handle any older Boom-based errors or the few places our app uses them
-  if (isBoom(error)) {
-    // only log the message
-    logger.error(error.output.payload.message);
-    return response.customError({
-      statusCode: error.output.statusCode,
-      body: { message: error.output.payload.message },
-    });
-  }
-
-  // not sure what type of error this is. log as much as possible
-  logger.error(error);
-  return response.customError({
-    statusCode: 500,
-    body: { message: error.message },
-  });
+  const options = ingestErrorToResponseOptions(error);
+  return response.customError(options);
 };
