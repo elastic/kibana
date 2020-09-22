@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../../common/store';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
@@ -35,10 +34,9 @@ export const useTimelineEventsDetails = ({
   eventId,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [
     timelineDetailsRequest,
@@ -101,7 +99,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex,
         docValueFields,
         indexName,
         eventId,
@@ -112,7 +109,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
     if (timelineDetailsRequest) {
