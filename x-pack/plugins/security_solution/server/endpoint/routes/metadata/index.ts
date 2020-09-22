@@ -49,9 +49,9 @@ export const GetMetadataListRequestSchema = {
               page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
             }),
             /**
-             * the zero based page index of the the total number of pages of page size
+             * The search ID of the last returned object, as a Search-After artifact
              */
-            schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+            schema.object({ after: schema.string() }),
           ])
         )
       ),
