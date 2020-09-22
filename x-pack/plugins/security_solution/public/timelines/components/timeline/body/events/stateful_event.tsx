@@ -9,10 +9,13 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
-import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { TimelineDetailsQuery } from '../../../../containers/details';
-import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import {
+  TimelineEventsDetailsItem,
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -67,7 +70,7 @@ interface Props {
 
 export const getNewNoteId = (): string => uuid.v4();
 
-const emptyDetails: DetailItem[] = [];
+const emptyDetails: TimelineEventsDetailsItem[] = [];
 
 /**
  * This is the default row height whenever it is a plain row renderer and not a custom row height.
@@ -134,9 +137,15 @@ const StatefulEventComponent: React.FC<Props> = ({
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const { status: timelineStatus } = useSelector<StoreState, TimelineModel>(
-    (state) => state.timeline.timelineById[TimelineId.active]
+    (state) => state.timeline.timelineById[timelineId]
   );
   const divElement = useRef<HTMLDivElement | null>(null);
+  const [loading, detailsData] = useTimelineEventsDetails({
+    docValueFields,
+    indexName: event._index!,
+    eventId: event._id,
+    skip: !expanded[event._id],
+  });
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
@@ -174,94 +183,84 @@ const StatefulEventComponent: React.FC<Props> = ({
       {({ isVisible }) => {
         if (isVisible || disableSensorVisibility) {
           return (
-            <TimelineDetailsQuery
-              docValueFields={docValueFields}
-              sourceId="default"
-              indexName={event._index!}
-              eventId={event._id}
-              executeQuery={!!expanded[event._id]}
+            <EventsTrGroup
+              className={STATEFUL_EVENT_CSS_CLASS_NAME}
+              data-test-subj="event"
+              eventType={getEventType(event.ecs)}
+              showLeftBorder={!isEventViewer}
+              ref={divElement}
             >
-              {({ detailsData, loading }) => (
-                <EventsTrGroup
-                  className={STATEFUL_EVENT_CSS_CLASS_NAME}
-                  data-test-subj="event"
-                  eventType={getEventType(event.ecs)}
-                  showLeftBorder={!isEventViewer}
-                  ref={divElement}
+              <EventColumnView
+                id={event._id}
+                actionsColumnWidth={actionsColumnWidth}
+                associateNote={associateNote}
+                columnHeaders={columnHeaders}
+                columnRenderers={columnRenderers}
+                data={event.data}
+                ecsData={event.ecs}
+                expanded={!!expanded[event._id]}
+                eventIdToNoteIds={eventIdToNoteIds}
+                getNotesByIds={getNotesByIds}
+                isEventPinned={isEventPinned}
+                isEventViewer={isEventViewer}
+                loading={loading}
+                loadingEventIds={loadingEventIds}
+                onColumnResized={onColumnResized}
+                onEventToggled={onToggleExpanded}
+                onPinEvent={onPinEvent}
+                onRowSelected={onRowSelected}
+                onUnPinEvent={onUnPinEvent}
+                refetch={refetch}
+                selectedEventIds={selectedEventIds}
+                showCheckboxes={showCheckboxes}
+                showNotes={!!showNotes[event._id]}
+                timelineId={timelineId}
+                toggleShowNotes={onToggleShowNotes}
+                updateNote={updateNote}
+              />
+
+              <EventsTrSupplementContainerWrapper>
+                <EventsTrSupplement
+                  className="siemEventsTable__trSupplement--notes"
+                  data-test-subj="event-notes-flex-item"
                 >
-                  <EventColumnView
-                    id={event._id}
-                    actionsColumnWidth={actionsColumnWidth}
+                  <NoteCards
                     associateNote={associateNote}
-                    columnHeaders={columnHeaders}
-                    columnRenderers={columnRenderers}
-                    data={event.data}
-                    ecsData={event.ecs}
-                    expanded={!!expanded[event._id]}
-                    eventIdToNoteIds={eventIdToNoteIds}
+                    data-test-subj="note-cards"
+                    getNewNoteId={getNewNoteId}
                     getNotesByIds={getNotesByIds}
-                    isEventPinned={isEventPinned}
-                    isEventViewer={isEventViewer}
-                    loading={loading}
-                    loadingEventIds={loadingEventIds}
-                    onColumnResized={onColumnResized}
-                    onEventToggled={onToggleExpanded}
-                    onPinEvent={onPinEvent}
-                    onRowSelected={onRowSelected}
-                    onUnPinEvent={onUnPinEvent}
-                    refetch={refetch}
-                    selectedEventIds={selectedEventIds}
-                    showCheckboxes={showCheckboxes}
-                    showNotes={!!showNotes[event._id]}
-                    timelineId={timelineId}
-                    toggleShowNotes={onToggleShowNotes}
+                    noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+                    showAddNote={!!showNotes[event._id]}
+                    status={timelineStatus}
+                    toggleShowAddNote={onToggleShowNotes}
                     updateNote={updateNote}
                   />
+                </EventsTrSupplement>
 
-                  <EventsTrSupplementContainerWrapper>
-                    <EventsTrSupplement
-                      className="siemEventsTable__trSupplement--notes"
-                      data-test-subj="event-notes-flex-item"
-                    >
-                      <NoteCards
-                        associateNote={associateNote}
-                        data-test-subj="note-cards"
-                        getNewNoteId={getNewNoteId}
-                        getNotesByIds={getNotesByIds}
-                        noteIds={eventIdToNoteIds[event._id] || emptyNotes}
-                        showAddNote={!!showNotes[event._id]}
-                        status={timelineStatus}
-                        toggleShowAddNote={onToggleShowNotes}
-                        updateNote={updateNote}
-                      />
-                    </EventsTrSupplement>
+                {getRowRenderer(event.ecs, rowRenderers).renderRow({
+                  browserFields,
+                  data: event.ecs,
+                  timelineId,
+                })}
 
-                    {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                      browserFields,
-                      data: event.ecs,
-                      timelineId,
-                    })}
-
-                    <EventsTrSupplement
-                      className="siemEventsTable__trSupplement--attributes"
-                      data-test-subj="event-details"
-                    >
-                      <ExpandableEvent
-                        browserFields={browserFields}
-                        columnHeaders={columnHeaders}
-                        event={detailsData || emptyDetails}
-                        forceExpand={!!expanded[event._id] && !loading}
-                        id={event._id}
-                        onEventToggled={onToggleExpanded}
-                        onUpdateColumns={onUpdateColumns}
-                        timelineId={timelineId}
-                        toggleColumn={toggleColumn}
-                      />
-                    </EventsTrSupplement>
-                  </EventsTrSupplementContainerWrapper>
-                </EventsTrGroup>
-              )}
-            </TimelineDetailsQuery>
+                <EventsTrSupplement
+                  className="siemEventsTable__trSupplement--attributes"
+                  data-test-subj="event-details"
+                >
+                  <ExpandableEvent
+                    browserFields={browserFields}
+                    columnHeaders={columnHeaders}
+                    event={detailsData || emptyDetails}
+                    forceExpand={!!expanded[event._id] && !loading}
+                    id={event._id}
+                    onEventToggled={onToggleExpanded}
+                    onUpdateColumns={onUpdateColumns}
+                    timelineId={timelineId}
+                    toggleColumn={toggleColumn}
+                  />
+                </EventsTrSupplement>
+              </EventsTrSupplementContainerWrapper>
+            </EventsTrGroup>
           );
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.

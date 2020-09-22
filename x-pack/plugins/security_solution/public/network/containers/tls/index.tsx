@@ -23,7 +23,9 @@ import {
   NetworkTlsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+
 import * as i18n from './translations';
+import { getInspectResponse } from '../../../helpers';
 
 const ID = 'networkTlsQuery';
 
@@ -123,7 +125,7 @@ export const useNetworkTls = ({
         const searchSubscription$ = data.search
           .search<NetworkTlsRequestOptions, NetworkTlsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -133,7 +135,7 @@ export const useNetworkTls = ({
                   setNetworkTlsResponse((prevResponse) => ({
                     ...prevResponse,
                     tls: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,

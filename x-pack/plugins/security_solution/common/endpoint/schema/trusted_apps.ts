@@ -6,6 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const DeleteTrustedAppsRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
@@ -16,11 +22,11 @@ export const GetTrustedAppsRequestSchema = {
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({
     name: schema.string({ minLength: 1 }),
-    description: schema.maybe(schema.string({ minLength: 1 })),
+    description: schema.maybe(schema.string({ minLength: 0, defaultValue: '' })),
     os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
     entries: schema.arrayOf(
       schema.object({
-        field: schema.oneOf([schema.literal('hash'), schema.literal('path')]),
+        field: schema.oneOf([schema.literal('process.hash.*'), schema.literal('process.path')]),
         type: schema.literal('match'),
         operator: schema.literal('included'),
         value: schema.string({ minLength: 1 }),

@@ -27,6 +27,7 @@ export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
+  searchAggregatedTransactions: boolean;
   logger: Logger;
 }
 
@@ -77,10 +78,11 @@ async function getConnectionData({
 }
 
 async function getServicesData(options: IEnvOptions) {
-  const { setup } = options;
+  const { setup, searchAggregatedTransactions } = options;
 
   const projection = getServicesProjection({
     setup: { ...setup, uiFiltersES: [] },
+    searchAggregatedTransactions,
   });
 
   const { filter } = projection.body.query.bool;

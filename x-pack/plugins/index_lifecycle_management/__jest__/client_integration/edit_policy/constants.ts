@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyFromES } from '../../../public/application/services/policies/types';
+import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';

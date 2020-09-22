@@ -21,7 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, SavedObject } from 'src/core/server';
 import { importDashboards } from '../lib';
 
-export const registerImportRoute = (router: IRouter) => {
+export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: number) => {
   router.post(
     {
       path: '/api/kibana/dashboards/import',
@@ -39,6 +39,9 @@ export const registerImportRoute = (router: IRouter) => {
       },
       options: {
         tags: ['api'],
+        body: {
+          maxBytes: maxImportPayloadBytes,
+        },
       },
     },
     async (ctx, req, res) => {

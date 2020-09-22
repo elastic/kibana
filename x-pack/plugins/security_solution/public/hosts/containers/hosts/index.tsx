@@ -10,22 +10,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { HostsEdges, PageInfoPaginated } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
+  HostsEdges,
+  PageInfoPaginated,
   DocValueFields,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 
 const ID = 'hostsQuery';
 
@@ -34,7 +37,7 @@ export interface HostsArgs {
   endDate: string;
   hosts: HostsEdges[];
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: LoadPage;
   pageInfo: PageInfoPaginated;
@@ -84,17 +87,14 @@ export const useAllHost = ({
       direction,
       field: sortField,
     },
-    // inspect: isInspected,
   });
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setHostRequest((prevRequest) => ({
+        ...prevRequest,
+        pagination: generateTablePaginationOptions(newActivePage, limit),
+      }));
     },
     [limit]
   );
@@ -129,7 +129,7 @@ export const useAllHost = ({
         const searchSubscription$ = data.search
           .search<HostsRequestOptions, HostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -139,7 +139,7 @@ export const useAllHost = ({
                   setHostsResponse((prevResponse) => ({
                     ...prevResponse,
                     hosts: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,

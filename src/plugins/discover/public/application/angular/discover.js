@@ -29,18 +29,18 @@ import { getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
+import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
-
-import indexTemplate from './discover.html';
+import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getHeaderActionMenuMounter,
   getUrlTracker,
   unhashUrl,
   subscribeWithScope,
@@ -70,7 +70,6 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  search,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -114,7 +113,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: indexTemplate,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -307,17 +306,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-
-  $scope.$watch(
-    () => uiCapabilities.discover.saveQuery,
-    (newCapability) => {
-      $scope.showSaveQuery = newCapability;
-    }
-  );
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -513,8 +504,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     ]);
   }
 
-  $scope.screenTitle = savedSearch.title;
-
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -610,6 +599,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    fixedScroll: createFixedScroll($scope, $timeout),
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -769,6 +761,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
@@ -866,9 +859,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         tabifiedData,
         getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
-      if ($scope.vis.data.aggs.aggs[1]) {
-        $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
-      }
       $scope.updateTime();
     }
 

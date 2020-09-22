@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ISavedObjectTypeRegistry } from 'kibana/server';
+import { ISavedObjectTypeRegistry, SavedObjectsUtils } from '../../../../../src/core/server';
 
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,
@@ -12,5 +12,12 @@ export const getDescriptorNamespace = (
   namespace?: string
 ) => {
   const descriptorNamespace = typeRegistry.isSingleNamespace(type) ? namespace : undefined;
-  return descriptorNamespace === 'default' ? undefined : descriptorNamespace;
+  return normalizeNamespace(descriptorNamespace);
 };
+
+/**
+ * Ensure that a namespace is always in its namespace ID representation.
+ * This allows `'default'` to be used interchangeably with `undefined`.
+ */
+const normalizeNamespace = (namespace?: string) =>
+  namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);

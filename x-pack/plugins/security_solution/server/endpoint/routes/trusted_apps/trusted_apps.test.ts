@@ -9,11 +9,12 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
-import { IRouter, RequestHandler } from 'kibana/server';
+import { IRouter, KibanaRequest, RequestHandler } from 'kibana/server';
 import { httpServerMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
 import { registerTrustedAppsRoutes } from './index';
 import {
   TRUSTED_APPS_CREATE_API,
+  TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
 import {
@@ -23,14 +24,23 @@ import {
 import { xpackMocks } from '../../../../../../mocks';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { EndpointAppContext } from '../../types';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ExceptionListClient, ListClient } from '../../../../../lists/server';
+import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { DeleteTrustedAppsRequestParams } from './types';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+
+type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
+  lists?: {
+    getListClient: () => jest.Mocked<ListClient>;
+    getExceptionListClient: () => jest.Mocked<ExceptionListClient>;
+  };
+};
 
 describe('when invoking endpoint trusted apps route handlers', () => {
   let routerMock: jest.Mocked<IRouter>;
   let endpointAppContextService: EndpointAppContextService;
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: RequestHandlerContextWithLists;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let exceptionsListClient: jest.Mocked<ExceptionListClient>;
   let endpointAppContext: EndpointAppContext;
@@ -39,7 +49,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    exceptionsListClient = startContract.exceptionsListService as jest.Mocked<ExceptionListClient>;
+    exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
     endpointAppContextService.start(startContract);
     endpointAppContext = {
       ...createMockEndpointAppContext(),
@@ -48,7 +58,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     registerTrustedAppsRoutes(routerMock, endpointAppContext);
 
     // For use in individual API calls
-    context = xpackMocks.createRequestHandlerContext();
+    context = {
+      ...xpackMocks.createRequestHandlerContext(),
+      lists: {
+        getListClient: jest.fn(),
+        getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+      },
+    };
     response = httpServerMock.createResponseFactory();
   });
 
@@ -70,6 +86,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       [, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith(TRUSTED_APPS_LIST_API)
       )!;
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createListRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
     });
 
     it('should create the Trusted Apps List first', async () => {
@@ -122,7 +144,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'path',
+          field: 'process.path',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -153,6 +175,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       });
     });
 
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createPostRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
     it('should create trusted app list first', async () => {
       const request = createPostRequest();
       await routeHandler(context, request, response);
@@ -169,7 +197,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'path',
+            field: 'process.path',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -196,7 +224,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'path',
+                field: 'process.path',
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -215,6 +243,52 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         throw new Error('expected error for create');
       });
       const request = createPostRequest();
+      await routeHandler(context, request, response);
+      expect(response.internalError).toHaveBeenCalled();
+      expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();
+    });
+  });
+
+  describe('when deleting a trusted app', () => {
+    let routeHandler: RequestHandler<DeleteTrustedAppsRequestParams>;
+    let request: KibanaRequest<DeleteTrustedAppsRequestParams>;
+
+    beforeEach(() => {
+      [, routeHandler] = routerMock.delete.mock.calls.find(([{ path }]) =>
+        path.startsWith(TRUSTED_APPS_DELETE_API)
+      )!;
+
+      request = httpServerMock.createKibanaRequest<DeleteTrustedAppsRequestParams>({
+        path: TRUSTED_APPS_DELETE_API.replace('{id}', '123'),
+        method: 'delete',
+      });
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
+    it('should return 200 on successful delete', async () => {
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.deleteExceptionListItem).toHaveBeenCalledWith({
+        id: request.params.id,
+        itemId: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should return 404 if item does not exist', async () => {
+      exceptionsListClient.deleteExceptionListItem.mockResolvedValueOnce(null);
+      await routeHandler(context, request, response);
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('should log unexpected error if one occurs', async () => {
+      exceptionsListClient.deleteExceptionListItem.mockImplementation(() => {
+        throw new Error('expected error for delete');
+      });
       await routeHandler(context, request, response);
       expect(response.internalError).toHaveBeenCalled();
       expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();

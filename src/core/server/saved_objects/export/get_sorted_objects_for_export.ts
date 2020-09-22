@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { createListStream } from '../../../../legacy/utils/streams';
+import { createListStream } from '../../utils/streams';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';

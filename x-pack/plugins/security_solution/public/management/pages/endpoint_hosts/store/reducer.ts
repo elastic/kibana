@@ -30,9 +30,13 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
+  agentPolicies: {},
   endpointsExist: true,
+  patterns: [],
+  patternsError: undefined,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+  queryStrategyVersion: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -46,6 +50,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
+      query_strategy_version: queryStrategyVersion,
     } = action.payload;
     return {
       ...state,
@@ -53,6 +58,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       pageSize,
       pageIndex,
+      queryStrategyVersion,
       loading: false,
       error: undefined,
     };
@@ -69,6 +75,26 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         ...state.nonExistingPolicies,
         ...action.payload,
       },
+    };
+  } else if (action.type === 'serverReturnedEndpointAgentPolicies') {
+    return {
+      ...state,
+      agentPolicies: {
+        ...state.agentPolicies,
+        ...action.payload,
+      },
+    };
+  } else if (action.type === 'serverReturnedMetadataPatterns') {
+    // handle error case
+    return {
+      ...state,
+      patterns: action.payload,
+      patternsError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnMetadataPatterns') {
+    return {
+      ...state,
+      patternsError: action.payload,
     };
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {

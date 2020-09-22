@@ -344,7 +344,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return (
               <RowActions
                 agent={agent}
-                refresh={() => agentsRequest.sendRequest()}
+                refresh={() => agentsRequest.resendRequest()}
                 onReassignClick={() => setAgentToReassignId(agent.id)}
               />
             );
@@ -394,7 +394,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agent={agentToReassign}
             onClose={() => {
               setAgentToReassignId(undefined);
-              agentsRequest.sendRequest();
+              agentsRequest.resendRequest();
             }}
           />
         </EuiPortal>

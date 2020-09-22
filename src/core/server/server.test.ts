@@ -35,15 +35,14 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
-import { PluginName } from './plugins';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
@@ -110,31 +109,6 @@ test('injects legacy dependency to context#setup()', async () => {
       [pluginA, []],
       [pluginB, [pluginA]],
       [mockLegacyService.legacyId, [pluginA, pluginB]],
-    ]),
-  });
-});
-
-test('injects legacy dependency to status#setup()', async () => {
-  const server = new Server(rawConfigService, env, logger);
-
-  const pluginDependencies = new Map<PluginName, PluginName[]>([
-    ['a', []],
-    ['b', ['a']],
-  ]);
-  mockPluginsService.discover.mockResolvedValue({
-    pluginTree: { asOpaqueIds: new Map(), asNames: pluginDependencies },
-    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
-  });
-
-  await server.setup();
-
-  expect(mockStatusService.setup).toHaveBeenCalledWith({
-    elasticsearch: expect.any(Object),
-    savedObjects: expect.any(Object),
-    pluginDependencies: new Map([
-      ['a', []],
-      ['b', ['a']],
-      ['legacy', ['a', 'b']],
     ]),
   });
 });

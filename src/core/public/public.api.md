@@ -7,6 +7,8 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
+import { ConfigPath } from '@kbn/config';
+import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -19,10 +21,13 @@ import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
+import { Logger } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
-import { ParsedQuery } from 'query-string';
+import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -39,25 +44,18 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): void;
 
-// @public
-export interface App<HistoryLocationState = unknown> extends AppBase {
-    appRoute?: string;
-    chromeless?: boolean;
-    exactRoute?: boolean;
-    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
-}
-
 // @public (undocumented)
-export interface AppBase {
+export interface App<HistoryLocationState = unknown> {
+    appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
     defaultPath?: string;
     euiIconType?: string;
+    exactRoute?: boolean;
     icon?: string;
     id: string;
-    // @internal
-    legacy?: boolean;
+    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
@@ -121,7 +119,7 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
-    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
@@ -186,13 +184,10 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
-export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
-
-// @public
-export function assertNever(x: never): never;
+export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
 // @public
 export interface Capabilities {
@@ -227,10 +222,6 @@ export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
-    // @internal (undocumented)
-    __legacy: {
-        setBaseTitle(baseTitle: string): void;
-    };
     change(newTitle: string | string[]): void;
     reset(): void;
 }
@@ -281,37 +272,30 @@ export interface ChromeNavControl {
 // @public
 export interface ChromeNavControls {
     // @internal (undocumented)
+    getCenter$(): Observable<ChromeNavControl[]>;
+    // @internal (undocumented)
     getLeft$(): Observable<ChromeNavControl[]>;
     // @internal (undocumented)
     getRight$(): Observable<ChromeNavControl[]>;
+    registerCenter(navControl: ChromeNavControl): void;
     registerLeft(navControl: ChromeNavControl): void;
     registerRight(navControl: ChromeNavControl): void;
 }
 
 // @public (undocumented)
 export interface ChromeNavLink {
-    // @deprecated
-    readonly active?: boolean;
     readonly baseUrl: string;
     readonly category?: AppCategory;
-    // @deprecated
     readonly disabled?: boolean;
-    // @deprecated
-    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
-    readonly href?: string;
+    readonly href: string;
     readonly icon?: string;
     readonly id: string;
-    // @internal
-    readonly legacy: boolean;
-    // @deprecated
-    readonly linkToLastSubUrl?: boolean;
     readonly order?: number;
-    // @deprecated
-    readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
     readonly url?: string;
 }
 
@@ -324,12 +308,14 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
+    //
     // @deprecated
     update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -361,7 +347,6 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
-    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -460,41 +445,8 @@ export class CoreSystem {
     stop(): void;
     }
 
-// @public
-export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
-
 // @internal (undocumented)
-export const DEFAULT_APP_CATEGORIES: Readonly<{
-    kibana: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    enterpriseSearch: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    observability: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    security: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    management: {
-        id: string;
-        label: string;
-        order: number;
-    };
-}>;
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -506,6 +458,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
@@ -596,15 +551,7 @@ export interface DocLinksStart {
     };
 }
 
-// @public (undocumented)
-export interface EnvironmentMode {
-    // (undocumented)
-    dev: boolean;
-    // (undocumented)
-    name: 'development' | 'production';
-    // (undocumented)
-    prod: boolean;
-}
+export { EnvironmentMode }
 
 // @public
 export interface ErrorToastOptions extends ToastOptions {
@@ -628,16 +575,6 @@ export interface FatalErrorsSetup {
 
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
-
-// @public (undocumented)
-export type Freezable = {
-    [k: string]: any;
-} | any[];
-
-// @public
-export function getFlattenedObject(rootValue: Record<string, any>): {
-    [key: string]: any;
-};
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -851,9 +788,6 @@ export interface ImageValidation {
 }
 
 // @public
-export function isRelativeUrl(candidatePath: string): boolean;
-
-// @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
@@ -880,55 +814,6 @@ export interface IUiSettingsClient {
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
-
-// @public (undocumented)
-export interface LegacyApp extends AppBase {
-    // (undocumented)
-    appUrl: string;
-    // (undocumented)
-    disableSubUrlTracking?: boolean;
-    // (undocumented)
-    linkToLastSubUrl?: boolean;
-    // (undocumented)
-    subUrlBase?: string;
-}
-
-// @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup<any, any> {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataSetup;
-}
-
-// @public @deprecated
-export interface LegacyCoreStart extends CoreStart {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataStart;
-}
-
-// @public (undocumented)
-export interface LegacyNavLink {
-    // (undocumented)
-    category?: AppCategory;
-    // (undocumented)
-    euiIconType?: string;
-    // (undocumented)
-    icon?: string;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    order: number;
-    // (undocumented)
-    title: string;
-    // (undocumented)
-    url: string;
-}
-
-// @public
-export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -994,19 +879,7 @@ export interface OverlayStart {
     openModal: OverlayModalStart['open'];
 }
 
-// @public (undocumented)
-export interface PackageInfo {
-    // (undocumented)
-    branch: string;
-    // (undocumented)
-    buildNum: number;
-    // (undocumented)
-    buildSha: string;
-    // (undocumented)
-    dist: boolean;
-    // (undocumented)
-    version: string;
-}
+export { PackageInfo }
 
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -1040,17 +913,9 @@ export type PluginOpaqueId = symbol;
 
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
-    legacy: false;
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-};
-
-// @public
-export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
-    legacy: true;
-    status: AppStatus;
-    navLinkStatus: AppNavLinkStatus;
 };
 
 // @public
@@ -1515,26 +1380,6 @@ export type UnmountCallback = () => void;
 export const URL_MAX_LENGTH: number;
 
 // @public
-export interface URLMeaningfulParts {
-    // (undocumented)
-    auth?: string | null;
-    // (undocumented)
-    hash?: string | null;
-    // (undocumented)
-    hostname?: string | null;
-    // (undocumented)
-    pathname?: string | null;
-    // (undocumented)
-    port?: string | null;
-    // (undocumented)
-    protocol?: string | null;
-    // (undocumented)
-    query: ParsedQuery;
-    // (undocumented)
-    slashes?: boolean | null;
-}
-
-// @public
 export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
@@ -1545,6 +1390,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

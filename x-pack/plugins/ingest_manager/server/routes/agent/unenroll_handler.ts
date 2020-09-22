@@ -9,6 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { PostAgentUnenrollResponse } from '../../../common/types';
 import { PostAgentUnenrollRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentsUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
@@ -23,14 +24,9 @@ export const postAgentsUnenrollHandler: RequestHandler<
       await AgentService.unenrollAgent(soClient, request.params.agentId);
     }
 
-    const body: PostAgentUnenrollResponse = {
-      success: true,
-    };
+    const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

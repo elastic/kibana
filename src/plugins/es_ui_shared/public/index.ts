@@ -26,7 +26,7 @@ import * as Monaco from './monaco';
 import * as ace from './ace';
 import * as GlobalFlyout from './global_flyout';
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
 
 export { SectionLoading } from './components/section_loading';
 

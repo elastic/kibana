@@ -6,27 +6,24 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { PolicyFromES, SerializedPolicy, ListNodesRouteResponse } from '../../../common/types';
+
 import {
   UIM_POLICY_DELETE,
   UIM_POLICY_ATTACH_INDEX,
   UIM_POLICY_ATTACH_INDEX_TEMPLATE,
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
-} from '../constants/ui_metric';
-
+} from '../constants';
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-import { PolicyFromES, SerializedPolicy } from './policies/types';
-
-interface GenericObject {
-  [key: string]: any;
-}
+import { IndexSettings } from '../../../../index_management/common/types';
 
 export const useLoadNodes = () => {
-  return useRequest({
+  return useRequest<ListNodesRouteResponse>({
     path: `nodes/list`,
     method: 'get',
-    initialData: [],
+    initialData: { nodesByAttributes: {}, nodesByRoles: {} } as ListNodesRouteResponse,
   });
 };
 
@@ -37,9 +34,14 @@ export const useLoadNodeDetails = (selectedNodeAttrs: string) => {
   });
 };
 
-export async function loadIndexTemplates() {
-  return await sendGet(`templates`);
-}
+export const useLoadIndexTemplates = (legacy: boolean = false) => {
+  return useRequest<Array<{ name: string; settings: IndexSettings }>>({
+    path: 'templates',
+    query: { legacy },
+    method: 'get',
+    initialData: [],
+  });
+};
 
 export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
@@ -78,15 +80,26 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   return response;
 };
 
-export const addLifecyclePolicyToIndex = async (body: GenericObject) => {
+export const addLifecyclePolicyToIndex = async (body: {
+  indexName: string;
+  policyName: string;
+  alias: string;
+}) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX);
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async (body: GenericObject) => {
-  const response = await sendPost(`template`, body);
+export const addLifecyclePolicyToTemplate = async (
+  body: {
+    policyName: string;
+    templateName: string;
+    aliasName?: string;
+  },
+  legacy: boolean = false
+) => {
+  const response = await sendPost(`template`, body, { legacy });
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;
