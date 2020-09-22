@@ -8866,9 +8866,7 @@ const BootstrapCommand = {
     }
 
     const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn);
-    await Object(_utils_validate_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["assertSingleLodashV4"])(kbn, yarnLock);
-    await Object(_utils_validate_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["assertNoProductionLodash3"])(kbn, yarnLock);
-    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success('yarn.lock analysis completed without any issues');
+    await Object(_utils_validate_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["validateYarnLock"])(kbn, yarnLock);
     await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_0__["linkProjectExecutables"])(projects, projectGraph);
     /**
      * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
@@ -39602,8 +39600,7 @@ class BootstrapCacheFile {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assertSingleLodashV4", function() { return assertSingleLodashV4; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assertNoProductionLodash3", function() { return assertNoProductionLodash3; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validateYarnLock", function() { return validateYarnLock; });
 /* harmony import */ var _yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(284);
 /* harmony import */ var _yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
@@ -39633,44 +39630,47 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function assertSingleLodashV4(kbn, yarnLock) {
+async function validateYarnLock(kbn, yarnLock) {
+  // look through all of the packages in the yarn.lock file to see if
+  // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set();
   const lodash4Reqs = new Set();
 
   for (const [req, dep] of Object.entries(yarnLock)) {
-    const chunks = req.split('@');
-
-    if (chunks[0] === 'lodash' && dep.version.startsWith('4.')) {
+    if (req.startsWith('lodash@') && dep.version.startsWith('4.')) {
       lodash4Reqs.add(req);
       lodash4Versions.add(dep.version);
     }
-  }
+  } // if we find more than one lodash v4 version installed then delete
+  // lodash v4 requests from the yarn.lock file and prompt the user to
+  // retry bootstrap so that a single v4 version will be installed
 
-  if (lodash4Versions.size === 1) {
-    return;
-  }
 
-  for (const req of lodash4Reqs) {
-    delete yarnLock[req];
-  }
+  if (lodash4Versions.size > 1) {
+    for (const req of lodash4Reqs) {
+      delete yarnLock[req];
+    }
 
-  await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["writeFile"])(kbn.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
-  _log__WEBPACK_IMPORTED_MODULE_3__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["writeFile"])(kbn.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
+    _log__WEBPACK_IMPORTED_MODULE_3__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
 
-    Multiple version of lodash v4 were detected, so they have been removed
-    from the yarn.lock file. Please rerun yarn kbn bootstrap to coalese the
-    lodash versions installed.
+      Multiple version of lodash v4 were detected, so they have been removed
+      from the yarn.lock file. Please rerun yarn kbn bootstrap to coalese the
+      lodash versions installed.
 
-    If you still see this error when you re-bootstrap then you might need
-    to force a new dependency to use the latest version of lodash via the
-    "resolutions" field in package.json.
+      If you still see this error when you re-bootstrap then you might need
+      to force a new dependency to use the latest version of lodash via the
+      "resolutions" field in package.json.
 
-    If you have questions about this please reach out to the operations team.
+      If you have questions about this please reach out to the operations team.
 
-  `);
-  process.exit(1);
-}
-async function assertNoProductionLodash3(kbn, yarnLock) {
+    `);
+    process.exit(1);
+  } // look through all the dependencies of production packages and production
+  // dependencies of those packages to determine if we're shipping any versions
+  // of lodash v3 in the distributable
+
+
   const prodDependencies = kbn.resolveAllProductionDependencies(yarnLock, _log__WEBPACK_IMPORTED_MODULE_3__["log"]);
   const lodash3Versions = new Set();
 
@@ -39678,26 +39678,27 @@ async function assertNoProductionLodash3(kbn, yarnLock) {
     if (dep.name === 'lodash' && dep.version.startsWith('3.')) {
       lodash3Versions.add(dep.version);
     }
+  } // if any lodash v3 packages were found we abort and tell the user to fix things
+
+
+  if (lodash3Versions.size) {
+    _log__WEBPACK_IMPORTED_MODULE_3__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+
+      Due to changes in the yarn.lock file and/or package.json files a version of
+      lodash 3 is now included in the production dependencies. To reduce the size of
+      our distributable and especially our front-end bundles we have decided to
+      prevent adding any new instances of lodash 3.
+
+      Please inspect the changes to yarn.lock or package.json files to identify where
+      the lodash 3 version is coming from and remove it.
+
+      If you have questions about this please reack out to the operations team.
+
+    `);
+    process.exit(1);
   }
 
-  if (!lodash3Versions.size) {
-    return;
-  }
-
-  _log__WEBPACK_IMPORTED_MODULE_3__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
-
-    Due to changes in the yarn.lock file and/or package.json files a version of
-    lodash 3 is now included in the production dependencies. To reduce the size of
-    our distributable and especially our front-end bundles we have decided to
-    prevent adding any new instances of lodash 3.
-
-    Please inspect the changes to yarn.lock or package.json files to identify where
-    the lodash 3 version is coming from and remove it.
-
-    If you have questions about this please reack out to the operations team.
-
-  `);
-  process.exit(1);
+  _log__WEBPACK_IMPORTED_MODULE_3__["log"].success('yarn.lock analysis completed without any issues');
 }
 
 /***/ }),
