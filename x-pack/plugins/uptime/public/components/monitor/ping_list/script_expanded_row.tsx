@@ -14,9 +14,12 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiPanel,
   EuiPopover,
+  EuiOverlayMask,
   EuiText,
   EuiCodeBlock,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -64,6 +67,7 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   imgRef,
 }) => {
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState<boolean>(false);
+  const [isOverlayOpen, setIsOverlayOpen] = useState<boolean>(false);
   const intersection = useIntersection(imgRef, {
     root: null,
     rootMargin: '0px',
@@ -77,35 +81,50 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   console.log('int:', intersection);
   // need to render container for intersection ref
   if (screenshot) {
+    const screenshotSrc = `data:image/png;base64,${screenshot}`;
     return (
-      <EuiPopover
-        anchorPosition="rightCenter"
-        button={
-          <input
-            type="image"
-            ref={imgRef}
-            style={{
-              width: THUMBNAIL_WIDTH,
-              height: THUMBNAIL_HEIGHT,
-              objectFit: 'cover',
-              objectPosition: 'center top',
-            }}
-            src={`data:image/png;base64,${screenshot}`}
+      <>
+        {isOverlayOpen && (
+          <EuiOverlayMask onClick={() => setIsOverlayOpen(false)}>
+            <input
+              type="image"
+              src={screenshotSrc}
+              alt="full-size screenshot"
+              style={{ objectFit: 'contain' }}
+              onClick={() => setIsOverlayOpen(false)}
+            />
+          </EuiOverlayMask>
+        )}
+        <EuiPopover
+          anchorPosition="rightCenter"
+          button={
+            <input
+              type="image"
+              ref={imgRef}
+              style={{
+                width: THUMBNAIL_WIDTH,
+                height: THUMBNAIL_HEIGHT,
+                objectFit: 'cover',
+                objectPosition: 'center top',
+              }}
+              src={screenshotSrc}
+              alt="stuff"
+              onClick={() => setIsOverlayOpen(true)}
+              onMouseEnter={() => setIsImagePopoverOpen(true)}
+              onMouseLeave={() => setIsImagePopoverOpen(false)}
+            />
+          }
+          closePopover={() => setIsImagePopoverOpen(false)}
+          isOpen={isImagePopoverOpen}
+        >
+          <img
             alt="stuff"
-            onMouseEnter={() => setIsImagePopoverOpen(true)}
-            onMouseLeave={() => setIsImagePopoverOpen(false)}
+            src={screenshotSrc}
+            // TODO: extract these vals to a constant and @media
+            style={{ width: 640, height: 360, objectFit: 'contain' }}
           />
-        }
-        closePopover={() => setIsImagePopoverOpen(false)}
-        isOpen={isImagePopoverOpen}
-      >
-        <img
-          alt="stuff"
-          src={`data:image/png;base64,${screenshot}`}
-          // TODO: extract these vals to a constant and @media
-          style={{ width: 640, height: 360, objectFit: 'contain' }}
-        />
-      </EuiPopover>
+        </EuiPopover>
+      </>
     );
   } else if (isLoading === false && screenshot === '') {
     return (
