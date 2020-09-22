@@ -25,6 +25,8 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  wrapBuildingBlocks,
+  generateSignalId,
 } from './utils';
 import { BulkResponseErrorAggregation } from './types';
 import {
@@ -33,6 +35,7 @@ import {
   sampleBulkError,
   sampleBulkErrorItem,
   mockLogger,
+  sampleSignalHit,
 } from './__mocks__/es_results';
 
 const buildRuleMessage = buildRuleMessageFactory({
@@ -781,6 +784,56 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
+    });
+  });
+
+  describe('wrapBuildingBlocks', () => {
+    it('should generate a unique id for each building block', () => {
+      const wrappedBlocks = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockIds: string[] = [];
+      wrappedBlocks.forEach((block) => {
+        expect(blockIds.includes(block._id)).toEqual(false);
+        blockIds.push(block._id);
+      });
+    });
+
+    it('should generate different ids for identical documents in different sequences', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockId = wrappedBlockSequence1[0]._id;
+      wrappedBlockSequence2.forEach((block) => {
+        expect(block._id).not.toEqual(blockId);
+      });
+    });
+
+    it('should generate the same ids when given the same sequence twice', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      wrappedBlockSequence1.forEach((block, idx) => {
+        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
+      });
+    });
+  });
+
+  describe('generateSignalId', () => {
+    it('generates a unique signal id for same signal with different rule id', () => {
+      const signalId1 = generateSignalId(sampleSignalHit());
+      const modifiedSignal = sampleSignalHit();
+      modifiedSignal.signal.rule.id = 'some other rule id';
+      const signalIdModified = generateSignalId(modifiedSignal);
+      expect(signalId1).not.toEqual(signalIdModified);
     });
   });
 });

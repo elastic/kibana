@@ -12,7 +12,13 @@ import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation, isValidUnit, SignalHit } from './types';
+import {
+  BulkResponse,
+  BulkResponseErrorAggregation,
+  isValidUnit,
+  SignalHit,
+  BaseSignalHit,
+} from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
@@ -234,6 +240,29 @@ export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] 
   return buildingBlocks.map((block, idx) =>
     createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
   );
+};
+
+export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+  const blockIds = generateBuildingBlockIds(buildingBlocks);
+  return buildingBlocks.map((block, idx) => {
+    return {
+      _id: blockIds[idx],
+      _index: index,
+      _source: {
+        ...block,
+      },
+    };
+  });
+};
+
+export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+  return {
+    _id: generateSignalId(signal),
+    _index: index,
+    _source: {
+      ...signal,
+    },
+  };
 };
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {

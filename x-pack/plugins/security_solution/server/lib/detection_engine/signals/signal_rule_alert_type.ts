@@ -31,7 +31,6 @@ import {
   SignalRuleAlertTypeDefinition,
   RuleAlertAttributes,
   EqlSignalSearchResponse,
-  SignalHit,
   BaseSignalHit,
 } from './types';
 import {
@@ -40,8 +39,8 @@ import {
   getExceptions,
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
-  generateBuildingBlockIds,
-  generateSignalId,
+  wrapBuildingBlocks,
+  wrapSignal,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -579,29 +578,6 @@ export const signalRulesAlertType = ({
           lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
-    },
-  };
-};
-
-export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
-  const blockIds = generateBuildingBlockIds(buildingBlocks);
-  return buildingBlocks.map((block, idx) => {
-    return {
-      _id: blockIds[idx],
-      _index: index,
-      _source: {
-        ...block,
-      },
-    };
-  });
-};
-
-export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
-  return {
-    _id: generateSignalId(signal),
-    _index: index,
-    _source: {
-      ...signal,
     },
   };
 };
