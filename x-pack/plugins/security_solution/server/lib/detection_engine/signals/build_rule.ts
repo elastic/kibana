@@ -119,7 +119,7 @@ export const buildRuleWithoutOverrides = (
   ruleSO: SavedObject<RuleAlertAttributes>
 ): RulesSchema => {
   const ruleParams = ruleSO.attributes.params;
-  const rule = {
+  const rule: RulesSchema = {
     id: ruleSO.id,
     rule_id: ruleParams.ruleId,
     actions: ruleSO.attributes.actions,
@@ -165,6 +165,10 @@ export const buildRuleWithoutOverrides = (
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
     threshold: ruleParams.threshold,
+    threat_filters: ruleParams.threatFilters,
+    threat_index: ruleParams.threatIndex,
+    threat_query: ruleParams.threatQuery,
+    threat_mapping: ruleParams.threatMapping,
   };
   return removeInternalTagsFromRule(rule);
 };
