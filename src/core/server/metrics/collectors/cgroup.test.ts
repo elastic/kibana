@@ -18,6 +18,7 @@
  */
 
 import mockFs from 'mock-fs';
+import { loggerMock } from '@kbn/logging/target/mocks';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 describe('OsCgroupMetricsCollector', () => {
@@ -30,7 +31,7 @@ describe('OsCgroupMetricsCollector', () => {
       },
     });
 
-    const collector = new OsCgroupMetricsCollector({});
+    const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
     expect(await collector.collect()).toEqual({});
   });
 
@@ -51,7 +52,7 @@ throttled_time 666
       `,
     });
 
-    const collector = new OsCgroupMetricsCollector({});
+    const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
     expect(await collector.collect()).toMatchInlineSnapshot(`
       Object {
         "cpu": Object {
@@ -90,6 +91,7 @@ throttled_time 666
     });
 
     const collector = new OsCgroupMetricsCollector({
+      logger: loggerMock.create(),
       cpuAcctPath: 'xxcustomcpuacctxx',
       cpuPath: 'xxcustomcpuxx',
     });
@@ -111,5 +113,33 @@ throttled_time 666
         },
       }
     `);
+  });
+
+  it('returns empty object and logs warning on an fs error', async () => {
+    mockFs({
+      '/proc/self/cgroup': `
+123:memory:/groupname
+123:cpu:/groupname
+123:cpuacct:/groupname
+      `,
+      '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage': mockFs.file({
+        mode: parseInt('0000', 8),
+      }),
+      '/sys/fs/cgroup/cpu/groupname/cpu.cfs_period_us': '222',
+      '/sys/fs/cgroup/cpu/groupname/cpu.cfs_quota_us': '333',
+      '/sys/fs/cgroup/cpu/groupname/cpu.stat': `
+nr_periods 444
+nr_throttled 555
+throttled_time 666
+      `,
+    });
+
+    const logger = loggerMock.create();
+
+    const collector = new OsCgroupMetricsCollector({ logger });
+    expect(await collector.collect()).toEqual({});
+    expect(logger.warn).toHaveBeenCalledWith(
+      "cgroup metrics could not be read due to error: [Error: EACCES, permission denied '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
+    );
   });
 });

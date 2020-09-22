@@ -19,11 +19,13 @@
 
 import fs from 'fs';
 import { join as joinPath } from 'path';
+import { Logger } from '@kbn/logging';
 import { MetricsCollector, OpsOsMetrics } from './types';
 
 type OsCgroupMetrics = Pick<OpsOsMetrics, 'cpu' | 'cpuacct'>;
 
 interface OsCgroupMetricsCollectorOptions {
+  logger: Logger;
   cpuPath?: string;
   cpuAcctPath?: string;
 }
@@ -64,12 +66,11 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
         },
       };
     } catch (err) {
-      if (err.code === 'ENOENT') {
-        this.noCgroupPresent = true;
-        return {};
-      } else {
-        throw err;
-      }
+      this.noCgroupPresent = true;
+      this.options.logger.warn(
+        `cgroup metrics could not be read due to error: [${err.toString()}]`
+      );
+      return {};
     }
   }
 

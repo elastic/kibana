@@ -20,12 +20,14 @@
 import os from 'os';
 import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
+import { Logger } from '@kbn/logging';
 import { OpsOsMetrics, MetricsCollector } from './types';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 const getos = promisify(getosAsync);
 
 export interface OpsMetricsCollectorOptions {
+  logger: Logger;
   cpuPath?: string;
   cpuAcctPath?: string;
 }
@@ -33,7 +35,7 @@ export interface OpsMetricsCollectorOptions {
 export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   private readonly cgroupCollector: OsCgroupMetricsCollector;
 
-  constructor(options: OpsMetricsCollectorOptions = {}) {
+  constructor(options: OpsMetricsCollectorOptions) {
     this.cgroupCollector = new OsCgroupMetricsCollector(options);
   }
 
