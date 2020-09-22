@@ -122,7 +122,17 @@ export class EditorFrameService {
       return {
         mount: (
           element,
-          { doc, onError, dateRange, query, filters, savedQuery, onChange, showNoDataPopover }
+          {
+            doc,
+            onError,
+            dateRange,
+            query,
+            filters,
+            savedQuery,
+            onChange,
+            showNoDataPopover,
+            visualizeTriggerFieldContext,
+          }
         ) => {
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
@@ -149,6 +159,7 @@ export class EditorFrameService {
                 savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
+                visualizeTriggerFieldContext={visualizeTriggerFieldContext}
               />
             </I18nProvider>,
             domElement

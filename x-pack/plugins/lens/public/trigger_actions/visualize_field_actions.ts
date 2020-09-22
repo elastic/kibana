@@ -16,16 +16,13 @@ export const visualizeFieldAction = (application: ApplicationStart) =>
     type: ACTION_VISUALIZE_LENS_FIELD,
     id: ACTION_VISUALIZE_LENS_FIELD,
     getDisplayName: () =>
-      i18n.translate('visualize.discover.visualizeFieldLabel', {
+      i18n.translate('xpack.lens.discover.visualizeFieldLegend', {
         defaultMessage: 'Visualize field',
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: VisualizeFieldContext) => {
       application.navigateToApp('lens', {
-        state: {
-          fieldName: context.fieldName,
-          indexPatternId: context.indexPatternId,
-        },
+        state: context,
       });
     },
   });

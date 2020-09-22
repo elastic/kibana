@@ -19,6 +19,7 @@ import { RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
 
@@ -45,6 +46,7 @@ export interface EditorFrameProps {
     isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -63,7 +65,12 @@ export function EditorFrame(props: EditorFrameProps) {
       // prevents executing dispatch on unmounted component
       let isUnmounted = false;
       if (!allLoaded) {
-        initializeDatasources(props.datasourceMap, state.datasourceStates, props.doc?.references)
+        initializeDatasources(
+          props.datasourceMap,
+          state.datasourceStates,
+          props.doc?.references,
+          props.visualizeTriggerFieldContext
+        )
           .then((result) => {
             if (!isUnmounted) {
               Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
@@ -84,7 +91,6 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [allLoaded, onError]
   );
-
   const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
 
   const framePublicAPI: FramePublicAPI = {
@@ -275,6 +281,7 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
+              visualizeTriggerFieldContext={props.visualizeTriggerFieldContext}
             />
           )
         }

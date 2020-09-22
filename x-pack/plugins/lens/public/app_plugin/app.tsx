@@ -40,6 +40,7 @@ import {
   SavedQuery,
 } from '../../../../../src/plugins/data/public';
 import { getFullPath } from '../../common';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 
 interface State {
   indicateNoData: boolean;
@@ -75,6 +76,7 @@ export function App({
   setHeaderActionMenu,
   history,
   getAppNameFromId,
+  locationState,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -89,6 +91,7 @@ export function App({
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: History;
   getAppNameFromId?: (appId: string) => string | undefined;
+  locationState?: VisualizeFieldContext;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -541,6 +544,7 @@ export function App({
                 filters: state.filters,
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
+                visualizeTriggerFieldContext: locationState,
                 onError,
                 showNoDataPopover,
                 onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {

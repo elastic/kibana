@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,
@@ -47,6 +48,7 @@ export function getSuggestions({
   subVisualizationId,
   visualizationState,
   field,
+  visualizeTriggerFieldContext,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -61,6 +63,7 @@ export function getSuggestions({
   subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -70,10 +73,16 @@ export function getSuggestions({
   const datasourceTableSuggestions = _.flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
-      return (field
+      const dataSourceSuggestions = visualizeTriggerFieldContext
+        ? datasource.getDatasourceSuggestionsForVisualizeField(
+            datasourceState,
+            visualizeTriggerFieldContext.indexPatternId,
+            visualizeTriggerFieldContext.fieldName
+          )
+        : field
         ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
-        : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
-      ).map((suggestion) => ({ ...suggestion, datasourceId }));
+        : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState);
+      return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
     })
   );
 

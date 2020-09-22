@@ -26,6 +26,7 @@ import {
   IIndexPattern,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -131,6 +132,7 @@ describe('Lens App', () => {
     core: typeof core;
     storage: Storage;
     docId?: string;
+    locationState?: VisualizeFieldContext;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
@@ -185,6 +187,7 @@ describe('Lens App', () => {
       core: typeof core;
       storage: Storage;
       docId?: string;
+      locationState?: VisualizeFieldContext;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;
@@ -241,6 +244,7 @@ describe('Lens App', () => {
             },
             "savedQuery": undefined,
             "showNoDataPopover": [Function],
+            "visualizeTriggerFieldContext": undefined,
           },
         ],
       ]

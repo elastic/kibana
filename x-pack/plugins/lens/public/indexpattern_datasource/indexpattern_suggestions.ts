@@ -117,6 +117,32 @@ export function getDatasourceSuggestionsForField(
   }
 }
 
+export function getDatasourceSuggestionsForVisualizeField(
+  state: IndexPatternPrivateState,
+  indexPatternId: string,
+  fieldName: string
+): IndexPatternSugestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  const suggestions: IndexPatternSugestion[] = [];
+  if (layerIds.length === 0) return [];
+  const indexPattern = state.indexPatterns[indexPatternId];
+  const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+  if (!field) return [];
+  const mostEmptyLayerId = _.minBy(
+    layerIds,
+    (layerId) => state.layers[layerId].columnOrder.length
+  ) as string;
+  if (state.layers[mostEmptyLayerId].columnOrder.length === 0) {
+    suggestions.push(
+      ...getEmptyLayerSuggestionsForField(state, mostEmptyLayerId, indexPatternId, field)
+    );
+  } else {
+    suggestions.push(...getExistingLayerSuggestionsForField(state, mostEmptyLayerId, field));
+  }
+  return suggestions;
+}
+
 function getBucketOperation(field: IndexPatternField) {
   // We allow numeric bucket types in some cases, but it's generally not the right suggestion,
   // so we eliminate it here.
@@ -471,7 +497,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             suggestions.push(createChangedNestingSuggestion(state, layerId));
           }
         }
-
         return suggestions;
       })
   );

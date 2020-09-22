@@ -35,7 +35,10 @@ import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -59,6 +62,7 @@ export interface WorkspacePanelProps {
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -77,6 +81,7 @@ export function InnerWorkspacePanel({
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   title,
+  visualizeTriggerFieldContext,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
@@ -116,6 +121,7 @@ export function InnerWorkspacePanel({
   const [localState, setLocalState] = useState({
     expressionBuildError: undefined as string | undefined,
     expandError: false,
+    visualizeTriggerSuggestionsLoaded: false,
   });
 
   const activeVisualization = activeVisualizationId
@@ -199,6 +205,31 @@ export function InnerWorkspacePanel({
       }));
     }
   }, [expression, localState.expressionBuildError]);
+
+  useEffect(() => {
+    if (
+      !activeDatasourceId ||
+      !visualizeTriggerFieldContext ||
+      localState.visualizeTriggerSuggestionsLoaded
+    ) {
+      return;
+    }
+
+    const suggestions = getSuggestions({
+      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
+      datasourceStates,
+      visualizationMap,
+      activeVisualizationId,
+      visualizationState,
+      visualizeTriggerFieldContext,
+    });
+
+    if (suggestions.length) {
+      switchToSuggestion(dispatch, suggestions[0], 'SWITCH_VISUALIZATION');
+      setLocalState((s) => ({ ...s, visualizeTriggerSuggestionsLoaded: true }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visualizeTriggerFieldContext, visualizationState]);
 
   function onDrop() {
     if (suggestionForDraggedField) {

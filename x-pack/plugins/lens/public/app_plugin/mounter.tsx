@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
@@ -35,7 +35,7 @@ export async function mountApp(
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
-
+  const locationState = params.history.location.state as VisualizeFieldContext;
   const stateTransfer = embeddable?.getStateTransfer(params.history);
   const { originatingApp } =
     stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
@@ -73,7 +73,6 @@ export async function mountApp(
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-
     return (
       <App
         core={coreStart}
@@ -91,6 +90,7 @@ export async function mountApp(
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
+        locationState={locationState}
       />
     );
   };

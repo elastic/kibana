@@ -23,6 +23,7 @@ import {
   IndexPatternsContract,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 
@@ -178,6 +179,7 @@ export async function loadInitialState({
   defaultIndexPatternId,
   storage,
   indexPatternsService,
+  visualizeTriggerFieldContext,
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
@@ -185,6 +187,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
@@ -200,13 +203,15 @@ export async function loadInitialState({
       : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
-  const currentIndexPatternId = requiredPatterns[0];
+  const currentIndexPatternId = visualizeTriggerFieldContext?.indexPatternId ?? requiredPatterns[0];
   setLastUsedIndexPatternId(storage, currentIndexPatternId);
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: requiredPatterns,
+    patterns: visualizeTriggerFieldContext
+      ? [visualizeTriggerFieldContext.indexPatternId]
+      : requiredPatterns,
   });
   if (state) {
     return {
