@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getConfigurationFilePaths, getConfigFromFiles } from './utils';
+import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
 
 import { ApmConfiguration } from './config';
 
@@ -30,5 +30,6 @@ import { ApmConfiguration } from './config';
 export const loadConfiguration = (argv: string[], rootDir: string): ApmConfiguration => {
   const configPaths = getConfigurationFilePaths(argv);
   const rawConfiguration = getConfigFromFiles(configPaths);
+  applyConfigOverrides(rawConfiguration, argv);
   return new ApmConfiguration(rootDir, rawConfiguration);
 };

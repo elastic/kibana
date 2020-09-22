@@ -50,8 +50,8 @@ function merge(target: Record<string, any>, value: any, key?: string) {
 }
 
 /** @internal */
-export const getConfigFromFiles = (configFiles: readonly string[]) => {
-  let mergedYaml = {};
+export const getConfigFromFiles = (configFiles: readonly string[]): Record<string, any> => {
+  let mergedYaml: Record<string, any> = {};
 
   for (const configFile of configFiles) {
     const yaml = readYaml(configFile);

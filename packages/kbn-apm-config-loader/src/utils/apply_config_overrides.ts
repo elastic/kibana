@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export { getConfigFromFiles } from './read_config';
-export { getConfigurationFilePaths } from './get_config_file_paths';
-export { applyConfigOverrides } from './apply_config_overrides';
+import { set } from '@elastic/safer-lodash-set';
+import { getFlagValue } from './read_argv';
+
+/**
+ * Manually applies the specific configuration overrides we need to load the APM config.
+ * Currently, only these are needed:
+ *   - server.uuid
+ *   - path.data
+ */
+export const applyConfigOverrides = (config: Record<string, any>, argv: string[]) => {
+  const serverUuid = getFlagValue(argv, '--server.uuid');
+  if (serverUuid) {
+    set(config, 'server.uuid', serverUuid);
+  }
+  const dataPath = getFlagValue(argv, '--path.data');
+  if (dataPath) {
+    set(config, 'path.data', dataPath);
+  }
+};
