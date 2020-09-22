@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSteps,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -21,7 +22,6 @@ import { usePostCase } from '../../containers/use_post_case';
 import { schema, FormProps } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useGetTags } from '../../containers/use_get_tags';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
@@ -37,20 +37,20 @@ import {
   getNoneConnector,
 } from '../configure_cases/utils';
 import { ActionConnector } from '../../containers/types';
+import * as i18n from './translations';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const ContainerBig = styled.div`
-  ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSizeXL};
+interface ContainerProps {
+  big?: boolean;
+}
+
+const Container = styled.div.attrs((props) => props)<ContainerProps>`
+  ${({ big, theme }) => css`
+    margin-top: ${big ? theme.eui.euiSizeXL : theme.eui.euiSize};
   `}
 `;
 
-const Container = styled.div`
-  ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSize};
-  `}
-`;
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
@@ -171,6 +171,97 @@ export const Create = React.memo(() => {
     history.push('/');
   }, [history]);
 
+  const firstStep = useMemo(
+    () => ({
+      title: i18n.STEP_ONE_TITLE,
+      children: (
+        <>
+          <CommonUseField
+            path="title"
+            componentProps={{
+              idAria: 'caseTitle',
+              'data-test-subj': 'caseTitle',
+              euiFieldProps: {
+                fullWidth: false,
+                disabled: isLoading,
+              },
+            }}
+          />
+          <Container>
+            <CommonUseField
+              path="tags"
+              componentProps={{
+                idAria: 'caseTags',
+                'data-test-subj': 'caseTags',
+                euiFieldProps: {
+                  fullWidth: true,
+                  placeholder: '',
+                  disabled: isLoading,
+                  options,
+                  noSuggestions: false,
+                },
+              }}
+            />
+          </Container>
+          <Container big>
+            <UseField
+              path={'description'}
+              component={MarkdownEditorForm}
+              componentProps={{
+                dataTestSubj: 'caseDescription',
+                idAria: 'caseDescription',
+                isDisabled: isLoading,
+                onClickTimeline: handleTimelineClick,
+                onCursorPositionUpdate: handleCursorChange,
+                topRightContent: (
+                  <InsertTimelinePopover
+                    hideUntitled={true}
+                    isDisabled={isLoading}
+                    onTimelineChange={handleOnTimelineChange}
+                  />
+                ),
+              }}
+            />
+          </Container>
+        </>
+      ),
+    }),
+    [isLoading, options, handleCursorChange, handleTimelineClick, handleOnTimelineChange]
+  );
+
+  const secondStep = useMemo(
+    () => ({
+      title: i18n.STEP_TWO_TITLE,
+      children: (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <Container>
+              <UseField
+                path="connectorId"
+                component={ConnectorSelector}
+                componentProps={{
+                  connectors,
+                  dataTestSubj: 'caseConnectors',
+                  idAria: 'caseConnectors',
+                  isLoading,
+                  disabled: isLoadingConnectors,
+                }}
+              />
+            </Container>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Container>
+              <SettingFieldsForm connector={connector} onFieldsChange={setFields} />
+            </Container>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    }),
+    [isLoadingConnectors, connectors, isLoading, connector]
+  );
+
+  const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);
+
   if (caseData != null && caseData.id) {
     history.push(getCaseDetailsUrl({ id: caseData.id }));
     return null;
@@ -180,69 +271,7 @@ export const Create = React.memo(() => {
     <EuiPanel>
       {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
       <Form form={form}>
-        <CommonUseField
-          path="title"
-          componentProps={{
-            idAria: 'caseTitle',
-            'data-test-subj': 'caseTitle',
-            euiFieldProps: {
-              fullWidth: false,
-              disabled: isLoading,
-            },
-          }}
-        />
-        <Container>
-          <CommonUseField
-            path="tags"
-            componentProps={{
-              idAria: 'caseTags',
-              'data-test-subj': 'caseTags',
-              euiFieldProps: {
-                fullWidth: true,
-                placeholder: '',
-                disabled: isLoading,
-                options,
-                noSuggestions: false,
-              },
-            }}
-          />
-        </Container>
-        <Container>
-          <UseField
-            path="connectorId"
-            component={ConnectorSelector}
-            componentProps={{
-              connectors,
-              dataTestSubj: 'caseConnectors',
-              idAria: 'caseConnectors',
-              isLoading,
-              disabled: isLoadingConnectors,
-            }}
-          />
-        </Container>
-        <Container>
-          <SettingFieldsForm connector={connector} onFieldsChange={setFields} />
-        </Container>
-        <ContainerBig>
-          <UseField
-            path={'description'}
-            component={MarkdownEditorForm}
-            componentProps={{
-              dataTestSubj: 'caseDescription',
-              idAria: 'caseDescription',
-              isDisabled: isLoading,
-              onClickTimeline: handleTimelineClick,
-              onCursorPositionUpdate: handleCursorChange,
-              topRightContent: (
-                <InsertTimelinePopover
-                  hideUntitled={true}
-                  isDisabled={isLoading}
-                  onTimelineChange={handleOnTimelineChange}
-                />
-              ),
-            }}
-          />
-        </ContainerBig>
+        <EuiSteps headingElement="h2" steps={allSteps} />
       </Form>
       <Container>
         <EuiFlexGroup
