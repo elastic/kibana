@@ -52,14 +52,7 @@ describe('getTile', () => {
       callElasticsearch: mockCallElasticsearch,
     });
 
-    if (tile === null) {
-      throw new Error('Tile should be created');
-    }
-
-    const expectedPath = path.resolve(__dirname, './__tests__/pbf/0_0_0_docs.pbf');
-    const expectedBin = fs.readFileSync(expectedPath, 'binary');
-    const expectedTile = Buffer.from(expectedBin, 'binary');
-    expect(expectedTile.equals(tile)).toBe(true);
+    compareTiles('./__tests__/pbf/0_0_0_docs.pbf', tile);
   });
 });
 
@@ -121,13 +114,16 @@ describe('getGridTile', () => {
       requestType: RENDER_AS.POINT,
     });
 
-    if (tile === null) {
-      throw new Error('Tile should be created');
-    }
-
-    const expectedPath = path.resolve(__dirname, './__tests__/pbf/0_0_0_grid.pbf');
-    const expectedBin = fs.readFileSync(expectedPath, 'binary');
-    const expectedTile = Buffer.from(expectedBin, 'binary');
-    expect(expectedTile.equals(tile)).toBe(true);
+    compareTiles('./__tests__/pbf/0_0_0_grid.pbf', tile);
   });
 });
+
+function compareTiles(expectedRelativePath: string, actualTile: Buffer | null) {
+  if (actualTile === null) {
+    throw new Error('Tile should be created');
+  }
+  const expectedPath = path.resolve(__dirname, expectedRelativePath);
+  const expectedBin = fs.readFileSync(expectedPath, 'binary');
+  const expectedTile = Buffer.from(expectedBin, 'binary');
+  expect(expectedTile.equals(actualTile)).toBe(true);
+}
