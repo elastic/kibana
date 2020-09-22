@@ -39,7 +39,7 @@ export async function createOrUpdateIndex({
     await client.indices.exists({
       index: indexName,
     })
-  ).body as boolean;
+  ).body as unknown;
 
   if (!indexExists) {
     await client.indices.create({

@@ -5944,12 +5944,9 @@ exports[`Header renders 1`] = `
                       ]
                     }
                   >
-                    <EuiCollapsibleNavGroup
-                      className="eui-showFor--l eui-showFor--xl"
-                      key=".0"
-                    >
+                    <EuiCollapsibleNavGroup>
                       <div
-                        className="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
+                        className="euiCollapsibleNavGroup"
                         id="mockId"
                       >
                         <div

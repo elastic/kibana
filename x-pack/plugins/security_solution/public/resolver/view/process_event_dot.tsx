@@ -257,13 +257,6 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const handleRelatedEventRequest = useCallback(() => {
-      dispatch({
-        type: 'userRequestedRelatedEventData',
-        payload: nodeID,
-      });
-    }, [dispatch, nodeID]);
-
     const handleClick = useCallback(
       (clickEvent) => {
         if (animationTarget.current?.beginElement) {
@@ -439,11 +432,7 @@ const UnstyledProcessEventDot = React.memo(
             <EuiFlexItem grow={false} className="related-dropdown">
               {grandTotal !== null && grandTotal > 0 && (
                 <NodeSubMenu
-                  count={grandTotal}
-                  buttonBorderColor={labelButtonFill}
                   buttonFill={colorMap.resolverBackground}
-                  menuAction={handleRelatedEventRequest}
-                  projectionMatrix={projectionMatrix}
                   relatedEventStats={relatedEventStats}
                   nodeID={nodeID}
                 />
