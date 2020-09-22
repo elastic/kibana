@@ -48,7 +48,7 @@ export function SelectableUrlList({
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
-  const titleRef = useRef();
+  const titleRef = useRef<HTMLDivElement>(null);
 
   const searchOnFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
@@ -62,7 +62,7 @@ export function SelectableUrlList({
   const searchOnBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (
       !popoverRef?.contains(e.relatedTarget as HTMLElement) &&
-      !popoverRef?.contains(titleRef.current as HTMLElement)
+      !popoverRef?.contains(titleRef.current as HTMLDivElement)
     ) {
       setPopoverIsOpen(false);
     }
@@ -82,13 +82,13 @@ export function SelectableUrlList({
     <EuiSelectableMessage style={{ minHeight: 300 }}>
       <EuiLoadingSpinner size="l" />
       <br />
-      <p>Loading results</p>
+      <p>{I18LABELS.loadingResults}</p>
     </EuiSelectableMessage>
   );
 
   const emptyMessage = (
     <EuiSelectableMessage style={{ minHeight: 300 }}>
-      <p>No results available</p>
+      <p>{I18LABELS.noResults}</p>
     </EuiSelectableMessage>
   );
 

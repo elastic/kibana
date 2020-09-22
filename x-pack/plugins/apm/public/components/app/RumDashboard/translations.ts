@@ -99,6 +99,12 @@ export const I18LABELS = {
   matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
     defaultMessage: 'Match this query',
   }),
+  loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
+    defaultMessage: 'Loading results',
+  }),
+  noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
+    defaultMessage: 'No results available',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
