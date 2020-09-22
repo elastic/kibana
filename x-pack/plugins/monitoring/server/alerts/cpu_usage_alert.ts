@@ -333,7 +333,11 @@ export class CpuUsageAlert extends BaseAlert {
     }
   }
 
-  protected processData(data: AlertData[], clusters: AlertCluster[], services: AlertServices) {
+  protected async processData(
+    data: AlertData[],
+    clusters: AlertCluster[],
+    services: AlertServices
+  ) {
     const currentUTC = +new Date();
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);

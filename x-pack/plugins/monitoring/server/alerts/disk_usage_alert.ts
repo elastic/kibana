@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient, Logger } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -207,10 +207,6 @@ export class DiskUsageAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    if (!alertStates.length) {
-      return;
-    }
-
     const ccs = alertStates.find((state) => state.ccs)?.ccs;
     const firingNodes = alertStates.filter(
       (alertState) => alertState.ui.isFiring
@@ -297,8 +293,58 @@ export class DiskUsageAlert extends BaseAlert {
     }
   }
 
-  protected processData(data: AlertData[], clusters: AlertCluster[], services: AlertServices) {
-    const currentUTC = +new Date();
+  private executeDeltas(
+    services: AlertServices,
+    cluster: AlertCluster,
+    newAlertStates: AlertDiskUsageState[],
+    oldAlertStates: AlertDiskUsageState[]
+  ) {
+    const deltaFiringStates = [];
+    const deltaResolvedStates = [];
+    const deltaInstanceIdPrefix: string = `.monitoring:${this.type}:${
+      cluster.clusterUuid
+    }:${Date.now()}:`;
+
+    for (const newAlertState of newAlertStates) {
+      const relatedOldState = oldAlertStates.find(
+        (oldState) =>
+          oldState.nodeId === newAlertState.nodeId &&
+          oldState.ui.isFiring !== newAlertState.ui.isFiring &&
+          oldState.ui.resolvedMS !== newAlertState.ui.resolvedMS
+      );
+      if (!relatedOldState) {
+        if (newAlertState.ui.isFiring) {
+          deltaFiringStates.push(newAlertState);
+        } else if (newAlertState.ui.resolvedMS) {
+          deltaResolvedStates.push(newAlertState);
+        }
+      }
+    }
+
+    if (deltaFiringStates.length + deltaResolvedStates.length === newAlertStates.length) {
+      /** No delta changes, so we do nothing */
+      return;
+    }
+
+    if (deltaFiringStates.length) {
+      const instance = services.alertInstanceFactory(`${deltaInstanceIdPrefix}:firing`);
+      this.executeActions(instance, { alertStates: deltaFiringStates }, null, cluster);
+    }
+
+    if (deltaResolvedStates.length) {
+      const instance = services.alertInstanceFactory(`${deltaInstanceIdPrefix}:resolved`);
+      this.executeActions(instance, { alertStates: deltaResolvedStates }, null, cluster);
+    }
+  }
+
+  protected async processData(
+    data: AlertData[],
+    clusters: AlertCluster[],
+    services: AlertServices,
+    logger: Logger,
+    state: any
+  ) {
+    const currentUTC = Date.now();
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {
@@ -307,9 +353,9 @@ export class DiskUsageAlert extends BaseAlert {
 
       const instanceId = `.monitoring:${this.type}:${cluster.clusterUuid}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const state = instance.getState() as AlertInstanceState;
-      const newAlertStates: AlertInstanceState['alertStates'] = [];
-      const oldAlertStates = (state?.alertStates || []) as AlertDiskUsageState[];
+      const instanceState = instance.getState() as AlertInstanceState;
+      const newAlertStates: AlertDiskUsageState[] = [];
+      const oldAlertStates = (instanceState?.alertStates || []) as AlertDiskUsageState[];
 
       for (const node of nodes) {
         const stat = node.meta as AlertDiskUsageState;
@@ -334,13 +380,24 @@ export class DiskUsageAlert extends BaseAlert {
         }
 
         nodeState.ui.message = this.getUiMessage(nodeState, node);
+      }
 
-        const alertInstanceState = { alertStates: newAlertStates };
-        instance.replaceState(alertInstanceState);
-        if (newAlertStates.length && !instance.hasScheduledActions()) {
-          this.executeActions(instance, alertInstanceState, null, cluster);
-        }
+      /**
+       * Addresses lost delta triggers if executed between throttle states, context:
+       * https://github.com/elastic/kibana/pull/75419#discussion_r490497639. This is
+       * a temporary solution until: https://github.com/elastic/kibana/issues/49405 is implemented
+       */
+      this.executeDeltas(services, cluster, newAlertStates, oldAlertStates);
+
+      const alertInstanceState = { alertStates: newAlertStates };
+      instance.replaceState(alertInstanceState);
+      if (newAlertStates.length && !instance.hasScheduledActions()) {
+        this.executeActions(instance, alertInstanceState, null, cluster);
+        state.lastExecutedAction = currentUTC;
       }
     }
+
+    state.lastChecked = currentUTC;
+    return state;
   }
 }

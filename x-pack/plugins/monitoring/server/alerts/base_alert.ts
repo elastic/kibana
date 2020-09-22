@@ -238,7 +238,7 @@ export class BaseAlert {
     );
 
     const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
-    this.processData(data, clusters, services, logger);
+    return await this.processData(data, clusters, services, logger, state);
   }
 
   protected async fetchData(
@@ -252,12 +252,13 @@ export class BaseAlert {
     throw new Error('Child classes must implement `fetchData`');
   }
 
-  protected processData(
+  protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,
-    logger: Logger
-  ) {
+    logger: Logger,
+    instanceState: unknown
+  ): Promise<void | Record<string, any>> {
     for (const item of data) {
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
       if (!cluster) {
