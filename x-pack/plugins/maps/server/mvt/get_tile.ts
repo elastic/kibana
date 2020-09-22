@@ -84,7 +84,10 @@ export async function getGridTile({
       body: requestBody,
     };
 
+    logger.info(JSON.stringify(esGeotileGridQuery));
     const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
+    logger.info('--------------');
+    logger.info(JSON.stringify(gridAggResult));
 
     const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
     const featureCollection: FeatureCollection = {

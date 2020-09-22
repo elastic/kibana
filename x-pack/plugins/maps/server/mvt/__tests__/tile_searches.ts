@@ -7,10 +7,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-const search000path = path.resolve(__dirname, './json/0_0_0_search.json');
-const search000raw = fs.readFileSync(search000path);
-const search000json = JSON.parse((search000raw as unknown) as string);
-
 export const TILE_SEARCHES = {
   '0.0.0': {
     countResponse: {
@@ -22,7 +18,18 @@ export const TILE_SEARCHES = {
         failed: 0,
       },
     },
-    searchResponse: search000json,
+    searchResponse: loadJson('./json/0_0_0_search.json'),
   },
-  '1.1.0': {},
 };
+
+// export const TILE_GRIDAGGS = {
+//   '0.0.0': {
+//     gridAggResponse: loadJson('./json/0_0_0_gridagg.json'),
+//   },
+// };
+
+function loadJson(filePath: string) {
+  const absolutePath = path.resolve(__dirname, filePath);
+  const rawContents = fs.readFileSync(absolutePath);
+  return JSON.parse((rawContents as unknown) as string);
+}
