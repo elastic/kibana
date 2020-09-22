@@ -441,6 +441,8 @@ describe('buildSignalFromSequence', () => {
     const blocks = [sampleDocWithAncestors().hits.hits[0], sampleDocWithAncestors().hits.hits[0]];
     const ruleSO = sampleRuleSO();
     const signal = buildSignalFromSequence(blocks, ruleSO);
+    // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> = {
       event: {
