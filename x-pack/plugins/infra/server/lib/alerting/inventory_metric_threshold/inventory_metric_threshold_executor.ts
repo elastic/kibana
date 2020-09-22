@@ -6,6 +6,7 @@
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { idxToAlphabeticalLabel } from '../../../../common/utils/index_to_alphabetical_label';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
@@ -132,12 +133,14 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
+  list.map(mapFn).reduce(
+    (result: Record<string, any>, value, i) => ({
+      ...result,
+      [`condition${i}`]: value,
+      [`condition${idxToAlphabeticalLabel(i)}`]: value,
+    }),
+    {}
+  );
 
 export const FIRED_ACTIONS = {
   id: 'metrics.invenotry_threshold.fired',

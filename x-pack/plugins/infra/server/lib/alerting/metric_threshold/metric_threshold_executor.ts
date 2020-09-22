@@ -6,6 +6,7 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { idxToAlphabeticalLabel } from '../../../../common/utils/index_to_alphabetical_label';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -116,12 +117,14 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
+  list.map(mapFn).reduce(
+    (result: Record<string, any>, value, i) => ({
+      ...result,
+      [`condition${i}`]: value,
+      [`condition${idxToAlphabeticalLabel(i)}`]: value,
+    }),
+    {}
+  );
 
 const formatAlertResult = <AlertResult>(
   alertResult: {
