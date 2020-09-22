@@ -18,6 +18,7 @@ import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { getMLJobIds } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
+import { getCommaSeparetedAggregationKey } from './utils';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -26,8 +27,8 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   environment: schema.string(),
@@ -94,8 +95,8 @@ export function registerTransactionDurationAnomalyAlertType({
       }
 
       const anomalySearchParams = {
+        terminateAfter: 1,
         body: {
-          terminateAfter: 1,
           size: 0,
           query: {
             bool: {
@@ -110,11 +111,15 @@ export function registerTransactionDurationAnomalyAlertType({
                     },
                   },
                 },
-                {
-                  term: {
-                    partition_field_value: alertParams.serviceName,
-                  },
-                },
+                ...(alertParams.serviceName
+                  ? [
+                      {
+                        term: {
+                          partition_field_value: alertParams.serviceName,
+                        },
+                      },
+                    ]
+                  : []),
                 {
                   range: {
                     record_score: {
@@ -125,12 +130,32 @@ export function registerTransactionDurationAnomalyAlertType({
               ],
             },
           },
+          aggs: {
+            services: {
+              terms: {
+                field: 'partition_field_value',
+                size: 50,
+              },
+            },
+            transaction_types: {
+              terms: {
+                field: 'by_field_value',
+              },
+            },
+          },
         },
       };
 
       const response = ((await mlAnomalySearch(
         anomalySearchParams
-      )) as unknown) as { hits: { total: { value: number } } };
+      )) as unknown) as {
+        hits: { total: { value: number } };
+        aggregations?: {
+          services: { buckets: Array<{ key: string }> };
+          transaction_types: { buckets: Array<{ key: string }> };
+        };
+      };
+
       const hitCount = response.hits.total.value;
 
       if (hitCount > 0) {
@@ -138,8 +163,16 @@ export function registerTransactionDurationAnomalyAlertType({
           AlertType.TransactionDurationAnomaly
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-          transactionType: alertParams.transactionType,
+          serviceName:
+            alertParams.serviceName ||
+            getCommaSeparetedAggregationKey(
+              response.aggregations?.services.buckets
+            ),
+          transactionType:
+            alertParams.transactionType ||
+            getCommaSeparetedAggregationKey(
+              response.aggregations?.transaction_types.buckets
+            ),
           environment: alertParams.environment,
         });
       }

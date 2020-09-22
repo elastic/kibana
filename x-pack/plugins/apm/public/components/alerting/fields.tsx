@@ -11,13 +11,17 @@ import { EuiSelectOption } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../common/environment_filter_values';
 import { PopoverExpression } from './ServiceAlertTrigger/PopoverExpression';
 
+const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
+  defaultMessage: 'All',
+});
+
 export function ServiceField({ value }: { value?: string }) {
   return (
     <EuiExpression
       description={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
       })}
-      value={value}
+      value={value || ALL_OPTION}
     />
   );
 }
@@ -61,8 +65,10 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
 
-  if (!options || options.length === 1) {
-    return <EuiExpression description={label} value={currentValue} />;
+  if (!options || options.length <= 1) {
+    return (
+      <EuiExpression description={label} value={currentValue || ALL_OPTION} />
+    );
   }
 
   return (

@@ -32,8 +32,8 @@ import {
 interface Params {
   windowSize: number;
   windowUnit: string;
-  serviceName: string;
-  transactionType: string;
+  serviceName?: string;
+  transactionType?: string;
   environment: string;
   anomalySeverityType:
     | ANOMALY_SEVERITY.CRITICAL
@@ -59,7 +59,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     [TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST].includes(transactionType)
   );
 
-  if (!supportedTransactionTypes.length || !serviceName) {
+  if (serviceName && !supportedTransactionTypes.length) {
     return null;
   }
 

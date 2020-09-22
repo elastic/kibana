@@ -26,6 +26,8 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { AlertIntegrations } from './AlertIntegrations';
+import { useAlertingIntegrations } from '../../../hooks/use_alerting_integrations';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -84,11 +86,19 @@ interface Props {
 
 export function Home({ tab }: Props) {
   const { config, core } = useApmPluginContext();
-  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
+  const capabilities = core.application.capabilities;
+  const canAccessML = !!capabilities.ml?.canAccessML;
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
+
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = useAlertingIntegrations();
 
   return (
     <div>
@@ -106,6 +116,15 @@ export function Home({ tab }: Props) {
               </EuiButtonEmpty>
             </SettingsLink>
           </EuiFlexItem>
+          {isAlertingAvailable && (
+            <EuiFlexItem grow={false}>
+              <AlertIntegrations
+                canReadAlerts={canReadAlerts}
+                canSaveAlerts={canSaveAlerts}
+                canReadAnomalies={canReadAnomalies}
+              />
+            </EuiFlexItem>
+          )}
           {canAccessML && (
             <EuiFlexItem grow={false}>
               <AnomalyDetectionSetupLink />

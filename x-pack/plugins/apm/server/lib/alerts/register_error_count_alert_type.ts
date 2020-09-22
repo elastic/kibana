@@ -10,10 +10,7 @@ import { take } from 'rxjs/operators';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -22,6 +19,7 @@ import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 import { apmActionVariables } from './action_variables';
+import { getCommaSeparetedAggregationKey } from './utils';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -32,7 +30,7 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  serviceName: schema.string(),
+  serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });
 
@@ -83,9 +81,19 @@ export function registerErrorCountAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                { term: { [SERVICE_NAME]: alertParams.serviceName } },
+                ...(alertParams.serviceName
+                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                  : []),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
+            },
+          },
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 50,
+              },
             },
           },
         },
@@ -93,7 +101,7 @@ export function registerErrorCountAlertType({
 
       const response: ESSearchResponse<
         unknown,
-        ESSearchRequest
+        typeof searchParams
       > = await services.callCluster('search', searchParams);
 
       const errorCount = response.hits.total.value;
@@ -102,8 +110,13 @@ export function registerErrorCountAlertType({
         const alertInstance = services.alertInstanceFactory(
           AlertType.ErrorCount
         );
+
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
+          serviceName:
+            alertParams.serviceName ||
+            getCommaSeparetedAggregationKey(
+              response.aggregations?.services.buckets
+            ),
           environment: alertParams.environment,
           threshold: alertParams.threshold,
           triggerValue: errorCount,

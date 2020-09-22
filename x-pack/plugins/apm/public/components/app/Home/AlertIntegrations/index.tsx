@@ -16,28 +16,26 @@ import { AlertType } from '../../../../../common/alert_types';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { AlertingFlyout } from '../../../alerting/AlertingFlyout';
 
-const alertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.alerts',
-  { defaultMessage: 'Alerts' }
-);
+const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
+  defaultMessage: 'Alerts',
+});
 const transactionDurationLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.transactionDuration',
+  'xpack.apm.home.alertsMenu.transactionDuration',
   { defaultMessage: 'Transaction duration' }
 );
 const transactionErrorRateLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.transactionErrorRate',
+  'xpack.apm.home.alertsMenu.transactionErrorRate',
   { defaultMessage: 'Transaction error rate' }
 );
-const errorCountLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.errorCount',
-  { defaultMessage: 'Error count' }
-);
+const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
+  defaultMessage: 'Error count',
+});
 const createThresholdAlertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.createThresholdAlert',
+  'xpack.apm.home.alertsMenu.createThresholdAlert',
   { defaultMessage: 'Create threshold alert' }
 );
 const createAnomalyAlertAlertLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.createAnomalyAlert',
+  'xpack.apm.home.alertsMenu.createAnomalyAlert',
   { defaultMessage: 'Create anomaly alert' }
 );
 
@@ -97,7 +95,7 @@ export function AlertIntegrations(props: Props) {
           ? [
               {
                 name: i18n.translate(
-                  'xpack.apm.serviceDetails.alertsMenu.viewActiveAlerts',
+                  'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'View active alerts' }
                 ),
                 href: plugin.core.http.basePath.prepend(
@@ -115,15 +113,6 @@ export function AlertIntegrations(props: Props) {
       id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
       title: transactionDurationLabel,
       items: [
-        // threshold alerts
-        {
-          name: createThresholdAlertLabel,
-          onClick: () => {
-            setAlertType(AlertType.TransactionDuration);
-            setPopoverOpen(false);
-          },
-        },
-
         // anomaly alerts
         ...(canReadAnomalies
           ? [

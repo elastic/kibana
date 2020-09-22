@@ -43,7 +43,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
-  if (!transactionTypes.length || !serviceName) {
+  if (serviceName && !transactionTypes.length) {
     return null;
   }
 

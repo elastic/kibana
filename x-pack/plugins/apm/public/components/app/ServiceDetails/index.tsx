@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useAlertingIntegrations } from '../../../hooks/use_alerting_integrations';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { AlertIntegrations } from './AlertIntegrations';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
@@ -25,18 +26,12 @@ interface Props extends RouteComponentProps<{ serviceName: string }> {
 export function ServiceDetails({ match, tab }: Props) {
   const plugin = useApmPluginContext();
   const { serviceName } = match.params;
-  const capabilities = plugin.core.application.capabilities;
-  const canReadAlerts = !!capabilities.apm['alerting:show'];
-  const canSaveAlerts = !!capabilities.apm['alerting:save'];
-  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-  const isAlertingAvailable =
-    isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-  const isMlPluginEnabled = 'ml' in plugin.plugins;
-  const canReadAnomalies = !!(
-    isMlPluginEnabled &&
-    capabilities.ml.canAccessML &&
-    capabilities.ml.canGetJobs
-  );
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = useAlertingIntegrations();
 
   const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
     defaultMessage: 'Add data',

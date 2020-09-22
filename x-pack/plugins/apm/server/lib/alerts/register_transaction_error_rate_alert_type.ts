@@ -22,6 +22,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { apmActionVariables } from './action_variables';
+import { getCommaSeparetedAggregationKey } from './utils';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -32,8 +33,8 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  transactionType: schema.string(),
-  serviceName: schema.string(),
+  transactionType: schema.maybe(schema.string()),
+  serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });
 
@@ -84,8 +85,18 @@ export function registerTransactionErrorRateAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                { term: { [SERVICE_NAME]: alertParams.serviceName } },
-                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
+                ...(alertParams.serviceName
+                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                  : []),
+                ...(alertParams.transactionType
+                  ? [
+                      {
+                        term: {
+                          [TRANSACTION_TYPE]: alertParams.transactionType,
+                        },
+                      },
+                    ]
+                  : []),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },
@@ -94,6 +105,13 @@ export function registerTransactionErrorRateAlertType({
             erroneous_transactions: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
             },
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 50,
+              },
+            },
+            transaction_types: { terms: { field: TRANSACTION_TYPE } },
           },
         },
       };
@@ -119,8 +137,18 @@ export function registerTransactionErrorRateAlertType({
         );
 
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-          transactionType: alertParams.transactionType,
+          serviceName:
+            alertParams.serviceName ||
+            getCommaSeparetedAggregationKey(
+              response.aggregations?.services.buckets
+            ),
+
+          transactionType:
+            alertParams.transactionType ||
+            getCommaSeparetedAggregationKey(
+              response.aggregations?.transaction_types.buckets
+            ),
+
           environment: alertParams.environment,
           threshold: alertParams.threshold,
           triggerValue: transactionErrorRate,

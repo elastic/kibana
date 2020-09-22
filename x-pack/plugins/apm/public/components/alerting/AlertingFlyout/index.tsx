@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { AlertType } from '../../../../../../common/alert_types';
-import { AlertAdd } from '../../../../../../../triggers_actions_ui/public';
+import { AlertType } from '../../../../common/alert_types';
+import { AlertAdd } from '../../../../../triggers_actions_ui/public';
 
 type AlertAddProps = React.ComponentProps<typeof AlertAdd>;
 
