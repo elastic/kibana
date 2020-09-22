@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { euiStyled } from '../../../../../observability/public';
 
-export const ExpressionRowLabel = euiStyled(EuiFlexItem).attrs({ grow: false })`
-flex-direction: row;
-align-items: center;
-margin-right: 8px !important;
-padding: 6px;
-background-color: ${(props) => props.theme.eui.euiColorLightestShade};
-border-radius: 4px;
-color: ${(props) => props.theme.eui.euiTitleColor};
-font-weight: 600;
+const StyledLabel = euiStyled(EuiFlexItem).attrs({ grow: false })`
+  flex-direction: row;
+  align-items: center;
+  margin-right: ${(props) => props.theme.eui.euiSizeXS} !important;
+  margin-bottom: 6px!important;
+  padding: ${(props) => props.theme.eui.euiSizeS};
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  border-radius: ${(props) => props.theme.eui.euiBorderRadius};
+  color: ${(props) => props.theme.eui.euiTitleColor};
 `;
+
+export const ExpressionRowLabel: React.FC = ({ children }) => (
+  <StyledLabel>
+    <EuiText size="xs">
+      <strong>{children}</strong>
+    </EuiText>
+  </StyledLabel>
+);
