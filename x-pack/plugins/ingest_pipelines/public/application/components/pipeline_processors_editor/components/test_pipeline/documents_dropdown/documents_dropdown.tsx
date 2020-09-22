@@ -33,9 +33,9 @@ const i18nTexts = {
     }
   ),
   addDocumentsButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.addDocumentsButtonLabel',
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.editDocumentsButtonLabel',
     {
-      defaultMessage: 'Add documents',
+      defaultMessage: 'Edit documents',
     }
   ),
   resetButtonLabel: i18n.translate(
@@ -100,8 +100,10 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       >
         <EuiSelectable
           singleSelection
+          data-test-subj="documentList"
           options={documents.map((doc, index) => ({
             key: index.toString(),
+            'data-test-subj': 'documentListItem',
             checked: selectedDocumentIndex === index ? 'on' : undefined,
             label: i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel',
@@ -123,10 +125,10 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
           }}
         >
           {(list) => (
-            <div>
+            <>
               <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
               {list}
-            </div>
+            </>
           )}
         </EuiSelectable>
 
@@ -142,7 +144,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
                 openFlyout('documents');
                 setShowPopover(false);
               }}
-              data-test-subj="addDocumentsButton"
+              data-test-subj="editDocumentsButton"
             >
               {i18nTexts.addDocumentsButtonLabel}
             </EuiButton>

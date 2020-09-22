@@ -22,6 +22,27 @@ describe('Test pipeline', () => {
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
+  // This is a hack
+  // We need to provide the processor id in the mocked output;
+  // this is generated dynamically
+  // As a workaround, the value is added as a data attribute in the UI
+  // and we retrieve it to generate the mocked output.
+  const addProcessorTagtoMockOutput = (output: VerboseTestOutput) => {
+    const { find } = testBed;
+
+    const docs = output.docs.map((doc) => {
+      const results = doc.processor_results.map((result, index) => {
+        const tag = find(`processors>${index}`).props()['data-processor-id'];
+        return {
+          ...result,
+          tag,
+        };
+      });
+      return { processor_results: results };
+    });
+    return { docs };
+  };
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -160,30 +181,76 @@ describe('Test pipeline', () => {
       expect(exists('pipelineExecutionError')).toBe(true);
       expect(find('pipelineExecutionError').text()).toContain(error.message);
     });
+
+    describe('Documents dropdown', () => {
+      beforeEach(async () => {
+        const { actions } = testBed;
+
+        httpRequestsMockHelpers.setSimulatePipelineResponse(
+          addProcessorTagtoMockOutput(SIMULATE_RESPONSE)
+        );
+
+        // Open flyout
+        actions.clickAddDocumentsButton();
+        // Add sample documents and click run
+        actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
+        await actions.clickRunPipelineButton();
+        // Close flyout
+        actions.closeTestPipelineFlyout();
+      });
+
+      it('should open flyout to edit documents', () => {
+        const { exists, actions } = testBed;
+
+        // Dropdown should be visible
+        expect(exists('documentsDropdown')).toBe(true);
+
+        // Open dropdown and edit documents
+        actions.clickDocumentsDropdown();
+        actions.clickEditDocumentsButton();
+
+        // Flyout should be visible with "Documents" tab enabled
+        expect(exists('testPipelineFlyout')).toBe(true);
+        expect(exists('documentsTabContent')).toBe(true);
+      });
+
+      it('should reset documents and stop pipeline simulation', async () => {
+        const { exists, actions, find } = testBed;
+
+        // Dropdown should be visible and processor status should equal "success"
+        expect(exists('documentsDropdown')).toBe(true);
+        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()[
+          'aria-label'
+        ];
+        expect(initialProcessorStatusLabel).toEqual('Success');
+
+        // Open dropdown and click "reset" button
+        actions.clickDocumentsDropdown();
+        actions.clickResetButton();
+
+        // Verify modal
+        const modal = document.body.querySelector(
+          '[data-test-subj="resetDocumentsConfirmationModal"]'
+        );
+
+        expect(modal).not.toBe(null);
+        expect(modal!.textContent).toContain('Reset');
+
+        // Confirm reset and close modal
+        await actions.clickConfirmResetButton();
+
+        // Verify documents and processors were reset
+        expect(exists('documentsDropdown')).toBe(false);
+        expect(exists('addDocumentsButton')).toBe(true);
+        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()[
+          'aria-label'
+        ];
+        expect(resetProcessorStatusIconLabel).toEqual('Not run');
+      });
+    });
   });
 
   describe('Processors', () => {
-    // This is a hack
-    // We need to provide the processor id in the mocked output;
-    // this is generated dynamically and not something we can stub.
-    // As a workaround, the value is added as a data attribute in the UI
-    // and we retrieve it to generate the mocked output.
-    const addProcessorTagtoMockOutput = (output: VerboseTestOutput) => {
-      const { find } = testBed;
-
-      const docs = output.docs.map((doc) => {
-        const results = doc.processor_results.map((result, index) => {
-          const tag = find(`processors>${index}`).props()['data-processor-id'];
-          return {
-            ...result,
-            tag,
-          };
-        });
-        return { processor_results: results };
-      });
-      return { docs };
-    };
-
     it('should show "inactive" processor status by default', async () => {
       const { find } = testBed;
 
