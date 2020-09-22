@@ -30,7 +30,7 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
   <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
     <EuiTitle size="s">
       <h2 id="kbnOverviewNews__title">
-        <FormattedMessage id="kibana.overview.news.title" defaultMessage="What's new?" />
+        <FormattedMessage id="kibana.overview.news.title" defaultMessage="What's new" />
       </h2>
     </EuiTitle>
 
