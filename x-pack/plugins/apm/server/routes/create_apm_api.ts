@@ -46,8 +46,6 @@ import {
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry,
-  transactionGroupsAvgDurationByBrowser,
   transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
 } from './transaction_groups';
@@ -140,8 +138,6 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsAvgDurationByBrowser)
-    .add(transactionGroupsAvgDurationByCountry)
     .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)
 
