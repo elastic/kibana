@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiText,
   htmlIdGenerator,
-  EuiForm,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
@@ -366,7 +365,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     'auto';
 
   return (
-    <EuiForm>
+    <>
       <ColorPicker {...props} />
 
       <EuiFormRow
@@ -430,7 +429,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           }}
         />
       </EuiFormRow>
-    </EuiForm>
+    </>
   );
 }
 

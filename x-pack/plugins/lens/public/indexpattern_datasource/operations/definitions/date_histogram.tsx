@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiForm,
   EuiFormRow,
   EuiSwitch,
   EuiSwitchEvent,
@@ -180,7 +179,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     };
 
     return (
-      <EuiForm>
+      <>
         {!intervalIsRestricted && (
           <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
@@ -314,7 +313,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             )}
           </EuiFormRow>
         )}
-      </EuiForm>
+      </>
     );
   },
 };

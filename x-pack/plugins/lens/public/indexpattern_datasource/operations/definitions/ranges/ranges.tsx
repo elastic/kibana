@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm } from '@elastic/eui';
 
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/index';
@@ -182,21 +181,19 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       );
     };
     return (
-      <EuiForm>
-        <RangeEditor
-          setParam={setParam}
-          maxBars={
-            currentColumn.params.maxBars === AUTO_BARS
-              ? maxBarsDefaultValue
-              : currentColumn.params.maxBars
-          }
-          granularityStep={granularityStep}
-          params={currentColumn.params}
-          onChangeMode={onChangeMode}
-          maxHistogramBars={uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
-          rangeFormatter={rangeFormatter}
-        />
-      </EuiForm>
+      <RangeEditor
+        setParam={setParam}
+        maxBars={
+          currentColumn.params.maxBars === AUTO_BARS
+            ? maxBarsDefaultValue
+            : currentColumn.params.maxBars
+        }
+        granularityStep={granularityStep}
+        params={currentColumn.params}
+        onChangeMode={onChangeMode}
+        maxHistogramBars={uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
+        rangeFormatter={rangeFormatter}
+      />
     );
   },
 };

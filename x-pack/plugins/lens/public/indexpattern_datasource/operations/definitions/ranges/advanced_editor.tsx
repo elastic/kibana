@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './ranges.scss';
+import './advanced_editor.scss';
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';

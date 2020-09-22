@@ -7,7 +7,15 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
-import { EuiButtonEmpty, EuiFormRow, EuiRange, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFormRow,
+  EuiRange,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
@@ -36,28 +44,44 @@ const BaseRangeEditor = ({
     [maxBarsValue]
   );
 
+  const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
+    defaultMessage: 'Granularity',
+  });
+  const decreaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.decreaseButtonLabel', {
+    defaultMessage: 'Decrease granularity',
+  });
+  const increaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.increaseButtonLabel', {
+    defaultMessage: 'Increase granularity',
+  });
+
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-          defaultMessage: 'Granularity',
-        })}
+        label={granularityLabel}
         data-test-subj="indexPattern-ranges-section-label"
+        labelType="legend"
+        fullWidth
+        display="rowCompressed"
       >
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="minusInCircle"
-              data-test-subj="lns-indexPattern-range-maxBars-minus"
-              onClick={() =>
-                setMaxBarsValue('' + Math.max(Number(maxBarsValue) - step, MIN_HISTOGRAM_BARS))
-              }
-            />
+            <EuiToolTip content={decreaseButtonLabel} delay="long">
+              <EuiButtonIcon
+                iconType="minusInCircle"
+                color="text"
+                data-test-subj="lns-indexPattern-range-maxBars-minus"
+                onClick={() =>
+                  setMaxBarsValue('' + Math.max(Number(maxBarsValue) - step, MIN_HISTOGRAM_BARS))
+                }
+                aria-label={decreaseButtonLabel}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiRange
               compressed
+              fullWidth
+              aria-label={granularityLabel}
               data-test-subj="lns-indexPattern-range-maxBars-field"
               min={MIN_HISTOGRAM_BARS}
               max={maxHistogramBars}
@@ -67,24 +91,26 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="plusInCircle"
-              data-test-subj="lns-indexPattern-range-maxBars-plus"
-              onClick={() =>
-                setMaxBarsValue('' + Math.min(Number(maxBarsValue) + step, maxHistogramBars))
-              }
-            />
+            <EuiToolTip content={decreaseButtonLabel} delay="long">
+              <EuiButtonIcon
+                iconType="plusInCircle"
+                color="text"
+                data-test-subj="lns-indexPattern-range-maxBars-plus"
+                onClick={() =>
+                  setMaxBarsValue('' + Math.min(Number(maxBarsValue) + step, maxHistogramBars))
+                }
+                aria-label={increaseButtonLabel}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow hasChildLabel={false} display="rowCompressed">
-        <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
-          {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
-            defaultMessage: 'Create custom intervals',
-          })}
-        </EuiButtonEmpty>
-      </EuiFormRow>
+
+      <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
+        {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
+          defaultMessage: 'Create custom intervals',
+        })}
+      </EuiButtonEmpty>
     </>
   );
 };
