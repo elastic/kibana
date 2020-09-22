@@ -26,6 +26,7 @@ import {
   KBN_FIELD_TYPES,
   IIndexPattern,
   FieldFormatNotFoundError,
+  IFieldType,
 } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
@@ -378,8 +379,9 @@ export class IndexPattern implements IIndexPattern {
    * Provide a field, get its formatter
    * @param field
    */
-
-  getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
+  getFormatterForField(
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+  ): FieldFormat {
     return (
       this.fieldFormatMap[field.name] ||
       this.fieldFormats.getDefaultInstance(

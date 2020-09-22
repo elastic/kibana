@@ -154,7 +154,7 @@ export class IndexPatternField implements IFieldType {
     getFormatterForField,
   }: {
     getFormatterForField?: IndexPattern['getFormatterForField'];
-  } = {}) {
+  } = {}): FieldSpec {
     return {
       count: this.count,
       script: this.script,
