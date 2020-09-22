@@ -81,17 +81,13 @@ export const getAgentEventsHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
-
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -253,11 +249,8 @@ export const getAgentsHandler: RequestHandler<
       perPage,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
