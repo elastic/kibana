@@ -18,20 +18,77 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 
-export function getPainlessError(error: Error) {
-  const rootCause: Array<{ lang: string; script: string }> | undefined = get(
-    error,
-    'body.attributes.error.root_cause'
-  );
-  const message: string = get(error, 'body.message');
+interface FailedShards {
+  shard: number;
+  index: string;
+  node: string;
+  reason: {
+    type: string;
+    reason: string;
+    script_stack: string[];
+    script: string;
+    lang: string;
+    position: {
+      offset: number;
+      start: number;
+      end: number;
+    };
+    caused_by: {
+      type: string;
+      reason: string;
+    };
+  };
+}
 
-  if (!rootCause) {
+interface EsError {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes?: {
+      error?: {
+        root_cause?: [
+          {
+            lang: string;
+            script: string;
+          }
+        ];
+        type: string;
+        reason: string;
+        caused_by: {
+          type: string;
+          reason: string;
+          phase: string;
+          grouped: boolean;
+          failed_shards: FailedShards[];
+        };
+      };
+    };
+  };
+}
+
+export function getCause(error: EsError) {
+  const cause = error.body?.attributes?.error?.root_cause;
+  if (cause) {
+    return cause[0];
+  }
+
+  const failedShards = error.body?.attributes?.error?.caused_by?.failed_shards;
+
+  if (failedShards && failedShards[0] && failedShards[0].reason) {
+    return error.body?.attributes?.error?.caused_by?.failed_shards[0].reason;
+  }
+}
+
+export function getPainlessError(error: EsError) {
+  const cause = getCause(error);
+
+  if (!cause) {
     return;
   }
 
-  const [{ lang, script }] = rootCause;
+  const { lang, script } = cause;
 
   if (lang !== 'painless') {
     return;
@@ -44,6 +101,6 @@ export function getPainlessError(error: Error) {
       defaultMessage: "Error with Painless scripted field '{script}'.",
       values: { script },
     }),
-    error: message,
+    error: error.body?.message,
   };
 }

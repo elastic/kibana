@@ -69,15 +69,20 @@ export async function callIndexAliasApi(
  *
  *  @param  {Function} callCluster bound function for accessing an es client
  *  @param  {Array<String>|String} indices
+ *  @param  {Object} fieldCapsOptions
  *  @return {Promise<FieldCapsResponse>}
  */
-export async function callFieldCapsApi(callCluster: LegacyAPICaller, indices: string[] | string) {
+export async function callFieldCapsApi(
+  callCluster: LegacyAPICaller,
+  indices: string[] | string,
+  fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
+) {
   try {
     return (await callCluster('fieldCaps', {
       index: indices,
       fields: '*',
       ignoreUnavailable: true,
-      allowNoIndices: false,
+      ...fieldCapsOptions,
     })) as FieldCapsResponse;
   } catch (error) {
     throw convertEsError(indices, error);
