@@ -33,7 +33,7 @@ describe('Shared Telemetry Helpers', () => {
         metric: 'setup_guide',
       });
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"setup_guide"}',
       });
@@ -54,7 +54,7 @@ describe('Shared Telemetry Helpers', () => {
         http: httpMock,
       });
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"page"}',
       });
@@ -65,7 +65,7 @@ describe('Shared Telemetry Helpers', () => {
         http: httpMock,
       });
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"app_search","action":"clicked","metric":"button"}',
       });
@@ -76,7 +76,7 @@ describe('Shared Telemetry Helpers', () => {
         http: httpMock,
       });
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"workplace_search","action":"error","metric":"not_found"}',
       });
