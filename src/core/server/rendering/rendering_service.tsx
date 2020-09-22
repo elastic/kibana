@@ -45,7 +45,7 @@ export class RenderingService {
       render: async (
         request,
         uiSettings,
-        { app = { getId: () => 'core' }, includeUserSettings = true, vars }: IRenderOptions = {}
+        { includeUserSettings = true, vars }: IRenderOptions = {}
       ) => {
         const env = {
           mode: this.coreContext.env.mode,
@@ -57,7 +57,6 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
-        const appId = app.getId();
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
@@ -88,15 +87,6 @@ export class RenderingService {
               }))
             ),
             legacyMetadata: {
-              app,
-              bundleId: `app:${appId}`,
-              version: env.packageInfo.version,
-              branch: env.packageInfo.branch,
-              buildNum: env.packageInfo.buildNum,
-              buildSha: env.packageInfo.buildSha,
-              serverName: http.server.name,
-              devMode: env.mode.dev,
-              basePath,
               uiSettings: settings,
             },
           },

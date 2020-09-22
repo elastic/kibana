@@ -56,15 +56,6 @@ export interface RenderingMetadata {
       config?: Record<string, unknown>;
     }>;
     legacyMetadata: {
-      app: { getId(): string };
-      bundleId: string;
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      serverName: string;
-      devMode: boolean;
-      basePath: string;
       uiSettings: {
         defaults: Record<string, any>;
         user: Record<string, UserProvidedValues<any>>;
@@ -87,14 +78,6 @@ export interface IRenderOptions {
    * `true` by default.
    */
   includeUserSettings?: boolean;
-
-  /**
-   * Render the bootstrapped HTML content for an optional legacy application.
-   * Defaults to `core`.
-   * @deprecated for legacy use only, remove with ui_render_mixin
-   * @internal
-   */
-  app?: { getId(): string };
 
   /**
    * Inject custom vars into the page metadata.

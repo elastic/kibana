@@ -184,7 +184,6 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   async function renderApp(h) {
-    const app = { getId: () => 'core' };
     const { http } = kbnServer.newPlatform.setup.core;
     const { savedObjects } = kbnServer.newPlatform.start.core;
     const { rendering } = kbnServer.newPlatform.__internals;
@@ -196,7 +195,6 @@ export function uiRenderMixin(kbnServer, server, config) {
       apmConfig: getApmConfig(h.request.path),
     };
     const content = await rendering.render(h.request, uiSettings, {
-      app,
       includeUserSettings: true,
       vars,
     });

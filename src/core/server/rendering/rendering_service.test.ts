@@ -43,12 +43,6 @@ const INJECTED_METADATA = {
       version: expect.any(String),
     },
   },
-  legacyMetadata: {
-    branch: expect.any(String),
-    buildNum: expect.any(Number),
-    buildSha: expect.any(String),
-    version: expect.any(String),
-  },
 };
 
 const { createKibanaRequest, createRawRequest } = httpServerMock;
