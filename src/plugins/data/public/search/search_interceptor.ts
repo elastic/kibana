@@ -17,20 +17,10 @@
  * under the License.
  */
 
-import { get, trimEnd, debounce } from 'lodash';
-import {
-  BehaviorSubject,
-  throwError,
-  timer,
-  Subscription,
-  defer,
-  from,
-  Observable,
-  NEVER,
-} from 'rxjs';
+import { get, trimEnd, throttle } from 'lodash';
+import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
-import { KbnError } from 'src/plugins/kibana_utils/common';
 import {
   getCombinedSignal,
   AbortError,
@@ -65,12 +55,6 @@ export class SearchInterceptor {
   protected pendingCount$ = new BehaviorSubject(0);
 
   /**
-   * The subscriptions from scheduling the automatic timeout for each request.
-   * @internal
-   */
-  protected timeoutSubscriptions: Subscription = new Subscription();
-
-  /**
    * @internal
    */
   protected application!: CoreStart['application'];
@@ -98,7 +82,7 @@ export class SearchInterceptor {
    * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
    * @internal
    */
-  protected getSearchError(
+  protected handleSearchError(
     e: any,
     request: IEsSearchRequest,
     timeoutSignal: AbortSignal,
@@ -159,7 +143,6 @@ export class SearchInterceptor {
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });
-    this.timeoutSubscriptions.add(subscription);
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
@@ -186,22 +169,16 @@ export class SearchInterceptor {
   }
 
   /**
-   * Right now we are debouncing but we will hook this up with background sessions to show only one
+   * Right now we are throttling but we will hook this up with background sessions to show only one
    * error notification per session.
    * @internal
    */
-  private showTimeoutError = debounce(
-    (e: SearchTimeoutError) => {
-      this.deps.toasts.addDanger({
-        title: 'Timed out',
-        text: toMountPoint(e.getErrorMessage(this.application)),
-      });
-    },
-    60000,
-    {
-      leading: true,
-    }
-  );
+  private showTimeoutError = throttle((e: SearchTimeoutError) => {
+    this.deps.toasts.addDanger({
+      title: 'Timed out',
+      text: toMountPoint(e.getErrorMessage(this.application)),
+    });
+  }, 30000);
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
@@ -229,7 +206,9 @@ export class SearchInterceptor {
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         catchError((e: any) => {
-          return throwError(this.getSearchError(e, request, timeoutSignal, options?.abortSignal));
+          return throwError(
+            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
+          );
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
@@ -242,7 +221,7 @@ export class SearchInterceptor {
   /*
    *
    */
-  public showError(e: Error | KbnError) {
+  public showError(e: Error) {
     if (e instanceof AbortError) return;
 
     if (e instanceof SearchTimeoutError) {

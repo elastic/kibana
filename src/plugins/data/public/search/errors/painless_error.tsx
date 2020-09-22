@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -28,7 +27,7 @@ import { IEsSearchRequest } from '..';
 
 export class PainlessError extends KbnError {
   constructor(err: Error, request: IEsSearchRequest) {
-    const rootCause = get(err, 'body.attributes.error.root_cause');
+    const rootCause = getRootCause(err);
     const [{ script }] = rootCause;
 
     super(
@@ -60,8 +59,12 @@ export class PainlessError extends KbnError {
   }
 }
 
-export function isPainlessError(error: any) {
-  const rootCause = get(error, 'body.attributes.error.root_cause');
+function getRootCause(err: Error) {
+  return (err as any).body?.attributes?.error?.root_cause;
+}
+
+export function isPainlessError(err: Error) {
+  const rootCause = getRootCause(err);
   if (!rootCause) return false;
 
   const [{ lang }] = rootCause;

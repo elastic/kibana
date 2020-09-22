@@ -36,7 +36,6 @@ import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
-import { KbnError } from 'src/plugins/kibana_utils/common';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
@@ -71,7 +70,6 @@ import { SavedObjectsClientContract } from 'src/core/public';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
-import { Subscription } from 'rxjs';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -1589,7 +1587,7 @@ export interface OptionedValueProp {
 // Warning: (ae-missing-release-tag) "PainlessError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class PainlessError extends KbnError_2 {
+export class PainlessError extends KbnError {
     constructor(err: Error, request: IEsSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
@@ -1941,9 +1939,9 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
-    protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
-    // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
+    // (undocumented)
+    protected handleSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
@@ -1959,10 +1957,8 @@ export class SearchInterceptor {
         cleanup: () => void;
     };
     // (undocumented)
-    showError(e: Error | KbnError): void;
-    // @internal
-    protected timeoutSubscriptions: Subscription;
-}
+    showError(e: Error): void;
+    }
 
 // Warning: (ae-missing-release-tag) "SearchInterceptorDeps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2078,7 +2074,7 @@ export interface SearchSourceFields {
 // Warning: (ae-missing-release-tag) "SearchTimeoutError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class SearchTimeoutError extends KbnError_2 {
+export class SearchTimeoutError extends KbnError {
     constructor(err: Error, mode: TimeoutErrorMode);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;

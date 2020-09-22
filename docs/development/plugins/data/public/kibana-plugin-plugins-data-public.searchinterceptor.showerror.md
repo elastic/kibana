@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-showError(e: Error | KbnError): void;
+showError(e: Error): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  e | <code>Error &#124; KbnError</code> |  |
+|  e | <code>Error</code> |  |
 
 <b>Returns:</b>
 
