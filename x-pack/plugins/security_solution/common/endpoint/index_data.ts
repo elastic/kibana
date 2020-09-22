@@ -340,18 +340,15 @@ const fleetEnrollAgentForHost = async (
 
     // ------------------------------------------------
     // First enroll the agent
-    const res = await kbnClient.requestWithApiKey(
-      `http://localhost:5601${AGENT_API_ROUTES.ENROLL_PATTERN}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-          'kbn-xsrf': 'xxx',
-          Authorization: `ApiKey ${enrollmentApiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const res = await kbnClient.requestWithApiKey(`${AGENT_API_ROUTES.ENROLL_PATTERN}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'kbn-xsrf': 'xxx',
+        Authorization: `ApiKey ${enrollmentApiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (res) {
       const enrollObj: PostAgentEnrollResponse = await res.json();
@@ -380,10 +377,7 @@ const fleetEnrollAgentForHost = async (
         ],
       };
       const checkinRes = await kbnClient.requestWithApiKey(
-        `http://localhost:5601${AGENT_API_ROUTES.CHECKIN_PATTERN.replace(
-          '{agentId}',
-          enrollObj.item.id
-        )}`,
+        `${AGENT_API_ROUTES.CHECKIN_PATTERN.replace('{agentId}', enrollObj.item.id)}`,
         {
           method: 'POST',
           body: JSON.stringify(checkinBody),
@@ -427,10 +421,7 @@ const fleetEnrollAgentForHost = async (
           }),
         };
         const ackActionResp = await kbnClient.requestWithApiKey(
-          `http://localhost:5601${AGENT_API_ROUTES.ACKS_PATTERN.replace(
-            '{agentId}',
-            enrollObj.item.id
-          )}`,
+          `${AGENT_API_ROUTES.ACKS_PATTERN.replace('{agentId}', enrollObj.item.id)}`,
           {
             method: 'POST',
             body: JSON.stringify(ackActionBody),
