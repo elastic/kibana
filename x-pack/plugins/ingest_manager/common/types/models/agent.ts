@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { FullAgentPolicy } from './agent_policy';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -21,7 +21,7 @@ export type AgentStatus =
   | 'unenrolling'
   | 'degraded';
 
-export type AgentActionType = 'POLICY_CHANGE' | 'CONFIG_CHANGE' | 'UNENROLL';
+export type AgentActionType = 'POLICY_CHANGE' | 'UNENROLL';
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -42,12 +42,23 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentPolicyAction extends NewAgentAction {
   id: string;
   type: AgentActionType;
-  data?: any;
+  data: {
+    policy: FullAgentPolicy;
+  };
   policy_id: string;
   policy_revision: number;
   created_at: string;
   ack_data?: any;
 }
+
+// Make policy change action renaming BWC with agent version <= 7.9
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type AgentPolicyActionV7_9 = Omit<AgentPolicyAction, 'type' | 'data'> & {
+  type: 'CONFIG_CHANGE';
+  data: {
+    config: FullAgentPolicy;
+  };
+};
 
 interface CommonAgentActionSOAttributes {
   type: AgentActionType;

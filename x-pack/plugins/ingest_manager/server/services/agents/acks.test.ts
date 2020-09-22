@@ -120,7 +120,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
     const actionAttributes = {
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       policy_id: 'policy1',
       policy_revision: 4,
       sent_at: '2020-03-14T19:45:02.620Z',
@@ -180,7 +180,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
     const actionAttributes = {
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       policy_id: 'policy1',
       policy_revision: 4,
       sent_at: '2020-03-14T19:45:02.620Z',

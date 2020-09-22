@@ -17,6 +17,7 @@ export {
   AgentEventSOAttributes,
   AgentAction,
   AgentPolicyAction,
+  AgentPolicyActionV7_9,
   BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
   AgentPolicyActionSOAttributes,

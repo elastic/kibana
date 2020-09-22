@@ -16,6 +16,7 @@ import {
   Agent,
   AgentAction,
   AgentPolicyAction,
+  AgentPolicyActionV7_9,
   AgentEvent,
   AgentEventSOAttributes,
   AgentSOAttributes,
@@ -126,15 +127,17 @@ async function fetchActionsUsingCache(
   return [...freshActions, ...actions];
 }
 
-function isAgentPolicyAction(action: AgentAction | AgentPolicyAction): action is AgentPolicyAction {
+function isAgentPolicyAction(
+  action: AgentAction | AgentPolicyAction | AgentPolicyActionV7_9
+): action is AgentPolicyAction | AgentPolicyActionV7_9 {
   return (action as AgentPolicyAction).policy_id !== undefined;
 }
 
 function getLatestConfigChangePolicyActionIfUpdated(
   agent: Agent,
-  actions: Array<AgentAction | AgentPolicyAction>
-): AgentPolicyAction | null {
-  return actions.reduce<null | AgentPolicyAction>((acc, action) => {
+  actions: Array<AgentAction | AgentPolicyAction | AgentPolicyActionV7_9>
+): AgentPolicyAction | AgentPolicyActionV7_9 | null {
+  return actions.reduce<null | AgentPolicyAction | AgentPolicyActionV7_9>((acc, action) => {
     if (
       !isAgentPolicyAction(action) ||
       (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import semver from 'semver';
 import { timer, from, Observable, TimeoutError } from 'rxjs';
 import { omit } from 'lodash';
 import {
@@ -17,7 +17,13 @@ import {
   take,
 } from 'rxjs/operators';
 import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import { Agent, AgentAction, AgentPolicyAction, AgentSOAttributes } from '../../../types';
+import {
+  Agent,
+  AgentAction,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
+  AgentSOAttributes,
+} from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
   AGENT_SAVED_OBJECT_TYPE,
@@ -104,15 +110,29 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-async function createAgentActionFromPolicyAction(
+export async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
+  // Transform the policy action for agent version <=  7.9 for BWC
+  const agentVersion = semver.parse((agent.local_metadata?.elastic as any)?.agent?.version);
+  const agentPolicyAction: AgentPolicyAction | AgentPolicyActionV7_9 =
+    agentVersion && semver.lt(agentVersion, '7.10.0')
+      ? {
+          ...policyAction,
+          type: 'CONFIG_CHANGE',
+          data: {
+            config: policyAction.data.policy,
+          },
+        }
+      : policyAction;
+
+  // Create agent action
   const newAgentAction: AgentAction = Object.assign(
     omit(
       // Faster than clone
-      JSON.parse(JSON.stringify(policyAction)) as AgentPolicyAction,
+      JSON.parse(JSON.stringify(agentPolicyAction)) as AgentPolicyAction,
       'policy_id',
       'policy_revision'
     ),
@@ -122,10 +142,14 @@ async function createAgentActionFromPolicyAction(
   );
 
   // Mutate the policy to set the api token for this agent
-  newAgentAction.data.config.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
-    soClient,
-    agent
-  );
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  if (newAgentAction.data.policy) {
+    newAgentAction.data.policy.outputs.default.api_key = apiKey;
+  }
+  // BWC for agent <= 7.9
+  else if (newAgentAction.data.config) {
+    newAgentAction.data.config.outputs.default.api_key = apiKey;
+  }
 
   return [newAgentAction];
 }
