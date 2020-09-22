@@ -34,7 +34,10 @@ export const FIELD_TYPES = {
 
 // Validation types
 export const VALIDATION_TYPES = {
-  FIELD: 'field', // Default validation error (on the field value)
-  ASYNC: 'async', // Returned from asynchronous validations
-  ARRAY_ITEM: 'arrayItem', // If the field value is an Array, this error would be returned if an _item_ of the array is invalid
+  /** Default validation error (on the field value) */
+  FIELD: 'field',
+  /** Returned from asynchronous validations */
+  ASYNC: 'async',
+  /** If the field value is an Array, this error type would be returned if an _item_ of the array is invalid */
+  ARRAY_ITEM: 'arrayItem',
 };
