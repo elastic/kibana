@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
@@ -54,7 +55,10 @@ export function JSErrors() {
 
   const items = (data?.items ?? []).map(({ errorMessage, count }) => ({
     errorMessage,
-    percent: ((count / totalPageViews) * 100).toFixed(1) + ' %',
+    percent: i18n.translate('xpack.apm.rum.jsErrors.percent', {
+      defaultMessage: '{pageLoadPercent} %',
+      values: { pageLoadPercent: ((count / totalPageViews) * 100).toFixed(1) },
+    }),
   }));
 
   const cols = [
