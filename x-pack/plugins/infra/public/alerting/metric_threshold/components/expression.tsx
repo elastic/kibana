@@ -297,7 +297,7 @@ export const Expressions: React.FC<Props> = (props) => {
             label={alertParams.criteria?.length > 1 ? idxToAlphabeticalLabel(idx) : null}
           />
         ))}
-
+      {alertParams.criteria?.length > 1 && <EuiSpacer size="xs" />}
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
