@@ -52,6 +52,10 @@ export const transformRequestToMetricsAPIRequest = async (
     filters.push({ term: { 'cloud.region': snapshotRequest.region } });
   }
 
+  if (snapshotRequest.nodeType === 'awsEC2') {
+    filters.push({ term: { 'event.dataset': 'aws.ec2' } });
+  }
+
   const inventoryFields = findInventoryFields(
     snapshotRequest.nodeType,
     source.configuration.fields
