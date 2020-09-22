@@ -7,6 +7,7 @@
 export default function loadTests({ loadTestFile }) {
   describe('EPM Endpoints', () => {
     loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./setup'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./file'));
     //loadTestFile(require.resolve('./template'));

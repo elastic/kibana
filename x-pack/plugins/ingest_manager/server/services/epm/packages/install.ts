@@ -91,12 +91,10 @@ export async function ensureInstalledDefaultPackages(
 
   for (const resp of bulkResponse) {
     if (isBulkInstallError(resp)) {
-      if (resp.error instanceof Error) {
-        throw resp.error;
-      } else {
-        throw new Error(resp.error);
-      }
+      throw new Error(resp.error);
     } else {
+      // getInstallation can return undefined so we'll tack on the name so when we throw an error in setup we can
+      // reference the name of the package that we failed to retrieve the installation information for
       const installation = getInstallationAndName(savedObjectsClient, resp.name);
       installations.push(installation);
     }
