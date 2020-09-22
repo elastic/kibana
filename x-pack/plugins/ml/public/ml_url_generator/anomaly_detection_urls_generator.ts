@@ -5,7 +5,7 @@
  */
 
 import isEmpty from 'lodash/isEmpty';
-import {
+import type {
   AnomalyDetectionQueryState,
   AnomalyDetectionUrlState,
   ExplorerAppState,
