@@ -27,25 +27,3 @@ export interface IConfiguredLimits {
     maxEnginesPerMetaEngine: number;
   };
 }
-
-export interface IApiToken {
-  access_all_engines?: boolean;
-  key?: string;
-  engines?: string[];
-  id?: number;
-  name: string;
-  read?: boolean;
-  type: string;
-  write?: boolean;
-}
-
-export interface IEngine {
-  name: string;
-  type: string;
-  language: string;
-  result_fields: object[];
-}
-
-export interface ICredentialsDetails {
-  engines: IEngine[];
-}

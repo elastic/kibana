@@ -10,9 +10,9 @@ import { formatApiName } from '../../utils/format_api_name';
 import { ADMIN, PRIVATE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
-import { IApiToken, IEngine, ICredentialsDetails } from '../../../../../common/types/app_search';
 import { IMeta } from '../../../../../common/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { IApiToken, ICredentialsDetails, IEngine } from '../../types';
 
 const defaultApiToken: IApiToken = {
   name: '',
