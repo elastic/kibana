@@ -75,16 +75,6 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
     }
   }
 
-  if (!fieldConfig.path) {
-    (fieldConfig.path as any) = path;
-  } else {
-    if (fieldConfig.path !== path) {
-      throw new Error(
-        `Field path mismatch. Got "${path}" but field config has "${fieldConfig.path}".`
-      );
-    }
-  }
-
   const field = useField<T>(form, path, fieldConfig, onChange);
 
   // Children prevails over anything else provided.
