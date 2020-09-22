@@ -151,7 +151,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       .toPromise();
 
     this.logger = initContext.logger.get('actions');
-    this.telemetryLogger = initContext.logger.get('telemetry');
+    this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
   }
 
