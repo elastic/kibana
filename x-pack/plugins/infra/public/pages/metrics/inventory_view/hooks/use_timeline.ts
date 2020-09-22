@@ -43,9 +43,9 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
         ? 30
         : 1;
     const timeLength = intervalInSeconds * multiplier;
-    return { timeLength, intervalInSeconds, lookbackSize: Math.max(6, multiplier) };
+    return { timeLength, intervalInSeconds };
   } else {
-    return { timeLength: 0, lookbackSize: 0, intervalInSeconds: 0 };
+    return { timeLength: 0, intervalInSeconds: 0 };
   }
 };
 
@@ -68,13 +68,14 @@ export function useTimeline(
   };
 
   const timeLengthResult = useMemo(() => getTimeLengthFromInterval(interval), [interval]);
-  const { timeLength, lookbackSize, intervalInSeconds } = timeLengthResult;
+  const { timeLength, intervalInSeconds } = timeLengthResult;
 
   const timerange: InfraTimerangeInput = {
     interval: interval ?? '',
     to: currentTime + intervalInSeconds * 1000,
     from: currentTime - timeLength * 1000,
-    lookbackSize,
+    lookbackSize: 0,
+    ignoreLookback: true,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
