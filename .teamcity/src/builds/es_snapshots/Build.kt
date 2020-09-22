@@ -54,8 +54,7 @@ object ESSnapshotBuild : BuildType({
     script {
       name = "Create Snapshot Manifest"
       scriptContent =
-        """
-          #!/bin/bash
+        """#!/bin/bash
           cd kibana
           node ./.ci/teamcity/es_snapshots/create_manifest.js "$(cd ../es-build && pwd)"
         """.trimIndent()
