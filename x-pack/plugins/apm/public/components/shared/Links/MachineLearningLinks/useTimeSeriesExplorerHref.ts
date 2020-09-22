@@ -39,7 +39,6 @@ export function useTimeSeriesExplorerHref({
                   'service.name': serviceName,
                   'transaction.type': transactionType,
                 },
-                zoom: time,
               },
             }),
           }
