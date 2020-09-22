@@ -14,8 +14,10 @@ import '../__mocks__/kea.mock';
 import { useValues } from 'kea';
 
 import { EnterpriseSearch } from './';
+import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { ProductCard } from './components/product_card';
+import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {
   beforeEach(() => {
@@ -23,11 +25,11 @@ describe('EnterpriseSearch', () => {
     (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
   });
 
-  it('renders the overview page and product cards', () => {
+  it('renders the Setup Guide and Product Selector', () => {
     const wrapper = shallow(<EnterpriseSearch />);
 
-    expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
-    expect(wrapper.find(ProductCard)).toHaveLength(2);
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+    expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 
   it('renders the error connecting prompt', () => {
@@ -38,5 +40,6 @@ describe('EnterpriseSearch', () => {
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
     expect(wrapper.find(EuiPage)).toHaveLength(0);
+    expect(wrapper.find(ProductSelector)).toHaveLength(0);
   });
 });
