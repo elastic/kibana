@@ -12,6 +12,8 @@ import {
   EuiComboBoxOptionOption,
   EuiHealth,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -352,15 +354,19 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               </>
             )}
             <EuiSpacer size="m" />
-            <EuiButton
-              onClick={handleSaveIndices}
-              data-test-subj="add-index"
-              fill
-              fullWidth
-              size="s"
-            >
-              {i18n.SAVE_INDEX_PATTERNS}
-            </EuiButton>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={handleSaveIndices}
+                  data-test-subj="add-index"
+                  fill
+                  fullWidth
+                  size="s"
+                >
+                  {i18n.SAVE_INDEX_PATTERNS}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </PopoverContent>
         </EuiPopover>
       </EuiToolTip>
