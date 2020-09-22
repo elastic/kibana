@@ -6,7 +6,7 @@
 
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 import React, {

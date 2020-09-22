@@ -6,8 +6,6 @@
 
 import { isUndefined } from 'lodash';
 import { set } from '@elastic/safer-lodash-set/fp';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';

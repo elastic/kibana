@@ -18,8 +18,6 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';

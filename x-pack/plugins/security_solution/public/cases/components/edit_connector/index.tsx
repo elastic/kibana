@@ -15,8 +15,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 
 import * as i18n from '../../translations';

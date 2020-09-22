@@ -5,8 +5,6 @@
  */
 
 import axios from 'axios';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { omitBy, isNil } from 'lodash/fp';
 
 import { Logger } from '../../../../../../src/core/server';

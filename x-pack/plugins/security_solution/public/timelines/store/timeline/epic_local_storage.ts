@@ -7,8 +7,6 @@
 import { Action } from 'redux';
 import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { get } from 'lodash/fp';
 
 import { TimelineIdLiteral } from '../../../../common/types/timeline';

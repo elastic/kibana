@@ -5,8 +5,6 @@
  */
 
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';

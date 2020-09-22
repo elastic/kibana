@@ -9,8 +9,6 @@ import React from 'react';
 import { GroupsFilterPopoverComponent } from './groups_filter_popover';
 import { mockSecurityJobs } from '../../api.mock';
 import { SecurityJob } from '../../types';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 
 describe('GroupsFilterPopover', () => {

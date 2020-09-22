@@ -7,8 +7,6 @@
 // REPLACE WHEN HOST ENDPOINT DATA IS AVAILABLE
 
 import deepEqual from 'fast-deep-equal';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 

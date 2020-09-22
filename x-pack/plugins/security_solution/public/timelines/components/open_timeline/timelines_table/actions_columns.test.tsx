@@ -6,8 +6,6 @@
 
 import { EuiButtonIconProps } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';

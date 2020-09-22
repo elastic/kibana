@@ -7,8 +7,6 @@
 /* eslint-disable react/display-name */
 
 import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { clone } from 'lodash/fp';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';

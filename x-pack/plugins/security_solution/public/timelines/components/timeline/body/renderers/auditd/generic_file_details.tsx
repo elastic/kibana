@@ -5,8 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { get } from 'lodash/fp';
 import React from 'react';
 

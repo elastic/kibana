@@ -5,8 +5,6 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEmpty, uniqWith } from 'lodash/fp';
 import React from 'react';
 import deepEqual from 'fast-deep-equal';

@@ -5,8 +5,6 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 

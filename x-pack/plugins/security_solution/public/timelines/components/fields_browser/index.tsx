@@ -5,8 +5,6 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';

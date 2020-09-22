@@ -5,8 +5,6 @@
  */
 
 import { GraphQLResolveInfo } from 'graphql';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 
 import {

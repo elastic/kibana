@@ -10,7 +10,7 @@
  * And a minimum bucket span
  */
 
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 

@@ -6,8 +6,6 @@
 
 import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';

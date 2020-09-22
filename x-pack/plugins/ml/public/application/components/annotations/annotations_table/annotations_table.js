@@ -10,7 +10,7 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import uniq from 'lodash/uniq';
 

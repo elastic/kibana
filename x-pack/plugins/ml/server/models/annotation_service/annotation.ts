@@ -5,10 +5,10 @@
  */
 
 import Boom from 'boom';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import each from 'lodash/each';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 import { IScopedClusterClient } from 'kibana/server';

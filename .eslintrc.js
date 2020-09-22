@@ -1285,13 +1285,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            paths: [
-              {
-                name: 'lodash',
-                message:
-                  'Prefer importing entire lodash library, e.g. import { get } from "lodash"',
-              },
-            ],
+            patterns: ['lodash/*', '!lodash/fp'],
           },
         ],
       },

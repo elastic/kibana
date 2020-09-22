@@ -15,8 +15,6 @@ import {
 import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../case/common/api';
 import {

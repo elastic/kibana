@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
 import { toArray } from '../../../../helpers/to_array';

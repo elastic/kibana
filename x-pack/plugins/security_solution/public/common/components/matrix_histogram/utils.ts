@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ScaleType, Position } from '@elastic/charts';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';

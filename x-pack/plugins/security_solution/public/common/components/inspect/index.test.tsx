@@ -19,8 +19,6 @@ import { createStore, State } from '../../store';
 import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton, InspectButtonContainer, BUTTON_CLASS } from '.';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 
 describe('Inspect Button', () => {

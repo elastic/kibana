@@ -5,8 +5,6 @@
  */
 
 import uuidv5 from 'uuid/v5';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { reduce, get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 

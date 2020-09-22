@@ -8,8 +8,6 @@ import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { JobSwitchComponent } from './job_switch';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../api.mock';
 import { SecurityJob } from '../types';

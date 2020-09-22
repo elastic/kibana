@@ -13,8 +13,6 @@ import {
   EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';

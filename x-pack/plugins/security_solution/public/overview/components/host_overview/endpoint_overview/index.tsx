@@ -5,8 +5,6 @@
  */
 
 import { EuiFlexItem, EuiHealth } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 

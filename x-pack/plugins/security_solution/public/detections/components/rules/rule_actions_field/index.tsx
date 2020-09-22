@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

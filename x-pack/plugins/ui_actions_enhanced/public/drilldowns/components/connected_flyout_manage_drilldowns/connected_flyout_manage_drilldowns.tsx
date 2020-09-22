@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import intersection from 'lodash/intersection';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';

@@ -12,8 +12,6 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 

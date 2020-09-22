@@ -7,7 +7,7 @@
 import React from 'react';
 
 import classNames from 'classnames';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import _kebabCase from 'lodash/kebabCase';
 import { Link } from 'react-router-dom';

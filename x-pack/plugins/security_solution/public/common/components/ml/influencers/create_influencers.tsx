@@ -6,8 +6,6 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import { getEntries } from '../get_entries';
 

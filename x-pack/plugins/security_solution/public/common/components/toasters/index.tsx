@@ -5,8 +5,6 @@
  */
 
 import { EuiButton, EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
-// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
