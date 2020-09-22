@@ -70,6 +70,7 @@ export const createExceptionList = async ({
     list_type: 'list',
     meta,
     name,
+    os_types: [],
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,

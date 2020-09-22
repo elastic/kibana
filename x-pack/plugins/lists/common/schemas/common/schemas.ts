@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 
 import { DefaultNamespace } from '../types/default_namespace';
-import { DefaultStringArray, NonEmptyString } from '../../shared_imports';
+import { DefaultArray, DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -317,3 +317,20 @@ export type Immutable = t.TypeOf<typeof immutable>;
 
 export const immutableOrUndefined = t.union([immutable, t.undefined]);
 export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;
+
+// TODO: fix case below?
+export const osType = t.keyof({
+  Linux: null,
+  Macos: null,
+  Windows: null,
+  linux: null,
+  macos: null,
+  windows: null,
+});
+export type OsType = t.TypeOf<typeof osType>;
+
+export const osTypeArrayOrUndefined = DefaultArray(osType);
+export type OsTypeArrayOrUndefined = t.TypeOf<typeof osTypeArrayOrUndefined>;
+
+export const osTypeArray = t.array(osType);
+export type OsTypeArray = t.TypeOf<typeof osTypeArray>;

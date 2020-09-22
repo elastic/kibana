@@ -39,6 +39,7 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   meta: META,
   name: 'Sample Endpoint Exception List',
   namespace_type: 'agnostic',
+  os_types: ['linux'],
   tags: ['user added string for a tag', 'malware'],
   tie_breaker_id: TIE_BREAKER,
   type: ENDPOINT_TYPE,

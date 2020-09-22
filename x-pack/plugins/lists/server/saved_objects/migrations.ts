@@ -12,6 +12,7 @@ import {
   EntriesArray,
   ExceptionListSoSchema,
   NonEmptyNestedEntriesArray,
+  OsTypeArray,
   entriesNested,
   entry,
 } from '../../common/schemas';
@@ -32,6 +33,7 @@ const migrateEntry = (entryToMigrate: EntryType): EntryType => {
 
 const reduceOsTypes = (acc: string[], tag: string): string[] => {
   if (tag.startsWith('os:')) {
+    // TODO: check OS against type
     return [...acc, tag.replace('os:', '')];
   }
   return [...acc];
@@ -51,7 +53,7 @@ export const migrations = {
           }),
         ...(doc.attributes._tags &&
           doc.attributes._tags.reduce(reduceOsTypes, []).length > 0 && {
-            os_types: doc.attributes._tags.reduce(reduceOsTypes, []),
+            os_types: doc.attributes._tags.reduce(reduceOsTypes, []) as OsTypeArray,
           }),
       },
     },

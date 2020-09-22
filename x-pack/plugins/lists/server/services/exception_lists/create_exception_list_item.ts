@@ -19,6 +19,7 @@ import {
   MetaOrUndefined,
   Name,
   NamespaceType,
+  OsTypeArray,
   Tags,
   _Tags,
 } from '../../../common/schemas';
@@ -68,6 +69,7 @@ export const createExceptionListItem = async ({
     incomingComments: comments,
     user,
   });
+  const osTypes = _tags.find((tag) => tag.startsWith('os:'))?.replace('os:', '') ?? [];
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
     comments: transformedComments,
@@ -81,6 +83,7 @@ export const createExceptionListItem = async ({
     list_type: 'item',
     meta,
     name,
+    os_types: osTypes as OsTypeArray,
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,

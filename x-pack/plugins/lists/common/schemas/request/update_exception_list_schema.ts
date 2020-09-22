@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 
 import {
+  OsTypeArray,
   Tags,
   _Tags,
   _tags,
@@ -18,6 +19,7 @@ import {
   meta,
   name,
   namespace_type,
+  osTypeArrayOrUndefined,
   tags,
   version,
 } from '../common/schemas';
@@ -40,6 +42,7 @@ export const updateExceptionListSchema = t.intersection([
       list_id, // defaults to undefined if not set during decode
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
+      os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
       version, // defaults to undefined if not set during decode
     })
@@ -51,9 +54,10 @@ export type UpdateExceptionListSchema = t.OutputOf<typeof updateExceptionListSch
 // This type is used after a decode since the arrays turn into defaults of empty arrays.
 export type UpdateExceptionListSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof updateExceptionListSchema>>,
-  '_tags | tags | namespace_type'
+  '_tags | tags | namespace_type' | 'os_types'
 > & {
   _tags: _Tags;
   tags: Tags;
   namespace_type: NamespaceType;
+  os_types: OsTypeArray;
 };

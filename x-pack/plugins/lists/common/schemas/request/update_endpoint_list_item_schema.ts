@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 
 import {
+  OsTypeArray,
   Tags,
   _Tags,
   _tags,
@@ -24,6 +25,7 @@ import {
   EntriesArray,
   UpdateCommentsArray,
   nonEmptyEntriesArray,
+  osTypeArrayOrUndefined,
 } from '../types';
 
 export const updateEndpointListItemSchema = t.intersection([
@@ -43,6 +45,7 @@ export const updateEndpointListItemSchema = t.intersection([
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
+      os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
     })
   ),
@@ -59,4 +62,5 @@ export type UpdateEndpointListItemSchemaDecoded = Omit<
   comments: UpdateCommentsArray;
   tags: Tags;
   entries: EntriesArray;
+  os_types: OsTypeArray;
 };
