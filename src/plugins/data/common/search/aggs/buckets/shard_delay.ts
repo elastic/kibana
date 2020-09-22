@@ -18,8 +18,13 @@
  */
 
 import { BucketAggType } from './bucket_agg_type';
+import { BaseAggParams } from '../types';
 
 export const SHARD_DELAY_AGG_NAME = 'shard_delay';
+
+export interface AggParamsShardDelay extends BaseAggParams {
+  delay: number;
+}
 
 export const getShardDelayBucketAgg = () =>
   new BucketAggType({
