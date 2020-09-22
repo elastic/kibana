@@ -29,7 +29,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { registerManagementSection } from './application/management';
 import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
-import { PLUGIN_ICON, PLUGIN_ID } from '../common/constants/app';
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
@@ -72,7 +72,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         defaultMessage: 'Machine Learning',
       }),
       order: 5000,
-      euiIconType: PLUGIN_ICON,
+      euiIconType: PLUGIN_ICON_SOLUTION,
       appRoute: '/app/ml',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appUpdater,
@@ -106,11 +106,16 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
+
       if (isMlEnabled(license)) {
         // add ML to home page
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
+
+        // the mlUrlGenerator should be registered even without full license
+        // for other plugins to access ML links
+        registerUrlGenerator(pluginsSetup.share, core);
 
         const { capabilities } = coreStart.application;
 
@@ -129,7 +134,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
-          registerUrlGenerator(pluginsSetup.share, core);
         } else if (managementApp) {
           managementApp.disable();
         }

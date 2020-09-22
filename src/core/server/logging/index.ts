@@ -17,10 +17,17 @@
  * under the License.
  */
 
-export { Logger, LogMeta } from './logger';
-export { LoggerFactory } from './logger_factory';
-export { LogRecord } from './log_record';
-export { LogLevel } from './log_level';
+export {
+  DisposableAppender,
+  Appender,
+  LogRecord,
+  Layout,
+  LoggerFactory,
+  LogMeta,
+  Logger,
+  LogLevelId,
+  LogLevel,
+} from '@kbn/logging';
 export {
   config,
   LoggingConfigType,

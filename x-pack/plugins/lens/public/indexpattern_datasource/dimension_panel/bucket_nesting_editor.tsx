@@ -69,7 +69,7 @@ export function BucketNestingEditor({
         values: { field: fieldName },
       }),
       filters: i18n.translate('xpack.lens.indexPattern.groupingOverallFilters', {
-        defaultMessage: 'Top values for each custom query',
+        defaultMessage: 'Top values for each filter',
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
         defaultMessage: 'Top values for each {field}',
@@ -99,6 +99,7 @@ export function BucketNestingEditor({
           label={i18n.translate('xpack.lens.indexPattern.groupingControlLabel', {
             defaultMessage: 'Grouping',
           })}
+          labelType="legend"
         >
           <>
             <EuiRadio

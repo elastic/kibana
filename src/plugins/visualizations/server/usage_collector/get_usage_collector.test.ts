@@ -132,6 +132,16 @@ describe('Visualizations usage collector', () => {
     expect(usageCollector.fetch).toEqual(expect.any(Function));
   });
 
+  test('Returns undefined when no results found (undefined)', async () => {
+    const result = await usageCollector.fetch(getMockCallCluster(undefined as any));
+    expect(result).toBe(undefined);
+  });
+
+  test('Returns undefined when no results found (0 results)', async () => {
+    const result = await usageCollector.fetch(getMockCallCluster([]));
+    expect(result).toBe(undefined);
+  });
+
   test('Summarizes visualizations response data', async () => {
     const result = await usageCollector.fetch(getMockCallCluster(defaultMockSavedObjects));
 

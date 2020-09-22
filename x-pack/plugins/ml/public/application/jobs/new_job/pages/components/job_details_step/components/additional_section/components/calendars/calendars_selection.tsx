@@ -26,6 +26,7 @@ import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app
 import { Calendar } from '../../../../../../../../../../../common/types/calendars';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
+import { ML_PAGES } from '../../../../../../../../../../../common/constants/ml_url_generator';
 
 export const CalendarsSelection: FC = () => {
   const {
@@ -73,7 +74,7 @@ export const CalendarsSelection: FC = () => {
   };
 
   const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
-    path: '/settings/calendars_list',
+    path: ML_PAGES.CALENDARS_MANAGE,
   });
 
   return (

@@ -156,9 +156,9 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
+        "transaction",
         "metric",
         "error",
-        "transaction",
       ],
     },
     "body": Object {
@@ -213,7 +213,19 @@ Array [
       "aggs": Object {
         "services": Object {
           "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
             "timeseries": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
               "date_histogram": Object {
                 "extended_bounds": Object {
                   "max": 1528977600000,
@@ -265,6 +277,13 @@ Array [
         "services": Object {
           "aggs": Object {
             "outcomes": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
               "terms": Object {
                 "field": "event.outcome",
               },
@@ -272,6 +291,13 @@ Array [
             "timeseries": Object {
               "aggs": Object {
                 "outcomes": Object {
+                  "aggs": Object {
+                    "count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                  },
                   "terms": Object {
                     "field": "event.outcome",
                   },
@@ -328,8 +354,8 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
-        "metric",
         "transaction",
+        "metric",
         "error",
       ],
     },

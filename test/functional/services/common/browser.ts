@@ -22,9 +22,9 @@ import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../../src/core/utils';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -478,6 +478,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async setScrollTop(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollTop = ' + scrollSize);
       return this.getScrollTop();
+    }
+
+    public async setScrollToById(elementId: string, xCoord: number, yCoord: number) {
+      await driver.executeScript(
+        `document.getElementById("${elementId}").scrollTo(${xCoord},${yCoord})`
+      );
     }
 
     public async setScrollLeft(scrollSize: number | string) {

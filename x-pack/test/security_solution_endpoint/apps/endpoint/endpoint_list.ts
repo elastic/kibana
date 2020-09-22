@@ -22,8 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Hostname',
       'Agent Status',
-      'Integration',
-      'Configuration Status',
+      'Integration Policy',
+      'Policy Status',
       'Operating System',
       'IP Address',
       'Version',
@@ -160,13 +160,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
-
-        // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
-          await (await testSubjects.find('hostnameCellLink')).click();
-          await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
-          await testSubjects.existOrFail('fleetAgentListTable');
-        });
       });
 
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
@@ -188,8 +181,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'OS',
             'Last Seen',
             'Alerts',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'IP Address',
             'Hostname',
             'Sensor Version',
@@ -236,8 +229,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -267,8 +260,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -305,18 +298,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
-      });
-    });
-
-    describe.skip('when there is no data,', () => {
-      before(async () => {
-        // clear out the data and reload the page
-        await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
-        await pageObjects.endpoint.navigateToEndpointList();
-      });
-      it('displays empty Policy Table page.', async () => {
-        await testSubjects.existOrFail('emptyPolicyTable');
       });
     });
   });
