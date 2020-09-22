@@ -14,10 +14,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiPopover,
   EuiText,
   EuiCodeBlock,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIntersection } from 'react-use';
 import { Ping } from '../../../../common/runtime_types';
@@ -62,6 +63,7 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   fetchScreenshot,
   imgRef,
 }) => {
+  const [isImagePopoverOpen, setIsImagePopoverOpen] = useState<boolean>(false);
   const intersection = useIntersection(imgRef, {
     root: null,
     rootMargin: '0px',
@@ -76,17 +78,34 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   // need to render container for intersection ref
   if (screenshot) {
     return (
-      <img
-        ref={imgRef}
-        style={{
-          width: THUMBNAIL_WIDTH,
-          height: THUMBNAIL_HEIGHT,
-          objectFit: 'cover',
-          objectPosition: 'center top',
-        }}
-        src={`data:image/png;base64,${screenshot}`}
-        alt="stuff"
-      />
+      <EuiPopover
+        anchorPosition="rightCenter"
+        button={
+          <input
+            type="image"
+            ref={imgRef}
+            style={{
+              width: THUMBNAIL_WIDTH,
+              height: THUMBNAIL_HEIGHT,
+              objectFit: 'cover',
+              objectPosition: 'center top',
+            }}
+            src={`data:image/png;base64,${screenshot}`}
+            alt="stuff"
+            onMouseEnter={() => setIsImagePopoverOpen(true)}
+            onMouseLeave={() => setIsImagePopoverOpen(false)}
+          />
+        }
+        closePopover={() => setIsImagePopoverOpen(false)}
+        isOpen={isImagePopoverOpen}
+      >
+        <img
+          alt="stuff"
+          src={`data:image/png;base64,${screenshot}`}
+          // TODO: extract these vals to a constant and @media
+          style={{ width: 640, height: 360, objectFit: 'contain' }}
+        />
+      </EuiPopover>
     );
   } else if (isLoading === false && screenshot === '') {
     return (
