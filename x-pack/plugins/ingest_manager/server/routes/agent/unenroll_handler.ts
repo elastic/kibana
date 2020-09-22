@@ -11,6 +11,7 @@ import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } fr
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
