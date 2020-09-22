@@ -87,7 +87,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should have installed the transform components', async function () {
         const res = await es.transport.request({
           method: 'GET',
-          path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+          path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
       });
@@ -252,7 +252,7 @@ export default function (providerContext: FtrProviderContext) {
         const res = await es.transport.request(
           {
             method: 'GET',
-            path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+            path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
           },
           {
             ignore: [404],
