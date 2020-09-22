@@ -14895,7 +14895,7 @@
     "xpack.securitySolution.auditd.violatedSeLinuxPolicyDescription": "selinuxポリシーに違反しました",
     "xpack.securitySolution.auditd.wasAuthorizedToUseDescription": "が以下の使用を承認されました。",
     "xpack.securitySolution.auditd.withResultDescription": "結果付き",
-    "xpack.securitySolution.authenticationsTable.authenticationsFailures": "認証",
+    "xpack.securitySolution.authenticationsTable.authentications": "認証",
     "xpack.securitySolution.authenticationsTable.failures": "失敗",
     "xpack.securitySolution.authenticationsTable.lastFailedDestination": "前回失敗したデスティネーション",
     "xpack.securitySolution.authenticationsTable.lastFailedSource": "前回失敗したソース",
