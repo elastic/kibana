@@ -8821,7 +8821,6 @@
     "xpack.infra.registerFeatures.logsDescription": "实时流式传输日志或在类似控制台的工具中滚动浏览历史视图。",
     "xpack.infra.registerFeatures.logsTitle": "日志",
     "xpack.infra.sampleDataLinkLabel": "日志",
-    "xpack.infra.savedView.changeView": "更改视图",
     "xpack.infra.savedView.currentView": "当前视图",
     "xpack.infra.savedView.defaultViewNameHosts": "默认视图",
     "xpack.infra.savedView.errorOnCreate.duplicateViewName": "具有该名称的视图已存在。",
