@@ -161,6 +161,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           defaultMessage: 'Search Elastic',
         }),
       }}
+      popoverProps={{
+        repositionOnScroll: true,
+      }}
       emptyMessage={
         <EuiSelectableMessage style={{ minHeight: 300 }}>
           <p>

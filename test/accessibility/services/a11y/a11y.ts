@@ -71,7 +71,6 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           .concat(excludeTestSubj || [])
           .map((ts) => [testSubjectToCss(ts)])
           .concat([
-            ['.ace_scrollbar'],
             [
               '.leaflet-vega-container[role="graphics-document"][aria-roledescription="visualization"]',
             ],
@@ -97,10 +96,16 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         runOnly: ['wcag2a', 'wcag2aa'],
         rules: {
           'color-contrast': {
-            enabled: false,
+            enabled: false, // disabled because we have too many failures
           },
           bypass: {
             enabled: false, // disabled because it's too flaky
+          },
+          'scrollable-region-focusable': {
+            selector: '[data-skip-axe="scrollable-region-focusable"]',
+          },
+          'aria-required-children': {
+            selector: '[data-skip-axe="aria-required-children"] > *',
           },
         },
       };
