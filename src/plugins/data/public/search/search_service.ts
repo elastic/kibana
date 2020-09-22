@@ -21,11 +21,17 @@ import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import { handleResponse } from './fetch';
+import {
+  createSearchSource,
+  ISearchGeneric,
+  SearchSource,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
@@ -56,7 +62,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
     { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -95,7 +101,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
@@ -108,8 +114,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      http,
-      loadingCount$,
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
     };
 
     return {

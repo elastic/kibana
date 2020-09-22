@@ -76,7 +76,7 @@ describe('When invoking Trusted Apps Schema', () => {
       os: 'windows',
       entries: [
         {
-          field: 'path',
+          field: 'process.path',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -109,14 +109,6 @@ describe('When invoking Trusted Apps Schema', () => {
     it('should validate `description` as optional', () => {
       const { description, ...bodyMsg } = getCreateTrustedAppItem();
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
-    });
-
-    it('should validate `description` to be non-empty if defined', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        description: '',
-      };
-      expect(() => body.validate(bodyMsg)).toThrow();
     });
 
     it('should validate `os` to to only accept known values', () => {
@@ -202,7 +194,7 @@ describe('When invoking Trusted Apps Schema', () => {
         };
         expect(() => body.validate(bodyMsg2)).toThrow();
 
-        ['hash', 'path'].forEach((field) => {
+        ['process.hash.*', 'process.path'].forEach((field) => {
           const bodyMsg3 = {
             ...getCreateTrustedAppItem(),
             entries: [
@@ -217,9 +209,55 @@ describe('When invoking Trusted Apps Schema', () => {
         });
       });
 
-      it.todo('should validate `entry.type` is limited to known values');
+      it('should validate `entry.type` is limited to known values', () => {
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              type: 'invalid',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
 
-      it.todo('should validate `entry.operator` is limited to known values');
+        // Allow `match`
+        const bodyMsg2 = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              type: 'match',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg2)).not.toThrow();
+      });
+
+      it('should validate `entry.operator` is limited to known values', () => {
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              operator: 'invalid',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
+
+        // Allow `match`
+        const bodyMsg2 = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              operator: 'included',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg2)).not.toThrow();
+      });
 
       it('should validate `entry.value` required', () => {
         const { value, ...entry } = getTrustedAppItemEntryItem();

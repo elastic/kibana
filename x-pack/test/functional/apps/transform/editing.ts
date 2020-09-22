@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_2_${date}`,
+    id: `ec_editing_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -32,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.api.createAndRunTransform(transformConfig);
+      await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -52,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         messageText: 'updated transform.',
         row: {
-          status: 'stopped',
+          status: TRANSFORM_STATE.STOPPED,
           mode: 'batch',
           progress: '100',
         },
@@ -97,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep(
           'should update the transform documents per second'
         );
+        await transform.editFlyout.openTransformEditAccordionAdvancedSettings();
         await transform.editFlyout.assertTransformEditFlyoutInputExists('DocsPerSecond');
         await transform.editFlyout.assertTransformEditFlyoutInputValue('DocsPerSecond', '');
         await transform.editFlyout.setTransformEditFlyoutInputValue(

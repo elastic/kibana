@@ -5,7 +5,6 @@
  */
 
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
 
 const mockDataPoints = [
@@ -52,8 +51,8 @@ const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 describe('UrlDrilldown', () => {
   const urlDrilldown = new UrlDrilldown({
     getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
-    getOpenModal: () => Promise.resolve(coreMock.createStart().overlays.openModal),
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
+    getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
   });
 
