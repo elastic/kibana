@@ -239,6 +239,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const getCheckboxValue = (testSubject: TestSubjects): boolean =>
     find(testSubject).props().checked;
 
+  const toggleFormRow = (formRowName: string) => {
+    form.toggleEuiSwitch(`${formRowName}.formRowToggle`);
+  };
+
   return {
     selectTab,
     getFieldAt,
@@ -252,6 +256,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getComboBoxValue,
     getToggleValue,
     getCheckboxValue,
+    toggleFormRow,
   };
 };
 
@@ -365,4 +370,6 @@ export type TestSubjects =
   | 'searchQuoteAnalyzer-custom'
   | 'searchQuoteAnalyzer-toggleCustomButton'
   | 'searchQuoteAnalyzer-custom.input'
-  | 'useSameAnalyzerForSearchCheckBox.input';
+  | 'useSameAnalyzerForSearchCheckBox.input'
+  | 'metaParameterEditor'
+  | string;
