@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const AUTHENTICATIONS = i18n.translate(
-  'xpack.securitySolution.authenticationsTable.authenticationsFailures',
+  'xpack.securitySolution.authenticationsTable.authentications',
   {
     defaultMessage: 'Authentications',
   }
