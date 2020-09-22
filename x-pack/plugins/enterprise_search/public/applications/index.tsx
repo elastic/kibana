@@ -14,7 +14,7 @@ import { getContext, resetContext } from 'kea';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
-import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
+import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
@@ -39,12 +39,11 @@ export const KibanaContext = React.createContext({});
 
 export const renderApp = (
   App: React.FC<IInitialAppData>,
-  params: AppMountParameters,
-  core: CoreStart,
-  plugins: PluginsSetup,
-  config: ClientConfigType,
-  { externalUrl, errorConnecting, ...initialData }: ClientData
+  { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
+  { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
+  const { externalUrl, errorConnecting, ...initialData } = data;
+
   resetContext({ createStore: true });
   const store = getContext().store as Store;
 
