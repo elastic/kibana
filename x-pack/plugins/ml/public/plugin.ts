@@ -104,25 +104,25 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     const managementApp = registerManagementSection(pluginsSetup.management, core);
+    if (pluginsSetup.share) {
+      const baseUrl = core.http.basePath.prepend('/app/ml');
+      this.urlGenerator = pluginsSetup.share.urlGenerators.registerUrlGenerator(
+        new MlUrlGenerator({
+          appBasePath: baseUrl,
+          useHash: core.uiSettings.get('state:storeInSessionStorage'),
+        })
+      );
+    }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
+
       if (isMlEnabled(license)) {
         // add ML to home page
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-        if (pluginsSetup.share) {
-          const baseUrl = core.http.basePath.prepend('/app/ml');
-          this.urlGenerator = pluginsSetup.share.urlGenerators.registerUrlGenerator(
-            new MlUrlGenerator({
-              appBasePath: baseUrl,
-              useHash: core.uiSettings.get('state:storeInSessionStorage'),
-            })
-          );
-        }
-
         const { capabilities } = coreStart.application;
 
         // register ML for the index pattern management no data screen.
