@@ -274,7 +274,7 @@
     "@babel/register": "^7.10.5",
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "5.0.3",
-    "@elastic/ems-client": "7.9.3",
+    "@elastic/ems-client": "7.10.0",
     "@elastic/eui": "29.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
