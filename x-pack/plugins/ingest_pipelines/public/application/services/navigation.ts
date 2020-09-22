@@ -25,7 +25,7 @@ const _getListPath = (name?: string): string => {
   return `${BASE_PATH}${name ? `?pipeline=${encodeURIComponent(name)}` : ''}`;
 };
 
-export const ROUTES_CONFIG = {
+export const ROUTES = {
   list: _getListPath(),
   edit: _getEditPath(':name', false),
   create: _getCreatePath(),

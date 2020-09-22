@@ -21,14 +21,14 @@ import {
 } from '../shared_imports';
 
 import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from './sections';
-import { ROUTES_CONFIG } from './services/navigation';
+import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={ROUTES_CONFIG.list} component={PipelinesList} />
-    <Route exact path={ROUTES_CONFIG.clone} component={PipelinesClone} />
-    <Route exact path={ROUTES_CONFIG.create} component={PipelinesCreate} />
-    <Route exact path={ROUTES_CONFIG.edit} component={PipelinesEdit} />
+    <Route exact path={ROUTES.list} component={PipelinesList} />
+    <Route exact path={ROUTES.clone} component={PipelinesClone} />
+    <Route exact path={ROUTES.create} component={PipelinesCreate} />
+    <Route exact path={ROUTES.edit} component={PipelinesEdit} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Switch>

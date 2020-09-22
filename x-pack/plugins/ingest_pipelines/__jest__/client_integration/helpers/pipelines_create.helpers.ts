@@ -8,7 +8,7 @@ import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_uti
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
-import { getCreatePath, ROUTES_CONFIG } from '../../../public/application/services/navigation';
+import { getCreatePath, ROUTES } from '../../../public/application/services/navigation';
 
 export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -17,7 +17,7 @@ export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [getCreatePath()],
-    componentRoutePath: ROUTES_CONFIG.create,
+    componentRoutePath: ROUTES.create,
   },
   doMountAsync: true,
 };

@@ -15,12 +15,12 @@ import {
 } from '../../../../../test_utils';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
-import { getListPath, ROUTES_CONFIG } from '../../../public/application/services/navigation';
+import { getListPath, ROUTES } from '../../../public/application/services/navigation';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [getListPath()],
-    componentRoutePath: ROUTES_CONFIG.list,
+    componentRoutePath: ROUTES.list,
   },
   doMountAsync: true,
 };

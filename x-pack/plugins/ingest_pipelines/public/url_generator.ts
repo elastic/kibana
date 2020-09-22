@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
+import { MANAGEMENT_APP_ID } from '../../../../src/plugins/management/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 import {
   getClonePath,
@@ -13,7 +14,7 @@ import {
   getListPath,
 } from './application/services/navigation';
 import { Dependencies } from './types';
-import { MANAGEMENT_APP_ID, PLUGIN_ID } from '../common/constants';
+import { PLUGIN_ID } from '../common/constants';
 
 export const INGEST_PIPELINES_APP_ULR_GENERATOR = 'INGEST_PIPELINES_APP_URL_GENERATOR';
 
