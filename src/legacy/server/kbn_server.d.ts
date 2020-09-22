@@ -57,7 +57,6 @@ export interface PluginsSetup {
 
 export interface KibanaCore {
   __internals: {
-    elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
@@ -93,8 +92,6 @@ export default class KbnServer {
   public readonly newPlatform: NewPlatform;
   public server: Server;
   public inject: Server['inject'];
-  public pluginSpecs: any[];
-  public uiBundles: any;
 
   constructor(settings: Record<string, any>, config: KibanaConfig, core: KibanaCore);
 
@@ -102,7 +99,6 @@ export default class KbnServer {
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
-  public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
   public config: KibanaConfig;
 }

@@ -299,12 +299,8 @@ export class LegacyService implements CoreService {
         plugins: startDeps.plugins,
       },
       __internals: {
-        http: {
-          registerStaticDir: setupDeps.core.http.registerStaticDir,
-        },
         hapiServer: setupDeps.core.http.server,
         uiPlugins: setupDeps.uiPlugins,
-        elasticsearch: setupDeps.core.elasticsearch,
         rendering: setupDeps.core.rendering,
       },
       logger: this.coreContext.logger,

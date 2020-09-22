@@ -285,7 +285,7 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                 ],
@@ -316,14 +316,11 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
                   '!(x-pack/)?test/**/*',
-                  // next folder contains legacy browser tests which can't be migrated to jest
-                  // which import np files
-                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -763,7 +760,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -809,7 +806,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -1040,7 +1037,7 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
-        'x-pack/{,legacy/}plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
