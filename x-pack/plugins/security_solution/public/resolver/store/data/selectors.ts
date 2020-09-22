@@ -222,31 +222,46 @@ export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents)
  */
 export const relatedEventsByCategory: (
   state: DataState
-) => (entityID: string) => (ecsCategory: string) => SafeResolverEvent[] = createSelector(
+) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
   relatedEventsByEntityId,
   function (
     /* eslint-disable no-shadow */
     relatedEventsByEntityId
     /* eslint-enable no-shadow */
   ) {
-    return defaultMemoize((entityID: string) => {
-      return defaultMemoize((ecsCategory: string) => {
-        const relatedById = relatedEventsByEntityId.get(entityID);
-        // With no related events, we can't return related by category
-        if (!relatedById) {
-          return [];
+    // A map of nodeID -> event category -> SafeResolverEvent[]
+    const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
+    for (const [nodeID, events] of relatedEventsByEntityId) {
+      // A map of eventCategory -> SafeResolverEvent[]
+      let categoryMap = nodeMap.get(nodeID);
+      if (!categoryMap) {
+        categoryMap = new Map();
+        nodeMap.set(nodeID, categoryMap);
+      }
+
+      for (const event of events.events) {
+        for (const category of eventModel.eventCategory(event)) {
+          let eventsInCategory = categoryMap.get(category);
+          if (!eventsInCategory) {
+            eventsInCategory = [];
+            categoryMap.set(category, eventsInCategory);
+          }
+          eventsInCategory.push(event);
         }
-        return relatedById.events.reduce(
-          (eventsByCategory: SafeResolverEvent[], candidate: SafeResolverEvent) => {
-            if ([candidate && eventModel.eventCategory(candidate)].flat().includes(ecsCategory)) {
-              eventsByCategory.push(candidate);
-            }
-            return eventsByCategory;
-          },
-          []
-        );
-      });
-    });
+      }
+    }
+
+    // Use the same empty array for all values that are missing
+    const emptyArray: SafeResolverEvent[] = [];
+
+    return (entityID: string, category: string): SafeResolverEvent[] => {
+      const categoryMap = nodeMap.get(entityID);
+      if (!categoryMap) {
+        return emptyArray;
+      }
+      const eventsInCategory = categoryMap.get(category);
+      return eventsInCategory ?? emptyArray;
+    };
   }
 );
 
@@ -284,113 +299,6 @@ export function hasMoreAncestors(state: DataState): boolean {
   const resolverTree = resolverTreeResponse(state);
   return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
 }
-
-interface RelatedInfoFunctions {
-  shouldShowLimitForCategory: (category: string) => boolean;
-  numberNotDisplayedForCategory: (category: string) => number;
-  numberActuallyDisplayedForCategory: (category: string) => number;
-}
-/**
- * A map of `entity_id`s to functions that provide information about
- * related events by ECS `.category` Primarily to avoid having business logic
- * in UI components.
- * @deprecated
- */
-export const relatedEventInfoByEntityId: (
-  state: DataState
-) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
-  relatedEventsByEntityId,
-  relatedEventsStats,
-  function selectLineageLimitInfo(
-    /* eslint-disable no-shadow */
-    relatedEventsByEntityId,
-    relatedEventsStats
-    /* eslint-enable no-shadow */
-  ) {
-    return (entityID) => {
-      const stats = relatedEventsStats(entityID);
-      if (!stats) {
-        return null;
-      }
-      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityID);
-      const hasMoreEvents =
-        eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
-      /**
-       * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
-       * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
-       * This is currently aligned with how the backed provides this information.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const aggregateTotalForCategory = (eventCategory: string): number => {
-        return stats.events.byCategory[eventCategory] || 0;
-      };
-
-      /**
-       * Get all the related events in the category provided.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const unmemoizedMatchingEventsForCategory = (eventCategory: string): SafeResolverEvent[] => {
-        if (!eventsResponseForThisEntry) {
-          return [];
-        }
-        return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [eventModel.eventCategory(resolverEvent)].flat()) {
-            if (category === eventCategory) {
-              return true;
-            }
-          }
-          return false;
-        });
-      };
-
-      const matchingEventsForCategory = unmemoizedMatchingEventsForCategory;
-
-      /**
-       * The number of events that occurred before the API limit was reached.
-       * The number of events that came back form the API that have `eventCategory` in their list of categories.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const numberActuallyDisplayedForCategory = (eventCategory: string): number => {
-        return matchingEventsForCategory(eventCategory)?.length || 0;
-      };
-
-      /**
-       * The total number counted by the backend - the number displayed
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const numberNotDisplayedForCategory = (eventCategory: string): number => {
-        return (
-          aggregateTotalForCategory(eventCategory) -
-          numberActuallyDisplayedForCategory(eventCategory)
-        );
-      };
-
-      /**
-       * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
-       * fullfill the aggregate count.
-       *
-       * @param eventCategory {string} The ECS category like 'file','dns',etc.
-       */
-      const shouldShowLimitForCategory = (eventCategory: string): boolean => {
-        if (hasMoreEvents && numberNotDisplayedForCategory(eventCategory) > 0) {
-          return true;
-        }
-        return false;
-      };
-
-      const entryValue = {
-        shouldShowLimitForCategory,
-        numberNotDisplayedForCategory,
-        numberActuallyDisplayedForCategory,
-      };
-      return entryValue;
-    };
-  }
-);
 
 /**
  * If the tree resource needs to be fetched then these are the parameters that should be used.

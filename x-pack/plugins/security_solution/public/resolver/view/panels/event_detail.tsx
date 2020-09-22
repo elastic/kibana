@@ -26,77 +26,39 @@ import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 
-const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
-    overflow-wrap: break-word;
-  }
-  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
-    max-width: calc(100% - 8.5em);
-    overflow-wrap: break-word;
-  }
-`);
-
-// Also prevents horizontal scrollbars on long descriptive names
-const StyledDescriptiveName = memo(styled(EuiText)`
-  padding-right: 1em;
-  overflow-wrap: break-word;
-`);
-
-const StyledFlexTitle = memo(styled('h3')`
-  display: flex;
-  flex-flow: row;
-  font-size: 1.2em;
-`);
-const StyledTitleRule = memo(styled('hr')`
-  &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
-    display: block;
-    flex: 1;
-    margin-left: 0.5em;
-  }
-`);
-
-const TitleHr = memo(() => {
-  return (
-    <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
+export const EventDetail = memo(function EventDetail({
+  nodeID,
+  eventID,
+  eventType,
+}: {
+  nodeID: string;
+  eventID: string;
+  /** The event type to show in the breadcrumbs */
+  eventType: string;
+}) {
+  const event = useSelector((state: ResolverState) =>
+    selectors.eventByID(state)({ nodeID, eventID })
   );
-});
-
-export const EventDetail = memo(
-  ({
-    nodeID,
-    eventID,
-    eventType,
-  }: {
-    nodeID: string;
-    eventID: string;
-    /** The event type to show in the breadcrumbs */
-    eventType: string;
-  }) => {
-    const event = useSelector((state: ResolverState) =>
-      selectors.eventByID(state)({ nodeID, eventID })
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  if (event && processEvent) {
+    return (
+      <EventDetailContents
+        nodeID={nodeID}
+        event={event}
+        processEvent={processEvent}
+        eventType={eventType}
+      />
     );
-    const processEvent = useSelector((state: ResolverState) =>
-      selectors.processEventForID(state)(nodeID)
+  } else {
+    return (
+      <StyledPanel>
+        <PanelLoading />
+      </StyledPanel>
     );
-    if (event && processEvent) {
-      return (
-        <EventDetailContents
-          nodeID={nodeID}
-          event={event}
-          processEvent={processEvent}
-          eventType={eventType}
-        />
-      );
-    } else {
-      return (
-        <StyledPanel>
-          <PanelLoading />
-        </StyledPanel>
-      );
-    }
   }
-);
+});
 
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
@@ -304,3 +266,39 @@ function EventDetailBreadcrumbs({
   ]);
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }
+
+const StyledDescriptionList = memo(styled(EuiDescriptionList)`
+  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
+    max-width: 8em;
+    overflow-wrap: break-word;
+  }
+  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
+    max-width: calc(100% - 8.5em);
+    overflow-wrap: break-word;
+  }
+`);
+
+// Also prevents horizontal scrollbars on long descriptive names
+const StyledDescriptiveName = memo(styled(EuiText)`
+  padding-right: 1em;
+  overflow-wrap: break-word;
+`);
+
+const StyledFlexTitle = memo(styled('h3')`
+  display: flex;
+  flex-flow: row;
+  font-size: 1.2em;
+`);
+const StyledTitleRule = memo(styled('hr')`
+  &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
+    display: block;
+    flex: 1;
+    margin-left: 0.5em;
+  }
+`);
+
+const TitleHr = memo(() => {
+  return (
+    <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
+  );
+});

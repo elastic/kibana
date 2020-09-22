@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
@@ -25,48 +23,52 @@ import { useLinkProps } from '../use_link_props';
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
-export const NodeEventsOfType = memo(
-  ({ nodeID, eventType }: { nodeID: string; eventType: string }) => {
-    const processEvent = useSelector((state: ResolverState) =>
-      selectors.processEventForID(state)(nodeID)
-    );
-    const eventCount = useSelector(
-      (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
-    );
-    const eventsInCategoryCount = useSelector(
-      (state: ResolverState) =>
-        selectors.relatedEventsStats(state)(nodeID)?.events.byCategory[eventType]
-    );
-    const events = useSelector(
-      useCallback(
-        (state: ResolverState) => {
-          return selectors.relatedEventsByCategory(state)(nodeID)(eventType);
-        },
-        [eventType, nodeID]
-      )
-    );
+export const NodeEventsOfType = memo(function NodeEventsOfType({
+  nodeID,
+  eventType,
+}: {
+  nodeID: string;
+  eventType: string;
+}) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const eventCount = useSelector(
+    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
+  );
+  const eventsInCategoryCount = useSelector(
+    (state: ResolverState) =>
+      selectors.relatedEventsStats(state)(nodeID)?.events.byCategory[eventType]
+  );
+  const events = useSelector(
+    useCallback(
+      (state: ResolverState) => {
+        return selectors.relatedEventsByCategory(state)(nodeID, eventType);
+      },
+      [eventType, nodeID]
+    )
+  );
 
-    return (
-      <StyledPanel>
-        {eventCount === undefined || processEvent === null ? (
-          <PanelLoading />
-        ) : (
-          <>
-            <NodeEventsOfTypeBreadcrumbs
-              nodeName={eventModel.processNameSafeVersion(processEvent)}
-              eventType={eventType}
-              eventCount={eventCount}
-              nodeID={nodeID}
-              eventsInCategoryCount={eventsInCategoryCount}
-            />
-            <EuiSpacer size="l" />
-            <NodeEventList eventType={eventType} nodeID={nodeID} events={events} />
-          </>
-        )}
-      </StyledPanel>
-    );
-  }
-);
+  return (
+    <StyledPanel>
+      {eventCount === undefined || processEvent === null ? (
+        <PanelLoading />
+      ) : (
+        <>
+          <NodeEventsOfTypeBreadcrumbs
+            nodeName={eventModel.processNameSafeVersion(processEvent)}
+            eventType={eventType}
+            eventCount={eventCount}
+            nodeID={nodeID}
+            eventsInCategoryCount={eventsInCategoryCount}
+          />
+          <EuiSpacer size="l" />
+          <NodeEventList eventType={eventType} nodeID={nodeID} events={events} />
+        </>
+      )}
+    </StyledPanel>
+  );
+});
 
 /**
  * Rendered for each event in the list.
@@ -122,7 +124,7 @@ const NodeEventsListItem = memo(function ({
 /**
  * Renders a list of events with a separator in between.
  */
-const NodeEventList = memo(function ({
+const NodeEventList = memo(function NodeEventList({
   eventType,
   events,
   nodeID,

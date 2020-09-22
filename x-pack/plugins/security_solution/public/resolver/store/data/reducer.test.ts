@@ -60,8 +60,6 @@ describe('Resolver Data Middleware', () => {
 
   describe('when data was received with stats mocked for the first child node', () => {
     let firstChildNodeInTree: TreeNode;
-    let eventStatsForFirstChildNode: { total: number; byCategory: Record<string, number> };
-    let categoryToOverCount: string;
     let tree: ResolverTree;
 
     /**
@@ -71,12 +69,7 @@ describe('Resolver Data Middleware', () => {
      */
 
     beforeEach(() => {
-      ({
-        tree,
-        firstChildNodeInTree,
-        eventStatsForFirstChildNode,
-        categoryToOverCount,
-      } = mockedTree());
+      ({ tree, firstChildNodeInTree } = mockedTree());
       if (tree) {
         dispatchTree(tree);
       }
@@ -104,96 +97,6 @@ describe('Resolver Data Middleware', () => {
         )!.events;
 
         expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
-      });
-      it('should indicate the correct related event count for each category', () => {
-        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-        const displayCountsForCategory = selectedRelatedInfo(firstChildNodeInTree.id)
-          ?.numberActuallyDisplayedForCategory!;
-
-        const eventCategoriesForNode: string[] = Object.keys(
-          eventStatsForFirstChildNode.byCategory
-        );
-
-        for (const eventCategory of eventCategoriesForNode) {
-          expect(`${eventCategory}:${displayCountsForCategory(eventCategory)}`).toBe(
-            `${eventCategory}:${eventStatsForFirstChildNode.byCategory[eventCategory]}`
-          );
-        }
-      });
-      /**
-       * The general approach reflected here is to _avoid_ showing a limit warning - even if we hit
-       * the overall related event limit - as long as the number in our category matches what the stats
-       * say we have. E.g. If the stats say you have 20 dns events, and we receive 20 dns events, we
-       * don't need to display a limit warning for that, even if we hit some overall event limit of e.g. 100
-       * while we were fetching the 20.
-       */
-      it('should not indicate the limit has been exceeded because the number of related events received for the category is greater or equal to the stats count', () => {
-        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-        const shouldShowLimit = selectedRelatedInfo(firstChildNodeInTree.id)
-          ?.shouldShowLimitForCategory!;
-        for (const typeCounted of Object.keys(eventStatsForFirstChildNode.byCategory)) {
-          expect(shouldShowLimit(typeCounted)).toBe(false);
-        }
-      });
-      it('should not indicate that there are any related events missing because the number of related events received for the category is greater or equal to the stats count', () => {
-        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-        const notDisplayed = selectedRelatedInfo(firstChildNodeInTree.id)
-          ?.numberNotDisplayedForCategory!;
-        for (const typeCounted of Object.keys(eventStatsForFirstChildNode.byCategory)) {
-          expect(notDisplayed(typeCounted)).toBe(0);
-        }
-      });
-    });
-    describe('when data was received and stats show more related events than the API can provide', () => {
-      beforeEach(() => {
-        // Add 1 to the stats for an event category so that the selectors think we are missing data.
-        // This mutates `tree`, and then we re-dispatch it
-        eventStatsForFirstChildNode.byCategory[categoryToOverCount] =
-          eventStatsForFirstChildNode.byCategory[categoryToOverCount] + 1;
-
-        if (tree) {
-          dispatchTree(tree);
-          const relatedAction: DataAction = {
-            type: 'serverReturnedRelatedEventData',
-            payload: {
-              entityID: firstChildNodeInTree.id,
-              // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
-              // a lot of the frontend functions. So casting it back to the unsafe type for now.
-              events: firstChildNodeInTree.relatedEvents,
-              nextEvent: 'aValidNextEventCursor',
-            },
-          };
-          store.dispatch(relatedAction);
-        }
-      });
-      it('should have the correct related events', () => {
-        const selectedEventsByEntityId = selectors.relatedEventsByEntityId(store.getState());
-        const selectedEventsForFirstChildNode = selectedEventsByEntityId.get(
-          firstChildNodeInTree.id
-        )!.events;
-
-        expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
-      });
-      it('should return related events for the category equal to the number of events of that type provided', () => {
-        const relatedEventsByCategory = selectors.relatedEventsByCategory(store.getState());
-        const relatedEventsForOvercountedCategory = relatedEventsByCategory(
-          firstChildNodeInTree.id
-        )(categoryToOverCount);
-        expect(relatedEventsForOvercountedCategory.length).toBe(
-          eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
-        );
-      });
-      it('should indicate the limit has been exceeded because the number of related events received for the category is less than what the stats count said it would be', () => {
-        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-        const shouldShowLimit = selectedRelatedInfo(firstChildNodeInTree.id)
-          ?.shouldShowLimitForCategory!;
-        expect(shouldShowLimit(categoryToOverCount)).toBe(true);
-      });
-      it('should indicate that there are related events missing because the number of related events received for the category is less than what the stats count said it would be', () => {
-        const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
-        const notDisplayed = selectedRelatedInfo(firstChildNodeInTree.id)
-          ?.numberNotDisplayedForCategory!;
-        expect(notDisplayed(categoryToOverCount)).toBe(1);
       });
     });
   });
@@ -253,7 +156,6 @@ function mockedTree() {
   return {
     tree: tree!,
     firstChildNodeInTree,
-    eventStatsForFirstChildNode: statsResults.eventStats,
     categoryToOverCount: statsResults.firstCategory,
   };
 }

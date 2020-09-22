@@ -5,7 +5,7 @@
  */
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
-import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -32,7 +32,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
   beforeEach(() => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
