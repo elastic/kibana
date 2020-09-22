@@ -12,7 +12,7 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';

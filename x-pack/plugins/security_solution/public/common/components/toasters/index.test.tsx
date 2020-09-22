@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';

@@ -5,7 +5,7 @@
  */
 
 import { RisonValue, RisonObject, decode } from 'rison-node';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isObject, isString } from 'lodash/fp';
 

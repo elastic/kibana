@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';

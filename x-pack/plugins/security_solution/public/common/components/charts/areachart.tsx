@@ -15,7 +15,7 @@ import {
   AreaSeriesStyle,
   RecursivePartial,
 } from '@elastic/charts';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 

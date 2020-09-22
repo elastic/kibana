@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { map } from 'lodash/fp';
 import { EuiFormRow, EuiComboBox, EuiSelectOption, EuiHorizontalRule } from '@elastic/eui';

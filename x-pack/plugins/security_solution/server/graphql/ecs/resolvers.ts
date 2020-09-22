@@ -5,7 +5,7 @@
  */
 
 import { GraphQLScalarType, Kind } from 'graphql';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isBoolean, isNumber, isObject } from 'lodash/fp';
 

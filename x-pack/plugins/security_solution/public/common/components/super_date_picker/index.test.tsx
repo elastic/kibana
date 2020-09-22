@@ -21,7 +21,7 @@ import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 

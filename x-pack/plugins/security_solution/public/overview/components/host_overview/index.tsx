@@ -7,7 +7,7 @@
 import { EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';

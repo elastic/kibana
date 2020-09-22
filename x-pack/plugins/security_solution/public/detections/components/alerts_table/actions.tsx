@@ -7,7 +7,7 @@
 /* eslint-disable complexity */
 
 import dateMath from '@elastic/datemath';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';

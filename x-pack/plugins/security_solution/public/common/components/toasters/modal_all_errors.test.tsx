@@ -10,7 +10,7 @@ import React from 'react';
 
 import { ModalAllErrors } from './modal_all_errors';
 import { AppToast } from '.';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 

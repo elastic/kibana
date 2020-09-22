@@ -16,7 +16,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
 } from '@elastic/eui';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';

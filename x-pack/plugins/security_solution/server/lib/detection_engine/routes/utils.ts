@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { has, snakeCase } from 'lodash/fp';
 

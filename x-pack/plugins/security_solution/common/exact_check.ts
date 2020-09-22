@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { left, Either, fold, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isObject, get } from 'lodash/fp';
 

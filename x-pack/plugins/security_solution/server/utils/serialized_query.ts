@@ -5,7 +5,7 @@
  */
 
 import { UserInputError } from 'apollo-server-errors';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 

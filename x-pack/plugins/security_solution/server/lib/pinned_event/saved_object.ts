@@ -5,7 +5,7 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';

@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';

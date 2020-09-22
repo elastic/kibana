@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isObject } from 'lodash/fp';
 

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 

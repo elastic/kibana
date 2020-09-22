@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiCheckbox, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { uniqBy } from 'lodash/fp';
 import React from 'react';

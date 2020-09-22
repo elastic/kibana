@@ -5,7 +5,7 @@
  */
 
 import cytoscape from 'cytoscape';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import debounce from 'lodash/debounce';
 import { useEffect } from 'react';

@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { omit } from 'lodash/fp';
 

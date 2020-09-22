@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useCallback } from 'react';
-//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// Prefer  importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
