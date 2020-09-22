@@ -164,6 +164,15 @@ import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
 
+// @public
+export interface AppCategory {
+    ariaLabel?: string;
+    euiIconType?: string;
+    id: string;
+    label: string;
+    order?: number;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
@@ -484,37 +493,7 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
 }
 
 // @internal (undocumented)
-export const DEFAULT_APP_CATEGORIES: Readonly<{
-    kibana: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    enterpriseSearch: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    observability: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    security: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    management: {
-        id: string;
-        label: string;
-        order: number;
-    };
-}>;
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public (undocumented)
 export interface DeleteDocumentResponse {
@@ -964,6 +943,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // (undocumented)
     readonly socket: IKibanaSocket;
     readonly url: Url;
+    readonly uuid: string;
     }
 
 // @public
@@ -2197,6 +2177,7 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 // @public
@@ -2408,7 +2389,7 @@ export class SavedObjectsRepository {
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, rootSearchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespaces, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
@@ -2516,6 +2497,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 
 // @public (undocumented)
 export class SavedObjectsUtils {
+    static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
