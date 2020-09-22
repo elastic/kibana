@@ -47,11 +47,7 @@ object ESSnapshotManifest : BuildType({
       scriptContent =
         """#!/bin/bash
           echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > "${"$"}GOOGLE_APPLICATION_CREDENTIALS"
-          echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > test.json
-          ls -alh
-          export GOOGLE_APPLICATION_CREDENTIALS="${"$"}(pwd)/gcp-credentials.json"
           gcloud auth activate-service-account --key-file "${"$"}GOOGLE_APPLICATION_CREDENTIALS"
-          gcloud info
         """.trimIndent()
     }
 

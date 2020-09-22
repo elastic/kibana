@@ -67,7 +67,7 @@ const { execSync } = require('child_process');
       gsutil -m cp -r *.* gs://kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}
       cp manifest.json manifest-latest.json
       gsutil cp manifest-latest.json gs://kibana-ci-es-snapshots-daily-teamcity/${VERSION}
-      tc_set_env ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json'
+      echo "##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json']"
     `, { shell: '/bin/bash' });
   } catch (ex) {
     console.error(ex);
