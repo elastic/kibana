@@ -120,5 +120,4 @@ export const tagCloudVisTypeDefinition = {
       },
     ]),
   },
-  useCustomNoDataScreen: true,
 };

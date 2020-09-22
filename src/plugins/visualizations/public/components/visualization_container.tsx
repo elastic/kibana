@@ -18,13 +18,19 @@
  */
 
 import React, { ReactNode } from 'react';
+import { VisualizationNoResults } from './visualization_noresults';
 
 interface VisualizationContainerProps {
   className?: string;
   children: ReactNode;
+  showNoResults?: boolean;
 }
 
-export const VisualizationContainer = (props: VisualizationContainerProps) => {
-  const classes = `visualization ${props.className}`;
-  return <div className={classes}>{props.children}</div>;
+export const VisualizationContainer = ({
+  className = '',
+  children,
+  showNoResults = false,
+}: VisualizationContainerProps) => {
+  const classes = `visualization ${className}`;
+  return <div className={classes}>{showNoResults ? <VisualizationNoResults /> : children}</div>;
 };
