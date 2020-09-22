@@ -23,7 +23,6 @@ module.exports = {
   // change during development.
   entry: [
     '@elastic/eui/dist/eui_theme_light.css',
-    '@kbn/ui-framework/dist/kui_light.css',
     '@storybook/addon-actions/register',
     '@storybook/core',
     '@storybook/core/dist/server/common/polyfills.js',
