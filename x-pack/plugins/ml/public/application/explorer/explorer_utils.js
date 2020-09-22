@@ -281,6 +281,7 @@ export function getViewBySwimlaneOptions({
 }) {
   const selectedJobIds = selectedJobs.map((d) => d.id);
 
+  // Unique influencers for the selected job(s).
   const viewByOptions = sortBy(
     uniq(
       mlJobService.jobs.reduce((reducedViewByOptions, job) => {
