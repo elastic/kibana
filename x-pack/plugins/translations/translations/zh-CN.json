@@ -1466,7 +1466,6 @@
     "discover.uninitializedText": "编写查询，添加一些筛选，或只需单击“刷新”来检索当前查询的结果。",
     "discover.uninitializedTitle": "开始搜索",
     "discover.valueIsNotConfiguredIndexPatternIDWarningTitle": "{stateVal} 不是配置的索引模式 ID",
-    "embeddableApi.actions.applyFilterActionTitle": "将筛选应用于当前视图",
     "embeddableApi.addPanel.createNewDefaultOption": "新建",
     "embeddableApi.addPanel.displayName": "添加面板",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "未找到任何匹配对象。",
