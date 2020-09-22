@@ -20,7 +20,6 @@
     "discover",
     "kibanaUtils",
     "kibanaReact",
-    "ml",
     "savedObjects"
   ]
 }
