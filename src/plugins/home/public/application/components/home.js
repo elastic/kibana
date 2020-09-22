@@ -198,13 +198,13 @@ export class Home extends Component {
         </header>
 
         <div className="homContent">
-          {solutions.length && (
+          {solutions.length ? (
             <SolutionsSection
               addBasePath={addBasePath}
               solutions={solutions}
               directories={directories}
             />
-          )}
+          ) : null}
 
           <EuiFlexGroup
             className={`homData ${

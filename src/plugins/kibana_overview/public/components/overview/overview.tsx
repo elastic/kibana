@@ -218,6 +218,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                           ? 'kibanaOverview__Data--compressed'
                           : 'kibanaOverview__Data--expanded'
                       }`}
+                      direction="column"
                     >
                       <EuiFlexItem>
                         <AddData addBasePath={addBasePath} features={addDataFeatures} />

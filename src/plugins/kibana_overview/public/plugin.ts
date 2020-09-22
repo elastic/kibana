@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Subject, Subscription, from } from 'rxjs';
+import { distinct, map, switchMap } from 'rxjs/operators';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
   DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
+  AppUpdater,
 } from '../../../../src/core/public';
 import {
   KibanaOverviewPluginSetup,
@@ -31,7 +35,7 @@ import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME, PLUGIN_PATH } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { setServices } from './kibana_services';
 
 export class KibanaOverviewPlugin
@@ -46,12 +50,33 @@ export class KibanaOverviewPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     { home }: AppPluginSetupDependencies
   ): KibanaOverviewPluginSetup {
+    const appUpdater$ = from(core.getStartServices()).pipe(
+      switchMap(([coreDeps]) => coreDeps.chrome.navLinks.getNavLinks$()),
+      map((navLinks) => {
+        const hasKibanaApp = navLinks.find(
+          ({ id, category, hidden }) => !hidden && category?.id === 'kibana' && id !== PLUGIN_ID
+        );
+
+        return hasKibanaApp;
+      }),
+      distinct(),
+      map((hasKibanaApp) => {
+        return () => {
+          if (!hasKibanaApp) {
+            return { navLinkStatus: AppNavLinkStatus.hidden };
+          } else {
+            return { navLinkStatus: AppNavLinkStatus.default };
+          }
+        };
+      })
+    );
     // Register an application into the side navigation menu
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
-      id: 'kibanaOverview',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 1,
+      updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
       async mount(params: AppMountParameters) {
         // Load application bundle

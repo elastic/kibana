@@ -46,37 +46,31 @@ const mockNewsFetchResult = {
   feedItems: [
     {
       badge: null,
-      description:
-        'The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.',
+      description: 'Content of blog post 1',
       expireOn: moment('2050-12-31T11:59:59Z'),
-      hash: '8e18fcedbc',
+      hash: 'hash1',
       linkText: 'Read more on the blog',
-      linkUrl:
-        'https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed',
+      linkUrl: 'link-blog-post-1',
       publishOn: moment('2020-08-31T04:23:47Z'),
-      title: 'The Go client for Elasticsearch: Introduction',
+      title: 'Blog Post 1',
     },
     {
       badge: null,
-      description:
-        'Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.',
+      description: 'Content of blog post 2',
       expireOn: moment('2050-12-31T11:59:59Z'),
-      hash: 'fb3e3d42ef',
+      hash: 'hash2',
       linkText: 'Read more on the blog',
-      linkUrl:
-        'https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed',
+      linkUrl: 'link-blog-post-2',
       publishOn: moment('2020-08-14T04:23:47Z'),
       title: 'Alerting and anomaly detection for uptime and reliability',
     },
     {
       badge: null,
-      description:
-        'Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.',
+      description: 'Content of blog post 1',
       expireOn: moment('2050-12-31T11:59:59Z'),
-      hash: 'b2fc7d47d5',
+      hash: 'hash3',
       linkText: 'Learn more on the blog',
-      linkUrl:
-        'https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed',
+      linkUrl: 'link-blog-post-3',
       publishOn: moment('2020-08-01T04:23:47Z'),
       title: 'Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management',
     },

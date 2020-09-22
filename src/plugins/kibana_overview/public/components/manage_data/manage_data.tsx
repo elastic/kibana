@@ -19,7 +19,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-expect-error untyped service
 import { FeatureCatalogueEntry } from '../../services';
@@ -50,7 +50,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup className="homDataManage__content">
+        <EuiFlexGrid className="homDataManage__content" columns={2}>
           {features.map((feature) => (
             <EuiFlexItem key={feature.id}>
               <Synopsis
@@ -64,7 +64,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
               />
             </EuiFlexItem>
           ))}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </section>
     )}
   </>

@@ -23,6 +23,7 @@ import { NewsfeedApiEndpoint } from '../../../../src/plugins/newsfeed/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { KibanaOverviewApp } from './components/app';
+import { getServices } from './kibana_services';
 
 export const renderApp = (
   core: CoreStart,
@@ -31,8 +32,12 @@ export const renderApp = (
 ) => {
   const { notifications, http } = core;
   const newsfeed$ = newsfeed.createNewsFeed$(NewsfeedApiEndpoint.KIBANA);
-
-  const solutions = home.featureCatalogue.getSolutions().filter(({ id }) => id !== 'kibana');
+  const { chrome } = getServices();
+  const navLinks = chrome.navLinks.getAll();
+  const solutions = home.featureCatalogue
+    .getSolutions()
+    .filter(({ id }) => id !== 'kibana')
+    .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
 
   ReactDOM.render(
