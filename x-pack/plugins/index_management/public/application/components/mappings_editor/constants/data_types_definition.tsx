@@ -841,6 +841,35 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  version: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.versionDescription', {
+      defaultMessage: 'Version',
+    }),
+    value: 'version',
+    documentation: {
+      main: '/version.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription"
+          defaultMessage="Version fields are helpful to handle software version values and to support specialized precedence rules for them. This field type isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
+          values={{
+            keywordType: (
+              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription.textTypeLink',
+                  {
+                    defaultMessage: 'keyword data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
   wildcard: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
       defaultMessage: 'Wildcard',
@@ -903,6 +932,7 @@ export const MAIN_TYPES: MainType[] = [
   'histogram',
   'wildcard',
   'point',
+  'version',
   'other',
 ];
 
