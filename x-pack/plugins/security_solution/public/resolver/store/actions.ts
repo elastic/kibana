@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -13,14 +14,41 @@ interface UserBroughtProcessIntoView {
   readonly type: 'userBroughtProcessIntoView';
   readonly payload: {
     /**
-     * Used to identify the node that should be brought into view.
+     * Used to identify the process node that should be brought into view.
      */
-    readonly nodeID: string;
+    readonly process: ResolverEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
     readonly time: number;
   };
+}
+
+/**
+ * When an examination of query params in the UI indicates that state needs to
+ * be updated to reflect the new selection
+ */
+interface AppDetectedNewIdFromQueryParams {
+  readonly type: 'appDetectedNewIdFromQueryParams';
+  readonly payload: {
+    /**
+     * Used to identify the process the process that should be synced with state.
+     */
+    readonly process: ResolverEvent;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
+}
+
+/**
+ * The action dispatched when the app requests related event data for one
+ * subject (whose entity_id should be included as `payload`)
+ */
+interface UserRequestedRelatedEventData {
+  readonly type: 'userRequestedRelatedEventData';
+  readonly payload: string;
 }
 
 /**
@@ -38,39 +66,48 @@ interface UserFocusedOnResolverNode {
 }
 
 /**
+ * When the user "selects" a node in the Resolver
+ * "Selected" refers to the state of being the element that the
+ * user most recently "picked" (by e.g. pressing a button corresponding
+ * to the element in a list) as opposed to "active" or "current" (see UserFocusedOnResolverNode above).
+ */
+interface UserSelectedResolverNode {
+  readonly type: 'userSelectedResolverNode';
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
+}
+
+/**
  * Used by `useStateSyncingActions` hook.
  * This is dispatched when external sources provide new parameters for Resolver.
  * When the component receives a new 'databaseDocumentID' prop, this is fired.
  */
 interface AppReceivedNewExternalProperties {
-  readonly type: 'appReceivedNewExternalProperties';
+  type: 'appReceivedNewExternalProperties';
   /**
    * Defines the externally provided properties that Resolver acknowledges.
    */
-  readonly payload: {
+  payload: {
     /**
      * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
-    readonly databaseDocumentID: string;
+    databaseDocumentID: string;
     /**
      * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
      */
-    readonly resolverComponentInstanceID: string;
+    resolverComponentInstanceID: string;
 
     /**
      * The `search` part of the URL of this page.
      */
-    readonly locationSearch: string;
+    locationSearch: string;
 
     /**
      * Indices that the backend will use to find the document.
      */
-    readonly indices: string[];
-
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
+    indices: string[];
   };
 }
 
@@ -79,4 +116,7 @@ export type ResolverAction =
   | DataAction
   | AppReceivedNewExternalProperties
   | UserBroughtProcessIntoView
-  | UserFocusedOnResolverNode;
+  | UserFocusedOnResolverNode
+  | UserSelectedResolverNode
+  | UserRequestedRelatedEventData
+  | AppDetectedNewIdFromQueryParams;

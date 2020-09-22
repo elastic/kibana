@@ -7,10 +7,58 @@ import { Reducer, combineReducers } from 'redux';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { uiReducer } from './ui/reducer';
 import { ResolverAction } from './actions';
-import { ResolverState } from '../types';
-import * as selectors from './selectors';
+import { ResolverState, ResolverUIState } from '../types';
+import { uniquePidForProcess } from '../models/process_event';
+
+const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
+  state = {
+    ariaActiveDescendant: null,
+    selectedNode: null,
+  },
+  action
+) => {
+  if (action.type === 'serverReturnedResolverData') {
+    const next: ResolverUIState = {
+      ...state,
+      ariaActiveDescendant: action.payload.result.entityID,
+      selectedNode: action.payload.result.entityID,
+    };
+    return next;
+  } else if (action.type === 'userFocusedOnResolverNode') {
+    const next: ResolverUIState = {
+      ...state,
+      ariaActiveDescendant: action.payload,
+    };
+    return next;
+  } else if (action.type === 'userSelectedResolverNode') {
+    const next: ResolverUIState = {
+      ...state,
+      selectedNode: action.payload,
+    };
+    return next;
+  } else if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
+    const nodeID = uniquePidForProcess(action.payload.process);
+    const next: ResolverUIState = {
+      ...state,
+      ariaActiveDescendant: nodeID,
+      selectedNode: nodeID,
+    };
+    return next;
+  } else if (action.type === 'appReceivedNewExternalProperties') {
+    const next: ResolverUIState = {
+      ...state,
+      locationSearch: action.payload.locationSearch,
+      resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
+    };
+    return next;
+  } else {
+    return state;
+  }
+};
 
 const concernReducers = combineReducers({
   camera: cameraReducer,
@@ -20,18 +68,12 @@ const concernReducers = combineReducers({
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'appReceivedNewExternalProperties') {
-    console.log('doing it');
-    const selectedNode = selectors.selectedNode(nextState);
-    const lastSelectedNode = state ? selectors.selectedNode(state) : undefined;
-    console.log('selected', selectedNode, 'lastSelectedNode', lastSelectedNode);
-    if (selectedNode !== undefined && selectedNode !== lastSelectedNode) {
-      console.log('animating');
-      return animateProcessIntoView(nextState, action.payload.time, selectedNode);
-    } else {
-      console.log('not animating');
-      return nextState;
-    }
+  if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
+    return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
+  } else {
+    return nextState;
   }
-  return nextState;
 };

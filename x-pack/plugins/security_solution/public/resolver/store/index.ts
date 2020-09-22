@@ -12,18 +12,14 @@ import { resolverMiddlewareFactory } from './middleware';
 import { ResolverAction } from './actions';
 
 export const resolverStoreFactory = (
-  dataAccessLayer: DataAccessLayer,
-  /**
-   * Returns the current time.
-   */
-  timestamp: () => number
+  dataAccessLayer: DataAccessLayer
 ): Store<ResolverState, ResolverAction> => {
   const actionsDenylist: Array<ResolverAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',
     actionsBlacklist: actionsDenylist,
   });
-  const middlewareEnhancer = applyMiddleware(resolverMiddlewareFactory(dataAccessLayer, timestamp));
+  const middlewareEnhancer = applyMiddleware(resolverMiddlewareFactory(dataAccessLayer));
 
   return createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
 };

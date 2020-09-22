@@ -6,7 +6,11 @@
 import { eventType, orderByTime, userInfoForProcess } from './process_event';
 
 import { mockProcessEvent } from './process_event_test_helpers';
-import { LegacyEndpointEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import {
+  LegacyEndpointEvent,
+  ResolverEvent,
+  SafeResolverEvent,
+} from '../../../common/endpoint/types';
 
 describe('process event', () => {
   describe('eventType', () => {

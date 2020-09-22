@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { SideEffectContext } from './side_effect_context';
 import { useResolverDispatch } from './use_resolver_dispatch';
 
 /**
@@ -27,24 +26,10 @@ export function useStateSyncingActions({
 }) {
   const dispatch = useResolverDispatch();
   const locationSearch = useLocation().search;
-  const { timestamp } = useContext(SideEffectContext);
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: {
-        databaseDocumentID,
-        resolverComponentInstanceID,
-        locationSearch,
-        indices,
-        time: timestamp(),
-      },
+      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch, indices },
     });
-  }, [
-    dispatch,
-    databaseDocumentID,
-    resolverComponentInstanceID,
-    locationSearch,
-    indices,
-    timestamp,
-  ]);
+  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch, indices]);
 }

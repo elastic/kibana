@@ -14,16 +14,10 @@ interface ServerReturnedResolverData {
      * The result of fetching data
      */
     result: ResolverTree;
-
     /**
      * The database parameters that was used to fetch the resolver tree
      */
     parameters: TreeFetcherParameters;
-
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
   };
 }
 

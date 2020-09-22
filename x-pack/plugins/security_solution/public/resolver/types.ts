@@ -592,13 +592,7 @@ export interface ResolverPluginSetup {
    * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
    * All data acess (e.g. HTTP requests) are done through the store.
    */
-  storeFactory: (
-    dataAccessLayer: DataAccessLayer,
-    /**
-     * Returns the current time in milliseconds since Unix epoch. This is used to provide timestamps to actions.
-     */
-    timestamp: () => number
-  ) => Store<ResolverState, ResolverAction>;
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
 
   /**
    * The Resolver component without the required Providers.

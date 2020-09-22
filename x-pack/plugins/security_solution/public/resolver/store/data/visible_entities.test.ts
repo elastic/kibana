@@ -8,7 +8,7 @@ import { Store, createStore } from 'redux';
 import { ResolverAction } from '../actions';
 import { resolverReducer } from '../reducer';
 import { ResolverState } from '../../types';
-import { LegacyEndpointEvent, SafeResolverEvent } from '../../../../common/endpoint/types';
+import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/types';
 import { visibleNodesAndEdgeLines } from '../selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
@@ -102,7 +102,7 @@ describe('resolver visible entities', () => {
   });
   describe('when rendering a large tree with a small viewport', () => {
     beforeEach(() => {
-      const events: SafeResolverEvent[] = [
+      const events: ResolverEvent[] = [
         processA,
         processB,
         processC,
@@ -113,11 +113,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: {
-          result: mockResolverTree({ events })!,
-          parameters: mockTreeFetcherParameters(),
-          /** This value doesn't matter. */ time: 0,
-        },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -134,7 +130,7 @@ describe('resolver visible entities', () => {
   });
   describe('when rendering a large tree with a large viewport', () => {
     beforeEach(() => {
-      const events: SafeResolverEvent[] = [
+      const events: ResolverEvent[] = [
         processA,
         processB,
         processC,
@@ -145,11 +141,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: {
-          result: mockResolverTree({ events })!,
-          parameters: mockTreeFetcherParameters(),
-          /** This value doesn't matter. */ time: 0,
-        },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);

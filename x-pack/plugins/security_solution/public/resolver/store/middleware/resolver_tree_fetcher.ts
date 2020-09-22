@@ -19,7 +19,6 @@ import { ResolverAction } from '../actions';
  */
 export function ResolverTreeFetcher(
   dataAccessLayer: DataAccessLayer,
-  timestamp: () => number,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let lastRequestAbortController: AbortController | undefined;
@@ -81,7 +80,6 @@ export function ResolverTreeFetcher(
           type: 'serverReturnedResolverData',
           payload: {
             result,
-            time: timestamp(),
             parameters: databaseParameters,
           },
         });

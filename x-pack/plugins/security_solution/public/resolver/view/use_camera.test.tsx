@@ -11,7 +11,7 @@ import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
@@ -159,11 +159,10 @@ describe('useCamera on an unpainted element', () => {
     it('should not initially request an animation frame', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
-    // TODO
-    describe.skip('when the camera begins animation', () => {
-      let process: SafeResolverEvent;
+    describe('when the camera begins animation', () => {
+      let process: ResolverEvent;
       beforeEach(() => {
-        const events: SafeResolverEvent[] = [];
+        const events: ResolverEvent[] = [];
         const numberOfEvents: number = 10;
 
         for (let index = 0; index < numberOfEvents; index++) {
@@ -183,12 +182,7 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: {
-              result: tree,
-              parameters: mockTreeFetcherParameters(),
-              // this value doesn't matter
-              time: 0,
-            },
+            payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
           act(() => {
             store.dispatch(serverResponseAction);
@@ -196,18 +190,14 @@ describe('useCamera on an unpainted element', () => {
         } else {
           throw new Error('failed to create tree');
         }
-        const processes: SafeResolverEvent[] = [
+        const processes: ResolverEvent[] = [
           ...selectors.layout(store.getState()).processNodePositions.keys(),
-        ];
+        ] as ResolverEvent[];
         process = processes[processes.length - 1];
         if (!process) {
           throw new Error('missing the process to bring into view');
         }
         simulator.controls.time = 0;
-        /*
-         * TODO, this needs to be triggered by appReceivedNewExternalProperties and/or serverReturnedResolverData
-         */
-        /*
         const cameraAction: ResolverAction = {
           type: 'userBroughtProcessIntoView',
           payload: {
@@ -218,7 +208,6 @@ describe('useCamera on an unpainted element', () => {
         act(() => {
           store.dispatch(cameraAction);
         });
-       */
       });
 
       it('should request animation frames in a loop', () => {
