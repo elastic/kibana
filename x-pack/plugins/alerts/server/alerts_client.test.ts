@@ -24,6 +24,7 @@ import { QueryEventsBySavedObjectResult } from '../../event_log/server';
 import { SavedObject } from 'kibana/server';
 import { EventsFactory } from './lib/alert_instance_summary_from_event_log.test';
 
+const actionsClient = actionsClientMock.create();
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -65,7 +66,6 @@ beforeEach(() => {
   });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
-  const actionsClient = actionsClientMock.create();
   actionsClient.getBulk.mockResolvedValueOnce([
     {
       id: '1',
@@ -452,6 +452,7 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -768,9 +769,7 @@ describe('create()', () => {
 
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
-    const actionsClient = actionsClientMock.create();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
-    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
@@ -3312,6 +3311,8 @@ describe('update()', () => {
         "version": "123",
       }
     `);
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });
 
   it('calls the createApiKey function', async () => {
