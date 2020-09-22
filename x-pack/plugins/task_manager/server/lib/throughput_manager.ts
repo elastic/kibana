@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { interval, merge, of, BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { filter, mergeScan, map } from 'rxjs/operators';
 import { Logger } from '../types';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
+const FLUSH_MARKER: string = 'FLUSH';
 const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 
 // When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
@@ -37,11 +39,9 @@ interface ThroughputManagerOpts {
   logger: Logger;
 }
 
-export class ThroughputManager {
-  private isStarted: boolean = false;
-  private errorsSubscription?: Subscription;
-  private errorCountSinceLastInterval: number = 0;
-  private throughputCheckIntervalId?: NodeJS.Timeout;
+export class ThroughputManagerReactive {
+  private throughputCheckSubcription?: Subscription;
+  private readonly throughputCheck$: Observable<number>;
   private readonly logger: Logger;
   private readonly maxWorkers: DynamicConfiguration<number>;
   private readonly pollInterval: DynamicConfiguration<number>;
@@ -60,47 +60,48 @@ export class ThroughputManager {
       currentValue: opts.startingPollInterval,
       observable$: opts.pollInterval$,
     };
+    // Count the number of errors from errors$ and reset whenever throughputCheckInterval$ flushes it
+    this.throughputCheck$ = merge(
+      // Flush error count at fixed interval
+      interval(ADJUST_THROUGHPUT_INTERVAL).pipe(map(() => FLUSH_MARKER)),
+      this.errors$.pipe(filter((e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e)))
+    ).pipe(
+      // When tag is "flush", reset the error counter
+      // Otherwise increment the error counter
+      mergeScan(
+        ({ count }, next) =>
+          next === FLUSH_MARKER
+            ? of(emitErrorCount(count), resetErrorCount())
+            : of(incementErrorCount(count)),
+        emitErrorCount(0)
+      ),
+      filter(isEmitEvent),
+      map(({ count }) => count)
+    );
+  }
+
+  public get isStarted() {
+    return this.throughputCheckSubcription && !this.throughputCheckSubcription.closed;
   }
 
   public start() {
     if (!this.isStarted) {
-      this.errorsSubscription = this.errors$.subscribe(this.storeErrorHandler.bind(this));
-      this.throughputCheckIntervalId = setInterval(
-        this.adjustThroughput.bind(this),
-        ADJUST_THROUGHPUT_INTERVAL
-      );
-      this.isStarted = true;
+      this.throughputCheckSubcription = this.throughputCheck$.subscribe((errorCount) => {
+        if (errorCount > 0) {
+          this.reduceThroughput(errorCount);
+          return;
+        }
+        this.increaseThroughput();
+      });
     }
   }
 
   public stop() {
-    this.errorsSubscription?.unsubscribe();
-    if (this.throughputCheckIntervalId) {
-      clearInterval(this.throughputCheckIntervalId);
-    }
-    delete this.errorsSubscription;
-    delete this.throughputCheckIntervalId;
+    this.throughputCheckSubcription?.unsubscribe();
     // Reset observable values to original values
     this.updateConfiguration(this.maxWorkers.startingValue, this.pollInterval.startingValue);
-    this.isStarted = false;
   }
-
-  private storeErrorHandler(e: Error) {
-    if (SavedObjectsErrorHelpers.isTooManyRequestsError(e)) {
-      this.errorCountSinceLastInterval++;
-    }
-  }
-
-  private adjustThroughput() {
-    if (this.errorCountSinceLastInterval > 0) {
-      this.reduceThroughput();
-    } else {
-      this.increaseThroughput();
-    }
-    this.errorCountSinceLastInterval = 0;
-  }
-
-  private reduceThroughput() {
+  private reduceThroughput(errorCount: number) {
     const newMaxWorkers = Math.max(
       Math.floor(this.maxWorkers.currentValue * MAX_WORKERS_DECREASE_PERCENTAGE),
       1
@@ -109,7 +110,7 @@ export class ThroughputManager {
       this.pollInterval.currentValue * POLL_INTERVAL_INCREASE_PERCENTAGE
     );
     this.logger.info(
-      `Throughput reduced after seeing ${this.errorCountSinceLastInterval} error(s): maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+      `Throughput reduced after seeing ${errorCount} error(s): maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
     );
     this.updateConfiguration(newMaxWorkers, newPollInterval);
   }
@@ -144,4 +145,29 @@ export class ThroughputManager {
       this.pollInterval.observable$.next(newPollInterval);
     }
   }
+}
+
+function emitErrorCount(count: number) {
+  return {
+    tag: 'emit',
+    count,
+  };
+}
+
+function isEmitEvent(event: { tag: string; count: number }) {
+  return event.tag === 'emit';
+}
+
+function incementErrorCount(count: number) {
+  return {
+    tag: 'inc',
+    count: count + 1,
+  };
+}
+
+function resetErrorCount() {
+  return {
+    tag: 'initial',
+    count: 0,
+  };
 }
