@@ -27,7 +27,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
-  const ENTITY_TYPES = ['string', 'number'];
+  const ENTITY_TYPES = ['string', 'number', 'ip'];
   const indexPopover = (
     <EuiFormRow id="someSelect" fullWidth error={errors.index}>
       <SingleFieldSelect
