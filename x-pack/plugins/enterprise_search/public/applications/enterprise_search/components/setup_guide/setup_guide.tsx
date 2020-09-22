@@ -34,8 +34,7 @@ export const SetupGuide: React.FC = () => (
         className="setupGuide__thumbnail"
         src={GettingStarted}
         alt={i18n.translate('xpack.enterpriseSearch.enterpriseSearch.setupGuide.videoAlt', {
-          defaultMessage:
-            "Getting started with App Search - in this short video we'll guide you through how to get App Search up and running",
+          defaultMessage: 'Getting started with Enterprise Search',
         })}
         width="1280"
         height-="720"
@@ -46,7 +45,7 @@ export const SetupGuide: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.enterpriseSearch.setupGuide.description"
-          defaultMessage="Elastic Enterprise Search provides modern search experiences for your busy team. Quickly add pre-tuned search to your website, app, or workplace. Search it all, simply."
+          defaultMessage="Search everything, anywhere. Easily implement powerful, modern search experiences for your busy team. Quickly add pre-tuned search to your website, app, or workplace. Search it all, simply."
         />
       </p>
     </EuiTitle>
