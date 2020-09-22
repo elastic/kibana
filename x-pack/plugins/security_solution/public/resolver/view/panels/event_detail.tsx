@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime, GeneratedText, formatDate } from './panel_content_utilities';
+import { BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -25,6 +25,7 @@ import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
+import { useFormattedDate } from './use_formatted_date';
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
@@ -78,12 +79,8 @@ const EventDetailContents = memo(function ({
   eventType: string;
   processEvent: SafeResolverEvent;
 }) {
-  const formattedDate = useMemo(() => {
-    const timestamp = eventModel.timestampSafeVersion(event);
-    if (timestamp !== undefined) {
-      return formatDate(new Date(timestamp));
-    }
-  }, [event]);
+  const timestamp = eventModel.timestampSafeVersion(event);
+  const formattedDate = useFormattedDate(timestamp);
 
   return (
     <StyledPanel>

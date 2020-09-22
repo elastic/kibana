@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { formatDate, BoldCode, StyledTime } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -19,6 +19,7 @@ import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
+import { useFormattedDate } from './use_formatted_date';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -83,7 +84,7 @@ const NodeEventsListItem = memo(function ({
   eventType: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const date = timestamp !== undefined ? formatDate(timestamp) : timestamp;
+  const date = useFormattedDate(timestamp);
   const linkProps = useLinkProps({
     panelView: 'eventDetail',
     panelParameters: {

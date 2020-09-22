@@ -32,7 +32,6 @@ import {
 } from './styles';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { formatter } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
@@ -41,6 +40,7 @@ import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
+import { useFormattedDate } from './use_formatted_date';
 
 interface ProcessTableView {
   name?: string;
@@ -81,7 +81,7 @@ export const NodeList = memo(() => {
         sortable: true,
         render(eventDate?: Date) {
           return eventDate ? (
-            formatter.format(eventDate)
+            <NodeDetailTimestamp eventDate={eventDate} />
           ) : (
             <EuiBadge color="warning">
               {i18n.translate(
@@ -220,3 +220,9 @@ function NodeDetailLink({
     </EuiButtonEmpty>
   );
 }
+
+const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date }) => {
+  const formattedDate = useFormattedDate(eventDate);
+
+  return <>{formattedDate}</>;
+});
