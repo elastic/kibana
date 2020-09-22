@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job creation sets the timerange');
+      await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Jun 12, 2019 @ 00:04:19.000',
         'Jul 12, 2019 @ 23:45:36.000'
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job cloning sets the timerange');
+      await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Jun 12, 2019 @ 00:04:19.000',
         'Jul 12, 2019 @ 23:45:36.000'

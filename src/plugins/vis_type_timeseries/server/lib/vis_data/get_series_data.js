@@ -28,7 +28,6 @@ export async function getSeriesData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
-  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const meta = {
     type: panel.type,
@@ -45,8 +44,13 @@ export async function getSeriesData(req, panel) {
       []
     );
 
-    const data = await searchRequest.search(searches);
-    const series = data.map(handleResponseBody(panel));
+    const data = await searchStrategy.search(req, searches);
+
+    const handleResponseBodyFn = handleResponseBody(panel);
+
+    const series = data.map((resp) =>
+      handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)
+    );
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {
