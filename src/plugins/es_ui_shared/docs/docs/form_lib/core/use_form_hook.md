@@ -201,8 +201,8 @@ You can optionally give an id to the form, that will be attached to the `form` o
 
 #### valueChangeDebounceTime
 
-**Type:**: `number` (ms)
-**Default:**: 500
+**Type:** `number` (ms)
+**Default:** 500
 
 When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state change entirely depend on the time it take to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
 

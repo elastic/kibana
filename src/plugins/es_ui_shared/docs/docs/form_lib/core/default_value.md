@@ -40,7 +40,7 @@ const fetchedData = {
 <UseField path="user.lastName" defaultValue={fetchedData.user.lastName} />
 ```
 
-It is much easier to provide the defaultValue object (probably fetched from the server) at the form level
+It is much easier to provide the `defaultValue` object (probably some data that we have fetched from the server) at the form level
 
 ```js
 const { form } = useForm({ defaultValue: fetchedData });
@@ -52,7 +52,7 @@ const { form } = useForm({ defaultValue: fetchedData });
 
 ### In the field `defaultValue` config parameter of the field config
 
-When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still migth want to define a defaultValue for your fields.
+When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still migth want to define a default value for your fields.
 
 ```js
 interface Props {
