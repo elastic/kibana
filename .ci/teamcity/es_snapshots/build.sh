@@ -21,14 +21,25 @@ export NODE_NAME=""
 export ES_BUILD_JAVA="openjdk14"
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 
+tc_start_block "Build Elasticsearch"
 ./gradlew -Dbuild.docker=true assemble --parallel
+tc_end_block "Build Elasticsearch"
+
 # mkdir -p ${destination}
+
+tc_start_block "Create distribution archives"
 find distribution -type f \( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \) -not -path '*no-jdk*' -not -path '*build-context*' -exec cp {} "$destination" \;
+tc_end_block "Create distribution archives"
+
 ls -alh "$destination"
+
+tc_start_block "Create docker image archives"
 docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
-sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
+tc_end_block "Create docker image archives"
+
+find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
 ls -alh "$destination"
 
 cd "$destination"
