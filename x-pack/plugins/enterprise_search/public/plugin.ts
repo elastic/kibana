@@ -103,8 +103,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         await this.getInitialData(coreStart.http);
 
-        const { renderApp } = await import('./applications');
+        const { renderApp, renderHeaderActions } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
+
+        const { WorkplaceSearchHeaderActions } = await import(
+          './applications/workplace_search/components/layout'
+        );
+        params.setHeaderActionMenu((element) =>
+          renderHeaderActions(WorkplaceSearchHeaderActions, element, this.data.externalUrl)
+        );
 
         return renderApp(WorkplaceSearch, params, coreStart, plugins, this.config, this.data);
       },
