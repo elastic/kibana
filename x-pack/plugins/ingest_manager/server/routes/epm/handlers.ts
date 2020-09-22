@@ -8,7 +8,6 @@ import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
   GetInfoResponse,
   InstallPackageResponse,
-  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -37,6 +36,7 @@ import {
   handleInstallPackageFailure,
   isBulkInstallError,
   installPackageFromRegistry,
+  installPackageByUpload,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
@@ -212,10 +212,24 @@ export const installPackageByUploadHandler: RequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
-  const body: MessageResponse = {
-    response: 'package upload was received ok, but not installed (not implemented yet)',
-  };
-  return response.ok({ body });
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
+  const archiveBuffer = Buffer.from(request.body);
+  try {
+    const res = await installPackageByUpload({
+      savedObjectsClient,
+      callCluster,
+      archiveBuffer,
+      contentType,
+    });
+    const body: InstallPackageResponse = {
+      response: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<

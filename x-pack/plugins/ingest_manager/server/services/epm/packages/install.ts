@@ -47,6 +47,7 @@ import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransform } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
+import { loadArchive } from '../archive';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -273,6 +274,21 @@ export async function installPackageFromRegistry({
     registryPackageInfo,
     installType,
   });
+}
+
+export async function installPackageByUpload({
+  savedObjectsClient,
+  callCluster,
+  archiveBuffer,
+  contentType,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  archiveBuffer: Buffer;
+  contentType: string;
+}): Promise<AssetReference[]> {
+  const { paths, archivePackageInfo } = await loadArchive({ archiveBuffer, contentType });
+  return [];
 }
 
 async function installPackage({
