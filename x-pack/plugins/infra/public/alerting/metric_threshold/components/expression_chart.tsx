@@ -18,7 +18,7 @@ import {
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiEmptyPrompt, EuiLoadingChart } from '@elastic/eui';
+import { EuiText, EuiEmptyPrompt, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -102,35 +102,46 @@ export const ExpressionChart: React.FC<Props> = ({
 
   if (showCompleteExpressionPrompt) {
     return (
-      <EuiEmptyPrompt
-        iconType="visBarVertical"
-        body={
-          <EuiText color="subdued" data-test-subj="noChartData">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.completeTheExpressionmessage"
-              defaultMessage="Complete the expression to generate a preview."
-            />
-          </EuiText>
-        }
-      />
+      <>
+        <EuiSpacer size="l" />
+        <EuiEmptyPrompt
+          iconType="visBarVertical"
+          body={
+            <>
+              <EuiText color="subdued" data-test-subj="noChartData">
+                <FormattedMessage
+                  id="xpack.infra.metrics.alerts.completeTheExpressionmessage"
+                  defaultMessage="Complete the expression to generate a preview."
+                />
+              </EuiText>
+            </>
+          }
+        />
+        <EuiSpacer size="l" />
+      </>
     );
   }
 
   if (loading || !data) {
     return (
-      <EuiEmptyPrompt
-        body={
-          <>
-            <EuiLoadingChart size="xl" mono />
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.infra.metrics.alerts.loadingMessage"
-                defaultMessage="Loading"
-              />
-            </EuiText>
-          </>
-        }
-      />
+      <>
+        <EuiSpacer size="xl" />
+        <EuiEmptyPrompt
+          body={
+            <>
+              <div style={{ height: '2px' }} />
+              <EuiLoadingChart size="xl" mono />
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.infra.metrics.alerts.loadingMessage"
+                  defaultMessage="Loading"
+                />
+              </EuiText>
+            </>
+          }
+        />
+        <EuiSpacer size="l" />
+      </>
     );
   }
 
@@ -141,16 +152,22 @@ export const ExpressionChart: React.FC<Props> = ({
   const firstSeries = first(data.series);
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
-      <EuiEmptyPrompt
-        body={
-          <EuiText color="subdued" data-test-subj="noChartData">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.noDataMessage"
-              defaultMessage="Oops, no chart data available."
-            />
-          </EuiText>
-        }
-      />
+      <>
+        <EuiSpacer size="l" />
+        <EuiEmptyPrompt
+          body={
+            <>
+              <EuiText color="subdued" data-test-subj="noChartData">
+                <FormattedMessage
+                  id="xpack.infra.metrics.alerts.noDataMessage"
+                  defaultMessage="Oops, no chart data available."
+                />
+              </EuiText>
+            </>
+          }
+        />
+        <EuiSpacer size="l" />
+      </>
     );
   }
 

@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 export { AlertPreview } from './components/alert_preview';
+export { ConditionCharts, useConditionSelector } from './components/condition_preview_charts';
+export { ExpressionRowLabel } from './components/expression_row_label';
 
 export const previewOptions = [
   {

@@ -16,9 +16,11 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
+import { ExpressionRowLabel } from '../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
@@ -94,6 +96,7 @@ interface Props {
   canDelete: boolean;
   errors: IErrorObject;
   documentCount?: number;
+  label: string | null;
 }
 
 export const Criterion: React.FC<Props> = ({
@@ -105,6 +108,7 @@ export const Criterion: React.FC<Props> = ({
   canDelete,
   errors,
   documentCount,
+  label,
 }) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
@@ -148,131 +152,141 @@ export const Criterion: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow>
-        <EuiPopover
-          id="criterion-field"
-          button={
-            <EuiExpression
-              description={
-                idx === 0
-                  ? firstCriterionFieldPrefix(documentCount)
-                  : successiveCriterionFieldPrefix
-              }
-              uppercase={true}
-              value={criterion.field}
-              isActive={isFieldPopoverOpen}
-              color={errors.field.length === 0 ? 'secondary' : 'danger'}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFieldPopoverOpen(true);
-              }}
-              display="columns"
-            />
-          }
-          isOpen={isFieldPopoverOpen}
-          closePopover={() => setIsFieldPopoverOpen(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-          display="block"
-        >
-          <div>
-            <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
-            <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
-              <EuiSelect
-                compressed
+    <>
+      <EuiFlexGroup gutterSize="s">
+        {label && (
+          <ExpressionRowLabel>
+            <label htmlFor={`expression-${label}`}>{label}</label>
+          </ExpressionRowLabel>
+        )}
+        <EuiFlexItem grow id={`expression-${label}`}>
+          <EuiPopover
+            id="criterion-field"
+            button={
+              <EuiExpression
+                description={
+                  idx === 0
+                    ? firstCriterionFieldPrefix(documentCount)
+                    : successiveCriterionFieldPrefix
+                }
+                uppercase={true}
                 value={criterion.field}
-                onChange={handleFieldChange}
-                options={fieldOptions}
+                isActive={isFieldPopoverOpen}
+                color={errors.field.length === 0 ? 'secondary' : 'danger'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFieldPopoverOpen(true);
+                }}
+                display="columns"
               />
-            </EuiFormRow>
-          </div>
-        </EuiPopover>
+            }
+            isOpen={isFieldPopoverOpen}
+            closePopover={() => setIsFieldPopoverOpen(false)}
+            ownFocus
+            panelPaddingSize="s"
+            anchorPosition="downLeft"
+            display="block"
+          >
+            <div>
+              <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
+              <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
+                <EuiSelect
+                  compressed
+                  value={criterion.field}
+                  onChange={handleFieldChange}
+                  options={fieldOptions}
+                />
+              </EuiFormRow>
+            </div>
+          </EuiPopover>
 
-        <EuiPopover
-          id="criterion-comparator-value"
-          button={
-            <EuiExpression
-              description={
-                ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                  ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                  : ComparatorToi18nMap[criterion.comparator]
-              }
-              uppercase={true}
-              value={criterion.value}
-              isActive={isComparatorPopoverOpen}
-              color={
-                errors.comparator.length === 0 && errors.value.length === 0 ? 'secondary' : 'danger'
-              }
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsComparatorPopoverOpen(true);
-              }}
-              display="columns"
-            />
-          }
-          isOpen={isComparatorPopoverOpen}
-          closePopover={() => setIsComparatorPopoverOpen(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-          display="block"
-        >
-          <div>
-            <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
-                  <EuiSelect
-                    compressed
-                    value={criterion.comparator}
-                    onChange={(e) =>
-                      updateCriterion(idx, { comparator: e.target.value as Comparator })
-                    }
-                    options={compatibleComparatorOptions}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
-                  {fieldInfo?.type === 'number' ? (
-                    <EuiFieldNumber
+          <EuiPopover
+            id="criterion-comparator-value"
+            button={
+              <EuiExpression
+                description={
+                  ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                    ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                    : ComparatorToi18nMap[criterion.comparator]
+                }
+                uppercase={true}
+                value={criterion.value}
+                isActive={isComparatorPopoverOpen}
+                color={
+                  errors.comparator.length === 0 && errors.value.length === 0
+                    ? 'secondary'
+                    : 'danger'
+                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsComparatorPopoverOpen(true);
+                }}
+                display="columns"
+              />
+            }
+            isOpen={isComparatorPopoverOpen}
+            closePopover={() => setIsComparatorPopoverOpen(false)}
+            ownFocus
+            panelPaddingSize="s"
+            anchorPosition="downLeft"
+            display="block"
+          >
+            <div>
+              <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
+              <EuiFlexGroup gutterSize="l">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
+                    <EuiSelect
                       compressed
-                      value={criterion.value as number | undefined}
-                      onChange={(e) => {
-                        const number = parseInt(e.target.value, 10);
-                        updateCriterion(idx, { value: number ? number : undefined });
-                      }}
+                      value={criterion.comparator}
+                      onChange={(e) =>
+                        updateCriterion(idx, { comparator: e.target.value as Comparator })
+                      }
+                      options={compatibleComparatorOptions}
                     />
-                  ) : (
-                    <EuiFieldText
-                      compressed
-                      value={criterion.value}
-                      onChange={(e) => updateCriterion(idx, { value: e.target.value })}
-                    />
-                  )}
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
-      {canDelete && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
-              defaultMessage: 'Remove condition',
-            })}
-            color={'danger'}
-            iconType={'trash'}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              removeCriterion(idx);
-            }}
-          />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                    {fieldInfo?.type === 'number' ? (
+                      <EuiFieldNumber
+                        compressed
+                        value={criterion.value as number | undefined}
+                        onChange={(e) => {
+                          const number = parseInt(e.target.value, 10);
+                          updateCriterion(idx, { value: number ? number : undefined });
+                        }}
+                      />
+                    ) : (
+                      <EuiFieldText
+                        compressed
+                        value={criterion.value}
+                        onChange={(e) => updateCriterion(idx, { value: e.target.value })}
+                      />
+                    )}
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </EuiPopover>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        {canDelete && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+                defaultMessage: 'Remove condition',
+              })}
+              color={'danger'}
+              iconType={'trash'}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                removeCriterion(idx);
+              }}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {label && <EuiSpacer size="xs" />}
+    </>
   );
 };

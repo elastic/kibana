@@ -9,7 +9,6 @@ import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
-  EuiText,
   EuiFormRow,
   EuiButtonEmpty,
   EuiCheckbox,
@@ -19,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertPreview } from '../../common';
+import { idxToAlphabeticalLabel } from '../../../../common/utils/index_to_alphabetical_label';
+import { AlertPreview, ConditionCharts, useConditionSelector } from '../../common';
 import {
   Comparator,
   Aggregators,
@@ -83,6 +83,17 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
+
+  const [conditionPreviewId, setConditionPreviewId] = useConditionSelector(alertParams.criteria);
+  const previewedConditionIsIncomplete = useMemo(
+    () =>
+      errors[conditionPreviewId] &&
+      Object.entries(errors[conditionPreviewId])
+        .filter(([key]) => !key.startsWith('threshold'))
+        .some(([, errorList]) => errorList?.length > 0),
+    [errors, conditionPreviewId]
+  );
+
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
@@ -271,56 +282,30 @@ export const Expressions: React.FC<Props> = (props) => {
   return (
     <>
       <EuiSpacer size={'m'} />
-      <EuiText size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.conditions"
-            defaultMessage="Conditions"
-          />
-        </h4>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
-        alertParams.criteria.map((e, idx) => {
-          const conditionIsIncomplete =
-            errors[idx] &&
-            Object.entries(errors[idx])
-              .filter(([key]) => !key.startsWith('threshold'))
-              .some(([, errorList]) => errorList?.length > 0);
-          return (
-            <ExpressionRow
-              canDelete={(alertParams.criteria && alertParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setAlertParams={updateParams}
-              errors={errors[idx] || emptyError}
-              expression={e || {}}
-            >
-              <ExpressionChart
-                expression={e}
-                context={alertsContext}
-                derivedIndexPattern={derivedIndexPattern}
-                source={source}
-                filterQuery={alertParams.filterQueryText}
-                groupBy={alertParams.groupBy}
-                showCompleteExpressionPrompt={conditionIsIncomplete}
-              />
-            </ExpressionRow>
-          );
-        })}
+        alertParams.criteria.map((e, idx) => (
+          <ExpressionRow
+            canDelete={(alertParams.criteria && alertParams.criteria.length > 1) || false}
+            fields={derivedIndexPattern.fields}
+            remove={removeExpression}
+            addExpression={addExpression}
+            key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+            expressionId={idx}
+            setAlertParams={updateParams}
+            errors={errors[idx] || emptyError}
+            expression={e || {}}
+            label={alertParams.criteria?.length > 1 ? idxToAlphabeticalLabel(idx) : null}
+          />
+        ))}
 
-      <div style={{ marginLeft: 28 }}>
-        <ForLastExpression
-          timeWindowSize={timeSize}
-          timeWindowUnit={timeUnit}
-          errors={emptyError}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-        />
-      </div>
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
+      />
 
       <EuiSpacer size={'m'} />
       <div>
@@ -337,6 +322,26 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </EuiButtonEmpty>
       </div>
+
+      <EuiSpacer size={'m'} />
+      {alertParams.criteria && (
+        <ConditionCharts
+          selectedConditionId={conditionPreviewId}
+          setSelectedConditionId={setConditionPreviewId}
+          conditions={alertParams.criteria}
+          expressionChart={(expressionIdx) => (
+            <ExpressionChart
+              expression={alertParams.criteria[expressionIdx]}
+              context={alertsContext}
+              derivedIndexPattern={derivedIndexPattern}
+              source={source}
+              filterQuery={alertParams.filterQueryText}
+              groupBy={alertParams.groupBy}
+              showCompleteExpressionPrompt={previewedConditionIsIncomplete}
+            />
+          )}
+        />
+      )}
 
       <EuiSpacer size={'m'} />
       <EuiCheckbox
@@ -361,7 +366,6 @@ export const Expressions: React.FC<Props> = (props) => {
       />
 
       <EuiSpacer size={'m'} />
-
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
           defaultMessage: 'Filter (optional)',

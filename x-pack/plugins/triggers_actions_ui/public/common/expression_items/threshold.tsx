@@ -44,7 +44,7 @@ interface ThresholdExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
-  metricUnit?: string;
+  valueSuffix?: string;
 }
 
 export const ThresholdExpression = ({
@@ -56,7 +56,7 @@ export const ThresholdExpression = ({
   display = 'inline',
   threshold = [],
   popupPosition,
-  metricUnit,
+  valueSuffix,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
@@ -72,7 +72,7 @@ export const ThresholdExpression = ({
     .slice(0, comparators[thresholdComparator].requiredValues)
     .join(` ${andThresholdText} `);
   const thresholdValueText =
-    metricUnit && threshold ? `${thresholdValue} ${metricUnit}` : thresholdValue;
+    valueSuffix && threshold ? `${thresholdValue} ${valueSuffix}` : thresholdValue;
 
   return (
     <EuiPopover

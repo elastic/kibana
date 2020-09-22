@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiAccordion } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
+import { idxToAlphabeticalLabel } from '../../../../../common/utils/index_to_alphabetical_label';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import { Criterion } from './criterion';
@@ -15,7 +16,6 @@ import {
   Criterion as CriterionType,
 } from '../../../../../common/alerting/logs/types';
 import { AlertsContext } from './editor';
-import { CriterionPreview } from './criterion_preview_chart';
 
 interface Props {
   fields: IFieldType[];
@@ -46,30 +46,18 @@ export const Criteria: React.FC<Props> = ({
       <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
-            <EuiAccordion
-              id={`criterion-${idx}`}
-              buttonContent={
-                <Criterion
-                  idx={idx}
-                  fields={fields}
-                  criterion={criterion}
-                  updateCriterion={updateCriterion}
-                  removeCriterion={removeCriterion}
-                  canDelete={criteria.length > 1}
-                  errors={errors[idx.toString()] as IErrorObject}
-                  documentCount={documentCount}
-                />
-              }
+            <Criterion
               key={idx}
-              arrowDisplay="right"
-            >
-              <CriterionPreview
-                alertParams={alertParams}
-                context={context}
-                chartCriterion={criterion}
-                sourceId={sourceId}
-              />
-            </EuiAccordion>
+              idx={idx}
+              fields={fields}
+              criterion={criterion}
+              updateCriterion={updateCriterion}
+              removeCriterion={removeCriterion}
+              canDelete={criteria.length > 1}
+              errors={errors[idx.toString()] as IErrorObject}
+              documentCount={documentCount}
+              label={criteria.length > 1 ? idxToAlphabeticalLabel(idx) : null}
+            />
           );
         })}
       </EuiFlexItem>
