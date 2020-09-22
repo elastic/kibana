@@ -3,6 +3,5 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "newsfeed"],
-  "optionalPlugins": ["home"]
+  "requiredPlugins": ["navigation", "data", "newsfeed", "home"]
 }

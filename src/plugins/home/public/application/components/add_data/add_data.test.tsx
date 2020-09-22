@@ -56,7 +56,7 @@ const mockFeatures = [
   {
     category: 'data',
     description: 'Ingest data from popular apps and services.',
-    homePageSection: 'add_data',
+    showOnHomePage: true,
     icon: 'indexOpen',
     id: 'home_tutorial_directory',
     order: 500,
@@ -66,7 +66,7 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Add and manage your fleet of Elastic Agents and integrations.',
-    homePageSection: 'add_data',
+    showOnHomePage: true,
     icon: 'indexManagementApp',
     id: 'ingestManager',
     order: 510,
@@ -76,7 +76,7 @@ const mockFeatures = [
   {
     category: 'data',
     description: 'Import your own CSV, NDJSON, or log file',
-    homePageSection: 'add_data',
+    showOnHomePage: true,
     icon: 'document',
     id: 'ml_file_data_visualizer',
     order: 520,

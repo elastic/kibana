@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeedItem render 1`] = `
+<section
+  aria-labelledby="kbnOverviewNews__title"
+  className="kbnOverviewNews"
+>
+  <EuiTitle
+    size="s"
+  >
+    <h2
+      id="kbnOverviewNews__title"
+    >
+      <FormattedMessage
+        defaultMessage="What's new?"
+        id="kibana.overview.news.title"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <div
+    className="kbnOverviewNews__content"
+  >
+    <article
+      key="The Go client for Elasticsearch: Introduction"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3>
+            <EuiLink
+              href="https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed"
+              target="_blank"
+            >
+              The Go client for Elasticsearch: Introduction
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-08-30"
+            >
+              30 August 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.
+        </p>
+      </EuiText>
+    </article>
+    <article
+      key="Alerting and anomaly detection for uptime and reliability"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3>
+            <EuiLink
+              href="https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed"
+              target="_blank"
+            >
+              Alerting and anomaly detection for uptime and reliability
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-08-13"
+            >
+              13 August 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.
+        </p>
+      </EuiText>
+    </article>
+    <article
+      key="Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3>
+            <EuiLink
+              href="https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed"
+              target="_blank"
+            >
+              Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-07-31"
+            >
+              31 July 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.
+        </p>
+      </EuiText>
+    </article>
+  </div>
+</section>
+`;

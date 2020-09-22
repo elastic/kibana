@@ -19,7 +19,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { SolutionTitle } from './solution_title';
 
@@ -42,15 +42,18 @@ const addSpacersBetweenElementsReducer = (
   return acc;
 };
 
-const getDescriptions = (descriptions: string[]) =>
-  descriptions.map(getDescriptionText).reduce<JSX.Element[]>(addSpacersBetweenElementsReducer, []);
+const getDescriptions = (appDescriptions: string[]) =>
+  appDescriptions
+    .map(getDescriptionText)
+    .reduce<JSX.Element[]>(addSpacersBetweenElementsReducer, []);
 
 interface Props {
   addBasePath: (path: string) => string;
   solution: FeatureCatalogueSolution;
+  apps?: FeatureCatalogueEntry[];
 }
 
-export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => (
+export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) => (
   <EuiFlexItem
     key={solution.id}
     data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
@@ -75,7 +78,9 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => (
           </EuiFlexItem>
 
           <EuiFlexItem grow={1} className="homSolutionPanel__content">
-            {getDescriptions(solution.descriptions)}
+            {getDescriptions(
+              apps.length ? apps.map(({ subtitle = '' }) => subtitle) : solution.appDescriptions
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

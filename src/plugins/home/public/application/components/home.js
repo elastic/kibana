@@ -121,7 +121,7 @@ export class Home extends Component {
       .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
-    const { addBasePath, solutions } = this.props;
+    const { addBasePath, solutions, directories } = this.props;
 
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
@@ -198,7 +198,13 @@ export class Home extends Component {
         </header>
 
         <div className="homContent">
-          {solutions.length && <SolutionsSection addBasePath={addBasePath} solutions={solutions} />}
+          {solutions.length && (
+            <SolutionsSection
+              addBasePath={addBasePath}
+              solutions={solutions}
+              directories={directories}
+            />
+          )}
 
           <EuiFlexGroup
             className={`homData ${
@@ -294,12 +300,14 @@ Home.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string,
       description: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
       order: PropTypes.number,
+      solutionId: PropTypes.string,
     })
   ),
   solutions: PropTypes.arrayOf(
@@ -307,7 +315,8 @@ Home.propTypes = {
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       subtitle: PropTypes.string.isRequired,
-      descriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+      description: PropTypes.string,
+      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

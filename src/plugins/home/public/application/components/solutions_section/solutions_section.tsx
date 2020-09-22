@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SolutionPanel } from './solution_panel';
-import { FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution,
@@ -32,11 +32,13 @@ const sortByOrder = (
 interface Props {
   addBasePath: (path: string) => string;
   solutions: FeatureCatalogueSolution[];
+  directories: FeatureCatalogueEntry[];
 }
 
-export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
+export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories }) => {
   // Separate Kibana from other solutions
   const kibana = solutions.find(({ id }) => id === 'kibana');
+  const kibanaApps = directories.filter(({ solutionId }) => solutionId === 'kibana');
   solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
 
   return (
@@ -61,7 +63,9 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
-          {kibana ? <SolutionPanel solution={kibana} addBasePath={addBasePath} /> : null}
+          {kibana && kibanaApps.length ? (
+            <SolutionPanel solution={kibana} addBasePath={addBasePath} apps={kibanaApps} />
+          ) : null}
         </EuiFlexGroup>
       </section>
 
@@ -71,12 +75,28 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
 };
 
 SolutionsSection.propTypes = {
+  addBasePath: PropTypes.func.isRequired,
+  directories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      showOnHomePage: PropTypes.bool.isRequired,
+      category: PropTypes.string.isRequired,
+      order: PropTypes.number,
+      solutionId: PropTypes.string,
+    })
+  ),
   solutions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       subtitle: PropTypes.string.isRequired,
-      descriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+      description: PropTypes.string,
+      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

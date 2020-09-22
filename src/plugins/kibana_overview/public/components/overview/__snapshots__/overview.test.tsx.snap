@@ -1,0 +1,784 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview render 1`] = `
+<main
+  aria-labelledby="kbnOverviewHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <PageHeader
+    features={
+      Array [
+        Object {
+          "category": "data",
+          "description": "Description of dashboard",
+          "icon": "dashboardApp",
+          "id": "dashboard",
+          "path": "dashboard_landing_page",
+          "showOnHomePage": false,
+          "title": "Dashboard",
+        },
+        Object {
+          "category": "data",
+          "description": "Description of discover",
+          "icon": "discoverApp",
+          "id": "discover",
+          "path": "discover_landing_page",
+          "showOnHomePage": false,
+          "title": "Discover",
+        },
+        Object {
+          "category": "data",
+          "description": "Description of canvas",
+          "icon": "canvasApp",
+          "id": "canvas",
+          "path": "canvas_landing_page",
+          "showOnHomePage": false,
+          "title": "Canvas",
+        },
+      ]
+    }
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibana.overview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="kbnOverviewMore__title"
+          className="kbnOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="kbnOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with Elastic"
+                id="kibana.overview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup>
+            <EuiFlexItem
+              key="kibana"
+            >
+              <EuiCard
+                description={<span />}
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="logoKibana"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Kibana"
+                    url="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Kibana
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-2"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution two
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution two"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution two
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-3"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution three
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution three"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution three
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-4"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution four
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution four"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution four
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <PageFooter
+      features={
+        Array [
+          Object {
+            "category": "data",
+            "description": "Description of dashboard",
+            "icon": "dashboardApp",
+            "id": "dashboard",
+            "path": "dashboard_landing_page",
+            "showOnHomePage": false,
+            "title": "Dashboard",
+          },
+          Object {
+            "category": "data",
+            "description": "Description of discover",
+            "icon": "discoverApp",
+            "id": "discover",
+            "path": "discover_landing_page",
+            "showOnHomePage": false,
+            "title": "Discover",
+          },
+          Object {
+            "category": "data",
+            "description": "Description of canvas",
+            "icon": "canvasApp",
+            "id": "canvas",
+            "path": "canvas_landing_page",
+            "showOnHomePage": false,
+            "title": "Canvas",
+          },
+        ]
+      }
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview without features 1`] = `
+<main
+  aria-labelledby="kbnOverviewHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <PageHeader
+    features={Array []}
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibana.overview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="kbnOverviewMore__title"
+          className="kbnOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="kbnOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with Elastic"
+                id="kibana.overview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup>
+            <EuiFlexItem
+              key="kibana"
+            >
+              <EuiCard
+                description={<span />}
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="logoKibana"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Kibana"
+                    url="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Kibana
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-2"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution two
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution two"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution two
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-3"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution three
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution three"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution three
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              key="solution-4"
+            >
+              <EuiCard
+                description={
+                  <span>
+                    Description of solution four
+                  </span>
+                }
+                icon={
+                  <EuiToken
+                    className="homSolutionPanel__icon"
+                    fill="light"
+                    iconType="empty"
+                    shape="circle"
+                    size="l"
+                  />
+                }
+                image={
+                  <EuiImage
+                    alt="Solution four"
+                    url="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
+                  />
+                }
+                onClick={[Function]}
+                title={
+                  <EuiTitle
+                    size="s"
+                  >
+                    <h3>
+                      Solution four
+                    </h3>
+                  </EuiTitle>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <PageFooter
+      features={Array []}
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview without solutions 1`] = `
+<main
+  aria-labelledby="kbnOverviewHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <PageHeader
+    features={
+      Array [
+        Object {
+          "category": "data",
+          "description": "Description of dashboard",
+          "icon": "dashboardApp",
+          "id": "dashboard",
+          "path": "dashboard_landing_page",
+          "showOnHomePage": false,
+          "title": "Dashboard",
+        },
+        Object {
+          "category": "data",
+          "description": "Description of discover",
+          "icon": "discoverApp",
+          "id": "discover",
+          "path": "discover_landing_page",
+          "showOnHomePage": false,
+          "title": "Discover",
+        },
+        Object {
+          "category": "data",
+          "description": "Description of canvas",
+          "icon": "canvasApp",
+          "id": "canvas",
+          "path": "canvas_landing_page",
+          "showOnHomePage": false,
+          "title": "Canvas",
+        },
+      ]
+    }
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibana.overview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="kbnOverviewMore__title"
+          className="kbnOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="kbnOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with Elastic"
+                id="kibana.overview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup
+            className="kibanaOverview__Data kibanaOverview__Data--expanded"
+          >
+            <EuiFlexItem>
+              <AddData
+                addBasePath={[Function]}
+                features={Array []}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ManageData
+                addBasePath={[Function]}
+                features={Array []}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <PageFooter
+      features={
+        Array [
+          Object {
+            "category": "data",
+            "description": "Description of dashboard",
+            "icon": "dashboardApp",
+            "id": "dashboard",
+            "path": "dashboard_landing_page",
+            "showOnHomePage": false,
+            "title": "Dashboard",
+          },
+          Object {
+            "category": "data",
+            "description": "Description of discover",
+            "icon": "discoverApp",
+            "id": "discover",
+            "path": "discover_landing_page",
+            "showOnHomePage": false,
+            "title": "Discover",
+          },
+          Object {
+            "category": "data",
+            "description": "Description of canvas",
+            "icon": "canvasApp",
+            "id": "canvas",
+            "path": "canvas_landing_page",
+            "showOnHomePage": false,
+            "title": "Canvas",
+          },
+        ]
+      }
+    />
+  </div>
+</main>
+`;

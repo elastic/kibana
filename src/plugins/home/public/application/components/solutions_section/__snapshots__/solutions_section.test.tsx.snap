@@ -7,19 +7,15 @@ exports[`SolutionsSection only renders a spacer if no solutions are available 1`
     className="homSolutions"
   >
     <EuiScreenReaderOnly>
-      <EuiTitle
-        size="s"
+      <h2
+        id="homSolutions__title"
       >
-        <h2
-          id="homSolutions__title"
-        >
-          <FormattedMessage
-            defaultMessage="Pick your solution"
-            id="home.solutionsSection.sectionTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
+        <FormattedMessage
+          defaultMessage="Pick your solution"
+          id="home.solutionsSection.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
@@ -40,41 +36,20 @@ exports[`SolutionsSection renders a single solution 1`] = `
     className="homSolutions"
   >
     <EuiScreenReaderOnly>
-      <EuiTitle
-        size="s"
+      <h2
+        id="homSolutions__title"
       >
-        <h2
-          id="homSolutions__title"
-        >
-          <FormattedMessage
-            defaultMessage="Pick your solution"
-            id="home.solutionsSection.sectionTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
+        <FormattedMessage
+          defaultMessage="Pick your solution"
+          id="home.solutionsSection.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
       justifyContent="spaceAround"
-    >
-      <SolutionPanel
-        addBasePath={[Function]}
-        solution={
-          Object {
-            "descriptions": Array [
-              "Analyze data in dashboards",
-            ],
-            "icon": "logoKibana",
-            "id": "kibana",
-            "order": 1,
-            "path": "kibana_landing_page",
-            "subtitle": "Visualize & analyze",
-            "title": "Kibana",
-          }
-        }
-      />
-    </EuiFlexGroup>
+    />
   </section>
   <EuiHorizontalRule
     aria-hidden="true"
@@ -90,19 +65,15 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
     className="homSolutions"
   >
     <EuiScreenReaderOnly>
-      <EuiTitle
-        size="s"
+      <h2
+        id="homSolutions__title"
       >
-        <h2
-          id="homSolutions__title"
-        >
-          <FormattedMessage
-            defaultMessage="Pick your solution"
-            id="home.solutionsSection.sectionTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
+        <FormattedMessage
+          defaultMessage="Pick your solution"
+          id="home.solutionsSection.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
@@ -120,9 +91,10 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
             key="solution-2"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution two",
                 "icon": "empty",
                 "id": "solution-2",
                 "order": 2,
@@ -137,9 +109,10 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
             key="solution-3"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution three",
                 "icon": "empty",
                 "id": "solution-3",
                 "order": 3,
@@ -154,9 +127,10 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
             key="solution-4"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution four",
                 "icon": "empty",
                 "id": "solution-4",
                 "order": 4,
@@ -184,19 +158,15 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
     className="homSolutions"
   >
     <EuiScreenReaderOnly>
-      <EuiTitle
-        size="s"
+      <h2
+        id="homSolutions__title"
       >
-        <h2
-          id="homSolutions__title"
-        >
-          <FormattedMessage
-            defaultMessage="Pick your solution"
-            id="home.solutionsSection.sectionTitle"
-            values={Object {}}
-          />
-        </h2>
-      </EuiTitle>
+        <FormattedMessage
+          defaultMessage="Pick your solution"
+          id="home.solutionsSection.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
     </EuiScreenReaderOnly>
     <EuiFlexGroup
       className="homSolutions__content"
@@ -214,9 +184,10 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
             key="solution-2"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution two",
                 "icon": "empty",
                 "id": "solution-2",
                 "order": 2,
@@ -231,9 +202,10 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
             key="solution-3"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution three",
                 "icon": "empty",
                 "id": "solution-3",
                 "order": 3,
@@ -248,9 +220,10 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
             key="solution-4"
             solution={
               Object {
-                "descriptions": Array [
+                "appDescriptions": Array [
                   "Example use case",
                 ],
+                "description": "Description for solution four",
                 "icon": "empty",
                 "id": "solution-4",
                 "order": 4,
@@ -262,22 +235,6 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <SolutionPanel
-        addBasePath={[Function]}
-        solution={
-          Object {
-            "descriptions": Array [
-              "Analyze data in dashboards",
-            ],
-            "icon": "logoKibana",
-            "id": "kibana",
-            "order": 1,
-            "path": "kibana_landing_page",
-            "subtitle": "Visualize & analyze",
-            "title": "Kibana",
-          }
-        }
-      />
     </EuiFlexGroup>
   </section>
   <EuiHorizontalRule

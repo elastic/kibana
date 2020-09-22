@@ -22,6 +22,9 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     title: i18n.translate('xpack.ml.machineLearningTitle', {
       defaultMessage: 'Machine Learning',
     }),
+    subtitle: i18n.translate('xpack.ml.machineLearningSubtitle', {
+      defaultMessage: 'Model, predict, and detect.',
+    }),
     description: i18n.translate('xpack.ml.machineLearningDescription', {
       defaultMessage:
         'Automatically model the normal behavior of your time series data to detect anomalies.',
@@ -30,6 +33,8 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     path: '/app/ml',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
+    solutionId: 'kibana',
+    order: 500,
   });
 
   home.featureCatalogue.register({

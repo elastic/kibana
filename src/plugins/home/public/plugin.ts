@@ -33,6 +33,7 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistryStart,
   TutorialService,
   TutorialServiceSetup,
 } from './services';
@@ -58,7 +59,12 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -155,11 +161,16 @@ export class HomePublicPlugin
         }
       });
     }
+
+    return { featureCatalogue: this.featuresCatalogueRegistry };
   }
 }
 
 /** @public */
 export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
+
+/** @public */
+export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
 
 /** @public */
 export type EnvironmentSetup = EnvironmentServiceSetup;
@@ -178,4 +189,7 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+}
+export interface HomePublicPluginStart {
+  featureCatalogue: FeatureCatalogueRegistry;
 }

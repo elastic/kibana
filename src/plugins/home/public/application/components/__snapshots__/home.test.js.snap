@@ -22,7 +22,7 @@ exports[`home change home route should render a link to change the default route
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -33,9 +33,12 @@ exports[`home change home route should render a link to change the default route
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -90,7 +93,7 @@ exports[`home change home route should render a link to change the default route
           >
             <FormattedMessage
               defaultMessage="Display a different page on log in"
-              id="home.changeHomeRouteLink"
+              id="home.footer.changeHomeRouteLink"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -100,14 +103,13 @@ exports[`home change home route should render a link to change the default route
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -140,7 +142,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -151,9 +153,12 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -165,6 +170,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
             <EuiFlexItem
               className="homHeader__actionItem"
               data-test-subj="homManagementActionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 iconType="gear"
@@ -217,14 +223,13 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -257,7 +262,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -268,9 +273,12 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -335,14 +343,13 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -375,7 +382,7 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -386,9 +393,12 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -453,14 +463,13 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -493,7 +502,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -504,9 +513,12 @@ exports[`home directories should render solutions in the "solution section" 1`] 
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -525,10 +537,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   >
     <SolutionsSection
       addBasePath={[Function]}
+      directories={Array []}
       solutions={
         Array [
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Analyze data in dashboards",
             ],
             "icon": "logoKibana",
@@ -539,7 +552,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Kibana",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -550,7 +563,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Solution two",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -561,7 +574,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Solution three",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -609,14 +622,13 @@ exports[`home directories should render solutions in the "solution section" 1`] 
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -649,7 +661,7 @@ exports[`home header render 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -660,9 +672,12 @@ exports[`home header render 1`] = `
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -715,14 +730,13 @@ exports[`home header render 1`] = `
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -755,7 +769,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -766,9 +780,12 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -779,6 +796,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
             </EuiFlexItem>
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 iconType="wrench"
@@ -843,14 +861,13 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -883,7 +900,7 @@ exports[`home header should show "Manage" link if stack management is available 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -894,9 +911,12 @@ exports[`home header should show "Manage" link if stack management is available 
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -908,6 +928,7 @@ exports[`home header should show "Manage" link if stack management is available 
             <EuiFlexItem
               className="homHeader__actionItem"
               data-test-subj="homManagementActionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 iconType="gear"
@@ -960,14 +981,13 @@ exports[`home header should show "Manage" link if stack management is available 
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1000,7 +1020,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1011,9 +1031,12 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1066,14 +1089,13 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1106,7 +1128,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1117,9 +1139,12 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1172,14 +1197,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1212,7 +1236,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1223,9 +1247,12 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1278,14 +1305,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1318,7 +1344,7 @@ exports[`home should render home component 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1329,9 +1355,12 @@ exports[`home should render home component 1`] = `
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1384,14 +1413,13 @@ exports[`home should render home component 1`] = `
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1424,7 +1452,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1435,9 +1463,12 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1490,14 +1521,13 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1530,7 +1560,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1541,9 +1571,12 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1596,14 +1629,13 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -1643,7 +1675,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
@@ -1654,9 +1686,12 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiFlexGroup
             className="homHeader__actions"
+            responsive={false}
+            wrap={true}
           >
             <EuiFlexItem
               className="homHeader__actionItem"
+              grow={false}
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1709,14 +1744,13 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            flush="right"
             href="#/feature_directory"
             iconType="apps"
             size="xs"
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>

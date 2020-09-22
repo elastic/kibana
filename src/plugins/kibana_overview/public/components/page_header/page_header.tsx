@@ -21,17 +21,17 @@ import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Capabilities } from 'kibana/public';
-import { createAppNavigationHandler } from '../app_navigation_handler';
+import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
+import { createAppNavigationHandler } from '../../app_navigation_handler';
 
 interface Props {
-  capabilities: Capabilities;
+  features: FeatureCatalogueEntry[];
 }
 
-export const PageHeader: FC<Props> = ({ capabilities }) => {
-  const { navLinks } = capabilities;
-  const showStackManagement = navLinks.management;
-  const showDevTools = navLinks.dev_tools;
+export const PageHeader: FC<Props> = ({ features }) => {
+  const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
+  const devTools = findFeatureById('console');
+  const stackManagement = findFeatureById('stack-management');
 
   return (
     <header className="kbnOverviewHeader">
@@ -57,7 +57,7 @@ export const PageHeader: FC<Props> = ({ capabilities }) => {
             <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
               <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                 <EuiButtonEmpty
-                  onClick={createAppNavigationHandler('/app/management')}
+                  onClick={createAppNavigationHandler('/app/home#/tutorial_directory')}
                   iconType="indexOpen"
                 >
                   {i18n.translate('kibana.overview.header.addDataButtonLabel', {
@@ -66,7 +66,7 @@ export const PageHeader: FC<Props> = ({ capabilities }) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
 
-              {showStackManagement ? (
+              {stackManagement ? (
                 <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
                     iconType="gear"
@@ -79,7 +79,7 @@ export const PageHeader: FC<Props> = ({ capabilities }) => {
                 </EuiFlexItem>
               ) : null}
 
-              {showDevTools ? (
+              {devTools ? (
                 <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
                     iconType="wrench"

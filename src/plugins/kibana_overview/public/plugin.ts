@@ -86,7 +86,7 @@ export class KibanaOverviewPlugin
         subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
           defaultMessage: 'Visualize & analyze',
         }),
-        descriptions: [
+        appDescriptions: [
           i18n.translate('home.kibana.featureCatalogueDescription1', {
             defaultMessage: 'Analyze data in dashboards.',
           }),

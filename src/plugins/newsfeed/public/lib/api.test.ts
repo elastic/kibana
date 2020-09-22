@@ -47,6 +47,10 @@ Object.defineProperty(window, 'sessionStorage', {
   writable: true,
 });
 
+jest.mock('uuid', () => ({
+  v4: () => 'NEW_UUID',
+}));
+
 describe('NewsfeedApiDriver', () => {
   const kibanaVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
@@ -65,14 +69,18 @@ describe('NewsfeedApiDriver', () => {
 
     it('returns true if last fetch time precedes page load time', () => {
       sessionStoragetGet.throws('Wrong key passed!');
-      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(322642800000); // 1980-03-23
+      sessionStoragetGet
+        .withArgs(`${NEWSFEED_LAST_FETCH_STORAGE_KEY}.NEW_UUID`)
+        .returns(322642800000); // 1980-03-23
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(true);
     });
 
     it('returns false if last fetch time is recent enough', () => {
       sessionStoragetGet.throws('Wrong key passed!');
-      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(3005017200000); // 2065-03-23
+      sessionStoragetGet
+        .withArgs(`${NEWSFEED_LAST_FETCH_STORAGE_KEY}.NEW_UUID`)
+        .returns(3005017200000); // 2065-03-23
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(false);
     });
@@ -571,19 +579,8 @@ describe('getApi', () => {
     getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "error": null,
-          "feedItems": Array [
-            Object {
-              "badge": "firefighter",
-              "description": "test",
-              "expireOn": "2049-10-31T04:23:47.000Z",
-              "hash": "happyness",
-              "linkText": "click here",
-              "linkUrl": "xyzxyzxyz",
-              "publishOn": "2014-10-31T04:23:47.000Z",
-              "title": "hasNew test",
-            },
-          ],
+          "error": [Wrong key passed!],
+          "feedItems": Array [],
           "hasNew": false,
           "kibanaVersion": "6.8.2",
         }
@@ -654,19 +651,8 @@ describe('getApi', () => {
                 "kibanaVersion": "6.8.2",
               },
               Object {
-                "error": null,
-                "feedItems": Array [
-                  Object {
-                    "badge": "firefighter",
-                    "description": "test",
-                    "expireOn": "2049-10-31T04:23:47.000Z",
-                    "hash": "happyness",
-                    "linkText": "click here",
-                    "linkUrl": "xyzxyzxyz",
-                    "publishOn": "2014-10-31T04:23:47.000Z",
-                    "title": "hasNew test",
-                  },
-                ],
+                "error": [Wrong key passed!],
+                "feedItems": Array [],
                 "hasNew": false,
                 "kibanaVersion": "6.8.2",
               },

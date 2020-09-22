@@ -20,21 +20,22 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Capabilities } from 'kibana/public';
-import { createAppNavigationHandler } from '../app_navigation_handler';
+import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
+import { createAppNavigationHandler } from '../../app_navigation_handler';
 
 interface Props {
-  capabilities: Capabilities;
+  features: FeatureCatalogueEntry[];
 }
 
-export const PageFooter: FC<Props> = ({ capabilities }) => {
-  const showAdvancedSettings = capabilities.advancedSettings?.show;
+export const PageFooter: FC<Props> = ({ features }) => {
+  const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
+  const advancedSettings = findFeatureById('advanced_settings');
 
   return (
     <footer className="kbnOverviewFooter">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {showAdvancedSettings ? (
+          {advancedSettings ? (
             <EuiButtonEmpty
               iconType="home"
               onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
@@ -50,7 +51,7 @@ export const PageFooter: FC<Props> = ({ capabilities }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="allPlugins"
-            href="#/feature_directory"
+            onClick={createAppNavigationHandler('/app/home#/feature_directory')}
             size="xs"
             iconType="apps"
           >

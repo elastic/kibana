@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageHeader render 1`] = `
+<header
+  className="kbnOverviewHeader"
+>
+  <div
+    className="kbnOverviewHeader__inner"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIcon
+              size="xxl"
+              type="logoKibana"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="m"
+            >
+              <h1
+                id="kbnOverviewHeader__title"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana"
+                  id="kibana.overview.header.title"
+                  values={Object {}}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewHeader__actions"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="indexOpen"
+              onClick={[Function]}
+            >
+              Add data
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</header>
+`;
+
+exports[`PageHeader with both apps 1`] = `
+<header
+  className="kbnOverviewHeader"
+>
+  <div
+    className="kbnOverviewHeader__inner"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIcon
+              size="xxl"
+              type="logoKibana"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="m"
+            >
+              <h1
+                id="kbnOverviewHeader__title"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana"
+                  id="kibana.overview.header.title"
+                  values={Object {}}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewHeader__actions"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="indexOpen"
+              onClick={[Function]}
+            >
+              Add data
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="gear"
+              onClick={[Function]}
+            >
+              Manage
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="wrench"
+              onClick={[Function]}
+            >
+              Dev tools
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</header>
+`;
+
+exports[`PageHeader with dev tools 1`] = `
+<header
+  className="kbnOverviewHeader"
+>
+  <div
+    className="kbnOverviewHeader__inner"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIcon
+              size="xxl"
+              type="logoKibana"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="m"
+            >
+              <h1
+                id="kbnOverviewHeader__title"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana"
+                  id="kibana.overview.header.title"
+                  values={Object {}}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewHeader__actions"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="indexOpen"
+              onClick={[Function]}
+            >
+              Add data
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="wrench"
+              onClick={[Function]}
+            >
+              Dev tools
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</header>
+`;
+
+exports[`PageHeader with management 1`] = `
+<header
+  className="kbnOverviewHeader"
+>
+  <div
+    className="kbnOverviewHeader__inner"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIcon
+              size="xxl"
+              type="logoKibana"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="m"
+            >
+              <h1
+                id="kbnOverviewHeader__title"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana"
+                  id="kibana.overview.header.title"
+                  values={Object {}}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewHeader__actions"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="indexOpen"
+              onClick={[Function]}
+            >
+              Add data
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="kbnOverviewHeader__actionItem"
+            grow={false}
+          >
+            <EuiButtonEmpty
+              iconType="gear"
+              onClick={[Function]}
+            >
+              Manage
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</header>
+`;

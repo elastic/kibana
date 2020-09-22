@@ -97,7 +97,7 @@ export class NewsfeedApiDriver {
     return { previous: old, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpSetup, config: ApiConfig): Rx.Observable<FetchResult> {
+  fetchNewsfeedItems(http: HttpSetup, config: ApiConfig): Rx.Observable<void | FetchResult> {
     const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
     const fullUrl = (config.urlRoot || NEWSFEED_DEFAULT_SERVICE_BASE_URL) + urlPath;
 
@@ -106,7 +106,7 @@ export class NewsfeedApiDriver {
         .fetch(fullUrl, {
           method: 'GET',
         })
-        .then(({ items }) => {
+        .then(({ items }: { items: ApiItem[] }) => {
           return this.modelItems(items);
         })
     );

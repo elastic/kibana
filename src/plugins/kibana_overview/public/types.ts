@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from 'src/plugins/home/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
@@ -33,7 +33,8 @@ export interface AppPluginSetupDependencies {
 }
 
 export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+  home: HomePublicPluginStart;
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
   newsfeed: NewsfeedPublicPluginStart;
 }

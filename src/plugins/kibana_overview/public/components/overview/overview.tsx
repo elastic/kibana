@@ -17,142 +17,69 @@
  * under the License.
  */
 
+import { snakeCase } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
-import { Observable } from 'rxjs';
 import {
-  EuiButton,
   EuiCard,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiImage,
-  EuiLink,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FetchResult, NewsfeedItem } from 'src/plugins/newsfeed/public';
+import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
+import {
+  FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
+  FeatureCatalogueCategory,
+} from '../../../../../../src/plugins/home/public';
 import { PLUGIN_ID } from '../../../common';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
+import { AddData } from '../add_data';
+import { GettingStarted } from '../getting_started';
+import { ManageData } from '../manage_data';
 import { PageHeader } from '../page_header';
 import { PageFooter } from '../page_footer';
+import { NewsFeed } from '../news_feed';
 
-const apps = {
-  dashboards: {
-    id: 'dashboards',
-    title: 'Dashboard',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription1', {
-      defaultMessage: 'Analyze data in dashboards.',
-    }),
-    icon: 'dashboardApp',
-    path: '/app/dashboards',
-  },
-  discover: {
-    id: 'discover',
-    title: 'Discover',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription2', {
-      defaultMessage: 'Search and find insights.',
-    }),
-    icon: 'search',
-    path: '/app/discover',
-  },
-  canvas: {
-    id: 'canvas',
-    title: 'Canvas',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription3', {
-      defaultMessage: 'Design pixel-perfect reports.',
-    }),
-    icon: 'canvasApp',
-    path: '/app/canvas',
-  },
-  maps: {
-    id: 'maps',
-    title: 'Maps',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription4', {
-      defaultMessage: 'Plot geographic data.',
-    }),
-    icon: 'gisApp',
-    path: '/app/maps',
-  },
-  ml: {
-    id: 'ml',
-    title: 'Machine Learning',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription5', {
-      defaultMessage: 'Model, predict, and detect.',
-    }),
-    icon: 'compute',
-    path: '/app/ml',
-  },
-  graph: {
-    id: 'graph',
-    title: 'Graph',
-    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription6', {
-      defaultMessage: 'Reveal patterns and relationships.',
-    }),
-    icon: 'graphApp',
-    path: '/app/graph',
-  },
-};
-
-type AppId = keyof typeof apps;
-
-const solutions = {
-  enterpriseSearch: {
-    id: 'enterprise_search',
-    title: 'Enterprise Search',
-    description:
-      'Build a leading search experience using a refined set of APIs and powerful search-based UI.',
-    icon: 'logoEnterpriseSearch',
-    path: '/app/enterprise_search/overview',
-  },
-  observability: {
-    id: 'observability',
-    title: 'Observability',
-    description:
-      'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
-    icon: 'logoObservability',
-    path: '/app/observability/overview',
-  },
-  securitySolution: {
-    id: 'security_solution',
-    title: 'Security',
-    description:
-      'Combine network and host data integrations, sharable analytics, and explore your security data.',
-    icon: 'logoSecurity',
-    path: '/app/security/overview',
-  },
-};
+const sortByOrder = (featureA: FeatureCatalogueEntry, featureB: FeatureCatalogueEntry) =>
+  (featureA.order || Infinity) - (featureB.order || Infinity);
 
 interface Props {
-  newsfeed$: Observable<FetchResult | null | void>;
+  newsFetchResult: FetchResult | null | void;
+  solutions: FeatureCatalogueSolution[];
+  features: FeatureCatalogueEntry[];
 }
 
-export const Overview: FC<Props> = ({ newsfeed$ }) => {
+export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
-  const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-  const { addBasePath, application, indexPatternService, uiSettings } = getServices();
-  const { capabilities } = application;
+  const { addBasePath, indexPatternService, uiSettings } = getServices();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  const getFeaturesByCategory = (category: string) =>
+    features
+      .filter((feature) => feature.showOnHomePage && feature.category === category)
+      .sort(sortByOrder);
 
   const getSolutionGraphicURL = (solutionId: string) =>
     `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_${
       IS_DARK_THEME ? 'dark' : 'light'
     }_2x.png`;
 
-  useEffect(() => {
-    const subscription = newsfeed$.subscribe((res: FetchResult | void | null) => {
-      setNewsFetchResult(res);
-    });
+  const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
+  const addDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.DATA);
+  const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
+  const devTools = features.find(({ id }) => id === 'console');
 
-    return () => subscription.unsubscribe();
-  }, [newsfeed$]);
+  // Show card for console if none of the manage data plugins are available, most likely in OSS
+  if (manageDataFeatures.length < 1 && devTools) {
+    manageDataFeatures.push(devTools);
+  }
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
@@ -164,122 +91,19 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     fetchIsNewKibanaInstance();
   }, [indexPatternService]);
 
-  const renderGettingStarted = () => {
-    const gettingStartedGraphicURL = `/plugins/${PLUGIN_ID}/assets/kibana_montage_${
-      IS_DARK_THEME ? 'dark' : 'light'
-    }_2x.png`;
+  const renderAppCard = (appId: string) => {
+    const app = kibanaApps.find(({ id }) => id === appId);
 
-    return (
-      <section
-        aria-labelledby="kbnOverviewGettingStarted__title"
-        className="kbnOverviewGettingStarted"
-      >
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem className="kbnOverviewGettingStarted__content">
-            <EuiTitle size="s">
-              <h2 id="kbnOverviewGettingStarted__title">
-                <FormattedMessage
-                  id="kibana.overview.gettingStarted.title"
-                  defaultMessage="Getting started with Kibana"
-                />
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="m" />
-
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
-                  id="kibana.overview.gettingStarted.description"
-                />
-              </p>
-            </EuiText>
-
-            <EuiSpacer size="xl" />
-
-            <EuiFlexGrid className="kbnOverviewGettingStarted__apps" columns={2}>
-              {Object.values(apps).map(({ description, icon, title }) => (
-                <EuiFlexItem key={title}>
-                  <EuiCard
-                    description={description}
-                    display="plain"
-                    icon={<EuiIcon size="l" type={icon} />}
-                    layout="horizontal"
-                    paddingSize="none"
-                    title={title}
-                    titleElement="h3"
-                    titleSize="xs"
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-
-            <EuiSpacer size="xl" />
-
-            <EuiButton
-              fill
-              iconType="indexOpen"
-              onClick={createAppNavigationHandler('/app/management/kibana/indexPatterns')}
-            >
-              <FormattedMessage
-                defaultMessage="Begin by adding data"
-                id="kibana.overview.gettingStarted.addDataButtonLabel"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem className="kbnOverviewGettingStarted__graphic">
-            <EuiImage
-              alt="Kibana visualizations illustration"
-              url={addBasePath(gettingStartedGraphicURL)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-    );
-  };
-
-  const renderFeedItem = ({ title, description, linkUrl, publishOn }: NewsfeedItem) => (
-    <article key={title}>
-      <header>
-        <EuiTitle size="xxs">
-          <h3>
-            <EuiLink href={linkUrl} target="_blank">
-              {title}
-            </EuiLink>
-          </h3>
-        </EuiTitle>
-
-        <EuiText size="xs" color="subdued">
-          <p>
-            <time dateTime={publishOn.format('YYYY-MM-DD')}>
-              {publishOn.format('DD MMMM YYYY')}
-            </time>
-          </p>
-        </EuiText>
-      </header>
-
-      <EuiText size="xs">
-        <p>{description}</p>
-      </EuiText>
-    </article>
-  );
-
-  const renderAppCard = (appId: AppId) => {
-    const app = apps[appId];
-
-    return capabilities.navLinks[appId] ? (
+    return app ? (
       <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
         <EuiCard
-          description={app.description}
+          description={app?.subtitle || ''}
           href={addBasePath(app.path)}
           image={addBasePath(
             `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
               IS_DARK_THEME ? 'dark' : 'light'
             }_2x.png`
           )}
-          // isDisabled={!capabilities.navLinks[appId]}
           onClick={createAppNavigationHandler(app.path)}
           title={app.title}
           titleElement="h3"
@@ -289,121 +113,130 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     ) : null;
   };
 
-  const renderNormal = () => {
-    const mainApps = [apps.dashboards.id, apps.discover.id] as AppId[];
-    const remainingApps = Object.keys(apps).filter(
-      (appId) => !mainApps.includes(appId as AppId)
-    ) as AppId[];
-
-    return (
-      <>
-        <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
-          <EuiScreenReaderOnly>
-            <h2 id="kbnOverviewApps__title">
-              <FormattedMessage
-                id="kibana.overview.apps.title"
-                defaultMessage="Explore these apps"
-              />
-            </h2>
-          </EuiScreenReaderOnly>
-
-          {mainApps.length ? (
-            <>
-              <EuiFlexGroup
-                className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-                justifyContent="center"
-              >
-                {mainApps.map(renderAppCard)}
-              </EuiFlexGroup>
-
-              <EuiSpacer size="l" />
-            </>
-          ) : null}
-
-          {remainingApps.length ? (
-            <EuiFlexGroup
-              className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
-              justifyContent="center"
-            >
-              {remainingApps.map(renderAppCard)}
-            </EuiFlexGroup>
-          ) : null}
-        </section>
-
-        <EuiHorizontalRule aria-hidden="true" margin="xl" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
-              <EuiTitle size="s">
-                <h2 id="kbnOverviewNews__title">
-                  <FormattedMessage id="kibana.overview.news.title" defaultMessage="What's new?" />
-                </h2>
-              </EuiTitle>
-
-              <EuiSpacer size="m" />
-
-              <div className="kbnOverviewNews__content">
-                {newsFetchResult ? newsFetchResult.feedItems.slice(0, 3).map(renderFeedItem) : null}
-              </div>
-            </section>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={3}>
-            <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
-              <EuiTitle size="s">
-                <h2 id="kbnOverviewMore__title">
-                  <FormattedMessage
-                    id="kibana.overview.more.title"
-                    defaultMessage="Do more with Elastic"
-                  />
-                </h2>
-              </EuiTitle>
-
-              <EuiSpacer size="m" />
-
-              <EuiFlexGroup>
-                {Object.values(solutions).map(({ id, title, description, icon, path }) => (
-                  <EuiFlexItem key={id}>
-                    <EuiCard
-                      title={
-                        <EuiTitle size="s">
-                          <h3>{title}</h3>
-                        </EuiTitle>
-                      }
-                      description={<span>{description}</span>}
-                      icon={
-                        <EuiToken
-                          iconType={icon}
-                          shape="circle"
-                          fill="light"
-                          size="l"
-                          className="homSolutionPanel__icon"
-                        />
-                      }
-                      image={<EuiImage url={addBasePath(getSolutionGraphicURL(id))} alt={title} />}
-                      onClick={createAppNavigationHandler(path)}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </section>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  };
+  // Dashboard and discover are displayed in larger cards
+  const mainApps = ['dashboard', 'discover'];
+  const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   return (
     <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
-      <PageHeader capabilities={capabilities} />
+      <PageHeader features={features} />
 
       <div className="kbnOverviewContent">
-        {isNewKibanaInstance ? renderGettingStarted() : renderNormal()}
+        {isNewKibanaInstance ? (
+          <GettingStarted addBasePath={addBasePath} isDarkTheme={IS_DARK_THEME} apps={kibanaApps} />
+        ) : (
+          <>
+            <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
+              <EuiScreenReaderOnly>
+                <h2 id="kbnOverviewApps__title">
+                  <FormattedMessage
+                    id="kibana.overview.apps.title"
+                    defaultMessage="Explore these apps"
+                  />
+                </h2>
+              </EuiScreenReaderOnly>
+
+              {mainApps.length ? (
+                <>
+                  <EuiFlexGroup
+                    className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+                    justifyContent="center"
+                  >
+                    {mainApps.map(renderAppCard)}
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+                </>
+              ) : null}
+
+              {remainingApps.length ? (
+                <EuiFlexGroup
+                  className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+                  justifyContent="center"
+                >
+                  {remainingApps.map(renderAppCard)}
+                </EuiFlexGroup>
+              ) : null}
+            </section>
+
+            <EuiHorizontalRule aria-hidden="true" margin="xl" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                <NewsFeed newsFetchResult={newsFetchResult} />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={3}>
+                <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
+                  <EuiTitle size="s">
+                    <h2 id="kbnOverviewMore__title">
+                      <FormattedMessage
+                        id="kibana.overview.more.title"
+                        defaultMessage="Do more with Elastic"
+                      />
+                    </h2>
+                  </EuiTitle>
+
+                  <EuiSpacer size="m" />
+
+                  {solutions.length ? (
+                    <EuiFlexGroup>
+                      {solutions.map(({ id, title, description, icon, path }) => (
+                        <EuiFlexItem key={id}>
+                          <EuiCard
+                            title={
+                              <EuiTitle size="s">
+                                <h3>{title}</h3>
+                              </EuiTitle>
+                            }
+                            description={<span>{description}</span>}
+                            icon={
+                              <EuiToken
+                                iconType={icon}
+                                shape="circle"
+                                fill="light"
+                                size="l"
+                                className="homSolutionPanel__icon"
+                              />
+                            }
+                            image={
+                              <EuiImage
+                                // Image file names must be snake case
+                                url={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
+                                alt={title}
+                              />
+                            }
+                            onClick={createAppNavigationHandler(path)}
+                          />
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  ) : (
+                    <EuiFlexGroup
+                      className={`kibanaOverview__Data ${
+                        addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                          ? 'kibanaOverview__Data--compressed'
+                          : 'kibanaOverview__Data--expanded'
+                      }`}
+                    >
+                      <EuiFlexItem>
+                        <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </section>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <PageFooter capabilities={capabilities} />
+        <PageFooter features={features} />
       </div>
     </main>
   );

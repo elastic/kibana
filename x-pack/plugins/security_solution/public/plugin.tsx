@@ -83,7 +83,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
           defaultMessage: 'SIEM & Endpoint Security',
         }),
-        descriptions: [
+        description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
+          defaultMessage:
+            'Combine network and host data integrations, sharable analytics, and explore your security data.',
+        }),
+        appDescriptions: [
           i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
             defaultMessage: 'Prevent threats autonomously.',
           }),

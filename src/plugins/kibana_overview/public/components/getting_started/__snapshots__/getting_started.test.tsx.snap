@@ -1,0 +1,371 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GettingStarted dark mode on 1`] = `
+<section
+  aria-labelledby="kbnOverviewGettingStarted__title"
+  className="kbnOverviewGettingStarted"
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <EuiFlexItem
+      className="kbnOverviewGettingStarted__content"
+    >
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="kbnOverviewGettingStarted__title"
+        >
+          <FormattedMessage
+            defaultMessage="Getting started with Kibana"
+            id="kibana.overview.gettingStarted.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer
+        size="m"
+      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
+            id="kibana.overview.gettingStarted.description"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiFlexGrid
+        className="kbnOverviewGettingStarted__apps"
+        columns={2}
+      >
+        <EuiFlexItem
+          key="Dashboard"
+        >
+          <EuiCard
+            description="Analyze data in dashboards."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="dashboardApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Dashboard"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Discover"
+        >
+          <EuiCard
+            description="Search and find insights."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="discoverApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Discover"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Canvas"
+        >
+          <EuiCard
+            description="Design pixel-perfect reports."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="canvasApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Canvas"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Maps"
+        >
+          <EuiCard
+            description="Plot geographic data."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="gisApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Maps"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Machine Learning"
+        >
+          <EuiCard
+            description="Model, predict, and detect."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="machineLearningApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Machine Learning"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Graph"
+        >
+          <EuiCard
+            description="Reveal patterns and relationships."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="graphApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Graph"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiButton
+        fill={true}
+        iconType="indexOpen"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Begin by adding data"
+          id="kibana.overview.gettingStarted.addDataButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="kbnOverviewGettingStarted__graphic"
+    >
+      <EuiImage
+        alt="Kibana visualizations illustration"
+        url="/plugins/kibanaOverview/assets/kibana_montage_dark_2x.png"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</section>
+`;
+
+exports[`GettingStarted render 1`] = `
+<section
+  aria-labelledby="kbnOverviewGettingStarted__title"
+  className="kbnOverviewGettingStarted"
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <EuiFlexItem
+      className="kbnOverviewGettingStarted__content"
+    >
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="kbnOverviewGettingStarted__title"
+        >
+          <FormattedMessage
+            defaultMessage="Getting started with Kibana"
+            id="kibana.overview.gettingStarted.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer
+        size="m"
+      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
+            id="kibana.overview.gettingStarted.description"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiFlexGrid
+        className="kbnOverviewGettingStarted__apps"
+        columns={2}
+      >
+        <EuiFlexItem
+          key="Dashboard"
+        >
+          <EuiCard
+            description="Analyze data in dashboards."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="dashboardApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Dashboard"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Discover"
+        >
+          <EuiCard
+            description="Search and find insights."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="discoverApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Discover"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Canvas"
+        >
+          <EuiCard
+            description="Design pixel-perfect reports."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="canvasApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Canvas"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Maps"
+        >
+          <EuiCard
+            description="Plot geographic data."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="gisApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Maps"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Machine Learning"
+        >
+          <EuiCard
+            description="Model, predict, and detect."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="machineLearningApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Machine Learning"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          key="Graph"
+        >
+          <EuiCard
+            description="Reveal patterns and relationships."
+            display="plain"
+            icon={
+              <EuiIcon
+                size="l"
+                type="graphApp"
+              />
+            }
+            layout="horizontal"
+            paddingSize="none"
+            title="Graph"
+            titleElement="h3"
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiButton
+        fill={true}
+        iconType="indexOpen"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Begin by adding data"
+          id="kibana.overview.gettingStarted.addDataButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="kbnOverviewGettingStarted__graphic"
+    >
+      <EuiImage
+        alt="Kibana visualizations illustration"
+        url="/plugins/kibanaOverview/assets/kibana_montage_light_2x.png"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</section>
+`;

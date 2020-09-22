@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageHeader render 1`] = `
+<footer
+  className="kbnOverviewFooter"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        data-test-subj="allPlugins"
+        iconType="apps"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="View app directory"
+          id="kibana.overview.footer.appDirectoryButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</footer>
+`;
+
+exports[`PageHeader with advanced settings 1`] = `
+<footer
+  className="kbnOverviewFooter"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="home"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Display a different page on log in"
+          id="kibana.overview.footer.changeHomeRouteLink"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        data-test-subj="allPlugins"
+        iconType="apps"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="View app directory"
+          id="kibana.overview.footer.appDirectoryButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</footer>
+`;
