@@ -22,11 +22,11 @@ export const TILE_SEARCHES = {
   },
 };
 
-// export const TILE_GRIDAGGS = {
-//   '0.0.0': {
-//     gridAggResponse: loadJson('./json/0_0_0_gridagg.json'),
-//   },
-// };
+export const TILE_GRIDAGGS = {
+  '0.0.0': {
+    gridAggResponse: loadJson('./json/0_0_0_gridagg.json'),
+  },
+};
 
 function loadJson(filePath: string) {
   const absolutePath = path.resolve(__dirname, filePath);
