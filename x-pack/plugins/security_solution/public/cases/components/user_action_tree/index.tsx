@@ -22,11 +22,17 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';
-import { getLabelTitle, getPushInfo } from './helpers';
+import {
+  getConnectorLabelTitle,
+  getLabelTitle,
+  getPushedServiceLabelTitle,
+  getPushInfo,
+  getUpdateAction,
+} from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
@@ -39,7 +45,7 @@ import { UserActionContentToolbar } from './user_action_content_toolbar';
 export interface UserActionTreeProps {
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
-  connectors: Connector[];
+  connectors: ActionConnector[];
   data: Case;
   fetchUserActions: () => void;
   isLoadingDescription: boolean;
@@ -258,6 +264,7 @@ export const UserActionTree = React.memo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
           (comments, action, index) => {
+            // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
               if (comment != null) {
@@ -315,8 +322,14 @@ export const UserActionTree = React.memo(
               }
             }
 
-            if (action.actionField.length === 1) {
-              const myField = action.actionField[0];
+            // Connectors
+            if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
+              const label = getConnectorLabelTitle({ action, connectors });
+              return [...comments, getUpdateAction({ action, label, handleOutlineComment })];
+            }
+
+            // Pushed information
+            if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
               const parsedValue = parseString(`${action.newValue}`);
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
@@ -324,12 +337,7 @@ export const UserActionTree = React.memo(
                 index
               );
 
-              const labelTitle: string | JSX.Element = getLabelTitle({
-                action,
-                field: myField,
-                firstPush,
-                connectors,
-              });
+              const label = getPushedServiceLabelTitle(action, firstPush);
 
               const showTopFooter =
                 action.action === 'push-to-service' &&
@@ -370,37 +378,20 @@ export const UserActionTree = React.memo(
 
               return [
                 ...comments,
-                {
-                  username: (
-                    <UserActionUsernameWithAvatar
-                      username={action.actionBy.username ?? ''}
-                      fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
-                    />
-                  ),
-                  type: 'update',
-                  event: labelTitle,
-                  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-                  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-                  timelineIcon:
-                    action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
-                  actions: (
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <UserActionCopyLink id={action.actionId} />
-                      </EuiFlexItem>
-                      {action.action === 'update' && action.commentId != null && (
-                        <EuiFlexItem>
-                          <UserActionMoveToReference
-                            id={action.commentId}
-                            outlineComment={handleOutlineComment}
-                          />
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  ),
-                },
+                getUpdateAction({ action, label, handleOutlineComment }),
                 ...footers,
               ];
+            }
+
+            // description, comments, tags
+            if (action.actionField.length === 1) {
+              const myField = action.actionField[0];
+              const label: string | JSX.Element = getLabelTitle({
+                action,
+                field: myField,
+              });
+
+              return [...comments, getUpdateAction({ action, label, handleOutlineComment })];
             }
 
             return comments;
