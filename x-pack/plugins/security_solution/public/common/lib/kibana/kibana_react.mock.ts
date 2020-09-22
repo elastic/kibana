@@ -30,6 +30,7 @@ import {
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
+import { MlUrlGenerator } from '../../../../../ml/public';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -82,6 +83,12 @@ export const createStartServicesMock = (): StartServices => {
     data,
     security,
     storage,
+    ml: {
+      urlGenerator: new MlUrlGenerator({
+        appBasePath: '/app/ml',
+        useHash: false,
+      }),
+    },
   } as unknown) as StartServices;
 
   return services;
