@@ -135,6 +135,7 @@ export const EndpointList = () => {
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
+    isTransformEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -532,8 +533,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist]);
+    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist, isTransformEnabled]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -542,6 +543,10 @@ export const EndpointList = () => {
   const refreshInterval = useMemo(() => {
     return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
   }, [endpointsExist, autoRefreshInterval]);
+
+  const shouldShowKQLBar = useMemo(() => {
+    return endpointsExist && !patternsError && isTransformEnabled;
+  }, [endpointsExist, patternsError, isTransformEnabled]);
 
   return (
     <AdministrationListPage
@@ -563,7 +568,7 @@ export const EndpointList = () => {
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         <EuiFlexGroup>
-          {endpointsExist && !patternsError && (
+          {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />
             </EuiFlexItem>
