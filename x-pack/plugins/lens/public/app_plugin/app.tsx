@@ -355,6 +355,17 @@ export function App({
       savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
       title: saveProps.newTitle,
     };
+
+    // Required to serialize filters in by value mode until
+    // https://github.com/elastic/kibana/issues/77588 is fixed
+    if (getIsByValueMode()) {
+      docToSave.state.filters.forEach((filter) => {
+        if (typeof filter.meta.value === 'function') {
+          delete filter.meta.value;
+        }
+      });
+    }
+
     const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
     const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
     if (options.saveToLibrary && !originalInput) {
