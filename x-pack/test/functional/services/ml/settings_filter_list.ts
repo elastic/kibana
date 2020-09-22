@@ -180,7 +180,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertAddItemsButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListAddItemsButton');
+      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "add" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
