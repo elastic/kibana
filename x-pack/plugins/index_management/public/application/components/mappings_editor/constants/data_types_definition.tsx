@@ -853,12 +853,12 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription"
-          defaultMessage="Version fields are helpful to handle software version values and to support specialized precedence rules for them. This field type isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
+          defaultMessage="Version fields are helpful to handle software version values. This field isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
           values={{
             keywordType: (
               <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
                 {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription.textTypeLink',
+                  'xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription.keywordTypeLink',
                   {
                     defaultMessage: 'keyword data type',
                   }
