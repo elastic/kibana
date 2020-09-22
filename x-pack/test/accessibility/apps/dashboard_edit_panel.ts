@@ -85,6 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // flow will change whenever the custom time range a11y issue gets fixed.
+    // Will need to click on gear icon and then click on more.
+
     // inspector panel
     it('A11y test on dashboard embeddable open inspector', async () => {
       await testSubjects.click('embeddablePanelAction-openInspector');
