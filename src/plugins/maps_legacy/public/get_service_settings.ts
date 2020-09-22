@@ -17,27 +17,21 @@
  * under the License.
  */
 
-let loadModulesPromise: Promise<LazyLoadedMapsLegacyModules>;
+import { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
+import { getMapsLegacyConfig } from './kibana_services';
+import { IServiceSettings } from './map/service_settings_types';
 
-interface LazyLoadedMapsLegacyModules {
-  KibanaMap: unknown;
-  L: unknown;
-  ServiceSettings: unknown;
-}
+let loadPromise: Promise<IServiceSettings>;
 
-export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyModules> {
-  if (typeof loadModulesPromise !== 'undefined') {
-    return loadModulesPromise;
+export async function getServiceSettings(): Promise<IServiceSettings> {
+  if (typeof loadPromise !== 'undefined') {
+    return loadPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const { KibanaMap, L, ServiceSettings } = await import('./lazy');
-
-    resolve({
-      KibanaMap,
-      L,
-      ServiceSettings,
-    });
+  loadPromise = new Promise(async (resolve) => {
+    const modules = await lazyLoadMapsLegacyModules();
+    const config = getMapsLegacyConfig();
+    resolve(new modules.ServiceSettings(config, config.tilemap));
   });
-  return loadModulesPromise;
+  return loadPromise;
 }

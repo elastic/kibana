@@ -22,13 +22,12 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 // @ts-ignore
 import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
 // @ts-ignore
-import { ServiceSettings } from './map/service_settings';
-// @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
+import { getServiceSettings } from './get_service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -65,11 +64,10 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
 
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
 
-    const serviceSettings = new ServiceSettings(config, config.tilemap);
-    const getBaseMapsVis = () => new BaseMapsVisualizationProvider(serviceSettings);
+    const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
     return {
-      serviceSettings,
+      getServiceSettings,
       getZoomPrecision,
       getPrecision,
       config,

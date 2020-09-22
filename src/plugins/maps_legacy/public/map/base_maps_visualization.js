@@ -22,20 +22,17 @@ import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
 import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
+import { getServiceSettings } from '../get_service_settings';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(mapServiceSettings) {
+export function BaseMapsVisualizationProvider() {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
-
-  const serviceSettings = mapServiceSettings;
-  const toastService = getToasts();
-
   return class BaseMapsVisualization {
     constructor(element, vis) {
       this.vis = vis;
@@ -99,6 +96,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
       const modules = await lazyLoadMapsLegacyModules();
       this._leaflet = modules.L;
       this._kibanaMap = new modules.KibanaMap(this._container, options);
+      this._serviceSettings = await getServiceSettings();
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
@@ -132,14 +130,14 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
     async _updateBaseLayer() {
       const emsTileLayerId = getEmsTileLayerId();
 
-      if (!this._kibanaMap) {
+      if (!this._kibanaMap || !this._serviceSettings) {
         return;
       }
 
       const mapParams = this._getMapsParams();
       if (!this._tmsConfigured()) {
         try {
-          const tmsServices = await serviceSettings.getTMSServices();
+          const tmsServices = await this._serviceSettings.getTMSServices();
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
@@ -148,7 +146,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
             this._setTmsLayer(initBasemapLayer);
           }
         } catch (e) {
-          toastService.addWarning(e.message);
+          getToasts().addWarning(e.message);
           return;
         }
         return;
@@ -175,7 +173,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
           this._setTmsLayer(selectedTmsLayer);
         }
       } catch (tmsLoadingError) {
-        toastService.addWarning(tmsLoadingError.message);
+        getToasts().addWarning(tmsLoadingError.message);
       }
     }
 
@@ -190,12 +188,12 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
         isDesaturated = true;
       }
       const isDarkMode = getUiSettings().get('theme:darkMode');
-      const meta = await serviceSettings.getAttributesForTMSLayer(
+      const meta = await this._serviceSettings.getAttributesForTMSLayer(
         tmsLayer,
         isDesaturated,
         isDarkMode
       );
-      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
+      const showZoomMessage = this._serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;

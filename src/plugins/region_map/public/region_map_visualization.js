@@ -27,7 +27,6 @@ import _ from 'lodash';
 
 export function createRegionMapVisualization({
   regionmapsConfig,
-  serviceSettings,
   uiSettings,
   BaseMapsVisualization,
 }) {
@@ -102,7 +101,9 @@ export function createRegionMapVisualization({
         fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
         (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
       ) {
-        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
+        return this._serviceSettings
+          ? await this._serviceSettings.loadFileLayerConfig(fileLayerConfig)
+          : null;
       }
 
       //Configured in the kibana.yml. Needs to be resolved through the settings.
@@ -182,7 +183,7 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings
+          this._serviceSettings
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -192,7 +193,7 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings,
+          this._serviceSettings,
           this._leaflet
         );
       }

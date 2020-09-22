@@ -46,7 +46,7 @@ export interface VegaVisualizationDependencies {
   plugins: {
     data: DataPublicPluginSetup;
   };
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
@@ -87,7 +87,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       plugins: {
         data,
       },
-      serviceSettings: mapsLegacy.serviceSettings,
+      getServiceSettings: mapsLegacy.getServiceSettings,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));

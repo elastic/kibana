@@ -34,7 +34,7 @@ import {
   FileLayer,
   TmsLayer,
   IServiceSettings,
-} from './map/service_settings';
+} from './map/service_settings_types';
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
