@@ -9,13 +9,13 @@ Constructs a new instance of the `PainlessError` class
 <b>Signature:</b>
 
 ```typescript
-constructor(err: Error, request: IEsSearchRequest);
+constructor(err: EsError, request: IEsSearchRequest);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  err | <code>Error</code> |  |
+|  err | <code>EsError</code> |  |
 |  request | <code>IEsSearchRequest</code> |  |
 

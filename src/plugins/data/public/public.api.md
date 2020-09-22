@@ -1588,9 +1588,12 @@ export interface OptionedValueProp {
 //
 // @public (undocumented)
 export class PainlessError extends KbnError {
-    constructor(err: Error, request: IEsSearchRequest);
+    // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
+    constructor(err: EsError, request: IEsSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
+    // (undocumented)
+    painlessStack: any;
 }
 
 // Warning: (ae-forgotten-export) The symbol "parseEsInterval" needs to be exported by the entry point index.d.ts

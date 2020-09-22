@@ -16,6 +16,12 @@ export declare class PainlessError extends KbnError
 |  --- | --- | --- |
 |  [(constructor)(err, request)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
 
+## Properties
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [painlessStack](./kibana-plugin-plugins-data-public.painlesserror.painlessstack.md) |  | <code>any</code> |  |
+
 ## Methods
 
 |  Method | Modifiers | Description |
