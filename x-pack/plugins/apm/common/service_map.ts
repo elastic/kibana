@@ -27,6 +27,7 @@ export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
   [SPAN_TYPE]: string;
   [SPAN_SUBTYPE]: string;
+  label?: string;
 }
 
 export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;
@@ -57,3 +58,22 @@ export const invalidLicenseMessage = i18n.translate(
       "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
   }
 );
+
+const NONGROUPED_SPANS: Record<string, string[]> = {
+  aws: ['servicename'],
+  cache: ['all'],
+  db: ['all'],
+  external: ['graphql', 'grpc', 'websocket'],
+  messaging: ['all'],
+  template: ['handlebars'],
+};
+
+export function isSpanGroupingSupported(type?: string, subtype?: string) {
+  if (!type || !(type in NONGROUPED_SPANS)) {
+    return true;
+  }
+  return !NONGROUPED_SPANS[type].some(
+    (nongroupedSubType) =>
+      nongroupedSubType === 'all' || nongroupedSubType === subtype
+  );
+}

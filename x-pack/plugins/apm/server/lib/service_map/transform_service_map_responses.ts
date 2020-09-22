@@ -19,6 +19,7 @@ import {
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
+import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -217,5 +218,5 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     data: element,
   }));
 
-  return { elements };
+  return groupResourceNodes({ elements });
 }

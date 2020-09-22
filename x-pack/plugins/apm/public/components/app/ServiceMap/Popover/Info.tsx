@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
@@ -12,6 +12,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ItemRow = styled.div`
   line-height: 2;
@@ -19,6 +20,11 @@ const ItemRow = styled.div`
 
 const ItemTitle = styled.dt`
   color: ${({ theme }) => theme.eui.textColors.subdued};
+`;
+
+const ExternalResourcesList = styled.section`
+  max-height: 360px;
+  overflow: auto;
 `;
 
 const ItemDescription = styled.dd``;
@@ -50,6 +56,22 @@ export function Info(data: InfoProps) {
       description: subtype,
     },
   ];
+
+  if (data.groupedConnections) {
+    return (
+      <ExternalResourcesList>
+        <EuiDescriptionList
+          listItems={data.groupedConnections.map(
+            (resource: ExternalConnectionNode) => ({
+              title:
+                resource.label || resource['span.destination.service.resource'],
+              description: `${resource['span.type']} (${resource['span.subtype']})`,
+            })
+          )}
+        />
+      </ExternalResourcesList>
+    );
+  }
 
   return (
     <>
