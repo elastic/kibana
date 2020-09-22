@@ -8,12 +8,13 @@ import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF } from '../types';
+import { JobParamsPDF, TaskPayloadPDF } from '../types';
 // @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPDF
+  JobParamsPDF,
+  TaskPayloadPDF
 >> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
