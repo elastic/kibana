@@ -20,7 +20,7 @@ import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
-import { OperationFieldSupportMatrix } from './dimension_panel';
+import { OperationSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
@@ -37,7 +37,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
   selectedColumnSourceField?: string;
-  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  operationSupportMatrix: OperationSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
@@ -49,13 +49,13 @@ export function FieldSelect({
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
-  operationFieldSupportMatrix,
+  operationSupportMatrix,
   onChoose,
   onDeleteColumn,
   existingFields,
   ...rest
 }: FieldSelectProps) {
-  const { operationByField } = operationFieldSupportMatrix;
+  const { operationByField } = operationSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 

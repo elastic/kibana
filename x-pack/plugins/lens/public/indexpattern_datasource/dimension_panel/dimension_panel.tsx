@@ -46,7 +46,7 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
   dateRange: DateRange;
 };
 
-export interface OperationFieldSupportMatrix {
+export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, OperationType[]>>;
   operationWithoutField: OperationType[];
   fieldByOperation: Partial<Record<OperationType, string[]>>;
@@ -59,7 +59,7 @@ type Props = Pick<
 
 // TODO: This code has historically been memoized, as a potentially performance
 // sensitive task. If we can add memoization without breaking the behavior, we should.
-const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatrix => {
+const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
   const layerId = props.layerId;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
@@ -98,13 +98,13 @@ const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatr
 };
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const { dragging } = props.dragDropContext;
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedField(dragging)) {
@@ -126,11 +126,11 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
 }
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
@@ -174,8 +174,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return false;
   }
 
-  const operationsForNewField =
-    operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+  const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
   const layerId = props.layerId;
   const selectedColumn: IndexPatternColumn | null =
@@ -266,7 +265,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
@@ -276,7 +275,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
-      operationFieldSupportMatrix={operationFieldSupportMatrix}
+      operationSupportMatrix={operationSupportMatrix}
     />
   );
 };

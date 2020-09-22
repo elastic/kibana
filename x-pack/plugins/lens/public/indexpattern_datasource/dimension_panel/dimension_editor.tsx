@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { EuiFormLabel } from '@elastic/eui';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
-import { IndexPatternDimensionEditorProps, OperationFieldSupportMatrix } from './dimension_panel';
+import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -36,7 +36,7 @@ const operationPanels = getOperationDisplay();
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
-  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
 }
 
@@ -90,7 +90,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
 export function DimensionEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
-    operationFieldSupportMatrix,
+    operationSupportMatrix,
     state,
     columnId,
     setState,
@@ -98,7 +98,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern,
     hideGrouping,
   } = props;
-  const { operationByField, fieldByOperation } = operationFieldSupportMatrix;
+  const { operationByField, fieldByOperation } = operationSupportMatrix;
   const [
     incompatibleSelectedOperationType,
     setInvalidOperationType,
@@ -132,7 +132,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         ...asOperationOptions(validOperationTypes, true),
         ...asOperationOptions(possibleOperationTypes, false),
         ...asOperationOptions(
-          operationFieldSupportMatrix.operationWithoutField,
+          operationSupportMatrix.operationWithoutField,
           !selectedColumn || !hasField(selectedColumn)
         ),
       ],
@@ -172,37 +172,30 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         onClick() {
-          if (selectedColumn?.operationType === operationType) {
-            return;
-          }
-
-          // todo: when moving from terms agg to filters, we want to create a filter `$field.name : *`
-          // it probably has to be re-thought when removing the field name.
-          const isTermsToFilters =
-            selectedColumn?.operationType === 'terms' && operationType === 'filters';
-
-          if (!selectedColumn || !compatibleWithCurrentField) {
-            if (operationDefinitionMap[operationType].input === 'none') {
-              setInvalidOperationType(null);
-              setState(
-                changeColumn({
-                  state,
-                  layerId,
-                  columnId,
-                  newColumn: buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
-                    suggestedPriority: props.suggestedPriority,
-                    layerId: props.layerId,
-                    op: operationType,
-                    indexPattern: currentIndexPattern,
-                    previousColumn: selectedColumn,
-                  }),
-                })
-              );
-              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+          if (operationDefinitionMap[operationType].input === 'none') {
+            // Clear invalid state because we are creating a valid column
+            setInvalidOperationType(null);
+            if (selectedColumn?.operationType === operationType) {
               return;
             }
-
+            setState(
+              changeColumn({
+                state,
+                layerId,
+                columnId,
+                newColumn: buildColumn({
+                  columns: props.state.layers[props.layerId].columns,
+                  suggestedPriority: props.suggestedPriority,
+                  layerId: props.layerId,
+                  op: operationType,
+                  indexPattern: currentIndexPattern,
+                  previousColumn: selectedColumn,
+                }),
+              })
+            );
+            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+            return;
+          } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || [];
 
             if (possibleFields.length === 1) {
@@ -228,8 +221,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           }
-          if (incompatibleSelectedOperationType && !isTermsToFilters) {
-            setInvalidOperationType(null);
+
+          setInvalidOperationType(null);
+
+          if (selectedColumn?.operationType === operationType) {
+            return;
           }
 
           const newColumn: IndexPatternColumn = buildColumn({
@@ -296,7 +292,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               currentIndexPattern={currentIndexPattern}
               existingFields={state.existingFields}
               fieldMap={fieldMap}
-              operationFieldSupportMatrix={operationFieldSupportMatrix}
+              operationSupportMatrix={operationSupportMatrix}
               selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
               selectedColumnSourceField={
                 selectedColumn && hasField(selectedColumn) ? selectedColumn.sourceField : undefined
@@ -325,8 +321,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 } else {
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   const compatibleOperations =
-                    ('field' in choice &&
-                      operationFieldSupportMatrix.operationByField[choice.field]) ||
+                    ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
                     [];
                   let operation;
                   if (compatibleOperations.length > 0) {
