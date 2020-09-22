@@ -233,7 +233,6 @@ export class IndexPatternsService {
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return {};
       }
 
       this.onError(err, {

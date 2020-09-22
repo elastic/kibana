@@ -268,7 +268,7 @@ export {
   fieldList,
 } from '../common';
 
-export * from '../common/index_patterns/errors';
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
