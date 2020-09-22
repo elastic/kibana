@@ -22,8 +22,8 @@ import { extractTimeFields } from './extract_time_fields';
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {
     const fields = [
-      { type: 'text', name: 'name' },
-      { type: 'text', name: 'name' },
+      { type: 'text', name: 'name', aggregatable: false },
+      { type: 'text', name: 'name', aggregatable: false },
     ];
 
     expect(extractTimeFields(fields)).toEqual([
@@ -32,7 +32,7 @@ describe('extractTimeFields', () => {
   });
 
   it('should add extra options', () => {
-    const fields = [{ type: 'date', name: '@timestamp' }];
+    const fields = [{ type: 'date', name: '@timestamp', aggregatable: false }];
 
     expect(extractTimeFields(fields)).toEqual([
       { display: '@timestamp', fieldName: '@timestamp' },

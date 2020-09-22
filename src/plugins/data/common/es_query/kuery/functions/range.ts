@@ -70,6 +70,7 @@ export function toElasticsearchQuery(
       name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
       type: '',
+      aggregatable: false,
     });
   }
 

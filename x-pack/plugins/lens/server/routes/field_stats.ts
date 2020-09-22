@@ -85,16 +85,16 @@ export async function initFieldsRoute(setup: CoreSetup) {
 
         if (field.type === 'number') {
           return res.ok({
-            body: await getNumberHistogram(search, field),
+            body: await getNumberHistogram(search, field as IFieldType),
           });
         } else if (field.type === 'date') {
           return res.ok({
-            body: await getDateHistogram(search, field, { fromDate, toDate }),
+            body: await getDateHistogram(search, field as IFieldType, { fromDate, toDate }),
           });
         }
 
         return res.ok({
-          body: await getStringSamples(search, field),
+          body: await getStringSamples(search, field as IFieldType),
         });
       } catch (e) {
         if (e.status === 404) {

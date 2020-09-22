@@ -141,7 +141,7 @@ describe('helpers', () => {
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
         indexPatterns: {
-          fields: [{ name: 'event.category', type: 'test type' }],
+          fields: [{ name: 'event.category', type: 'test type', aggregatable: false }],
           title: 'test title',
           getFormatterForField: () => ({ convert: (val: unknown) => val }),
         },

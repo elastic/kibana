@@ -25,8 +25,8 @@ describe('ExpressionRow', () => {
       <ExpressionRow
         canDelete={false}
         fields={[
-          { name: 'system.cpu.user.pct', type: 'test' },
-          { name: 'system.load.1', type: 'test' },
+          { name: 'system.cpu.user.pct', type: 'test', aggregatable: false },
+          { name: 'system.load.1', type: 'test', aggregatable: false },
         ]}
         remove={() => {}}
         addExpression={() => {}}

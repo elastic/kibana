@@ -19,6 +19,7 @@ describe('getSourceFields', () => {
       {
         name: 'agent',
         type: 'string',
+        aggregatable: false,
       },
       {
         name: 'agent.keyword',
@@ -28,6 +29,7 @@ describe('getSourceFields', () => {
           },
         },
         type: 'string',
+        aggregatable: false,
       },
     ];
     const sourceFields = getSourceFields(fields);

@@ -36,6 +36,7 @@ const items: IndexedFieldItem[] = [
     type: 'name',
     excluded: false,
     format: '',
+    aggregatable: false,
   },
   {
     name: 'timestamp',
@@ -44,6 +45,7 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: 'YYYY-MM-DD',
+    aggregatable: false,
   },
   {
     name: 'conflictingField',
@@ -52,6 +54,7 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: '',
+    aggregatable: false,
   },
 ];
 

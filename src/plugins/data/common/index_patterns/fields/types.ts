@@ -28,7 +28,7 @@ export interface IFieldType {
   // esTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
   esTypes?: string[];
-  aggregatable?: boolean;
+  aggregatable: boolean;
   filterable?: boolean;
   searchable?: boolean;
   sortable?: boolean;
