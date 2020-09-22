@@ -18,6 +18,7 @@
  */
 
 import { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
+// @ts-expect-error
 import { getMapsLegacyConfig } from './kibana_services';
 import { IServiceSettings } from './map/service_settings_types';
 
@@ -31,6 +32,7 @@ export async function getServiceSettings(): Promise<IServiceSettings> {
   loadPromise = new Promise(async (resolve) => {
     const modules = await lazyLoadMapsLegacyModules();
     const config = getMapsLegacyConfig();
+    // @ts-expect-error
     resolve(new modules.ServiceSettings(config, config.tilemap));
   });
   return loadPromise;

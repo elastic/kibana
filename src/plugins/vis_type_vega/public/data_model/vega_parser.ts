@@ -80,7 +80,7 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
-  getServiceSettings: () => Promse<IServiceSettings>;
+  getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
 
@@ -89,7 +89,7 @@ export class VegaParser {
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promse<IServiceSettings>
+    getServiceSettings: () => Promise<IServiceSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -568,7 +568,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         type = DEFAULT_PARSER;
       }
 
-      const parser = this._urlParsers[type];
+      const parser = this._urlParsers![type];
       if (parser === undefined) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
@@ -592,7 +592,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
     }
   }

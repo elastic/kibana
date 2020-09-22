@@ -47,7 +47,7 @@ interface TileMapVisualizationDependencies {
   getZoomPrecision: any;
   getPrecision: any;
   BaseMapsVisualization: any;
-  getServiceSettings: Promise<IServiceSettings>;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
