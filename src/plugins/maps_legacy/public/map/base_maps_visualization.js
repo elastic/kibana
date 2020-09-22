@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
@@ -197,7 +196,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
         isDarkMode
       );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
-      const options = _.cloneDeep(tmsLayer);
+      const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
@@ -230,12 +229,11 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
     }
 
     _getMapsParams() {
-      return _.assign(
-        {},
-        this.vis.type.visConfig.defaults,
-        { type: this.vis.type.name },
-        this._params
-      );
+      return {
+        ...this.vis.type.visConfig.defaults,
+        type: this.vis.type.name,
+        ...this._params,
+      };
     }
 
     _whenBaseLayerIsLoaded() {

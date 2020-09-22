@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
@@ -44,20 +43,6 @@ export class ServiceSettings {
       fetchFunction: function (...args) {
         return fetch(...args);
       },
-    });
-    this.getTMSOptions();
-  }
-
-  getTMSOptions() {
-    const markdownIt = new MarkdownIt({
-      html: false,
-      linkify: true,
-    });
-
-    // TMS Options
-    this.tmsOptionsFromConfig = _.assign({}, this._tilemapsConfig.options, {
-      attribution: _.escape(markdownIt.render(this._tilemapsConfig.options.attribution || '')),
-      url: this._tilemapsConfig.url,
     });
   }
 
@@ -121,8 +106,19 @@ export class ServiceSettings {
   async getTMSServices() {
     let allServices = [];
     if (this._hasTmsConfigured) {
+      const { escape } = await import('lodash');
+
+      const markdownIt = new MarkdownIt({
+        html: false,
+        linkify: true,
+      });
+
       //use tilemap.* settings from yml
-      const tmsService = _.cloneDeep(this.tmsOptionsFromConfig);
+      const tmsService = {
+        ...this._tilemapsConfig.options,
+        attribution: escape(markdownIt.render(this._tilemapsConfig.options.attribution || '')),
+        url: this._tilemapsConfig.url,
+      };
       tmsService.id = TMS_IN_YML_ID;
       tmsService.origin = ORIGIN.KIBANA_YML;
       allServices.push(tmsService);
@@ -208,13 +204,23 @@ export class ServiceSettings {
     if (tmsServiceConfig.origin === ORIGIN.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
     } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
-      const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-      return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+      return {
+        url: this._tilemapsConfig.url,
+        minzoom: this._tilemapsConfig.minzoom,
+        maxzoom: this._tilemapsConfig.maxzoom,
+        attribution: this._tilemapsConfig.attribution,
+        origin: ORIGIN.KIBANA_YML,
+      };
     } else {
       //this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
-        const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-        return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+        return {
+          url: this._tilemapsConfig.url,
+          minzoom: this._tilemapsConfig.minzoom,
+          maxzoom: this._tilemapsConfig.maxzoom,
+          attribution: this._tilemapsConfig.attribution,
+          origin: ORIGIN.KIBANA_YML,
+        };
       } else {
         //assume ems
         return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);

@@ -27,7 +27,7 @@ import { KibanaMapLayer } from './map/kibana_map_layer';
 // @ts-ignore
 import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
-import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
+import { getPrecision, geoContains } from './map/decode_geo_hash';
 import {
   VectorLayer,
   FileLayerField,
@@ -46,7 +46,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public */
 export {
-  scaleBounds,
   getPrecision,
   geoContains,
   colorUtil,

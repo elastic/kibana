@@ -30,7 +30,7 @@ export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyM
   }
 
   loadModulesPromise = new Promise(async (resolve) => {
-    const { KibanaMap } = await import('./lazy');
+    const { KibanaMap, L } = await import('./lazy');
 
     resolve({
       KibanaMap,
