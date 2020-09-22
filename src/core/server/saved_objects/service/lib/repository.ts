@@ -707,26 +707,26 @@ export class SavedObjectsRepository {
       fields,
       namespaces,
       type,
-      typesAndNamespacesMap,
+      typeToNamespacesMap,
       filter,
       preference,
     } = options;
 
-    if (!type && !typesAndNamespacesMap) {
+    if (!type && !typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be a string or an array of strings'
       );
-    } else if (namespaces?.length === 0 && !typesAndNamespacesMap) {
+    } else if (namespaces?.length === 0 && !typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.namespaces cannot be an empty array'
       );
-    } else if (type && typesAndNamespacesMap) {
+    } else if (type && typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.type must be an empty string when options.typesAndNamespacesMap is used'
+        'options.type must be an empty string when options.typeToNamespacesMap is used'
       );
-    } else if ((!namespaces || namespaces?.length) && typesAndNamespacesMap) {
+    } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.namespaces must be an empty array when options.typesAndNamespacesMap is used'
+        'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
       );
     }
 
@@ -734,7 +734,7 @@ export class SavedObjectsRepository {
       ? Array.isArray(type)
         ? type
         : [type]
-      : Array.from(typesAndNamespacesMap!.keys());
+      : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return SavedObjectsUtils.createEmptyFindResponse<T>(options);
@@ -780,7 +780,7 @@ export class SavedObjectsRepository {
           sortField,
           sortOrder,
           namespaces,
-          typesAndNamespacesMap,
+          typeToNamespacesMap,
           hasReference,
           kueryNode,
         }),

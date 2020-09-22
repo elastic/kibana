@@ -1079,7 +1079,7 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
-    typesAndNamespacesMap?: Map<string, string[] | undefined>;
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 // @public

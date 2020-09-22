@@ -2484,24 +2484,24 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
-      it(`throws when type is not falsy and typesAndNamespacesMap is defined`, async () => {
+      it(`throws when type is not falsy and typeToNamespacesMap is defined`, async () => {
         await expect(
-          savedObjectsRepository.find({ type: 'foo', typesAndNamespacesMap: new Map() })
+          savedObjectsRepository.find({ type: 'foo', typeToNamespacesMap: new Map() })
         ).rejects.toThrowError(
-          'options.type must be an empty string when options.typesAndNamespacesMap is used'
+          'options.type must be an empty string when options.typeToNamespacesMap is used'
         );
         expect(client.search).not.toHaveBeenCalled();
       });
 
-      it(`throws when type is not an empty array and typesAndNamespacesMap is defined`, async () => {
+      it(`throws when type is not an empty array and typeToNamespacesMap is defined`, async () => {
         const test = async (args) => {
           await expect(savedObjectsRepository.find(args)).rejects.toThrowError(
-            'options.namespaces must be an empty array when options.typesAndNamespacesMap is used'
+            'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
           );
           expect(client.search).not.toHaveBeenCalled();
         };
-        await test({ type: '', typesAndNamespacesMap: new Map() });
-        await test({ type: '', namespaces: ['some-ns'], typesAndNamespacesMap: new Map() });
+        await test({ type: '', typeToNamespacesMap: new Map() });
+        await test({ type: '', namespaces: ['some-ns'], typeToNamespacesMap: new Map() });
       });
 
       it(`throws when searchFields is defined but not an array`, async () => {
@@ -2612,10 +2612,10 @@ describe('SavedObjectsRepository', () => {
         await test(['unknownType', HIDDEN_TYPE]);
       });
 
-      it(`should return empty results when attempting to find only invalid or hidden types using typesAndNamespacesMap`, async () => {
+      it(`should return empty results when attempting to find only invalid or hidden types using typeToNamespacesMap`, async () => {
         const test = async (types) => {
           const result = await savedObjectsRepository.find({
-            typesAndNamespacesMap: new Map(types.map((x) => [x, undefined])),
+            typeToNamespacesMap: new Map(types.map((x) => [x, undefined])),
             type: '',
             namespaces: [],
           });
@@ -2631,8 +2631,8 @@ describe('SavedObjectsRepository', () => {
 
     describe('search dsl', () => {
       const commonOptions = {
-        type: [type], // cannot be used when `typesAndNamespacesMap` is present
-        namespaces: [namespace], // cannot be used when `typesAndNamespacesMap` is present
+        type: [type], // cannot be used when `typeToNamespacesMap` is present
+        namespaces: [namespace], // cannot be used when `typeToNamespacesMap` is present
         search: 'foo*',
         searchFields: ['foo'],
         sortField: 'name',
@@ -2650,12 +2650,12 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
       });
 
-      it(`accepts typesAndNamespacesMap`, async () => {
+      it(`accepts typeToNamespacesMap`, async () => {
         const relevantOpts = {
           ...commonOptions,
           type: '',
           namespaces: [],
-          typesAndNamespacesMap: new Map([[type, [namespace]]]), // can only be used when `type` is falsy and `namespaces` is an empty array
+          typeToNamespacesMap: new Map([[type, [namespace]]]), // can only be used when `type` is falsy and `namespaces` is an empty array
         };
 
         await findSuccess(relevantOpts, namespace);

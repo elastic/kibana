@@ -90,12 +90,13 @@ export interface SavedObjectsFindOptions {
   filter?: string | KueryNode;
   namespaces?: string[];
   /**
-   * Map that is a subset of types and namespaces to search in; this is only intended to be used by a saved object client wrapper.
+   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
+   * object client wrapper.
    * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
    * Any types that are not included in this map will be excluded entirely.
    * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
    */
-  typesAndNamespacesMap?: Map<string, string[] | undefined>;
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
 }

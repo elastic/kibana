@@ -638,7 +638,7 @@ describe('#find', () => {
     const result = await expectSuccess(client.find, { options });
     expect(clientOpts.baseClient.find.mock.calls[0][0]).toEqual({
       ...options,
-      typesAndNamespacesMap: undefined,
+      typeToNamespacesMap: undefined,
     });
     expect(result).toEqual(apiCallReturnValue);
   });
@@ -676,7 +676,7 @@ describe('#find', () => {
     // 'expect(clientOpts.baseClient.find).toHaveBeenCalledWith' resulted in false negatives, resorting to manually comparing mock call args
     expect(clientOpts.baseClient.find.mock.calls[0][0]).toEqual({
       ...options,
-      typesAndNamespacesMap: new Map([
+      typeToNamespacesMap: new Map([
         ['foo', ['some-ns', 'another-ns']],
         ['bar', ['some-ns']],
         ['baz', ['another-ns']],

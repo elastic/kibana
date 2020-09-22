@@ -34,7 +34,7 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typesAndNamespacesMap'
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;

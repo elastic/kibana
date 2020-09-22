@@ -129,7 +129,7 @@ interface QueryParams {
   registry: ISavedObjectTypeRegistry;
   namespaces?: string[];
   type?: string | string[];
-  typesAndNamespacesMap?: Map<string, string[] | undefined>;
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   search?: string;
   searchFields?: string[];
   rootSearchFields?: string[];
@@ -146,7 +146,7 @@ export function getQueryParams({
   registry,
   namespaces,
   type,
-  typesAndNamespacesMap,
+  typeToNamespacesMap,
   search,
   searchFields,
   rootSearchFields,
@@ -156,7 +156,7 @@ export function getQueryParams({
 }: QueryParams) {
   const types = getTypes(
     mappings,
-    typesAndNamespacesMap ? Array.from(typesAndNamespacesMap.keys()) : type
+    typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
   );
 
   // A de-duplicated set of namespaces makes for a more effecient query.
@@ -207,7 +207,7 @@ export function getQueryParams({
             : undefined,
           should: types.map((shouldType) => {
             const normalizedNamespaces = normalizeNamespaces(
-              typesAndNamespacesMap ? typesAndNamespacesMap.get(shouldType) : namespaces
+              typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
             );
             return getClauseForType(registry, normalizedNamespaces, shouldType);
           }),

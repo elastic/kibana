@@ -282,7 +282,7 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`typesAndNamespacesMap` parameter', () => {
+    describe('`typeToNamespacesMap` parameter', () => {
       const expectResult = (result: Result, ...typeClauses: any) => {
         expect(result.query.bool.filter).toEqual(
           expect.arrayContaining([
@@ -297,7 +297,7 @@ describe('#getQueryParams', () => {
           registry,
           type: ['pending', 'saved', 'shared', 'global'],
           namespaces: ['foo', 'bar', 'default'],
-          typesAndNamespacesMap: new Map([
+          typeToNamespacesMap: new Map([
             ['pending', ['foo']], // 'pending' is only authorized in the 'foo' namespace
             // 'saved' is not authorized in any namespaces
             ['shared', ['bar', 'default']], // 'shared' is only authorized in the 'bar' and 'default' namespaces
