@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HttpLogic, IHttpValues, IHttpActions, mountHttpLogic } from './http_logic';
+import { httpServiceMock } from 'src/core/public/mocks';
+
+export const mockHttpValues = {
+  http: httpServiceMock.createSetupContract(),
+  errorConnecting: false,
+  readOnlyMode: false,
+};
