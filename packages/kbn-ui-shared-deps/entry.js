@@ -52,6 +52,7 @@ export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
 export const Lodash = require('lodash');
+export const LodashFp = require('lodash/fp');
 
 import * as Theme from './theme.ts';
 export { Theme };

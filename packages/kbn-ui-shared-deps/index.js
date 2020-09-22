@@ -63,5 +63,6 @@ exports.externals = {
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
   lodash: '__kbnSharedDeps__.Lodash',
+  'lodash/fp': '__kbnSharedDeps__.LodashFp',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');
