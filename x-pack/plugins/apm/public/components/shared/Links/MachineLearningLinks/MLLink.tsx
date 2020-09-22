@@ -35,7 +35,6 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
   const [mlADLink, setMlADLink] = useState(
     core.http.basePath.prepend('/app/ml/jobs')
   );
-
   useEffect(() => {
     let isCancelled = false;
     const generateLink = async () => {
@@ -51,8 +50,10 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
           pageState: {
             jobId: jobIds,
             groupIds: ['apm'],
-            timeRange: time,
-            refreshInterval,
+            globalState: {
+              time,
+              refreshInterval,
+            },
           },
         });
         if (!isCancelled) {

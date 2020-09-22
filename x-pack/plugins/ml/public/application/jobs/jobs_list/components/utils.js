@@ -268,7 +268,6 @@ export function deleteJobs(jobs, finish = () => {}) {
 }
 
 export function filterJobs(jobs, clauses) {
-  console.log('jobs, clauses', jobs, clauses);
   if (clauses.length === 0) {
     return jobs;
   }
