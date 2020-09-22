@@ -58,10 +58,10 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   const intersection = useIntersection(imgRef, {
     root: null,
     rootMargin: '0px',
-    threshold: 1,
+    threshold: 0.25,
   });
   useEffect(() => {
-    if (!screenshot && intersection && intersection.isIntersecting) {
+    if (screenshot === undefined && intersection && intersection.isIntersecting) {
       fetchScreenshot(stepIndex);
     }
   }, [fetchScreenshot, intersection, screenshot, stepIndex]);
@@ -81,7 +81,7 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
         alt="stuff"
       />
     );
-  } else if (isLoading === false && !screenshot) {
+  } else if (isLoading === false && screenshot === '') {
     return (
       <EuiIcon
         color="subdued"
