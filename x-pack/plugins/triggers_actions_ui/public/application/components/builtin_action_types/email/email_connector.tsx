@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -22,8 +22,15 @@ import { EmailActionConnector } from '../types';
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EmailActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
-  const { from, host, port, secure } = action.config;
+  const { from, host, port, secure, hasAuth } = action.config;
   const { user, password } = action.secrets;
+  // const [initialHasAuth] = useState<boolean>(hasAuth === true);
+  useEffect(() => {
+    if (!action.id) {
+      editActionConfig('hasAuth', true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Fragment>
@@ -160,60 +167,95 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            id="emailUser"
-            fullWidth
-            error={errors.user}
-            isInvalid={errors.user.length > 0}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
-              {
-                defaultMessage: 'Username',
-              }
-            )}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={errors.user.length > 0}
-              name="user"
-              readOnly={readOnly}
-              value={user || ''}
-              data-test-subj="emailUserInput"
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.noCredentialsSwitchLabel',
+                {
+                  defaultMessage: 'Do not send credentials',
+                }
+              )}
+              disabled={readOnly}
+              checked={!hasAuth || false}
               onChange={(e) => {
-                editActionSecrets('user', nullableString(e.target.value));
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="emailPassword"
-            fullWidth
-            error={errors.password}
-            isInvalid={errors.password.length > 0}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
-              {
-                defaultMessage: 'Password',
-              }
-            )}
-          >
-            <EuiFieldPassword
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={errors.password.length > 0}
-              name="password"
-              value={password || ''}
-              data-test-subj="emailPasswordInput"
-              onChange={(e) => {
-                editActionSecrets('password', nullableString(e.target.value));
+                editActionConfig('hasAuth', !e.target.checked);
+                if (e.target.checked) {
+                  editActionSecrets('user', null);
+                  editActionSecrets('password', null);
+                }
               }}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {hasAuth ? (
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFormRow
+              id="emailUser"
+              fullWidth
+              error={errors.user}
+              isInvalid={errors.user.length > 0 && user !== undefined}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                {
+                  defaultMessage: 'Username',
+                }
+              )}
+            >
+              <EuiFieldText
+                fullWidth
+                isInvalid={errors.user.length > 0 && user !== undefined}
+                name="user"
+                readOnly={readOnly}
+                value={user || ''}
+                data-test-subj="emailUserInput"
+                onChange={(e) => {
+                  editActionSecrets('user', nullableString(e.target.value));
+                }}
+                onBlur={() => {
+                  if (!user) {
+                    editActionSecrets('user', '');
+                  }
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              id="emailPassword"
+              fullWidth
+              error={errors.password}
+              isInvalid={errors.password.length > 0 && password !== undefined}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                {
+                  defaultMessage: 'Password',
+                }
+              )}
+            >
+              <EuiFieldPassword
+                fullWidth
+                readOnly={readOnly}
+                isInvalid={errors.password.length > 0 && password !== undefined}
+                name="password"
+                value={password || ''}
+                data-test-subj="emailPasswordInput"
+                onChange={(e) => {
+                  editActionSecrets('password', nullableString(e.target.value));
+                }}
+                onBlur={() => {
+                  if (!password) {
+                    editActionSecrets('password', '');
+                  }
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
     </Fragment>
   );
 };

@@ -36,6 +36,7 @@ const ConfigSchemaProps = {
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
+  hasAuth: schema.boolean({ defaultValue: false }),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);

@@ -75,6 +75,26 @@ export function getActionType(): ActionTypeModel<EmailActionConnector, EmailActi
           )
         );
       }
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        errors.user.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
+            {
+              defaultMessage: 'Username is required.',
+            }
+          )
+        );
+      }
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        errors.password.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
+            {
+              defaultMessage: 'Password is required.',
+            }
+          )
+        );
+      }
       if (action.secrets.user && !action.secrets.password) {
         errors.password.push(
           i18n.translate(

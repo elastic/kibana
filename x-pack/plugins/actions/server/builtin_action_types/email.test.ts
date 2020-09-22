@@ -233,6 +233,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: true,
     };
     const secrets: ActionTypeSecretsType = {
       user: 'bob',
@@ -298,6 +299,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,
@@ -356,6 +358,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,
