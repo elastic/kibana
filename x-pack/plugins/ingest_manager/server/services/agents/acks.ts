@@ -139,16 +139,12 @@ function getLatestConfigChangePolicyActionIfUpdated(
       !isAgentPolicyAction(action) ||
       (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||
       action.policy_id !== agent.policy_id ||
-      (acc?.policy_revision ?? 0) < (agent.policy_revision || 0)
+      (action?.policy_revision ?? 0) < (agent.policy_revision || 0)
     ) {
       return acc;
     }
 
-    if (action.policy_revision > (acc?.policy_revision ?? 0)) {
-      return action;
-    }
-
-    return acc;
+    return action;
   }, null);
 }
 
