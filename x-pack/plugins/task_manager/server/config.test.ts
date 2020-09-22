@@ -15,6 +15,7 @@ describe('config validation', () => {
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
+        "monitored_aggregated_stats_refresh_rate": 60000,
         "poll_interval": 3000,
         "request_capacity": 1000,
       }

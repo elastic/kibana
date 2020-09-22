@@ -10,6 +10,9 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 
+// Refresh "pull based" monitored stats at a default rate of once a minute
+export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -47,6 +50,12 @@ export const configSchema = schema.object({
     defaultValue: DEFAULT_MAX_WORKERS,
     // disable the task manager rather than trying to specify it with 0 workers
     min: 1,
+  }),
+  /* The rate at which we refresh monitored stats that require aggregation queries against ES. */
+  monitored_aggregated_stats_refresh_rate: schema.number({
+    defaultValue: DEFAULT_MONITORING_REFRESH_RATE,
+    /* don't run monitored stat aggregations any faster than once every 5 seconds */
+    min: 5000,
   }),
 });
 

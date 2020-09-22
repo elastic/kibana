@@ -60,6 +60,7 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
+import { AggregationQuery, AggregationResult } from './queries/aggregation_clauses';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -77,6 +78,11 @@ export interface SearchOpts {
   size?: number;
   seq_no_primary_term?: boolean;
   search_after?: unknown[];
+}
+
+export interface AggregationOpts {
+  aggs: AggregationQuery;
+  size?: number;
 }
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
@@ -458,6 +464,22 @@ export class TaskStore {
     };
   }
 
+  public async aggregate<AggregationName extends string>({
+    aggs,
+    size = 0,
+  }: AggregationOpts): Promise<AggregationResult<AggregationName>> {
+    const result = await this.callCluster('search', {
+      index: this.index,
+      ignoreUnavailable: true,
+      body: {
+        aggs: ensureAggregationOnlyReturnsTaskObjects(aggs),
+        size,
+      },
+    });
+
+    return (result as { aggregations: AggregationResult<AggregationName> }).aggregations;
+  }
+
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -535,6 +557,22 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ...opts,
     query,
   };
+}
+
+function ensureAggregationOnlyReturnsTaskObjects(
+  aggs: AggregationOpts['aggs']
+): AggregationOpts['aggs'] {
+  const filteredAgg: AggregationQuery = {
+    task: {
+      filter: {
+        term: {
+          type: 'task',
+        },
+      },
+      aggs,
+    },
+  };
+  return filteredAgg;
 }
 
 function isSavedObjectsUpdateResponse(

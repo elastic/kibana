@@ -15,7 +15,6 @@ import {
   DEFAULT_POLL_INTERVAL,
 } from '../../../../plugins/task_manager/server/config';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
-import { SavedObjectsRawDoc } from '../../../../../src/core/server';
 
 const {
   task: { properties: taskManagerIndexMapping },
@@ -33,6 +32,22 @@ export interface SearchResults {
     hits: RawDoc[];
   };
 }
+
+type DeprecatedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'schedule'> & {
+  interval: string;
+};
+
+type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+> & {
+  state: State;
+  params: Params;
+  scheduledAt: string;
+  startedAt: string | null;
+  retryAt: string | null;
+  runAt: string;
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -67,8 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    function currentTasks(): Promise<{
-      docs: ConcreteTaskInstance[];
+    function currentTasks<State = unknown, Params = unknown>(): Promise<{
+      docs: Array<SerializedConcreteTaskInstance<State, Params>>;
     }> {
       return supertest
         .get('/api/sample_tasks')
@@ -76,7 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    function currentTask(task: string): ConcreteTaskInstance {
+    function currentTask<State = unknown, Params = unknown>(
+      task: string
+    ): Promise<SerializedConcreteTaskInstance<State, Params>> {
       return supertest
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
@@ -84,11 +101,11 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    function ensureTasksIndexRefreshed(): Promise<void> {
+    function ensureTasksIndexRefreshed() {
       return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
-    function historyDocs(taskId: string) {
+    function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
           index: testHistoryIndex,
@@ -97,16 +114,18 @@ export default function ({ getService }: FtrProviderContext) {
         .then((result: SearchResults) => result.hits.hits);
     }
 
-    function scheduleTask(task: string): ConcreteTaskInstance {
+    function scheduleTask(
+      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
+    ): Promise<SerializedConcreteTaskInstance> {
       return supertest
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response: { body: ConcreteTaskInstance }) => response.body);
+        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
     }
 
-    function runTaskNow(task) {
+    function runTaskNow(task: { id: string }) {
       return supertest
         .post('/api/sample_tasks/run_now')
         .set('kbn-xsrf', 'xxx')
@@ -115,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    function scheduleTaskIfNotExists(task) {
+    function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
         .set('kbn-xsrf', 'xxx')
@@ -124,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response: { body: ConcreteTaskInstance }) => response.body);
     }
 
-    function releaseTasksWaitingForEventToComplete(event) {
+    function releaseTasksWaitingForEventToComplete(event: string) {
       return supertest
         .post('/api/sample_tasks/event')
         .set('kbn-xsrf', 'xxx')
@@ -132,7 +151,10 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     }
 
-    function getTaskById(tasks: ConcreteTaskInstance[], id: string) {
+    function getTaskById<State = unknown, Params = unknown>(
+      tasks: Array<SerializedConcreteTaskInstance<State, Params>>,
+      id: string
+    ) {
       return tasks.filter((task) => task.id === id)[0];
     }
 
@@ -166,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         log.debug(`Task found: ${task.id}`);
         log.debug(`Task status: ${task.status}`);
         log.debug(`Task state: ${JSON.stringify(task.state, null, 2)}`);
@@ -251,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
 
@@ -272,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -293,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -314,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
           1
         );
 
-        const [task] = (await currentTasks()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
 
@@ -337,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
             .length
         ).to.eql(2);
 
-        const [task] = (await currentTasks()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
         expect(task.state.count).to.eql(2);
@@ -358,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
         const docs = await historyDocs(originalTask.id);
         expect(docs.length).to.eql(1);
 
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
 
         expect(task.state.count).to.eql(1);
 
@@ -408,16 +430,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await runNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(2);
       });
 
       // drain tasks, othrwise they'll keep Task Manager stalled
       await retry.try(async () => {
         await releaseTasksWaitingForEventToComplete('releaseTheOthers');
-        const tasks = (await currentTasks()).docs.filter(
-          (task) => task.params.originalParams.waitForEvent === 'releaseTheOthers'
-        );
+        const tasks = (
+          await currentTasks<{}, { originalParams: { waitForEvent: string } }>()
+        ).docs.filter((task) => task.params.originalParams.waitForEvent === 'releaseTheOthers');
         expect(tasks.length).to.eql(0);
       });
     });
@@ -435,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
           1
         );
 
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(1);
         expect(task.status).to.eql('idle');
 
@@ -452,7 +474,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(successfulRunNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(2);
         expect(task.status).to.eql('idle');
       });
@@ -530,7 +552,7 @@ export default function ({ getService }: FtrProviderContext) {
       // finish first run by emitting 'runNowHasBeenAttempted' event
       await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
 
         const task = await currentTask(longRunningTask.id);
@@ -579,7 +601,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
     });
 
-    async function expectReschedule(originalRunAt: number, task: Task, expectedDiff: number) {
+    async function expectReschedule(
+      originalRunAt: number,
+      task: SerializedConcreteTaskInstance<any, any>,
+      expectedDiff: number
+    ) {
       const buffer = 10000;
       expect(Date.parse(task.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
       expect(Date.parse(task.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
@@ -607,14 +633,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, fastTask.id).state.count).to.eql(2);
       });
 
       await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
 
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);

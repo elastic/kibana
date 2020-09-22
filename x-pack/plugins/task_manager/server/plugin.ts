@@ -11,6 +11,8 @@ import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
+import { healthRoute } from './routes';
+import { createAggregatedStatsStream } from './monitoring';
 
 export type TaskManagerSetupContract = Pick<
   TaskManager,
@@ -36,13 +38,23 @@ export class TaskManagerPlugin
   }
 
   public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
+    const config = (this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
-      .toPromise();
+      .toPromise());
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
+
+    // Routes
+    const router = core.http.createRouter();
+    healthRoute(
+      router,
+      config,
+      this.taskManager.then((tm) => createAggregatedStatsStream(tm, config)),
+      // if health is any more stale than the pollInterval (+1s buffer) consider the system unhealthy
+      config.poll_interval + 1000
+    );
 
     return {
       addMiddleware: (middleware: Middleware) => {

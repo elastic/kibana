@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { KibanaRequest } from '../../../../src/core/server';
 import {
   savedObjectsClientMock,
@@ -35,7 +35,7 @@ const features = featuresPluginMock.createStart();
 const securityPluginSetup = securityMock.createSetup();
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
-  taskManager: taskManagerMock.start(),
+  taskManager: taskManagerMock.createStart(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   getSpace: jest.fn(),

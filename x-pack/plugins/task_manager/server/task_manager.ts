@@ -60,10 +60,12 @@ import {
   OwnershipClaimingOpts,
   ClaimOwnershipResult,
   SearchOpts,
+  AggregationOpts,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { BufferedTaskStore } from './buffered_task_store';
+import { AggregationResult } from './queries/aggregation_clauses';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -370,6 +372,19 @@ export class TaskManager {
   public async fetch(opts: SearchOpts): Promise<FetchResult> {
     await this.waitUntilStarted();
     return this.store.fetch(opts);
+  }
+
+  /**
+   * Fetches a list of scheduled tasks.
+   *
+   * @param opts - The query options used to filter tasks
+   * @returns {Promise<FetchResult>}
+   */
+  public async aggregate<AggregationName extends string>(
+    opts: AggregationOpts
+  ): Promise<AggregationResult<AggregationName>> {
+    await this.waitUntilStarted();
+    return this.store.aggregate<AggregationName>(opts);
   }
 
   /**
