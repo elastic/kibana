@@ -15,7 +15,7 @@ import {
   RENDER_AS,
   SOURCE_TYPES,
 } from '../../../../common/constants';
-import { SearchSource } from '../../../../../../../src/plugins/data/public/search/search_source';
+import { SearchSource } from 'src/plugins/data/public';
 
 export class MockSearchSource {
   setField = jest.fn();

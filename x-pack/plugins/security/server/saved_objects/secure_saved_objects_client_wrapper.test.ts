@@ -222,15 +222,17 @@ function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: true,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource) =>
-        _actions.map((action) => ({
-          resource,
-          privilege: action,
-          authorized: true,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource) =>
+          _actions.map((action) => ({
+            resource,
+            privilege: action,
+            authorized: true,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
@@ -246,15 +248,17 @@ function getMockCheckPrivilegesFailure(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: false,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource, idxa) =>
-        _actions.map((action, idxb) => ({
-          resource,
-          privilege: action,
-          authorized: idxa > 0 || idxb > 0,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource, idxa) =>
+          _actions.map((action, idxb) => ({
+            resource,
+            privilege: action,
+            authorized: idxa > 0 || idxb > 0,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
@@ -605,22 +609,83 @@ describe('#find', () => {
     await expectGeneralError(client.find, { type: type1 });
   });
 
-  test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
+  test(`returns empty result when unauthorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure
+    );
+
     const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
-    await expectForbiddenError(client.find, { options });
+    const result = await client.find(options);
+
+    expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+      USERNAME,
+      'find',
+      [type1],
+      options.namespaces,
+      [{ spaceId: 'some-ns', privilege: 'mock-saved_object:foo/find' }],
+      { options }
+    );
+    expect(result).toEqual({ page: 1, per_page: 20, total: 0, saved_objects: [] });
   });
 
-  test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
-    await expectForbiddenError(client.find, { options });
-  });
-
-  test(`returns result of baseClient.find when authorized`, async () => {
+  test(`returns result of baseClient.find when fully authorized`, async () => {
     const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
     clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
 
     const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
     const result = await expectSuccess(client.find, { options });
+    expect(clientOpts.baseClient.find.mock.calls[0][0]).toEqual({
+      ...options,
+      typeToNamespacesMap: undefined,
+    });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`returns result of baseClient.find when partially authorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
+      hasAllRequested: false,
+      username: USERNAME,
+      privileges: {
+        kibana: [
+          { resource: 'some-ns', privilege: 'mock-saved_object:foo/find', authorized: true },
+          { resource: 'some-ns', privilege: 'mock-saved_object:bar/find', authorized: true },
+          { resource: 'some-ns', privilege: 'mock-saved_object:baz/find', authorized: false },
+          { resource: 'some-ns', privilege: 'mock-saved_object:qux/find', authorized: false },
+          { resource: 'another-ns', privilege: 'mock-saved_object:foo/find', authorized: true },
+          { resource: 'another-ns', privilege: 'mock-saved_object:bar/find', authorized: false },
+          { resource: 'another-ns', privilege: 'mock-saved_object:baz/find', authorized: true },
+          { resource: 'another-ns', privilege: 'mock-saved_object:qux/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:foo/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:bar/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:baz/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:qux/find', authorized: false },
+        ],
+      },
+    });
+
+    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
+
+    const options = Object.freeze({
+      type: ['foo', 'bar', 'baz', 'qux'],
+      namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
+    });
+    const result = await client.find(options);
+    // 'expect(clientOpts.baseClient.find).toHaveBeenCalledWith' resulted in false negatives, resorting to manually comparing mock call args
+    expect(clientOpts.baseClient.find.mock.calls[0][0]).toEqual({
+      ...options,
+      typeToNamespacesMap: new Map([
+        ['foo', ['some-ns', 'another-ns']],
+        ['bar', ['some-ns']],
+        ['baz', ['another-ns']],
+        // qux is not authorized, so there is no entry for it
+        // forbidden-ns is completely forbidden, so there are no entries with this namespace
+      ]),
+      type: '',
+      namespaces: [],
+    });
     expect(result).toEqual(apiCallReturnValue);
   });
 

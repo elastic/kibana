@@ -7,14 +7,17 @@
 import { Map as MbMap } from 'mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
+import { RawValue } from '../../../../../common/constants';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
-      // Fields that support auto-domain are normalized with a field-formatter and stored into a computed-field
-      // Otherwise, the raw value is just carried over and no computed field is created.
-      const targetName = this._field.getMbPropertyName(this.getStyleName());
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
+      const targetName = this.getMbPropertyName();
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', [
+        'coalesce',
+        [this.getMbLookupFunction(), targetName],
+        '',
+      ]);
     } else {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
     }
@@ -30,5 +33,9 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
 
   supportsMbFeatureState() {
     return false;
+  }
+
+  getMbPropertyValue(rawValue: RawValue): RawValue {
+    return this.formatField(rawValue);
   }
 }

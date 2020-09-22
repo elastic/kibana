@@ -140,8 +140,8 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    clickProcessorOutputTab() {
-      act(() => {
+    async clickProcessorOutputTab() {
+      await act(async () => {
         find('outputTab').simulate('click');
       });
       component.update();
@@ -224,7 +224,8 @@ type TestSubject =
   | 'processorStatusIcon'
   | 'documentsTab'
   | 'manageItemButton'
-  | 'processorSettingsForm'
+  | 'addProcessorForm'
+  | 'editProcessorForm'
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlacklistedHeaders } from '../../export_types/common';
+import { omitBlockedHeaders } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
 import { LevelLogger as Logger } from '../../lib';
@@ -35,19 +35,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         config.get('kibanaServer', 'port'),
       ] as string[];
 
-      const getAbsoluteUrl = getAbsoluteUrlFactory({
-        defaultBasePath: basePath,
-        protocol,
-        hostname,
-        port,
-      });
-
-      const hashUrl = getAbsoluteUrl({
-        basePath,
-        path: '/',
-        hash: '',
-        search: '',
-      });
+      const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
+      const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
 
       // Hack the layout to make the base/login page work
       const layout = {
@@ -65,7 +54,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       };
 
       const headers = {
-        headers: omitBlacklistedHeaders({
+        headers: omitBlockedHeaders({
           job: null,
           decryptedHeaders,
         }),

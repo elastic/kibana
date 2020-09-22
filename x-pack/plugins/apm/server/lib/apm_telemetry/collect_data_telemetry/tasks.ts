@@ -85,7 +85,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   { range: { '@timestamp': { gte: start, lt: end } } },
                 ],
               },
@@ -606,7 +606,10 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, range1d],
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+                  range1d,
+                ],
               },
             },
             aggs: {
@@ -640,7 +643,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
               },
@@ -674,7 +677,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
                 must_not: {

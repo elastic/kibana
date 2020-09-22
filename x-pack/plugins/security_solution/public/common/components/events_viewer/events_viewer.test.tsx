@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
@@ -26,6 +25,11 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { KqlMode } from '../../../timelines/store/timeline/model';
 import { SortDirection } from '../../../timelines/components/timeline/body/sort';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
+import { useTimelineEvents } from '../../../timelines/containers';
+
+jest.mock('../../../timelines/containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
@@ -83,20 +87,19 @@ describe('EventsViewer', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
     mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks }]);
   });
 
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
@@ -114,14 +117,12 @@ describe('EventsViewer', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
@@ -139,14 +140,12 @@ describe('EventsViewer', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={''}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={''}
+        />
       </TestProviders>
     );
 
@@ -164,14 +163,12 @@ describe('EventsViewer', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={''}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={''}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
@@ -187,14 +184,12 @@ describe('EventsViewer', () => {
   test('it renders the Fields Browser as a settings gear', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
@@ -208,21 +203,19 @@ describe('EventsViewer', () => {
   test('it renders the footer containing the Load More button', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
+      expect(wrapper.find(`[data-test-subj="timeline-pagination"]`).first().exists()).toBe(true);
     });
   });
 
@@ -230,14 +223,12 @@ describe('EventsViewer', () => {
     test(`it renders the ${header.id} default EventsViewer column header`, async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <StatefulEventsViewer
-              defaultModel={eventsDefaultModel}
-              end={to}
-              id={'test-stateful-events-viewer'}
-              start={from}
-            />
-          </MockedProvider>
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
         </TestProviders>
       );
 
@@ -257,13 +248,11 @@ describe('EventsViewer', () => {
     test('it renders the provided headerFilterGroup', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer
-              {...eventsViewerDefaultProps}
-              graphEventId={undefined}
-              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
-            />
-          </MockedProvider>
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventId={undefined}
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+          />
         </TestProviders>
       );
 
@@ -277,13 +266,11 @@ describe('EventsViewer', () => {
     test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer
-              {...eventsViewerDefaultProps}
-              graphEventId={undefined}
-              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
-            />
-          </MockedProvider>
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventId={undefined}
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+          />
         </TestProviders>
       );
 
@@ -299,13 +286,11 @@ describe('EventsViewer', () => {
     test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is an empty string', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer
-              {...eventsViewerDefaultProps}
-              graphEventId=""
-              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
-            />
-          </MockedProvider>
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventId=""
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+          />
         </TestProviders>
       );
 
@@ -321,13 +306,11 @@ describe('EventsViewer', () => {
     test('it does NOT have a visible HeaderFilterGroupWrapper when Resolver is showing, because graphEventId is a valid id', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer
-              {...eventsViewerDefaultProps}
-              graphEventId="a valid id"
-              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
-            />
-          </MockedProvider>
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventId="a valid id"
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+          />
         </TestProviders>
       );
 
@@ -343,13 +326,11 @@ describe('EventsViewer', () => {
     test('it (still) renders an invisible headerFilterGroup (to maintain state while hidden) when Resolver is showing, because graphEventId is a valid id', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer
-              {...eventsViewerDefaultProps}
-              graphEventId="a valid id"
-              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
-            />
-          </MockedProvider>
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventId="a valid id"
+            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+          />
         </TestProviders>
       );
 
@@ -365,9 +346,7 @@ describe('EventsViewer', () => {
     test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is undefined', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
         </TestProviders>
       );
 
@@ -381,9 +360,7 @@ describe('EventsViewer', () => {
     test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is an empty string', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
         </TestProviders>
       );
 
@@ -397,9 +374,7 @@ describe('EventsViewer', () => {
     test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventId is a valid id', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
         </TestProviders>
       );
 
@@ -415,9 +390,7 @@ describe('EventsViewer', () => {
     test('it renders the inspect button when Resolver is NOT showing, because graphEventId is undefined', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
         </TestProviders>
       );
 
@@ -431,9 +404,7 @@ describe('EventsViewer', () => {
     test('it renders the inspect button when Resolver is NOT showing, because graphEventId is an empty string', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
         </TestProviders>
       );
 
@@ -447,9 +418,7 @@ describe('EventsViewer', () => {
     test('it does NOT render the inspect button when Resolver is showing, because graphEventId is a valid id', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
-          </MockedProvider>
+          <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
         </TestProviders>
       );
 
