@@ -62,7 +62,7 @@ const { execSync } = require('child_process');
     fs.writeFileSync(`${destination}/manifest.json`, manifestJSON);
 
     execSync(`
-      set -euo pipefail
+      set -eu
       cd "${destination}"
       gsutil -m cp -r *.* gs://kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}
       cp manifest.json manifest-latest.json

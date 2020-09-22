@@ -50,6 +50,7 @@ object ESSnapshotManifest : BuildType({
   dependencies{
     dependency(ESSnapshotBuild) {
       snapshot {
+        onDependencyFailure = FailureAction.IGNORE
       }
 
       artifacts {
