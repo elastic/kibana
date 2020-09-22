@@ -34,7 +34,7 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnType,
   mergeSearchAfterAndBulkCreate,
-  mergeSearchAfterReturnTypeFromResponse,
+  createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -256,15 +256,15 @@ export const signalRulesAlertType = ({
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
-          result = mergeSearchAfterAndBulkCreate({
-            prev: result,
-            next: createSearchAfterReturnType({
+          result = mergeSearchAfterAndBulkCreate([
+            result,
+            createSearchAfterReturnType({
               success: success && anomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
-          });
+          ]);
         } else if (isEqlRule(type)) {
           throw new Error('EQL Rules are under development, execution is not yet implemented');
         } else if (isThresholdRule(type) && threshold) {
@@ -317,16 +317,16 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result = mergeSearchAfterReturnTypeFromResponse({
-            searchResult: thresholdResults,
-            prev: result,
-            next: createSearchAfterReturnType({
+          result = mergeSearchAfterAndBulkCreate([
+            result,
+            createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
+            createSearchAfterReturnType({
               success,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
-          });
+          ]);
         } else if (isThreatMatchRule(type)) {
           if (
             threatQuery == null ||

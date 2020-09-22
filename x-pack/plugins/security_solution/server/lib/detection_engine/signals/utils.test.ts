@@ -28,7 +28,6 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
-  mergeSearchAfterReturnTypeFromResponse,
   mergeSearchAfterAndBulkCreate,
   createTotalHitsFromSearchResult,
 } from './utils';
@@ -968,137 +967,12 @@ describe('utils', () => {
     });
   });
 
-  describe('mergeSearchAfterReturnTypeFromResponse', () => {
-    test('it merges search in with two default search results and an empty doc correctly', () => {
-      const merged = mergeSearchAfterReturnTypeFromResponse({
-        searchResult: sampleEmptyDocSearchResults(),
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType(),
-      });
-      const expected: SearchAfterAndBulkCreateReturnType = {
-        bulkCreateTimes: [],
-        createdSignalsCount: 0,
-        errors: [],
-        lastLookBackDate: null,
-        searchAfterTimes: [],
-        success: true,
-      };
-      expect(merged).toEqual(expected);
-    });
-
-    test('it merges search in with two default search results and a sample doc correctly', () => {
-      const merged = mergeSearchAfterReturnTypeFromResponse({
-        searchResult: sampleDocSearchResultsWithSortId(),
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType(),
-      });
-      const expected: SearchAfterAndBulkCreateReturnType = {
-        bulkCreateTimes: [],
-        createdSignalsCount: 0,
-        errors: [],
-        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
-        searchAfterTimes: [],
-        success: true,
-      };
-      expect(merged).toEqual(expected);
-    });
-
-    test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterReturnTypeFromResponse({
-        searchResult: sampleEmptyDocSearchResults(),
-        prev: createSearchAfterReturnType({ success: false }),
-        next: createSearchAfterReturnType(),
-      });
-      expect(success).toEqual(false);
-    });
-
-    test('it merges search in with two default search results where "next" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterReturnTypeFromResponse({
-        searchResult: sampleEmptyDocSearchResults(),
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType({ success: false }),
-      });
-      expect(success).toEqual(false);
-    });
-
-    test('it merges search in with two default search results where the search result has a false', () => {
-      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
-      searchResult._shards.failed = 1;
-      const { success } = mergeSearchAfterReturnTypeFromResponse({
-        searchResult,
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType(),
-      });
-      expect(success).toEqual(false);
-    });
-
-    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
-      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
-      const { lastLookBackDate } = mergeSearchAfterReturnTypeFromResponse({
-        searchResult,
-        prev: createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        next: createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
-        }),
-      });
-      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
-    });
-
-    test('it merges search where the lastLookBackDate is the "prev" if given an empty data set', () => {
-      const searchResult = sampleEmptyDocSearchResults();
-      const { lastLookBackDate } = mergeSearchAfterReturnTypeFromResponse({
-        searchResult,
-        prev: createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        next: createSearchAfterReturnType({
-          lastLookBackDate: undefined,
-        }),
-      });
-      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
-    });
-
-    test('it merges search where values from "next" and "prev" are computed together', () => {
-      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
-      const merged = mergeSearchAfterReturnTypeFromResponse({
-        searchResult,
-        prev: createSearchAfterReturnType({
-          bulkCreateTimes: ['123'],
-          createdSignalsCount: 3,
-          errors: ['error 1', 'error 2'],
-          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
-          searchAfterTimes: ['123'],
-          success: true,
-        }),
-        next: createSearchAfterReturnType({
-          bulkCreateTimes: ['456'],
-          createdSignalsCount: 2,
-          errors: ['error 3'],
-          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
-          searchAfterTimes: ['567'],
-          success: true,
-        }),
-      });
-      const expected: SearchAfterAndBulkCreateReturnType = {
-        bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
-        createdSignalsCount: 5, // Adds the 3 and 2 together
-        errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
-        searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
-        success: true, // Defaults to success true is all of it was successful
-      };
-      expect(merged).toEqual(expected);
-    });
-  });
-
   describe('mergeSearchAfterAndBulkCreate', () => {
     test('it merges a default "prev" and "next" correctly ', () => {
-      const merged = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType(),
-      });
+      const merged = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType(),
+        createSearchAfterReturnType(),
+      ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
@@ -1111,48 +985,48 @@ describe('utils', () => {
     });
 
     test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType({ success: false }),
-        next: createSearchAfterReturnType(),
-      });
+      const { success } = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType({ success: false }),
+        createSearchAfterReturnType(),
+      ]);
       expect(success).toEqual(false);
     });
 
     test('it merges search in with two default search results where "next" "success" is false correctly', () => {
-      const { success } = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType(),
-        next: createSearchAfterReturnType({ success: false }),
-      });
+      const { success } = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType(),
+        createSearchAfterReturnType({ success: false }),
+      ]);
       expect(success).toEqual(false);
     });
 
     test('it merges search where the lastLookBackDate is the "next" date when given', () => {
-      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType({
+      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType({
           lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
         }),
-        next: createSearchAfterReturnType({
+        createSearchAfterReturnType({
           lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
         }),
-      });
+      ]);
       expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
     });
 
     test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
-      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType({
+      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType({
           lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
         }),
-        next: createSearchAfterReturnType({
+        createSearchAfterReturnType({
           lastLookBackDate: undefined,
         }),
-      });
+      ]);
       expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
     });
 
     test('it merges search where values from "next" and "prev" are computed together', () => {
-      const merged = mergeSearchAfterAndBulkCreate({
-        prev: createSearchAfterReturnType({
+      const merged = mergeSearchAfterAndBulkCreate([
+        createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
           errors: ['error 1', 'error 2'],
@@ -1160,7 +1034,7 @@ describe('utils', () => {
           searchAfterTimes: ['123'],
           success: true,
         }),
-        next: createSearchAfterReturnType({
+        createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
           createdSignalsCount: 2,
           errors: ['error 3'],
@@ -1168,7 +1042,7 @@ describe('utils', () => {
           searchAfterTimes: ['567'],
           success: true,
         }),
-      });
+      ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
         createdSignalsCount: 5, // Adds the 3 and 2 together

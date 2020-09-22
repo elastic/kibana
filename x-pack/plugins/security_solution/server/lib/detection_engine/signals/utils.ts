@@ -496,65 +496,37 @@ export const createSearchAfterReturnType = ({
   };
 };
 
-export const mergeSearchAfterReturnTypeFromResponse = ({
-  searchResult,
-  prev,
-  next,
-}: {
-  searchResult: SignalSearchResponse;
-  prev: SearchAfterAndBulkCreateReturnType;
-  next: SearchAfterAndBulkCreateReturnType;
-}): SearchAfterAndBulkCreateReturnType => {
-  const searchReturn = createSearchAfterReturnType({
-    success: searchResult._shards.failed === 0,
-    lastLookBackDate:
-      searchResult.hits.hits.length > 0
-        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'])
-        : undefined,
-  });
-  const partialMerge = mergeSearchAfterAndBulkCreate({
-    prev,
-    next: searchReturn,
-  });
-  return mergeSearchAfterAndBulkCreate({
-    prev: partialMerge,
-    next,
-  });
-};
+export const mergeSearchAfterAndBulkCreate = (
+  searchAfters: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  return searchAfters.reduce((prev, next) => {
+    const {
+      success: existingSuccess,
+      searchAfterTimes: existingSearchAfterTimes,
+      bulkCreateTimes: existingBulkCreateTimes,
+      lastLookBackDate: existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount,
+      errors: existingErrors,
+    } = prev;
 
-export const mergeSearchAfterAndBulkCreate = ({
-  prev,
-  next,
-}: {
-  prev: SearchAfterAndBulkCreateReturnType;
-  next: SearchAfterAndBulkCreateReturnType;
-}): SearchAfterAndBulkCreateReturnType => {
-  const {
-    success: existingSuccess,
-    searchAfterTimes: existingSearchAfterTimes,
-    bulkCreateTimes: existingBulkCreateTimes,
-    lastLookBackDate: existingLastLookBackDate,
-    createdSignalsCount: existingCreatedSignalsCount,
-    errors: existingErrors,
-  } = prev ?? createSearchAfterReturnType();
+    const {
+      success: newSuccess,
+      searchAfterTimes: newSearchAfterTimes,
+      bulkCreateTimes: newBulkCreateTimes,
+      lastLookBackDate: newLastLookBackDate,
+      createdSignalsCount: newCreatedSignalsCount,
+      errors: newErrors,
+    } = next;
 
-  const {
-    success: newSuccess,
-    searchAfterTimes: newSearchAfterTimes,
-    bulkCreateTimes: newBulkCreateTimes,
-    lastLookBackDate: newLastLookBackDate,
-    createdSignalsCount: newCreatedSignalsCount,
-    errors: newErrors,
-  } = next ?? createSearchAfterReturnType();
-
-  return {
-    success: existingSuccess && newSuccess,
-    searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
-    bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
-    lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
-    createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
-    errors: [...new Set([...existingErrors, ...newErrors])],
-  };
+    return {
+      success: existingSuccess && newSuccess,
+      searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      errors: [...new Set([...existingErrors, ...newErrors])],
+    };
+  });
 };
 
 export const createTotalHitsFromSearchResult = ({

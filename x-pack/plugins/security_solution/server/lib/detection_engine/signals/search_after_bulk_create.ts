@@ -9,10 +9,10 @@ import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filter_events_with_list';
 import {
   createSearchAfterReturnType,
+  createSearchAfterReturnTypeFromResponse,
   createTotalHitsFromSearchResult,
   getSignalTimeTuples,
   mergeSearchAfterAndBulkCreate,
-  mergeSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
@@ -90,15 +90,14 @@ export const searchAfterAndBulkCreate = async ({
           pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
           timestampOverride: ruleParams.timestampOverride,
         });
-        toReturn = mergeSearchAfterReturnTypeFromResponse({
-          searchResult,
-          prev: toReturn,
-          next: createSearchAfterReturnType({
+        toReturn = mergeSearchAfterAndBulkCreate([
+          toReturn,
+          createSearchAfterReturnTypeFromResponse({ searchResult }),
+          createSearchAfterReturnType({
             searchAfterTimes: [searchDuration],
             errors: searchErrors,
           }),
-        });
-
+        ]);
         // determine if there are any candidate signals to be processed
         const totalHits = createTotalHitsFromSearchResult({ searchResult });
         logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
@@ -172,15 +171,15 @@ export const searchAfterAndBulkCreate = async ({
             tags,
             throttle,
           });
-          toReturn = mergeSearchAfterAndBulkCreate({
-            prev: toReturn,
-            next: createSearchAfterReturnType({
+          toReturn = mergeSearchAfterAndBulkCreate([
+            toReturn,
+            createSearchAfterReturnType({
               success: bulkSuccess,
               createdSignalsCount: createdCount,
               bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
               errors: bulkErrors,
             }),
-          });
+          ]);
           signalsCreatedCount += createdCount;
           logger.debug(buildRuleMessage(`created ${createdCount} signals`));
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
@@ -201,13 +200,13 @@ export const searchAfterAndBulkCreate = async ({
         }
       } catch (exc: unknown) {
         logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
-        return mergeSearchAfterAndBulkCreate({
-          prev: toReturn,
-          next: createSearchAfterReturnType({
+        return mergeSearchAfterAndBulkCreate([
+          toReturn,
+          createSearchAfterReturnType({
             success: false,
             errors: [`${exc}`],
           }),
-        });
+        ]);
       }
     }
   }
