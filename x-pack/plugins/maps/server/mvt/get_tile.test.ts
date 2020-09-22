@@ -93,29 +93,34 @@ describe('getGridTile', () => {
 
   beforeEach(() => {
     mockCallElasticsearch.mockReset();
-  });
-
-  test('0.0.0 tile (clusters)', async () => {
     mockCallElasticsearch.mockImplementation((type) => {
       return TILE_GRIDAGGS['0.0.0'].gridAggResponse;
     });
+  });
 
-    const tile = await getGridTile({
-      x: 0,
-      y: 0,
-      z: 0,
-      index: 'manhattan',
-      requestBody,
-      geometryFieldName,
-      logger: ({
-        info: () => {},
-      } as unknown) as Logger,
-      callElasticsearch: mockCallElasticsearch,
-      requestType: RENDER_AS.POINT,
-      geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
-    });
+  const defaultParams = {
+    x: 0,
+    y: 0,
+    z: 0,
+    index: 'manhattan',
+    requestBody,
+    geometryFieldName,
+    logger: ({
+      info: () => {},
+    } as unknown) as Logger,
+    callElasticsearch: mockCallElasticsearch,
+    requestType: RENDER_AS.POINT,
+    geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
+  };
 
-    compareTiles('./__tests__/pbf/0_0_0_grid.pbf', tile);
+  test('0.0.0 tile (clusters)', async () => {
+    const tile = await getGridTile(defaultParams);
+    compareTiles('./__tests__/pbf/0_0_0_grid_aspoint.pbf', tile);
+  });
+
+  test('0.0.0 tile (grids)', async () => {
+    const tile = await getGridTile({ ...defaultParams, requestType: RENDER_AS.GRID });
+    compareTiles('./__tests__/pbf/0_0_0_grid_asgrid.pbf', tile);
   });
 });
 
