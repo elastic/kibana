@@ -49,6 +49,7 @@ object ESSnapshotManifest : BuildType({
           echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > "${"$"}GOOGLE_APPLICATION_CREDENTIALS"
           echo "${"$"}GOOGLE_APPLICATION_CREDENTIALS_JSON" > test.json
           ls -alh
+          export GOOGLE_APPLICATION_CREDENTIALS="${"$"}(pwd)/gcp-credentials.json"
           gcloud info
         """.trimIndent()
     }
