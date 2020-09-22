@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import cloneDeep from 'lodash/cloneDeep';
-import { serializePolicy } from './policy_serialization';
+import { deserializePolicy, serializePolicy } from './policy_serialization';
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
@@ -12,6 +12,7 @@ import {
   defaultNewWarmPhase,
 } from '../../constants';
 import { DataTierAllocationType } from '../../../../common/types';
+import { coldPhaseInitialization } from './cold_phase';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
@@ -366,5 +367,136 @@ describe('Policy serialization', () => {
     deserializedPolicy.phases.warm.dataTierAllocationType = 'default';
     serializePolicy(deserializedPolicy, originalPolicy);
     expect(originalPolicy).toEqual(originalClone);
+  });
+
+  test('serialize a policy using "best_compression" codec for forcemerge', () => {
+    expect(
+      serializePolicy(
+        {
+          name: 'test',
+          phases: {
+            hot: {
+              ...defaultNewHotPhase,
+              forceMergeEnabled: true,
+              selectedForceMergeSegments: '1',
+              bestCompressionEnabled: true,
+            },
+            warm: {
+              ...defaultNewWarmPhase,
+              phaseEnabled: true,
+              forceMergeEnabled: true,
+              selectedForceMergeSegments: '1',
+              bestCompressionEnabled: true,
+            },
+            cold: {
+              ...defaultNewColdPhase,
+            },
+            delete: { ...defaultNewDeletePhase },
+          },
+        },
+        {
+          name: 'test',
+          phases: {
+            hot: { actions: {} },
+            warm: {
+              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+            },
+          },
+        }
+      )
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          actions: {
+            rollover: {
+              max_age: '30d',
+              max_size: '50gb',
+            },
+            forcemerge: {
+              max_num_segments: 1,
+              index_codec: 'best_compression',
+            },
+            set_priority: {
+              priority: 100,
+            },
+          },
+        },
+        warm: {
+          actions: {
+            forcemerge: {
+              max_num_segments: 1,
+              index_codec: 'best_compression',
+            },
+            set_priority: {
+              priority: 50,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('de-serialize a policy using "best_compression" codec for forcemerge', () => {
+    expect(
+      deserializePolicy({
+        modified_date: Date.now().toString(),
+        name: 'test',
+        version: 1,
+        policy: {
+          name: 'test',
+          phases: {
+            hot: {
+              actions: {
+                rollover: {
+                  max_age: '30d',
+                  max_size: '50gb',
+                },
+                forcemerge: {
+                  max_num_segments: 1,
+                  index_codec: 'best_compression',
+                },
+                set_priority: {
+                  priority: 100,
+                },
+              },
+            },
+            warm: {
+              actions: {
+                forcemerge: {
+                  max_num_segments: 1,
+                  index_codec: 'best_compression',
+                },
+                set_priority: {
+                  priority: 50,
+                },
+              },
+            },
+          },
+        },
+      })
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          ...defaultNewHotPhase,
+          forceMergeEnabled: true,
+          selectedForceMergeSegments: '1',
+          bestCompressionEnabled: true,
+        },
+        warm: {
+          ...defaultNewWarmPhase,
+          warmPhaseOnRollover: false,
+          phaseEnabled: true,
+          forceMergeEnabled: true,
+          selectedForceMergeSegments: '1',
+          bestCompressionEnabled: true,
+        },
+        cold: {
+          ...coldPhaseInitialization,
+        },
+        delete: { ...defaultNewDeletePhase },
+      },
+    });
   });
 });

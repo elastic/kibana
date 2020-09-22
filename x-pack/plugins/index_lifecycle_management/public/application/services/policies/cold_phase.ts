@@ -16,7 +16,7 @@ import {
 import { determineDataTierAllocationType } from '../../lib';
 import { serializePhaseWithAllocation } from './shared';
 
-const coldPhaseInitialization: ColdPhase = {
+export const coldPhaseInitialization: ColdPhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',

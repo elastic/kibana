@@ -42,9 +42,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_age?: string;
       max_docs?: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -57,9 +55,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: {
       number_of_shards: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -103,6 +99,12 @@ export interface AllocateAction {
      */
     enabled: false;
   };
+}
+
+export interface ForcemergeAction {
+  max_num_segments: number;
+  // only accepted value for index_codec
+  index_codec?: 'best_compression';
 }
 
 export interface Policy {
@@ -150,6 +152,7 @@ export interface PhaseWithIndexPriority {
 export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
+  bestCompressionEnabled: boolean;
 }
 
 export interface HotPhase
