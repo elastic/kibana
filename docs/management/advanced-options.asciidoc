@@ -142,8 +142,8 @@ Options for the Lucene query string parser. Only used when "Query language" is
 set to Lucene.
 
 [[savedobjects-listinglimit]]`savedObjects:listingLimit`::
-The number of objects to fetch for lists of saved objects. The default value is
-1000. Do not set above 10000.
+The number of objects to fetch for lists of saved objects. The default value
+is 1000. Do not set above 10000.
 
 [[savedobjects-perpage]]`savedObjects:perPage`::
 The number of objects to show on each page of the list of saved objects. The
