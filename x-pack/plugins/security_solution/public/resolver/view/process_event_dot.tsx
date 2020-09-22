@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
