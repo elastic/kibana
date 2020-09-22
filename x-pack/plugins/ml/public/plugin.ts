@@ -123,6 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
+
         const { capabilities } = coreStart.application;
 
         // register ML for the index pattern management no data screen.

@@ -50,6 +50,7 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
           page: 'jobs',
           pageState: {
             jobId: jobIds,
+            groupIds: ['apm'],
             timeRange: time,
             refreshInterval,
           },
