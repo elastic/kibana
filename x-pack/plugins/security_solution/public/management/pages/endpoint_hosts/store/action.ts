@@ -118,6 +118,21 @@ interface ServerReturnedAgenstWithEndpointsTotal {
   payload: number;
 }
 
+interface ServerFailedToReturnAgenstWithEndpointsTotal {
+  type: 'serverFailedToReturnAgenstWithEndpointsTotal';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointsTotal {
+  type: 'serverReturnedEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnEndpointsTotal {
+  type: 'serverFailedToReturnEndpointsTotal';
+  payload: ServerApiError;
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -138,4 +153,7 @@ export type EndpointAction =
   | ServerReturnedEndpointNonExistingPolicies
   | ServerReturnedAgenstWithEndpointsTotal
   | ServerReturnedEndpointAgentPolicies
-  | UserUpdatedEndpointListRefreshOptions;
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedEndpointsTotal
+  | ServerFailedToReturnAgenstWithEndpointsTotal
+  | ServerFailedToReturnEndpointsTotal;

@@ -106,14 +106,29 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
+          const endpointsTotalCount = await endpointsTotal(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointsTotal',
+            payload: endpointsTotalCount,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnEndpointsTotal',
+            payload: error,
+          });
+        }
+
+        try {
           const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
           dispatch({
             type: 'serverReturnedAgenstWithEndpointsTotal',
             payload: agentsWithEndpoint.total,
           });
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.log(error);
+          dispatch({
+            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+            payload: error,
+          });
         }
 
         try {
@@ -382,17 +397,27 @@ const getAgentAndPoliciesForEndpointsList = async (
   return nonExistingPackagePoliciesAndExistingAgentPolicies;
 };
 
-const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      (
-        await http.post<HostResultList>('/api/endpoint/metadata', {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-          }),
-        })
-      ).hosts.length !== 0
-    );
+      await http.post<HostResultList>('/api/endpoint/metadata', {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
+        }),
+      })
+    ).total;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`error while trying to check for total endpoints`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+  return 0;
+};
+
+const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+  try {
+    return (await endpointsTotal(http)) > 0;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`error while trying to check if endpoints exist`);

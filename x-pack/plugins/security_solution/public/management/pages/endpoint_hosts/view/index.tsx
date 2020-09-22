@@ -137,6 +137,8 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     areEndpointsEnrolling,
+    agentsWithEndpointsTotalError,
+    endpointsTotalError,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -546,6 +548,10 @@ export const EndpointList = () => {
     return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
   }, [endpointsExist, autoRefreshInterval]);
 
+  const hasErrorFindingTotals = useMemo(() => {
+    return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
+  }, [endpointsTotalError, agentsWithEndpointsTotalError]);
+
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
@@ -565,7 +571,7 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
-        {areEndpointsEnrolling && (
+        {areEndpointsEnrolling && !hasErrorFindingTotals && (
           <>
             <EuiCallOut
               size="s"
