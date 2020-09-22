@@ -1286,21 +1286,6 @@ export class LegacyElasticsearchErrorHelpers {
     static isNotAuthorizedError(error: any): error is LegacyElasticsearchError;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ILegacyInternals" needs to be exported by the entry point index.d.ts
-//
-// @internal @deprecated (undocumented)
-export class LegacyInternals implements ILegacyInternals {
-    constructor();
-    // (undocumented)
-    getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
-    // (undocumented)
-    getVars(id: string, request: KibanaRequest | LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
-    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    injectUiAppVars(id: string, injector: VarsInjector): void;
-}
-
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
