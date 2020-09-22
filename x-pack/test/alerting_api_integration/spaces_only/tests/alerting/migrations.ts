@@ -5,8 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -38,6 +44,50 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       expect(response.body.consumer).to.equal('infrastructure');
+    });
+
+    it('7.10.0 migrates PagerDuty actions to have a default dedupKey', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/b6087f72-994f-46fb-8120-c6e5c50d0f8f`
+      );
+
+      expect(response.status).to.eql(200);
+
+      expect(response.body.actions).to.eql([
+        {
+          actionTypeId: '.pagerduty',
+          id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
+          group: 'default',
+          params: {
+            component: '',
+            dedupKey: '{{alertId}}',
+            eventAction: 'trigger',
+            summary: 'fired {{alertInstanceId}}',
+          },
+        },
+        {
+          actionTypeId: '.pagerduty',
+          id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
+          group: 'default',
+          params: {
+            component: '',
+            dedupKey: '{{alertId}}',
+            eventAction: 'resolve',
+            summary: 'fired {{alertInstanceId}}',
+          },
+        },
+        {
+          actionTypeId: '.pagerduty',
+          id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
+          group: 'default',
+          params: {
+            component: '',
+            dedupKey: '{{alertInstanceId}}',
+            eventAction: 'resolve',
+            summary: 'fired {{alertInstanceId}}',
+          },
+        },
+      ]);
     });
   });
 }

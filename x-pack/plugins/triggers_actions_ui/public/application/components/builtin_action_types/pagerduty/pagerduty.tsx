@@ -50,8 +50,22 @@ export function getActionType(): ActionTypeModel {
       const errors = {
         summary: new Array<string>(),
         timestamp: new Array<string>(),
+        dedupKey: new Array<string>(),
       };
       validationResult.errors = errors;
+      if (
+        !actionParams.dedupKey?.length &&
+        (actionParams.eventAction === 'resolve' || actionParams.eventAction === 'acknowledge')
+      ) {
+        errors.dedupKey.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredDedupKeyText',
+            {
+              defaultMessage: 'DedupKey is required when resolving or acknowledging an incident.',
+            }
+          )
+        );
+      }
       if (!actionParams.summary?.length) {
         errors.summary.push(
           i18n.translate(

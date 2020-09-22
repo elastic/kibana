@@ -51,6 +51,10 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const EVENT_ACTION_TRIGGER = 'trigger';
 const EVENT_ACTION_RESOLVE = 'resolve';
 const EVENT_ACTION_ACKNOWLEDGE = 'acknowledge';
+const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
+  EVENT_ACTION_RESOLVE,
+  EVENT_ACTION_ACKNOWLEDGE,
+]);
 
 const EventActionSchema = schema.oneOf([
   schema.literal(EVENT_ACTION_TRIGGER),
@@ -81,7 +85,7 @@ const ParamsSchema = schema.object(
 );
 
 function validateParams(paramsObject: unknown): string | void {
-  const { timestamp } = paramsObject as ActionParamsType;
+  const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
   if (timestamp != null) {
     try {
       const date = Date.parse(timestamp);
@@ -102,6 +106,14 @@ function validateParams(paramsObject: unknown): string | void {
         },
       });
     }
+  }
+  if (EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
+    return i18n.translate('xpack.actions.builtin.pagerduty.missingDedupkeyErrorMessage', {
+      defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
+      values: {
+        eventAction,
+      },
+    });
   }
 }
 

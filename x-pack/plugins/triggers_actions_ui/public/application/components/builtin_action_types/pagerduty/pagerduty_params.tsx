@@ -94,6 +94,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
   ];
+
+  const isDedupeKeyRequired = eventAction !== 'trigger';
+
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -144,12 +147,23 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
-              {
-                defaultMessage: 'DedupKey (optional)',
-              }
-            )}
+            error={errors.dedupKey}
+            isInvalid={errors.dedupKey.length > 0}
+            label={
+              isDedupeKeyRequired
+                ? i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextRequiredFieldLabel',
+                    {
+                      defaultMessage: 'DedupKey',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
+                    {
+                      defaultMessage: 'DedupKey (optional)',
+                    }
+                  )
+            }
           >
             <TextFieldWithMessageVariables
               index={index}

@@ -85,6 +85,120 @@ describe('7.10.0', () => {
       },
     });
   });
+
+  test('migrates PagerDuty actions to set a default dedupkey of the AlertId', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'resolve',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'resolve',
+              dedupKey: '{{alertId}}',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
+
+  test('skips PagerDuty actions with a specified dedupkey', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'trigger',
+            dedupKey: '{{alertInstanceId}}',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'trigger',
+              dedupKey: '{{alertInstanceId}}',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
+
+  test('skips PagerDuty actions with an eventAction of "trigger"', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'trigger',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        meta: {
+          versionApiKeyLastmodified: 'pre-7.10.0',
+        },
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'trigger',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('7.10.0 migrates with failure', () => {

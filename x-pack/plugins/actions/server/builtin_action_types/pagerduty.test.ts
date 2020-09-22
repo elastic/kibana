@@ -169,6 +169,16 @@ describe('validateParams()', () => {
       });
     }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
+
+  test('should validate and throw error when dedupKey is missing on resolve', () => {
+    expect(() => {
+      validateParams(actionType, {
+        eventAction: 'resolve',
+      });
+    }).toThrowError(
+      `error validating action params: DedupKey is required when eventAction is "resolve"`
+    );
+  });
 });
 
 describe('execute()', () => {
