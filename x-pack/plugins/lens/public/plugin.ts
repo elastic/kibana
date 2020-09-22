@@ -32,8 +32,6 @@ import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
-import './index.scss';
-
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;

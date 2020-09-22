@@ -57,8 +57,12 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
-  registerVisualization: <T>(visualization: Visualization<T> | Promise<Visualization<T>>) => void;
+  registerDatasource: <T, P>(
+    datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
+  ) => void;
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
 }
 
 export interface EditorFrameStart {

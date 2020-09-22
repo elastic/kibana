@@ -104,6 +104,8 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
+export * from './rename_columns';
+
 export function getIndexPatternDatasource({
   core,
   storage,

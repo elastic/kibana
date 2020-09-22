@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './expression.scss';
+
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';

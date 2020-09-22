@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xyVisualization } from './xy_visualization';
+import { xyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';

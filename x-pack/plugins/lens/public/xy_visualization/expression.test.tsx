@@ -17,7 +17,7 @@ import {
   SeriesNameFn,
   Fit,
 } from '@elastic/charts';
-import { xyChart, XYChart } from './xy_expression';
+import { xyChart, XYChart } from './expression';
 import { LensMultiTable } from '../types';
 import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';

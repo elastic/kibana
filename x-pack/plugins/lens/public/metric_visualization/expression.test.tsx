@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { metricChart, MetricChart } from './metric_expression';
+import { metricChart, MetricChart } from './expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
