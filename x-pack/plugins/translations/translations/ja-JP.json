@@ -4811,8 +4811,6 @@
     "xpack.apm.serviceMap.avgMemoryUsagePopoverStat": "メモリー使用状況（平均）",
     "xpack.apm.serviceMap.avgReqPerMinutePopoverMetric": "1分あたりのリクエスト（平均）",
     "xpack.apm.serviceMap.avgTransDurationPopoverStat": "トランザクションの長さ（平均）",
-    "xpack.apm.serviceMap.betaBadge": "ベータ",
-    "xpack.apm.serviceMap.betaTooltipMessage": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.serviceMap.center": "中央",
     "xpack.apm.serviceMap.download": "ダウンロード",
     "xpack.apm.serviceMap.emptyBanner.docsLink": "詳細はドキュメントをご覧ください",
