@@ -17,6 +17,7 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
+  isTransformEnabled,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -70,24 +71,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
-      // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0) {
-        try {
-          const indexPatterns = await fetchIndexPatterns();
-          if (indexPatterns !== undefined) {
-            dispatch({
-              type: 'serverReturnedMetadataPatterns',
-              payload: indexPatterns,
-            });
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnMetadataPatterns',
-            payload: error,
-          });
-        }
-      }
-
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
@@ -132,6 +115,24 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
+      }
+
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: indexPatterns,
+            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
+          });
+        }
       }
 
       // No endpoints, so we should check to see if there are policies for onboarding
