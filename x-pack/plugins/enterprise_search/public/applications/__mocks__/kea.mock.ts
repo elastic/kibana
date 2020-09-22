@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * NOTE: These variable names MUST start with 'mock*' in order for
+ * Jest to accept its use within a jest.mock()
+ */
+import { mockHttpValues } from './http_logic.mock';
+
 jest.mock('kea', () => ({
   ...(jest.requireActual('kea') as object),
-  useValues: jest.fn(() => ({})),
+  useValues: jest.fn(() => ({ ...mockHttpValues })),
   useActions: jest.fn(() => ({})),
 }));
 
