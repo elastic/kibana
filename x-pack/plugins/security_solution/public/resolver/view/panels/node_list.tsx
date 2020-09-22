@@ -47,7 +47,6 @@ interface ProcessTableView {
   timestamp?: Date;
   nodeID: string;
   event: SafeResolverEvent;
-  // TODO, use event, and side effect context to trigger userBroughtProcessInto view from the link click
 }
 
 /**

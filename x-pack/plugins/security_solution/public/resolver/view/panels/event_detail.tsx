@@ -24,6 +24,7 @@ import { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { deepObjectEntries } from './deep_object_entries';
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -216,45 +217,6 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
   );
 }
 
-/**
- * Sort of like object entries, but does a DFS of an object.
- * Instead of getting a key, an array of keys is returned.
- * The array of keys represents the
- */
-function deepObjectEntries(root: object): Array<[string[], unknown]> {
-  const queue: Array<{ path: string[]; value: unknown }> = [{ path: [], value: root }];
-  const result: Array<[string[], unknown]> = [];
-  while (queue.length) {
-    const next = queue.shift();
-    if (next === undefined) {
-      // this should be impossible
-      throw new Error();
-    }
-    const { path, value } = next;
-    if (Array.isArray(value)) {
-      // array (branch)
-      queue.push(
-        ...value.map((element) => ({
-          path: [...path], // unlike with object paths, don't add the number indices to `path`
-          value: element,
-        }))
-      );
-    } else if (typeof value === 'object' && value !== null) {
-      // object (branch)
-      queue.push(
-        ...Object.keys(value).map((key) => ({
-          path: [...path, key],
-          value: (value as Record<string, unknown>)[key],
-        }))
-      );
-    } else {
-      // leaf
-      result.push([path, value]);
-    }
-  }
-  return result;
-}
-
 function EventDetailBreadcrumbs({
   nodeID,
   nodeName,
@@ -307,25 +269,21 @@ function EventDetailBreadcrumbs({
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
-              values={{ totalCount: relatedEventCount }}
-              defaultMessage="{totalCount} Events"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+            values={{ totalCount: relatedEventCount }}
+            defaultMessage="{totalCount} Events"
+          />
         ),
         ...nodeEventsLinkNavProps,
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.countByCategory"
-              values={{ count: countByCategory, category: breadcrumbEventCategory }}
-              defaultMessage="{count} {category}"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.countByCategory"
+            values={{ count: countByCategory, category: breadcrumbEventCategory }}
+            defaultMessage="{count} {category}"
+          />
         ),
         ...nodeEventsOfTypeLinkNavProps,
       },

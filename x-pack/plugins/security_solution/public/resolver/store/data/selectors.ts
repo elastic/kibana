@@ -182,14 +182,20 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
   return data.relatedEvents;
 }
 
+/**
+ * Get an event (from memory) by its `event.id`.
+ * @deprecated Use the API to find events by ID
+ */
 export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
   // A map of nodeID to a map of eventID to events. Lazily populated.
   const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
   return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
+    // We keep related events in a map by their nodeID.
     const eventsWrapper = relatedEvents.get(nodeID);
     if (!eventsWrapper) {
       return undefined;
     }
+    // When an event from a nodeID is requested, build a map for all events related to that node.
     if (!memo.has(nodeID)) {
       const map = new Map<string | number, SafeResolverEvent>();
       for (const event of eventsWrapper.events) {
@@ -208,42 +214,6 @@ export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents)
     return eventMap.get(eventID);
   };
 });
-
-/**
- * A helper function to turn objects into EuiDescriptionList entries.
- * This reflects the strategy of more or less "dumping" metadata for related processes
- * in description lists with little/no 'prettification'. This has the obvious drawback of
- * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
- * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
- *
- * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
- * {title: "a.b", description: "1"}, {title: "c", description: "d"}
- *
- * @param {object} obj The object to turn into `<dt><dd>` entries
- * @deprecated
- */
-const objectToDescriptionListEntries = function* (
-  obj: object,
-  prefix = ''
-): Generator<{ title: string; description: string }> {
-  const nextPrefix = prefix.length ? `${prefix}.` : '';
-  for (const [metaKey, metaValue] of Object.entries(obj)) {
-    if (typeof metaValue === 'number' || typeof metaValue === 'string') {
-      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
-    } else if (metaValue instanceof Array) {
-      yield {
-        title: nextPrefix + metaKey,
-        description: metaValue
-          .filter((arrayEntry) => {
-            return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
-          })
-          .join(','),
-      };
-    } else if (typeof metaValue === 'object') {
-      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
-    }
-  }
-};
 
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)

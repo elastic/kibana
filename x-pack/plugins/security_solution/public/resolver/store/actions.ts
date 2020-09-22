@@ -9,7 +9,6 @@ import { DataAction } from './data/action';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
- * @deprecated Use `appReceivedNewExternalProperties` instead.
  */
 interface UserBroughtProcessIntoView {
   readonly type: 'userBroughtProcessIntoView';
