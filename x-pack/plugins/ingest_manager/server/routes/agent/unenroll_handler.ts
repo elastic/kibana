@@ -8,7 +8,6 @@ import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostAgentUnenrollResponse, PostBulkAgentUnenrollResponse } from '../../../common/types';
 import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import { defaultIngestErrorHandler } from '../../errors';
