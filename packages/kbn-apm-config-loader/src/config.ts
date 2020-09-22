@@ -40,31 +40,42 @@ const defaultConfig = {
 };
 
 export class ApmConfiguration {
+  private baseConfig?: any;
+  private kibanaVersion: string;
+
   constructor(
     private readonly rootDir: string,
     private readonly rawKibanaConfig: Record<string, any>
-  ) {}
-
-  public getConfig(serviceName: string) {
-    const apmConfig = merge(defaultConfig, this.getDevConfig());
-
-    const rev = this.getGitRev();
-    if (rev !== null) {
-      apmConfig.globalLabels.git_rev = rev;
-    }
-
-    const uuid = this.getKibanaUuid();
-    if (uuid) {
-      apmConfig.globalLabels.kibana_uuid = uuid;
-    }
-
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version } = require(join(this.rootDir, 'package.json'));
+    this.kibanaVersion = version.replace(/\./g, '_');
+  }
 
+  public getConfig(serviceName: string) {
     return {
-      ...apmConfig,
-      serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
+      ...this.getBaseConfig(),
+      serviceName: `${serviceName}-${this.kibanaVersion}`,
     };
+  }
+
+  private getBaseConfig() {
+    if (!this.baseConfig) {
+      const apmConfig = merge(defaultConfig, this.getDevConfig());
+
+      const rev = this.getGitRev();
+      if (rev !== null) {
+        apmConfig.globalLabels.git_rev = rev;
+      }
+
+      const uuid = this.getKibanaUuid();
+      if (uuid) {
+        apmConfig.globalLabels.kibana_uuid = uuid;
+      }
+      this.baseConfig = apmConfig;
+    }
+
+    return this.baseConfig;
   }
 
   private getKibanaUuid() {

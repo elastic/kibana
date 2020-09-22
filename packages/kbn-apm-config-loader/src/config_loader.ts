@@ -24,10 +24,11 @@ import { ApmConfiguration } from './config';
 /**
  * Load the APM configuration.
  *
- * @param root The root directory of kibana (where the sources and the `package.json` file are)
+ * @param argv the `process.argv` arguments
+ * @param rootDir The root directory of kibana (where the sources and the `package.json` file are)
  */
-export const loadConfiguration = (rootDir: string): ApmConfiguration => {
-  const configPaths = getConfigurationFilePaths();
+export const loadConfiguration = (argv: string[], rootDir: string): ApmConfiguration => {
+  const configPaths = getConfigurationFilePaths(argv);
   const rawConfiguration = getConfigFromFiles(configPaths);
   return new ApmConfiguration(rootDir, rawConfiguration);
 };

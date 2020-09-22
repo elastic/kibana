@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-// deep import to avoid loading the whole package
-import { getConfigPath } from '@kbn/utils/target/path';
-import { getFlagValues } from './read_argv';
-
-/**
- * Return the configuration files that needs to be loaded.
- *
- * This mimics the behavior of the `src/cli/serve/serve.js` cli script by reading
- * `-c` and `--config` options from process.argv, and fallbacks to `@kbn/utils`'s `getConfigPath()`
- */
-export const getConfigurationFilePaths = (argv: string[]): string[] => {
-  const rawPaths = getFlagValues(argv, ['-c', '--config']);
-  if (rawPaths.length) {
-    return rawPaths.map((path) => resolve(process.cwd(), path));
+export const getFlagValues = (argv: string[], flag: string | string[]): string[] => {
+  const flags = typeof flag === 'string' ? [flag] : flag;
+  const values: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (flags.includes(argv[i]) && argv[i + 1]) {
+      values.push(argv[++i]);
+    }
   }
-  return [getConfigPath()];
+  return values;
+};
+
+export const getFlagValue = (argv: string[], flag: string | string[]): string | undefined => {
+  const values = getFlagValues(argv, flag);
+  if (values.length) {
+    return values[0];
+  }
 };

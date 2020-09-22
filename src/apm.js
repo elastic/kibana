@@ -34,7 +34,7 @@ module.exports = function (serviceName = name) {
     return;
   }
 
-  apmConfig = loadConfiguration(ROOT_DIR);
+  apmConfig = loadConfiguration(process.argv, ROOT_DIR);
   const conf = apmConfig.getConfig(serviceName);
   require('elastic-apm-node').start(conf);
 };
