@@ -38,7 +38,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
       layout,
       objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
       title,
-      type: objectType, // 7.x only: this changes the shape of the job params object
+      objectType,
     };
   });
 };
