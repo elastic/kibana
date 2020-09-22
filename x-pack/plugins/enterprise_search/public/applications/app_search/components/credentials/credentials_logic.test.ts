@@ -48,7 +48,6 @@ describe('CredentialsLogic', () => {
       resetContext({});
     } else {
       resetContext({
-        // the enterprise_search.app_search.credentials namespace is set in `path` in credentials_logic
         defaults: {
           enterprise_search: {
             app_search: {
