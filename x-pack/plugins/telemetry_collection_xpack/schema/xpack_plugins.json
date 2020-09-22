@@ -141,15 +141,18 @@
           }
         },
         "packages": {
-          "properties": {
-            "name": {
-              "type": "keyword"
-            },
-            "version": {
-              "type": "keyword"
-            },
-            "enabled": {
-              "type": "boolean"
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
             }
           }
         }
@@ -261,18 +264,21 @@
               "type": "long"
             },
             "os": {
-              "properties": {
-                "full_name": {
-                  "type": "keyword"
-                },
-                "platform": {
-                  "type": "keyword"
-                },
-                "version": {
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "long"
+              "type": "array",
+              "items": {
+                "properties": {
+                  "full_name": {
+                    "type": "keyword"
+                  },
+                  "platform": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "long"
+                  }
                 }
               }
             },
@@ -312,10 +318,16 @@
           "type": "number"
         },
         "enabledAuthProviders": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "httpAuthSchemes": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },
@@ -447,16 +459,28 @@
                   "type": "boolean"
                 },
                 "autorefreshInterval": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "dateRangeEnd": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "dateRangeStart": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "monitor_frequency": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "monitor_name_stats": {
                   "properties": {

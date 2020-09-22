@@ -155,13 +155,15 @@ Array [
             "type": "StringKeyword",
           },
           "my_array": Object {
-            "total": Object {
-              "kind": 143,
-              "type": "NumberKeyword",
-            },
-            "type": Object {
-              "kind": 131,
-              "type": "BooleanKeyword",
+            "items": Object {
+              "total": Object {
+                "kind": 143,
+                "type": "NumberKeyword",
+              },
+              "type": Object {
+                "kind": 131,
+                "type": "BooleanKeyword",
+              },
             },
           },
           "my_index_signature_prop": Object {
@@ -187,8 +189,10 @@ Array [
             "type": "StringKeyword",
           },
           "my_str_array": Object {
-            "kind": 146,
-            "type": "StringKeyword",
+            "items": Object {
+              "kind": 146,
+              "type": "StringKeyword",
+            },
           },
         },
         "typeName": "Usage",
@@ -199,12 +203,15 @@ Array [
             "type": "keyword",
           },
           "my_array": Object {
-            "total": Object {
-              "type": "number",
+            "items": Object {
+              "total": Object {
+                "type": "number",
+              },
+              "type": Object {
+                "type": "boolean",
+              },
             },
-            "type": Object {
-              "type": "boolean",
-            },
+            "type": "array",
           },
           "my_index_signature_prop": Object {
             "avg": Object {
@@ -232,7 +239,10 @@ Array [
             "type": "text",
           },
           "my_str_array": Object {
-            "type": "keyword",
+            "items": Object {
+              "type": "keyword",
+            },
+            "type": "array",
           },
         },
       },

@@ -84,8 +84,8 @@ describe('getDescriptor', () => {
     expect(descriptor).toEqual({
       prop1: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
       prop2: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
-      prop3: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
-      prop4: { kind: TelemetryKinds.Date, type: 'Date' },
+      prop3: { items: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' } },
+      prop4: { items: { kind: TelemetryKinds.Date, type: 'Date' } },
     });
   });
 

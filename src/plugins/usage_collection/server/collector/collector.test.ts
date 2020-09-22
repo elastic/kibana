@@ -153,7 +153,10 @@ describe('collector', () => {
         isReady: () => false,
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }] }),
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -166,7 +169,10 @@ describe('collector', () => {
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }], otherProp: 1 }),
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -185,7 +191,10 @@ describe('collector', () => {
         },
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -203,7 +212,10 @@ describe('collector', () => {
           return { otherProp: 1 };
         },
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
           otherProp: { type: 'long' },
         },
       });

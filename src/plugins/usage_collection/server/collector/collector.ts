@@ -40,7 +40,7 @@ export type RecursiveMakeSchemaFrom<U> = U extends object
 
 export type MakeSchemaFrom<Base> = {
   [Key in keyof Base]: Base[Key] extends Array<infer U>
-    ? RecursiveMakeSchemaFrom<U>
+    ? { type: 'array'; items: RecursiveMakeSchemaFrom<U> }
     : RecursiveMakeSchemaFrom<Base[Key]>;
 };
 

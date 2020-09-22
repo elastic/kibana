@@ -131,7 +131,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
 
   if (ts.isArrayTypeNode(node)) {
-    return getDescriptor(node.elementType, program);
+    return { items: getDescriptor(node.elementType, program) };
   }
 
   if (ts.isLiteralTypeNode(node)) {
