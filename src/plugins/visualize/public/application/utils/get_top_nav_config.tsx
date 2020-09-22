@@ -185,7 +185,7 @@ export const getTopNavConfig = (
     <ConfirmModal
       onConfirm={() => {
         if (originatingApp) {
-          stateTransfer.navigateToWithEmbeddablePackage(originatingApp);
+          application.navigateToApp(originatingApp);
         }
       }}
       onCancel={() => {}}
@@ -332,7 +332,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(originatingApp === 'dashboards'
+    ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
       ? [
           {
             id: 'cancel',
@@ -345,15 +345,13 @@ export const getTopNavConfig = (
             }),
             testId: 'visualizeCancelAndReturnButton',
             tooltip() {
-              if (hasUnappliedChanges) {
-                return i18n.translate(
-                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
-                  {
-                    defaultMessage: 'Apply or Discard your changes before finishing',
-                  }
-                );
+              if (hasUnappliedChanges || hasUnsavedChanges) {
+                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                  defaultMessage: 'Discard your changes before finishing',
+                });
               }
             },
+            disableButton: !hasUnappliedChanges && !hasUnsavedChanges,
             run: async () => {
               return cancelAndReturn();
             },

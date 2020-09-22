@@ -85,5 +85,17 @@ export default function ({ getService, getPageObjects }) {
       const markdownText = await testSubjects.find('markdownBody');
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
     });
+
+    it('cancel button is disabled if there are no changes to apply', async () => {
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickEdit();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const disabled = await testSubjects.getAttribute(
+        'visualizeCancelAndReturnButton',
+        'disabled'
+      );
+      expect(disabled).to.eql('true');
+    });
   });
 }
