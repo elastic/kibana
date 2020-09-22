@@ -11,7 +11,6 @@ import {
   SERVICE_NAME,
   EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   Setup,
@@ -19,17 +18,23 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 
 export async function getErrorRate({
   serviceName,
   transactionType,
   transactionName,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
 
@@ -53,7 +58,11 @@ export async function getErrorRate({
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -67,8 +76,19 @@ export async function getErrorRate({
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            erroneous_transactions: {
-              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+            [EVENT_OUTCOME]: {
+              terms: {
+                field: EVENT_OUTCOME,
+              },
+              aggs: {
+                count: {
+                  value_count: {
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                  },
+                },
+              },
             },
           },
         },
@@ -81,18 +101,24 @@ export async function getErrorRate({
   const noHits = resp.hits.total.value === 0;
 
   const erroneousTransactionsRate =
-    resp.aggregations?.total_transactions.buckets.map(
-      ({
-        key,
-        doc_count: totalTransactions,
-        erroneous_transactions: erroneousTransactions,
-      }) => {
-        return {
-          x: key,
-          y: erroneousTransactions.doc_count / totalTransactions,
-        };
-      }
-    ) || [];
+    resp.aggregations?.total_transactions.buckets.map((bucket) => {
+      const successful =
+        bucket[EVENT_OUTCOME].buckets.find(
+          (eventOutcomeBucket) =>
+            eventOutcomeBucket.key === EventOutcome.success
+        )?.count.value ?? 0;
+
+      const failed =
+        bucket[EVENT_OUTCOME].buckets.find(
+          (eventOutcomeBucket) =>
+            eventOutcomeBucket.key === EventOutcome.failure
+        )?.count.value ?? 0;
+
+      return {
+        x: bucket.key,
+        y: failed / (successful + failed),
+      };
+    }) || [];
 
   const average = mean(
     erroneousTransactionsRate

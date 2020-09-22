@@ -6,6 +6,9 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
+import Boom from 'boom';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -32,8 +35,12 @@ import {
   ArchiveAsset,
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { deleteKibanaSavedObjectsAssets } from './remove';
-import { PackageOutdatedError } from '../../../errors';
+import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
+import {
+  IngestManagerError,
+  PackageOutdatedError,
+  ingestErrorToResponseOptions,
+} from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
@@ -95,17 +102,185 @@ export async function ensureInstalledPackage(options: {
   return installation;
 }
 
+export async function handleInstallPackageFailure({
+  savedObjectsClient,
+  error,
+  pkgName,
+  pkgVersion,
+  installedPkg,
+  callCluster,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  error: IngestManagerError | Boom | Error;
+  pkgName: string;
+  pkgVersion: string;
+  installedPkg: SavedObject<Installation> | undefined;
+  callCluster: CallESAsCurrentUser;
+}) {
+  if (error instanceof IngestManagerError) {
+    return;
+  }
+  const logger = appContextService.getLogger();
+  const pkgkey = Registry.pkgToPkgKey({
+    name: pkgName,
+    version: pkgVersion,
+  });
+
+  // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
+  try {
+    const installType = getInstallType({ pkgVersion, installedPkg });
+    if (installType === 'install' || installType === 'reinstall') {
+      logger.error(`uninstalling ${pkgkey} after error installing`);
+      await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+    }
+
+    if (installType === 'update') {
+      if (!installedPkg) {
+        logger.error(
+          `failed to rollback package after installation error ${error} because saved object was undefined`
+        );
+        return;
+      }
+      const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
+      logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+      await installPackage({
+        savedObjectsClient,
+        pkgkey: prevVersion,
+        callCluster,
+      });
+    }
+  } catch (e) {
+    logger.error(`failed to uninstall or rollback package after installation error ${e}`);
+  }
+}
+
+type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
+function bulkInstallErrorToOptions({
+  pkgToUpgrade,
+  error,
+}: {
+  pkgToUpgrade: string;
+  error: Error;
+}): IBulkInstallPackageError {
+  const { statusCode, body } = ingestErrorToResponseOptions(error);
+  return {
+    name: pkgToUpgrade,
+    statusCode,
+    error: body.message,
+  };
+}
+
+interface UpgradePackageParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
+  latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
+  pkgToUpgrade: string;
+}
+async function upgradePackage({
+  savedObjectsClient,
+  callCluster,
+  installedPkg,
+  latestPkg,
+  pkgToUpgrade,
+}: UpgradePackageParams): Promise<BulkInstallResponse> {
+  if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
+    const pkgkey = Registry.pkgToPkgKey({
+      name: latestPkg.name,
+      version: latestPkg.version,
+    });
+
+    try {
+      const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
+      return {
+        name: pkgToUpgrade,
+        newVersion: latestPkg.version,
+        oldVersion: installedPkg?.attributes.version ?? null,
+        assets,
+      };
+    } catch (installFailed) {
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: installFailed,
+        pkgName: latestPkg.name,
+        pkgVersion: latestPkg.version,
+        installedPkg,
+        callCluster,
+      });
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: installFailed });
+    }
+  } else {
+    // package was already at the latest version
+    return {
+      name: pkgToUpgrade,
+      newVersion: latestPkg.version,
+      oldVersion: latestPkg.version,
+      assets: [
+        ...installedPkg.attributes.installed_es,
+        ...installedPkg.attributes.installed_kibana,
+      ],
+    };
+  }
+}
+
+interface BulkInstallPackagesParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  packagesToUpgrade: string[];
+  callCluster: CallESAsCurrentUser;
+}
+export async function bulkInstallPackages({
+  savedObjectsClient,
+  packagesToUpgrade,
+  callCluster,
+}: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
+  const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
+    Promise.all([
+      getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
+      Registry.fetchFindLatestPackage(pkgToUpgrade),
+    ])
+  );
+  const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
+  const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
+    const pkgToUpgrade = packagesToUpgrade[index];
+    if (result.status === 'fulfilled') {
+      const [installedPkg, latestPkg] = result.value;
+      return upgradePackage({
+        savedObjectsClient,
+        callCluster,
+        installedPkg,
+        latestPkg,
+        pkgToUpgrade,
+      });
+    } else {
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
+    }
+  });
+  const installResults = await Promise.allSettled(installResponsePromises);
+  const installResponses = installResults.map((result, index) => {
+    const pkgToUpgrade = packagesToUpgrade[index];
+    if (result.status === 'fulfilled') {
+      return result.value;
+    } else {
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
+    }
+  });
+
+  return installResponses;
+}
+
+interface InstallPackageParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  callCluster: CallESAsCurrentUser;
+  force?: boolean;
+}
+
 export async function installPackage({
   savedObjectsClient,
   pkgkey,
   callCluster,
   force = false,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
-  callCluster: CallESAsCurrentUser;
-  force?: boolean;
-}): Promise<AssetReference[]> {
+}: InstallPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
@@ -197,8 +372,7 @@ export async function installPackage({
     registryPackageInfo,
     paths,
     callCluster,
-    savedObjectsClient,
-    appContextService.getLogger()
+    savedObjectsClient
   );
 
   // if this is an update or retrying an update, delete the previous version's pipelines

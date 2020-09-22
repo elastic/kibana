@@ -7,10 +7,11 @@
 import { UiActionsEnhancedBaseActionFactoryContext } from '../../../../../ui_actions_enhanced/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
 
-export interface Config {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type Config = {
   dashboardId?: string;
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
-}
+};
 
 export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext<typeof APPLY_FILTER_TRIGGER>;

@@ -6,13 +6,12 @@
 
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
+import { schema } from '@kbn/config-schema';
 
 import { validate } from '../../../../../common/validate';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
-  importRulesPayloadSchema,
-  ImportRulesPayloadSchemaDecoded,
   ImportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
@@ -48,7 +47,7 @@ import { PartialFilter } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-const CHUNK_PARSED_OBJECT_SIZE = 10;
+const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
   router.post(
@@ -58,10 +57,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         query: buildRouteValidation<typeof importRulesQuerySchema, ImportRulesQuerySchemaDecoded>(
           importRulesQuerySchema
         ),
-        body: buildRouteValidation<
-          typeof importRulesPayloadSchema,
-          ImportRulesPayloadSchemaDecoded
-        >(importRulesPayloadSchema),
+        body: schema.any(), // validation on file object is accomplished later in the handler.
       },
       options: {
         tags: ['access:securitySolution'],
@@ -162,6 +158,10 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   severity_mapping: severityMapping,
                   tags,
                   threat,
+                  threat_filters: threatFilters,
+                  threat_index: threatIndex,
+                  threat_query: threatQuery,
+                  threat_mapping: threatMapping,
                   threshold,
                   timestamp_override: timestampOverride,
                   to,
@@ -221,7 +221,11 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       to,
                       type,
                       threat,
+                      threatFilters,
+                      threatIndex,
+                      threatQuery,
                       threshold,
+                      threatMapping,
                       timestampOverride,
                       references,
                       note,

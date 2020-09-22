@@ -19,6 +19,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     });
 
     describe('Settings', function () {
+      loadTestFile(require.resolve('./settings/custom_link.ts'));
       describe('Anomaly detection', function () {
         loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
         loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
@@ -34,6 +35,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/csm_services.ts'));
       loadTestFile(require.resolve('./csm/web_core_vitals.ts'));
       loadTestFile(require.resolve('./csm/long_task_metrics.ts'));
+      loadTestFile(require.resolve('./csm/page_views.ts'));
     });
   });
 }
