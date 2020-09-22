@@ -6,13 +6,26 @@ sidebar_label: Dynamic fields
 
 ## Basic
 
-Dynamic fields are fields that the user can add or remove in your form. Usually they end up in an array of values or an array of objects.
+Dynamic fields are fields that the user can add or remove in your form. Those fields will end up in an array of _values_ or an array of _objects_.
 
 Let's imagine a form that lets a user enter multiple parent / child relationships.
 
 ```js
 export const DynamicFields = () => {
-  const { form } = useForm();
+  const fetchedData = {
+    name: 'My resource',
+    relationships: [
+      {
+        parent: 'Parent 1',
+        child: 'Child 1',
+      },
+      {
+        parent: 'Parent 2',
+        child: 'Child 2',
+      },
+    ],
+  };
+  const { form } = useForm({ defaultValue: fetchedData });
 
   const submitForm = () => {
     console.log(form.getFormData());
@@ -33,6 +46,9 @@ export const DynamicFields = () => {
                       path={`${item.path}.parent`}
                       config={{ label: 'Parent' }}
                       component={TextField}
+                      // Make sure to add this prop otherwise when you delete
+                      // a row and add a new one, the stale values will appear
+                      readDefaultValueOnForm={!item.isNew}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -40,6 +56,7 @@ export const DynamicFields = () => {
                       path={`${item.path}.child`}
                       config={{ label: 'Child' }}
                       component={TextField}
+                      readDefaultValueOnForm={!item.isNew}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -95,7 +112,6 @@ const relationShipsValidations = [
 
 const { emptyField } = fieldValidators;
 const textFieldValidations = [{ validator: emptyField("The field can't be empty.") }];
-
 
 export const DynamicFieldsValidation = () => {
   const { form } = useForm();
