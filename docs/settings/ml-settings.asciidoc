@@ -13,11 +13,11 @@ enabled by default.
 
 [cols="2*<"]
 |===
-| `xpack.ml.enabled` {ess-icon}
+|[[xpack-ml-enabled]] `xpack.ml.enabled` {ess-icon}
   | Set to `true` (default) to enable {kib} {ml-features}. +
   +
   If set to `false` in `kibana.yml`, the {ml} icon is hidden in this {kib}
-  instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however,
+  instance. If <<xpack-ml-enabled, `xpack.ml.enabled`>> is set to `true` in `elasticsearch.yml`, however,
   you can still use the {ml} APIs. To disable {ml} entirely, see the
   {ref}/ml-settings.html[{es} {ml} settings].
 
