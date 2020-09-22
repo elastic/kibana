@@ -7,18 +7,18 @@
 import React, { memo, Suspense, useState, useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CaseSettingsConnector } from './types';
+import { AllSettingFields, CaseSettingsConnector } from './types';
 import { useCaseSettings } from './use_case_settings';
 
 interface Props {
   connector: CaseSettingsConnector | null;
-  onFieldsChange: (fields: Record<string, unknown>) => void;
-  fields?: Record<string, unknown>;
+  onFieldsChange: (fields: AllSettingFields) => void;
+  fields?: AllSettingFields;
 }
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
-  const [currentFields, setCurrentFields] = useState<Record<string, unknown>>(fields ?? {});
+  const [currentFields, setCurrentFields] = useState<AllSettingFields>(fields ?? {});
   const onChange = useCallback(
     (p, v) => setCurrentFields((prevFields) => ({ ...prevFields, [p]: v })),
     [setCurrentFields]

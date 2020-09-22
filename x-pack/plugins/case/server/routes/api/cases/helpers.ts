@@ -81,7 +81,7 @@ export const getCaseToUpdate = (
           ...acc,
           [key]: value,
         };
-      } else if (currentValue == null && key === 'connector_id' && value !== currentValue) {
+      } else if (currentValue == null && key === 'connector' && value !== currentValue) {
         return {
           ...acc,
           [key]: value,

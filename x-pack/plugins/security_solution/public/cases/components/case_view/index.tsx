@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { ActionConnector, Case, CaseConnector } from '../../containers/types';
+import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -40,7 +40,6 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { SettingFieldsForm } from '../settings/fields_form';
 
 interface Props {
   caseId: string;

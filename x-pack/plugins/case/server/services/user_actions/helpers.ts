@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
-import { get } from 'lodash';
+import { get, isPlainObject, isString } from 'lodash';
 
 import {
   CaseUserActionAttributes,
@@ -120,7 +120,7 @@ export const buildCaseUserActionItem = ({
 
 const userActionFieldsAllowed: UserActionField = [
   'comment',
-  'connector_id',
+  'connector',
   'description',
   'tags',
   'title',
@@ -147,9 +147,23 @@ export const buildCaseUserActions = ({
         if (userActionFieldsAllowed.includes(field)) {
           const origValue = get(originalItem, ['attributes', field]);
           const updatedValue = get(updatedItem, ['attributes', field]);
-          const compareValues = isTwoArraysDifference(origValue, updatedValue);
-          if (compareValues != null) {
-            if (compareValues.addedItems.length > 0) {
+
+          if (isString(origValue) && isString(updatedValue)) {
+            userActions = [
+              ...userActions,
+              buildCaseUserActionItem({
+                action: 'update',
+                actionAt: actionDate,
+                actionBy,
+                caseId: updatedItem.id,
+                fields: [field],
+                newValue: updatedValue,
+                oldValue: origValue,
+              }),
+            ];
+          } else if (Array.isArray(origValue) && Array.isArray(updatedValue)) {
+            const compareValues = isTwoArraysDifference(origValue, updatedValue);
+            if (compareValues && compareValues.addedItems.length > 0) {
               userActions = [
                 ...userActions,
                 buildCaseUserActionItem({
@@ -162,7 +176,8 @@ export const buildCaseUserActions = ({
                 }),
               ];
             }
-            if (compareValues.deletedItems.length > 0) {
+
+            if (compareValues && compareValues.deletedItems.length > 0) {
               userActions = [
                 ...userActions,
                 buildCaseUserActionItem({
@@ -175,7 +190,7 @@ export const buildCaseUserActions = ({
                 }),
               ];
             }
-          } else if (origValue !== updatedValue) {
+          } else if (isPlainObject(origValue) && isPlainObject(updatedValue)) {
             userActions = [
               ...userActions,
               buildCaseUserActionItem({
@@ -184,8 +199,8 @@ export const buildCaseUserActions = ({
                 actionBy,
                 caseId: updatedItem.id,
                 fields: [field],
-                newValue: updatedValue,
-                oldValue: origValue,
+                newValue: JSON.stringify(updatedValue),
+                oldValue: JSON.stringify(origValue),
               }),
             ];
           }
