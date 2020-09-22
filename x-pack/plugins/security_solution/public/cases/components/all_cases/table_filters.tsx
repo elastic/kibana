@@ -5,6 +5,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isEqual } from 'lodash/fp';
 import {
   EuiFieldSearch,

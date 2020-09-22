@@ -5,6 +5,8 @@
  */
 
 import mustache from 'mustache';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
 import {

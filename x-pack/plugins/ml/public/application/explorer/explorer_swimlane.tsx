@@ -10,8 +10,14 @@
 
 import React from 'react';
 import './_explorer.scss';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import uniq from 'lodash/uniq';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 import d3 from 'd3';
 import moment from 'moment';

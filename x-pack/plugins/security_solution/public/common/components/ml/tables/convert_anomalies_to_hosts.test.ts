@@ -10,6 +10,8 @@
  */
 
 import { mockAnomalies } from '../mock';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 import { convertAnomaliesToHosts, getHostNameFromEntity } from './convert_anomalies_to_hosts';
 import { AnomaliesByHost } from '../types';

@@ -5,6 +5,8 @@
  */
 
 import React, { useMemo } from 'react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { omit } from 'lodash/fp';
 
 import { FormattedMessage } from '@kbn/i18n/react';

@@ -6,6 +6,8 @@
 
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
 import {

@@ -5,6 +5,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { get, getOr, has, head } from 'lodash/fp';
 
 import {

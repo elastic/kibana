@@ -8,6 +8,8 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isEmpty, get } from 'lodash/fp';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';

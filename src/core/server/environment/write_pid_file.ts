@@ -18,6 +18,8 @@
  */
 
 import { unlinkSync as unlink } from 'fs';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import once from 'lodash/once';
 import { Logger } from '../logging';
 import { writeFile, exists } from './fs';

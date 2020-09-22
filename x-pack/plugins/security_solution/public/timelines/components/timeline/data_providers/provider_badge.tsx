@@ -6,6 +6,8 @@
 
 import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';

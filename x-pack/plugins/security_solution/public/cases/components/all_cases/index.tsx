@@ -15,6 +15,8 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';

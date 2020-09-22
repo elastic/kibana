@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';

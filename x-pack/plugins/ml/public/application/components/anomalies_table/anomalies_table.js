@@ -9,6 +9,8 @@
  */
 
 import PropTypes from 'prop-types';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 
 import React, { Component } from 'react';

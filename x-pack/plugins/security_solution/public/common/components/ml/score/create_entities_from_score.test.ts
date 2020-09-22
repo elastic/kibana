@@ -11,6 +11,8 @@ import {
   createEntityFromRecord,
   createInfluencersFromScore,
 } from './create_entities_from_score';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { cloneDeep } from 'lodash/fp';
 
 describe('create_entities_from_score', () => {

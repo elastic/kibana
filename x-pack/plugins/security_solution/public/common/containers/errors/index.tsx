@@ -5,6 +5,8 @@
  */
 
 import { onError, ErrorLink } from 'apollo-link-error';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { get, throttle, noop } from 'lodash/fp';
 
 import uuid from 'uuid';

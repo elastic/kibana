@@ -5,6 +5,8 @@
  */
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isString, isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';

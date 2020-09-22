@@ -5,6 +5,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 

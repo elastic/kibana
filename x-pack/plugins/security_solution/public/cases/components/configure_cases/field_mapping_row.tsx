@@ -13,6 +13,8 @@ import {
   EuiSuperSelectOption,
 } from '@elastic/eui';
 
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { capitalize } from 'lodash/fp';
 import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
 import { AllThirdPartyFields } from '../../../common/lib/connectors/types';

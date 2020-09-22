@@ -5,6 +5,8 @@
  */
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { isEmpty } from 'lodash/fp';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 

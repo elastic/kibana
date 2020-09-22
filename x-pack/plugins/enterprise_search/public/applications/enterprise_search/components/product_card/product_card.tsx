@@ -5,7 +5,11 @@
  */
 
 import React, { useContext } from 'react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import upperFirst from 'lodash/upperFirst';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import snakeCase from 'lodash/snakeCase';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';

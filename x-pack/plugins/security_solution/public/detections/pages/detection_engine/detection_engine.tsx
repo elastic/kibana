@@ -5,6 +5,8 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';

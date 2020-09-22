@@ -6,6 +6,8 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';

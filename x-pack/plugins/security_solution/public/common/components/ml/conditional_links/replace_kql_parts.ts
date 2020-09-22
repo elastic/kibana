@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import { flow } from 'lodash/fp';
 import { replaceKqlCommasWithOr } from './replace_kql_commas_with_or';
 import { removeKqlVariables } from './remove_kql_variables';

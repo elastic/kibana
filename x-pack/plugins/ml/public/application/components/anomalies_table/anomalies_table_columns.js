@@ -7,6 +7,8 @@
 import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
+//Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 
 import { i18n } from '@kbn/i18n';
