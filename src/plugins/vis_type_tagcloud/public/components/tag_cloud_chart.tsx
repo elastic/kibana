@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
-import * as Rx from 'rxjs';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
 
 import { TagCloudVisDependencies } from '../plugin';
 import { TagCloudVisRenderValue } from '../tag_cloud_fn';
@@ -33,30 +33,45 @@ type TagCloudChartProps = TagCloudVisDependencies &
     renderComplete: () => void;
   };
 
-export const TagCloudChart = ({ colors, visData, visParams, fireEvent }: TagCloudChartProps) => {
+export const TagCloudChart = ({
+  colors,
+  visData,
+  visParams,
+  fireEvent,
+  renderComplete,
+}: TagCloudChartProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<any>(null);
-  const renderSubject = useRef(new Rx.Subject());
 
   useEffect(() => {
     visController.current = new TagCloudVisualization(chartDiv.current, colors, fireEvent);
-    renderSubject.current.subscribe((params: any) => {
-      visController.current.render(params.visData, params.visParams);
-    });
-
     return () => {
       visController.current.destroy();
+      visController.current = null;
     };
   }, [colors, fireEvent]);
 
   useEffect(() => {
-    renderSubject.current.next({
-      visData,
-      visParams,
-    });
-  }, [visData, visParams]);
+    if (visController.current) {
+      visController.current.render(visData, visParams).then(renderComplete);
+    }
+  }, [visData, visParams, renderComplete]);
 
-  return <div className="tgcChart__container" ref={chartDiv} />;
+  const onResize = useCallback(() => {
+    if (visController.current) {
+      visController.current.render().then(renderComplete);
+    }
+  }, [renderComplete]);
+
+  return (
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <div className="tgcChart__wrapper" ref={resizeRef}>
+          <div className="tgcChart__container" ref={chartDiv} />
+        </div>
+      )}
+    </EuiResizeObserver>
+  );
 };
 
 // default export required for React.Lazy

@@ -85,13 +85,16 @@ export class TagCloudVisualization {
   }
 
   async render(data, visParams) {
-    this._updateParams(visParams);
-    this._updateData(data);
+    if (data && visParams) {
+      this._updateParams(visParams);
+      this._updateData(data);
+    }
+
     this._resize();
 
     await this._renderComplete$.pipe(take(1)).toPromise();
 
-    if (data.columns.length !== 2) {
+    if (data && data.columns.length !== 2 && this._feedbackMessage.current) {
       this._feedbackMessage.current.setState({
         shouldShowTruncate: false,
         shouldShowIncomplete: false,
@@ -99,14 +102,19 @@ export class TagCloudVisualization {
       return;
     }
 
-    this._label.current.setState({
-      label: `${data.columns[0].name} - ${data.columns[1].name}`,
-      shouldShowLabel: visParams.showLabel,
-    });
-    this._feedbackMessage.current.setState({
-      shouldShowTruncate: this._truncated,
-      shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE,
-    });
+    if (data && this._label.current) {
+      this._label.current.setState({
+        label: `${data.columns[0].name} - ${data.columns[1].name}`,
+        shouldShowLabel: visParams.showLabel,
+      });
+    }
+
+    if (this._feedbackMessage.current) {
+      this._feedbackMessage.current.setState({
+        shouldShowTruncate: this._truncated,
+        shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE,
+      });
+    }
   }
 
   destroy() {
