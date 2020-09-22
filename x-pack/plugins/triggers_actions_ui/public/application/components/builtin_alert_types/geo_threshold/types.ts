@@ -10,7 +10,7 @@ export enum TrackingEvent {
 }
 
 export interface GeoThresholdAlertParams {
-  indexTitle: string;
+  index: string;
   indexId: string;
   geoField: string;
   entity: string;

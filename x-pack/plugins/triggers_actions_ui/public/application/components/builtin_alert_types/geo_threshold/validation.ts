@@ -9,7 +9,7 @@ import { GeoThresholdAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoThresholdAlertParams): ValidationResult => {
   const {
-    indexTitle,
+    index,
     geoField,
     entity,
     dateField,
@@ -20,7 +20,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
   } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
-    indexTitle: new Array<string>(),
+    index: new Array<string>(),
     indexId: new Array<string>(),
     geoField: new Array<string>(),
     entity: new Array<string>(),
@@ -33,8 +33,8 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
   };
   validationResult.errors = errors;
 
-  if (!indexTitle) {
-    errors.indexTitle.push(
+  if (!index) {
+    errors.index.push(
       i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredIndexTitleText', {
         defaultMessage: 'Index pattern title is required.',
       })

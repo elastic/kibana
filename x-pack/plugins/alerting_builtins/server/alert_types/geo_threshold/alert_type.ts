@@ -80,7 +80,7 @@ export function getAlertType(
     startedAt: Date;
     services: AlertServices;
     params: {
-      indexTitle: string;
+      index: string;
       indexId: string;
       geoField: string;
       entity: string;
@@ -91,13 +91,14 @@ export function getAlertType(
       boundaryIndexId: string;
       boundaryGeoField: string;
     };
+    alertId: string;
   }) => Promise<void>;
   validate?: {
     params?: {
       validate: (
         object: unknown
       ) => {
-        indexTitle: string;
+        index: string;
         indexId: string;
         geoField: string;
         entity: string;
@@ -139,7 +140,7 @@ export function getAlertType(
     producer: BUILT_IN_ALERTS_FEATURE_ID,
     validate: {
       params: schema.object({
-        indexTitle: schema.string({ minLength: 1 }),
+        index: schema.string({ minLength: 1 }),
         indexId: schema.string({ minLength: 1 }),
         geoField: schema.string({ minLength: 1 }),
         entity: schema.string({ minLength: 1 }),

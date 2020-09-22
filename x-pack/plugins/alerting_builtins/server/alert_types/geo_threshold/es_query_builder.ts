@@ -7,8 +7,11 @@
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from '../../types';
+import { GEO_THRESHOLD_ID } from './alert_type';
 
 export const OTHER_CATEGORY = 'other';
+// Consider dynamically obtaining from config?
+const MAX_QUERY_SIZE = 10000;
 
 async function getShapesFilters(
   boundaryIndexTitle: string,
@@ -16,7 +19,8 @@ async function getShapesFilters(
   boundaryGeoField: string,
   geoField: string,
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
-  log: Logger
+  log: Logger,
+  alertId: string
 ) {
   const filters: Record<string, unknown> = {};
   switch (boundaryType) {
@@ -24,7 +28,9 @@ async function getShapesFilters(
       // Get all shapes in index
       const boundaryData: SearchResponse<unknown> = await callCluster('search', {
         index: boundaryIndexTitle,
-        body: {},
+        body: {
+          size: MAX_QUERY_SIZE,
+        },
       });
       boundaryData.hits.hits.forEach(({ _index, _id }) => {
         filters[_id] = {
@@ -41,7 +47,7 @@ async function getShapesFilters(
       });
       break;
     default:
-      log.info(`Unsupported type: ${boundaryType}`);
+      log.info(`alert ${GEO_THRESHOLD_ID}:${alertId} Unsupported type: ${boundaryType}`);
   }
   return filters;
 }
@@ -49,7 +55,7 @@ async function getShapesFilters(
 export async function executeEsQueryFactory(
   {
     entity,
-    indexTitle,
+    index,
     dateField,
     boundaryGeoField,
     geoField,
@@ -57,7 +63,7 @@ export async function executeEsQueryFactory(
     boundaryType,
   }: {
     entity: string;
-    indexTitle: string;
+    index: string;
     dateField: string;
     boundaryGeoField: string;
     geoField: string;
@@ -65,7 +71,8 @@ export async function executeEsQueryFactory(
     boundaryType: string;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
-  log: Logger
+  log: Logger,
+  alertId: string
 ) {
   const shapesFilters = await getShapesFilters(
     boundaryIndexTitle,
@@ -73,7 +80,8 @@ export async function executeEsQueryFactory(
     boundaryGeoField,
     geoField,
     callCluster,
-    log
+    log,
+    alertId
   );
   return async (
     gteDateTime: Date | null,
@@ -82,9 +90,9 @@ export async function executeEsQueryFactory(
   ): Promise<SearchResponse<unknown> | undefined> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esQuery: Record<string, any> = {
-      index: indexTitle,
+      index,
       body: {
-        size: 0,
+        size: MAX_QUERY_SIZE,
         aggs: {
           shapes: {
             filters: {

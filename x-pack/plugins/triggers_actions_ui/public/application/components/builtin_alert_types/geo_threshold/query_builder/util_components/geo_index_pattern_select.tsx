@@ -127,7 +127,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             defaultMessage: 'Index pattern',
           })}
         >
-          {IndexPatternSelectComponent && this.props.value ? (
+          {IndexPatternSelectComponent ? (
             <IndexPatternSelectComponent
               isDisabled={this.state.noGeoIndexPatternsExist}
               indexPatternId={this.props.value}

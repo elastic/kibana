@@ -20,12 +20,12 @@ import { IIndexPattern } from '../../../../../../../../../src/plugins/data/commo
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
   ENTITY: '',
-  INDEX_TITLE: '',
+  INDEX: '',
   INDEX_ID: '',
   DATE_FIELD: '',
   BOUNDARY_TYPE: 'entireIndex', // Only one supported currently. Will eventually be more
   GEO_FIELD: '',
-  BOUNDARY_INDEX_TITLE: '',
+  BOUNDARY_INDEX: '',
   BOUNDARY_INDEX_ID: '',
   BOUNDARY_GEO_FIELD: '',
 };
@@ -40,7 +40,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
   AlertsContextValue
 >> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
-    indexTitle,
+    index,
     indexId,
     geoField,
     entity,
@@ -61,7 +61,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     if (_indexPattern) {
       _setIndexPattern(_indexPattern);
       if (_indexPattern.title) {
-        setAlertParams('indexTitle', _indexPattern.title);
+        setAlertParams('index', _indexPattern.title);
       }
       if (_indexPattern.id) {
         setAlertParams('indexId', _indexPattern.id);
@@ -97,14 +97,14 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     const initToDefaultParams = async () => {
       setAlertProperty('params', {
         ...alertParams,
-        indexTitle: indexTitle ?? DEFAULT_VALUES.INDEX_TITLE,
+        index: index ?? DEFAULT_VALUES.INDEX,
         indexId: indexId ?? DEFAULT_VALUES.INDEX_ID,
         entity: entity ?? DEFAULT_VALUES.ENTITY,
         dateField: dateField ?? DEFAULT_VALUES.DATE_FIELD,
         trackingEvent: trackingEvent ?? DEFAULT_VALUES.TRACKING_EVENT,
         boundaryType: boundaryType ?? DEFAULT_VALUES.BOUNDARY_TYPE,
         geoField: geoField ?? DEFAULT_VALUES.GEO_FIELD,
-        boundaryIndexTitle: boundaryIndexTitle ?? DEFAULT_VALUES.BOUNDARY_INDEX_TITLE,
+        boundaryIndexTitle: boundaryIndexTitle ?? DEFAULT_VALUES.BOUNDARY_INDEX,
         boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
       });

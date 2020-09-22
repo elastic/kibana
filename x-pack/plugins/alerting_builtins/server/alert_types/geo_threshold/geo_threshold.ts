@@ -133,12 +133,13 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     startedAt: currIntervalEndTime,
     services,
     params,
+    alertId,
   }: {
     previousStartedAt: Date | null;
     startedAt: Date;
     services: AlertServices;
     params: {
-      indexTitle: string;
+      index: string;
       indexId: string;
       geoField: string;
       entity: string;
@@ -149,8 +150,9 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryIndexId: string;
       boundaryGeoField: string;
     };
+    alertId: string;
   }) {
-    const executeEsQuery = await executeEsQueryFactory(params, services, log);
+    const executeEsQuery = await executeEsQueryFactory(params, services, log, alertId);
 
     const currentIntervalResults: SearchResponse<unknown> | undefined = await executeEsQuery(
       currIntervalStartTime,
