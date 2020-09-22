@@ -6,7 +6,7 @@
 
 export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
 export { XJsonMode } from '@kbn/ace';
-export { UseRequestConfig, useRequest, XJson } from '../../../../src/plugins/es_ui_shared/public';
+export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
   getFieldType,
@@ -27,5 +27,6 @@ export {
   INDEX_STATUS,
 } from '../../ml/public';
 
+import { XJson } from '../../../../src/plugins/es_ui_shared/public';
 const { expandLiteralStrings, collapseLiteralStrings } = XJson;
 export { expandLiteralStrings, collapseLiteralStrings };
