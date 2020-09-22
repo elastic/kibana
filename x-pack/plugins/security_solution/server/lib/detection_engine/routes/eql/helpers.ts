@@ -9,6 +9,7 @@ import has from 'lodash/has';
 
 const PARSING_ERROR_TYPE = 'parsing_exception';
 const VERIFICATION_ERROR_TYPE = 'verification_exception';
+const MAPPING_ERROR_TYPE = 'mapping_exception';
 
 interface ErrorCause {
   type: string;
@@ -20,7 +21,7 @@ export interface ValidationErrorResponse {
 }
 
 const isValidationErrorType = (type: unknown): boolean =>
-  type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE;
+  type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE || type === MAPPING_ERROR_TYPE;
 
 export const isValidationErrorResponse = (response: unknown): response is ValidationErrorResponse =>
   has(response, 'error.type') && isValidationErrorType(get(response, 'error.type'));
