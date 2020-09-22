@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchClient } from '../../../../../../../../src/core/server';
-import { getValidationErrors, isValidationError } from './helpers';
+import { getValidationErrors, isValidationErrorResponse } from './helpers';
 
 export interface Validation {
   isValid: boolean;
@@ -23,8 +23,8 @@ export const validateEql = async ({
   index,
   query,
 }: ValidateEqlParams): Promise<Validation> => {
-  try {
-    await client.eql.search({
+  const response = await client.eql.search(
+    {
       // @ts-expect-error type is missing allow_no_indices
       allow_no_indices: true,
       index: index.join(','),
@@ -32,13 +32,13 @@ export const validateEql = async ({
         query,
         size: 1,
       },
-    });
+    },
+    { ignore: [400] }
+  );
 
-    return { isValid: true, errors: [] };
-  } catch (error) {
-    if (isValidationError(error)) {
-      return { isValid: false, errors: getValidationErrors(error) };
-    }
-    throw error;
-  }
+  const errors = isValidationErrorResponse(response.body) ? getValidationErrors(response.body) : [];
+  return {
+    errors,
+    isValid: errors.length === 0,
+  };
 };
