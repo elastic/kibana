@@ -106,11 +106,15 @@ export function JSErrors() {
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={
-              (((data?.totalErrorPages ?? 0) / totalPageViews) * 100).toFixed(
-                0
-              ) + ' %'
-            }
+            title={i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+              defaultMessage: '{errorRate} %',
+              values: {
+                errorRate: (
+                  ((data?.totalErrorPages ?? 0) / totalPageViews) *
+                  100
+                ).toFixed(0),
+              },
+            })}
             description={I18LABELS.errorRate}
             isLoading={status !== 'success'}
           />
