@@ -5,7 +5,7 @@
  */
 
 declare module '@elastic/apm-rum-react' {
-  import { Route } from 'react-router-dom';
+  import { RouteProps } from 'react-router-dom';
 
-  export const ApmRoute: Route;
+  export const ApmRoute: React.ComponentClass<RouteProps>;
 }
