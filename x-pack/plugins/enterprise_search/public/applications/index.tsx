@@ -15,7 +15,7 @@ import { getContext, resetContext } from 'kea';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
-import { mountLicensingLogic, LicensingProvider } from './shared/licensing';
+import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { IExternalUrl } from './shared/enterprise_search_url';
@@ -70,13 +70,11 @@ export const renderApp = (
           setDocTitle: core.chrome.docTitle.change,
         }}
       >
-        <LicenseProvider license$={plugins.licensing.license$}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-            </Router>
-          </Provider>
-        </LicenseProvider>
+        <Provider store={store}>
+          <Router history={params.history}>
+            <App {...initialData} />
+          </Router>
+        </Provider>
       </KibanaContext.Provider>
     </I18nProvider>,
     params.element
