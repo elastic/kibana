@@ -196,76 +196,93 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     ]
   );
 
-  const renderContent = useCallback(
+  const RenderClone = useCallback(
+    (provided, snapshot) => (
+      <ConditionalPortal registerProvider={registerProvider}>
+        <div
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          style={getStyle(provided.draggableProps.style, snapshot)}
+          ref={provided.innerRef}
+          data-test-subj="providerContainer"
+        >
+          <ProviderContentWrapper
+            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+          >
+            {render(dataProvider, provided, snapshot)}
+          </ProviderContentWrapper>
+        </div>
+      </ConditionalPortal>
+    ),
+    [dataProvider, registerProvider, render]
+  );
+
+  const DraggableContent = useCallback(
+    (provided, snapshot) => (
+      <ProviderContainer
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        ref={(e: HTMLDivElement) => {
+          provided.innerRef(e);
+          draggableRef.current = e;
+        }}
+        data-test-subj="providerContainer"
+        isDragging={snapshot.isDragging}
+        registerProvider={registerProvider}
+      >
+        {truncate && !snapshot.isDragging ? (
+          <TruncatableText data-test-subj="draggable-truncatable-content">
+            {render(dataProvider, provided, snapshot)}
+          </TruncatableText>
+        ) : (
+          <ProviderContentWrapper
+            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+          >
+            {render(dataProvider, provided, snapshot)}
+          </ProviderContentWrapper>
+        )}
+      </ProviderContainer>
+    ),
+    [dataProvider, registerProvider, render, truncate]
+  );
+
+  const DroppableContent = useCallback(
+    (droppableProvided) => (
+      <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
+        <Draggable
+          draggableId={getDraggableId(dataProvider.id)}
+          index={0}
+          key={getDraggableId(dataProvider.id)}
+          isDragDisabled={isDisabled}
+        >
+          {DraggableContent}
+        </Draggable>
+        {droppableProvided.placeholder}
+      </div>
+    ),
+    [DraggableContent, dataProvider.id, isDisabled]
+  );
+
+  const content = useMemo(
     () => (
       <Wrapper data-test-subj="draggableWrapperDiv" disabled={isDisabled}>
         <DragDropErrorBoundary>
           <Droppable
             isDropDisabled={true}
             droppableId={getDroppableId(dataProvider.id)}
-            renderClone={(provided, snapshot) => (
-              <ConditionalPortal registerProvider={registerProvider}>
-                <div
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  style={getStyle(provided.draggableProps.style, snapshot)}
-                  ref={provided.innerRef}
-                  data-test-subj="providerContainer"
-                >
-                  <ProviderContentWrapper
-                    data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                  >
-                    {render(dataProvider, provided, snapshot)}
-                  </ProviderContentWrapper>
-                </div>
-              </ConditionalPortal>
-            )}
+            renderClone={RenderClone}
           >
-            {(droppableProvided) => (
-              <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
-                <Draggable
-                  draggableId={getDraggableId(dataProvider.id)}
-                  index={0}
-                  key={getDraggableId(dataProvider.id)}
-                  isDragDisabled={isDisabled}
-                >
-                  {(provided, snapshot) => (
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={(e: HTMLDivElement) => {
-                        provided.innerRef(e);
-                        draggableRef.current = e;
-                      }}
-                      data-test-subj="providerContainer"
-                      isDragging={snapshot.isDragging}
-                      registerProvider={registerProvider}
-                    >
-                      {truncate && !snapshot.isDragging ? (
-                        <TruncatableText data-test-subj="draggable-truncatable-content">
-                          {render(dataProvider, provided, snapshot)}
-                        </TruncatableText>
-                      ) : (
-                        <ProviderContentWrapper
-                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                        >
-                          {render(dataProvider, provided, snapshot)}
-                        </ProviderContentWrapper>
-                      )}
-                    </ProviderContainer>
-                  )}
-                </Draggable>
-                {droppableProvided.placeholder}
-              </div>
-            )}
+            {DroppableContent}
           </Droppable>
         </DragDropErrorBoundary>
       </Wrapper>
     ),
-    [dataProvider, registerProvider, render, isDisabled, truncate]
+    [DroppableContent, RenderClone, dataProvider.id, isDisabled]
   );
 
-  if (isDisabled) return <>{renderContent()}</>;
+  const renderContent = useCallback(() => content, [content]);
+
+  if (isDisabled) return <>{content}</>;
 
   return (
     <WithHoverActions

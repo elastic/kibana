@@ -259,6 +259,25 @@ export const FooterComponent = ({
   ]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
+  const rowItems = useMemo(
+    () =>
+      itemsPerPageOptions &&
+      itemsPerPageOptions.map((item) => (
+        <EuiContextMenuItem
+          key={item}
+          icon={itemsPerPage === item ? 'check' : 'empty'}
+          data-test-subj={`items-per-page-option-${item}`}
+          onClick={() => {
+            closePopover();
+            onChangeItemsPerPage(item);
+          }}
+        >
+          {`${item} ${i18n.ROWS}`}
+        </EuiContextMenuItem>
+      )),
+    [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
+  );
+
   useEffect(() => {
     if (paginationLoading && !isLoading) {
       setPaginationLoading(false);
@@ -278,22 +297,6 @@ export const FooterComponent = ({
       </LoadingPanelContainer>
     );
   }
-
-  const rowItems =
-    itemsPerPageOptions &&
-    itemsPerPageOptions.map((item) => (
-      <EuiContextMenuItem
-        key={item}
-        icon={itemsPerPage === item ? 'check' : 'empty'}
-        data-test-subj={`items-per-page-option-${item}`}
-        onClick={() => {
-          closePopover();
-          onChangeItemsPerPage(item);
-        }}
-      >
-        {`${item} ${i18n.ROWS}`}
-      </EuiContextMenuItem>
-    ));
 
   return (
     <FooterContainer

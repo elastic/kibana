@@ -19,14 +19,7 @@ import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
-import {
-  OnChangeItemsPerPage,
-  OnDataProviderRemoved,
-  OnDataProviderEdited,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from './events';
+import { OnChangeItemsPerPage } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
@@ -115,11 +108,6 @@ export interface Props {
   loadingIndexName: boolean;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   start: string;
@@ -153,11 +141,6 @@ export const TimelineComponent: React.FC<Props> = ({
   loadingIndexName,
   onChangeItemsPerPage,
   onClose,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
-  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   start,
@@ -282,11 +265,6 @@ export const TimelineComponent: React.FC<Props> = ({
             dataProviders={dataProviders}
             filterManager={filterManager}
             graphEventId={graphEventId}
-            onDataProviderEdited={onDataProviderEdited}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            onToggleDataProviderType={onToggleDataProviderType}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineId={id}

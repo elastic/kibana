@@ -5,7 +5,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   DragEffects,
@@ -71,16 +71,25 @@ const NonDecoratedIpComponent: React.FC<{
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, truncate, value }) => (
-  <DraggableWrapper
-    dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
-    key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
-      contextId,
-      eventId,
-      fieldName,
-      address: value,
-    })}`}
-    render={(dataProvider, _, snapshot) =>
+}> = ({ contextId, eventId, fieldName, truncate, value }) => {
+  const key = useMemo(
+    () =>
+      `non-decorated-ip-draggable-wrapper-${getUniqueId({
+        contextId,
+        eventId,
+        fieldName,
+        address: value,
+      })}`,
+    [contextId, eventId, fieldName, value]
+  );
+
+  const dataProviderProp = useMemo(
+    () => getDataProvider({ contextId, eventId, fieldName, address: value }),
+    [contextId, eventId, fieldName, value]
+  );
+
+  const render = useCallback(
+    (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -89,47 +98,107 @@ const NonDecoratedIpComponent: React.FC<{
         getOrEmptyTagFromValue(value)
       ) : (
         getOrEmptyTagFromValue(tryStringify(value))
-      )
-    }
-    truncate={truncate}
-  />
-);
+      ),
+    [value]
+  );
+
+  return (
+    <DraggableWrapper
+      dataProvider={dataProviderProp}
+      key={key}
+      render={render}
+      truncate={truncate}
+    />
+  );
+};
 
 const NonDecoratedIp = React.memo(NonDecoratedIpComponent);
 
-const AddressLinksComponent: React.FC<{
+interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
+  address: string;
+}
+
+const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
+  address,
+  contextId,
+  eventId,
+  fieldName,
+  truncate,
+}) => {
+  const key = useMemo(
+    () =>
+      `address-links-draggable-wrapper-${getUniqueId({
+        contextId,
+        eventId,
+        fieldName,
+        address,
+      })}`,
+    [address, contextId, eventId, fieldName]
+  );
+
+  const dataProviderProp = useMemo(
+    () => getDataProvider({ contextId, eventId, fieldName, address }),
+    [address, contextId, eventId, fieldName]
+  );
+
+  const render = useCallback(
+    (_props, _provided, snapshot) =>
+      snapshot.isDragging ? (
+        <DragEffects>
+          <Provider dataProvider={dataProviderProp} />
+        </DragEffects>
+      ) : (
+        <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+      ),
+    [address, dataProviderProp]
+  );
+
+  return (
+    <DraggableWrapper
+      dataProvider={dataProviderProp}
+      key={key}
+      render={render}
+      truncate={truncate}
+    />
+  );
+};
+
+const AddressLinksItem = React.memo(AddressLinksItemComponent);
+
+interface AddressLinksProps {
   addresses: string[];
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
-}> = ({ addresses, contextId, eventId, fieldName, truncate }) => (
-  <>
-    {uniq(addresses).map((address) => (
-      <DraggableWrapper
-        dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-        key={`address-links-draggable-wrapper-${getUniqueId({
-          contextId,
-          eventId,
-          fieldName,
-          address,
-        })}`}
-        render={(_props, _provided, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider
-                dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-              />
-            </DragEffects>
-          ) : (
-            <NetworkDetailsLink data-test-subj="network-details" ip={address} />
-          )
-        }
-        truncate={truncate}
-      />
-    ))}
-  </>
-);
+}
+
+const AddressLinksComponent: React.FC<AddressLinksProps> = ({
+  addresses,
+  contextId,
+  eventId,
+  fieldName,
+  truncate,
+}) => {
+  const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
+
+  const content = useMemo(
+    () =>
+      uniqAddresses.map((address) => (
+        <AddressLinksItem
+          key={address}
+          address={address}
+          contextId={contextId}
+          eventId={eventId}
+          fieldName={fieldName}
+          truncate={truncate}
+        />
+      )),
+    [contextId, eventId, fieldName, truncate, uniqAddresses]
+  );
+
+  return <>{content}</>;
+};
 
 const AddressLinks = React.memo(AddressLinksComponent);
 

@@ -41,11 +41,6 @@ describe('DataProviders', () => {
               data-test-subj="dataProviders-container"
               dataProviders={mockDataProviders}
               timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
             />
           </ManageGlobalTimeline>
         </TestProviders>
@@ -58,16 +53,7 @@ describe('DataProviders', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <DataProviders
-            browserFields={{}}
-            timelineId="foo"
-            dataProviders={dataProviders}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            onToggleDataProviderType={jest.fn()}
-          />
+          <DataProviders browserFields={{}} timelineId="foo" dataProviders={dataProviders} />
         </TestProviders>
       );
 
@@ -77,16 +63,7 @@ describe('DataProviders', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <DataProviders
-            browserFields={{}}
-            timelineId="foo"
-            dataProviders={mockDataProviders}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            onToggleDataProviderType={jest.fn()}
-          />
+          <DataProviders browserFields={{}} timelineId="foo" dataProviders={mockDataProviders} />
         </TestProviders>
       );
 
