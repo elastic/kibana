@@ -57,6 +57,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const certId = getSha256();
         const { monitorId } = await makeCheck({
           es,
+          monitorId: 'cert-test-check-id',
+          fields: {
+            monitor: {
+              name: 'Cert Test Check',
+            },
+            url: {
+              full: 'https://site-to-check.com/',
+            },
+          },
           tls: {
             sha256: certId,
           },

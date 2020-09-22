@@ -32,6 +32,7 @@ import {
   DeleteAgentConfigResponse,
   GetFullAgentConfigResponse,
 } from '../../../common';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getAgentConfigsHandler: RequestHandler<
   undefined,
@@ -65,11 +66,8 @@ export const getAgentConfigsHandler: RequestHandler<
     );
 
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -93,11 +91,8 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
         body: { message: 'Agent config not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -147,11 +142,8 @@ export const createAgentConfigHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -175,11 +167,8 @@ export const updateAgentConfigHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -203,11 +192,8 @@ export const copyAgentConfigHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -225,11 +211,8 @@ export const deleteAgentConfigsHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -259,11 +242,8 @@ export const getFullAgentConfig: RequestHandler<
         body: { message: 'Agent config not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -296,10 +276,7 @@ export const downloadFullAgentConfig: RequestHandler<
         body: { message: 'Agent config not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

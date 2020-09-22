@@ -8,7 +8,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -35,7 +34,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
@@ -96,12 +95,9 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
+          <>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal
-              globalFullScreen={globalFullScreen}
-              show={showGlobalFilters({ globalFullScreen, graphEventId })}
-            >
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
@@ -156,7 +152,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 hostsPagePath={hostsPagePath}
               />
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />

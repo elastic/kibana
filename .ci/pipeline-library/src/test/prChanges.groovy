@@ -97,4 +97,17 @@ class PrChangesTest extends KibanaBasePipelineTest {
 
     assertFalse(prChanges.areChangesSkippable())
   }
+
+  @Test
+  void 'areChangesSkippable() with plugin readme changes'() {
+    props([
+      githubPrs: [
+        getChanges: { [
+          [filename: 'src/plugins/foo/README.asciidoc'],
+        ] },
+      ],
+    ])
+
+    assertFalse(prChanges.areChangesSkippable())
+  }
 }

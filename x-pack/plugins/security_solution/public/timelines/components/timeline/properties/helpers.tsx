@@ -272,9 +272,6 @@ export interface NewTimelineProps {
 
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
@@ -282,7 +279,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     });
     const button = getButton({ outline, title });
 
-    return capabilitiesCanUserCRUD ? button : null;
+    return button;
   }
 );
 NewTimeline.displayName = 'NewTimeline';

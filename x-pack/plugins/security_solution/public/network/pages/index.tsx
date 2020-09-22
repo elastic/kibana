@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 

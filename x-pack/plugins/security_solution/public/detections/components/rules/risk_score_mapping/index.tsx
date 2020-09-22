@@ -179,7 +179,7 @@ export const RiskScoreField = ({
           error={'errorMessage'}
           isInvalid={false}
           fullWidth
-          data-test-subj={dataTestSubj}
+          data-test-subj={`${dataTestSubj}-riskOverride`}
           describedByIds={idAria ? [idAria] : undefined}
         >
           <NestedContent>

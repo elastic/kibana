@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
-import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
+import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
@@ -38,13 +38,13 @@ export const AnomaliesQueryTabBody = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [, siemJobs] = useSiemJobs(true);
+  const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
     filterQuery,
     anomaliesFilterQuery,
-    siemJobs,
+    jobs,
     anomalyScore,
     flowTarget,
     ip

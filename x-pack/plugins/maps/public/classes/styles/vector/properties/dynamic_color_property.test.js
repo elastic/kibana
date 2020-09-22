@@ -343,6 +343,15 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
     });
 
     describe('custom color ramp', () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.ORDINAL,
+        useCustomColorRamp: true,
+        customColorRamp: [
+          { stop: 10, color: '#f7faff' },
+          { stop: 100, color: '#072f6b' },
+        ],
+      };
+
       test('should return null when customColorRamp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
@@ -362,19 +371,28 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
-      test('should return mapbox expression for custom color ramp', async () => {
-        const dynamicStyleOptions = {
-          type: COLOR_MAP_TYPE.ORDINAL,
-          useCustomColorRamp: true,
-          customColorRamp: [
-            { stop: 10, color: '#f7faff' },
-            { stop: 100, color: '#072f6b' },
-          ],
-        };
+      test('should use `feature-state` by default', async () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
           ['coalesce', ['feature-state', 'foobar'], 9],
+          'rgba(0,0,0,0)',
+          10,
+          '#f7faff',
+          100,
+          '#072f6b',
+        ]);
+      });
+
+      test('should use `get` when source cannot return raw geojson', async () => {
+        const field = Object.create(mockField);
+        field.canReadFromGeoJson = function () {
+          return false;
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, undefined, field);
+        expect(colorProperty._getMbColor()).toEqual([
+          'step',
+          ['coalesce', ['get', 'foobar'], 9],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',

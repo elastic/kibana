@@ -73,27 +73,27 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.enabled`
+`<provider-type>.<provider-name>.enabled` {ess-icon}
 | Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.order`
+`<provider-type>.<provider-name>.order` {ess-icon}
 | Order of the provider in the authentication chain and on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.description`
+`<provider-type>.<provider-name>.description` {ess-icon}
 | Custom description of the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint`
+`<provider-type>.<provider-name>.hint` {ess-icon}
 | Custom hint for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon`
+`<provider-type>.<provider-name>.icon` {ess-icon}
 | Custom icon for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.showInSelector`
+`<provider-type>.<provider-name>.showInSelector` {ess-icon}
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
 |===
@@ -107,7 +107,7 @@ You are unable to set this setting to `false` for `basic` and `token` authentica
 |===
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.accessAgreement.message`
+`<provider-type>.<provider-name>.accessAgreement.message` {ess-icon}
 | Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
 
 |===
@@ -121,11 +121,11 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.realm`
+`saml.<provider-name>.realm` {ess-icon}
 | SAML realm in {es} that provider should use.
 
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.maxRedirectURLSize`
+`saml.<provider-name>.maxRedirectURLSize` {ess-icon}
 | The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
 
 |===
@@ -139,7 +139,7 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`oidc.<provider-name>.realm`
+`oidc.<provider-name>.realm` {ess-icon}
 | OpenID Connect realm in {es} that the provider should use.
 
 |===
@@ -169,8 +169,14 @@ There is a very limited set of cases when you'd want to change these settings. F
 
 [cols="2*<"]
 |===
-| `xpack.security.authc.selector.enabled`
-| Determines if the Login Selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+| `xpack.security.loginAssistanceMessage` {ess-icon}
+| Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
+
+| `xpack.security.loginHelp` {ess-icon}
+| Adds a message accessible at the login UI with additional help information for the login process.
+
+| `xpack.security.authc.selector.enabled` {ess-icon}
+| Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 |===
 
@@ -199,12 +205,12 @@ You can configure the following settings in the `kibana.yml` file.
   this to `true` if SSL is configured outside of {kib} (for example, you are
   routing requests through a load balancer or proxy).
 
-| `xpack.security.sameSiteCookies`
+| `xpack.security.sameSiteCookies` {ess-icon}
   | Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
   Valid values are `Strict`, `Lax`, `None`.
   This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting `xpack.security.secureCookies: true`. Some old versions of IE11 do not support `SameSite: None`.
 
-| `xpack.security.session.idleTimeout`
+| `xpack.security.session.idleTimeout` {ess-icon}
   | Sets the session duration. By default, sessions stay active until the
   browser is closed. When this is set to an explicit idle timeout, closing the
   browser still requires the user to log back in to {kib}.
@@ -220,7 +226,7 @@ The format is a string of `<count>[ms|s|m|h|d|w|M|Y]`
 [cols="2*<"]
 |===
 
-| `xpack.security.session.lifespan`
+| `xpack.security.session.lifespan` {ess-icon}
   | Sets the maximum duration, also known as "absolute timeout". By default,
   a session can be renewed indefinitely. When this value is set, a session will end
   once its lifespan is exceeded, even if the user is not idle. NOTE: if `idleTimeout`

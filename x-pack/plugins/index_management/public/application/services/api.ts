@@ -262,7 +262,7 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
 }
 
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
-  const includeTypeName = doMappingsHaveType(template.template.mappings);
+  const includeTypeName = doMappingsHaveType(template.template?.mappings);
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates`,
     method: 'post',

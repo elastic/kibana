@@ -53,9 +53,6 @@ export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) =>
         <CodeEditor
           value={xJson}
           languageId={XJsonLang.ID}
-          editorDidMount={(m) => {
-            XJsonLang.registerGrammarChecker(m);
-          }}
           options={{ minimap: { enabled: false } }}
           onChange={onChange}
           {...(editorProps as any)}

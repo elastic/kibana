@@ -10,6 +10,5 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./query_default_field'));
     loadTestFile(require.resolve('./reindexing'));
-    loadTestFile(require.resolve('./status'));
   });
 }

@@ -203,11 +203,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "ingest-agent-configs:config1",
+    "id": "ingest-agent-policies:config1",
     "index": ".kibana",
     "source": {
-      "type": "ingest-agent-configs",
-      "ingest-agent-configs": {
+      "type": "ingest-agent-policies",
+      "ingest-agent-policies": {
         "name": "Test config",
         "namespace": "default",
         "description": "Config 1",

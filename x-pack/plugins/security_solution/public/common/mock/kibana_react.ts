@@ -96,28 +96,10 @@ export const createUseKibanaMock = () => {
 export const createStartServices = () => {
   const core = createKibanaCoreStartMock();
   const plugins = createKibanaPluginsStartMock();
-  const security = {
-    authc: {
-      getCurrentUser: jest.fn(),
-      areAPIKeysEnabled: jest.fn(),
-    },
-    sessionTimeout: {
-      start: jest.fn(),
-      stop: jest.fn(),
-      extend: jest.fn(),
-    },
-    license: {
-      isEnabled: jest.fn(),
-      getFeatures: jest.fn(),
-      features$: jest.fn(),
-    },
-    __legacyCompat: { logoutUrl: 'logoutUrl', tenant: 'tenant' },
-  };
 
   const services = ({
     ...core,
     ...plugins,
-    security,
   } as unknown) as StartServices;
 
   return services;

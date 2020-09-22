@@ -28,7 +28,6 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
-const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
@@ -39,7 +38,7 @@ describe('Flyout', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -48,7 +47,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -69,7 +68,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -94,7 +93,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -117,7 +116,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -127,7 +126,7 @@ describe('Flyout', () => {
     test('it hides the data providers badge when the timeline does NOT have data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -152,7 +151,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -167,7 +166,6 @@ describe('Flyout', () => {
         <TestProviders>
           <FlyoutComponent
             dataProviders={mockDataProviders}
-            flyoutHeight={testFlyoutHeight}
             show={false}
             showTimeline={showTimeline}
             timelineId="test"

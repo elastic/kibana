@@ -64,13 +64,11 @@ export const TimelinesPageComponent: React.FC = () => {
                 </EuiFlexItem>
                 {tabName === TimelineType.default ? (
                   <EuiFlexItem>
-                    {capabilitiesCanUserCRUD && (
-                      <NewTimeline
-                        timelineId="timeline-1"
-                        outline={true}
-                        data-test-subj="create-default-btn"
-                      />
-                    )}
+                    <NewTimeline
+                      timelineId="timeline-1"
+                      outline={true}
+                      data-test-subj="create-default-btn"
+                    />
                   </EuiFlexItem>
                 ) : (
                   <EuiFlexItem>

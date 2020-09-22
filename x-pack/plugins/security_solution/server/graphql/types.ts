@@ -104,9 +104,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex?: Maybe<number>;
+  pageIndex: number;
 
-  pageSize?: Maybe<number>;
+  pageSize: number;
 }
 
 export interface SortTimeline {
@@ -423,11 +423,6 @@ export enum NetworkHttpFields {
 export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
-}
-
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
 }
 
 export type ToStringArrayNoNullable = any;
@@ -2326,7 +2321,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
@@ -2802,7 +2797,7 @@ export namespace QueryResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext, GetAllTimelineArgs>;
   export interface GetAllTimelineArgs {
-    pageInfo?: Maybe<PageInfoTimeline>;
+    pageInfo: PageInfoTimeline;
 
     search?: Maybe<string>;
 

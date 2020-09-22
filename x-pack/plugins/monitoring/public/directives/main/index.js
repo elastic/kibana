@@ -11,9 +11,14 @@ import { get } from 'lodash';
 import template from './index.html';
 import { Legacy } from '../../legacy_shims';
 import { shortenPipelineHash } from '../../../common/formatting';
-import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
+import {
+  getSetupModeState,
+  initSetupModeState,
+  isSetupModeFeatureEnabled,
+} from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
+import { SetupModeFeature } from '../../../common/enums';
 
 const setOptions = (controller) => {
   if (
@@ -179,7 +184,7 @@ export class MonitoringMainController {
 
   isDisabledTab(product) {
     const setupMode = getSetupModeState();
-    if (!setupMode.enabled || !setupMode.data) {
+    if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       return false;
     }
 

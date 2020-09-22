@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiPanel,
   EuiTitle,
   EuiAccordion,
   EuiBadge,
@@ -1028,6 +1029,7 @@ export class TimeSeriesExplorer extends React.Component {
       dataNotChartable,
       entityValues,
       focusAggregationInterval,
+      focusAnnotationError,
       focusAnnotationData,
       focusAggregations,
       focusChartData,
@@ -1316,6 +1318,36 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
+                {focusAnnotationError !== undefined && (
+                  <>
+                    <EuiTitle
+                      className="panel-title"
+                      data-test-subj="mlAnomalyExplorerAnnotations error"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
+                    <EuiPanel>
+                      <EuiCallOut
+                        title={i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                          {
+                            defaultMessage: 'An error occurred loading annotations:',
+                          }
+                        )}
+                        color="danger"
+                        iconType="alert"
+                      >
+                        <p>{focusAnnotationError}</p>
+                      </EuiCallOut>
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
                     id={'EuiAccordion-blah'}
@@ -1340,6 +1372,7 @@ export class TimeSeriesExplorer extends React.Component {
                         </h2>
                       </EuiTitle>
                     }
+                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
                   >
                     <AnnotationsTable
                       chartDetails={chartDetails}

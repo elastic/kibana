@@ -571,7 +571,7 @@ all http requests to https over the port configured as `server.port`.
  | An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`. *Default: TLSv1.1, TLSv1.2*
 
-| `server.xsrf.whitelist:`
+| [[settings-xsrf-whitelist]] `server.xsrf.whitelist:`
  | It is not recommended to disable protections for
 arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
 The `server.xsrf.whitelist` setting requires the following format:
@@ -585,6 +585,9 @@ The `server.xsrf.whitelist` setting requires the following format:
 
 [cols="2*<"]
 |===
+
+| [[settings-xsrf-disableProtection]] `server.xsrf.disableProtection:`
+ | Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
 
 | `status.allowAnonymous:`
  | If authentication is enabled,

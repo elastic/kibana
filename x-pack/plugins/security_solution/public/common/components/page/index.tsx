@@ -62,13 +62,38 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950;
   }
 
-  /** applies a "toggled" button style to the Full Screen button */
+  /* applies a "toggled" button style to the Full Screen button */
   .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  .${SCROLLING_DISABLED_CLASS_NAME} body {
+  body {
     overflow-y: hidden;
+  }
+
+  #kibana-body {
+    height: 100%;
+    overflow-y: hidden;
+
+    > .content {
+      height: 100%;
+
+      > .app-wrapper {
+        height: 100%;
+
+        > .app-wrapper-panel {
+          height: 100%;
+
+          > .application {
+            height: 100%;
+
+            > div {
+               height: 100%;
+            }
+          }
+        }
+      }
+    }
   }
 
   .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {

@@ -153,6 +153,39 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should handle create alert request appropriately when alert name has leading and trailing whitespaces', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                name: ' leading and trailing whitespace ',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.name).to.eql(' leading and trailing whitespace ');
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should handle create alert request appropriately when alert type is unregistered', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)

@@ -27,6 +27,7 @@
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
+|  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
 
@@ -49,6 +50,7 @@
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
+|  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
 ## Variables

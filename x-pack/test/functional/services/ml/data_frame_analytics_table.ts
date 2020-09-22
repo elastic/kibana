@@ -62,8 +62,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return rows;
     }
 
+    public async waitForRefreshButtonLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+    }
+
     public async refreshAnalyticsTable() {
-      await testSubjects.click('mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
       await this.waitForAnalyticsToLoad();
     }
 

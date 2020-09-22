@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
+import { none } from 'fp-ts/lib/Option';
 
 import {
   asTaskMarkRunningEvent,
@@ -297,7 +298,9 @@ describe('TaskManager', () => {
         events$.next(asTaskMarkRunningEvent(id, asOk(task)));
         events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
 
       test('rejects when the task mark as running fails', () => {
@@ -311,7 +314,9 @@ describe('TaskManager', () => {
         events$.next(asTaskClaimEvent(id, asOk(task)));
         events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
 
       test('when a task claim fails we ensure the task exists', async () => {
@@ -321,7 +326,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it does not exist`)
@@ -337,7 +342,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it is currently running`)
@@ -353,7 +358,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it is currently running`)
@@ -386,9 +391,11 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
-        await expect(result).rejects.toEqual(new Error('failed to claim'));
+        await expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
+        );
 
         expect(getLifecycle).toHaveBeenCalledWith(id);
       });
@@ -400,9 +407,11 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
-        await expect(result).rejects.toEqual(new Error('failed to claim'));
+        await expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`
+        );
 
         expect(getLifecycle).toHaveBeenCalledWith(id);
       });
@@ -424,7 +433,9 @@ describe('TaskManager', () => {
 
         events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
     });
   });

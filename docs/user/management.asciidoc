@@ -190,8 +190,6 @@ include::{kib-repo-dir}/management/index-lifecycle-policies/manage-policy.asciid
 
 include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
 
-include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
-
 include::{kib-repo-dir}/management/managing-indices.asciidoc[]
 
 include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]

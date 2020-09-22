@@ -191,6 +191,51 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should handle update alert request appropriately when alert name has leading and trailing whitespaces', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const updatedData = {
+            name: ' leading and trailing whitespace ',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.name).to.eql(' leading and trailing whitespace ');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it(`shouldn't update alert from another space`, async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)

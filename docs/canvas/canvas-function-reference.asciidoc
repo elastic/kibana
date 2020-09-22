@@ -13,7 +13,7 @@ A *** denotes a required argument.
 
 A † denotes an argument can be passed multiple times.
 
-<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | V | W | X | Y | Z
+<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | <<v_fns>> | W | X | Y | Z
 
 [float]
 [[a_fns]]
@@ -2871,3 +2871,56 @@ Default: `""`
 |===
 
 *Returns:* `string`
+
+[float]
+[[v_fns]]
+== V
+
+[float]
+[[var_fn]]
+=== `var`
+
+Updates the Kibana global context.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `name`
+|`string`
+|Specify the name of the variable.
+|===
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[var_set_fn]]
+=== `var_set`
+
+Updates the Kibana global context.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `name`
+|`string`
+|Specify the name of the variable.
+
+|`value`
+
+Alias: `val`
+|`any`
+|Specify the value for the variable. When unspecified, the input context is used.
+|===
+
+*Returns:* Depends on your input and arguments

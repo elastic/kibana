@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
 
-  describe('full screen mode', () => {
+  describe('maps full screen mode', () => {
     before(async () => {
+      await esArchiver.loadIfNeeded('maps/data');
       await PageObjects.maps.openNewMap();
     });
 

@@ -51,7 +51,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           cancel: this.cancelPending,
           runBeyondTimeout: this.runBeyondTimeout,
@@ -89,9 +89,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
         // If the response indicates it is complete, stop polling and complete the observable
         if (!response.is_running) {
-          if (this.deps.usageCollector && response.rawResponse) {
-            this.deps.usageCollector.trackSuccess(response.rawResponse.took);
-          }
           return EMPTY;
         }
 

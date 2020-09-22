@@ -33,7 +33,7 @@ export interface EndpointUsage {
   policies: PoliciesTelemetry;
 }
 
-type EndpointOSNames = 'Linux' | 'Windows' | 'macOs';
+type EndpointOSNames = 'Linux' | 'Windows' | 'macOS';
 
 export interface AgentLocalMetadata extends AgentMetadata {
   elastic: {
@@ -129,7 +129,7 @@ export const updateEndpointPolicyTelemetry = (
 ): PoliciesTelemetry => {
   const policyHostTypeToPolicyType = {
     Linux: 'linux',
-    macOs: 'mac',
+    macOS: 'mac',
     Windows: 'windows',
   };
   const enabledMalwarePolicyTypes = ['prevent', 'detect'];

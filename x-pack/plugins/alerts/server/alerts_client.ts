@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map, truncate } from 'lodash';
+import { omit, isEqual, map, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -313,11 +313,18 @@ export class AlertsClient {
           updateResult.scheduledTaskId &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
-            this.logger.error(
-              `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-            );
-          });
+          this.taskManager
+            .runNow(updateResult.scheduledTaskId)
+            .then(() => {
+              this.logger.debug(
+                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
+              );
+            })
+            .catch((err: Error) => {
+              this.logger.error(
+                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+              );
+            });
         }
       })(),
     ]);
@@ -712,6 +719,6 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
+    return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
 }

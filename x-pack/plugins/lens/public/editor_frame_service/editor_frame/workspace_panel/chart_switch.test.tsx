@@ -480,6 +480,34 @@ describe('chart_switch', () => {
     expect(frame.removeLayers).not.toHaveBeenCalled();
   });
 
+  it('should not remove layers and initialize with existing state when switching between subtypes without data', () => {
+    const dispatch = jest.fn();
+    const frame = mockFrame(['a']);
+    frame.datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
+    const visualizations = mockVisualizations();
+    visualizations.visC.getSuggestions = jest.fn().mockReturnValue([]);
+    visualizations.visC.switchVisualizationType = jest.fn(() => 'switched');
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visC"
+        visualizationState={{ type: 'subvisC1' }}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisC3', component);
+
+    expect(visualizations.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
+      type: 'subvisC1',
+    });
+    expect(frame.removeLayers).not.toHaveBeenCalled();
+  });
+
   it('should switch to the updated datasource state', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();

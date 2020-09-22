@@ -284,6 +284,28 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_upgrade_assistant_role: {
+          elasticsearch: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['apm-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],

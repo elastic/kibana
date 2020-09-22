@@ -141,6 +141,13 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated';
 export const MINIMUM_ML_LICENSE = 'platinum';
 
 /*
+  Machine Learning constants
+ */
+export const ML_GROUP_ID = 'security';
+export const LEGACY_ML_GROUP_ID = 'siem';
+export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
+
+/*
   Rule notifications options
 */
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [

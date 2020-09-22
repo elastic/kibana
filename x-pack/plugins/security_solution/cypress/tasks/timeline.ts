@@ -12,6 +12,7 @@ import {
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
+  PIN_EVENT,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DESCRIPTION,
@@ -78,6 +79,10 @@ export const openTimelineSettings = () => {
   cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
 };
 
+export const pinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
+};
+
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT)
@@ -86,6 +91,10 @@ export const populateTimeline = () => {
       const intCount = +strCount;
       cy.wrap(intCount).should('be.above', 0);
     });
+};
+
+export const unpinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const uncheckTimestampToggleField = () => {

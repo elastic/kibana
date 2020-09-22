@@ -112,7 +112,7 @@ export class VisualizePlugin
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
-      order: -1002,
+      order: 8002,
       euiIconType: 'visualizeApp',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,

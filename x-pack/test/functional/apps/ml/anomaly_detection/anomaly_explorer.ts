@@ -119,6 +119,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
         });
 
+        it('should display the annotations panel', async () => {
+          await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+        });
+
         it('displays the anomalies table', async () => {
           await ml.anomaliesTable.assertTableExists();
         });

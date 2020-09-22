@@ -20,7 +20,7 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 export const Settings: React.FC = (props) => {
   const plugin = useApmPluginContext();
-  const isMLEnabled = !!plugin.core.application.capabilities.ml;
+  const canAccessML = !!plugin.core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = useLocation();
   return (
     <>
@@ -51,7 +51,7 @@ export const Settings: React.FC = (props) => {
                       '/settings/agent-configuration'
                     ),
                   },
-                  ...(isMLEnabled
+                  ...(canAccessML
                     ? [
                         {
                           name: i18n.translate(

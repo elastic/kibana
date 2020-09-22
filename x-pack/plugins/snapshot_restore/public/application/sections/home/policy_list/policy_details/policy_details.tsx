@@ -24,6 +24,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
 import { SectionError, Error } from '../../../../../shared_imports';
@@ -40,8 +42,6 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policyName: SlmPolicy['name'];

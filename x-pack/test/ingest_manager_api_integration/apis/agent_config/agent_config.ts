@@ -26,13 +26,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.success).to.be(true);
       });
 
-      it('should return a 400 with an invalid namespace', async () => {
+      it('should return a 400 with an empty namespace', async () => {
         await supertest
           .post(`/api/ingest_manager/agent_configs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
             namespace: '',
+          })
+          .expect(400);
+      });
+
+      it('should return a 400 with an invalid namespace', async () => {
+        await supertest
+          .post(`/api/ingest_manager/agent_configs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'InvalidNamespace',
           })
           .expect(400);
       });
@@ -73,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return a 500 with invalid source config', async () => {
+      it('should return a 404 with invalid source config', async () => {
         await supertest
           .post(`/api/ingest_manager/agent_configs/INVALID_CONFIG_ID/copy`)
           .set('kbn-xsrf', 'xxxx')
@@ -81,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'Copied config',
             description: '',
           })
-          .expect(500);
+          .expect(404);
       });
 
       it('should return a 400 with invalid payload', async () => {

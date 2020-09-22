@@ -518,6 +518,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           {
             body: request.body,
             analyticsId,
+            ...getAuthorizationHeader(request),
           }
         );
         return response.ok({

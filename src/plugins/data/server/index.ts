@@ -170,6 +170,8 @@ export {
   ISearchStart,
   getDefaultSearchParams,
   getTotalLoaded,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace

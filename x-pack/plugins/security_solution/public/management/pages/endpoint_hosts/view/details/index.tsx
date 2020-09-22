@@ -77,7 +77,12 @@ export const HostDetailsFlyout = memo(() => {
   }, [error, notifications.toasts]);
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose} data-test-subj="hostDetailsFlyout" size="s">
+    <EuiFlyout
+      onClose={handleFlyoutClose}
+      style={{ zIndex: 4001 }}
+      data-test-subj="hostDetailsFlyout"
+      size="s"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 data-test-subj="hostDetailsFlyoutTitle">

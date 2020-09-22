@@ -356,6 +356,71 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
   });
 });
 
+describe.each(chartDataSets)('BarChart with custom color', () => {
+  let wrapper: ReactWrapper;
+
+  const data = [
+    {
+      key: 'python.exe',
+      value: [
+        {
+          x: 1586754900000,
+          y: 9675,
+          g: 'python.exe',
+        },
+      ],
+      color: '#1EA591',
+    },
+    {
+      key: 'kernel',
+      value: [
+        {
+          x: 1586754900000,
+          y: 8708,
+          g: 'kernel',
+        },
+        {
+          x: 1586757600000,
+          y: 9282,
+          g: 'kernel',
+        },
+      ],
+      color: '#000000',
+    },
+    {
+      key: 'sshd',
+      value: [
+        {
+          x: 1586754900000,
+          y: 5907,
+          g: 'sshd',
+        },
+      ],
+      color: '#ffffff',
+    },
+  ];
+
+  const expectedColors = ['#1EA591', '#000000', '#ffffff'];
+
+  const stackByField = 'process.name';
+
+  beforeAll(() => {
+    wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <TestProviders>
+          <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
+        </TestProviders>
+      </ThemeProvider>
+    );
+  });
+
+  expectedColors.forEach((color, i) => {
+    test(`it renders the expected legend color ${color} for legend item ${i}`, () => {
+      expect(wrapper.find(`div [color="${color}"]`).exists()).toBe(true);
+    });
+  });
+});
+
 describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', (data) => {
   let shallowWrapper: ShallowWrapper;
 

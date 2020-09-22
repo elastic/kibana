@@ -14,6 +14,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
+import { parseScheduleDates } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import {
@@ -24,7 +25,6 @@ import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
   getGapBetweenRuns,
-  parseScheduleDates,
   getListsClient,
   getExceptions,
   getGapMaxCatchupRatio,
@@ -356,7 +356,8 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string }).kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
             });
 
             logger.info(

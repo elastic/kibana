@@ -33,7 +33,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       return false;
     }
 
-    return true;
+    return super.supportsMbFeatureState();
   }
 
   syncHaloWidthWithMb(mbLayerId, mbMap) {
@@ -109,17 +109,13 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize, minValue, maxValue }) {
-    const lookup = this.supportsMbFeatureState()
-      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
-      : MB_LOOKUP_FUNCTION.GET;
-
     const stops =
       minValue === maxValue ? [maxValue, maxSize] : [minValue, minSize, maxValue, maxSize];
     return [
       'interpolate',
       ['linear'],
       makeMbClampedNumberExpression({
-        lookupFunction: lookup,
+        lookupFunction: this.getMbLookupFunction(),
         maxValue,
         minValue,
         fieldName: targetName,

@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should return a 400 with an invalid namespace', async function () {
+    it('should return a 400 with an empty namespace', async function () {
       if (server.enabled) {
         await supertest
           .post(`/api/ingest_manager/package_configs`)
@@ -70,6 +70,31 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'filetest-1',
             description: '',
             namespace: '',
+            config_id: agentConfigId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should return a 400 with an invalid namespace', async function () {
+      if (server.enabled) {
+        await supertest
+          .post(`/api/ingest_manager/package_configs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'InvalidNamespace',
             config_id: agentConfigId,
             enabled: true,
             output_id: '',
@@ -102,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(200);
@@ -120,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(500);

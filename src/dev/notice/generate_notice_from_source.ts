@@ -47,10 +47,13 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     cwd: directory,
     nodir: true,
     ignore: [
-      '{node_modules,build,target,dist,optimize,built_assets}/**',
-      'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,optimize}/**',
-      'x-pack/packages/*/{node_modules,build,target,dist}/**',
+      '{node_modules,build,dist,data,built_assets}/**',
+      'packages/*/{node_modules,build,dist}/**',
+      'src/plugins/*/{node_modules,build,dist}/**',
+      'x-pack/{node_modules,build,dist,data}/**',
+      'x-pack/packages/*/{node_modules,build,dist}/**',
+      'x-pack/plugins/*/{node_modules,build,dist}/**',
+      '**/target/**',
     ],
   };
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
+import { ReactChildren } from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
@@ -67,7 +69,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
 // https://github.com/elastic/eui/issues/3712
 jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
   return {
-    EuiOverlayMask: ({children}) => children,
+    EuiOverlayMask: ({ children }) => children,
   };
 });
 
@@ -87,6 +89,12 @@ RenderedElement.mockImplementation(() => 'RenderedElement');
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
+
+// Some of the code requires that this directory exists, but the tests don't actually require any css to be present
+const cssDir = path.resolve(__dirname, '../../../../built_assets/css');
+if (!fs.existsSync(cssDir)) {
+  fs.mkdirSync(cssDir, { recursive: true });
+}
 
 addSerializer(styleSheetSerializer);
 

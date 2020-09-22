@@ -133,7 +133,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     () =>
       barChart != null && stackByField != null
         ? barChart.map((d, i) => ({
-            color: d.color ?? i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+            color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),

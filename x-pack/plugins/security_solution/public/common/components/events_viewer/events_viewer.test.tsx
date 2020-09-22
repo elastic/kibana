@@ -50,6 +50,10 @@ const utilityBar = (refetch: inputsModel.Refetch, totalCount: number) => (
   <div data-test-subj="mock-utility-bar" />
 );
 
+const exceptionsModal = (refetch: inputsModel.Refetch) => (
+  <div data-test-subj="mock-exceptions-modal" />
+);
+
 const eventsViewerDefaultProps = {
   browserFields: {},
   columns: [],
@@ -457,6 +461,44 @@ describe('EventsViewer', () => {
         wrapper.update();
 
         expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('exceptions modal', () => {
+    test('it renders exception modal if "exceptionsModal" callback exists', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              exceptionsModal={exceptionsModal}
+              graphEventId=""
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="mock-exceptions-modal"]`).exists()).toBeTruthy();
+      });
+    });
+
+    test('it does not render exception modal if "exceptionModal" callback does not exist', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="mock-exceptions-modal"]`).exists()).toBeFalsy();
       });
     });
   });
