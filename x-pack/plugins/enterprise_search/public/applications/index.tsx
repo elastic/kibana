@@ -16,8 +16,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
-import { FlashMessagesProvider } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
@@ -54,6 +54,8 @@ export const renderApp = (
     readOnlyMode: initialData.readOnlyMode,
   });
 
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ history: params.history });
+
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
@@ -67,7 +69,6 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
-            <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
             </Router>
@@ -80,6 +81,7 @@ export const renderApp = (
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
     unmountHttpLogic();
+    unmountFlashMessagesLogic();
   };
 };
 
