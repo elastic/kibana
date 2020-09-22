@@ -5,13 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewNetworkQuery } from '../../../../plugins/security_solution/public/overview/containers/overview_network/index.gql_query';
-import { GetOverviewNetworkQuery } from '../../../../plugins/security_solution/public/graphql/types';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { NetworkQueries } from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
+
   describe('Overview Network', () => {
     describe('With filebeat', () => {
       before(() => esArchiver.load('filebeat/default'));
@@ -27,32 +28,30 @@ export default function ({ getService }: FtrProviderContext) {
         filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        packetbeatDNS: 0,
-        packetbeatFlow: 0,
+        packetbeatDNS: 44,
+        packetbeatFlow: 588,
         packetbeatTLS: 0,
-        __typename: 'OverviewNetworkData',
       };
 
-      it('Make sure that we get OverviewNetwork data', () => {
-        return client
-          .query<GetOverviewNetworkQuery.Query>({
-            query: overviewNetworkQuery,
-            variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              inspect: false,
+      it('Make sure that we get OverviewNetwork data', async () => {
+        const {
+          body: { overviewNetwork },
+        } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            factoryQueryType: NetworkQueries.overview,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
+            docValueFields: [],
+            inspect: false,
           })
-          .then((resp) => {
-            const overviewNetwork = resp.data.source.OverviewNetwork;
-            expect(overviewNetwork).to.eql(expectedResult);
-          });
+          .expect(200);
+        expect(overviewNetwork).to.eql(expectedResult);
       });
     });
 
@@ -65,36 +64,35 @@ export default function ({ getService }: FtrProviderContext) {
       const expectedResult = {
         auditbeatSocket: 0,
         filebeatCisco: 0,
-        filebeatNetflow: 1273,
+        filebeatNetflow: 0,
         filebeatPanw: 0,
-        filebeatSuricata: 4547,
+        filebeatSuricata: 0,
         filebeatZeek: 0,
-        packetbeatDNS: 0,
-        packetbeatFlow: 0,
+        packetbeatDNS: 44,
+        packetbeatFlow: 588,
         packetbeatTLS: 0,
-        __typename: 'OverviewNetworkData',
       };
 
-      it('Make sure that we get OverviewNetwork data', () => {
-        return client
-          .query<GetOverviewNetworkQuery.Query>({
-            query: overviewNetworkQuery,
-            variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              inspect: false,
+      it('Make sure that we get OverviewNetwork data', async () => {
+        const {
+          body: { overviewNetwork },
+        } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            factoryQueryType: NetworkQueries.overview,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
+            docValueFields: [],
+            inspect: false,
           })
-          .then((resp) => {
-            const overviewNetwork = resp.data.source.OverviewNetwork;
-            expect(overviewNetwork).to.eql(expectedResult);
-          });
+          .expect(200);
+
+        expect(overviewNetwork).to.eql(expectedResult);
       });
     });
 
@@ -105,38 +103,36 @@ export default function ({ getService }: FtrProviderContext) {
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
-        auditbeatSocket: 0,
+        auditbeatSocket: 45,
         filebeatCisco: 0,
-        filebeatNetflow: 1273,
+        filebeatNetflow: 0,
         filebeatPanw: 0,
-        filebeatSuricata: 4547,
+        filebeatSuricata: 0,
         filebeatZeek: 0,
-        packetbeatDNS: 0,
-        packetbeatFlow: 0,
+        packetbeatDNS: 44,
+        packetbeatFlow: 588,
         packetbeatTLS: 0,
-        __typename: 'OverviewNetworkData',
       };
 
-      it('Make sure that we get OverviewNetwork data', () => {
-        return client
-          .query<GetOverviewNetworkQuery.Query>({
-            query: overviewNetworkQuery,
-            variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              docValueFields: [],
-              inspect: false,
+      it('Make sure that we get OverviewNetwork data', async () => {
+        const {
+          body: { overviewNetwork },
+        } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            factoryQueryType: NetworkQueries.overview,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
+            docValueFields: [],
+            inspect: false,
           })
-          .then((resp) => {
-            const overviewNetwork = resp.data.source.OverviewNetwork;
-            expect(overviewNetwork).to.eql(expectedResult);
-          });
+          .expect(200);
+        expect(overviewNetwork).to.eql(expectedResult);
       });
     });
   });

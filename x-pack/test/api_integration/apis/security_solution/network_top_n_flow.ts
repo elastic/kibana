@@ -5,11 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { networkTopNFlowQuery } from '../../../../plugins/security_solution/public/network/containers/network_top_n_flow/index.gql_query';
+import { NetworkQueries } from '../../../../plugins/security_solution/common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
-  GetNetworkTopNFlowQuery,
   NetworkTopTablesFields,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -42,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
               'packetbeat-*',
               'winlogbeat-*',
             ],
-            factoryQueryType: 'topNFlow',
+            factoryQueryType: NetworkQueries.topNFlow,
             flowTarget: FlowTargetSourceDest.source,
             sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
             pagination: {
