@@ -13,13 +13,26 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { getCoreVitalTooltipMessage, Thresholds } from './CoreVitalItem';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const PaletteLegend = styled(EuiHealth)`
   &:hover {
     cursor: pointer;
     text-decoration: underline;
-    background-color: #e7f0f7;
+  }
+`;
+
+const StyledSpan = styled.span<{
+  darkMode: boolean;
+}>`
+  &:hover {
+    background-color: ${(props) =>
+      props.darkMode
+        ? euiDarkVars.euiColorLightestShad
+        : euiLightVars.euiColorLightestShade};
   }
 `;
 
@@ -36,6 +49,8 @@ export function PaletteLegends({
   onItemHover,
   thresholds,
 }: Props) {
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   const palette = euiPaletteForStatus(3);
 
   return (
@@ -60,7 +75,9 @@ export function PaletteLegends({
             )}
             position="bottom"
           >
-            <PaletteLegend color={color}>{ranks?.[ind]}%</PaletteLegend>
+            <StyledSpan darkMode={darkMode}>
+              <PaletteLegend color={color}>{ranks?.[ind]}%</PaletteLegend>
+            </StyledSpan>
           </EuiToolTip>
         </EuiFlexItem>
       ))}
