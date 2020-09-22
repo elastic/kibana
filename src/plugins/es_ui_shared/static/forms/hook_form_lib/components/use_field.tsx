@@ -27,7 +27,7 @@ export interface Props<T> {
   path: string;
   config?: FieldConfig<any, T>;
   defaultValue?: T;
-  component?: FunctionComponent<any> | 'input';
+  component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
   onChange?: (value: T) => void;
@@ -50,9 +50,7 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
 
   const form = useFormContext();
   const ComponentToRender = component ?? 'input';
-  // For backward compatibility we merge the "componentProps" prop into the "rest"
-  const propsToForward =
-    componentProps !== undefined ? { ...componentProps, ...rest } : { ...rest };
+  const propsToForward = { ...componentProps, ...rest };
 
   const fieldConfig: FieldConfig<any, T> & { initialValue?: T } =
     config !== undefined
