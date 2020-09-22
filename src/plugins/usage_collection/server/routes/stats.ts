@@ -19,8 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
+
 import defaultsDeep from 'lodash/defaultsDeep';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
