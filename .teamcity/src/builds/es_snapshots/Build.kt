@@ -57,7 +57,7 @@ object ESSnapshotBuild : BuildType({
         """
           #!/bin/bash
           cd kibana
-          node ./.ci/teamcity/es_snapshots/create_manifest.js "\$(cd ../../es-build && pwd)"
+          node ./.ci/teamcity/es_snapshots/create_manifest.js "$(cd ../../es-build && pwd)"
         """.trimIndent()
     }
   }
