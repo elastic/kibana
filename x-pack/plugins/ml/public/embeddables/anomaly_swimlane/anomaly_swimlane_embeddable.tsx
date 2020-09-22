@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
@@ -59,15 +59,17 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <EmbeddableSwimLaneContainer
-          id={this.input.id}
-          embeddableContext={this}
-          embeddableInput={this.getInput$()}
-          services={this.services}
-          refresh={this.reload$.asObservable()}
-          onInputChange={this.updateInput.bind(this)}
-          onOutputChange={this.updateOutput.bind(this)}
-        />
+        <Suspense fallback={null}>
+          <EmbeddableSwimLaneContainer
+            id={this.input.id}
+            embeddableContext={this}
+            embeddableInput={this.getInput$()}
+            services={this.services}
+            refresh={this.reload$.asObservable()}
+            onInputChange={this.updateInput.bind(this)}
+            onOutputChange={this.updateOutput.bind(this)}
+          />
+        </Suspense>
       </I18nContext>,
       node
     );
