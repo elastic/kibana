@@ -15,12 +15,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
 
     testFiles: [
-      // require.resolve('./apps/login_page'),
-      // require.resolve('./apps/home'),
-      // require.resolve('./apps/grok_debugger'),
-      // require.resolve('./apps/search_profiler'),
-      // require.resolve('./apps/uptime'),
-      // require.resolve('./apps/spaces'),
+      require.resolve('./apps/login_page'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/grok_debugger'),
+      require.resolve('./apps/search_profiler'),
+      require.resolve('./apps/uptime'),
+      require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
     ],
     pageObjects,

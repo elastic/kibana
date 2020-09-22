@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const a11y = getService('a11y');
+  const testSubjects = getService('testSubjects');
 
   describe('Stack Management -Advanced Settings', () => {
     before(async () => {
@@ -18,40 +19,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // click on Management > Advanced settings
     it('click on advanced settings ', async () => {
-      await PageObjects.settings.navigateToApp('management');
-      // await PageObjects.settings.click('settings');
+      await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+        shouldUseHashForSubUrl: false,
+      });
+      await testSubjects.click('settings');
       await a11y.testAppSnapshot();
     });
 
+    // clicking on the top search bar
     it('adv settings - search ', async () => {
-      await PageObjects.settings.click('settingsSearchBar');
+      await testSubjects.click('settingsSearchBar');
       await a11y.testAppSnapshot();
     });
 
+    // clicking on the category dropdown
     it('adv settings - category -dropdown ', async () => {
-      await PageObjects.settings.click('settingsSearchBar');
+      // await testSubjects.click('settingsSearchBar');
       await a11y.testAppSnapshot();
     });
 
+    // clicking on the toggle button - https://github.com/elastic/kibana/issues/78225
     it('adv settings - toggle ', async () => {
-      await PageObjects.settings.click('advancedSetting-editField-csv:quoteValues');
+      await testSubjects.click('advancedSetting-editField-csv:quoteValues');
       await a11y.testAppSnapshot();
     });
 
+    // clicking on editor panel
     it('adv settings - edit ', async () => {
-      await PageObjects.settings.click('advancedSetting-editField-csv:separator');
+      await testSubjects.click('advancedSetting-editField-csv:separator');
       await a11y.testAppSnapshot();
     });
 
+    // clicking on save button
     it('adv settings - save', async () => {
-      await PageObjects.settings.click('advancedSetting-saveButton');
+      await testSubjects.click('advancedSetting-saveButton');
       await a11y.testAppSnapshot();
     });
 
-    it('adv settings - cancel', async () => {
-      await PageObjects.settings.click('advancedSetting-cancelButton');
-      await a11y.testAppSnapshot();
-    });
+    // clicking on cancel button
+    // it('adv settings - cancel', async () => {
+    //   await testSubjects.click('advancedSetting-cancelButton');
+    //   await a11y.testAppSnapshot();
+    // });
   });
 }
