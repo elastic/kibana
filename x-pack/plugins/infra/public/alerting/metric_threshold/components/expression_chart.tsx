@@ -44,7 +44,7 @@ interface Props {
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
-  showCompleteExpressionPrompt: boolean;
+  showCompleteExpressionPrompt?: boolean;
   filterQuery?: string;
   groupBy?: string | string[];
 }

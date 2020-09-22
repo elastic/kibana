@@ -46,7 +46,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: MetricExpression): void;
-  label: string | null;
+  label?: string | null;
 }
 
 const StyledExpression = euiStyled.div`

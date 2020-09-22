@@ -415,7 +415,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
   alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
-  label: string | null;
+  label?: string | null;
 }
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
