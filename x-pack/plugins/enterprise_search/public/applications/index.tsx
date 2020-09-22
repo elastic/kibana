@@ -13,17 +13,11 @@ import { Store } from 'redux';
 import { getContext, resetContext } from 'kea';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  AppMountParameters,
-  CoreStart,
-  ApplicationStart,
-  HttpSetup,
-  ChromeBreadcrumb,
-} from 'src/core/public';
+import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
 import { FlashMessagesProvider } from './shared/flash_messages';
-import { HttpProvider } from './shared/http';
+import { mountHttpLogic } from './shared/http';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
@@ -55,6 +49,12 @@ export const renderApp = (
   resetContext({ createStore: true });
   const store = getContext().store as Store;
 
+  const unmountHttpLogic = mountHttpLogic({
+    http: core.http,
+    errorConnecting,
+    readOnlyMode: initialData.readOnlyMode,
+  });
+
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
@@ -69,11 +69,6 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
-            <HttpProvider
-              http={core.http}
-              errorConnecting={errorConnecting}
-              readOnlyMode={initialData.readOnlyMode}
-            />
             <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
@@ -86,6 +81,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountHttpLogic();
   };
 };
 
