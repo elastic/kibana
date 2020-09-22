@@ -37,8 +37,14 @@ const THUMBNAIL_HEIGHT = 180;
 const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = (props) => {
   const imgRef = useRef(null);
 
+  const {
+    colors: { lightestShade: pageBackground },
+  } = useContext(UptimeThemeContext);
   return (
-    <div ref={imgRef}>
+    <div
+      ref={imgRef}
+      style={{ backgroundColor: pageBackground, height: THUMBNAIL_HEIGHT, width: THUMBNAIL_WIDTH }}
+    >
       <ScreenshotDisplayContent {...props} imgRef={imgRef} />
     </div>
   );
@@ -58,7 +64,7 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
   const intersection = useIntersection(imgRef, {
     root: null,
     rootMargin: '0px',
-    threshold: 0.25,
+    threshold: 1,
   });
   useEffect(() => {
     if (screenshot === undefined && intersection && intersection.isIntersecting) {
@@ -83,14 +89,19 @@ const ScreenshotDisplayContent: React.FC<ScreenshotDisplayContentProps> = ({
     );
   } else if (isLoading === false && screenshot === '') {
     return (
-      <EuiIcon
-        color="subdued"
-        type="faceSad"
-        style={{ width: THUMBNAIL_WIDTH, height: THUMBNAIL_HEIGHT }}
-      />
+      <EuiFlexGroup alignItems="center" direction="column" style={{ paddingTop: '32px' }}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="subdued" size="xxl" type="image" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <strong>No image available</strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   } else if (isLoading) {
-    return <EuiLoadingSpinner size="l" />;
+    return <EuiLoadingSpinner size="xl" />;
   }
   return null;
 };
