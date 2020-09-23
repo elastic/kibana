@@ -113,10 +113,10 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   }
 `;
 
-export const EventsTh = styled.div.attrs(({ className = '' }) => ({
+export const EventsTh = styled.div.attrs<{ role: string }>(({ className = '' }) => ({
   className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-}))`
+}))<{ role?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
