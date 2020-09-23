@@ -265,7 +265,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
-  const fieldGroups: FieldGroups = useMemo(() => {
+  const unfilteredFieldGroups: FieldGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
       const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
@@ -308,32 +308,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       }),
     };
 
-    const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
-      fieldGroup.filter((field) => {
-        if (
-          localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
-        ) {
-          return false;
-        }
-
-        if (localState.typeFilter.length > 0) {
-          return localState.typeFilter.includes(field.type as DataType);
-        }
-        return true;
-      });
-
-    const filteredGroupedFields = Object.entries(groupedFields).reduce((acc, [name, fields]) => {
-      return {
-        ...acc,
-        [name]: filterFieldGroup(fields),
-      };
-    }, defaultFieldGroups);
-
     const fieldGroupDefinitions: FieldGroups = {
       SpecialFields: {
-        fields: filteredGroupedFields.specialFields,
+        fields: groupedFields.specialFields,
         fieldCount: 1,
         isAffectedByGlobalFilter: false,
         isAffectedByTimeFilter: false,
@@ -343,7 +320,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         hideDetails: true,
       },
       AvailableFields: {
-        fields: filteredGroupedFields.availableFields,
+        fields: groupedFields.availableFields,
         fieldCount: groupedFields.availableFields.length,
         isInitiallyOpen: true,
         showInAccordion: true,
@@ -360,7 +337,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         hideDetails: fieldInfoUnavailable,
       },
       EmptyFields: {
-        fields: filteredGroupedFields.emptyFields,
+        fields: groupedFields.emptyFields,
         fieldCount: groupedFields.emptyFields.length,
         isAffectedByGlobalFilter: false,
         isAffectedByTimeFilter: false,
@@ -372,7 +349,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
       },
       MetaFields: {
-        fields: filteredGroupedFields.metaFields,
+        fields: groupedFields.metaFields,
         fieldCount: groupedFields.metaFields.length,
         isAffectedByGlobalFilter: false,
         isAffectedByTimeFilter: false,
@@ -398,9 +375,30 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
-    localState.nameFilter,
-    localState.typeFilter,
   ]);
+
+  const fieldGroups: FieldGroups = useMemo(() => {
+    const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
+      fieldGroup.filter((field) => {
+        if (
+          localState.nameFilter.length &&
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
+        ) {
+          return false;
+        }
+        if (localState.typeFilter.length > 0) {
+          return localState.typeFilter.includes(field.type as DataType);
+        }
+        return true;
+      });
+    return Object.fromEntries(
+      Object.entries(unfilteredFieldGroups).map(([name, group]) => [
+        name,
+        { ...group, fields: filterFieldGroup(group.fields) },
+      ])
+    );
+  }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
   const fieldProps = useMemo(
     () => ({

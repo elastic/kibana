@@ -83,13 +83,6 @@ export function FieldList({
       setPageSize(PAGINATION_SIZE);
     }
   }, [filter.nameFilter, filter.typeFilter, currentIndexPatternId, scrollContainer]);
-  // const currentIndexPattern = indexPatterns[currentIndexPatternId];
-  // const allFields = currentIndexPattern.fields;
-  // const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-  // const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
-  // const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
-  //   (type) => type in fieldTypeNames
-  // );
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
