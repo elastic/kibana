@@ -12,7 +12,6 @@ import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
-  BoostParameter,
   NullValueParameter,
 } from '../../field_parameters';
 
@@ -21,9 +20,6 @@ import { BasicParametersSection, AdvancedParametersSection } from '../edit_field
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost': {
-      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
-    }
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
@@ -51,8 +47,6 @@ export const IpType = ({ field }: Props) => {
         </NullValueParameter>
 
         <StoreParameter />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

@@ -17,7 +17,6 @@ import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
-  BoostParameter,
   AnalyzerParameter,
   NullValueParameter,
   MetaParameter,
@@ -27,8 +26,7 @@ import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } f
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'analyzer':
-    case 'meta':
-    case 'boost': {
+    case 'meta': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'null_value': {
@@ -110,8 +108,6 @@ export const TokenCountType = ({ field }: Props) => {
         <StoreParameter />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

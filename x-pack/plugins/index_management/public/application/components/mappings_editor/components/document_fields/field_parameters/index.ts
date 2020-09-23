@@ -15,8 +15,6 @@ export * from './store_parameter';
 
 export * from './doc_values_parameter';
 
-export * from './boost_parameter';
-
 export * from './analyzer_parameter';
 
 export * from './analyzers_parameter';

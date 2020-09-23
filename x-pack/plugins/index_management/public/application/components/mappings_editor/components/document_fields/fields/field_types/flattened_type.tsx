@@ -13,7 +13,6 @@ import { PARAMETERS_OPTIONS } from '../../../../constants';
 import {
   DocValuesParameter,
   IndexParameter,
-  BoostParameter,
   EagerGlobalOrdinalsParameter,
   NullValueParameter,
   SimilarityParameter,
@@ -29,7 +28,6 @@ interface Props {
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost':
     case 'ignore_above':
     case 'meta':
     case 'similarity': {
@@ -86,8 +84,6 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

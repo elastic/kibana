@@ -14,7 +14,6 @@ import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
-  BoostParameter,
   NullValueParameter,
   IgnoreMalformedParameter,
   FormatParameter,
@@ -27,8 +26,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'locale':
     case 'format':
-    case 'meta':
-    case 'boost': {
+    case 'meta': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'null_value': {
@@ -76,8 +74,6 @@ export const DateType = ({ field }: Props) => {
         <StoreParameter />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

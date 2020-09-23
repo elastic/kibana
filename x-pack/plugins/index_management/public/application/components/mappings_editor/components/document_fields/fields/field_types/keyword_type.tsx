@@ -16,7 +16,6 @@ import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
-  BoostParameter,
   NullValueParameter,
   EagerGlobalOrdinalsParameter,
   NormsParameter,
@@ -29,7 +28,6 @@ import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } f
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost':
     case 'similarity':
     case 'ignore_above': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
@@ -101,8 +99,6 @@ export const KeywordType = ({ field }: Props) => {
         />
 
         <StoreParameter />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

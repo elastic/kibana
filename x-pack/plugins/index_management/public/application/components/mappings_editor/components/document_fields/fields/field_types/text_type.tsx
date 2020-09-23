@@ -20,7 +20,6 @@ import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
   IndexParameter,
-  BoostParameter,
   AnalyzersParameter,
   EagerGlobalOrdinalsParameter,
   NormsParameter,
@@ -38,7 +37,6 @@ interface Props {
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost':
     case 'position_increment_gap':
     case 'similarity':
     case 'meta':
@@ -244,8 +242,6 @@ export const TextType = React.memo(({ field }: Props) => {
         <StoreParameter />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );

@@ -606,26 +606,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
-  boost: {
-    fieldConfig: {
-      defaultValue: 1.0,
-      type: FIELD_TYPES.NUMBER,
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.boostLabel', {
-        defaultMessage: 'Boost level',
-      }),
-      formatters: [toInt],
-      validations: [
-        {
-          validator: ({ value }: ValidationFuncArg<any, number>) => {
-            if (value < 0) {
-              return { message: commonErrorMessages.smallerThanZero };
-            }
-          },
-        },
-      ],
-    } as FieldConfig,
-    schema: t.number,
-  },
   scaling_factor: {
     title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
       defaultMessage: 'Scaling factor',

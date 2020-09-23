@@ -22,7 +22,6 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
 
   switch (param) {
     // Switches that don't map to a boolean in the mappings
-    case 'boost':
     case 'orientation': {
       return field[param] !== undefined && field[param] !== defaultValue;
     }

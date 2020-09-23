@@ -245,7 +245,6 @@ describe('Properties validator', () => {
         max_input_length: true,
         locale: 1,
         orientation: [],
-        boost: { a: 123 },
         scaling_factor: 'some_string',
         dynamic: [true],
         enabled: 'false',
@@ -297,7 +296,6 @@ describe('Properties validator', () => {
         max_input_length: 10,
         locale: 'en',
         orientation: 'ccw',
-        boost: 1.5,
         scaling_factor: 2.5,
         dynamic: 'strict', // true | false | 'strict' are allowed
         enabled: true,

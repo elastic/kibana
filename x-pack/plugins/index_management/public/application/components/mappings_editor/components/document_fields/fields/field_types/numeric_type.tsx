@@ -13,7 +13,6 @@ import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
-  BoostParameter,
   NullValueParameter,
   CoerceNumberParameter,
   IgnoreMalformedParameter,
@@ -26,7 +25,6 @@ import { PARAMETERS_DEFINITION } from '../../../../constants';
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'copy_to':
-    case 'boost':
     case 'meta':
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
@@ -98,8 +96,6 @@ export const NumericType = ({ field }: Props) => {
         <StoreParameter />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );
