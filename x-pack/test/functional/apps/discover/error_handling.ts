@@ -23,11 +23,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await esArchiver.unload('invalid_scripted_field');
     });
+
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
-        expect(isFetchErrorVisible).to.be(true);
+        const toast = await toasts.getToastElement(1);
+        const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
+        expect(painlessStackTrace).not.to.be(undefined);
       });
     });
   });
