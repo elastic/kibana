@@ -63,11 +63,6 @@ import { buildSignalFromSequence, buildSignalFromEvent } from './build_bulk_body
 import { buildParent } from './build_signal';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
-interface Sequence {
-  buildingBlocks: BaseSignalHit[];
-  sequenceSignal: BaseSignalHit;
-}
-
 export const signalRulesAlertType = ({
   logger,
   version,
