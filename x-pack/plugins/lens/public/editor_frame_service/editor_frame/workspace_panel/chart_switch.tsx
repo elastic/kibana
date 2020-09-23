@@ -15,7 +15,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
 } from '@elastic/eui';
 import { flatten, groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -252,16 +251,9 @@ export function ChartSwitch(props: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div className="lnsChartSwitch__chartContainer">
+      <div>
         {Object.entries(visualizationTypeGroups || {}).map(([section, visualizationTypes]) => (
-          <section aria-labelledby={`lnsChartSection-${section}`} key={section}>
-            <EuiText
-              size="xs"
-              id={`lnsChartSection-${section}`}
-              className="lnsChartSwitch__sectionTitle"
-            >
-              {section}
-            </EuiText>
+          <section aria-label={section} key={section} className="lnsChartSwitch__chartSection">
             <EuiKeyPadMenu>
               {visualizationTypes.map((v) => (
                 <EuiKeyPadMenuItem
