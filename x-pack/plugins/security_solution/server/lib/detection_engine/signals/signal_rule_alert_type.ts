@@ -362,6 +362,7 @@ export const signalRulesAlertType = ({
             previousStartedAt,
             listClient,
             logger,
+            eventsTelemetry,
             alertId,
             outputIndex,
             params,

@@ -908,6 +908,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,

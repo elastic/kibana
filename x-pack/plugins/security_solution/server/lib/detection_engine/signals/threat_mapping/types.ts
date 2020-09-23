@@ -21,6 +21,7 @@ import { AlertServices } from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
@@ -38,6 +39,7 @@ export interface CreateThreatSignalsOptions {
   previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
   params: RuleTypeParams;
@@ -73,6 +75,7 @@ export interface CreateThreatSignalOptions {
   previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
   params: RuleTypeParams;

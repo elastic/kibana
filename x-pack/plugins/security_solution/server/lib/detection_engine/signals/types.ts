@@ -21,6 +21,7 @@ import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
