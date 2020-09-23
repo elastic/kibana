@@ -36,10 +36,7 @@ import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
-
-import { useWithSource } from '../../../../../common/containers/source';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
@@ -89,6 +86,8 @@ import { showGlobalFilters } from '../../../../../timelines/components/timeline/
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
+import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -265,10 +264,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [rule, ruleDetailTab]
   );
 
-  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
-    signalIndexName,
-  ]);
-
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -308,7 +303,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [setShowBuildingBlockAlerts]
   );
 
-  const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
+  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionIdentifiers[];
@@ -500,7 +495,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    signalsIndex={signalIndexName ?? ''}
                     to={to}
                   />
                 )}

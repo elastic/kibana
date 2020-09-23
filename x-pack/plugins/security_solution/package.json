@@ -6,6 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/pages/detection_engine/mitre/mitre_tactics_techniques.ts --fix",
+    "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ./server/utils/beat_schema/fields.ts --fix",
     "build-graphql-types": "node scripts/generate_types_from_graphql.js",
     "cypress:open": "cypress open --config-file ./cypress/cypress.json",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/visual_config.ts",

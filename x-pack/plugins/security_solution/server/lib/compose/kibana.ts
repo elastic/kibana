@@ -42,7 +42,7 @@ export function compose(
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
-    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
+    fields: new IndexFields(new ElasticsearchIndexFieldAdapter()),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
