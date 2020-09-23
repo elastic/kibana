@@ -266,8 +266,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
+    const fieldByName = keyBy(allFields, 'name');
     const containsData = (field: IndexPatternField) => {
-      const fieldByName = keyBy(allFields, 'name');
       const overallField = fieldByName[field.name];
 
       return (
@@ -364,7 +364,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
     // do not show empty field accordion if there is no existence information
     if (fieldInfoUnavailable) {
-      delete fieldGroupDefinitions.emptyFields;
+      delete fieldGroupDefinitions.EmptyFields;
     }
 
     return fieldGroupDefinitions;
