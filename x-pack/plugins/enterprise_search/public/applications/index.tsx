@@ -13,24 +13,17 @@ import { Store } from 'redux';
 import { getContext, resetContext } from 'kea';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  AppMountParameters,
-  CoreStart,
-  ApplicationStart,
-  HttpSetup,
-  ChromeBreadcrumb,
-} from 'src/core/public';
+import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
-import { FlashMessagesProvider } from './shared/flash_messages';
-import { HttpProvider } from './shared/http';
+import { mountHttpLogic } from './shared/http';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
   externalUrl: IExternalUrl;
-  http: HttpSetup;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -55,13 +48,20 @@ export const renderApp = (
   resetContext({ createStore: true });
   const store = getContext().store as Store;
 
+  const unmountHttpLogic = mountHttpLogic({
+    http: core.http,
+    errorConnecting,
+    readOnlyMode: initialData.readOnlyMode,
+  });
+
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ history: params.history });
+
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
         value={{
           config,
           externalUrl,
-          http: core.http,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
@@ -69,12 +69,6 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
-            <HttpProvider
-              http={core.http}
-              errorConnecting={errorConnecting}
-              readOnlyMode={initialData.readOnlyMode}
-            />
-            <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
             </Router>
@@ -86,5 +80,26 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountHttpLogic();
+    unmountFlashMessagesLogic();
   };
+};
+
+/**
+ * Render function for Kibana's header action menu chrome -
+ * reusable by any Enterprise Search plugin simply by passing in
+ * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
+ * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ */
+interface IHeaderActionsProps {
+  externalUrl: IExternalUrl;
+}
+
+export const renderHeaderActions = (
+  HeaderActions: React.FC<IHeaderActionsProps>,
+  kibanaHeaderEl: HTMLElement,
+  externalUrl: IExternalUrl
+) => {
+  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
+  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };

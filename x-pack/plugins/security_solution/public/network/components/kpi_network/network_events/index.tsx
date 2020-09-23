@@ -9,7 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -46,7 +46,7 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

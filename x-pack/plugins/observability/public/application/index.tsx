@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
+import { EuiThemeProvider } from '../../../xpack_legacy/common';
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
