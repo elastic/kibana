@@ -2477,6 +2477,33 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
+      it(`throws when namespaces is an empty array`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type: 'foo', namespaces: [] })
+        ).rejects.toThrowError('options.namespaces cannot be an empty array');
+        expect(client.search).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is not falsy and typeToNamespacesMap is defined`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type: 'foo', typeToNamespacesMap: new Map() })
+        ).rejects.toThrowError(
+          'options.type must be an empty string when options.typeToNamespacesMap is used'
+        );
+        expect(client.search).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is not an empty array and typeToNamespacesMap is defined`, async () => {
+        const test = async (args) => {
+          await expect(savedObjectsRepository.find(args)).rejects.toThrowError(
+            'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        };
+        await test({ type: '', typeToNamespacesMap: new Map() });
+        await test({ type: '', namespaces: ['some-ns'], typeToNamespacesMap: new Map() });
+      });
+
       it(`throws when searchFields is defined but not an array`, async () => {
         await expect(
           savedObjectsRepository.find({ type, searchFields: 'string' })
@@ -2493,7 +2520,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when KQL filter syntax is invalid`, async () => {
         const findOpts = {
-          namespace,
+          namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
           type: ['dashboard'],
@@ -2577,38 +2604,70 @@ describe('SavedObjectsRepository', () => {
         const test = async (types) => {
           const result = await savedObjectsRepository.find({ type: types });
           expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
+          expect(client.search).not.toHaveBeenCalled();
         };
 
         await test('unknownType');
         await test(HIDDEN_TYPE);
         await test(['unknownType', HIDDEN_TYPE]);
       });
+
+      it(`should return empty results when attempting to find only invalid or hidden types using typeToNamespacesMap`, async () => {
+        const test = async (types) => {
+          const result = await savedObjectsRepository.find({
+            typeToNamespacesMap: new Map(types.map((x) => [x, undefined])),
+            type: '',
+            namespaces: [],
+          });
+          expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
+          expect(client.search).not.toHaveBeenCalled();
+        };
+
+        await test(['unknownType']);
+        await test([HIDDEN_TYPE]);
+        await test(['unknownType', HIDDEN_TYPE]);
+      });
     });
 
     describe('search dsl', () => {
-      it(`passes mappings, registry, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl`, async () => {
+      const commonOptions = {
+        type: [type], // cannot be used when `typeToNamespacesMap` is present
+        namespaces: [namespace], // cannot be used when `typeToNamespacesMap` is present
+        search: 'foo*',
+        searchFields: ['foo'],
+        sortField: 'name',
+        sortOrder: 'desc',
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'foo',
+          id: '1',
+        },
+        kueryNode: undefined,
+      };
+
+      it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
+        await findSuccess(commonOptions, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
+      });
+
+      it(`accepts typeToNamespacesMap`, async () => {
         const relevantOpts = {
-          namespaces: [namespace],
-          search: 'foo*',
-          searchFields: ['foo'],
-          type: [type],
-          sortField: 'name',
-          sortOrder: 'desc',
-          defaultSearchOperator: 'AND',
-          hasReference: {
-            type: 'foo',
-            id: '1',
-          },
-          kueryNode: undefined,
+          ...commonOptions,
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]), // can only be used when `type` is falsy and `namespaces` is an empty array
         };
 
         await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, relevantOpts);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          type: [type],
+        });
       });
 
       it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
-          namespace,
+          namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
           type: ['dashboard'],
@@ -2649,7 +2708,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
-          namespace,
+          namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
           type: ['dashboard'],

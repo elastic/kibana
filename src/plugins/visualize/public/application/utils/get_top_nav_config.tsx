@@ -267,6 +267,7 @@ export const getTopNavConfig = (
                 }
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
+                embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
                 const saveOptions = {

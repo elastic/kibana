@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { UptimeAlertTypeFactory } from './types';
-import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/server';
+import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   StatusCheckFilters,
@@ -26,7 +26,7 @@ import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { ESAPICaller } from '../adapters/framework';
-import { getUptimeIndexPattern } from '../requests/get_index_pattern';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
@@ -58,7 +58,7 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
 };
 
 export const generateFilterDSL = async (
-  getIndexPattern: () => Promise<IIndexPattern | undefined>,
+  getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
   filters: StatusCheckFilters,
   search: string
 ): Promise<JsonObject | undefined> => {

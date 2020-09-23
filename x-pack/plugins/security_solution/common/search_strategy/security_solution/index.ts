@@ -18,8 +18,15 @@ import {
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-  HostUncommonProcessesStrategyResponse,
-  HostUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+  HostsUncommonProcessesRequestOptions,
+  HostsKpiQueries,
+  HostsKpiAuthenticationsStrategyResponse,
+  HostsKpiAuthenticationsRequestOptions,
+  HostsKpiHostsStrategyResponse,
+  HostsKpiHostsRequestOptions,
+  HostsKpiUniqueIpsStrategyResponse,
+  HostsKpiUniqueIpsRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -70,6 +77,7 @@ export * from './network';
 
 export type FactoryQueryTypes =
   | HostsQueries
+  | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
   | typeof MatrixHistogramQuery;
@@ -105,7 +113,13 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesStrategyResponse
+  ? HostsUncommonProcessesStrategyResponse
+  : T extends HostsKpiQueries.kpiAuthentications
+  ? HostsKpiAuthenticationsStrategyResponse
+  : T extends HostsKpiQueries.kpiHosts
+  ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiUniqueIps
+  ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -147,7 +161,13 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesRequestOptions
+  ? HostsUncommonProcessesRequestOptions
+  : T extends HostsKpiQueries.kpiAuthentications
+  ? HostsKpiAuthenticationsRequestOptions
+  : T extends HostsKpiQueries.kpiHosts
+  ? HostsKpiHostsRequestOptions
+  : T extends HostsKpiQueries.kpiUniqueIps
+  ? HostsKpiUniqueIpsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

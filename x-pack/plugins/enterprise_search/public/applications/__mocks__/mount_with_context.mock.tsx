@@ -67,7 +67,7 @@ export const mountWithKibanaContext = (children: React.ReactNode, context?: obje
  */
 export const mountWithAsyncContext = async (
   children: React.ReactNode,
-  context: object
+  context?: object
 ): Promise<ReactWrapper> => {
   let wrapper: ReactWrapper | undefined;
 

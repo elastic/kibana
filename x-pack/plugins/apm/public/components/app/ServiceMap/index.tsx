@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useTheme } from '../../../hooks/useTheme';
+import React from 'react';
+import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
   isActivePlatinumLicense,
 } from '../../../../common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
+import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
@@ -22,8 +23,6 @@ import { getCytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
-import { BetaBadge } from './BetaBadge';
-import { useTrackPageview } from '../../../../../observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -80,7 +79,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={getCytoscapeDivStyle(theme)}
       >
         <Controls />
-        <BetaBadge />
         {serviceName && <EmptyBanner />}
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
@@ -96,7 +94,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         grow={false}
         style={{ width: 600, textAlign: 'center' as const }}
       >
-        <LicensePrompt text={invalidLicenseMessage} showBetaBadge />
+        <LicensePrompt text={invalidLicenseMessage} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -18,7 +18,11 @@ import {
   LastTimeDetails,
   LastEventIndexKey,
 } from '../../../../../common/search_strategy/timeline';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
 import { useWithSource } from '../../source';
 import * as i18n from './translations';
 
@@ -80,7 +84,7 @@ export const useTimelineLastEventTime = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineLastEventTimeResponse((prevResponse) => ({
@@ -91,7 +95,7 @@ export const useTimelineLastEventTime = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
