@@ -15,12 +15,13 @@ import { ml } from '../../services/ml_api_service';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 import { useMlContext } from '../../contexts/ml';
 
-import { DataFrameAnalyticsConfig } from '../common';
+import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig, getAnalysisType } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
 import { useInferenceApiService } from '../../services/ml_api_service/inference';
 import { TotalFeatureImportance } from '../../../../common/types/inference';
+import { getToastNotificationService } from '../../services/toast_notification_service';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
@@ -47,20 +48,8 @@ export const useResultsViewConfig = (jobId: string) => {
       setIsLoadingJobConfig(false);
 
       try {
-        const inferenceModels = await inferenceApiService.getInferenceModel(`${jobId}*`, {
-          include: 'total_feature_importance',
-        });
-        const inferenceModel = inferenceModels.find(
-          (model) => model.metadata?.analytics_config?.id === jobId
-        );
-        if (
-          Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true &&
-          inferenceModel?.metadata?.total_feature_importance.length > 0
-        ) {
-          setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
-        }
-
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
@@ -75,6 +64,29 @@ export const useResultsViewConfig = (jobId: string) => {
           analyticsConfigs.data_frame_analytics.length > 0
         ) {
           const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
+          const analysisType = getAnalysisType(jobConfigUpdate.analysis);
+          // don't fetch the total feature importance if it's outlier_detection
+          if (
+            analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+            analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION
+          ) {
+            try {
+              const inferenceModels = await inferenceApiService.getInferenceModel(`${jobId}*`, {
+                include: 'total_feature_importance',
+              });
+              const inferenceModel = inferenceModels.find(
+                (model) => model.metadata?.analytics_config?.id === jobId
+              );
+              if (
+                Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true &&
+                inferenceModel?.metadata?.total_feature_importance.length > 0
+              ) {
+                setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
+              }
+            } catch (e) {
+              getToastNotificationService().displayErrorToast(e);
+            }
+          }
 
           try {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
