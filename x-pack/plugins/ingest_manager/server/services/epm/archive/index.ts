@@ -75,15 +75,15 @@ export async function unpackArchiveToCache(
 
 function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
-  const pkgKey = paths[0].split('/')[0];
+  const toplevelDir = paths[0].split('/')[0];
   paths.forEach((path) => {
-    if (path.split('/')[0] !== pkgKey) {
+    if (path.split('/')[0] !== toplevelDir) {
       throw new PackageInvalidArchiveError('Package contains more than one top-level directory.');
     }
   });
 
   // The package must contain a manifest file ...
-  const manifestFile = `${pkgKey}/manifest.yml`;
+  const manifestFile = `${toplevelDir}/manifest.yml`;
   const manifestBuffer = cacheGet(manifestFile);
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.');
@@ -98,9 +98,9 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   }
 
   // Package name and version from the manifest must match those from the toplevel directory
-  if (pkgKey !== `${manifest.name}-${manifest.version}`) {
+  if (toplevelDir !== `${manifest.name}-${manifest.version}`) {
     throw new PackageInvalidArchiveError(
-      `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${pkgKey}`
+      `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${toplevelDir}`
     );
   }
   // Allow snake case for format_version
