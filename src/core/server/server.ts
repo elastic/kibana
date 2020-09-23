@@ -48,6 +48,7 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -273,24 +274,7 @@ export class Server {
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
         const coreStart = this.coreStart!;
-        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
-
-        return {
-          savedObjects: {
-            client: savedObjectsClient,
-            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
-          },
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(req),
-            legacy: {
-              client: coreStart.elasticsearch.legacy.client.asScoped(req),
-            },
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          auditor: coreStart.auditTrail.asScoped(req),
-        };
+        return new CoreRouteHandlerContext(coreStart, req);
       }
     );
   }
