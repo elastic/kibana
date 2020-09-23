@@ -4,9 +4,9 @@ const { execSync } = require('child_process');
 (async () => {
   const destination = process.argv[2] || __dirname + '/test';
 
-  let ES_BRANCH = 'TODO';
-  let GIT_COMMIT = 'TODO';
-  let GIT_COMMIT_SHORT = 'TODO';
+  let ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
+  let GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
+  let GIT_COMMIT_SHORT = execSync(`git rev-parse --short '${GIT_COMMIT}'`).toString().trim();
 
   let VERSION = '';
   let SNAPSHOT_ID = '';
@@ -72,6 +72,8 @@ const { execSync } = require('child_process');
     console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json']`);
     console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_VERSION' value='${VERSION}']`);
     console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_ID' value='${SNAPSHOT_ID}']`);
+
+    console.log(`##teamcity[buildNumber '{build.number}-${VERSION}']`);
   } catch (ex) {
     console.error(ex);
     process.exit(1);

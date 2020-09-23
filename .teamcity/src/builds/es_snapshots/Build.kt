@@ -21,6 +21,9 @@ object ESSnapshotBuild : BuildType({
   }
 
   params {
+    param("env.ELASTICSEARCH_BRANCH", "%vcsroot.${Elasticsearch.id.toString()}.branch%")
+    param("env.ELASTICSEARCH_GIT_COMMIT", "%build.vcs.number.${Elasticsearch.id.toString()}%")
+
     param("env.GOOGLE_APPLICATION_CREDENTIALS", "%teamcity.build.workingDir%/gcp-credentials.json")
     password("env.GOOGLE_APPLICATION_CREDENTIALS_JSON", "credentialsJSON:6e0acb7c-f89c-4225-84b8-4fc102f1a5ef", display = ParameterDisplay.HIDDEN)
   }
@@ -30,9 +33,9 @@ object ESSnapshotBuild : BuildType({
       name = "Setup Environment"
       scriptContent =
         """
-                #!/bin/bash
-                cd kibana
-                ./.ci/teamcity/setup_env.sh
+          #!/bin/bash
+          cd kibana
+          ./.ci/teamcity/setup_env.sh
         """.trimIndent()
     }
 
@@ -40,9 +43,9 @@ object ESSnapshotBuild : BuildType({
       name = "Setup Node and Yarn"
       scriptContent =
         """
-                #!/bin/bash
-                cd kibana
-                ./.ci/teamcity/setup_node.sh
+          #!/bin/bash
+          cd kibana
+          ./.ci/teamcity/setup_node.sh
         """.trimIndent()
     }
 
