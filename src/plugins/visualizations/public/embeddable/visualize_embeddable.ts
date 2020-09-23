@@ -72,7 +72,7 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
-  placeholderTitle?: string;
+  showPlaceholderTitle?: boolean;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -81,7 +81,6 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
-  placeholderTitle?: string | undefined;
 }
 
 export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
@@ -112,7 +111,6 @@ export class VisualizeEmbeddable
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
-  private placeholderTitle?: string;
   private attributeService?: AttributeService<
     VisualizeSavedObjectAttributes,
     VisualizeByValueInput,
@@ -148,7 +146,6 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
-    this.placeholderTitle = initialInput.placeholderTitle;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
@@ -261,14 +258,6 @@ export class VisualizeEmbeddable
       this.updateHandler();
     }
   }
-
-  getPlaceholderTitle = () => {
-    return this.placeholderTitle;
-  };
-
-  setPlaceholderTitle = (title: string | undefined) => {
-    this.placeholderTitle = title;
-  };
 
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore

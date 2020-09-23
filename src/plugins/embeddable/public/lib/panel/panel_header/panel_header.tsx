@@ -43,7 +43,7 @@ export interface PanelHeaderProps {
   notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
-  placeholderTitle?: string;
+  showPlaceholderTitle?: boolean;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -134,7 +134,7 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
-  placeholderTitle,
+  showPlaceholderTitle,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -142,6 +142,9 @@ export function PanelHeader({
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
+  });
+  const placeholderTitle = i18n.translate('dashboard.embeddable.placeholderTitle', {
+    defaultMessage: '[No Title]',
   });
 
   if (!showPanelBar) {
@@ -185,8 +188,6 @@ export function PanelHeader({
     });
     return titleBlock(title, 'embPanel__titleText', ariaLabel);
   };
-
-  const showPlaceholderTitle = !!placeholderTitle && !title;
 
   return (
     <figcaption

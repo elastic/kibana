@@ -56,9 +56,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
   public async execute({ embeddable }: ActionContext) {
     const data = await this.getDataFromUser({ embeddable });
     const { title, hideTitle } = data;
-    if (hideTitle && embeddable.setPlaceholderTitle) {
-      embeddable.setPlaceholderTitle(undefined);
-    }
-    embeddable.updateInput({ title });
+    const showPlaceholderTitle = (title === undefined || title === '') && !hideTitle;
+    embeddable.updateInput({ title, showPlaceholderTitle });
   }
 }
