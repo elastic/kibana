@@ -321,6 +321,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       []
     );
 
+    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] = useCallback(() => {
+      setWasVisited((prevState) => {
+        return {
+          ...prevState,
+          entries: true,
+        };
+      });
+    }, []);
+
     // Anytime the form values change, re-validate
     useEffect(() => {
       setValidationResult(validateFormValues(formValues));
@@ -385,6 +394,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onAndClicked={handleAndClick}
             onEntryRemove={handleEntryRemove}
             onEntryChange={handleEntryChange}
+            onVisited={handleConditionBuilderOnVisited}
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>

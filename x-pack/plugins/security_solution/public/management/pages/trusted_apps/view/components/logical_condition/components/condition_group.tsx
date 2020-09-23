@@ -20,10 +20,12 @@ export interface ConditionGroupProps {
   entries: TrustedApp['entries'];
   onEntryRemove: ConditionEntryProps['onRemove'];
   onEntryChange: ConditionEntryProps['onChange'];
+  /** called when any of the entries is visited (triggered via `onBlur` DOM event) */
+  onVisited?: ConditionEntryProps['onVisited'];
   'data-test-subj'?: string;
 }
 export const ConditionGroup = memo<ConditionGroupProps>(
-  ({ os, entries, onEntryRemove, onEntryChange, 'data-test-subj': dataTestSubj }) => {
+  ({ os, entries, onEntryRemove, onEntryChange, onVisited, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
         if (dataTestSubj) {
@@ -49,6 +51,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
               isRemoveDisabled={index === 0 && entries.length <= 1}
               onRemove={onEntryRemove}
               onChange={onEntryChange}
+              onVisited={onVisited}
               data-test-subj={getTestId(`entry${index}`)}
             />
           ))}
