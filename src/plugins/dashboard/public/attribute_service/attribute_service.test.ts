@@ -37,6 +37,10 @@ describe('attributeService', () => {
   let attributes: TestAttributes;
   let byValueInput: TestByValueInput;
   let byReferenceInput: { id: string; savedObjectId: string };
+  const defaultSaveMethod = jest.fn();
+  const defaultUnwrapMethod = (savedObjectId: string) => ({
+    ...attributes,
+  });
 
   beforeEach(() => {
     attributes = {
@@ -92,7 +96,12 @@ describe('attributeService', () => {
       });
       const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
-        undefined,
+        {
+          saveMethod: defaultSaveMethod,
+          unwrapMethod: (savedObjectId) => ({
+            ...attributes,
+          }),
+        },
         core
       );
       expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual(attributes);
@@ -111,8 +120,9 @@ describe('attributeService', () => {
       const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
         {
-          customUnwrapMethod: (savedObject) => ({
-            ...savedObject.attributes,
+          saveMethod: defaultSaveMethod,
+          unwrapMethod: (savedObjectId) => ({
+            ...attributes,
             testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
           }),
         },
@@ -137,7 +147,7 @@ describe('attributeService', () => {
       saveMethod.mockReturnValueOnce({});
       const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
-        { saveMethod },
+        { saveMethod, unwrapMethod: defaultUnwrapMethod },
         core
       );
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
@@ -150,6 +160,7 @@ describe('attributeService', () => {
       const saveMethod = jest.fn().mockReturnValue({ id: '123' });
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         saveMethod,
+        unwrapMethod: defaultUnwrapMethod,
       });
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
         byReferenceInput
@@ -165,6 +176,7 @@ describe('attributeService', () => {
       const saveMethod = jest.fn().mockReturnValue({ id: '678' });
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         saveMethod,
+        unwrapMethod: defaultUnwrapMethod,
       });
       expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
         savedObjectId: '678',

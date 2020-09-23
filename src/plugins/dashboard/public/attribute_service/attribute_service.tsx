@@ -32,7 +32,6 @@ import {
 } from '../embeddable_plugin';
 import {
   SavedObjectsClientContract,
-  SimpleSavedObject,
   I18nStart,
   NotificationsStart,
   OverlayStart,
@@ -58,7 +57,7 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     attributes: A,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
+  unwrapMethod: (savedObjectId: string) => A;
 }
 
 export class AttributeService<
@@ -94,12 +93,7 @@ export class AttributeService<
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
     if (this.inputIsRefType(input)) {
-      const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
-        SavedObjectAttributes
-      >(this.type, input.savedObjectId);
-      return this.options?.customUnwrapMethod
-        ? this.options?.customUnwrapMethod(savedObject)
-        : { ...savedObject.attributes };
+      return this.options.unwrapMethod(input.savedObjectId);
     }
     return input[ATTRIBUTE_SERVICE_KEY];
   }
