@@ -132,7 +132,7 @@ describe('Lens App', () => {
     core: typeof core;
     storage: Storage;
     docId?: string;
-    locationState?: VisualizeFieldContext;
+    visualizeTriggerFieldContext?: VisualizeFieldContext;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
@@ -187,7 +187,7 @@ describe('Lens App', () => {
       core: typeof core;
       storage: Storage;
       docId?: string;
-      locationState?: VisualizeFieldContext;
+      visualizeTriggerFieldContext?: VisualizeFieldContext;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;

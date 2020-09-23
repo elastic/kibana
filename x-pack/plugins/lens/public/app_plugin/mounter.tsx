@@ -35,7 +35,7 @@ export async function mountApp(
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
-  const locationState = params.history.location.state as VisualizeFieldContext;
+  const historyLocationState = params.history.location.state as VisualizeFieldContext;
   const stateTransfer = embeddable?.getStateTransfer(params.history);
   const { originatingApp } =
     stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
@@ -90,7 +90,11 @@ export async function mountApp(
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
-        locationState={locationState}
+        visualizeTriggerFieldContext={
+          historyLocationState && 'indexPatternId' in historyLocationState
+            ? historyLocationState
+            : undefined
+        }
       />
     );
   };

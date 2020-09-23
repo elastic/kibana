@@ -76,7 +76,7 @@ export function App({
   setHeaderActionMenu,
   history,
   getAppNameFromId,
-  locationState,
+  visualizeTriggerFieldContext,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -91,7 +91,7 @@ export function App({
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: History;
   getAppNameFromId?: (appId: string) => string | undefined;
-  locationState?: VisualizeFieldContext;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -544,7 +544,7 @@ export function App({
                 filters: state.filters,
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
-                visualizeTriggerFieldContext: locationState,
+                visualizeTriggerFieldContext,
                 onError,
                 showNoDataPopover,
                 onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
