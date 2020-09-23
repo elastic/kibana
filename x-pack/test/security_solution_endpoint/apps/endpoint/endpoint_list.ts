@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.exists('emptyPolicyTable');
       });
 
-      it('finds data after load and polling', async () => {
+      it.skip('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
@@ -94,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('when there is data,', () => {
+    describe.skip('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
@@ -212,7 +212,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('displays the correct table data for the kql queries', () => {
+    describe.skip('displays the correct table data for the kql queries', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
