@@ -25,10 +25,11 @@ import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 
 interface Props {
+  isNewKibanaInstance: boolean;
   features: FeatureCatalogueEntry[];
 }
 
-export const PageHeader: FC<Props> = ({ features }) => {
+export const PageHeader: FC<Props> = ({ isNewKibanaInstance, features }) => {
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const devTools = findFeatureById('console');
   const stackManagement = findFeatureById('stack-management');
@@ -52,47 +53,48 @@ export const PageHeader: FC<Props> = ({ features }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
-              <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
-                <EuiButtonEmpty
-                  onClick={createAppNavigationHandler('/app/home#/tutorial_directory')}
-                  iconType="indexOpen"
-                >
-                  {i18n.translate('kibana_overview.header.addDataButtonLabel', {
-                    defaultMessage: 'Add data',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              {stackManagement ? (
+          {!isNewKibanaInstance ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
                 <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
-                    iconType="gear"
-                    onClick={createAppNavigationHandler('/app/management')}
+                    onClick={createAppNavigationHandler('/app/home#/tutorial_directory')}
+                    iconType="indexOpen"
                   >
-                    {i18n.translate('kibana_overview.header.stackManagementButtonLabel', {
-                      defaultMessage: 'Manage',
+                    {i18n.translate('kibana_overview.header.addDataButtonLabel', {
+                      defaultMessage: 'Add data',
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              ) : null}
 
-              {devTools ? (
-                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
-                  <EuiButtonEmpty
-                    iconType="wrench"
-                    onClick={createAppNavigationHandler('/app/dev_tools#/console')}
-                  >
-                    {i18n.translate('kibana_overview.header.devToolsButtonLabel', {
-                      defaultMessage: 'Dev tools',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {stackManagement ? (
+                  <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                    <EuiButtonEmpty
+                      iconType="gear"
+                      onClick={createAppNavigationHandler('/app/management')}
+                    >
+                      {i18n.translate('kibana_overview.header.stackManagementButtonLabel', {
+                        defaultMessage: 'Manage',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+
+                {devTools ? (
+                  <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                    <EuiButtonEmpty
+                      iconType="wrench"
+                      onClick={createAppNavigationHandler('/app/dev_tools#/console')}
+                    >
+                      {i18n.translate('kibana_overview.header.devToolsButtonLabel', {
+                        defaultMessage: 'Dev tools',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </div>
     </header>

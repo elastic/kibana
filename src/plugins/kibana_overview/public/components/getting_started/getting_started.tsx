@@ -67,8 +67,8 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
           <EuiText>
             <p>
               <FormattedMessage
-                defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
                 id="kibana_overview.gettingStarted.description"
+                defaultMessage="Kibana empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
               />
             </p>
           </EuiText>
@@ -100,7 +100,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
             onClick={createAppNavigationHandler('/app/management/kibana/indexPatterns')}
           >
             <FormattedMessage
-              defaultMessage="Begin by adding data"
+              defaultMessage="Add your data"
               id="kibana_overview.gettingStarted.addDataButtonLabel"
             />
           </EuiButton>

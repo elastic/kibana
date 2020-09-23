@@ -52,8 +52,10 @@ export class KibanaOverviewPlugin
     const appUpdater$ = from(core.getStartServices()).pipe(
       switchMap(([coreDeps]) => coreDeps.chrome.navLinks.getNavLinks$()),
       map((navLinks) => {
-        const hasKibanaApp = navLinks.find(
-          ({ id, category, hidden }) => !hidden && category?.id === 'kibana' && id !== PLUGIN_ID
+        const hasKibanaApp = Boolean(
+          navLinks.find(
+            ({ id, category, hidden }) => !hidden && category?.id === 'kibana' && id !== PLUGIN_ID
+          )
         );
 
         return hasKibanaApp;

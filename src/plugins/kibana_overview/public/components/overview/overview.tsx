@@ -119,7 +119,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
-      <PageHeader features={features} />
+      <PageHeader isNewKibanaInstance={isNewKibanaInstance} features={features} />
 
       <div className="kbnOverviewContent">
         {isNewKibanaInstance ? (
@@ -235,9 +235,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           </>
         )}
 
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        {!isNewKibanaInstance ? (
+          <>
+            <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <PageFooter features={features} />
+            <PageFooter features={features} />
+          </>
+        ) : null}
       </div>
     </main>
   );

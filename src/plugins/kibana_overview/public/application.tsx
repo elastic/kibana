@@ -34,11 +34,11 @@ export const renderApp = (
   const newsfeed$ = newsfeed.createNewsFeed$(NewsfeedApiEndpoint.KIBANA);
   const { chrome } = getServices();
   const navLinks = chrome.navLinks.getAll();
-  const solutions = kibana_overview.featureCatalogue
+  const solutions = home.featureCatalogue
     .getSolutions()
     .filter(({ id }) => id !== 'kibana')
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
-  const features = kibana_overview.featureCatalogue.get();
+  const features = home.featureCatalogue.get();
 
   ReactDOM.render(
     <KibanaOverviewApp
