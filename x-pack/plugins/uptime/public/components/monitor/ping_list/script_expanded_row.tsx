@@ -25,6 +25,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useDispatch, useSelector } from 'react-redux';
 import { useIntersection } from 'react-use';
 import { Ping } from '../../../../common/runtime_types';
+import { UptimeAppColors } from '../../../apps/uptime_app';
 import { UptimeThemeContext } from '../../../contexts';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { journeySelector } from '../../../state/selectors';
@@ -174,6 +175,41 @@ function statusMessage(count: StepStatusCount) {
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
+interface StatusBadgeProps {
+  status: string;
+}
+
+function colorFromStatus(status: string, color: UptimeAppColors) {
+  switch (status) {
+    case 'succeeded':
+      return color.success;
+    case 'failed':
+      return color.danger;
+    default:
+      return 'default';
+  }
+}
+
+function textFromStatus(status: string) {
+  switch (status) {
+    case 'succeeded':
+      return 'Succeeded';
+    case 'failed':
+      return 'Failed';
+    case 'skipped':
+      return 'Skipped';
+    default:
+      return null;
+  }
+}
+
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const theme = useContext(UptimeThemeContext);
+  return (
+    <EuiBadge color={colorFromStatus(status, theme.colors)}>{textFromStatus(status)}</EuiBadge>
+  );
+};
+
 export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -229,11 +265,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
               </div>
               <EuiSpacer size="s" />
               <div>
-                <EuiBadge
-                  color={step.synthetics.payload.status === 'succeeded' ? successColor : failColor}
-                >
-                  {step.synthetics.payload.status === 'succeeded' ? 'Succeeded' : 'Failed'}
-                </EuiBadge>
+                <StatusBadge status={step.synthetics.payload.status} />
               </div>
               <EuiSpacer />
               <div>
