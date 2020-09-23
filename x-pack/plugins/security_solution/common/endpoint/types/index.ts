@@ -183,7 +183,7 @@ export interface ResolverTree {
   relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: ResolverAncestry;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   stats: ResolverNodeStats;
 }
 
@@ -209,7 +209,7 @@ export interface SafeResolverTree {
  */
 export interface ResolverLifecycleNode {
   entityID: string;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   /**
    * stats are only set when the entire tree is being fetched
    */
@@ -263,7 +263,7 @@ export interface SafeResolverAncestry {
  */
 export interface ResolverRelatedEvents {
   entityID: string;
-  events: ResolverEvent[];
+  events: SafeResolverEvent[];
   nextEvent: string | null;
 }
 
