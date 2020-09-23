@@ -45,7 +45,6 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
       loadTestFile(require.resolve('./transaction_groups/error_rate'));
       loadTestFile(require.resolve('./transaction_groups/breakdown'));
-      loadTestFile(require.resolve('./transaction_groups/avg_duration_by_browser'));
     });
 
     describe('Observability overview', function () {

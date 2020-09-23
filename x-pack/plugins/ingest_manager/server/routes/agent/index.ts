@@ -23,9 +23,11 @@ import {
   PostAgentAcksRequestParamsJSONSchema,
   PostAgentAcksRequestBodyJSONSchema,
   PostAgentUnenrollRequestSchema,
+  PostBulkAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
   PostAgentEnrollRequestBodyJSONSchema,
 } from '../../types';
 import {
@@ -38,12 +40,13 @@ import {
   postAgentEnrollHandler,
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
+  postBulkAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
-import { postAgentsUnenrollHandler } from './unenroll_handler';
+import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
 
 const ajv = new Ajv({
@@ -181,7 +184,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       validate: PostAgentUnenrollRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postAgentsUnenrollHandler
+    postAgentUnenrollHandler
   );
 
   router.put(
@@ -211,5 +214,25 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentStatusForAgentPolicyHandler
+  );
+
+  // Bulk reassign
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+      validate: PostBulkAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsReassignHandler
+  );
+
+  // Bulk unenroll
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+      validate: PostBulkAgentUnenrollRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUnenrollHandler
   );
 };

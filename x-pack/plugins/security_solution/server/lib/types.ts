@@ -121,6 +121,23 @@ export interface ShardsResponse {
   successful: number;
   failed: number;
   skipped: number;
+  failures?: ShardError[];
+}
+
+export interface ShardError {
+  shard: number;
+  index: string;
+  node: string;
+  reason: {
+    type: string;
+    reason: string;
+    index_uuid: string;
+    index: string;
+    caused_by: {
+      type: string;
+      reason: string;
+    };
+  };
 }
 
 export interface Explanation {
