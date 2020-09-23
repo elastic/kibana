@@ -20,11 +20,9 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { TLS } from './tls';
 import { MatrixHistogram } from './matrix_histogram';
 
 export * from './hosts';
@@ -39,9 +37,7 @@ export interface AppDomainLibs {
   network: Network;
   kpiNetwork: KpiNetwork;
   overview: Overview;
-  uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
-  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
