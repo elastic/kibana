@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createUncommonProcessesResolvers } from './resolvers';
-export { uncommonProcessesSchema } from './schema.gql';
+export * from './es_agg_utils';
+export * from './convert_to_geojson';
+export * from './elasticsearch_geo_utils';
