@@ -1381,6 +1381,10 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
     getFieldsForWildcard: (options?: GetFieldsOptions) => Promise<any>;
     getIds: (refresh?: boolean) => Promise<string[]>;
+    getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
+        id: string;
+        title: string;
+    }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
