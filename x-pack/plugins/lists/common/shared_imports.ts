@@ -6,6 +6,7 @@
 
 export {
   NonEmptyString,
+  DefaultArray,
   DefaultUuid,
   DefaultStringArray,
   DefaultVersionNumber,

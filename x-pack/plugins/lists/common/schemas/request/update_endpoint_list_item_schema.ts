@@ -17,6 +17,7 @@ import {
   id,
   meta,
   name,
+  osTypeArrayOrUndefined,
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
@@ -25,7 +26,6 @@ import {
   EntriesArray,
   UpdateCommentsArray,
   nonEmptyEntriesArray,
-  osTypeArrayOrUndefined,
 } from '../types';
 
 export const updateEndpointListItemSchema = t.intersection([
