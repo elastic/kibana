@@ -107,7 +107,7 @@ function validateParams(paramsObject: unknown): string | void {
       });
     }
   }
-  if (EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
+  if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
     return i18n.translate('xpack.actions.builtin.pagerduty.missingDedupkeyErrorMessage', {
       defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
       values: {
