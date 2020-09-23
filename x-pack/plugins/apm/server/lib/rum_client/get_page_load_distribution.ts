@@ -15,21 +15,41 @@ import {
 
 export const MICRO_TO_SEC = 1000000;
 
+const NUMBER_OF_PLD_STEPS = 100;
+
 export function microToSec(val: number) {
   return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
 }
+
+export const getPLDChartSteps = ({
+  maxDuration,
+  minDuration,
+}: {
+  maxDuration: number;
+  minDuration: number;
+}) => {
+  const stepValue = (maxDuration - minDuration) / NUMBER_OF_PLD_STEPS;
+  const stepValues = [];
+  for (let i = 1; i < NUMBER_OF_PLD_STEPS + 1; i++) {
+    stepValues.push((stepValue * i + minDuration).toFixed(2));
+  }
+  return stepValues;
+};
 
 export async function getPageLoadDistribution({
   setup,
   minPercentile,
   maxPercentile,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   minPercentile?: string;
   maxPercentile?: string;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
@@ -105,11 +125,7 @@ const getPercentilesDistribution = async ({
   minDuration: number;
   maxDuration: number;
 }) => {
-  const stepValue = (maxDuration - minDuration) / 100;
-  const stepValues = [];
-  for (let i = 1; i < 101; i++) {
-    stepValues.push((stepValue * i + minDuration).toFixed(2));
-  }
+  const stepValues = getPLDChartSteps({ maxDuration, minDuration });
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,

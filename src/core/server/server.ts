@@ -113,11 +113,12 @@ export class Server {
     const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyPlugins = await this.legacy.discoverPlugins();
+    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
     await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyPlugins);
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -152,18 +153,20 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
+      environment: environmentSetup,
+      http: httpSetup,
+      metrics: metricsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
       status: statusSetup,
-      legacyPlugins,
       uiPlugins,
     });
 
@@ -189,6 +192,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -243,10 +247,6 @@ export class Server {
     });
 
     await this.http.start();
-
-    await this.rendering.start({
-      legacy: this.legacy,
-    });
 
     return this.coreStart;
   }

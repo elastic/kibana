@@ -26,6 +26,7 @@ import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { RangeIndexPatternColumn, rangeOperation } from './ranges';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -40,6 +41,7 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
+  rangeOperation,
 ];
 
 /**
@@ -49,6 +51,7 @@ const internalOperationDefinitions = [
  */
 export type IndexPatternColumn =
   | FiltersIndexPatternColumn
+  | RangeIndexPatternColumn
   | TermsIndexPatternColumn
   | DateHistogramIndexPatternColumn
   | MinIndexPatternColumn
@@ -59,6 +62,7 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn;
 
 export { termsOperation } from './terms';
+export { rangeOperation } from './ranges';
 export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';

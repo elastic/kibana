@@ -19,7 +19,11 @@ import {
   USER_AGENT_OS,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
-import { MICRO_TO_SEC, microToSec } from './get_page_load_distribution';
+import {
+  getPLDChartSteps,
+  MICRO_TO_SEC,
+  microToSec,
+} from './get_page_load_distribution';
 
 export const getBreakdownField = (breakdown: string) => {
   switch (breakdown) {
@@ -40,23 +44,23 @@ export const getPageLoadDistBreakdown = async ({
   minDuration,
   maxDuration,
   breakdown,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   minDuration: number;
   maxDuration: number;
   breakdown: string;
+  urlQuery?: string;
 }) => {
   // convert secs to micros
-  const stepValue =
-    (maxDuration * MICRO_TO_SEC - minDuration * MICRO_TO_SEC) / 50;
-  const stepValues = [];
-
-  for (let i = 1; i < 51; i++) {
-    stepValues.push((stepValue * i + minDuration).toFixed(2));
-  }
+  const stepValues = getPLDChartSteps({
+    minDuration: minDuration * MICRO_TO_SEC,
+    maxDuration: maxDuration * MICRO_TO_SEC,
+  });
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
