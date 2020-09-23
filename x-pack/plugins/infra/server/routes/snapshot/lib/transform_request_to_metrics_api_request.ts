@@ -34,7 +34,7 @@ export const transformRequestToMetricsAPIRequest = async (
       interval: timeRangeWithIntervalApplied.interval,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
-    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 10,
+    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 5,
     alignDataToEnd: true,
   };
 
