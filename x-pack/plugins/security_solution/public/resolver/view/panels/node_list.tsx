@@ -41,6 +41,7 @@ import { useColors } from '../use_colors';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 interface ProcessTableView {
   name?: string;
@@ -80,18 +81,7 @@ export const NodeList = memo(() => {
         dataType: 'date',
         sortable: true,
         render(eventDate?: Date) {
-          return eventDate ? (
-            <NodeDetailTimestamp eventDate={eventDate} />
-          ) : (
-            <EuiBadge color="warning">
-              {i18n.translate(
-                'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampInvalidLabel',
-                {
-                  defaultMessage: 'invalid',
-                }
-              )}
-            </EuiBadge>
-          );
+          return <NodeDetailTimestamp eventDate={eventDate} />;
         },
       },
     ],
@@ -221,8 +211,8 @@ function NodeDetailLink({
   );
 }
 
-const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date }) => {
+const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
   const formattedDate = useFormattedDate(eventDate);
 
-  return <>{formattedDate}</>;
+  return formattedDate ? <>{formattedDate}</> : getEmptyTagValue();
 });

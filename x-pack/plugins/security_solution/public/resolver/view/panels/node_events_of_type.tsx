@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime } from './panel_content_utilities';
+import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -84,7 +84,7 @@ const NodeEventsListItem = memo(function ({
   eventType: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const date = useFormattedDate(timestamp);
+  const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
   const linkProps = useLinkProps({
     panelView: 'eventDetail',
     panelParameters: {

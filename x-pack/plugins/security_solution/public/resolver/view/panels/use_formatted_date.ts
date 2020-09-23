@@ -17,7 +17,7 @@ const invalidDateText = i18n.translate(
 /**
  * Long formatter (to second) for DateTime
  */
-export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
@@ -35,12 +35,12 @@ export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
  */
 export function useFormattedDate(
   timestamp: ConstructorParameters<typeof Date>[0] | Date | undefined
-): string {
+): string | undefined {
   const dateFormatSetting: string = useUiSetting('dateFormat');
   const timezoneSetting: string = useUiSetting('dateFormat:tz');
   const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
 
-  if (timestamp === undefined) return invalidDateText;
+  if (!timestamp) return undefined;
 
   const date = new Date(timestamp);
   if (date && Number.isFinite(date.getTime())) {

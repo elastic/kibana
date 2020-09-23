@@ -15,7 +15,12 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
+import {
+  BoldCode,
+  StyledTime,
+  GeneratedText,
+  noTimestampRetrievedText,
+} from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -80,7 +85,7 @@ const EventDetailContents = memo(function ({
   processEvent: SafeResolverEvent;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
-  const formattedDate = useFormattedDate(timestamp);
+  const formattedDate = useFormattedDate(timestamp) || noTimestampRetrievedText;
 
   return (
     <StyledPanel>

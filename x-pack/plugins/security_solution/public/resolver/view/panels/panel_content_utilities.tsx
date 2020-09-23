@@ -7,8 +7,20 @@
 /* eslint-disable react/display-name */
 
 import { EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { memo } from 'react';
+
+/**
+ * Text to use in place of an undefined timestamp value
+ */
+
+export const noTimestampRetrievedText = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved',
+  {
+    defaultMessage: 'No timestamp retrieved',
+  }
+);
 
 /**
  * A bold version of EuiCode to display certain titles with
