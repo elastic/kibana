@@ -14,6 +14,7 @@ export interface UiActionsExampleAppContextValue {
   core: CoreStart;
   plugins: StartDependencies;
   managerWithoutEmbeddable: UiActionsEnhancedDynamicActionManager;
+  managerWithoutEmbeddableSingleButton: UiActionsEnhancedDynamicActionManager;
   managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
 

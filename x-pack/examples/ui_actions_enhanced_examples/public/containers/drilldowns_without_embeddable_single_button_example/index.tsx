@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './sample_ml_triggers';
-export * from './sample_canvas_trigger';
+export * from './drilldowns_without_embeddable_single_button_example';

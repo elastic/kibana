@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createElement as h } from 'react';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
@@ -19,7 +21,13 @@ import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/p
 import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
-import { sampleMlJobClickTrigger } from './triggers';
+import {
+  sampleMlJobClickTrigger,
+  sampleCanvasElementClickTrigger,
+  SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER,
+  SampleCanvasElementClickContext,
+  sampleCanavsElementClickContext,
+} from './triggers';
 import { mount } from './mount';
 import {
   UiActionsEnhancedMemoryActionStorage,
@@ -43,6 +51,7 @@ export interface StartDependencies {
 
 export interface UiActionsEnhancedExamplesStart {
   managerWithoutEmbeddable: UiActionsEnhancedDynamicActionManager;
+  managerWithoutEmbeddableSingleButton: UiActionsEnhancedDynamicActionManager;
   managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
 
@@ -61,6 +70,58 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new SampleMlToDashboardDrilldown({ start }));
 
     uiActions.registerTrigger(sampleMlJobClickTrigger);
+    uiActions.registerTrigger(sampleCanvasElementClickTrigger);
+
+    uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
+      id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
+      order: 100,
+      getDisplayName: () => 'Add drilldown',
+      getIconType: () => 'plusInCircle',
+      isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
+        workpadId === '123' && elementId === '456',
+      execute: async () => {
+        const { core: coreStart, plugins: pluginsStart, self } = start();
+        const handle = coreStart.overlays.openFlyout(
+          toMountPoint(
+            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+              onClose: () => handle.close(),
+              viewMode: 'create',
+              dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
+              triggers: [SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER],
+              placeContext: { sampleCanavsElementClickContext },
+            })
+          ),
+          {
+            ownFocus: true,
+          }
+        );
+      },
+    });
+    uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
+      id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
+      order: 99,
+      getDisplayName: () => 'Manage drilldowns',
+      getIconType: () => 'list',
+      isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
+        workpadId === '123' && elementId === '456',
+      execute: async () => {
+        const { core: coreStart, plugins: pluginsStart, self } = start();
+        const handle = coreStart.overlays.openFlyout(
+          toMountPoint(
+            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+              onClose: () => handle.close(),
+              viewMode: 'manage',
+              dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
+              triggers: [SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER],
+              placeContext: { sampleCanavsElementClickContext },
+            })
+          ),
+          {
+            ownFocus: true,
+          }
+        );
+      },
+    });
 
     core.application.register({
       id: 'ui_actions_enhanced-explorer',
@@ -92,6 +153,11 @@ export class UiActionsEnhancedExamplesPlugin
       isCompatible: async () => true,
       uiActions: plugins.uiActionsEnhanced,
     });
+    const managerWithoutEmbeddableSingleButton = new UiActionsEnhancedDynamicActionManager({
+      storage: new UiActionsEnhancedMemoryActionStorage(),
+      isCompatible: async () => true,
+      uiActions: plugins.uiActionsEnhanced,
+    });
     const managerWithEmbeddable = new UiActionsEnhancedDynamicActionManager({
       storage: new UiActionsEnhancedMemoryActionStorage(),
       isCompatible: async () => true,
@@ -100,6 +166,7 @@ export class UiActionsEnhancedExamplesPlugin
 
     return {
       managerWithoutEmbeddable,
+      managerWithoutEmbeddableSingleButton,
       managerWithEmbeddable,
     };
   }

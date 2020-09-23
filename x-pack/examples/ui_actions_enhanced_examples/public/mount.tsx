@@ -16,7 +16,7 @@ export const mount = (
   const [
     core,
     plugins,
-    { managerWithoutEmbeddable, managerWithEmbeddable },
+    { managerWithoutEmbeddable, managerWithoutEmbeddableSingleButton, managerWithEmbeddable },
   ] = await coreSetup.getStartServices();
   const { App } = await import('./containers/app');
 
@@ -25,6 +25,7 @@ export const mount = (
     core,
     plugins,
     managerWithoutEmbeddable,
+    managerWithoutEmbeddableSingleButton,
     managerWithEmbeddable,
   };
   const reactElement = (
