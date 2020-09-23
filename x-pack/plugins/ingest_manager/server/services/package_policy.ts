@@ -30,6 +30,7 @@ import * as Registry from './epm/registry';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
+import { normalizeKuery } from './saved_object';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -211,13 +212,7 @@ class PackagePolicyService {
       sortOrder,
       page,
       perPage,
-      // To ensure users don't need to know about SO data structure...
-      filter: kuery
-        ? kuery.replace(
-            new RegExp(`${SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
     return {
