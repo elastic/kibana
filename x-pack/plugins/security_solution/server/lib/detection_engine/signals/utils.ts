@@ -20,6 +20,7 @@ import {
   BaseSignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
+  Signal,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -215,12 +216,12 @@ export const generateId = (
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
 
 // TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
-export const generateSignalId = (newSignal: SignalHit) =>
+export const generateSignalId = (signal: Signal) =>
   createHash('sha256')
     .update(
-      newSignal.signal.parents
+      signal.parents
         .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
-        .concat(newSignal.signal.rule.id)
+        .concat(signal.rule.id)
     )
     .digest('hex');
 
@@ -260,7 +261,7 @@ export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): 
 
 export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
   return {
-    _id: generateSignalId(signal),
+    _id: generateSignalId(signal.signal),
     _index: index,
     _source: {
       ...signal,

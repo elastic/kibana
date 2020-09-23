@@ -67,7 +67,10 @@ export interface SignalSource {
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
-    child?: Ancestor;
+    group?: {
+      id: string;
+      index?: number;
+    };
     rule: {
       id: string;
     };
@@ -156,6 +159,10 @@ export interface Signal {
   parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];
+  group?: {
+    id: string;
+    index?: number;
+  };
   original_time?: string;
   original_event?: SearchTypes;
   status: Status;

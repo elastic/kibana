@@ -532,6 +532,9 @@ describe('buildSignalFromSequence', () => {
           exceptions_list: getListArrayMock(),
         },
         depth: 2,
+        group: {
+          id: '269c1f5754bff92fb8040283b687258e99b03e8b2ab1262cc20c82442e5de5ea',
+        },
       },
     };
     expect(signal).toEqual(expected);

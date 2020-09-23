@@ -839,10 +839,10 @@ describe('utils', () => {
 
   describe('generateSignalId', () => {
     it('generates a unique signal id for same signal with different rule id', () => {
-      const signalId1 = generateSignalId(sampleSignalHit());
+      const signalId1 = generateSignalId(sampleSignalHit().signal);
       const modifiedSignal = sampleSignalHit();
       modifiedSignal.signal.rule.id = 'some other rule id';
-      const signalIdModified = generateSignalId(modifiedSignal);
+      const signalIdModified = generateSignalId(modifiedSignal.signal);
       expect(signalId1).not.toEqual(signalIdModified);
     });
   });

@@ -11,6 +11,7 @@ import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
+import { generateSignalId } from './utils';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
@@ -84,7 +85,14 @@ export const buildSignalFromSequence = (
     event: {
       kind: 'signal',
     },
-    signal,
+    signal: {
+      ...signal,
+      group: {
+        // This is the same function that is used later to generate the _id for the sequence signal document,
+        // so _id should equal signal.group.id for the "shell" document
+        id: generateSignalId(signal),
+      },
+    },
   };
 };
 

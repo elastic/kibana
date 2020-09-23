@@ -470,10 +470,13 @@ export const signalRulesAlertType = ({
                 buildSignalFromSequence(blocks, savedObject),
                 outputIndex
               );
-              blocks.forEach((block) => {
+              blocks.forEach((block, idx) => {
                 // TODO: fix type of blocks so we don't have to check existence of _source.signal
                 if (block._source.signal) {
-                  block._source.signal.child = buildParent(sequenceSignal);
+                  block._source.signal.group = {
+                    id: sequenceSignal._id,
+                    index: idx,
+                  };
                 }
               });
               return {

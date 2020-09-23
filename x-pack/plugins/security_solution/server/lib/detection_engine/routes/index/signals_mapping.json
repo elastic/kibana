@@ -41,7 +41,7 @@
               }
             }
           },
-          "child": {
+          "ancestors": {
             "properties": {
               "rule": {
                 "type": "keyword"
@@ -60,22 +60,13 @@
               }
             }
           },
-          "ancestors": {
+          "group": {
             "properties": {
-              "rule": {
-                "type": "keyword"
-              },
-              "index": {
-                "type": "keyword"
-              },
               "id": {
                 "type": "keyword"
               },
-              "type": {
-                "type": "keyword"
-              },
-              "depth": {
-                "type": "long"
+              "index": {
+                "type": "integer"
               }
             }
           },
