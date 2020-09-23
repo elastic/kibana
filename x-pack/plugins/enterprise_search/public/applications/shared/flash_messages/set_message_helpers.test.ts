@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockHistory } from '../../__mocks__';
+
 import {
   FlashMessagesLogic,
+  mountFlashMessagesLogic,
   setSuccessMessage,
   setErrorMessage,
   setQueuedSuccessMessage,
@@ -15,7 +18,7 @@ describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
   beforeEach(() => {
-    FlashMessagesLogic.mount();
+    mountFlashMessagesLogic({ history: mockHistory as any });
   });
 
   it('setSuccessMessage()', () => {
