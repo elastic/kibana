@@ -11,6 +11,7 @@ import {
   SearchInterceptorDeps,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
+import { isErrorResponse, isCompleteResponse } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { TimeoutErrorMode } from '../../../../../src/plugins/data/public';
 import { IAsyncSearchOptions } from '.';
@@ -71,12 +72,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, combinedSignal, strategy).pipe(
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (!response.isRunning && response.isPartial)) {
+        if (isErrorResponse(response)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.isRunning) {
+        if (isCompleteResponse(response)) {
           return EMPTY;
         }
 
