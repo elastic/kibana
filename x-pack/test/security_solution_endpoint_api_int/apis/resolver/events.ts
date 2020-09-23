@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { eventIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import {
-  ResolverKqlRelatedEvents,
+  ResolverPaginatedEvents,
   SafeResolverRelatedEvents,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should filter events by event.id', async () => {
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not find any events when given an invalid entity id', async () => {
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -253,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return related events for the root node', async () => {
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow for the events to be filtered', async () => {
         const filter = `event.category:"${RelatedEventCategory.Driver}" and ${entityIDFilter}`;
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return paginated results for the root node', async () => {
-        let { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        let { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events?limit=2`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -317,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return the first page of information when the cursor is invalid', async () => {
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events?afterEvent=blah`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -330,7 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should sort the events in descending order', async () => {
-        const { body }: { body: ResolverKqlRelatedEvents } = await supertest
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
           .post(`/api/endpoint/resolver/events`)
           .set('kbn-xsrf', 'xxx')
           .send({

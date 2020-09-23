@@ -13,7 +13,7 @@ import {
   SafeResolverEvent,
   SafeResolverChildNode,
   SafeResolverRelatedEvents,
-  ResolverKqlRelatedEvents,
+  ResolverPaginatedEvents,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -40,7 +40,7 @@ export function createRelatedEvents(
 export function createEvents(
   events: SafeResolverEvent[] = [],
   nextEvent: string | null = null
-): ResolverKqlRelatedEvents {
+): ResolverPaginatedEvents {
   return { events, nextEvent };
 }
 

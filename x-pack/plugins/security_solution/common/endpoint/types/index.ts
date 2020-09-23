@@ -279,7 +279,7 @@ export interface SafeResolverRelatedEvents {
 /**
  * Safe version of `ResolverRelatedEvents`
  */
-export interface ResolverKqlRelatedEvents {
+export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
   nextEvent: string | null;
 }
