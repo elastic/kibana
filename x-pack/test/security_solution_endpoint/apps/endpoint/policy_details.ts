@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
@@ -18,8 +19,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
+  const config = getService('config');
+  const kbnTestServer = config.get('servers.kibana');
+  const { protocol, hostname, port } = kbnTestServer;
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  const kibanaUrl = Url.format({
+    protocol,
+    hostname,
+    port,
+  });
+
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
     describe('with an invalid policy id', () => {
@@ -108,6 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           inputs: [
             {
               id: policyInfo.packagePolicy.id,
+              revision: 2,
               data_stream: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
@@ -220,6 +232,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             default: {
               hosts: ['http://localhost:9200'],
               type: 'elasticsearch',
+            },
+          },
+          fleet: {
+            kibana: {
+              hosts: [kibanaUrl],
             },
           },
           revision: 3,

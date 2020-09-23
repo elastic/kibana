@@ -21,7 +21,7 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor } from '../../legacy/utils/binder_for';
+import { BinderFor } from './binder_for';
 import { fromRoot } from '../../core/server/utils';
 
 const cliPath = fromRoot('src/cli');

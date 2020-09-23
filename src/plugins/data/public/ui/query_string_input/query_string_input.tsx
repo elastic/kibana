@@ -20,6 +20,7 @@
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import classNames from 'classnames';
 import {
   EuiTextArea,
   EuiOutsideClickDetector,
@@ -62,6 +63,8 @@ interface Props {
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  className?: string;
+  isInvalid?: boolean;
 }
 
 interface State {
@@ -543,13 +546,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
-    window.removeEventListener('scroll', this.handleListUpdate);
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
 
-  handleListUpdate = () =>
-    this.setState({
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
       queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
     });
+  };
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
@@ -586,9 +592,13 @@ export class QueryStringInputUI extends Component<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+    const className = classNames(
+      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      this.props.className
+    );
 
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap">
+      <div className={className}>
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -603,7 +613,7 @@ export class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kuiLocalSearchAssistedInput"
+              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -647,6 +657,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 }
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
               </EuiTextArea>

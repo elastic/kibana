@@ -86,6 +86,7 @@ export class DeleteFilterListModal extends Component {
             }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+            data-test-subj={'mlFilterListDeleteConfirmation'}
           />
         </EuiOverlayMask>
       );
@@ -103,6 +104,7 @@ export class DeleteFilterListModal extends Component {
             selectedFilterLists.length === 0 ||
             canDeleteFilter === false
           }
+          data-test-subj="mlFilterListsDeleteButton"
         >
           <FormattedMessage
             id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"

@@ -17,6 +17,7 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
+  MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
 import { Immutable } from '../../../common/endpoint/types';
@@ -25,6 +26,10 @@ import {
   endpointListReducer,
   initialEndpointListState,
 } from '../pages/endpoint_hosts/store/reducer';
+import {
+  initialTrustedAppsPageState,
+  trustedAppsPageReducer,
+} from '../pages/trusted_apps/store/reducer';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
@@ -35,6 +40,7 @@ export const mockManagementState: Immutable<ManagementState> = {
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialEndpointListState,
+  [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: initialTrustedAppsPageState(),
 };
 
 /**
@@ -44,4 +50,5 @@ export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: endpointListReducer,
+  [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: trustedAppsPageReducer,
 });

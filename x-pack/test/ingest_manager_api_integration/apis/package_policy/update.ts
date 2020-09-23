@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -77,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work with valid values', async function () {
-      const { body: apiResponse } = await supertest
+      await supertest
         .put(`/api/ingest_manager/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -95,8 +94,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-
-      expect(apiResponse.success).to.be(true);
     });
 
     it('should return a 500 if there is another package policy with the same name', async function () {

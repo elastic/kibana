@@ -35,7 +35,7 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
 
 // Indent the non-context frames the same amount as the accordion control
 const NoContextFrameHeadingWrapper = styled.div`
-  margin-left: ${px(units.unit + units.half + units.eighth)};
+  margin-left: ${px(units.unit + units.half + units.quarter)};
 `;
 
 interface Props {

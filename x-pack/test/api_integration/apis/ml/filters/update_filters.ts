@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send(updateFilterRequestBody)
         .expect(400);
 
-      expect(body.message).to.contain('No filter with id');
+      expect(body.message).to.contain('resource_not_found_exception');
     });
   });
 };

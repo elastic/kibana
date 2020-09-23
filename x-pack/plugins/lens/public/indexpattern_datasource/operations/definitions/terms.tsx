@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { DataType } from '../../../types';
@@ -171,12 +171,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       }),
     });
     return (
-      <EuiForm>
+      <>
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.size', {
             defaultMessage: 'Number of values',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <FixedEuiRange
             min={1}
@@ -209,6 +210,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order by',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed
@@ -236,6 +238,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order direction',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed
@@ -271,7 +274,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             })}
           />
         </EuiFormRow>
-      </EuiForm>
+      </>
     );
   },
 };

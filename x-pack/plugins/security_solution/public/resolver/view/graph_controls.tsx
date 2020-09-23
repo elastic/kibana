@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 /* eslint-disable react/button-has-type */
 
 import React, { useCallback, useMemo, useContext } from 'react';
@@ -13,8 +15,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { useResolverTheme } from './assets';
 import { ResolverAction } from '../store/actions';
+import { useColors } from './use_colors';
 
 interface StyledGraphControls {
   graphControlsBackground: string;
@@ -54,7 +56,7 @@ const StyledGraphControls = styled.div<StyledGraphControls>`
 /**
  * Controls for zooming, panning, and centering in Resolver
  */
-const GraphControlsComponent = React.memo(
+export const GraphControls = React.memo(
   ({
     className,
   }: {
@@ -66,7 +68,7 @@ const GraphControlsComponent = React.memo(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
-    const { colorMap } = useResolverTheme();
+    const colorMap = useColors();
 
     const handleZoomAmountChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
@@ -204,7 +206,3 @@ const GraphControlsComponent = React.memo(
     );
   }
 );
-
-GraphControlsComponent.displayName = 'GraphControlsComponent';
-
-export const GraphControls = GraphControlsComponent;

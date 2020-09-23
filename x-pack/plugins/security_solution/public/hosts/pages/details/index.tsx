@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { HostItem } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -20,13 +21,12 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../common/components/navigation';
-import { KpiHostsComponent } from '../../components/kpi_hosts';
+import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
-import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
+import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useWithSource } from '../../../common/containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
@@ -53,7 +53,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 const HostOverviewManage = manageQuery(HostOverview);
-const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
@@ -137,7 +136,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                           inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
-                          data={hostOverview}
+                          data={hostOverview as HostItem}
                           anomaliesData={anomaliesData}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
                           loading={loading}
@@ -159,27 +158,14 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
 
                 <EuiHorizontalRule />
 
-                <KpiHostDetailsQuery
-                  sourceId="default"
+                <HostsDetailsKpiComponent
                   filterQuery={filterQuery}
+                  from={from}
+                  setQuery={setQuery}
+                  to={to}
+                  narrowDateRange={narrowDateRange}
                   skip={isInitializing}
-                  startDate={from}
-                  endDate={to}
-                >
-                  {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                    <KpiHostDetailsManage
-                      data={kpiHostDetails}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostDetailsQuery>
+                />
 
                 <EuiSpacer />
 

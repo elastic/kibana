@@ -18,11 +18,10 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { SiemNavigation } from '../../common/components/navigation';
-import { manageQuery } from '../../common/components/page/manage_query';
-import { KpiNetworkComponent } from '..//components/kpi_network';
+
+import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { KpiNetworkQuery } from '../../network/containers/kpi_network';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
@@ -46,7 +45,6 @@ import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
 
-const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
 
 const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
@@ -127,27 +125,14 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
 
                 <EuiSpacer />
 
-                <KpiNetworkQuery
-                  endDate={to}
+                <NetworkKpiComponent
                   filterQuery={filterQuery}
+                  setQuery={setQuery}
                   skip={isInitializing}
-                  sourceId={sourceId}
-                  startDate={from}
-                >
-                  {({ kpiNetwork, loading, id, inspect, refetch }) => (
-                    <KpiNetworkComponentManage
-                      id={id}
-                      inspect={inspect}
-                      setQuery={setQuery}
-                      refetch={refetch}
-                      data={kpiNetwork}
-                      loading={loading}
-                      from={from}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiNetworkQuery>
+                  from={from}
+                  to={to}
+                  narrowDateRange={narrowDateRange}
+                />
               </Display>
 
               {capabilitiesFetched && !isInitializing ? (

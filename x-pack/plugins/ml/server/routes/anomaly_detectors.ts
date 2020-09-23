@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -20,6 +21,7 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
+
 /**
  * Routes for the anomaly detectors
  */
@@ -42,11 +44,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ response, client }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.jobs');
+        const { body } = await client.asInternalUser.ml.getJobs();
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -73,12 +75,12 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await legacyClient.callAsInternalUser('ml.jobs', { jobId });
+        const { body } = await client.asInternalUser.ml.getJobs({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -104,11 +106,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.jobStats');
+        const { body } = await client.asInternalUser.ml.getJobStats();
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -135,12 +137,12 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await legacyClient.callAsInternalUser('ml.jobStats', { jobId });
+        const { body } = await client.asInternalUser.ml.getJobStats({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -171,15 +173,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await legacyClient.callAsInternalUser('ml.addJob', {
-          jobId,
+        const { body } = await client.asInternalUser.ml.putJob({
+          job_id: jobId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -208,15 +210,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canUpdateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await legacyClient.callAsInternalUser('ml.updateJob', {
-          jobId,
+        const { body } = await client.asInternalUser.ml.updateJob({
+          job_id: jobId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -243,14 +245,12 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canOpenJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await legacyClient.callAsInternalUser('ml.openJob', {
-          jobId,
-        });
+        const { body } = await client.asInternalUser.ml.openJob({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -277,18 +277,18 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCloseJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { jobId: string; force?: boolean } = {
-          jobId: request.params.jobId,
+        const options: RequestParams.MlCloseJob = {
+          job_id: request.params.jobId,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
-        const results = await legacyClient.callAsInternalUser('ml.closeJob', options);
+        const { body } = await client.asInternalUser.ml.closeJob(options);
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -315,18 +315,19 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { jobId: string; force?: boolean } = {
-          jobId: request.params.jobId,
+        const options: RequestParams.MlDeleteJob = {
+          job_id: request.params.jobId,
+          wait_for_completion: false,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
-        const results = await legacyClient.callAsInternalUser('ml.deleteJob', options);
+        const { body } = await client.asInternalUser.ml.deleteJob(options);
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -351,13 +352,11 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.validateDetector', {
-          body: request.body,
-        });
+        const { body } = await client.asInternalUser.ml.validateDetector({ body: request.body });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -386,16 +385,16 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canForecastJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const jobId = request.params.jobId;
         const duration = request.body.duration;
-        const results = await legacyClient.callAsInternalUser('ml.forecast', {
-          jobId,
+        const { body } = await client.asInternalUser.ml.forecast({
+          job_id: jobId,
           duration,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -427,14 +426,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.records', {
-          jobId: request.params.jobId,
+        const { body } = await client.asInternalUser.ml.getRecords({
+          job_id: request.params.jobId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -466,15 +465,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.buckets', {
-          jobId: request.params.jobId,
+        const { body } = await client.asInternalUser.ml.getBuckets({
+          job_id: request.params.jobId,
           timestamp: request.params.timestamp,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -506,17 +505,17 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.overallBuckets', {
-          jobId: request.params.jobId,
+        const { body } = await client.asInternalUser.ml.getOverallBuckets({
+          job_id: request.params.jobId,
           top_n: request.body.topN,
           bucket_span: request.body.bucketSpan,
           start: request.body.start,
           end: request.body.end,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -543,14 +542,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.categories', {
-          jobId: request.params.jobId,
-          categoryId: request.params.categoryId,
+        const { body } = await client.asInternalUser.ml.getCategories({
+          job_id: request.params.jobId,
+          category_id: request.params.categoryId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -577,13 +576,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.modelSnapshots', {
-          jobId: request.params.jobId,
+        const { body } = await client.asInternalUser.ml.getModelSnapshots({
+          job_id: request.params.jobId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -610,14 +609,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.modelSnapshots', {
-          jobId: request.params.jobId,
-          snapshotId: request.params.snapshotId,
+        const { body } = await client.asInternalUser.ml.getModelSnapshots({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -646,15 +645,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.updateModelSnapshot', {
-          jobId: request.params.jobId,
-          snapshotId: request.params.snapshotId,
+        const { body } = await client.asInternalUser.ml.updateModelSnapshot({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -681,14 +680,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await legacyClient.callAsInternalUser('ml.deleteModelSnapshot', {
-          jobId: request.params.jobId,
-          snapshotId: request.params.snapshotId,
+        const { body } = await client.asInternalUser.ml.deleteModelSnapshot({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

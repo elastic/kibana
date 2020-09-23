@@ -32,6 +32,7 @@ import {
 } from '../../../ingest_manager/common';
 import { factory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
+import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -178,7 +179,7 @@ async function indexAlerts(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (array: Array<Record<string, any>>, doc) => {
         let index = eventIndex;
-        if (doc.event.kind === 'alert') {
+        if (firstNonNullValue(doc.event?.kind) === 'alert') {
           index = alertIndex;
         }
         array.push({ create: { _index: index } }, doc);

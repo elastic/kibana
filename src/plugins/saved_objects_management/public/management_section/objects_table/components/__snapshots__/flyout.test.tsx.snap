@@ -122,6 +122,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
           onClick={[MockFunction]}
           size="s"
         >
@@ -220,9 +222,11 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "indexPatterns": Array [
             Object {
               "id": "1",
+              "title": undefined,
             },
             Object {
               "id": "2",
+              "title": undefined,
             },
           ],
           "isLegacyFile": false,
@@ -420,6 +424,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
           onClick={[MockFunction]}
           size="s"
         >
@@ -553,7 +559,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Please select a file to import"
+            defaultMessage="Select a file to import"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
@@ -603,6 +609,8 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
           onClick={[MockFunction]}
           size="s"
         >

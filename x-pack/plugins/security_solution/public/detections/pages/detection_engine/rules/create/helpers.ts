@@ -9,13 +9,12 @@ import moment from 'moment';
 import deepmerge from 'deepmerge';
 
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { RuleType } from '../../../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
+import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
+import { Rule } from '../../../../containers/detection_engine/rules';
+import { Type } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   AboutStepRule,
@@ -26,6 +25,8 @@ import {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
+  RuleStepsFormData,
+  RuleStep,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -33,8 +34,8 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     unit: '',
     value: 0,
   };
-  const filterTimeVal = (time as string).match(/\d+/g);
-  const filterTimeType = (time as string).match(/[a-zA-Z]+/g);
+  const filterTimeVal = time.match(/\d+/g);
+  const filterTimeType = time.match(/[a-zA-Z]+/g);
   if (!isEmpty(filterTimeVal) && filterTimeVal != null && !isNaN(Number(filterTimeVal[0]))) {
     timeObj.value = Number(filterTimeVal[0]);
   }
@@ -47,6 +48,23 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
   }
   return timeObj;
 };
+
+export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
+  formData?: T
+): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
+  !!formData?.isValid && !!formData.data;
+
+export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
+  has('data.ruleType', input);
+
+export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
+  has('data.name', input);
+
+export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
+  has('data.interval', input);
+
+export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
+  has('data.actions', input);
 
 export interface RuleFields {
   anomalyThreshold: unknown;
@@ -68,17 +86,27 @@ const isThresholdFields = <T>(
   fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
-  if (isMlRule(type)) {
-    const { index, queryBar, threshold, ...mlRuleFields } = fields;
-    return mlRuleFields;
-  } else if (isThresholdRule(type)) {
-    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
-    return thresholdRuleFields;
-  } else {
-    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
-    return queryRuleFields;
+export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: Type) => {
+  switch (type) {
+    case 'machine_learning':
+      const { index, queryBar, threshold, ...mlRuleFields } = fields;
+      return mlRuleFields;
+    case 'threshold':
+      const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+      return thresholdRuleFields;
+    case 'threat_match':
+    case 'query':
+    case 'saved_query':
+    case 'eql':
+      const {
+        anomalyThreshold: _a,
+        machineLearningJobId: _m,
+        threshold: _t,
+        ...queryRuleFields
+      } = fields;
+      return queryRuleFields;
   }
+  assertUnreachable(type);
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
@@ -119,7 +147,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
+          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
 
   return {
@@ -129,7 +157,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 };
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
-  const { isNew, ...formatScheduleData } = scheduleData;
+  const { ...formatScheduleData } = scheduleData;
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
       formatScheduleData.interval
@@ -161,7 +189,6 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
-    isNew,
     note,
     ruleNameOverride,
     timestampOverride,
@@ -180,11 +207,11 @@ export const formatAboutStepData = (
             {
               id: ENDPOINT_LIST_ID,
               list_id: ENDPOINT_LIST_ID,
-              namespace_type: 'agnostic',
-              type: 'endpoint',
+              namespace_type: 'agnostic' as NamespaceType,
+              type: 'endpoint' as ExceptionListType,
             },
             ...detectionExceptionLists,
-          ] as AboutStepRuleJson['exceptions_list'],
+          ],
         }
       : exceptionsList != null
       ? {
@@ -237,16 +264,19 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   };
 };
 
-export const formatRule = (
+// Used to format form data in rule edit and
+// create flows so "T" here would likely
+// either be CreateRulesSchema or Rule
+export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
   rule?: Rule | null
-): NewRule =>
-  deepmerge.all([
+): T =>
+  (deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as NewRule;
+  ]) as unknown) as T;

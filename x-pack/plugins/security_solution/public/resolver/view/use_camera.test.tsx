@@ -11,7 +11,7 @@ import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
@@ -20,6 +20,7 @@ import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -32,7 +33,7 @@ describe('useCamera on an unpainted element', () => {
   beforeEach(async () => {
     store = createStore(resolverReducer);
 
-    const Test = function Test() {
+    const Test = function () {
       const camera = useCamera();
       const { ref, onMouseDown } = camera;
       projectionMatrix = camera.projectionMatrix;
@@ -159,9 +160,9 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: ResolverEvent;
+      let process: SafeResolverEvent;
       beforeEach(() => {
-        const events: ResolverEvent[] = [];
+        const events: SafeResolverEvent[] = [];
         const numberOfEvents: number = 10;
 
         for (let index = 0; index < numberOfEvents; index++) {
@@ -181,7 +182,7 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, databaseDocumentID: '' },
+            payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
           act(() => {
             store.dispatch(serverResponseAction);
@@ -189,9 +190,9 @@ describe('useCamera on an unpainted element', () => {
         } else {
           throw new Error('failed to create tree');
         }
-        const processes: ResolverEvent[] = [
+        const processes: SafeResolverEvent[] = [
           ...selectors.layout(store.getState()).processNodePositions.keys(),
-        ] as ResolverEvent[];
+        ];
         process = processes[processes.length - 1];
         if (!process) {
           throw new Error('missing the process to bring into view');

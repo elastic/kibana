@@ -7,11 +7,11 @@
 import {
   Agent,
   AgentAction,
+  NewAgentAction,
   NewAgentEvent,
   AgentEvent,
   AgentStatus,
   AgentType,
-  NewAgentAction,
 } from '../models';
 
 export interface GetAgentsRequest {
@@ -26,9 +26,9 @@ export interface GetAgentsRequest {
 export interface GetAgentsResponse {
   list: Agent[];
   total: number;
+  totalInactive: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOneAgentRequest {
@@ -39,7 +39,6 @@ export interface GetOneAgentRequest {
 
 export interface GetOneAgentResponse {
   item: Agent;
-  success: boolean;
 }
 
 export interface PostAgentCheckinRequest {
@@ -55,7 +54,7 @@ export interface PostAgentCheckinRequest {
 
 export interface PostAgentCheckinResponse {
   action: string;
-  success: boolean;
+
   actions: AgentAction[];
 }
 
@@ -72,7 +71,7 @@ export interface PostAgentEnrollRequest {
 
 export interface PostAgentEnrollResponse {
   action: string;
-  success: boolean;
+
   item: Agent & { status: AgentStatus };
 }
 
@@ -87,7 +86,6 @@ export interface PostAgentAcksRequest {
 
 export interface PostAgentAcksResponse {
   action: string;
-  success: boolean;
 }
 
 export interface PostNewAgentActionRequest {
@@ -100,7 +98,6 @@ export interface PostNewAgentActionRequest {
 }
 
 export interface PostNewAgentActionResponse {
-  success: boolean;
   item: AgentAction;
 }
 
@@ -108,11 +105,23 @@ export interface PostAgentUnenrollRequest {
   params: {
     agentId: string;
   };
+  body: {
+    force?: boolean;
+  };
 }
 
-export interface PostAgentUnenrollResponse {
-  success: boolean;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUnenrollResponse {}
+
+export interface PostBulkAgentUnenrollRequest {
+  body: {
+    agents: string[] | string;
+    force?: boolean;
+  };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUnenrollResponse {}
 
 export interface PutAgentReassignRequest {
   params: {
@@ -121,8 +130,21 @@ export interface PutAgentReassignRequest {
   body: { policy_id: string };
 }
 
-export interface PutAgentReassignResponse {
-  success: boolean;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutAgentReassignResponse {}
+
+export interface PostBulkAgentReassignRequest {
+  body: {
+    policy_id: string;
+    agents: string[] | string;
+  };
+}
+
+export interface PostBulkAgentReassignResponse {
+  [key: string]: {
+    success: boolean;
+    error?: Error;
+  };
 }
 
 export interface GetOneAgentEventsRequest {
@@ -141,7 +163,6 @@ export interface GetOneAgentEventsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface DeleteAgentRequest {
@@ -166,7 +187,6 @@ export interface GetAgentStatusRequest {
 }
 
 export interface GetAgentStatusResponse {
-  success: boolean;
   results: {
     events: number;
     total: number;

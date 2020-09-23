@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -19,11 +19,14 @@ import {
 
 export async function getVisitorBreakdown({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {

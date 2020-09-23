@@ -14,9 +14,6 @@ export { OnUpdateHandlerArg, OnUpdateHandler } from './types';
 
 export { SerializeResult } from './serialize';
 
-export {
-  LoadFromJsonButton,
-  OnDoneLoadJsonHandler,
-  TestPipelineActions,
-  DocumentsDropdown,
-} from './components';
+export { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from './components';
+
+export { PipelineProcessorsEditor } from './pipeline_processors_editor';

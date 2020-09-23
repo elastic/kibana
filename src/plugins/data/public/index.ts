@@ -172,7 +172,7 @@ import {
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic } from './field_formats';
+export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
@@ -230,6 +230,8 @@ import {
   formatHitProvider,
 } from './index_patterns';
 
+export type { IndexPatternsService } from './index_patterns';
+
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -262,8 +264,11 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  FieldList,
+  IndexPatternSpec,
+  fieldList,
 } from '../common';
+
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -276,6 +281,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  AutocompleteStart,
 } from './autocomplete';
 
 /*
@@ -313,6 +319,7 @@ import {
 
 export {
   // aggs
+  AggConfigSerialized,
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
@@ -337,12 +344,13 @@ export {
   TabbedTable,
 } from '../common';
 
+export type { AggConfigs, AggConfig } from '../common';
+
 export {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
   extractSearchSourceReferences,
-  FetchOptions,
   getEsPreference,
   getSearchParamsFromRequest,
   IEsSearchRequest,
@@ -351,8 +359,10 @@ export {
   IKibanaSearchResponse,
   injectSearchSourceReferences,
   ISearch,
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
   ISearchGeneric,
-  ISearchOptions,
   ISearchSource,
   parseSearchSourceJSON,
   RequestTimeoutError,
@@ -366,6 +376,10 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
 } from './search';
+
+export type { SearchSource } from './search';
+
+export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -429,7 +443,11 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  QueryStateChange,
+  QueryStart,
 } from './query';
+
+export { AggsStart } from './search/aggs';
 
 export {
   getTime,
@@ -454,7 +472,13 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataPublicPlugin(initializerContext);
 }
 
-export { DataPublicPluginSetup, DataPublicPluginStart, IDataPluginServices } from './types';
+export {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  IDataPluginServices,
+  DataPublicPluginStartUi,
+  DataPublicPluginStartActions,
+} from './types';
 
 // Export plugin after all other imports
 export { DataPublicPlugin as Plugin };

@@ -7,10 +7,10 @@
 import { Reducer } from 'redux';
 import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
+import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 
 const initialState: DataState = {
   relatedEvents: new Map(),
-  relatedEventsReady: new Map(),
   resolverComponentInstanceID: undefined,
 };
 
@@ -18,23 +18,40 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   if (action.type === 'appReceivedNewExternalProperties') {
     const nextState: DataState = {
       ...state,
-      databaseDocumentID: action.payload.databaseDocumentID,
+      tree: {
+        ...state.tree,
+        currentParameters: {
+          databaseDocumentID: action.payload.databaseDocumentID,
+          indices: action.payload.indices,
+        },
+      },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
     };
     return nextState;
   } else if (action.type === 'appRequestedResolverData') {
     // keep track of what we're requesting, this way we know when to request and when not to.
-    return {
+    const nextState: DataState = {
       ...state,
-      pendingRequestDatabaseDocumentID: action.payload,
+      tree: {
+        ...state.tree,
+        pendingRequestParameters: {
+          databaseDocumentID: action.payload.databaseDocumentID,
+          indices: action.payload.indices,
+        },
+      },
     };
+    return nextState;
   } else if (action.type === 'appAbortedResolverDataRequest') {
-    if (action.payload === state.pendingRequestDatabaseDocumentID) {
+    if (treeFetcherParameters.equal(action.payload, state.tree?.pendingRequestParameters)) {
       // the request we were awaiting was aborted
-      return {
+      const nextState: DataState = {
         ...state,
-        pendingRequestDatabaseDocumentID: undefined,
+        tree: {
+          ...state.tree,
+          pendingRequestParameters: undefined,
+        },
       };
+      return nextState;
     } else {
       return state;
     }
@@ -43,49 +60,47 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const nextState: DataState = {
       ...state,
 
-      /**
-       * Store the last received data, as well as the databaseDocumentID it relates to.
-       */
-      lastResponse: {
-        result: action.payload.result,
-        databaseDocumentID: action.payload.databaseDocumentID,
-        successful: true,
-      },
+      tree: {
+        ...state.tree,
+        /**
+         * Store the last received data, as well as the databaseDocumentID it relates to.
+         */
+        lastResponse: {
+          result: action.payload.result,
+          parameters: action.payload.parameters,
+          successful: true,
+        },
 
-      // This assumes that if we just received something, there is no longer a pending request.
-      // This cannot model multiple in-flight requests
-      pendingRequestDatabaseDocumentID: undefined,
+        // This assumes that if we just received something, there is no longer a pending request.
+        // This cannot model multiple in-flight requests
+        pendingRequestParameters: undefined,
+      },
     };
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {
     /** Only handle this if we are expecting a response */
-    if (state.pendingRequestDatabaseDocumentID !== undefined) {
+    if (state.tree?.pendingRequestParameters !== undefined) {
       const nextState: DataState = {
         ...state,
-        pendingRequestDatabaseDocumentID: undefined,
-        lastResponse: {
-          databaseDocumentID: state.pendingRequestDatabaseDocumentID,
-          successful: false,
+        tree: {
+          ...state.tree,
+          pendingRequestParameters: undefined,
+          lastResponse: {
+            parameters: state.tree.pendingRequestParameters,
+            successful: false,
+          },
         },
       };
       return nextState;
     } else {
       return state;
     }
-  } else if (
-    action.type === 'userRequestedRelatedEventData' ||
-    action.type === 'appDetectedMissingEventData'
-  ) {
-    return {
-      ...state,
-      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
-    };
   } else if (action.type === 'serverReturnedRelatedEventData') {
-    return {
+    const nextState: DataState = {
       ...state,
-      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload.entityID, true]]),
       relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
+    return nextState;
   } else {
     return state;
   }

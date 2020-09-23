@@ -106,13 +106,6 @@ export function pausifyMock<T>({
       },
 
       /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(...args): string[] {
-        return dataAccessLayer.indexPatterns(...args);
-      },
-
-      /**
        * Get entities matching a document.
        */
       async entities(...args): Promise<ResolverEntityIndex> {

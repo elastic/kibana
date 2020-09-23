@@ -4,41 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import {
+  TRANSACTION_DOM_INTERACTIVE,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getClientMetrics({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
-        pageViews: { value_count: { field: 'transaction.type' } },
+        pageViews: {
+          value_count: {
+            field: TRANSACTION_DURATION,
+          },
+        },
         backEnd: {
-          avg: {
-            field: 'transaction.marks.agent.timeToFirstByte',
-            missing: 0,
+          percentiles: {
+            field: TRANSACTION_TIME_TO_FIRST_BYTE,
+            percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         domInteractive: {
-          avg: {
-            field: 'transaction.marks.agent.domInteractive',
-            missing: 0,
+          percentiles: {
+            field: TRANSACTION_DOM_INTERACTIVE,
+            percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },
@@ -53,9 +68,11 @@ export async function getClientMetrics({
   // Divide by 1000 to convert ms into seconds
   return {
     pageViews,
-    backEnd: { value: (backEnd.value || 0) / 1000 },
+    backEnd: { value: (backEnd.values['50.0'] || 0) / 1000 },
     frontEnd: {
-      value: ((domInteractive.value || 0) - (backEnd.value || 0)) / 1000,
+      value:
+        ((domInteractive.values['50.0'] || 0) - (backEnd.values['50.0'] || 0)) /
+        1000,
     },
   };
 }

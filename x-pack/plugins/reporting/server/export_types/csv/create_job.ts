@@ -5,26 +5,28 @@
  */
 
 import { cryptoFactory } from '../../lib';
-import { CreateJobFn, ScheduleTaskFnFactory } from '../../types';
-import { JobParamsDiscoverCsv } from './types';
+import { CreateJobFn, CreateJobFnFactory } from '../../types';
+import { IndexPatternSavedObject, JobParamsCSV, TaskPayloadCSV } from './types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
-  JobParamsDiscoverCsv
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
+  JobParamsCSV,
+  TaskPayloadCSV
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTask(jobParams, context, request) {
+  return async function createJob(jobParams, context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;
-    const indexPatternSavedObject = await savedObjectsClient.get(
+    const indexPatternSavedObject = ((await savedObjectsClient.get(
       'index-pattern',
       jobParams.indexPatternId
-    );
+    )) as unknown) as IndexPatternSavedObject; // FIXME
 
     return {
       headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(request),
       indexPatternSavedObject,
       ...jobParams,
     };

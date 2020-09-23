@@ -125,7 +125,7 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
       columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
-      noItemsMessage={<NoItemsMessage />}
+      noItemsMessage={<NoItemsMessage basePath={basePath} />}
       pagination={pagination}
       responsive={false}
       onChange={({ page }: { page: { index: number } }) => {
@@ -141,13 +141,13 @@ export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 
-export const NoItemsMessage = React.memo(() => (
+export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
     titleSize="xs"
     actions={
       <EuiButton
-        href="ml#/jobs/new_job/step/index_or_search"
+        href={`${basePath}/app/ml#/jobs/new_job/step/index_or_search`}
         iconType="popout"
         iconSide="right"
         size="s"

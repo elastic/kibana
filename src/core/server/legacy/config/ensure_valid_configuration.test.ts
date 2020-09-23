@@ -19,7 +19,7 @@
 
 import { ensureValidConfiguration } from './ensure_valid_configuration';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
-import { configServiceMock } from '../../config/config_service.mock';
+import { configServiceMock } from '../../config/mocks';
 
 jest.mock('./get_unused_config_keys');
 
@@ -39,17 +39,12 @@ describe('ensureValidConfiguration', () => {
       configService as any,
       {
         settings: 'settings',
-        pluginSpecs: 'pluginSpecs',
-        disabledPluginSpecs: 'disabledPluginSpecs',
-        pluginExtendedConfig: 'pluginExtendedConfig',
-        uiExports: 'uiExports',
+        legacyConfig: 'pluginExtendedConfig',
       } as any
     );
     expect(getUnusedConfigKeys).toHaveBeenCalledTimes(1);
     expect(getUnusedConfigKeys).toHaveBeenCalledWith({
       coreHandledConfigPaths: ['core', 'elastic'],
-      pluginSpecs: 'pluginSpecs',
-      disabledPluginSpecs: 'disabledPluginSpecs',
       settings: 'settings',
       legacyConfig: 'pluginExtendedConfig',
     });

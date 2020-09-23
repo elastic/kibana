@@ -60,7 +60,15 @@ export async function bootstrap({
     return;
   }
 
-  const env = Env.createDefault({
+  // `bootstrap` is exported from the `src/core/server/index` module,
+  // meaning that any test importing, implicitly or explicitly, anything concrete
+  // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
+  // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
+  // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { REPO_ROOT } = require('@kbn/utils');
+
+  const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,

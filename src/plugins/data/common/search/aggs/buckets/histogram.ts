@@ -28,6 +28,8 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { ExtendedBounds } from './lib/extended_bounds';
+import { isAutoInterval, autoInterval } from './_interval_options';
+import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
 export interface AutoBounds {
   min: number;
@@ -47,6 +49,7 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 export interface AggParamsHistogram extends BaseAggParams {
   field: string;
   interval: string;
+  maxBars?: number;
   intervalBase?: number;
   min_doc_count?: boolean;
   has_extended_bounds?: boolean;
@@ -102,6 +105,7 @@ export const getHistogramBucketAgg = ({
       },
       {
         name: 'interval',
+        default: autoInterval,
         modifyAggConfigOnSearchRequestStart(
           aggConfig: IBucketHistogramAggConfig,
           searchSource: any,
@@ -127,9 +131,12 @@ export const getHistogramBucketAgg = ({
           return childSearchSource
             .fetch(options)
             .then((resp: any) => {
+              const min = resp.aggregations?.minAgg?.value ?? 0;
+              const max = resp.aggregations?.maxAgg?.value ?? 0;
+
               aggConfig.setAutoBounds({
-                min: get(resp, 'aggregations.minAgg.value'),
-                max: get(resp, 'aggregations.maxAgg.value'),
+                min,
+                max,
               });
             })
             .catch((e: Error) => {
@@ -143,45 +150,24 @@ export const getHistogramBucketAgg = ({
             });
         },
         write(aggConfig, output) {
-          let interval = parseFloat(aggConfig.params.interval);
-          if (interval <= 0) {
-            interval = 1;
-          }
-          const autoBounds = aggConfig.getAutoBounds();
+          const values = aggConfig.getAutoBounds();
 
-          // ensure interval does not create too many buckets and crash browser
-          if (autoBounds) {
-            const range = autoBounds.max - autoBounds.min;
-            const bars = range / interval;
-
-            if (bars > getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS)) {
-              const minInterval = range / getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS);
-
-              // Round interval by order of magnitude to provide clean intervals
-              // Always round interval up so there will always be less buckets than histogram:maxBars
-              const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(minInterval)));
-              let roundInterval = orderOfMagnitude;
-
-              while (roundInterval < minInterval) {
-                roundInterval += orderOfMagnitude;
-              }
-              interval = roundInterval;
-            }
-          }
-          const base = aggConfig.params.intervalBase;
-
-          if (base) {
-            if (interval < base) {
-              // In case the specified interval is below the base, just increase it to it's base
-              interval = base;
-            } else if (interval % base !== 0) {
-              // In case the interval is not a multiple of the base round it to the next base
-              interval = Math.round(interval / base) * base;
-            }
-          }
-
-          output.params.interval = interval;
+          output.params.interval = calculateHistogramInterval({
+            values,
+            interval: aggConfig.params.interval,
+            maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+            maxBucketsUserInput: aggConfig.params.maxBars,
+            intervalBase: aggConfig.params.intervalBase,
+            esTypes: aggConfig.params.field?.spec?.esTypes || [],
+          });
         },
+      },
+      {
+        name: 'maxBars',
+        shouldShow(agg) {
+          return isAutoInterval(get(agg, 'params.interval'));
+        },
+        write: () => {},
       },
       {
         name: 'min_doc_count',

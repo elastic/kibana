@@ -66,7 +66,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
           entityID,
           events,
           nextEvent: null,
-        } as ResolverRelatedEvents);
+        });
       },
 
       /**
@@ -74,13 +74,6 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
        */
       resolverTree(): Promise<ResolverTree> {
         return Promise.resolve(tree);
-      },
-
-      /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(): string[] {
-        return ['index pattern'];
       },
 
       /**

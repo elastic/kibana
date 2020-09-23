@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateJobBaseParams, ScheduledTaskParams } from '../../../server/types';
-import { LayoutInstance, LayoutParams } from '../../lib/layouts';
+import { LayoutParams } from '../../lib/layouts';
+import { BaseParams, BasePayload } from '../../types';
+
+interface BaseParamsPDF {
+  layout: LayoutParams;
+  forceNow?: string;
+  relativeUrls: string[];
+}
 
 // Job params: structure of incoming user request data, after being parsed from RISON
-export interface JobParamsPDF extends CreateJobBaseParams {
-  title: string;
-  relativeUrls: string[];
-  layout: LayoutInstance;
-}
+export type JobParamsPDF = BaseParamsPDF & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export interface ScheduledTaskParamsPDF extends ScheduledTaskParams<JobParamsPDF> {
-  basePath?: string;
-  browserTimezone: string;
-  forceNow?: string;
-  layout: LayoutParams;
-  relativeUrls: string[];
-}
+export type TaskPayloadPDF = BaseParamsPDF & BasePayload;
