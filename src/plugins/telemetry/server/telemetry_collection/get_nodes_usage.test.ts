@@ -19,7 +19,6 @@
 
 import { getNodesUsage } from './get_nodes_usage';
 import { TIMEOUT } from './constants';
-// import { ElasticsearchClient } from 'kibana/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 const mockedNodesFetchResponse = {
@@ -46,10 +45,6 @@ const mockedNodesFetchResponse = {
     },
   },
 };
-
-export function clearMockFetchNodesUsage(esClient: any) {
-  esClient.nodes.usage.mockClear();
-}
 
 describe('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
@@ -80,6 +75,5 @@ describe('get_nodes_usage', () => {
         },
       ],
     });
-    clearMockFetchNodesUsage(esClient);
   });
 });

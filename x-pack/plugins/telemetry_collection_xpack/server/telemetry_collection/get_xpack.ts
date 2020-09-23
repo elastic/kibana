@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XpackUsage } from '@elastic/elasticsearch/api/requestParams';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
 /**
@@ -16,6 +15,6 @@ import { TIMEOUT } from './constants';
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
 export async function getXPackUsage(esClient: ElasticsearchClient) {
-  const { body } = await esClient.xpack.usage<XpackUsage>({ master_timeout: TIMEOUT });
+  const { body } = await esClient.xpack.usage({ master_timeout: TIMEOUT });
   return body;
 }

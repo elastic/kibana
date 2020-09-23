@@ -108,7 +108,7 @@ export class TelemetryCollectionManagerPlugin
         throw Error('esCluster name must be set for the getCluster method.');
       }
       if (!esClientGetter) {
-        throw Error('esClientGetter metod not set.');
+        throw Error('esClientGetter method not set.');
       }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');

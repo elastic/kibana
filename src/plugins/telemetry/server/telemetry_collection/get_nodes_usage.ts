@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
 export interface NodeAggregation {

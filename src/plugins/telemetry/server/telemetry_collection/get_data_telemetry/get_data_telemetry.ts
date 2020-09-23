@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ApiResponse, RequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
@@ -231,9 +230,9 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
-
-    const indexMappingsParams: RequestParams.IndicesGetMapping = {
-      index: '*',
+    const indexMappingsParams: { index: string; filter_path: string[] } = {
+      // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
+      index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
       filter_path: [
         // _meta.beat tells the shipper
         '*.mappings._meta.beat',
@@ -250,16 +249,19 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
         '*.mappings.properties.data_stream.properties.dataset.value',
       ],
     };
-    const indicesStatsParams: RequestParams.IndicesStats = {
+    const indicesStatsParams: {
+      index: string | string[] | undefined;
+      level: 'cluster' | 'indices' | 'shards' | undefined;
+      metric: string[];
+      filter_path: string[];
+    } = {
+      // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
       index,
       level: 'indices',
       metric: ['docs', 'store'],
       filter_path: ['indices.*.total'],
     };
-    const [{ body: indexMappings }, { body: indexStats }]: [
-      ApiResponse,
-      ApiResponse
-    ] = await Promise.all([
+    const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
       esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
       esClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);

@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from '../../../../../src/core/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterStats } from './get_cluster_stats';
 import { TIMEOUT } from './constants';
 
-export function clearMockGetClusterStats(esClient: DeeplyMockedKeys<ElasticsearchClient>) {
-  esClient.cluster.stats.mockClear();
-}
-
-export function mockGetClusterStats(clusterStats: any): DeeplyMockedKeys<ElasticsearchClient> {
+export function mockGetClusterStats(clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   esClient.cluster.stats.mockResolvedValue(clusterStats);
   return esClient;
@@ -45,6 +40,5 @@ describe('get_cluster_stats', () => {
     const result = getClusterStats(esClient);
     expect(esClient.cluster.stats).toHaveBeenCalledWith({ timeout: TIMEOUT });
     expect(result).toStrictEqual(response);
-    clearMockGetClusterStats(esClient);
   });
 });

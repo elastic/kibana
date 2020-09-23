@@ -18,7 +18,7 @@
  */
 
 import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 let cachedLicense: ESLicense | undefined;
 
@@ -31,15 +31,14 @@ let cachedLicense: ESLicense | undefined;
  *
  * In OSS we'll get a 400 response using the nwe client and need to catch that error too
  */
-async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClient) {
+async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
   let response;
   try {
     // TODO: extract the call into it's own function that accepts the flag for local
     // Fetching the license from the local node is cheaper than getting it from the master node and good enough
     const { body } = await esClient.license.get<{ license: ESLicense }>({
       local: true,
-      // @ts-ignore this should be a boolean
-      accept_enterprise: 'true',
+      accept_enterprise: true,
     });
     cachedLicense = body.license;
     response = body.license;
@@ -49,8 +48,7 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
       try {
         const { body } = await esClient.license.get<{ license: ESLicense }>({
           local: false,
-          // @ts-ignore this should be a boolean
-          accept_enterprise: 'true',
+          accept_enterprise: true,
         });
         cachedLicense = body.license;
         response = body.license;
@@ -74,7 +72,7 @@ async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClien
 }
 
 export const getLocalLicense: LicenseGetter = async (clustersDetails, { esClient }) => {
-  const license = await getLicenseFromLocalOrMasterNewClient(esClient);
+  const license = await getLicenseFromLocalOrMaster(esClient);
   // It should be called only with 1 cluster element in the clustersDetails array, but doing reduce just in case.
   return clustersDetails.reduce((acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }), {});
 };

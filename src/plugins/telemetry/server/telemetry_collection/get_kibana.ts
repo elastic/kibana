@@ -21,7 +21,7 @@ import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 export interface KibanaUsageStats {
   kibana: {

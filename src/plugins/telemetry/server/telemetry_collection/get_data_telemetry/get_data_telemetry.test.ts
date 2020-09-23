@@ -200,8 +200,6 @@ describe('get_data_telemetry', () => {
       await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
       expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
-
-      mockEsClientClear(esClient);
     });
 
     test('can only see the index mappings, but not the stats', async () => {
@@ -216,7 +214,6 @@ describe('get_data_telemetry', () => {
       ]);
       expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
-      mockEsClientClear(esClient);
     });
 
     test('can see the mappings and the stats', async () => {
@@ -239,7 +236,6 @@ describe('get_data_telemetry', () => {
           size_in_bytes: 10,
         },
       ]);
-      mockEsClientClear(esClient);
     });
 
     test('find an index that does not match any index pattern but has mappings metadata', async () => {
@@ -264,17 +260,13 @@ describe('get_data_telemetry', () => {
           size_in_bytes: 10,
         },
       ]);
-      mockEsClientClear(esClient);
     });
 
     test('return empty array when there is an error', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      // @ts-ignore
       esClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
-      // @ts-ignore
       esClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
       await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
-      mockEsClientClear(esClient);
     });
   });
 });
@@ -318,9 +310,4 @@ function mockEsClient(
     return { body: indexStats };
   });
   return esClient;
-}
-
-function mockEsClientClear(esClient: any) {
-  esClient.indices.getMapping.mockClear();
-  esClient.indices.stats.mockClear();
 }

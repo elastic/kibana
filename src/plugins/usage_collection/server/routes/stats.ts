@@ -39,22 +39,6 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMe
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
-export interface ESClusterInfo {
-  cluster_uuid: string;
-  cluster_name: string;
-  version: {
-    number: string;
-    build_flavor: string;
-    build_type: string;
-    build_hash: string;
-    build_date: string;
-    build_snapshot?: boolean;
-    lucene_version: string;
-    minimum_wire_compatibility_version: string;
-    minimum_index_compatibility_version: string;
-  };
-}
-
 export function registerStatsRoute({
   router,
   config,
@@ -87,7 +71,7 @@ export function registerStatsRoute({
   };
 
   const getClusterUuid = async (esClient: ElasticsearchClient): Promise<string> => {
-    const result = await esClient.info<ESClusterInfo>();
+    const result = await esClient.info<{ cluster_uuid: string }>();
     const { cluster_uuid: uuid } = result.body;
     return uuid;
   };

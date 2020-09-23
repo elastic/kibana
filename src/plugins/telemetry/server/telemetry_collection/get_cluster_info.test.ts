@@ -17,23 +17,25 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from '../../../../../src/core/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 
-export function clearMockGetClusterInfo(esClient: DeeplyMockedKeys<ElasticsearchClient>) {
-  esClient.info.mockClear();
-}
-
-export function mockGetClusterInfo(clusterInfo: any): DeeplyMockedKeys<ElasticsearchClient> {
+export function mockGetClusterInfo(clusterInfo: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info.mockResolvedValue(clusterInfo);
+  esClient.info
+    // @ts-ignore we only care about the response body
+    .mockResolvedValue(
+      // @ts-ignore we only care about the response body
+      {
+        body: { ...clusterInfo },
+      }
+    );
   return esClient;
 }
 
 describe('get_cluster_info using the elasticsearch client', () => {
-  it('uses the esClient to get info API', () => {
-    const response = Promise.resolve({
+  it('uses the esClient to get info API', async () => {
+    const clusterInfo = {
       cluster_uuid: '1234',
       cluster_name: 'testCluster',
       version: {
@@ -47,9 +49,9 @@ describe('get_cluster_info using the elasticsearch client', () => {
         minimum_wire_compatibility_version: '6.8.0',
         minimum_index_compatibility_version: '6.0.0-beta1',
       },
-    });
-    const esClient = mockGetClusterInfo(response);
-    expect(getClusterInfo(esClient)).toStrictEqual(response);
-    clearMockGetClusterInfo(esClient);
+    };
+    const esClient = mockGetClusterInfo(clusterInfo);
+
+    expect(await getClusterInfo(esClient)).toStrictEqual(clusterInfo);
   });
 });

@@ -14,7 +14,6 @@ describe('get_xpack', () => {
       esClient.xpack.usage.mockResolvedValue({ body: {} });
       const result = await getXPackUsage(esClient);
       expect(result).toEqual({});
-      esClient.xpack.usage.mockClear();
     });
   });
 });

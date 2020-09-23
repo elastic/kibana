@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 // This can be removed when the ES client improves the types
 export interface ESClusterInfo {

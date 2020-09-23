@@ -20,12 +20,15 @@
 import { merge, omit } from 'lodash';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
+import { usageCollectionPluginMock } from '../../../usage_collection/server/mocks';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
-const mockUsageCollection = (kibanaUsage = {}) => ({
-  bulkFetch: () => kibanaUsage,
-  toObject: (data: any) => data,
-});
+function mockUsageCollection(kibanaUsage = {}) {
+  const usageCollection = usageCollectionPluginMock.createSetupContract();
+  usageCollection.bulkFetch = jest.fn().mockResolvedValue(kibanaUsage);
+  usageCollection.toObject = jest.fn().mockImplementation((data: any) => data);
+  return usageCollection;
+}
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -42,7 +45,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
     .mockResolvedValue({ body: { ...clusterStats } });
   esClient.nodes.usage.mockResolvedValue(
     // @ts-ignore we only care about the response body
-    Promise.resolve({
+    {
       body: {
         cluster_name: 'testCluster',
         nodes: {
@@ -67,21 +70,13 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
           },
         },
       },
-    })
+    }
   );
   // @ts-ignore we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
   // @ts-ignore we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
-}
-
-function mockGetLocalStatsClear(esClient: any) {
-  esClient.info.mockClear();
-  esClient.cluster.stats.mockClear();
-  esClient.nodes.usage.mockClear();
-  esClient.indices.getMapping.mockClear();
-  esClient.indices.stats.mockClear();
 }
 
 describe('get_local_stats', () => {
@@ -233,10 +228,8 @@ describe('get_local_stats', () => {
       const usageCollection = mockUsageCollection(kibana);
       const esClient = mockGetLocalStats(clusterInfo, clusterStats);
       const response = await getLocalStats(
-        // @ts-ignore we only need the uuid string for this test
-        ['abc123'],
-        // @ts-ignore we only need `bulkFetch` and `toObject` in this test
-        { callCluster, usageCollection, esClient },
+        [{ clusterUuid: 'abc123' }],
+        { callCluster, usageCollection, esClient, start: '', end: '' },
         context
       );
       const result = response[0];
@@ -248,7 +241,6 @@ describe('get_local_stats', () => {
       expect(result.collection).toBe('local');
       expect(Object.keys(result).indexOf('license')).toBeLessThan(0);
       expect(Object.keys(result.stack_stats).indexOf('xpack')).toBeLessThan(0);
-      mockGetLocalStatsClear(esClient);
     });
 
     it('returns an empty array when no cluster uuid is provided', async () => {
@@ -257,13 +249,11 @@ describe('get_local_stats', () => {
       const esClient = mockGetLocalStats(clusterInfo, clusterStats);
       const response = await getLocalStats(
         [],
-        // @ts-ignore we only need `bulkFetch` and `toObject` in this test
-        { callCluster, usageCollection, esClient },
+        { callCluster, usageCollection, esClient, start: '', end: '' },
         context
       );
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
-      mockGetLocalStatsClear(esClient);
     });
   });
 });

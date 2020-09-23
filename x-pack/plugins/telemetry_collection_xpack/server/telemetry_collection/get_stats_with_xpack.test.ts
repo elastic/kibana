@@ -53,13 +53,6 @@ const mockUsageCollection = (kibanaUsage = kibana) => ({
   toObject: (data: any) => data,
 });
 
-function clearEsClientMock(esClient: any) {
-  esClient.xpack.usage.mockClear();
-  esClient.license.get.mockClear();
-  esClient.nodes.usage.mockClear();
-  esClient.info.mockClear();
-}
-
 describe('Telemetry Collection: Get Aggregated Stats', () => {
   test('OSS-like telemetry (no license nor X-Pack telemetry)', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -99,7 +92,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         timestamp: expect.any(String),
       });
     });
-    clearEsClientMock(esClient);
   });
 
   test('X-Pack telemetry (license + X-Pack)', async () => {
@@ -145,6 +137,5 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         timestamp: expect.any(String),
       });
     });
-    clearEsClientMock(esClient);
   });
 });
