@@ -5,7 +5,7 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { Ping } from '../../../common/runtime_types';
+import { Ping, SyntheticsJourneyApiResponse, SyntheticsPing } from '../../../common/runtime_types';
 import {
   FetchJourneyStepsParams,
   FetchStepScreenshot,
@@ -13,7 +13,6 @@ import {
   getJourneySteps,
   getJourneyStepsFail,
   getJourneyStepsSuccess,
-  GetJourneySuccessPayload,
   getStepScreenshot,
   getStepScreenshotFail,
   GetStepScreenshotFailPayload,
@@ -23,9 +22,8 @@ import {
 
 export interface JourneyState {
   checkGroup: string;
-  steps: Ping[];
+  steps: SyntheticsPing[];
   loading: boolean;
-  screenshot?: string;
   error?: Error;
 }
 
@@ -38,7 +36,7 @@ const initialState: JourneyStepsState = {
 };
 
 type Payload = FetchJourneyStepsParams &
-  GetJourneySuccessPayload &
+  SyntheticsJourneyApiResponse &
   GetJourneyFailPayload &
   GetStepScreenshotSuccessPayload;
 
@@ -92,7 +90,7 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
 
     [String(getJourneyStepsSuccess)]: (
       state: JourneyStepsState,
-      action: Action<GetJourneySuccessPayload>
+      action: Action<SyntheticsJourneyApiResponse>
     ) => ({
       journeys: [
         ...state.journeys.filter((j) => j.checkGroup !== action.payload.checkGroup),
@@ -117,7 +115,7 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
       journeys: state.journeys.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.screenshotLoading = true;
+        step.synthetics.screenshotLoading = true;
         return j;
       }),
     }),
@@ -129,8 +127,8 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
       journeys: state.journeys.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.screenshot = action.payload.screenshot;
-        step.screenshotLoading = false;
+        step.synthetics.blob = action.payload.screenshot;
+        step.synthetics.screenshotLoading = false;
         return j;
       }),
     }),
@@ -142,7 +140,7 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
       journeys: state.journeys.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.screenshotLoading = false;
+        step.synthetics.screenshotLoading = false;
         // TODO: error handle
         return j;
       }),
@@ -150,16 +148,3 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
   },
   initialState
 );
-
-interface IHasCheckGroup {
-  checkGroup: string;
-}
-
-const mapFn = (set: (step: JourneyState) => JourneyState, action: Action<IHasCheckGroup>) => (
-  j: JourneyState
-) => {
-  if (j.checkGroup !== action.payload.checkGroup) return j;
-  const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-  if (!step) return undefined;
-  return set(step);
-};

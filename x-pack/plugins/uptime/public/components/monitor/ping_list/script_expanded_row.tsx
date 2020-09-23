@@ -272,8 +272,8 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <ScreenshotDisplay
-                      isLoading={step.screenshotLoading}
-                      screenshot={step.screenshot}
+                      isLoading={step.synthetics.screenshotLoading}
+                      screenshot={step.synthetics.blob}
                       stepIndex={step.synthetics.step.index}
                       fetchScreenshot={fetchScreenshot}
                     />

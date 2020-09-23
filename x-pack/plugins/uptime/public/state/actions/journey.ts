@@ -5,15 +5,10 @@
  */
 
 import { createAction } from 'redux-actions';
-import { Ping } from '../../../common/runtime_types';
+import { Ping, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
-}
-
-export interface GetJourneySuccessPayload {
-  checkGroup: string;
-  steps: Ping[];
 }
 
 export interface GetJourneyFailPayload {
@@ -22,7 +17,7 @@ export interface GetJourneyFailPayload {
 }
 
 export const getJourneySteps = createAction<FetchJourneyStepsParams>('GET_JOURNEY_STEPS');
-export const getJourneyStepsSuccess = createAction<GetJourneySuccessPayload>(
+export const getJourneyStepsSuccess = createAction<SyntheticsJourneyApiResponse>(
   'GET_JOURNEY_STEPS_SUCCESS'
 );
 export const getJourneyStepsFail = createAction<GetJourneyFailPayload>('GET_JOURNEY_STEPS_FAIL');

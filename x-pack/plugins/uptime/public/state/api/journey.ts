@@ -6,9 +6,19 @@
 
 import { apiService } from './utils';
 import { FetchJourneyStepsParams, FetchStepScreenshot } from '../actions/journey';
+import {
+  SyntheticsJourneyApiResponse,
+  SyntheticsJourneyApiResponseType,
+} from '../../../common/runtime_types';
 
-export async function fetchJourneySteps(params: FetchJourneyStepsParams) {
-  return await apiService.get(`/api/uptime/journey/${params.checkGroup}`);
+export async function fetchJourneySteps(
+  params: FetchJourneyStepsParams
+): Promise<SyntheticsJourneyApiResponse> {
+  return (await apiService.get(
+    `/api/uptime/journey/${params.checkGroup}`,
+    undefined,
+    SyntheticsJourneyApiResponseType
+  )) as SyntheticsJourneyApiResponse;
 }
 
 export async function fetchStepScreenshot({ checkGroup, stepIndex }: FetchStepScreenshot) {
