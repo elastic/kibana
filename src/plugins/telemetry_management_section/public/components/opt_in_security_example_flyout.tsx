@@ -37,7 +37,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
-  fetchExample: () => Promise<any[]>;
   onClose: () => void;
 }
 
