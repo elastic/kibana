@@ -78,8 +78,8 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
 
 export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   type: 'range',
-  displayName: i18n.translate('xpack.lens.indexPattern.ranges', {
-    defaultMessage: 'Ranges',
+  displayName: i18n.translate('xpack.lens.indexPattern.intervals', {
+    defaultMessage: 'Intervals',
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
