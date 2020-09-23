@@ -14,17 +14,17 @@ import { EvaluatePanel } from './evaluate_panel';
 
 interface Props {
   jobId: string;
+  isTraining?: boolean;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId }) => {
-  return (
-    <ExplorationPageWrapper
-      jobId={jobId}
-      title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
-        defaultMessage: 'Destination index for regression job ID {jobId}',
-        values: { jobId },
-      })}
-      EvaluatePanel={EvaluatePanel}
-    />
-  );
-};
+export const RegressionExploration: FC<Props> = ({ jobId, isTraining }) => (
+  <ExplorationPageWrapper
+    jobId={jobId}
+    title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
+      defaultMessage: 'Destination index for regression job ID {jobId}',
+      values: { jobId },
+    })}
+    EvaluatePanel={EvaluatePanel}
+    isTraining={isTraining}
+  />
+);

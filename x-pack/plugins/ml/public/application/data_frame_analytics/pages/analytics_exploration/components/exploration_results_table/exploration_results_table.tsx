@@ -20,6 +20,7 @@ import {
   SEARCH_SIZE,
   defaultSearchQuery,
   getAnalysisType,
+  getDefaultTrainingFilterQuery,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -53,6 +54,7 @@ interface Props {
   needsDestIndexPattern: boolean;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
   title: string;
+  isTraining?: boolean;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
@@ -63,6 +65,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     needsDestIndexPattern,
     setEvaluateSearchQuery,
     title,
+    isTraining,
   }) => {
     const {
       services: {
@@ -70,10 +73,18 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       },
     } = useMlKibana();
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+    const [defaultQueryString, setDefaultQueryString] = useState<string | undefined>();
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
+
+    useEffect(() => {
+      if (isTraining !== undefined) {
+        setSearchQuery(getDefaultTrainingFilterQuery(jobConfig.dest.results_field, isTraining));
+        setDefaultQueryString(`${jobConfig.dest.results_field}.is_training : ${isTraining}`);
+      }
+    }, []);
 
     const analysisType = getAnalysisType(jobConfig.analysis);
 
@@ -140,6 +151,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                   <ExplorationQueryBar
                     indexPattern={indexPattern}
                     setSearchQuery={setSearchQuery}
+                    defaultQueryString={defaultQueryString}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

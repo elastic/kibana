@@ -27,9 +27,10 @@ interface Props {
   jobId: string;
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
+  isTraining?: boolean;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel }) => {
+export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel, isTraining }) => {
   const {
     indexPattern,
     isInitialized,
@@ -70,6 +71,7 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
             needsDestIndexPattern={needsDestIndexPattern}
             setEvaluateSearchQuery={setSearchQuery}
             title={title}
+            isTraining={isTraining}
           />
         )}
     </>

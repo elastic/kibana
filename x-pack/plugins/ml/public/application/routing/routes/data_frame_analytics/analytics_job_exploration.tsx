@@ -67,10 +67,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   }
   const jobId: string = globalState.ml.jobId;
   const analysisType: DataFrameAnalysisConfigType = globalState.ml.analysisType;
+  const isTraining: string | undefined = globalState.ml.isTraining;
 
   return (
     <PageLoader context={context}>
-      <Page {...{ jobId, analysisType }} />
+      <Page {...{ jobId, analysisType, isTraining }} />
     </PageLoader>
   );
 };

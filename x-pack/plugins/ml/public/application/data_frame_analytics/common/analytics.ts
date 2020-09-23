@@ -67,6 +67,16 @@ export const defaultSearchQuery = {
   match_all: {},
 };
 
+export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: boolean) => ({
+  bool: {
+    must: [
+      {
+        term: { [`${resultsField}.is_training`]: { value: isTraining } },
+      },
+    ],
+  },
+});
+
 export interface SearchQuery {
   track_total_hits?: boolean;
   query: SavedSearchQuery;
