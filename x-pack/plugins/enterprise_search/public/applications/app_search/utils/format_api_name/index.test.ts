@@ -10,12 +10,15 @@ describe('formatApiName', () => {
   it('replaces non-alphanumeric characters with dashes', () => {
     expect(formatApiName('f1  &&o$ 1  2 *&%da')).toEqual('f1-o-1-2-da');
   });
+
   it('strips leading and trailing non-alphanumeric characters', () => {
     expect(formatApiName('$$hello world**')).toEqual('hello-world');
   });
+
   it('strips leading and trailing whitespace', () => {
     expect(formatApiName('  test  ')).toEqual('test');
   });
+
   it('lowercases text', () => {
     expect(formatApiName('SomeName')).toEqual('somename');
   });

@@ -102,6 +102,7 @@ describe('CredentialsLogic', () => {
             engines: ['someEngine'],
           },
         });
+
         CredentialsLogic.actions.addEngineName('newEngine');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -116,6 +117,7 @@ describe('CredentialsLogic', () => {
             engines: undefined,
           },
         });
+
         CredentialsLogic.actions.addEngineName('newEngine');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -139,6 +141,7 @@ describe('CredentialsLogic', () => {
             engines: ['someEngine', 'anotherEngine'],
           },
         });
+
         CredentialsLogic.actions.removeEngineName('someEngine');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -153,6 +156,7 @@ describe('CredentialsLogic', () => {
             engines: ['someEngine', 'anotherEngine'],
           },
         });
+
         CredentialsLogic.actions.removeEngineName('notfound');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -177,6 +181,7 @@ describe('CredentialsLogic', () => {
             engines: ['someEngine', 'anotherEngine'],
           },
         });
+
         CredentialsLogic.actions.setAccessAllEngines(true);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -192,6 +197,7 @@ describe('CredentialsLogic', () => {
             engines: ['someEngine', 'anotherEngine'],
           },
         });
+
         CredentialsLogic.actions.setAccessAllEngines(false);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -458,6 +464,7 @@ describe('CredentialsLogic', () => {
     describe('apiTokens', () => {
       it('should be set', () => {
         mount();
+
         CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -469,6 +476,7 @@ describe('CredentialsLogic', () => {
     describe('meta', () => {
       it('should be set', () => {
         mount();
+
         CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -482,6 +490,7 @@ describe('CredentialsLogic', () => {
         mount({
           isCredentialsDataComplete: false,
         });
+
         CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -503,6 +512,7 @@ describe('CredentialsLogic', () => {
         mount({
           isCredentialsDetailsComplete: false,
         });
+
         CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -516,6 +526,7 @@ describe('CredentialsLogic', () => {
         mount({
           engines: [],
         });
+
         CredentialsLogic.actions.setCredentialsDetails(credentialsDetails);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -536,6 +547,7 @@ describe('CredentialsLogic', () => {
         mount({
           nameInputBlurred: false,
         });
+
         CredentialsLogic.actions.setNameInputBlurred(true);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -559,6 +571,7 @@ describe('CredentialsLogic', () => {
             read: false,
           },
         });
+
         CredentialsLogic.actions.setTokenReadWrite({ name: 'read', checked: true });
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -586,6 +599,7 @@ describe('CredentialsLogic', () => {
             name: 'bar',
           },
         });
+
         CredentialsLogic.actions.setTokenName('New Name');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -597,6 +611,7 @@ describe('CredentialsLogic', () => {
     describe('activeApiTokenRawName', () => {
       it('updates the raw name, with no formatting applied', () => {
         mount();
+
         CredentialsLogic.actions.setTokenName('New Name');
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -628,6 +643,7 @@ describe('CredentialsLogic', () => {
               access_all_engines: true,
             },
           });
+
           CredentialsLogic.actions.setTokenType(ADMIN);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -647,6 +663,7 @@ describe('CredentialsLogic', () => {
               access_all_engines: true,
             },
           });
+
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -664,6 +681,7 @@ describe('CredentialsLogic', () => {
               access_all_engines: false,
             },
           });
+
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -685,8 +703,15 @@ describe('CredentialsLogic', () => {
               engines: [{}, {}],
             },
           });
+
           CredentialsLogic.actions.setTokenType(ADMIN);
-          expect(CredentialsLogic.values.activeApiToken.engines).toEqual([]);
+          expect(CredentialsLogic.values).toEqual({
+            ...values,
+            activeApiToken: {
+              ...values.activeApiToken,
+              engines: [],
+            },
+          });
         });
       });
 
@@ -698,6 +723,7 @@ describe('CredentialsLogic', () => {
               engines: [{}, {}],
             },
           });
+
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -719,6 +745,7 @@ describe('CredentialsLogic', () => {
               write: false,
             },
           });
+
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -738,6 +765,7 @@ describe('CredentialsLogic', () => {
               write: true,
             },
           });
+
           CredentialsLogic.actions.setTokenType(ADMIN);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -759,6 +787,7 @@ describe('CredentialsLogic', () => {
               read: false,
             },
           });
+
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -778,6 +807,7 @@ describe('CredentialsLogic', () => {
               read: true,
             },
           });
+
           CredentialsLogic.actions.setTokenType(ADMIN);
           expect(CredentialsLogic.values).toEqual({
             ...values,
@@ -798,6 +828,7 @@ describe('CredentialsLogic', () => {
             type: ADMIN,
           },
         });
+
         CredentialsLogic.actions.setTokenType(PRIVATE);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -857,6 +888,7 @@ describe('CredentialsLogic', () => {
     describe('activeApiTokenRawName', () => {
       it('should set `activeApiTokenRawName` to the name of the provided token', () => {
         mount();
+
         CredentialsLogic.actions.toggleCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -866,6 +898,7 @@ describe('CredentialsLogic', () => {
 
       it('should set `activeApiTokenRawName` to the default value if no token is provided', () => {
         mount();
+
         CredentialsLogic.actions.toggleCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -889,6 +922,7 @@ describe('CredentialsLogic', () => {
     describe('activeApiToken', () => {
       it('should set `activeApiToken` to the provided token', () => {
         mount();
+
         CredentialsLogic.actions.toggleCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -900,6 +934,7 @@ describe('CredentialsLogic', () => {
         mount({
           activeApiToken: newToken,
         });
+
         CredentialsLogic.actions.toggleCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -914,6 +949,7 @@ describe('CredentialsLogic', () => {
         mount({
           activeApiTokenIsExisting: false,
         });
+
         CredentialsLogic.actions.toggleCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -926,6 +962,7 @@ describe('CredentialsLogic', () => {
           activeApiTokenIsExisting: true,
         });
         const { id, ...newTokenWithoutId } = newToken;
+
         CredentialsLogic.actions.toggleCredentialsForm(newTokenWithoutId);
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -937,6 +974,7 @@ describe('CredentialsLogic', () => {
         mount({
           activeApiTokenIsExisting: true,
         });
+
         CredentialsLogic.actions.toggleCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -958,6 +996,7 @@ describe('CredentialsLogic', () => {
         mount({
           activeApiTokenRawName: 'foo',
         });
+
         CredentialsLogic.actions.hideCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -971,6 +1010,7 @@ describe('CredentialsLogic', () => {
         mount({
           showCredentialsForm: true,
         });
+
         CredentialsLogic.actions.hideCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -993,6 +1033,7 @@ describe('CredentialsLogic', () => {
         mount({
           isCredentialsDetailsComplete: true,
         });
+
         CredentialsLogic.actions.resetCredentials();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -1006,6 +1047,7 @@ describe('CredentialsLogic', () => {
         mount({
           isCredentialsDataComplete: true,
         });
+
         CredentialsLogic.actions.resetCredentials();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -1019,6 +1061,7 @@ describe('CredentialsLogic', () => {
         mount({
           formErrors: ['I am an error'],
         });
+
         CredentialsLogic.actions.resetCredentials();
         expect(CredentialsLogic.values).toEqual({
           ...values,
@@ -1033,6 +1076,7 @@ describe('CredentialsLogic', () => {
       mount();
       jest.spyOn(CredentialsLogic.actions, 'fetchCredentials').mockImplementationOnce(() => {});
       jest.spyOn(CredentialsLogic.actions, 'fetchDetails').mockImplementationOnce(() => {});
+
       CredentialsLogic.actions.initializeCredentialsData();
       expect(CredentialsLogic.actions.fetchCredentials).toHaveBeenCalled();
       expect(CredentialsLogic.actions.fetchDetails).toHaveBeenCalled();
@@ -1056,7 +1100,6 @@ describe('CredentialsLogic', () => {
       (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve({ meta, results }));
 
       CredentialsLogic.actions.fetchCredentials(2);
-
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
         query: {
           'page[current]': 2,
@@ -1071,7 +1114,6 @@ describe('CredentialsLogic', () => {
       (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.reject('An error occured'));
 
       CredentialsLogic.actions.fetchCredentials(2);
-
       await flushPromises();
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
@@ -1084,6 +1126,7 @@ describe('CredentialsLogic', () => {
         .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
         .mockImplementationOnce(() => {});
       (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve(credentialsDetails));
+
       CredentialsLogic.actions.fetchDetails();
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
       await flushPromises();
@@ -1097,7 +1140,6 @@ describe('CredentialsLogic', () => {
       (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.reject('An error occured'));
 
       CredentialsLogic.actions.fetchDetails();
-
       await flushPromises();
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
@@ -1110,6 +1152,7 @@ describe('CredentialsLogic', () => {
       mount();
       jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
       (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(Promise.resolve());
+
       CredentialsLogic.actions.deleteApiKey(tokenName);
       expect(HttpLogic.values.http.delete).toHaveBeenCalledWith(
         `/api/app_search/credentials/${tokenName}`
@@ -1125,7 +1168,6 @@ describe('CredentialsLogic', () => {
       );
 
       CredentialsLogic.actions.deleteApiKey(tokenName);
-
       await flushPromises();
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
