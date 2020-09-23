@@ -17,10 +17,6 @@ import { ProductSelector } from './';
 import { ProductCard } from '../product_card';
 
 describe('ProductSelector', () => {
-  beforeEach(() => {
-    (useValues as jest.Mock).mockReturnValue({ errorConnecting: false });
-  });
-
   it('renders the overview page and product cards with no host set', () => {
     (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<ProductSelector access={{}} />);
