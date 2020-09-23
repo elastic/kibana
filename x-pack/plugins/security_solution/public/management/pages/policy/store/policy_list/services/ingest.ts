@@ -147,7 +147,7 @@ export const sendGetFleetAgentsWithEndpoint = (
     ...options,
     query: {
       page: 1,
-      perPage: 20,
+      perPage: 1,
       kuery: 'fleet-agents.packages : "endpoint"',
     },
   });
