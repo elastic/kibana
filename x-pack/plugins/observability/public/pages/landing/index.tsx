@@ -30,7 +30,7 @@ const EuiCardWithoutPadding = styled(EuiCard)`
 
 export function LandingPage() {
   useTrackPageview({ app: 'observability', path: 'landing' });
-  useTrackPageview({ app: 'observability', path: 'landing', delay: 1500 });
+  useTrackPageview({ app: 'observability', path: 'landing', delay: 15000 });
 
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
