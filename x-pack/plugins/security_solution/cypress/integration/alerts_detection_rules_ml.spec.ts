@@ -62,25 +62,14 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let expectedUrls = '';
-machineLearningRule.referenceUrls.forEach((url) => {
-  expectedUrls = expectedUrls + url;
-});
-let expectedFalsePositives = '';
-machineLearningRule.falsePositivesExamples.forEach((falsePositive) => {
-  expectedFalsePositives = expectedFalsePositives + falsePositive;
-});
-let expectedTags = '';
-machineLearningRule.tags.forEach((tag) => {
-  expectedTags = expectedTags + tag;
-});
-let expectedMitre = '';
-machineLearningRule.mitre.forEach((mitre) => {
-  expectedMitre = expectedMitre + mitre.tactic;
-  mitre.techniques.forEach((technique) => {
-    expectedMitre = expectedMitre + technique;
-  });
-});
+const expectedUrls = machineLearningRule.referenceUrls.join('');
+const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+const expectedTags = machineLearningRule.tags.join('');
+const expectedMitre = machineLearningRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
 
 describe('Detection rules, machine learning', () => {

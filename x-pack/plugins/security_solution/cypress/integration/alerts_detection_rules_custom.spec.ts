@@ -100,25 +100,14 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let expectedUrls = '';
-newRule.referenceUrls.forEach((url) => {
-  expectedUrls = expectedUrls + url;
-});
-let expectedFalsePositives = '';
-newRule.falsePositivesExamples.forEach((falsePositive) => {
-  expectedFalsePositives = expectedFalsePositives + falsePositive;
-});
-let expectedTags = '';
-newRule.tags.forEach((tag) => {
-  expectedTags = expectedTags + tag;
-});
-let expectedMitre = '';
-newRule.mitre.forEach((mitre) => {
-  expectedMitre = expectedMitre + mitre.tactic;
-  mitre.techniques.forEach((technique) => {
-    expectedMitre = expectedMitre + technique;
-  });
-});
+const expectedUrls = newRule.referenceUrls.join('');
+const expectedFalsePositives = newRule.falsePositivesExamples.join('');
+const expectedTags = newRule.tags.join('');
+const expectedMitre = newRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 const expectedNumberOfRules = 1;
 const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =

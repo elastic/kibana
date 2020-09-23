@@ -65,25 +65,14 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let expectedUrls = '';
-eqlRule.referenceUrls.forEach((url) => {
-  expectedUrls = expectedUrls + url;
-});
-let expectedFalsePositives = '';
-eqlRule.falsePositivesExamples.forEach((falsePositive) => {
-  expectedFalsePositives = expectedFalsePositives + falsePositive;
-});
-let expectedTags = '';
-eqlRule.tags.forEach((tag) => {
-  expectedTags = expectedTags + tag;
-});
-let expectedMitre = '';
-eqlRule.mitre.forEach((mitre) => {
-  expectedMitre = expectedMitre + mitre.tactic;
-  mitre.techniques.forEach((technique) => {
-    expectedMitre = expectedMitre + technique;
-  });
-});
+const expectedUrls = eqlRule.referenceUrls.join('');
+const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
+const expectedTags = eqlRule.tags.join('');
+const expectedMitre = eqlRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 const expectedNumberOfRules = 1;
 
 describe('Detection rules, EQL', () => {

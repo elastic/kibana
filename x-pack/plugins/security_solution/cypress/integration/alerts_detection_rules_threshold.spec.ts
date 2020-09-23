@@ -76,25 +76,14 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let expectedUrls = '';
-newThresholdRule.referenceUrls.forEach((url) => {
-  expectedUrls = expectedUrls + url;
-});
-let expectedFalsePositives = '';
-newThresholdRule.falsePositivesExamples.forEach((falsePositive) => {
-  expectedFalsePositives = expectedFalsePositives + falsePositive;
-});
-let expectedTags = '';
-newThresholdRule.tags.forEach((tag) => {
-  expectedTags = expectedTags + tag;
-});
-let expectedMitre = '';
-newThresholdRule.mitre.forEach((mitre) => {
-  expectedMitre = expectedMitre + mitre.tactic;
-  mitre.techniques.forEach((technique) => {
-    expectedMitre = expectedMitre + technique;
-  });
-});
+const expectedUrls = newThresholdRule.referenceUrls.join('');
+const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
+const expectedTags = newThresholdRule.tags.join('');
+const expectedMitre = newThresholdRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 
 describe('Detection rules, threshold', () => {
   before(() => {

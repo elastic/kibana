@@ -80,25 +80,14 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let expectedUrls = '';
-newOverrideRule.referenceUrls.forEach((url) => {
-  expectedUrls = expectedUrls + url;
-});
-let expectedFalsePositives = '';
-newOverrideRule.falsePositivesExamples.forEach((falsePositive) => {
-  expectedFalsePositives = expectedFalsePositives + falsePositive;
-});
-let expectedTags = '';
-newOverrideRule.tags.forEach((tag) => {
-  expectedTags = expectedTags + tag;
-});
-let expectedMitre = '';
-newOverrideRule.mitre.forEach((mitre) => {
-  expectedMitre = expectedMitre + mitre.tactic;
-  mitre.techniques.forEach((technique) => {
-    expectedMitre = expectedMitre + technique;
-  });
-});
+const expectedUrls = newOverrideRule.referenceUrls.join('');
+const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
+const expectedTags = newOverrideRule.tags.join('');
+const expectedMitre = newOverrideRule.mitre
+  .map(function (mitre) {
+    return mitre.tactic + mitre.techniques.join('');
+  })
+  .join('');
 
 describe('Detection rules, override', () => {
   before(() => {
