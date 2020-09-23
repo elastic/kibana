@@ -8,6 +8,7 @@ export default function ({ loadTestFile }) {
   describe('Siem GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./authentications'));
     loadTestFile(require.resolve('./hosts'));
+    loadTestFile(require.resolve('./host_details'));
     loadTestFile(require.resolve('./kpi_network'));
     loadTestFile(require.resolve('./kpi_hosts'));
     loadTestFile(require.resolve('./network_details'));

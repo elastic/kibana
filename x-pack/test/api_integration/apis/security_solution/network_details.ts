@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ip: '185.53.91.88',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.details,
             docValueFields: [],
             inspect: false,
