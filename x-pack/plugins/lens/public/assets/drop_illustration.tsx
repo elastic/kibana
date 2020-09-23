@@ -5,15 +5,9 @@
  */
 
 import * as React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
-export const DropIllustration = ({
-  title,
-  titleId,
-  ...props
-}: {
-  title: string;
-  titleId: string;
-}) => (
+export const DropIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
     width={176}
     height={176}
