@@ -143,7 +143,7 @@ export function PanelHeader({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
-  const placeholderTitle = i18n.translate('dashboard.embeddable.placeholderTitle', {
+  const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
     defaultMessage: '[No Title]',
   });
 
