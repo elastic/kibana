@@ -10,7 +10,7 @@ import { AlertType } from '../../../common/alert_types';
 import { ApmPluginStartDeps } from '../../plugin';
 
 export function registerApmAlerts(
-  alertTypeRegistry: ApmPluginStartDeps['triggers_actions_ui']['alertTypeRegistry']
+  alertTypeRegistry: ApmPluginStartDeps['triggersActionsUi']['alertTypeRegistry']
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
