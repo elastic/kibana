@@ -19,5 +19,5 @@ if (!existsSync(join(__dirname, '../../../../built_assets/canvas_storybook_dll/m
 
 module.exports = {
   stories: ['../**/*.stories.tsx'],
-  addons: ['@storybook/addon-actions', '@storybook/addon-knobs', './addon/src/register'],
+  addons: ['@storybook/addon-actions', '@storybook/addon-knobs', './addon/target/register'],
 };
