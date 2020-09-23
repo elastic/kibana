@@ -63,7 +63,7 @@ export interface ICredentialsLogicValues {
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
-  meta: IMeta;
+  meta: Partial<IMeta>;
   nameInputBlurred: boolean;
   showCredentialsForm: boolean;
 }
@@ -112,7 +112,7 @@ export const CredentialsLogic = kea<
       },
     ],
     meta: [
-      null,
+      {},
       {
         setCredentialsData: (_, { meta }) => meta,
       },

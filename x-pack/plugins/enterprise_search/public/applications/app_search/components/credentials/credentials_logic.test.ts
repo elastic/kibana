@@ -38,7 +38,7 @@ describe('CredentialsLogic', () => {
     formErrors: [],
     isCredentialsDataComplete: false,
     isCredentialsDetailsComplete: false,
-    meta: null,
+    meta: {},
     nameInputBlurred: false,
     showCredentialsForm: false,
   };
