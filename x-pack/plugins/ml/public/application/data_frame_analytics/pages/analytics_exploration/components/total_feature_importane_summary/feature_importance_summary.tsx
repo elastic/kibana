@@ -186,7 +186,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         </EuiFlexItem>
       </EuiFlexGroup>
       <Chart className="story-chart" size={{ width: '100%', height: 300 }}>
-        <Settings rotation={90} theme={theme} />
+        <Settings rotation={90} theme={theme} showLegend />
 
         <Axis
           id="x-axis"
