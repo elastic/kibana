@@ -4,7 +4,6 @@ import addSlackNotifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.finishBuildTrigger
-import vcs.Elasticsearch
 import vcs.Kibana
 
 object ESSnapshotPromote : BuildType({
@@ -25,7 +24,7 @@ object ESSnapshotPromote : BuildType({
 
   triggers {
     finishBuildTrigger {
-      buildType = Tests.id.toString()
+      buildType = Verify.id.toString()
       successfulOnly = true
     }
   }
@@ -79,7 +78,7 @@ object ESSnapshotPromote : BuildType({
         artifactRules = "manifest.json"
       }
     }
-    dependency(Tests) {
+    dependency(Verify) {
       snapshot {  }
     }
   }

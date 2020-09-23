@@ -51,5 +51,5 @@ object EsSnapshotsProject : Project({
   buildType(ESSnapshotBuild)
   buildType(ESSnapshotPromote)
   buildType(ESSnapshotPromoteImmediate)
-  buildType(Tests)
+  buildType(Verify)
 })

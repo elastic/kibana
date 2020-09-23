@@ -76,9 +76,10 @@ object IntegrationTests : BuildType({
   dependsOn(*integrationCloned.toTypedArray())
 })
 
-object Tests : BuildType({
-  id("ES_Snapshots_All_Tests_Composite")
-  name = "All Tests"
+object Verify : BuildType({
+  id("ES_Snapshots_Verify_Composite")
+  name = "Verify Snapshot"
+  description = "Run all Kibana functional and integration tests using a given Elasticsearch snapshot"
   type = Type.COMPOSITE
 
   dependsOn(
