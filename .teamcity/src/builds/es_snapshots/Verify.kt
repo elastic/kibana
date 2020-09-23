@@ -43,7 +43,21 @@ object EsSnapshotsProject : Project({
       val buildId = ESSnapshotBuild.id?.value ?: ""
       param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
     }
-    newBuild.dependsOn(ESSnapshotBuild)
+    newBuild.dependencies.items.forEach {
+      if (it.artifacts.size > 0) {
+        it.artifacts.forEach { artifact ->
+          artifact.buildRule = artifact.lastSuccessful()
+        }
+      }
+    }
+    newBuild.dependencies {
+      dependency(ESSnapshotBuild) {
+        snapshot {}
+        artifacts {
+          artifactRules = "manifest.json"
+        }
+      }
+    }
     newBuild.steps.items.removeIf { it.name == "Failed Test Reporter" }
     newBuild
   }
