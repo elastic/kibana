@@ -69,9 +69,10 @@ export const defaultSearchQuery = {
 
 export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: boolean) => ({
   bool: {
-    must: [
+    minimum_should_match: 1,
+    should: [
       {
-        term: { [`${resultsField}.is_training`]: { value: isTraining } },
+        match: { [`${resultsField}.is_training`]: isTraining },
       },
     ],
   },
