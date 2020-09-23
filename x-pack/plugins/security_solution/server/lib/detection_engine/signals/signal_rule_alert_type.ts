@@ -29,6 +29,7 @@ import {
   RuleAlertAttributes,
   EqlSignalSearchResponse,
   BaseSignalHit,
+  Sequence,
 } from './types';
 import {
   getGapBetweenRuns,
