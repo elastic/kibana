@@ -60,7 +60,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           group: 'default',
           params: {
             component: '',
-            dedupKey: '{{alertId}}',
             eventAction: 'trigger',
             summary: 'fired {{alertInstanceId}}',
           },
