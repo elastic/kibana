@@ -17,16 +17,9 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         onBlur={[Function]}
         onFocus={[Function]}
       >
-        <div
-          className="react-monaco-editor-container"
-          style={
-            Object {
-              "height": "100%",
-              "width": "100%",
-            }
-          }
+        <span
+          className="euiLoadingSpinner euiLoadingSpinner--medium"
         />
-        <div />
       </div>
     </div>
   </div>

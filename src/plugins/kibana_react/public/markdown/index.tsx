@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export { MarkdownSimple } from './markdown_simple';
-export { Markdown } from './markdown';
+import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import type { MarkdownSimpleProps } from './markdown_simple';
+import type { MarkdownProps } from './markdown';
+
+const LazyMarkdownSimple = React.lazy(() => import('./markdown_simple'));
+export const MarkdownSimple = (props: MarkdownSimpleProps) => (
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
+    <LazyMarkdownSimple {...props} />
+  </React.Suspense>
+);
+
+const LazyMarkdown = React.lazy(() => import('./markdown'));
+export const Markdown = (props: MarkdownProps) => (
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
+    <LazyMarkdown {...props} />
+  </React.Suspense>
+);
