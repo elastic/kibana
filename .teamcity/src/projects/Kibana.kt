@@ -3,7 +3,6 @@ package projects
 import vcs.Kibana
 import builds.*
 import builds.default.*
-import builds.es_snapshots.EsSnapshotsProject
 import builds.oss.*
 import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*

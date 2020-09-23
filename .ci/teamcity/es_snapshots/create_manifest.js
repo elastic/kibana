@@ -69,7 +69,9 @@ const { execSync } = require('child_process');
       gsutil cp manifest-latest.json gs://kibana-ci-es-snapshots-daily-teamcity/${VERSION}
     `, { shell: '/bin/bash' });
 
-    console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json']"`);
+    console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}/manifest.json']`);
+    console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_VERSION' value='${VERSION}']`);
+    console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_ID' value='${SNAPSHOT_ID}']`);
   } catch (ex) {
     console.error(ex);
     process.exit(1);

@@ -8,6 +8,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
 
 open class OssCiGroup(val ciGroup: Int, init: BuildType.() -> Unit = {}) : BuildType({
+  type = BuildTypeSettings.Type.DEPLOYMENT
   id("OssCiGroup_$ciGroup")
   name = "CI Group $ciGroup"
   paused = true
