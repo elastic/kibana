@@ -10,8 +10,8 @@ import { PromiseReturnType } from '../../../typings/common';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 describe('getConnections', () => {
-  describe('transforms a list of paths into a list of connections', () => {
-    it('with no filters', () => {
+  describe('if no filter is given', () => {
+    it('includes all connections', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
@@ -22,7 +22,10 @@ describe('getConnections', () => {
 
       expect(connections).toMatchSnapshot();
     });
-    it('filters by service.name and environment', () => {
+  });
+
+  describe('if service name and environment are given', () => {
+    it('excludes connections with different service name and environment', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
@@ -34,11 +37,17 @@ describe('getConnections', () => {
         serviceName,
         environment
       );
-
+      expect(
+        connections.every(
+          (conn) => conn.source['service.environment'] === environment
+        )
+      ).toBeTruthy();
       expect(connections).toMatchSnapshot();
     });
+  });
 
-    it('filters by service.name', () => {
+  describe('if service name is given', () => {
+    it('excludes connections with different service name', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
@@ -51,8 +60,10 @@ describe('getConnections', () => {
 
       expect(connections).toMatchSnapshot();
     });
+  });
 
-    it('filters by environment', () => {
+  describe('if environment is given', () => {
+    it('excludes connections with different environment', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
@@ -70,8 +81,10 @@ describe('getConnections', () => {
         )
       ).toBeTruthy();
     });
+  });
 
-    it('filters by environment not defined', () => {
+  describe('if environment is "not defined"', () => {
+    it('excludes connections with source environment set', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
@@ -81,6 +94,19 @@ describe('getConnections', () => {
         response.aggregations?.service_map.value.paths,
         undefined,
         environment
+      );
+
+      expect(connections).toMatchSnapshot();
+    });
+  });
+
+  describe('if environment is "all" (missing)', () => {
+    it('includes both connections with and without source environment set', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths
       );
 
       expect(connections).toMatchSnapshot();
