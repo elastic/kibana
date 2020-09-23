@@ -76,7 +76,7 @@ describe('When invoking Trusted Apps Schema', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.path',
+          field: 'process.path.text',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -194,7 +194,7 @@ describe('When invoking Trusted Apps Schema', () => {
         };
         expect(() => body.validate(bodyMsg2)).toThrow();
 
-        ['process.hash.*', 'process.path'].forEach((field) => {
+        ['process.hash.*', 'process.path.text'].forEach((field) => {
           const bodyMsg3 = {
             ...getCreateTrustedAppItem(),
             entries: [

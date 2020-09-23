@@ -14,8 +14,9 @@ import {
   expectResponses,
   getUrlPrefix,
   getTestTitle,
+  getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 export interface BulkCreateTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;
@@ -33,7 +34,7 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 const NEW_SINGLE_NAMESPACE_OBJ = Object.freeze({ type: 'dashboard', id: 'new-dashboard-id' });
 const NEW_MULTI_NAMESPACE_OBJ = Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' });
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
-export const TEST_CASES = Object.freeze({
+export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   ...CASES,
   NEW_SINGLE_NAMESPACE_OBJ,
   NEW_MULTI_NAMESPACE_OBJ,
@@ -45,7 +46,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
   const expectResponseBody = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
     statusCode: 200 | 403,
-    spaceId = SPACES.DEFAULT.spaceId
+    user?: TestUser
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
@@ -70,7 +71,8 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         await expectResponses.permitted(object, testCase);
         if (!testCase.failure) {
           expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-          await expectResponses.successCreated(es, spaceId, object.type, object.id);
+          const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+          expect(object.namespaces).to.eql(redactedNamespaces);
         }
       }
     }
@@ -81,6 +83,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     overwrite: boolean,
     options?: {
       spaceId?: string;
+      user?: TestUser;
       singleRequest?: boolean;
       responseBodyOverride?: ExpectResponseBody;
     }
@@ -95,8 +98,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         request: [createRequest(x)],
         responseStatusCode,
         responseBody:
-          options?.responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, options?.spaceId),
+          options?.responseBodyOverride || expectResponseBody(x, responseStatusCode, options?.user),
         overwrite,
       }));
     }
@@ -108,7 +110,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, options?.spaceId),
+          expectResponseBody(cases, responseStatusCode, options?.user),
         overwrite,
       },
     ];
