@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { FieldSpec } from './types';
-
-export class FieldTypeUnknownError extends Error {
-  public readonly fieldSpec: FieldSpec;
-  constructor(message: string, spec: FieldSpec) {
-    super(message);
-    this.name = 'FieldTypeUnknownError';
-    this.fieldSpec = spec;
-  }
-}
+export * from './duplicate_index_pattern';
