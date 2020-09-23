@@ -7,16 +7,16 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
+import { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
 import { UiActionsExampleAppContextValue, context } from './context';
 
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  appBasePath,
-  element,
-}: AppMountParameters) => {
-  const [core, plugins] = await coreSetup.getStartServices();
+export const mount = (
+  coreSetup: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>
+) => async ({ appBasePath, element }: AppMountParameters) => {
+  const [core, plugins, { manager }] = await coreSetup.getStartServices();
   const { App } = await import('./containers/app');
-  const deps: UiActionsExampleAppContextValue = { appBasePath, core, plugins };
+
+  const deps: UiActionsExampleAppContextValue = { appBasePath, core, plugins, manager };
   const reactElement = (
     <context.Provider value={deps}>
       <App />

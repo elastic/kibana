@@ -18,10 +18,6 @@ import {
 } from '@elastic/eui';
 import { Section } from '../../components/section/section';
 import { useUiActions } from '../../context';
-import {
-  UiActionsEnhancedMemoryActionStorage,
-  UiActionsEnhancedDynamicActionManager,
-} from '../../../../../plugins/ui_actions_enhanced/public';
 import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJob, SampleMlJobClickContext } from '../../triggers';
 
 export const job: SampleMlJob = {
@@ -33,19 +29,10 @@ export const job: SampleMlJob = {
 export const context: SampleMlJobClickContext = { job };
 
 export const DrilldownsManager: React.FC = () => {
-  const { plugins } = useUiActions();
+  const { plugins, manager } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const viewRef = React.useRef<'create' | 'manage'>('create');
-
-  const manager = React.useMemo(() => {
-    const storage = new UiActionsEnhancedMemoryActionStorage();
-    return new UiActionsEnhancedDynamicActionManager({
-      storage,
-      isCompatible: async () => true,
-      uiActions: plugins.uiActionsEnhanced,
-    });
-  }, [plugins]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {

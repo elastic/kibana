@@ -21,6 +21,10 @@ import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashbo
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { sampleMlJobClickTrigger } from './triggers';
 import { mount } from './mount';
+import {
+  UiActionsEnhancedMemoryActionStorage,
+  UiActionsEnhancedDynamicActionManager,
+} from '../../../plugins/ui_actions_enhanced/public';
 
 export interface SetupDependencies {
   dashboard: DashboardSetup;
@@ -37,10 +41,14 @@ export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
+export interface UiActionsEnhancedExamplesStart {
+  manager: UiActionsEnhancedDynamicActionManager;
+}
+
 export class UiActionsEnhancedExamplesPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies> {
   public setup(
-    core: CoreSetup<StartDependencies>,
+    core: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>,
     { uiActionsEnhanced: uiActions, developerExamples }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
@@ -77,7 +85,17 @@ export class UiActionsEnhancedExamplesPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: StartDependencies) {}
+  public start(core: CoreStart, plugins: StartDependencies): UiActionsEnhancedExamplesStart {
+    const manager = new UiActionsEnhancedDynamicActionManager({
+      storage: new UiActionsEnhancedMemoryActionStorage(),
+      isCompatible: async () => true,
+      uiActions: plugins.uiActionsEnhanced,
+    });
+
+    return {
+      manager,
+    };
+  }
 
   public stop() {}
 }

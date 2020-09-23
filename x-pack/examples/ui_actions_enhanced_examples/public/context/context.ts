@@ -6,12 +6,14 @@
 
 import { createContext, useContext } from 'react';
 import { CoreStart } from 'src/core/public';
+import { UiActionsEnhancedDynamicActionManager } from '../../../../plugins/ui_actions_enhanced/public';
 import { StartDependencies } from '../plugin';
 
 export interface UiActionsExampleAppContextValue {
   appBasePath: string;
   core: CoreStart;
   plugins: StartDependencies;
+  manager: UiActionsEnhancedDynamicActionManager;
 }
 
 export const context = createContext<UiActionsExampleAppContextValue | null>(null);

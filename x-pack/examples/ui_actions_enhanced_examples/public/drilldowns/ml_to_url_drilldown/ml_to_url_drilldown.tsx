@@ -11,6 +11,7 @@ import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../.
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { ActionExecutionContext } from '../../../../../../src/plugins/ui_actions/public';
 import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJobClickContext } from '../../triggers';
+import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 function isValidUrl(url: string) {
   try {
@@ -21,7 +22,7 @@ function isValidUrl(url: string) {
   }
 }
 
-export interface Config {
+export interface Config extends SerializableState {
   url: string;
   openInNewTab: boolean;
 }
