@@ -134,6 +134,8 @@ export interface TimelineInput {
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
+  indexNames?: Maybe<string[]>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -415,10 +417,6 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
-export type ToStringArrayNoNullable = any;
-
-export type ToIFieldSubTypeNonNullable = any;
-
 export type ToStringArray = string[] | string;
 
 export type Date = string;
@@ -432,6 +430,10 @@ export type ToBooleanArray = boolean[] | boolean;
 export type ToAny = any;
 
 export type EsValue = any;
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 // ====================================================
 // Scalars
@@ -591,33 +593,7 @@ export interface SourceStatus {
   /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
   indicesExist: boolean;
   /** The list of fields defined in the index mappings */
-  indexFields: IndexField[];
-}
-
-/** A descriptor of a field in an index */
-export interface IndexField {
-  /** Where the field belong */
-  category: string;
-  /** Example of field's value */
-  example?: Maybe<string>;
-  /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-  /** Description of the field */
-  description?: Maybe<string>;
-
-  format?: Maybe<string>;
-  /** the elastic type as mapped in the index */
-  esTypes?: Maybe<ToStringArrayNoNullable>;
-
-  subType?: Maybe<ToIFieldSubTypeNonNullable>;
+  indexFields: string[];
 }
 
 export interface AuthenticationsData {
@@ -1948,6 +1924,8 @@ export interface TimelineResult {
 
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
 
+  indexNames?: Maybe<string[]>;
+
   notes?: Maybe<NoteResult[]>;
 
   noteIds?: Maybe<string[]>;
@@ -2218,6 +2196,32 @@ export interface HostFields {
   os?: Maybe<OsFields>;
 
   type?: Maybe<string>;
+}
+
+/** A descriptor of a field in an index */
+export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: Maybe<string>;
+  /** whether the field's belong to an alias index */
+  indexes: (Maybe<string>)[];
+  /** The name of the field */
+  name: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** Description of the field */
+  description?: Maybe<string>;
+
+  format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 // ====================================================
@@ -3397,7 +3401,7 @@ export namespace SourceStatusResolvers {
     /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
     indicesExist?: IndicesExistResolver<boolean, TypeParent, TContext>;
     /** The list of fields defined in the index mappings */
-    indexFields?: IndexFieldsResolver<IndexField[], TypeParent, TContext>;
+    indexFields?: IndexFieldsResolver<string[], TypeParent, TContext>;
   }
 
   export type IndicesExistResolver<
@@ -3410,96 +3414,13 @@ export namespace SourceStatusResolvers {
   }
 
   export type IndexFieldsResolver<
-    R = IndexField[],
+    R = string[],
     Parent = SourceStatus,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext, IndexFieldsArgs>;
   export interface IndexFieldsArgs {
     defaultIndex: string[];
   }
-}
-/** A descriptor of a field in an index */
-export namespace IndexFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IndexField> {
-    /** Where the field belong */
-    category?: CategoryResolver<string, TypeParent, TContext>;
-    /** Example of field's value */
-    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
-    /** whether the field's belong to an alias index */
-    indexes?: IndexesResolver<(Maybe<string>)[], TypeParent, TContext>;
-    /** The name of the field */
-    name?: NameResolver<string, TypeParent, TContext>;
-    /** The type of the field's values as recognized by Kibana */
-    type?: TypeResolver<string, TypeParent, TContext>;
-    /** Whether the field's values can be efficiently searched for */
-    searchable?: SearchableResolver<boolean, TypeParent, TContext>;
-    /** Whether the field's values can be aggregated */
-    aggregatable?: AggregatableResolver<boolean, TypeParent, TContext>;
-    /** Description of the field */
-    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
-
-    format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
-    /** the elastic type as mapped in the index */
-    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
-
-    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
-  }
-
-  export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type ExampleResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type IndexesResolver<
-    R = (Maybe<string>)[],
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type TypeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type SearchableResolver<
-    R = boolean,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AggregatableResolver<
-    R = boolean,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DescriptionResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FormatResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EsTypesResolver<
-    R = Maybe<ToStringArrayNoNullable>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SubTypeResolver<
-    R = Maybe<ToIFieldSubTypeNonNullable>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
 }
 
 export namespace AuthenticationsDataResolvers {
@@ -7925,6 +7846,8 @@ export namespace TimelineResultResolvers {
 
     kqlQuery?: KqlQueryResolver<Maybe<SerializedFilterQueryResult>, TypeParent, TContext>;
 
+    indexNames?: IndexNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+
     notes?: NotesResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     noteIds?: NoteIdsResolver<Maybe<string[]>, TypeParent, TContext>;
@@ -8022,6 +7945,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type KqlQueryResolver<
     R = Maybe<SerializedFilterQueryResult>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexNamesResolver<
+    R = Maybe<string[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8973,6 +8901,89 @@ export namespace HostFieldsResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
+/** A descriptor of a field in an index */
+export namespace IndexFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = IndexField> {
+    /** Where the field belong */
+    category?: CategoryResolver<string, TypeParent, TContext>;
+    /** Example of field's value */
+    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
+    /** whether the field's belong to an alias index */
+    indexes?: IndexesResolver<(Maybe<string>)[], TypeParent, TContext>;
+    /** The name of the field */
+    name?: NameResolver<string, TypeParent, TContext>;
+    /** The type of the field's values as recognized by Kibana */
+    type?: TypeResolver<string, TypeParent, TContext>;
+    /** Whether the field's values can be efficiently searched for */
+    searchable?: SearchableResolver<boolean, TypeParent, TContext>;
+    /** Whether the field's values can be aggregated */
+    aggregatable?: AggregatableResolver<boolean, TypeParent, TContext>;
+    /** Description of the field */
+    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
+
+    format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
+    /** the elastic type as mapped in the index */
+    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
+
+    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
+  }
+
+  export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type ExampleResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexesResolver<
+    R = (Maybe<string>)[],
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TypeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type SearchableResolver<
+    R = boolean,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AggregatableResolver<
+    R = boolean,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DescriptionResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FormatResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EsTypesResolver<
+    R = Maybe<ToStringArrayNoNullable>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubTypeResolver<
+    R = Maybe<ToIFieldSubTypeNonNullable>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
 
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
@@ -9007,14 +9018,6 @@ export interface DeprecatedDirectiveArgs {
   reason?: string;
 }
 
-export interface ToStringArrayNoNullableScalarConfig
-  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
-  name: 'ToStringArrayNoNullable';
-}
-export interface ToIFieldSubTypeNonNullableScalarConfig
-  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
-  name: 'ToIFieldSubTypeNonNullable';
-}
 export interface ToStringArrayScalarConfig extends GraphQLScalarTypeConfig<ToStringArray, any> {
   name: 'ToStringArray';
 }
@@ -9036,6 +9039,14 @@ export interface ToAnyScalarConfig extends GraphQLScalarTypeConfig<ToAny, any> {
 export interface EsValueScalarConfig extends GraphQLScalarTypeConfig<EsValue, any> {
   name: 'EsValue';
 }
+export interface ToStringArrayNoNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
+  name: 'ToStringArrayNoNullable';
+}
+export interface ToIFieldSubTypeNonNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
+  name: 'ToIFieldSubTypeNonNullable';
+}
 
 export type IResolvers<TContext = SiemContext> = {
   Query?: QueryResolvers.Resolvers<TContext>;
@@ -9046,7 +9057,6 @@ export type IResolvers<TContext = SiemContext> = {
   SourceConfiguration?: SourceConfigurationResolvers.Resolvers<TContext>;
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
-  IndexField?: IndexFieldResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
@@ -9182,8 +9192,7 @@ export type IResolvers<TContext = SiemContext> = {
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;
   HostFields?: HostFieldsResolvers.Resolvers<TContext>;
-  ToStringArrayNoNullable?: GraphQLScalarType;
-  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
+  IndexField?: IndexFieldResolvers.Resolvers<TContext>;
   ToStringArray?: GraphQLScalarType;
   Date?: GraphQLScalarType;
   ToNumberArray?: GraphQLScalarType;
@@ -9191,6 +9200,8 @@ export type IResolvers<TContext = SiemContext> = {
   ToBooleanArray?: GraphQLScalarType;
   ToAny?: GraphQLScalarType;
   EsValue?: GraphQLScalarType;
+  ToStringArrayNoNullable?: GraphQLScalarType;
+  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
 } & { [typeName: string]: never };
 
 export type IDirectiveResolvers<Result> = {
