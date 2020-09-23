@@ -139,11 +139,19 @@ export function ApmServerInstances({ apms, setupMode }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instances.heading"
+              defaultMessage="APM Instances"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={data.stats} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={data.stats} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
