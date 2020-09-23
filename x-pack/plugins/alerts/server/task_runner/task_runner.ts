@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -228,12 +228,13 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
+      const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
-        Object.entries(enabledAlertInstances)
+        Object.entries(instancesWithScheduledActions)
           .filter(
-            ([, alertInstance]: [string, AlertInstance]) => !alertInstance.isThrottled(throttle)
+            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
+              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
           )
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)

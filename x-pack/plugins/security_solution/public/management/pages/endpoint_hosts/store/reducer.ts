@@ -36,6 +36,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   patternsError: undefined,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+  queryStrategyVersion: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -49,6 +50,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
+      query_strategy_version: queryStrategyVersion,
     } = action.payload;
     return {
       ...state,
@@ -56,6 +58,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       pageSize,
       pageIndex,
+      queryStrategyVersion,
       loading: false,
       error: undefined,
     };
