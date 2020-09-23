@@ -34,7 +34,6 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsCallout } from '../../../alerts/callout';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -469,15 +468,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         </EuiScreenReaderOnly>
         {renderClusterStatus()}
         {setupModeCallout}
-        <AlertsCallout
-          alerts={alerts}
-          nextStepsFilter={(nextStep) => {
-            if (nextStep.text.includes('Elasticsearch nodes')) {
-              return false;
-            }
-            return true;
-          }}
-        />
         <EuiPageContent>
           <EuiMonitoringSSPTable
             className="elasticsearchNodesTable"

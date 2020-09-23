@@ -26,7 +26,6 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsCallout } from '../../../alerts/callout';
 import { AlertsStatus } from '../../../alerts/status';
 
 export class Listing extends PureComponent {
@@ -186,15 +185,6 @@ export class Listing extends PureComponent {
           <EuiSpacer size="m" />
           <EuiPageContent>
             {setupModeCallOut}
-            <AlertsCallout
-              alerts={alerts}
-              nextStepsFilter={(nextStep) => {
-                if (nextStep.text.includes('Beat beats')) {
-                  return false;
-                }
-                return true;
-              }}
-            />
             <EuiMonitoringTable
               className="beatsTable"
               rows={data}

@@ -70,6 +70,7 @@ uiRoutes.when('/beats/beat/:beatUuid', {
         (data) => {
           this.renderReact(
             <Beat
+              alerts={this.alerts}
               summary={data.summary}
               metrics={data.metrics}
               onBrush={$scope.onBrush}
