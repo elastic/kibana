@@ -29,9 +29,8 @@ const getDefaultRegistryUrl = (): string => {
 };
 
 export const getRegistryUrl = (): string => {
-  const license = licenseService.getLicenseInformation();
   const customUrl = appContextService.getConfig()?.registryUrl;
-  const isGoldPlus = license?.isAvailable && license?.isActive && license?.hasAtLeast('gold');
+  const isGoldPlus = licenseService.isGoldPlus();
 
   if (customUrl && isGoldPlus) {
     return customUrl;

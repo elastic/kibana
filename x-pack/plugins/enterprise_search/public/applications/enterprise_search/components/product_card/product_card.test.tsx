@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../../__mocks__/kea.mock';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
