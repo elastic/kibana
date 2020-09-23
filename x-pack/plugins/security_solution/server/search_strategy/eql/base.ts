@@ -28,10 +28,14 @@ export const securityEqlSearchStrategyProvider = (
         // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
         if (options?.abortSignal)
           options.abortSignal.addEventListener('abort', () => promise.abort());
-        const response = await promise;
+        const rawResponse = await promise;
+        const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
 
         return {
-          rawResponse: response,
+          id,
+          isPartial,
+          isRunning,
+          rawResponse,
         };
       } catch (e) {
         logger.debug(`_eql/search error: ${e}`);
