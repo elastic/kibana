@@ -33,6 +33,7 @@ import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '../../../plugins/ui_actions_enhanced/public';
+import { SampleCanvasToDashboardDrilldown } from './drilldowns/canvas_to_dashboard_drilldown';
 
 export interface SetupDependencies {
   dashboard: DashboardSetup;
@@ -68,13 +69,14 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
     uiActions.registerDrilldown(new SampleMlToUrlDrilldown());
     uiActions.registerDrilldown(new SampleMlToDashboardDrilldown({ start }));
+    uiActions.registerDrilldown(new SampleCanvasToDashboardDrilldown({ start }));
 
     uiActions.registerTrigger(sampleMlJobClickTrigger);
     uiActions.registerTrigger(sampleCanvasElementClickTrigger);
 
     uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
       id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
-      order: 100,
+      order: 2,
       getDisplayName: () => 'Add drilldown',
       getIconType: () => 'plusInCircle',
       isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
@@ -99,7 +101,7 @@ export class UiActionsEnhancedExamplesPlugin
     });
     uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
       id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
-      order: 99,
+      order: 1,
       getDisplayName: () => 'Manage drilldowns',
       getIconType: () => 'list',
       isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
