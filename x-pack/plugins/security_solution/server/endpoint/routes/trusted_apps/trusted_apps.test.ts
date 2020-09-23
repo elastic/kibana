@@ -31,7 +31,6 @@ import {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '../../../../../lists/common/schemas/response';
-import { DeleteTrustedAppsRequestParams } from './types';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
