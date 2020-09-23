@@ -192,7 +192,7 @@ export const valueActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.valueActionVariableDescription',
   {
     defaultMessage:
-      'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
+      'The value of the metric in the specified condition. Usage: (ctx.value.conditionA, ctx.value.conditionB, etc...).',
   }
 );
 
@@ -200,7 +200,7 @@ export const metricActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.metricActionVariableDescription',
   {
     defaultMessage:
-      'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
+      'The metric name in the specified condition. Usage: (ctx.metric.conditionA, ctx.metric.conditionB, etc...).',
   }
 );
 
@@ -208,6 +208,6 @@ export const thresholdActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.thresholdActionVariableDescription',
   {
     defaultMessage:
-      'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+      'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.conditionA, ctx.threshold.conditionB, etc...).',
   }
 );
