@@ -25,10 +25,13 @@ export const validateEql = async ({
   query,
   signal,
 }: Params): Promise<EqlValidationResponse> => {
-  const { rawEqlResponse: response } = await data.search
+  const { rawResponse: response } = await data.search
     .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-      // @ts-expect-error EqlSearch is missing allow_no_indices
-      { params: { allow_no_indices: true, index, body: { query } }, options: { ignore: [400] } },
+      {
+        // @ts-expect-error allow_no_indices is missing on EqlSearch
+        params: { allow_no_indices: true, index: index.join(), body: { query } },
+        options: { ignore: [400] },
+      },
       {
         strategy: 'security_eql_base',
         abortSignal: signal,
@@ -36,7 +39,7 @@ export const validateEql = async ({
     )
     .toPromise();
 
-  const errors = isValidationErrorResponse(response) ? getValidationErrors(response) : [];
+  const errors = isValidationErrorResponse(response.body) ? getValidationErrors(response.body) : [];
   return {
     errors,
     valid: errors.length === 0,
