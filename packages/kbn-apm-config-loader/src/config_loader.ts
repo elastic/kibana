@@ -18,7 +18,6 @@
  */
 
 import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
-
 import { ApmConfiguration } from './config';
 
 /**
@@ -26,10 +25,15 @@ import { ApmConfiguration } from './config';
  *
  * @param argv the `process.argv` arguments
  * @param rootDir The root directory of kibana (where the sources and the `package.json` file are)
+ * @param production true for production builds, false otherwise
  */
-export const loadConfiguration = (argv: string[], rootDir: string): ApmConfiguration => {
+export const loadConfiguration = (
+  argv: string[],
+  rootDir: string,
+  isDistributable: boolean
+): ApmConfiguration => {
   const configPaths = getConfigurationFilePaths(argv);
   const rawConfiguration = getConfigFromFiles(configPaths);
   applyConfigOverrides(rawConfiguration, argv);
-  return new ApmConfiguration(rootDir, rawConfiguration);
+  return new ApmConfiguration(rootDir, rawConfiguration, isDistributable);
 };

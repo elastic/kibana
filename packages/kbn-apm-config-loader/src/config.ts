@@ -23,20 +23,28 @@ import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils/target/path';
 import { readFileSync } from 'fs';
+import { ApmAgentConfig } from './types';
 
-const defaultConfig = {
-  active: false,
-  serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
-  // The secretToken below is intended to be hardcoded in this file even though
-  // it makes it public. This is not a security/privacy issue. Normally we'd
-  // instead disable the need for a secretToken in the APM Server config where
-  // the data is transmitted to, but due to how it's being hosted, it's easier,
-  // for now, to simply leave it in.
-  secretToken: 'R0Gjg46pE9K9wGestd',
-  globalLabels: {},
-  breakdownMetrics: true,
-  centralConfig: false,
-  logUncaughtExceptions: true,
+const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
+  if (isDistributable) {
+    return {
+      active: false,
+    };
+  }
+  return {
+    active: false,
+    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    // The secretToken below is intended to be hardcoded in this file even though
+    // it makes it public. This is not a security/privacy issue. Normally we'd
+    // instead disable the need for a secretToken in the APM Server config where
+    // the data is transmitted to, but due to how it's being hosted, it's easier,
+    // for now, to simply leave it in.
+    secretToken: 'R0Gjg46pE9K9wGestd',
+    globalLabels: {},
+    breakdownMetrics: true,
+    centralConfig: false,
+    logUncaughtExceptions: true,
+  };
 };
 
 export class ApmConfiguration {
@@ -45,14 +53,15 @@ export class ApmConfiguration {
 
   constructor(
     private readonly rootDir: string,
-    private readonly rawKibanaConfig: Record<string, any>
+    private readonly rawKibanaConfig: Record<string, any>,
+    private readonly isDistributable: boolean
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version } = require(join(this.rootDir, 'package.json'));
     this.kibanaVersion = version.replace(/\./g, '_');
   }
 
-  public getConfig(serviceName: string) {
+  public getConfig(serviceName: string): ApmAgentConfig {
     return {
       ...this.getBaseConfig(),
       serviceName: `${serviceName}-${this.kibanaVersion}`,
@@ -61,7 +70,11 @@ export class ApmConfiguration {
 
   private getBaseConfig() {
     if (!this.baseConfig) {
-      const apmConfig = merge(defaultConfig, this.getDevConfig());
+      const apmConfig = merge(
+        getDefaultConfig(this.isDistributable),
+        this.getConfigFromKibanaConfig(),
+        this.getDevConfig()
+      );
 
       const rev = this.getGitRev();
       if (rev !== null) {
@@ -76,6 +89,10 @@ export class ApmConfiguration {
     }
 
     return this.baseConfig;
+  }
+
+  private getConfigFromKibanaConfig(): ApmAgentConfig {
+    return get(this.rawKibanaConfig, 'elastic.apm', {});
   }
 
   private getKibanaUuid() {
@@ -94,7 +111,7 @@ export class ApmConfiguration {
     } catch (e) {} // eslint-disable-line no-empty
   }
 
-  private getDevConfig() {
+  private getDevConfig(): ApmAgentConfig {
     try {
       const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
       return require(apmDevConfigPath);
