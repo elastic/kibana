@@ -56,8 +56,10 @@ export const transformRequestToMetricsAPIRequest = async (
     snapshotRequest.nodeType,
     source.configuration.fields
   );
-  const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
-  metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
+  if (snapshotRequest.groupBy) {
+    const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
+    metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
+  }
 
   const metaAggregation = {
     id: META_KEY,

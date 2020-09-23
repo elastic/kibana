@@ -7,7 +7,6 @@
 import {
   AppMountParameters,
   CoreSetup,
-  CoreStart,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
@@ -17,7 +16,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_PLUGIN,
@@ -36,7 +35,9 @@ export interface ClientData extends IInitialAppData {
 
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
-  licensing: LicensingPluginSetup;
+}
+export interface PluginsStart {
+  licensing: LicensingPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -57,16 +58,17 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { chrome } = coreStart;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const pluginData = this.getPluginData();
 
-        await this.getInitialData(coreStart.http);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+        await this.getInitialData(http);
 
         const { renderApp } = await import('./applications');
         const { EnterpriseSearch } = await import('./applications/enterprise_search');
 
-        return renderApp(EnterpriseSearch, params, coreStart, plugins, this.config, this.data);
+        return renderApp(EnterpriseSearch, kibanaDeps, pluginData);
       },
     });
 
@@ -77,16 +79,17 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { chrome } = coreStart;
-        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const pluginData = this.getPluginData();
 
-        await this.getInitialData(coreStart.http);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+        await this.getInitialData(http);
 
         const { renderApp } = await import('./applications');
         const { AppSearch } = await import('./applications/app_search');
 
-        return renderApp(AppSearch, params, coreStart, plugins, this.config, this.data);
+        return renderApp(AppSearch, kibanaDeps, pluginData);
       },
     });
 
@@ -97,16 +100,24 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { chrome } = coreStart;
-        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const pluginData = this.getPluginData();
 
-        await this.getInitialData(coreStart.http);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+        await this.getInitialData(http);
 
-        const { renderApp } = await import('./applications');
+        const { renderApp, renderHeaderActions } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
 
-        return renderApp(WorkplaceSearch, params, coreStart, plugins, this.config, this.data);
+        const { WorkplaceSearchHeaderActions } = await import(
+          './applications/workplace_search/components/layout'
+        );
+        params.setHeaderActionMenu((element) =>
+          renderHeaderActions(WorkplaceSearchHeaderActions, element, this.data.externalUrl)
+        );
+
+        return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
       },
     });
 
@@ -142,9 +153,21 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start(core: CoreStart) {}
+  public start() {}
 
   public stop() {}
+
+  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters) {
+    // Helper for using start dependencies on mount (instead of setup dependencies)
+    // and for grouping Kibana-related args together (vs. plugin-specific args)
+    const [coreStart, pluginsStart] = await core.getStartServices();
+    return { params, core: coreStart, plugins: pluginsStart as PluginsStart };
+  }
+
+  private getPluginData() {
+    // Small helper for grouping plugin data related args together
+    return { config: this.config, data: this.data };
+  }
 
   private async getInitialData(http: HttpSetup) {
     if (!this.config.host) return; // No API to call

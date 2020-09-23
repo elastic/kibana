@@ -23,7 +23,7 @@ import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { setHttpClient } from './applications/ingest_manager/hooks';
+import { setHttpClient, licenseService } from './applications/ingest_manager/hooks';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
@@ -70,6 +70,9 @@ export class IngestManagerPlugin
 
     // Set up http client
     setHttpClient(core.http);
+
+    // Set up license service
+    licenseService.start(deps.licensing.license$);
 
     // Register main Ingest Manager app
     core.application.register({
