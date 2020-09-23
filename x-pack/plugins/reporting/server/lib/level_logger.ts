@@ -10,14 +10,14 @@ const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
 };
 
-export interface ShareableLogger {
+export interface GenericLevelLogger {
   debug: (msg: string, tags?: string[]) => void;
   info: (msg: string, tags?: string[]) => void;
   warning: (msg: string, tags?: string[]) => void;
   error: (msg: string | Error, tags?: string[]) => void;
 }
 
-export class LevelLogger implements ShareableLogger {
+export class LevelLogger implements GenericLevelLogger {
   private _logger: LoggerFactory;
   private _tags: string[];
   public warning: (msg: string, tags?: string[]) => void;

@@ -7,7 +7,7 @@
 import { existsSync } from 'fs';
 import { resolve as resolvePath } from 'path';
 import { BrowserDownload, chromium } from '../';
-import { ShareableLogger } from '../../lib/level_logger';
+import { GenericLevelLogger } from '../../lib/level_logger';
 import { md5 } from './checksum';
 import { clean } from './clean';
 import { download } from './download';
@@ -18,7 +18,7 @@ import { asyncMap } from './util';
  * download them if they are missing or their checksum is invalid
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(logger: ShareableLogger) {
+export async function ensureBrowserDownloaded(logger: GenericLevelLogger) {
   await ensureDownloaded([chromium], logger);
 }
 
@@ -29,7 +29,7 @@ export async function ensureBrowserDownloaded(logger: ShareableLogger) {
  * @param  {BrowserSpec} browsers
  * @return {Promise<undefined>}
  */
-async function ensureDownloaded(browsers: BrowserDownload[], logger: ShareableLogger) {
+async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLevelLogger) {
   await asyncMap(browsers, async (browser) => {
     const { archivesPath } = browser.paths;
 
