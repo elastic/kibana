@@ -37,5 +37,9 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any>
     },
   };
   const result = await callES('search', params);
-  return result.hits.hits.map(({ _source }: any) => ({ ..._source }));
+  return result.hits.hits.map(({ _id, _source }: any) => ({
+    ..._source,
+    timestamp: _source['@timestamp'],
+    docId: _id,
+  }));
 };
