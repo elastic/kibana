@@ -70,9 +70,8 @@ export function registerStatsRoute({
     return collectorSet.toObject(usage);
   };
 
-  const getClusterUuid = async (esClient: ElasticsearchClient): Promise<string> => {
-    const result = await esClient.info<{ cluster_uuid: string }>();
-    const { cluster_uuid: uuid } = result.body;
+  const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
@@ -109,7 +108,7 @@ export function registerStatsRoute({
         }
 
         const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
-        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(esClient)]);
+        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
 
         let modifiedUsage = usage;
         if (isLegacy) {
