@@ -31,6 +31,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiHighlight } from '@elastic/eui';
 import {
   Query,
   KBN_FIELD_TYPES,
@@ -99,22 +100,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const [state, setState] = useState<State>({
     isLoading: false,
   });
-
-  const wrappableName = wrapOnDot(field.displayName)!;
-  const wrappableHighlight = wrapOnDot(highlight);
-  const highlightIndex = wrappableHighlight
-    ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
-    : -1;
-  const wrappableHighlightableFieldName =
-    highlightIndex < 0 ? (
-      wrappableName
-    ) : (
-      <span>
-        <span>{wrappableName.substr(0, highlightIndex)}</span>
-        <strong>{wrappableName.substr(highlightIndex, wrappableHighlight.length)}</strong>
-        <span>{wrappableName.substr(highlightIndex + wrappableHighlight.length)}</span>
-      </span>
-    );
 
   function fetchData() {
     if (state.isLoading) {
@@ -221,7 +206,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               },
             })}
             fieldIcon={lensFieldIcon}
-            fieldName={wrappableHighlightableFieldName}
+            fieldName={
+              <EuiHighlight search={wrapOnDot(highlight)}>
+                {wrapOnDot(field.displayName)}
+              </EuiHighlight>
+            }
             fieldInfoIcon={lensInfoIcon}
           />
         </DragDrop>
