@@ -28,11 +28,6 @@ export type unitType = 's' | 'm' | 'h';
 export const isValidUnit = (unitParam: string): unitParam is unitType =>
   ['s', 'm', 'h'].includes(unitParam);
 
-export interface Sequence {
-  buildingBlocks: BaseSignalHit[];
-  sequenceSignal: BaseSignalHit;
-}
-
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
