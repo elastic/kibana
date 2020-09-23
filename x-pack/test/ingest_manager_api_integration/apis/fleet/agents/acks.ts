@@ -218,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           action: {
             type: 'UPGRADE',
-            data: { version: '8.0.0', source_uri: 'http://localhost:8000' },
+            ack_data: { version: '8.0.0', source_uri: 'http://localhost:8000' },
           },
         })
         .expect(200);

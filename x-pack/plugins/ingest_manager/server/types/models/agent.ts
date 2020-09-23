@@ -68,5 +68,6 @@ export const NewAgentActionSchema = schema.object({
     schema.literal('UPGRADE'),
   ]),
   data: schema.maybe(schema.any()),
+  ack_data: schema.maybe(schema.any()),
   sent_at: schema.maybe(schema.string()),
 });
