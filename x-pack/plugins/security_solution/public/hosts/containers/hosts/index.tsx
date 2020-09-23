@@ -26,7 +26,11 @@ import {
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
@@ -87,17 +91,14 @@ export const useAllHost = ({
       direction,
       field: sortField,
     },
-    // inspect: isInspected,
   });
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setHostRequest((prevRequest) => ({
+        ...prevRequest,
+        pagination: generateTablePaginationOptions(newActivePage, limit),
+      }));
     },
     [limit]
   );
@@ -136,7 +137,7 @@ export const useAllHost = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostsResponse((prevResponse) => ({
@@ -149,7 +150,7 @@ export const useAllHost = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

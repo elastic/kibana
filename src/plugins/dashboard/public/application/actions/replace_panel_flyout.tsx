@@ -19,16 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import _ from 'lodash';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
 import { DashboardPanelState } from '../embeddable';
 import {
-  IContainer,
-  IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddableStart,
+  IContainer,
+  IEmbeddable,
   SavedObjectEmbeddableInput,
 } from '../../embeddable_plugin';
 
@@ -122,7 +121,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardReplacePanel">
+      <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -131,7 +130,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-      </EuiFlyout>
+      </>
     );
   }
 }

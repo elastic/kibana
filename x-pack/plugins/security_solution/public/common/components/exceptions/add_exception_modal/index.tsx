@@ -29,7 +29,8 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -308,10 +309,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
     addOrUpdateExceptionItems,
+    ruleId,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,
