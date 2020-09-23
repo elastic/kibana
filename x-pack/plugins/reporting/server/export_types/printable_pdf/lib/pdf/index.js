@@ -104,7 +104,7 @@ class PdfMaker {
       table: {
         body: [[img]],
       },
-      layout: 'simpleBorder',
+      layout: 'noBorder',
     };
 
     contents.push(wrappedImg);
