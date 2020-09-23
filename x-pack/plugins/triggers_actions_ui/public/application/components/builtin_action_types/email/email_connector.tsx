@@ -171,16 +171,16 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           <EuiFormRow hasEmptyLabelSpace>
             <EuiSwitch
               label={i18n.translate(
-                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.noCredentialsSwitchLabel',
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hasAuthSwitchLabel',
                 {
-                  defaultMessage: 'Do not send credentials',
+                  defaultMessage: 'Add username and password',
                 }
               )}
               disabled={readOnly}
-              checked={!hasAuth || false}
+              checked={hasAuth || false}
               onChange={(e) => {
-                editActionConfig('hasAuth', !e.target.checked);
-                if (e.target.checked) {
+                editActionConfig('hasAuth', e.target.checked);
+                if (!e.target.checked) {
                   editActionSecrets('user', null);
                   editActionSecrets('password', null);
                 }
