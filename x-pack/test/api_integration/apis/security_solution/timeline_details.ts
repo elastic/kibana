@@ -8,23 +8,12 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { TimelineEventsQueries } from '../../../../plugins/security_solution/common/search_strategy';
 
-import { timelineDetailsQuery } from '../../../../plugins/security_solution/public/timelines/containers/details/index.gql_query';
-import {
-  DetailItem,
-  GetTimelineDetailsQuery,
-} from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-type DetailsData = Array<
-  Pick<DetailItem, 'field' | 'values' | 'originalValue'> & {
-    __typename: string;
-  }
->;
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const INDEX_NAME = 'filebeat-7.0.0-iot-2019.06';
 const ID = 'QRhG1WgBqd-n62SwZYDT';
-const EXPECTED_DATA: DetailItem[] = [
+const EXPECTED_DATA = [
   {
     category: 'base',
     field: '@timestamp',
