@@ -68,6 +68,6 @@ report.asciidoc
 
 # TEMPORARY-FOR-DEVELOPMENT
 # TODO: REMOVE THIS
-compose_single_root_pkg_json_deps.js
+compose_single_root_pkg_json.js
 bazel-*
 .bazelrc.user
