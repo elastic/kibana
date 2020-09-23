@@ -310,7 +310,42 @@ const field2Config = {
 
 The minimum time to update the `isChanging` field state. [Read more about this setting](use_form_hook.md#valuechangedebouncetime) in the `useFormHook()`.
 
-## Value type
+### `component`
+
+**Type:** `FunctionComponent`
+
+The component to render. This component will receive the `field` hook object as props plus any other props that you pass in `componentProps` (see below).
+
+**Note:** You can see examples on how this prop is used in [the "Style fields" page](../examples/style_fields.md#using-the-component-prop).
+
+### `componentProps`
+
+**Type:** `{ [prop: string]: any }`
+
+If you provide a `component` you can pass here any prop you want to forward to this component.
+
+### `readDefaultValueOnForm`
+
+**Type:** `boolean`
+**Default:** true
+
+By default if you don't provide a `defaultValue` prop on the component, it will try to read the default value on the form `defaultValue` object. If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
+
+### `onChange`
+
+**Type:** `(value:T) => void`
+
+With this handler you can listen to the field value changes. [See the example](../examples/react_to_changes.md#using-the-onchange-handler) in the "React to changes" page.
+
+### `children`
+
+**Type:** `(field: FieldHook<T>) => JSX.Element`
+
+The (optional) children of `<UseField />` is a function child which receives the field hook. You are then responsible to return a JSX element from that function.  
+
+The docs for the field hook [are right here](field_hook.md).
+
+## Typescript value type
 
 You can provided the value type (`unknown` by default) on the component. 
 
