@@ -14,9 +14,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../../components/shared/content_section';
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
+import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
@@ -32,8 +34,9 @@ export interface IFeedActivity {
 export const RecentActivity: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    activityFeed,
-  } = useValues(OverviewLogic);
+  } = useValues(AppLogic);
+
+  const { activityFeed } = useValues(OverviewLogic);
 
   return (
     <ContentSection
@@ -91,8 +94,8 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   timestamp,
   sourceId,
 }) => {
+  const { http } = useValues(HttpLogic);
   const {
-    http,
     externalUrl: { getWorkplaceSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 

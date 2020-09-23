@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
@@ -93,16 +93,22 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
       <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
-            <React.Fragment key={idx}>
-              <Criterion
-                idx={idx}
-                fields={fields}
-                criterion={criterion}
-                updateCriterion={updateCriterion}
-                removeCriterion={removeCriterion}
-                canDelete={criteria.length > 1}
-                errors={errors[idx]}
-              />
+            <EuiAccordion
+              id={`criterion-${idx}`}
+              buttonContent={
+                <Criterion
+                  idx={idx}
+                  fields={fields}
+                  criterion={criterion}
+                  updateCriterion={updateCriterion}
+                  removeCriterion={removeCriterion}
+                  canDelete={criteria.length > 1}
+                  errors={errors[idx]}
+                />
+              }
+              key={idx}
+              arrowDisplay="right"
+            >
               <CriterionPreview
                 alertParams={alertParams}
                 context={context}
@@ -110,7 +116,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
                 sourceId={sourceId}
                 showThreshold={!isRatio}
               />
-            </React.Fragment>
+            </EuiAccordion>
           );
         })}
         <AddCriterionButton addCriterion={addCriterion} />

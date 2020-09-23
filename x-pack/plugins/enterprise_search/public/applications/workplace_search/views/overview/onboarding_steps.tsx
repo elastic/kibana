@@ -23,11 +23,13 @@ import {
 } from '@elastic/eui';
 import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { ContentSection } from '../../components/shared/content_section';
 
+import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import { OnboardingCard } from './onboarding_card';
@@ -59,15 +61,17 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 
 export const OnboardingSteps: React.FC = () => {
   const {
+    isFederatedAuth,
+    organization: { name, defaultOrgName },
+    account: { isCurated, canCreateInvitations },
+  } = useValues(AppLogic);
+
+  const {
     hasUsers,
     hasOrgSources,
     canCreateContentSources,
-    canCreateInvitations,
     accountsCount,
     sourcesCount,
-    fpAccount: { isCurated },
-    organization: { name, defaultOrgName },
-    isFederatedAuth,
   } = useValues(OverviewLogic);
 
   const accountsPath =
@@ -132,8 +136,8 @@ export const OnboardingSteps: React.FC = () => {
 };
 
 export const OrgNameOnboarding: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const {
-    http,
     externalUrl: { getWorkplaceSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 

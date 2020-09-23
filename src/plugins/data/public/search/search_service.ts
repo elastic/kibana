@@ -21,11 +21,17 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import { handleResponse } from './fetch';
+import {
+  createSearchSource,
+  ISearchGeneric,
+  SearchSource,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
@@ -49,29 +55,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
 
   public setup(
-    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
     { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
-
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
-     * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
-     * their own search collector instances
      */
-    this.searchInterceptor = new SearchInterceptor(
-      {
-        toasts: notifications.toasts,
-        http,
-        uiSettings,
-        startServices: getStartServices(),
-        usageCollector: this.usageCollector!,
-      },
-      esRequestTimeout
-    );
+    this.searchInterceptor = new SearchInterceptor({
+      toasts: notifications.toasts,
+      http,
+      uiSettings,
+      startServices: getStartServices(),
+      usageCollector: this.usageCollector!,
+    });
 
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
@@ -89,7 +88,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
@@ -101,18 +100,25 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      // TODO: we don't need this, apply on the server
-      esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
-      http,
-      loadingCount$,
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
     };
 
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
       searchSource: {
+        /**
+         * creates searchsource based on serialized search source fields
+         */
         create: createSearchSource(indexPatterns, searchSourceDependencies),
+        /**
+         * creates an enpty search source
+         */
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },

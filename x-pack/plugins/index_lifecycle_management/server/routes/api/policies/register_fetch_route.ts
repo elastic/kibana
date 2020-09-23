@@ -7,15 +7,21 @@
 import { schema } from '@kbn/config-schema';
 import { LegacyAPICaller } from 'src/core/server';
 
+import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-function formatPolicies(policiesMap: any): any {
+type PoliciesMap = {
+  [K: string]: Omit<PolicyFromES, 'name'>;
+} & {
+  status?: number;
+};
+function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   if (policiesMap.status === 404) {
     return [];
   }
 
-  return Object.keys(policiesMap).reduce((accum: any[], lifecycleName: string) => {
+  return Object.keys(policiesMap).reduce((accum: PolicyFromES[], lifecycleName: string) => {
     const policyEntry = policiesMap[lifecycleName];
     accum.push({
       ...policyEntry,
@@ -25,7 +31,7 @@ function formatPolicies(policiesMap: any): any {
   }, []);
 }
 
-async function fetchPolicies(callAsCurrentUser: LegacyAPICaller): Promise<any> {
+async function fetchPolicies(callAsCurrentUser: LegacyAPICaller): Promise<PoliciesMap> {
   const params = {
     method: 'GET',
     path: '/_ilm/policy',
@@ -36,7 +42,7 @@ async function fetchPolicies(callAsCurrentUser: LegacyAPICaller): Promise<any> {
   return await callAsCurrentUser('transport.request', params);
 }
 
-async function addLinkedIndices(callAsCurrentUser: LegacyAPICaller, policiesMap: any) {
+async function addLinkedIndices(callAsCurrentUser: LegacyAPICaller, policiesMap: PoliciesMap) {
   if (policiesMap.status === 404) {
     return policiesMap;
   }
@@ -47,11 +53,13 @@ async function addLinkedIndices(callAsCurrentUser: LegacyAPICaller, policiesMap:
     ignore: [404],
   };
 
-  const policyExplanation: any = await callAsCurrentUser('transport.request', params);
-  Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]: [string, any]) => {
+  const policyExplanation: {
+    indices: { [indexName: string]: IndexLifecyclePolicy };
+  } = await callAsCurrentUser('transport.request', params);
+  Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
     if (policy && policiesMap[policy]) {
       policiesMap[policy].linkedIndices = policiesMap[policy].linkedIndices || [];
-      policiesMap[policy].linkedIndices.push(indexName);
+      policiesMap[policy].linkedIndices!.push(indexName);
     }
   });
 }

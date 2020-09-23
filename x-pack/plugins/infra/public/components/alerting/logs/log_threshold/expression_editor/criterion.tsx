@@ -163,7 +163,10 @@ export const Criterion: React.FC<Props> = ({
                   value={criterion.field}
                   isActive={isFieldPopoverOpen}
                   color={errors.field.length === 0 ? 'secondary' : 'danger'}
-                  onClick={() => setIsFieldPopoverOpen(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsFieldPopoverOpen(true);
+                  }}
                 />
               }
               isOpen={isFieldPopoverOpen}
@@ -203,7 +206,10 @@ export const Criterion: React.FC<Props> = ({
                       ? 'secondary'
                       : 'danger'
                   }
-                  onClick={() => setIsComparatorPopoverOpen(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsComparatorPopoverOpen(true);
+                  }}
                 />
               }
               isOpen={isComparatorPopoverOpen}
@@ -263,7 +269,10 @@ export const Criterion: React.FC<Props> = ({
             })}
             color={'danger'}
             iconType={'trash'}
-            onClick={() => removeCriterion(idx)}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              removeCriterion(idx);
+            }}
           />
         </EuiFlexItem>
       )}

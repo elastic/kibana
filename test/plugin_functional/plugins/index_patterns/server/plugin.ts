@@ -78,7 +78,7 @@ export class IndexPatternsTestPlugin
         const id = (req.params as Record<string, string>).id;
         const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ip = await service.get(id);
-        await ip.save();
+        await service.updateSavedObject(ip);
         return res.ok();
       }
     );

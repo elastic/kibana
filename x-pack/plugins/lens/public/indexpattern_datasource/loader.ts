@@ -55,15 +55,27 @@ export async function loadIndexPatterns({
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
         .map(
-          (field): IndexPatternField => ({
-            name: field.name,
-            displayName: field.displayName,
-            type: field.type,
-            aggregatable: field.aggregatable,
-            searchable: field.searchable,
-            scripted: field.scripted,
-            esTypes: field.esTypes,
-          })
+          (field): IndexPatternField => {
+            // Convert the getters on the index pattern service into plain JSON
+            const base = {
+              name: field.name,
+              displayName: field.displayName,
+              type: field.type,
+              aggregatable: field.aggregatable,
+              searchable: field.searchable,
+              esTypes: field.esTypes,
+              scripted: field.scripted,
+            };
+
+            // Simplifies tests by hiding optional properties instead of undefined
+            return base.scripted
+              ? {
+                  ...base,
+                  lang: field.lang,
+                  script: field.script,
+                }
+              : base;
+          }
         )
         .concat(documentField);
 

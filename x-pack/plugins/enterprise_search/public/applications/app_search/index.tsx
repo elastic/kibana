@@ -49,9 +49,9 @@ export const AppSearchUnconfigured: React.FC = () => (
 );
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { hasInitialized } = useValues(AppLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -63,7 +63,7 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />}>
+        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorConnecting />
           ) : (
@@ -90,6 +90,10 @@ export const AppSearchNav: React.FC = () => {
     externalUrl: { getAppSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 
+  const {
+    myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
+  } = useValues(AppLogic);
+
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
       <SideNavLink to={ENGINES_PATH} isRoot>
@@ -97,21 +101,27 @@ export const AppSearchNav: React.FC = () => {
           defaultMessage: 'Engines',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-          defaultMessage: 'Account Settings',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
-          defaultMessage: 'Credentials',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
-          defaultMessage: 'Role Mappings',
-        })}
-      </SideNavLink>
+      {canViewSettings && (
+        <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
+            defaultMessage: 'Account Settings',
+          })}
+        </SideNavLink>
+      )}
+      {canViewAccountCredentials && (
+        <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
+            defaultMessage: 'Credentials',
+          })}
+        </SideNavLink>
+      )}
+      {canViewRoleMappings && (
+        <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
+            defaultMessage: 'Role Mappings',
+          })}
+        </SideNavLink>
+      )}
     </SideNav>
   );
 };

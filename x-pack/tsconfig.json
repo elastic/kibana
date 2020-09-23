@@ -3,9 +3,6 @@
   "include": [
     "mocks.ts",
     "typings/**/*",
-    "legacy/common/**/*",
-    "legacy/server/**/*",
-    "legacy/plugins/**/*",
     "plugins/**/*",
     "test_utils/**/*",
     "tasks/**/*"
@@ -21,19 +18,11 @@
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "plugins/xpack_main/*": [
-        "x-pack/legacy/plugins/xpack_main/public/*"
-      ],
-      "plugins/spaces/*": [
-        "x-pack/legacy/plugins/spaces/public/*"
-      ],
-      "test_utils/*": [
-        "x-pack/test_utils/*"
-      ],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "fixtures/*": ["src/fixtures/*"],
+      "test_utils/*": ["x-pack/test_utils/*"],
+      "fixtures/*": ["src/fixtures/*"]
     },
     // overhead is too significant
-    "incremental": false,
-  }
+    "incremental": false
+  },
+  "references": [{ "path": "../src/core/tsconfig.json" }]
 }

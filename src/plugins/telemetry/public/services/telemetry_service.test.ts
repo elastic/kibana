@@ -184,15 +184,15 @@ describe('TelemetryService', () => {
   describe('setUserHasSeenNotice', () => {
     it('should hit the API and change the config', async () => {
       const telemetryService = mockTelemetryService({
-        config: { telemetryNotifyUserAboutOptInDefault: undefined },
+        config: { telemetryNotifyUserAboutOptInDefault: undefined, userCanChangeSettings: true },
       });
 
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
-      expect(telemetryService.getUserHasSeenOptedInNotice()).toBe(false);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
       expect(telemetryService['http'].put).toBeCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(true);
-      expect(telemetryService.getUserHasSeenOptedInNotice()).toBe(true);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
     });
 
     it('should show a toast notification if the request fail', async () => {
@@ -207,12 +207,33 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
-      expect(telemetryService.getUserHasSeenOptedInNotice()).toBe(false);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
       expect(telemetryService['http'].put).toBeCalledTimes(1);
       expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(false);
-      expect(telemetryService.getUserHasSeenOptedInNotice()).toBe(false);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
+    });
+  });
+
+  describe('getUserShouldSeeOptInNotice', () => {
+    it('returns whether the user can update the telemetry config (has SavedObjects access)', () => {
+      const telemetryService = mockTelemetryService({
+        config: { userCanChangeSettings: undefined },
+      });
+      expect(telemetryService.config.userCanChangeSettings).toBe(undefined);
+      expect(telemetryService.userCanChangeSettings).toBe(false);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
+
+      telemetryService.userCanChangeSettings = false;
+      expect(telemetryService.config.userCanChangeSettings).toBe(false);
+      expect(telemetryService.userCanChangeSettings).toBe(false);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
+
+      telemetryService.userCanChangeSettings = true;
+      expect(telemetryService.config.userCanChangeSettings).toBe(true);
+      expect(telemetryService.userCanChangeSettings).toBe(true);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
     });
   });
 });
