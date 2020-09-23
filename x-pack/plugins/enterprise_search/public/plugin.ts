@@ -29,6 +29,7 @@ export interface ClientConfigType {
   host?: string;
 }
 export interface ClientData extends IInitialAppData {
+  publicUrl?: string;
   externalUrl: IExternalUrl;
   errorConnecting?: boolean;
 }
@@ -174,14 +175,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      const { publicUrl, ...initialData } = await http.get('/api/enterprise_search/config_data');
-      this.data = { ...this.data, ...initialData };
-      if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
-
+      this.data = await http.get('/api/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch {
       this.data.errorConnecting = true;
-      // The plugin will attempt to re-fetch config data on page change
     }
   }
 }

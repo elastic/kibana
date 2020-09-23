@@ -18,7 +18,7 @@ import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { IExternalUrl } from './shared/enterprise_search_url';
+import { externalUrl, IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
@@ -42,7 +42,8 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { externalUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, externalUrl, errorConnecting, ...initialData } = data;
+  externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
   const store = getContext().store as Store;
