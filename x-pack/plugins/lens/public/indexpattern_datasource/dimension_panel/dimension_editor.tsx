@@ -361,7 +361,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
         {!incompatibleSelectedOperationType && selectedColumn && ParamEditor && (
           <>
-            <EuiSpacer size="s" />
             <ParamEditor
               state={state}
               setState={setState}

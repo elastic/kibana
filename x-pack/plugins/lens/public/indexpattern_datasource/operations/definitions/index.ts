@@ -26,6 +26,7 @@ import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { RangeIndexPatternColumn, rangeOperation } from './ranges';
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -34,6 +35,7 @@ import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/pub
  */
 export type IndexPatternColumn =
   | FiltersIndexPatternColumn
+  | RangeIndexPatternColumn
   | TermsIndexPatternColumn
   | DateHistogramIndexPatternColumn
   | MinIndexPatternColumn
@@ -58,9 +60,11 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
+  rangeOperation,
 ];
 
 export { termsOperation } from './terms';
+export { rangeOperation } from './ranges';
 export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';

@@ -224,6 +224,7 @@ export const FilterList = ({
               removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
                 defaultMessage: 'Remove a filter',
               })}
+              isNotRemovable={localFilters.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"

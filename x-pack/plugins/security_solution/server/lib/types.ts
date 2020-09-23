@@ -24,7 +24,6 @@ import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { TLS } from './tls';
 import { MatrixHistogram } from './matrix_histogram';
 
 export * from './hosts';
@@ -41,7 +40,6 @@ export interface AppDomainLibs {
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
-  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -98,6 +96,23 @@ export interface ShardsResponse {
   successful: number;
   failed: number;
   skipped: number;
+  failures?: ShardError[];
+}
+
+export interface ShardError {
+  shard: number;
+  index: string;
+  node: string;
+  reason: {
+    type: string;
+    reason: string;
+    index_uuid: string;
+    index: string;
+    caused_by: {
+      type: string;
+      reason: string;
+    };
+  };
 }
 
 export interface Explanation {
