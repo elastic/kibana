@@ -130,13 +130,8 @@ export function getDatasourceSuggestionsForVisualizeField(
   const field = indexPattern.fields.find((fld) => fld.name === fieldName);
 
   if (layerIds.length === 0 || !field) return [];
-
   const layerId = layerIds[0];
-  if (state.layers[layerId].columnOrder.length === 0) {
-    return getEmptyLayerSuggestionsForField(state, layerId, indexPatternId, field);
-  } else {
-    return getExistingLayerSuggestionsForField(state, layerId, field);
-  }
+  return getEmptyLayerSuggestionsForField(state, layerId, indexPatternId, field);
 }
 
 function getBucketOperation(field: IndexPatternField) {
