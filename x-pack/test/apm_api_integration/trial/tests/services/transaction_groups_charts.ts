@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('with empty uiFilters', () => {
+        describe('when no environment is selected', () => {
           const uiFilters = encodeURIComponent(JSON.stringify({}));
           before(async () => {
             response = await supertest.get(
@@ -55,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should include an ML job id', () => {
+          it('should return the ML job id for anomalies with no defined environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
@@ -65,12 +65,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('should return the correct anomaly boundaries', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('anomalyBoundaries');
-            expect(response.body.anomalyTimeseries.anomalyBoundaries.length).to.equal(0);
+            expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
           });
         });
 
-        describe('with uiFilters environment defined', () => {
+        describe('with environment selected', () => {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
           before(async () => {
             response = await supertest.get(
@@ -82,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should include an ML job id', () => {
+          it('should return the ML job id for anomalies of the selected environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
@@ -90,15 +89,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           });
 
-          it('should return the correct anomaly boundaries', () => {
+          it('should return a non-empty anomaly series', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('anomalyBoundaries');
-            expect(response.body.anomalyTimeseries.anomalyBoundaries.length).to.be.greaterThan(0);
+            expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(0);
             expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
           });
         });
 
-        describe('with uiFilters environment set to ENVIRONMENT_ALL', () => {
+        describe('with all environments selected', () => {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'ENVIRONMENT_ALL' }));
           before(async () => {
             response = await supertest.get(
@@ -110,12 +108,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should not include anomalyTimeseries', () => {
+          it('should not return anomaly timeseries data', () => {
             expect(response.body).to.not.have.property('anomalyTimeseries');
           });
         });
 
-        describe('with uiFilters with empty kuery and environment defined', () => {
+        describe('with environment selected and empty kuery filter', () => {
           const uiFilters = encodeURIComponent(
             JSON.stringify({ kuery: '', environment: 'production' })
           );
@@ -129,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should include an ML job id', () => {
+          it('should return the ML job id for anomalies of the selected environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
             expect(response.body.anomalyTimeseries).to.have.property('jobId');
             expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
@@ -137,10 +135,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           });
 
-          it('should return the correct anomaly boundaries', () => {
+          it('should return a non-empty anomaly series', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('anomalyBoundaries');
-            expect(response.body.anomalyTimeseries.anomalyBoundaries.length).to.be.greaterThan(0);
+            expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(0);
             expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
           });
         });
