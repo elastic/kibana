@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from 'src/core/public';
+import { UrlDrilldownPlugin } from './plugin';
 
-export const txtUrlDrilldownDisplayName = i18n.translate(
-  'xpack.embeddableEnhanced.drilldowns.urlDrilldownDisplayName',
-  {
-    defaultMessage: 'Go to URL',
-  }
-);
+export function plugin(context: PluginInitializerContext) {
+  return new UrlDrilldownPlugin(context);
+}

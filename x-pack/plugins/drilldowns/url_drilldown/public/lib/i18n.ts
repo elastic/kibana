@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { DeleteTrustedAppsRequestSchema } from '../../../../common/endpoint/schema/trusted_apps';
+import { i18n } from '@kbn/i18n';
 
-export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
+export const txtUrlDrilldownDisplayName = i18n.translate('xpack.urlDrilldown.DisplayName', {
+  defaultMessage: 'Go to URL',
+});
