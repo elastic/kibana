@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'src/core/server';
 import { MonitoringClusterStackProductUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
 import { MonitoringConfig } from '../../../config';
@@ -23,7 +23,7 @@ import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export const getStackProductsUsage = async (
   config: MonitoringConfig,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   availableCcs: string[],
   clusterUuid: string
 ): Promise<
@@ -60,7 +60,7 @@ export const getStackProductsUsage = async (
       clusterUuid,
       beatsIndex,
       'beats_stats',
-      'beats_stats.beats.uuid'
+      'beats_stats.beat.uuid'
     ),
     fetchStackProductUsage(
       config,
@@ -68,7 +68,7 @@ export const getStackProductsUsage = async (
       clusterUuid,
       beatsIndex,
       'beats_stats',
-      'beats_stats.beats.uuid',
+      'beats_stats.beat.uuid',
       [{ term: { 'beats_stats.beat.type': 'apm-server' } }]
     ),
   ]);

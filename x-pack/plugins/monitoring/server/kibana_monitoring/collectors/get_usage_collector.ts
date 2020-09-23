@@ -5,7 +5,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
 import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
@@ -18,7 +18,7 @@ import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 export function getMonitoringUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  callCluster: CallCluster
+  callCluster: LegacyAPICaller
 ) {
   return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { get } from 'lodash';
+import { LegacyAPICaller } from 'src/core/server';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
 import { prefixIndexPattern } from '../../../lib/ccs_utils';
@@ -32,7 +32,7 @@ interface KeyBucket {
 
 export async function fetchStackProductUsage(
   config: MonitoringConfig,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   clusterUuid: string,
   index: string,
   type: string,

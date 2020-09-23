@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'src/core/server';
 import { get } from 'lodash';
 import { MonitoringConfig } from '../../../config';
 import { StackProductUsage } from '../types';
@@ -41,7 +41,7 @@ interface ClusterStats {
 
 export async function fetchESUsage(
   config: MonitoringConfig,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   clusterUuid: string,
   index: string
 ): Promise<StackProductUsage> {

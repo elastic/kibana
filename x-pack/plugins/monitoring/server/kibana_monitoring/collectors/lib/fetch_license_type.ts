@@ -5,11 +5,12 @@
  */
 
 import { get } from 'lodash';
+import { LegacyAPICaller } from 'src/core/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
-  callCluster: any,
+  callCluster: LegacyAPICaller,
   availableCcs: string[],
   clusterUuid: string
 ) {
