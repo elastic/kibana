@@ -18,6 +18,7 @@ const createTaskManagerMock = () => {
     runNow: jest.fn(),
     remove: jest.fn(),
     start: jest.fn(),
+    isStarted: jest.fn(() => true),
     stop: jest.fn(),
   } as jest.Mocked<TaskManager>;
 };
