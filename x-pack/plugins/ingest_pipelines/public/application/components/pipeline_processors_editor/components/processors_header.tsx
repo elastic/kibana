@@ -9,20 +9,31 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../shared_imports';
+import { useKibana } from '../../../../shared_imports';
 
-import {
-  LoadFromJsonButton,
-  OnDoneLoadJsonHandler,
-  TestPipelineActions,
-} from '../pipeline_processors_editor';
+import { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from './';
 
 export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
+  hasProcessors: boolean;
 }
 
-export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
+export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson, hasProcessors }) => {
   const { services } = useKibana();
+
+  const ProcessorTitle: FunctionComponent = () => (
+    <EuiTitle size="s">
+      <h3>
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
+          defaultMessage: 'Processors',
+        })}
+      </h3>
+    </EuiTitle>
+  );
+
+  if (!hasProcessors) {
+    return <ProcessorTitle />;
+  }
 
   return (
     <EuiFlexGroup
@@ -34,13 +45,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
-                  defaultMessage: 'Processors',
-                })}
-              </h3>
-            </EuiTitle>
+            <ProcessorTitle />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LoadFromJsonButton onDone={onLoadJson} />
