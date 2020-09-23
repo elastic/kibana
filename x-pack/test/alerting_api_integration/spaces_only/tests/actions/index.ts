@@ -19,5 +19,8 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
     loadTestFile(require.resolve('./type_not_enabled'));
+
+    // note that this test will destroy existing spaces
+    loadTestFile(require.resolve('./migrations'));
   });
 }
