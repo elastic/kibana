@@ -281,14 +281,14 @@ that feature would not take any effect. *Default: `false`*
 limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
 this option should be in the range of 1048576 (1 MB) to 1073741824 (1 GB). *Default: `10485760`*
 
-|[[logging-rotate-keepFiles]] `logging.rotate.keepFiles:`
+| `logging.rotate.keepFiles:`
  | experimental[] The number of most recent rotated log files to keep
-on disk. Older files are deleted during log rotation. The default value is 7. The <<logging-rotate-keepFiles, `logging.rotate.keepFiles`>>
+on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
 option has to be in the range of 2 to 1024 files. *Default: `7`*
 
 | `logging.rotate.pollingInterval:`
  | experimental[] The number of milliseconds for the polling strategy in case
-the <<logging-rotate-usePolling, `logging.rotate.usePolling`>> is enabled. <<logging-rotate-usePolling, `logging.rotate.usePolling`>> must be in the 5000 to 3600000 millisecond range. *Default: `10000`*
+the <<logging-rotate-usePolling, `logging.rotate.usePolling`>> is enabled. `logging.rotate.usePolling` must be in the 5000 to 3600000 millisecond range. *Default: `10000`*
 
 |[[logging-rotate-usePolling]] `logging.rotate.usePolling:`
  | experimental[] By default we try to understand the best way to monitoring
