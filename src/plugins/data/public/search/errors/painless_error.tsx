@@ -33,7 +33,7 @@ export class PainlessError extends KbnError {
 
     super(
       i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
-        defaultMessage: "Error with Painless scripted field '{script}'.",
+        defaultMessage: "Error executing Painless script: '{script}'.",
         values: { script: rootCause?.script },
       })
     );

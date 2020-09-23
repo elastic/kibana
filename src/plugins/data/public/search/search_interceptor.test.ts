@@ -91,7 +91,7 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Search error should be throttled', async (done) => {
+    test('Search error should be debounced', async (done) => {
       const mockResponse: any = {
         result: 500,
         body: {

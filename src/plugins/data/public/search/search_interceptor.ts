@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, trimEnd, throttle } from 'lodash';
+import { get, trimEnd, debounce } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
@@ -173,12 +173,16 @@ export class SearchInterceptor {
    * error notification per session.
    * @internal
    */
-  private showTimeoutError = throttle((e: SearchTimeoutError) => {
-    this.deps.toasts.addDanger({
-      title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application)),
-    });
-  }, 30000);
+  private showTimeoutError = debounce(
+    (e: SearchTimeoutError) => {
+      this.deps.toasts.addDanger({
+        title: 'Timed out',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+    },
+    30000,
+    { leading: true, trailing: false }
+  );
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
