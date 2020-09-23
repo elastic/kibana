@@ -25,7 +25,7 @@ An "async chunk" is created for the files imported by each https://developer.moz
 A "miscellaneous asset" is anything that isn't an async chunk or entry chunk, often images. This metric tracks the sum size of these assets, in bytes, broken down by plugin/bundle id.
 
 [[ci-metric-bundle-module-count]] `@kbn/optimizer bundle module count` ::
-The number of separate modules included in each bundle/plugin. This is the best indicator we have for how long a specific bundle will take to be built by the `@kbn/optimizer`, so we report it to help people know when they've imported a module which might be include a surprising number of modules.
+The number of separate modules included in each bundle/plugin. This is the best indicator we have for how long a specific bundle will take to be built by the `@kbn/optimizer`, so we report it to help people know when they've imported a module which might include a surprising number of sub-modules.
 
 
 [[ci-metric-types-distributable-size]]
