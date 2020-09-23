@@ -63,7 +63,8 @@ describe('ExpressionRow', () => {
       aggType: 'avg',
     };
     const { wrapper } = await setup(expression as MetricExpression);
-    const [valueMatch] = wrapper.html().match('<span class="euiExpression__value">50</span>') ?? [];
+    const [valueMatch] =
+      wrapper.html().match('<span class="euiExpression__value">50 %</span>') ?? [];
     expect(valueMatch).toBeTruthy();
   });
 
