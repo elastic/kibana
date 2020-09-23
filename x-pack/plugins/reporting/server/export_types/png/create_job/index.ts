@@ -7,10 +7,11 @@
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPNG } from '../types';
+import { JobParamsPNG, TaskPayloadPNG } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPNG
+  JobParamsPNG,
+  TaskPayloadPNG
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
@@ -25,13 +26,13 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
     validateUrls([relativeUrl]);
 
     return {
+      headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(req),
       objectType,
       title,
       relativeUrl,
-      headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: config.kbnConfig.get('server', 'basePath'),
       forceNow: new Date().toISOString(),
     };
   };

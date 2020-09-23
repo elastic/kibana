@@ -16,6 +16,7 @@ export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequ
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+
 export interface GetTrustedListAppsResponse {
   per_page: number;
   page: number;
@@ -25,12 +26,13 @@ export interface GetTrustedListAppsResponse {
 
 /** API Request body for creating a new Trusted App entry */
 export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body>;
+
 export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
 export interface MacosLinuxConditionEntry {
-  field: 'process.hash.*' | 'process.path';
+  field: 'process.hash.*' | 'process.path.text';
   type: 'match';
   operator: 'included';
   value: string;

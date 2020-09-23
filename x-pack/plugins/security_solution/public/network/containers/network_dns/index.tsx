@@ -23,7 +23,11 @@ import {
   NetworkDnsStrategyResponse,
   MatrixOverOrdinalHistogramData,
 } from '../../../../common/search_strategy/security_solution/network';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -130,7 +134,7 @@ export const useNetworkDns = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkDnsResponse((prevResponse) => ({
@@ -144,7 +148,7 @@ export const useNetworkDns = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

@@ -145,6 +145,10 @@ export const getCreateTransformRequestBody = (
   ...(transformDetailsState.transformDescription !== ''
     ? { description: transformDetailsState.transformDescription }
     : {}),
+  // conditionally add optional frequency
+  ...(transformDetailsState.transformFrequency !== ''
+    ? { frequency: transformDetailsState.transformFrequency }
+    : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
   },
@@ -156,6 +160,14 @@ export const getCreateTransformRequestBody = (
             field: transformDetailsState.continuousModeDateField,
             delay: transformDetailsState.continuousModeDelay,
           },
+        },
+      }
+    : {}),
+  // conditionally add additional settings
+  ...(transformDetailsState.transformSettingsMaxPageSearchSize
+    ? {
+        settings: {
+          max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize,
         },
       }
     : {}),
