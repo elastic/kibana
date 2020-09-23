@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -37,9 +36,10 @@ export interface HostDetailsArgs {
 }
 
 interface UseHostDetails {
-  id?: string;
-  hostName: string;
   endDate: string;
+  hostName: string;
+  id?: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -47,17 +47,17 @@ interface UseHostDetails {
 export const useHostDetails = ({
   endDate,
   hostName,
+  indexNames,
+  id = ID,
   skip = false,
   startDate,
-  id = ID,
 }: UseHostDetails): [boolean, HostDetailsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     hostName,
     factoryQueryType: HostsQueries.details,
     timerange: {
@@ -138,7 +138,7 @@ export const useHostDetails = ({
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         hostName,
         timerange: {
           interval: '12h',
@@ -151,7 +151,7 @@ export const useHostDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, hostName, startDate, skip]);
+  }, [endDate, hostName, indexNames, startDate, skip]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);

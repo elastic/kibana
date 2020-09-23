@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -37,6 +36,7 @@ export interface NetworkKpiDnsArgs {
 interface UseNetworkKpiDns {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -44,16 +44,16 @@ interface UseNetworkKpiDns {
 export const useNetworkKpiDns = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiDns): [boolean, NetworkKpiDnsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [networkKpiDnsRequest, setNetworkKpiDnsRequest] = useState<NetworkKpiDnsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkKpiQueries.dns,
     filterQuery: createFilter(filterQuery),
     id: ID,
@@ -134,7 +134,7 @@ export const useNetworkKpiDns = ({
     setNetworkKpiDnsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -147,7 +147,7 @@ export const useNetworkKpiDns = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     networkKpiDnsSearch(networkKpiDnsRequest);

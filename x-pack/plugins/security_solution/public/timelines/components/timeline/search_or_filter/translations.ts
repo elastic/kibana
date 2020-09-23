@@ -73,7 +73,7 @@ export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
 export const ALL_EVENT = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.eventTypeAllEvent',
   {
-    defaultMessage: 'All',
+    defaultMessage: 'All default',
   }
 );
 
@@ -88,5 +88,47 @@ export const DETECTION_ALERTS_EVENT = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.eventTypeDetectionAlertsEvent',
   {
     defaultMessage: 'Detection Alerts',
+  }
+);
+
+export const CUSTOM_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.customeIndexNames',
+  {
+    defaultMessage: 'Custom',
+  }
+);
+
+export const SELECT_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.help',
+  {
+    defaultMessage: 'Data sources selection',
+  }
+);
+
+export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.configure',
+  {
+    defaultMessage: 'View data sources associated with each of the above selections',
+  }
+);
+
+export const SAVE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const SHOW_INDEX_PATTERNS_ADVANCED_SETTINGS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.showAdvancedSettings',
+  {
+    defaultMessage: 'Show Advanced',
+  }
+);
+
+export const HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.hideAdvancedSettings',
+  {
+    defaultMessage: 'Hide Advanced',
   }
 );

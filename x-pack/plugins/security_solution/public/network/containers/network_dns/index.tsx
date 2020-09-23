@@ -10,7 +10,6 @@ import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
@@ -47,6 +46,7 @@ export interface NetworkDnsArgs {
 
 interface UseNetworkDns {
   id?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -58,6 +58,7 @@ export const useNetworkDns = ({
   endDate,
   filterQuery,
   id = ID,
+  indexNames,
   skip,
   startDate,
   type,
@@ -67,14 +68,13 @@ export const useNetworkDns = ({
     (state: State) => getNetworkDnsSelector(state),
     shallowEqual
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.dns,
     filterQuery: createFilter(filterQuery),
     isPtrIncluded,
@@ -178,7 +178,7 @@ export const useNetworkDns = ({
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         isPtrIncluded,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -194,7 +194,7 @@ export const useNetworkDns = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
 
   useEffect(() => {
     networkDnsSearch(networkDnsRequest);

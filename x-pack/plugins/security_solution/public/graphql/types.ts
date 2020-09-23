@@ -138,6 +138,8 @@ export interface TimelineInput {
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
+  indexNames?: Maybe<string[]>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -423,10 +425,6 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
-export type ToStringArrayNoNullable = any;
-
-export type ToIFieldSubTypeNonNullable = any;
-
 export type ToStringArray = string[];
 
 export type Date = string;
@@ -440,6 +438,10 @@ export type ToBooleanArray = boolean[];
 export type ToAny = any;
 
 export type EsValue = any;
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 // ====================================================
 // Scalars
@@ -603,33 +605,7 @@ export interface SourceStatus {
   /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
   indicesExist: boolean;
   /** The list of fields defined in the index mappings */
-  indexFields: IndexField[];
-}
-
-/** A descriptor of a field in an index */
-export interface IndexField {
-  /** Where the field belong */
-  category: string;
-  /** Example of field's value */
-  example?: Maybe<string>;
-  /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-  /** Description of the field */
-  description?: Maybe<string>;
-
-  format?: Maybe<string>;
-  /** the elastic type as mapped in the index */
-  esTypes?: Maybe<ToStringArrayNoNullable>;
-
-  subType?: Maybe<ToIFieldSubTypeNonNullable>;
+  indexFields: string[];
 }
 
 export interface AuthenticationsData {
@@ -2018,6 +1994,8 @@ export interface TimelineResult {
 
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
 
+  indexNames?: Maybe<string[]>;
+
   notes?: Maybe<NoteResult[]>;
 
   noteIds?: Maybe<string[]>;
@@ -2288,6 +2266,32 @@ export interface HostFields {
   os?: Maybe<OsFields>;
 
   type?: Maybe<string>;
+}
+
+/** A descriptor of a field in an index */
+export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: Maybe<string>;
+  /** whether the field's belong to an alias index */
+  indexes: (Maybe<string>)[];
+  /** The name of the field */
+  name: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** Description of the field */
+  description?: Maybe<string>;
+
+  format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 // ====================================================
@@ -2735,61 +2739,6 @@ export namespace GetMatrixHistogramQuery {
   };
 }
 
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: Maybe<string>;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    status: Status;
-  };
-
-  export type Status = {
-    __typename?: 'SourceStatus';
-
-    indicesExist: boolean;
-
-    indexFields: IndexFields[];
-  };
-
-  export type IndexFields = {
-    __typename?: 'IndexField';
-
-    category: string;
-
-    description: Maybe<string>;
-
-    example: Maybe<string>;
-
-    indexes: (Maybe<string>)[];
-
-    name: string;
-
-    searchable: boolean;
-
-    type: string;
-
-    aggregatable: boolean;
-
-    format: Maybe<string>;
-
-    esTypes: Maybe<ToStringArrayNoNullable>;
-
-    subType: Maybe<ToIFieldSubTypeNonNullable>;
-  };
-}
-
 export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
@@ -2930,6 +2879,116 @@ export namespace GetAuthenticationsQuery {
   };
 }
 
+export namespace GetHostOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostOverview: HostOverview;
+  };
+
+  export type HostOverview = {
+    __typename?: 'HostItem';
+
+    _id: Maybe<string>;
+
+    host: Maybe<Host>;
+
+    cloud: Maybe<Cloud>;
+
+    inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture: Maybe<string[]>;
+
+    id: Maybe<string[]>;
+
+    ip: Maybe<string[]>;
+
+    mac: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    os: Maybe<Os>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    platform: Maybe<string[]>;
+
+    version: Maybe<string[]>;
+  };
+
+  export type Cloud = {
+    __typename?: 'CloudFields';
+
+    instance: Maybe<Instance>;
+
+    machine: Maybe<Machine>;
+
+    provider: Maybe<(Maybe<string>)[]>;
+
+    region: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Instance = {
+    __typename?: 'CloudInstance';
+
+    id: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Machine = {
+    __typename?: 'CloudMachine';
+
+    type: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
+  };
+}
+
 export namespace GetHostFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
@@ -3057,116 +3116,6 @@ export namespace GetHostsTableQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetHostOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostOverview: HostOverview;
-  };
-
-  export type HostOverview = {
-    __typename?: 'HostItem';
-
-    _id: Maybe<string>;
-
-    host: Maybe<Host>;
-
-    cloud: Maybe<Cloud>;
-
-    inspect: Maybe<Inspect>;
-
-    endpoint: Maybe<Endpoint>;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture: Maybe<string[]>;
-
-    id: Maybe<string[]>;
-
-    ip: Maybe<string[]>;
-
-    mac: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    os: Maybe<Os>;
-
-    type: Maybe<string[]>;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    platform: Maybe<string[]>;
-
-    version: Maybe<string[]>;
-  };
-
-  export type Cloud = {
-    __typename?: 'CloudFields';
-
-    instance: Maybe<Instance>;
-
-    machine: Maybe<Machine>;
-
-    provider: Maybe<(Maybe<string>)[]>;
-
-    region: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Instance = {
-    __typename?: 'CloudInstance';
-
-    id: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Machine = {
-    __typename?: 'CloudMachine';
-
-    type: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type Endpoint = {
-    __typename?: 'EndpointFields';
-
-    endpointPolicy: Maybe<string>;
-
-    policyStatus: Maybe<HostPolicyResponseActionStatus>;
-
-    sensorVersion: Maybe<string>;
   };
 }
 
@@ -5558,6 +5507,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<KqlQuery>;
 
+    indexNames: Maybe<string[]>;
+
     notes: Maybe<Notes[]>;
 
     noteIds: Maybe<string[]>;
@@ -5889,6 +5840,8 @@ export namespace PersistTimelineMutation {
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
+
+    indexNames: Maybe<string[]>;
 
     title: Maybe<string>;
 
