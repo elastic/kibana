@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { DocValueFields } from '../../../../common/search_strategy/common';
 import {
   BrowserFields,
-  DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_PATTERN,
-} from '../../containers/sourcerer/format';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+} from '../../../../common/search_strategy/index_fields';
 
 export type ErrorModel = Error[];
 

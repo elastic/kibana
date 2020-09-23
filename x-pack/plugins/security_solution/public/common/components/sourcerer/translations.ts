@@ -43,3 +43,10 @@ export const INDEX_PATTERNS_RESET = i18n.translate(
     defaultMessage: 'Reset',
   }
 );
+
+export const PICK_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.indexPatterns.pickIndexPatternsCombo',
+  {
+    defaultMessage: 'Pick index patterns',
+  }
+);

@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-export { defaultIngestErrorHandler } from './handlers';
+export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export class IngestManagerError extends Error {
   constructor(message?: string) {
