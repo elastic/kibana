@@ -76,7 +76,7 @@ export function DiscoverField({
   getDetails,
   selected,
   useShortDots,
-  mobile = false,
+  mobile,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',

@@ -37,7 +37,7 @@ import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
 import { DiscoverSidebarMobile } from './sidebar';
-import { DiscoverMobileFlyout } from './sidebar';
+// import { DiscoverMobileFlyout } from './sidebar';
 import { getServices } from '../../kibana_services';
 
 // @ts-ignore
@@ -148,7 +148,7 @@ export function Discover({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <DiscoverMobileFlyout
+          <DiscoverSidebar
             columns={state.columns}
             fieldCounts={fieldCounts}
             hits={rows}
@@ -158,6 +158,7 @@ export function Discover({
             onRemoveField={onRemoveColumn}
             selectedIndexPattern={searchSource && searchSource.getField('index')}
             setIndexPattern={setIndexPattern}
+            mobile
           />
         </EuiFlyoutBody>
       </EuiFlyout>

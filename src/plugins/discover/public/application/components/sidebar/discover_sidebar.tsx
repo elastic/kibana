@@ -73,6 +73,10 @@ export interface DiscoverSidebarProps {
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
+  /**
+   * Shows Add button at all times and not only on focus
+   */
+  mobile?: boolean;
 }
 
 export function DiscoverSidebar({
@@ -85,6 +89,7 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
+  mobile = false,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
@@ -197,6 +202,7 @@ export function DiscoverSidebar({
                         getDetails={getDetailsByField}
                         selected={true}
                         useShortDots={useShortDots}
+                        mobile={mobile}
                       />
                     </li>
                   );
@@ -271,6 +277,7 @@ export function DiscoverSidebar({
                         onAddFilter={onAddFilter}
                         getDetails={getDetailsByField}
                         useShortDots={useShortDots}
+                        mobile={mobile}
                       />
                     </li>
                   );
@@ -301,6 +308,7 @@ export function DiscoverSidebar({
                     onAddFilter={onAddFilter}
                     getDetails={getDetailsByField}
                     useShortDots={useShortDots}
+                    mobile={mobile}
                   />
                 </li>
               );

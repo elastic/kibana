@@ -198,7 +198,7 @@ export function getSchemaDetectors() {
 export function getPopoverContents() {
   return {
     [geoPoint]: ({ children }: { children: ReactNode }) => {
-      return <span className="geo-point">{children}</span>;
+      return <span className="geo-point">{children}xx</span>;
     },
   };
 }
