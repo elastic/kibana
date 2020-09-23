@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiSpacer,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import groupBy from 'lodash/groupBy';
@@ -48,24 +55,25 @@ export const CategoryQualityWarnings: React.FC<{
                 defaultMessage="Details"
               />
             }
+            paddingSize="m"
           >
-            {qualityWarningsForJob.flatMap((qualityWarning) => (
-              <>
-                <WarningReasonListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
-                  {getFriendlyNameForPartitionId(qualityWarning.dataset)}
-                </WarningReasonListTitle>
-                <ul>
+            <EuiDescriptionList>
+              {qualityWarningsForJob.flatMap((qualityWarning) => (
+                <>
+                  <EuiDescriptionListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
+                    {getFriendlyNameForPartitionId(qualityWarning.dataset)}
+                  </EuiDescriptionListTitle>
                   {qualityWarning.reasons.map((reason) => (
-                    <li
+                    <QualityWarningReasonDescription
                       key={`description-${reason.type}-${qualityWarning.dataset}`}
                       data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
                     >
                       <CategoryQualityWarningReasonDescription reason={reason} />
-                    </li>
+                    </QualityWarningReasonDescription>
                   ))}
-                </ul>
-              </>
-            ))}
+                </>
+              ))}
+            </EuiDescriptionList>
           </EuiAccordion>
           <EuiSpacer size="l" />
         </RecreateJobCallout>
@@ -74,8 +82,10 @@ export const CategoryQualityWarnings: React.FC<{
   );
 };
 
-const WarningReasonListTitle = euiStyled.h4`
-  margin-top: ${(props) => props.theme.eui.paddingSizes.m};
+const QualityWarningReasonDescription = euiStyled(EuiDescriptionListDescription)`
+  display: list-item;
+  list-style-type: disc;
+  margin-left: ${(props) => props.theme.eui.paddingSizes.m};
 `;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(
