@@ -7,6 +7,7 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   expectTextsInDocument,
@@ -16,7 +17,11 @@ import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummm
 import { ErrorMarker } from './ErrorMarker';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
 }
 
 describe('ErrorMarker', () => {

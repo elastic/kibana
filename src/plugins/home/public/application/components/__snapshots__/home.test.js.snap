@@ -164,6 +164,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
             </EuiFlexItem>
             <EuiFlexItem
               className="homHeader__actionItem"
+              data-test-subj="homManagementActionItem"
             >
               <EuiButtonEmpty
                 iconType="gear"
@@ -906,6 +907,7 @@ exports[`home header should show "Manage" link if stack management is available 
             </EuiFlexItem>
             <EuiFlexItem
               className="homHeader__actionItem"
+              data-test-subj="homManagementActionItem"
             >
               <EuiButtonEmpty
                 iconType="gear"

@@ -22,13 +22,15 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { getServices } from '../../../kibana_services';
 
+export interface FetchError {
+  lang: string;
+  script: string;
+  message: string;
+  error: string;
+}
+
 interface Props {
-  fetchError: {
-    lang: string;
-    script: string;
-    message: string;
-    error: string;
-  };
+  fetchError: FetchError;
 }
 
 export const DiscoverFetchError = ({ fetchError }: Props) => {
@@ -92,7 +94,3 @@ export const DiscoverFetchError = ({ fetchError }: Props) => {
     </I18nProvider>
   );
 };
-
-export function createFetchErrorDirective(reactDirective: any) {
-  return reactDirective(DiscoverFetchError);
-}

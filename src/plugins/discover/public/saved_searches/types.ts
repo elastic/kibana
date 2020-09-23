@@ -29,6 +29,7 @@ export interface SavedSearch {
   sort: SortOrder[];
   grid: any;
   destroy: () => void;
+  lastSavedTitle?: string;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;

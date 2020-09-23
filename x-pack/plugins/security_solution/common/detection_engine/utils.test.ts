@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hasLargeValueList, hasNestedEntry } from './utils';
+import { hasLargeValueList, hasNestedEntry, isThreatMatchRule } from './utils';
 import { EntriesArray } from '../shared_imports';
 
 describe('#hasLargeValueList', () => {
@@ -101,5 +101,15 @@ describe('#hasNestedEntry', () => {
     const hasLists = hasNestedEntry(entries);
 
     expect(hasLists).toBeFalsy();
+  });
+
+  describe('isThreatMatchRule', () => {
+    test('it returns true if a threat match rule', () => {
+      expect(isThreatMatchRule('threat_match')).toEqual(true);
+    });
+
+    test('it returns false if not a threat match rule', () => {
+      expect(isThreatMatchRule('query')).toEqual(false);
+    });
   });
 });

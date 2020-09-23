@@ -359,6 +359,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       // currently unused
     }
     async clickAddNewIndexPatternButton() {
+      await PageObjects.common.scrollKibanaBodyTop();
       await testSubjects.click('createIndexPatternButton');
     }
 

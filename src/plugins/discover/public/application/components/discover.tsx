@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import moment from 'moment';
 import rison from 'rison-node';
 import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -33,23 +32,19 @@ import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError } from './fetch_error/fetch_error';
+import { DiscoverFetchError } from './fetch_error';
 import './discover.scss';
-import { esFilters } from '../../../../data/public';
+import { esFilters, search } from '../../../../data/public';
 
 export function Discover({
   addColumn,
-  bucketInterval,
-  config,
   fetch,
-  fetchError,
   fetchCounter,
+  fetchError,
   fieldCounts,
   histogramData,
   hits,
   indexPattern,
-  indexPatternList,
-  intervalOptions,
   onAddFilter,
   onChangeInterval,
   onRemoveColumn,
@@ -60,7 +55,6 @@ export function Discover({
   resetQuery,
   resultState,
   rows,
-  screenTitle,
   searchSource,
   setIndexPattern,
   showTimeCol,
@@ -74,17 +68,16 @@ export function Discover({
   updateSavedQueryId,
 }: any) {
   const [toggleOn, toggleChart] = useState(true);
-  const toMoment = function (datetime: string) {
-    if (!datetime) {
-      return '';
-    }
-    return moment(datetime).format(config.get('dateFormat'));
-  };
   if (!timeRange) {
     return <div>Loading</div>;
   }
   const { TopNavMenu } = getServices().navigation.ui;
-  const { savedSearch, filterManager } = opts;
+  const { savedSearch, filterManager, indexPatternList } = opts;
+  const bucketAggConfig = vis?.data?.aggs?.aggs[1];
+  const bucketInterval =
+    bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+      ? bucketAggConfig.buckets?.getInterval()
+      : undefined;
 
   const getContextAppHref = (anchorId: string) => {
     const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
@@ -110,7 +103,7 @@ export function Discover({
   return (
     <I18nProvider>
       <div className="dscApp" data-fetch-counter={fetchCounter}>
-        <h1 className="euiScreenReaderOnly">{screenTitle}</h1>
+        <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
@@ -118,8 +111,9 @@ export function Discover({
           onQuerySubmit={updateQuery}
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
+          setMenuMountPoint={opts.setHeaderActionMenu}
           savedQueryId={state.savedQuery}
-          screenTitle={screenTitle}
+          screenTitle={savedSearch.title}
           showDatePicker={indexPattern.isTimeBased()}
           showSaveQuery={showSaveQuery}
           showSearchBar={true}
@@ -192,14 +186,12 @@ export function Discover({
                             </EuiFlexItem>
                             <EuiFlexItem className="dscResultCount__actions">
                               <TimechartHeader
-                                from={toMoment(timeRange.from)}
-                                to={toMoment(timeRange.to)}
-                                options={intervalOptions}
+                                dateFormat={opts.config.get('dateFormat')}
+                                timeRange={timeRange}
+                                options={search.aggs.intervalOptions}
                                 onChangeInterval={onChangeInterval}
-                                stateInterval={state.interval}
-                                showScaledInfo={bucketInterval.scaled}
-                                bucketIntervalDescription={bucketInterval.description}
-                                bucketIntervalScale={bucketInterval.scale}
+                                stateInterval={state.interval || ''}
+                                bucketInterval={bucketInterval}
                               />
                             </EuiFlexItem>
                             <EuiFlexItem className="dscResultCount__toggle" grow={false}>

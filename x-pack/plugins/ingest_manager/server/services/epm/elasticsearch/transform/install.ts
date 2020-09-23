@@ -35,7 +35,10 @@ export const installTransformForDataset = async (
   callCluster: CallESAsCurrentUser,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
+  const installation = await getInstallation({
+    savedObjectsClient,
+    pkgName: registryPackage.name,
+  });
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
   if (installation) {
     previousInstalledTransformEsAssets = installation.installed_es.filter(
@@ -143,14 +146,14 @@ async function installTransform({
   // defer validation on put if the source index is not available
   await callCluster('transport.request', {
     method: 'PUT',
-    path: `_transform/${transform.installationName}`,
+    path: `/_transform/${transform.installationName}`,
     query: 'defer_validation=true',
     body: transform.content,
   });
 
   await callCluster('transport.request', {
     method: 'POST',
-    path: `_transform/${transform.installationName}/_start`,
+    path: `/_transform/${transform.installationName}/_start`,
   });
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };

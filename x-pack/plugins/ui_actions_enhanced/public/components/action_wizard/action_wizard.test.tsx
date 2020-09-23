@@ -82,3 +82,18 @@ test('If not enough license, button is disabled', () => {
 
   expect(screen.getByText(/Go to URL/i)).toBeDisabled();
 });
+
+test('if action is beta, beta badge is shown', () => {
+  const betaUrl = new ActionFactory(
+    {
+      ...urlDrilldownActionFactory,
+      isBeta: true,
+    },
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
+  );
+  const screen = render(<Demo actionFactories={[dashboardFactory, betaUrl]} />);
+  expect(screen.getByText(/Beta/i)).toBeVisible();
+});

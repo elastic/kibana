@@ -33,13 +33,13 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import {
   getDependentVar,
   getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
-  ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,

@@ -67,6 +67,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
+  getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
 }
@@ -74,7 +75,8 @@ export interface DiscoverServices {
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  getEmbeddableInjector: any
 ): Promise<DiscoverServices> {
   const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
@@ -94,6 +96,7 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
+    getEmbeddableInjector,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,

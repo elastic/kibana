@@ -16,6 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
@@ -78,10 +79,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register space/feature control
      */
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       icon: 'logoEnterpriseSearch',
       app: [
         'kibana',

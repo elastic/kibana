@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { NodeSubMenu, subMenuAssets } from './submenu';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NodeSubMenu } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
-import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
+import { useNavigateOrReplace } from './use_navigate_or_replace';
+import { fontSize } from './font_size';
+import { useCubeAssets } from './use_cube_assets';
+import { useSymbolIDs } from './use_symbol_ids';
+import { useColors } from './use_colors';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -109,6 +111,8 @@ const UnstyledProcessEventDot = React.memo(
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
+    const symbolIDs = useSymbolIDs();
+
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
@@ -119,6 +123,7 @@ const UnstyledProcessEventDot = React.memo(
     // Node (html id=) IDs
     const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
+    const originID = useSelector(selectors.originID);
     const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
     if (nodeID === undefined) {
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
@@ -191,7 +196,7 @@ const UnstyledProcessEventDot = React.memo(
      *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
      *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
      */
-    const scaledTypeSize = calculateResolverFontSize(xScale, 18.75, 12.5);
+    const scaledTypeSize = fontSize(xScale, 18.75, 12.5);
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
@@ -212,7 +217,7 @@ const UnstyledProcessEventDot = React.memo(
           })
         | null;
     } = React.createRef();
-    const { colorMap, cubeAssetsForNode } = useResolverTheme();
+    const colorMap = useColors();
     const {
       backingFill,
       cubeSymbol,
@@ -220,7 +225,7 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(
+    } = useCubeAssets(
       isProcessTerminated,
       /**
        * There is no definition for 'trigger process' yet. return false.
@@ -231,8 +236,19 @@ const UnstyledProcessEventDot = React.memo(
 
     const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
+    const isOrigin = nodeID === originID;
 
     const dispatch = useResolverDispatch();
+    const processDetailHref = useSelector((state: ResolverState) =>
+      selectors.relativeHref(state)({
+        panelView: 'nodeDetail',
+        panelParameters: { nodeID },
+      })
+    );
+
+    const processDetailNavProps = useNavigateOrReplace({
+      search: processDetailHref,
+    });
 
     const handleFocus = useCallback(() => {
       dispatch({
@@ -241,64 +257,19 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const handleRelatedEventRequest = useCallback(() => {
-      dispatch({
-        type: 'userRequestedRelatedEventData',
-        payload: nodeID,
-      });
-    }, [dispatch, nodeID]);
-
-    const pushToQueryParams = useReplaceBreadcrumbParameters();
-
-    const handleClick = useCallback(() => {
-      if (animationTarget.current?.beginElement) {
-        animationTarget.current.beginElement();
-      }
-      dispatch({
-        type: 'userSelectedResolverNode',
-        payload: nodeID,
-      });
-      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
-
-    /**
-     * Enumerates the stats for related events to display with the node as options,
-     * generally in the form `number of related events in category` `category title`
-     * e.g. "10 DNS", "230 File"
-     */
-
-    const relatedEventOptions = useMemo(() => {
-      const relatedStatsList = [];
-
-      if (!relatedEventStats) {
-        // Return an empty set of options if there are no stats to report
-        return [];
-      }
-      // If we have entries to show, map them into options to display in the selectable list
-
-      for (const [category, total] of Object.entries(relatedEventStats.events.byCategory)) {
-        relatedStatsList.push({
-          prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: category,
-          action: () => {
-            dispatch({
-              type: 'userSelectedRelatedEventCategory',
-              payload: {
-                subject: event,
-                category,
-              },
-            });
-
-            pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
-          },
+    const handleClick = useCallback(
+      (clickEvent) => {
+        if (animationTarget.current?.beginElement) {
+          animationTarget.current.beginElement();
+        }
+        dispatch({
+          type: 'userSelectedResolverNode',
+          payload: nodeID,
         });
-      }
-      return relatedStatsList;
-    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
-
-    const relatedEventStatusOrOptions = !relatedEventStats
-      ? subMenuAssets.initialMenuStatus
-      : relatedEventOptions;
+        processDetailNavProps.onClick(clickEvent);
+      },
+      [animationTarget, dispatch, nodeID, processDetailNavProps]
+    );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.relatedEventTotalForProcess(state)(event as ResolverEvent)
@@ -328,9 +299,9 @@ const UnstyledProcessEventDot = React.memo(
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
           onClick={
-            () => {
+            (clickEvent) => {
               handleFocus();
-              handleClick();
+              handleClick(clickEvent);
             } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
@@ -350,7 +321,7 @@ const UnstyledProcessEventDot = React.memo(
         >
           <StyledOuterGroup>
             <use
-              xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+              xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
               x={-15.35}
               y={-15.35}
@@ -359,6 +330,20 @@ const UnstyledProcessEventDot = React.memo(
               height={markerSize * 1.5}
               className="backing"
             />
+            {isOrigin && (
+              <use
+                xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
+                fill="transparent" // Transparent so we don't double up on the default hover
+                x={-15.35}
+                y={-15.35}
+                stroke={strokeColor}
+                strokeOpacity={0.35}
+                strokeDashoffset={0}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="origin"
+              />
+            )}
             <use
               role="presentation"
               xlinkHref={cubeSymbol}
@@ -392,7 +377,14 @@ const UnstyledProcessEventDot = React.memo(
             color={colorMap.descriptionText}
             isDisplaying={isShowingDescriptionText}
           >
-            {descriptionText}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.processDescription"
+              defaultMessage="{originText}{descriptionText}"
+              values={{
+                originText: isOrigin ? 'Analyzed Event · ' : '',
+                descriptionText,
+              }}
+            />
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
@@ -440,13 +432,8 @@ const UnstyledProcessEventDot = React.memo(
             <EuiFlexItem grow={false} className="related-dropdown">
               {grandTotal !== null && grandTotal > 0 && (
                 <NodeSubMenu
-                  count={grandTotal}
-                  buttonBorderColor={labelButtonFill}
                   buttonFill={colorMap.resolverBackground}
-                  menuAction={handleRelatedEventRequest}
-                  menuTitle={subMenuAssets.relatedEvents.title}
-                  projectionMatrix={projectionMatrix}
-                  optionsWithActions={relatedEventStatusOrOptions}
+                  relatedEventStats={relatedEventStats}
                   nodeID={nodeID}
                 />
               )}
