@@ -17,7 +17,6 @@ import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
-import { ElasticsearchTlsAdapter, TLS } from '../tls';
 
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
@@ -50,7 +49,6 @@ export function compose(
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
     ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
-    tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),

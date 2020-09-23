@@ -17,11 +17,9 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { SiemNavigation } from '../../common/components/navigation';
-import { KpiHostsComponent } from '../components/kpi_hosts';
-import { manageQuery } from '../../common/components/page/manage_query';
+import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { KpiHostsQuery } from '../containers/kpi_hosts';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
@@ -48,8 +46,6 @@ import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
-
-const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
   ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
@@ -109,27 +105,14 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                   title={i18n.PAGE_TITLE}
                 />
 
-                <KpiHostsQuery
-                  endDate={to}
+                <HostsKpiComponent
                   filterQuery={filterQuery}
+                  from={from}
+                  setQuery={setQuery}
+                  to={to}
                   skip={isInitializing}
-                  sourceId="default"
-                  startDate={from}
-                >
-                  {({ kpiHosts, loading, id, inspect, refetch }) => (
-                    <KpiHostsComponentManage
-                      data={kpiHosts}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostsQuery>
+                  narrowDateRange={narrowDateRange}
+                />
 
                 <EuiSpacer />
 

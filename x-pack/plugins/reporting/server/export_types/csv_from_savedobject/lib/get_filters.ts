@@ -6,7 +6,7 @@
 
 import { badRequest } from 'boom';
 import moment from 'moment-timezone';
-import { TimeRangeParams } from '../../../types';
+import { TimeRangeParams } from '../../common';
 import { Filter, QueryFilter, SavedSearchObjectAttributes, SearchSourceFilter } from '../types';
 
 export function getFilters(

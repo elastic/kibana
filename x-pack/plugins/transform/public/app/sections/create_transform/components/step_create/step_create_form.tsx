@@ -9,13 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
-  // Module '"@elastic/eui"' has no exported member 'EuiCard'.
-  // @ts-ignore
   EuiCard,
   EuiCopy,
-  // Module '"@elastic/eui"' has no exported member 'EuiDescribedFormGroup'.
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +25,10 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
+import type {
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
   isPutTransformsResponseSchema,
@@ -45,6 +43,7 @@ import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
+import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -60,16 +59,16 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
   };
 }
 
-interface Props {
+export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
-  transformConfig: any;
+  transformConfig: PutTransformsRequestSchema;
   overrides: StepDetailsExposedState;
   timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<Props> = React.memo(
+export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
@@ -85,7 +84,6 @@ export const StepCreateForm: FC<Props> = React.memo(
 
     const deps = useAppDependencies();
     const indexPatterns = deps.data.indexPatterns;
-    const uiSettings = deps.uiSettings;
     const toastNotifications = useToastNotifications();
 
     useEffect(() => {
@@ -191,35 +189,14 @@ export const StepCreateForm: FC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await indexPatterns.make();
-
-        Object.assign(newIndexPattern, {
-          id: '',
-          title: indexPatternName,
-          timeFieldName,
-        });
-        const id = await newIndexPattern.create();
-
-        await indexPatterns.clearCache();
-
-        // id returns false if there's a duplicate index pattern.
-        if (id === false) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
-              values: { indexPatternName },
-            })
-          );
-          setLoading(false);
-          return;
-        }
-
-        // check if there's a default index pattern, if not,
-        // set the newly created one as the default index pattern.
-        if (!uiSettings.get('defaultIndex')) {
-          await uiSettings.set('defaultIndex', id);
-        }
+        const newIndexPattern = await indexPatterns.createAndSave(
+          {
+            title: indexPatternName,
+            timeFieldName,
+          },
+          false,
+          true
+        );
 
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
@@ -228,22 +205,32 @@ export const StepCreateForm: FC<Props> = React.memo(
           })
         );
 
-        setIndexPatternId(id);
+        setIndexPatternId(newIndexPattern.id);
         setLoading(false);
         return true;
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
-            defaultMessage:
-              'An error occurred creating the Kibana index pattern {indexPatternName}:',
-            values: { indexPatternName },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
-          ),
-        });
-        setLoading(false);
-        return false;
+        if (e instanceof DuplicateIndexPatternError) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
+              values: { indexPatternName },
+            })
+          );
+        } else {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}:',
+              values: { indexPatternName },
+            }),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
+          });
+          setLoading(false);
+          return false;
+        }
       }
     };
 
@@ -267,8 +254,11 @@ export const StepCreateForm: FC<Props> = React.memo(
           ) {
             const percent =
               getTransformProgress({
-                id: transformConfig.id,
-                config: transformConfig,
+                id: transformId,
+                config: {
+                  ...transformConfig,
+                  id: transformId,
+                },
                 stats: stats.transforms[0],
               }) || 0;
             setProgressPercentComplete(percent);
