@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './url_drilldown';
+import { PluginInitializerContext } from 'src/core/public';
+import { UrlDrilldownPlugin } from './plugin';
+
+export function plugin(context: PluginInitializerContext) {
+  return new UrlDrilldownPlugin(context);
+}
