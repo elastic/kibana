@@ -558,10 +558,6 @@ export interface Source {
   NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
-
-  OverviewNetwork?: Maybe<OverviewNetworkData>;
-
-  OverviewHost?: Maybe<OverviewHostData>;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1834,64 +1830,6 @@ export interface NetworkHttpItem {
   statuses: string[];
 }
 
-export interface OverviewNetworkData {
-  auditbeatSocket?: Maybe<number>;
-
-  filebeatCisco?: Maybe<number>;
-
-  filebeatNetflow?: Maybe<number>;
-
-  filebeatPanw?: Maybe<number>;
-
-  filebeatSuricata?: Maybe<number>;
-
-  filebeatZeek?: Maybe<number>;
-
-  packetbeatDNS?: Maybe<number>;
-
-  packetbeatFlow?: Maybe<number>;
-
-  packetbeatTLS?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: Maybe<number>;
-
-  auditbeatFIM?: Maybe<number>;
-
-  auditbeatLogin?: Maybe<number>;
-
-  auditbeatPackage?: Maybe<number>;
-
-  auditbeatProcess?: Maybe<number>;
-
-  auditbeatUser?: Maybe<number>;
-
-  endgameDns?: Maybe<number>;
-
-  endgameFile?: Maybe<number>;
-
-  endgameImageLoad?: Maybe<number>;
-
-  endgameNetwork?: Maybe<number>;
-
-  endgameProcess?: Maybe<number>;
-
-  endgameRegistry?: Maybe<number>;
-
-  endgameSecurity?: Maybe<number>;
-
-  filebeatSystemModule?: Maybe<number>;
-
-  winlogbeatSecurity?: Maybe<number>;
-
-  winlogbeatMWSysmonOperational?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -2489,24 +2427,6 @@ export interface NetworkHttpSourceArgs {
 
   defaultIndex: string[];
 }
-export interface OverviewNetworkSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
 export interface IndicesExistSourceStatusArgs {
   defaultIndex: string[];
 }
@@ -2943,10 +2863,6 @@ export namespace SourceResolvers {
     NetworkDnsHistogram?: NetworkDnsHistogramResolver<NetworkDsOverTimeData, TypeParent, TContext>;
 
     NetworkHttp?: NetworkHttpResolver<NetworkHttpData, TypeParent, TContext>;
-
-    OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
-
-    OverviewHost?: OverviewHostResolver<Maybe<OverviewHostData>, TypeParent, TContext>;
     /** Just a simple example to get the app name */
     whoAmI?: WhoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
   }
@@ -3294,36 +3210,6 @@ export namespace SourceResolvers {
     sort: NetworkHttpSortField;
 
     timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
-  export type OverviewNetworkResolver<
-    R = Maybe<OverviewNetworkData>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, OverviewNetworkArgs>;
-  export interface OverviewNetworkArgs {
-    id?: Maybe<string>;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-  }
-
-  export type OverviewHostResolver<
-    R = Maybe<OverviewHostData>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, OverviewHostArgs>;
-  export interface OverviewHostArgs {
-    id?: Maybe<string>;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
   }
@@ -7598,209 +7484,6 @@ export namespace NetworkHttpItemResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace OverviewNetworkDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = OverviewNetworkData> {
-    auditbeatSocket?: AuditbeatSocketResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatCisco?: FilebeatCiscoResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatNetflow?: FilebeatNetflowResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatPanw?: FilebeatPanwResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatSuricata?: FilebeatSuricataResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatZeek?: FilebeatZeekResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatDNS?: PacketbeatDnsResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatFlow?: PacketbeatFlowResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatTLS?: PacketbeatTlsResolver<Maybe<number>, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type AuditbeatSocketResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatCiscoResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatNetflowResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatPanwResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatSuricataResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatZeekResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatDnsResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatFlowResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatTlsResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace OverviewHostDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditdResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatFIM?: AuditbeatFimResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatLogin?: AuditbeatLoginResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatPackage?: AuditbeatPackageResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatProcess?: AuditbeatProcessResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatUser?: AuditbeatUserResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameDns?: EndgameDnsResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameFile?: EndgameFileResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameImageLoad?: EndgameImageLoadResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameNetwork?: EndgameNetworkResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameProcess?: EndgameProcessResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameRegistry?: EndgameRegistryResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameSecurity?: EndgameSecurityResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
-
-    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
-
-    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
-      Maybe<number>,
-      TypeParent,
-      TContext
-    >;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type AuditbeatAuditdResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatFimResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatLoginResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatPackageResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatProcessResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatUserResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameDnsResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameFileResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameImageLoadResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameNetworkResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameProcessResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameRegistryResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameSecurityResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatSystemModuleResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatSecurityResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatMwSysmonOperationalResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace SayMyNameResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SayMyName> {
     /** The id of the source */
@@ -9168,8 +8851,6 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
   NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;
-  OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
-  OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
   SayMyName?: SayMyNameResolvers.Resolvers<TContext>;
   TimelineResult?: TimelineResultResolvers.Resolvers<TContext>;
   ColumnHeaderResult?: ColumnHeaderResultResolvers.Resolvers<TContext>;

@@ -17,20 +17,4 @@
  * under the License.
  */
 
-import { DashboardStart } from './plugin';
-
-export type Start = jest.Mocked<DashboardStart>;
-export { mockAttributeService } from './attribute_service/attribute_service.mock';
-
-const createStartContract = (): DashboardStart => {
-  // @ts-ignore
-  const startContract: DashboardStart = {
-    getAttributeService: jest.fn(),
-  };
-
-  return startContract;
-};
-
-export const dashboardPluginMock = {
-  createStartContract,
-};
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
