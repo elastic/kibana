@@ -26,7 +26,6 @@ import { toNumberSchema } from './scalar_to_number_array';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { timelineSchema } from './timeline';
-import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
 import { matrixHistogramSchema } from './matrix_histogram';
@@ -53,7 +52,6 @@ export const schemas = [
   sourceStatusSchema,
   sharedSchema,
   timelineSchema,
-  tlsSchema,
   uncommonProcessesSchema,
   whoAmISchema,
 ];

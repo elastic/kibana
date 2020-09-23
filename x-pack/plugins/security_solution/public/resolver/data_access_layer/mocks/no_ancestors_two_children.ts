@@ -9,7 +9,6 @@ import {
   ResolverTree,
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
-import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
@@ -54,13 +53,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
           entityID,
-          events: [
-            mockEndpointEvent({
-              entityID,
-              name: 'event',
-              timestamp: 0,
-            }),
-          ],
+          events: [],
           nextEvent: null,
         });
       },
