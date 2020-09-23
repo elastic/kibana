@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import fs from 'fs';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
