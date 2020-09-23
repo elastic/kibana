@@ -60,11 +60,11 @@ const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
   };
 };
 
-beforeEach(() => {
-  dateNowMock.mockReturnValue(initialNow);
-});
-
 describe('middleware', () => {
+  beforeEach(() => {
+    dateNowMock.mockReturnValue(initialNow);
+  });
+
   describe('initial state', () => {
     it('sets initial state properly', async () => {
       expect(createStoreSetup(createTrustedAppsServiceMock()).store.getState()).toStrictEqual(
