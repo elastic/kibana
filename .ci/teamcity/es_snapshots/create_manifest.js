@@ -49,6 +49,7 @@ const { execSync } = require('child_process');
       });
 
     const manifest = {
+      id: SNAPSHOT_ID,
       bucket: `kibana-ci-es-snapshots-daily-teamcity/${DESTINATION}`.toString(),
       branch: ES_BRANCH,
       sha: GIT_COMMIT,

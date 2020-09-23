@@ -20,7 +20,9 @@ const BASE_BUCKET_PERMANENT = 'kibana-ci-es-snapshots-daily-teamcity/permanent';
     execSync(`curl '${MANIFEST_URL}' > manifest.json`);
 
     const manifest = JSON.parse(fs.readFileSync('manifest.json'));
-    const { bucket, version } = manifest;
+    const { id, bucket, version } = manifest;
+
+    console.log(`##teamcity[buildNumber '{build.number}-${version}-${id}']`);
 
     const manifestPermanent = {
       ...manifest,
