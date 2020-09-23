@@ -20,14 +20,11 @@
 import React from 'react';
 import {
   htmlIdGenerator,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
   EuiFlexGrid,
-  EuiIconTip,
-  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';

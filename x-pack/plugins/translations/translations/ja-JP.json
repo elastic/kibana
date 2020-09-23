@@ -3854,7 +3854,6 @@
     "visTypeTimeseries.movingAverage.period": "期間",
     "visTypeTimeseries.movingAverage.windowSizeHint": "ウィンドウは、必ず、期間のサイズの 2 倍以上でなければなりません",
     "visTypeTimeseries.movingAverage.windowSizeLabel": "ウィンドウサイズ",
-    "visTypeTimeseries.multivalueRow.valueLabel": "値:",
     "visTypeTimeseries.noButtonLabel": "いいえ",
     "visTypeTimeseries.noDataDescription": "選択されたメトリックに表示するデータがありません",
     "visTypeTimeseries.percentile.aggregationLabel": "集約",
