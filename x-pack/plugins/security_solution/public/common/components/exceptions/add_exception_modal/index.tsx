@@ -222,7 +222,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
     if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
       return defaultEndpointExceptionItems(
-        exceptionListType,
         ruleExceptionList.list_id,
         ruleName,
         alertData.nonEcsData
@@ -329,13 +328,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
+  const addExceptionMessage =
+    exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -442,7 +442,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               isDisabled={isSubmitButtonDisabled}
               fill
             >
-              {i18n.ADD_EXCEPTION}
+              {addExceptionMessage}
             </EuiButton>
           </EuiModalFooter>
         )}

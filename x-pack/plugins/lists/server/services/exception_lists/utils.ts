@@ -71,7 +71,6 @@ export const transformSavedObjectToExceptionList = ({
     version: _version,
     attributes: {
       /* eslint-disable @typescript-eslint/naming-convention */
-      _tags,
       created_at,
       created_by,
       description,
@@ -94,7 +93,6 @@ export const transformSavedObjectToExceptionList = ({
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    _tags,
     _version,
     created_at,
     created_by,
@@ -126,7 +124,6 @@ export const transformSavedObjectUpdateToExceptionList = ({
   const {
     version: _version,
     attributes: {
-      _tags,
       description,
       immutable,
       meta,
@@ -144,7 +141,6 @@ export const transformSavedObjectUpdateToExceptionList = ({
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    _tags: _tags ?? exceptionList._tags,
     _version,
     created_at: exceptionList.created_at,
     created_by: exceptionList.created_by,
@@ -175,7 +171,6 @@ export const transformSavedObjectToExceptionListItem = ({
     version: _version,
     attributes: {
       /* eslint-disable @typescript-eslint/naming-convention */
-      _tags,
       comments,
       created_at,
       created_by,
@@ -199,7 +194,6 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: item"
   // TODO: Do a throw if item_id or entries is not defined.
   return {
-    _tags,
     _version,
     comments: comments ?? [],
     created_at,
@@ -232,7 +226,6 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
-      _tags,
       comments,
       description,
       entries,
@@ -252,7 +245,6 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // TODO: Update exception list and item types (perhaps separating out) so as to avoid
   // defaulting
   return {
-    _tags: _tags ?? exceptionListItem._tags,
     _version,
     comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,

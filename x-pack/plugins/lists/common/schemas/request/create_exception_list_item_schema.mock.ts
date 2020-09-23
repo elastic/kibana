@@ -15,13 +15,11 @@ import {
   NAME,
   NAMESPACE_TYPE,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { CreateExceptionListItemSchema } from './create_exception_list_item_schema';
 
 export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
-  _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,

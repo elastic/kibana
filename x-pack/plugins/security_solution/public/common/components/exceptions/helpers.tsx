@@ -33,7 +33,6 @@ import {
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
-  ExceptionListType,
   EntryNested,
   OsTypeArray,
 } from '../../../shared_imports';
@@ -149,18 +148,15 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
   }));
 
 export const getNewExceptionItem = ({
-  listType,
   listId,
   namespaceType,
   ruleName,
 }: {
-  listType: ExceptionListType;
   listId: string;
   namespaceType: NamespaceType;
   ruleName: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
-    _tags: [listType],
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
@@ -423,7 +419,6 @@ export const entryHasNonEcsType = (
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
 export const defaultEndpointExceptionItems = (
-  listType: ExceptionListType,
   listId: string,
   ruleName: string,
   alertData: TimelineNonEcsData[]
@@ -443,7 +438,7 @@ export const defaultEndpointExceptionItems = (
 
   return [
     {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
+      ...getNewExceptionItem({ listId, namespaceType, ruleName }),
       entries: [
         {
           field: 'file.Ext.code_signature',

@@ -9,8 +9,6 @@ import * as t from 'io-ts';
 import {
   ListId,
   Tags,
-  _Tags,
-  _tags,
   description,
   exceptionListType,
   meta,
@@ -36,7 +34,6 @@ export const createExceptionListSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      _tags, // defaults to empty array if not set during decode
       list_id: DefaultUuid, // defaults to a GUID (UUID v4) string if not set during decode
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
@@ -51,9 +48,8 @@ export type CreateExceptionListSchema = t.OutputOf<typeof createExceptionListSch
 // This type is used after a decode since some things are defaults after a decode.
 export type CreateExceptionListSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof createExceptionListSchema>>,
-  '_tags' | 'tags' | 'list_id' | 'namespace_type'
+  'tags' | 'list_id' | 'namespace_type'
 > & {
-  _tags: _Tags;
   tags: Tags;
   list_id: ListId;
   namespace_type: NamespaceType;

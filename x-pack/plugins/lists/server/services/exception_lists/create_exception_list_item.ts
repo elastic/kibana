@@ -21,7 +21,6 @@ import {
   NamespaceType,
   OsTypeArray,
   Tags,
-  _Tags,
 } from '../../../common/schemas';
 
 import {
@@ -31,7 +30,6 @@ import {
 } from './utils';
 
 interface CreateExceptionListItemOptions {
-  _tags: _Tags;
   comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
@@ -45,10 +43,10 @@ interface CreateExceptionListItemOptions {
   tags: Tags;
   tieBreaker?: string;
   type: ExceptionListItemType;
+  osTypes: OsTypeArray;
 }
 
 export const createExceptionListItem = async ({
-  _tags,
   comments,
   entries,
   itemId,
@@ -56,6 +54,7 @@ export const createExceptionListItem = async ({
   savedObjectsClient,
   namespaceType,
   name,
+  osTypes,
   description,
   meta,
   user,
@@ -69,10 +68,8 @@ export const createExceptionListItem = async ({
     incomingComments: comments,
     user,
   });
-  const osTypes =
-    _tags.filter((tag) => tag.startsWith('os:'))?.map((tag) => tag.replace('os:', '')) ?? [];
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags,
+    _tags: [],
     comments: transformedComments,
     created_at: dateNow,
     created_by: user,

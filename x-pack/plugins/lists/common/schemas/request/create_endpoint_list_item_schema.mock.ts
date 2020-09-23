@@ -12,13 +12,11 @@ import {
   META,
   NAME,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { CreateEndpointListItemSchema } from './create_endpoint_list_item_schema';
 
 export const getCreateEndpointListItemSchemaMock = (): CreateEndpointListItemSchema => ({
-  _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENDPOINT_ENTRIES,

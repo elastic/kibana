@@ -17,7 +17,6 @@ import {
 import { CreateExceptionListSchema } from './create_exception_list_schema';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
-  _tags: [],
   description: DESCRIPTION,
   list_id: undefined,
   meta: META,

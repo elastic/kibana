@@ -29,7 +29,6 @@ import {
 
 export const exceptionListSchema = t.exact(
   t.type({
-    _tags,
     _version: _versionOrUndefined,
     created_at,
     created_by,
@@ -49,5 +48,10 @@ export const exceptionListSchema = t.exact(
     version,
   })
 );
-
 export type ExceptionListSchema = t.TypeOf<typeof exceptionListSchema>;
+
+export const exceptionListPrivateSchema = t.intersection([
+  exceptionListSchema,
+  t.exact(t.type({ _tags })),
+]);
+export type ExceptionListPrivateSchema = t.TypeOf<typeof exceptionListPrivateSchema>;
