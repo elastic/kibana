@@ -11,9 +11,7 @@ import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 
 const initialState: DataState = {
   relatedEvents: new Map(),
-  relatedEventsReady: new Map(),
   resolverComponentInstanceID: undefined,
-  tree: {},
 };
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -44,7 +42,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
     return nextState;
   } else if (action.type === 'appAbortedResolverDataRequest') {
-    if (treeFetcherParameters.equal(action.payload, state.tree.pendingRequestParameters)) {
+    if (treeFetcherParameters.equal(action.payload, state.tree?.pendingRequestParameters)) {
       // the request we were awaiting was aborted
       const nextState: DataState = {
         ...state,
@@ -81,7 +79,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {
     /** Only handle this if we are expecting a response */
-    if (state.tree.pendingRequestParameters !== undefined) {
+    if (state.tree?.pendingRequestParameters !== undefined) {
       const nextState: DataState = {
         ...state,
         tree: {
@@ -97,19 +95,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
-  } else if (
-    action.type === 'userRequestedRelatedEventData' ||
-    action.type === 'appDetectedMissingEventData'
-  ) {
-    const nextState: DataState = {
-      ...state,
-      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
-    };
-    return nextState;
   } else if (action.type === 'serverReturnedRelatedEventData') {
     const nextState: DataState = {
       ...state,
-      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload.entityID, true]]),
       relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
     return nextState;
