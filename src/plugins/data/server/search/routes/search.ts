@@ -62,11 +62,9 @@ export function registerSearchRoute(
         return res.ok({
           body: {
             ...response,
-            ...(isEsResponse(response)
-              ? {
-                  rawResponse: shimHitsTotal(response.rawResponse),
-                }
-              : {}),
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
           },
         });
       } catch (err) {
