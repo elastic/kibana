@@ -22,7 +22,7 @@ import { EuiPanel } from '@elastic/eui';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
-import { ScriptExpandedRow } from './script_expanded_row';
+import { ScriptExpandedRow } from '../synthetics/script_expanded_row';
 
 interface Props {
   ping: Ping;
