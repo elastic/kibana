@@ -185,30 +185,5 @@ describe('<PipelinesCreate />', () => {
         expect(find('savePipelineError').find('li').length).toBe(8);
       });
     });
-
-    describe('test pipeline', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup();
-
-          const { waitFor } = testBed;
-
-          await waitFor('pipelineForm');
-        });
-      });
-
-      test('should open the test pipeline flyout', async () => {
-        const { actions, exists, find, waitFor } = testBed;
-
-        await act(async () => {
-          actions.clickAddDocumentsButton();
-          await waitFor('testPipelineFlyout');
-        });
-
-        // Verify test pipeline flyout opens
-        expect(exists('testPipelineFlyout')).toBe(true);
-        expect(find('testPipelineFlyout.title').text()).toBe('Test pipeline');
-      });
-    });
   });
 });

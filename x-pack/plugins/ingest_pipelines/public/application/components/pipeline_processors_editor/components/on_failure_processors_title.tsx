@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../shared_imports';
+import { useKibana } from '../../../../shared_imports';
 
 export const OnFailureProcessorsTitle: FunctionComponent = () => {
   const { services } = useKibana();
