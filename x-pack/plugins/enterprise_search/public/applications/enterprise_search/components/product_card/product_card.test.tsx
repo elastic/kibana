@@ -36,7 +36,6 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
-    expect(button.prop('data-test-subj')).toEqual('LaunchAppSearchButton');
     expect(button.prop('children')).toEqual('Launch App Search');
 
     button.simulate('click');
@@ -53,7 +52,6 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
-    expect(button.prop('data-test-subj')).toEqual('LaunchWorkplaceSearchButton');
     expect(button.prop('children')).toEqual('Launch Workplace Search');
 
     button.simulate('click');
@@ -69,7 +67,6 @@ describe('ProductCard', () => {
     const card = wrapper.find(EuiCard).dive().shallow();
     const button = card.find(EuiButton);
 
-    expect(button.prop('data-test-subj')).toEqual('SetupWorkplaceSearchButton');
     expect(button.prop('children')).toEqual('Setup Workplace Search');
   });
 });

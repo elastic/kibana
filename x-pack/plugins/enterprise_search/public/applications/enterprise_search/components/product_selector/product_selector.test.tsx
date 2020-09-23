@@ -10,9 +10,6 @@ import React, { useContext } from 'react';
 import { shallow } from 'enzyme';
 import { EuiPage } from '@elastic/eui';
 
-import '../../../__mocks__/kea.mock';
-import { useValues } from 'kea';
-
 import { ProductSelector } from './';
 import { ProductCard } from '../product_card';
 
