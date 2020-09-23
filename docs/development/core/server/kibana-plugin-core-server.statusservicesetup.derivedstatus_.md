@@ -14,7 +14,7 @@ derivedStatus$: Observable<ServiceStatus>;
 
 ## Remarks
 
-By default, plugins inherit this derived status from their dependencies. Calling  overrides this default status.
+By default, plugins are available. Calling  overrides this default status.
 
 This may emit multliple times for a single status change event as propagates through the dependency tree
 

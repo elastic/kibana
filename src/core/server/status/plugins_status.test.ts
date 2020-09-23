@@ -27,18 +27,6 @@ import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('PluginStatusService', () => {
-  const coreAllAvailable$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
-    savedObjects: { level: ServiceStatusLevels.available, summary: 'savedObjects avail' },
-  });
-  const coreOneDegraded$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
-    savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
-  });
-  const coreOneCriticalOneDegraded$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.critical, summary: 'elasticsearch critical' },
-    savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
-  });
   const pluginDependencies: Map<PluginName, PluginName[]> = new Map([
     ['a', []],
     ['b', ['a']],
@@ -46,84 +34,11 @@ describe('PluginStatusService', () => {
   ]);
 
   describe('getDerivedStatus$', () => {
-    it(`defaults to core's most severe status`, async () => {
-      const serviceAvailable = new PluginsStatusService({
-        core$: coreAllAvailable$,
-        pluginDependencies,
-      });
-      expect(await serviceAvailable.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
+    it('defaults to available', async () => {
+      const service = new PluginsStatusService({ pluginDependencies });
+      expect(await service.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.available,
-        summary: 'All dependencies are available',
-      });
-
-      const serviceDegraded = new PluginsStatusService({
-        core$: coreOneDegraded$,
-        pluginDependencies,
-      });
-      expect(await serviceDegraded.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.degraded,
-        summary: '[savedObjects]: savedObjects degraded',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
-      });
-
-      const serviceCritical = new PluginsStatusService({
-        core$: coreOneCriticalOneDegraded$,
-        pluginDependencies,
-      });
-      expect(await serviceCritical.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
-      });
-    });
-
-    it(`provides a summary status when core and dependencies are at same severity level`, async () => {
-      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
-      service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a is degraded' }));
-      expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.degraded,
-        summary: '[2] services are degraded',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
-      });
-    });
-
-    it(`allows dependencies status to take precedence over lower severity core statuses`, async () => {
-      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
-      service.set('a', of({ level: ServiceStatusLevels.unavailable, summary: 'a is not working' }));
-      expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.unavailable,
-        summary: '[a]: a is not working',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
-      });
-    });
-
-    it(`allows core status to take precedence over lower severity dependencies statuses`, async () => {
-      const service = new PluginsStatusService({
-        core$: coreOneCriticalOneDegraded$,
-        pluginDependencies,
-      });
-      service.set('a', of({ level: ServiceStatusLevels.unavailable, summary: 'a is not working' }));
-      expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
-      });
-    });
-
-    it(`allows a severe dependency status to take precedence over a less severe dependency status`, async () => {
-      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
-      service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a is degraded' }));
-      service.set('b', of({ level: ServiceStatusLevels.unavailable, summary: 'b is not working' }));
-      expect(await service.getDerivedStatus$('c').pipe(first()).toPromise()).toEqual({
-        level: ServiceStatusLevels.unavailable,
-        summary: '[b]: b is not working',
-        detail: 'See the status page for more information',
-        meta: expect.any(Object),
+        summary: 'Available',
       });
     });
   });
@@ -131,98 +46,35 @@ describe('PluginStatusService', () => {
   describe('getAll$', () => {
     it('defaults to empty record if no plugins', async () => {
       const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
         pluginDependencies: new Map(),
       });
       expect(await service.getAll$().pipe(first()).toPromise()).toEqual({});
     });
 
-    it('defaults to core status when no plugin statuses are set', async () => {
-      const serviceAvailable = new PluginsStatusService({
-        core$: coreAllAvailable$,
+    it('defaults to available when no plugin statuses are set', async () => {
+      const service = new PluginsStatusService({
         pluginDependencies,
       });
-      expect(await serviceAvailable.getAll$().pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-        b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-        c: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-      });
-
-      const serviceDegraded = new PluginsStatusService({
-        core$: coreOneDegraded$,
-        pluginDependencies,
-      });
-      expect(await serviceDegraded.getAll$().pipe(first()).toPromise()).toEqual({
-        a: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-        b: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-        c: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[3] services are degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-      });
-
-      const serviceCritical = new PluginsStatusService({
-        core$: coreOneCriticalOneDegraded$,
-        pluginDependencies,
-      });
-      expect(await serviceCritical.getAll$().pipe(first()).toPromise()).toEqual({
-        a: {
-          level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-        b: {
-          level: ServiceStatusLevels.critical,
-          summary: '[2] services are critical',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-        c: {
-          level: ServiceStatusLevels.critical,
-          summary: '[3] services are critical',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
+      expect(await service.getAll$().pipe(first()).toPromise()).toEqual({
+        a: { level: ServiceStatusLevels.available, summary: 'Available' },
+        b: { level: ServiceStatusLevels.available, summary: 'Available' },
+        c: { level: ServiceStatusLevels.available, summary: 'Available' },
       });
     });
 
     it('uses the manually set status level if plugin specifies one', async () => {
-      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
-      service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
+      const service = new PluginsStatusService({ pluginDependencies });
+      service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a status' }));
 
       expect(await service.getAll$().pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
-        b: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
-        c: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
+        a: { level: ServiceStatusLevels.degraded, summary: 'a status' },
+        b: { level: ServiceStatusLevels.available, summary: 'Available' },
+        c: { level: ServiceStatusLevels.available, summary: 'Available' },
       });
     });
 
     it('updates when a new plugin status observable is set', async () => {
       const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
         pluginDependencies: new Map([['a', []]]),
       });
       const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
@@ -236,7 +88,7 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' } },
+        { a: { level: ServiceStatusLevels.available, summary: 'Available' } },
         { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
@@ -247,44 +99,37 @@ describe('PluginStatusService', () => {
   describe('getDependenciesStatus$', () => {
     it('only includes dependencies of specified plugin', async () => {
       const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
         pluginDependencies,
       });
       expect(await service.getDependenciesStatus$('a').pipe(first()).toPromise()).toEqual({});
       expect(await service.getDependenciesStatus$('b').pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
+        a: { level: ServiceStatusLevels.available, summary: 'Available' },
       });
       expect(await service.getDependenciesStatus$('c').pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-        b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
+        a: { level: ServiceStatusLevels.available, summary: 'Available' },
+        b: { level: ServiceStatusLevels.available, summary: 'Available' },
       });
     });
 
     it('uses the manually set status level if plugin specifies one', async () => {
-      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
-      service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
+      const service = new PluginsStatusService({ pluginDependencies });
+      service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a status' }));
 
       expect(await service.getDependenciesStatus$('c').pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
-        b: {
-          level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
-          detail: 'See the status page for more information',
-          meta: expect.any(Object),
-        },
+        a: { level: ServiceStatusLevels.degraded, summary: 'a status' },
+        b: { level: ServiceStatusLevels.available, summary: 'Available' },
       });
     });
 
     it('throws error if unknown plugin passed', () => {
-      const service = new PluginsStatusService({ core$: coreAllAvailable$, pluginDependencies });
+      const service = new PluginsStatusService({ pluginDependencies });
       expect(() => {
-        service.getDependenciesStatus$('dont-exist');
+        service.getDependenciesStatus$('doesnt-exist');
       }).toThrowError();
     });
 
     it('debounces events in quick succession', async () => {
       const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
         pluginDependencies,
       });
       const available: ServiceStatus = {

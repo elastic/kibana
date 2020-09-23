@@ -22,13 +22,16 @@ import { map, distinctUntilChanged, switchMap, debounceTime } from 'rxjs/operato
 import { isDeepStrictEqual } from 'util';
 
 import { PluginName } from '../plugins';
-import { ServiceStatus, CoreStatus } from './types';
-import { getSummaryStatus } from './get_summary_status';
+import { ServiceStatus, ServiceStatusLevels } from './types';
 
 interface Deps {
-  core$: Observable<CoreStatus>;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
 }
+
+const DEFAULT_PLUGIN_STATUS: Observable<ServiceStatus> = of({
+  level: ServiceStatusLevels.available,
+  summary: 'Available',
+});
 
 export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
@@ -57,16 +60,7 @@ export class PluginsStatusService {
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
-      map(([coreStatus, pluginStatuses]) => {
-        return getSummaryStatus(
-          [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
-          {
-            allAvailableSummary: `All dependencies are available`,
-          }
-        );
-      })
-    );
+    return DEFAULT_PLUGIN_STATUS;
   }
 
   private getPluginStatuses$(plugins: PluginName[]): Observable<Record<PluginName, ServiceStatus>> {

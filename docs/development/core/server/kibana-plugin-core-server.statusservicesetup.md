@@ -14,7 +14,7 @@ export interface StatusServiceSetup
 
 ## Remarks
 
-By default, a plugin inherits it's current status from the most severe status level of any Core services and any plugins that it depends on. This default status is available on the  API.
+By default, a plugin is set to available. This default status is available on the  API.
 
 Plugins may customize their status calculation by calling the  API with an Observable. Within this Observable, a plugin may choose to only depend on the status of some of its dependencies, to ignore severe status levels of particular Core services they are not concerned with, or to make its status dependent on other external services.
 
