@@ -25,17 +25,19 @@ describe('7.10.0 lists migrations', () => {
       type: 'so-type',
       updated_at: '2020-06-09T20:18:20.349Z',
     };
-    expect(migration(doc as SavedObjectUnsanitizedDoc<ExceptionListSoSchema>)).toEqual({
-      attributes: {
-        buildNum: 9007199254740991,
-        'securitySolution:defaultAnomalyScore': 59,
-        'securitySolution:enableNewsFeed': false,
-      },
-      id: '8.0.0',
-      migrationVersion: {},
-      references: [],
-      type: 'config',
-      updated_at: '2020-06-09T20:18:20.349Z',
-    });
+    expect(migration((doc as unknown) as SavedObjectUnsanitizedDoc<ExceptionListSoSchema>)).toEqual(
+      {
+        attributes: {
+          buildNum: 9007199254740991,
+          'securitySolution:defaultAnomalyScore': 59,
+          'securitySolution:enableNewsFeed': false,
+        },
+        id: '8.0.0',
+        migrationVersion: {},
+        references: [],
+        type: 'config',
+        updated_at: '2020-06-09T20:18:20.349Z',
+      }
+    );
   });
 });

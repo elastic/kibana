@@ -69,7 +69,8 @@ export const createExceptionListItem = async ({
     incomingComments: comments,
     user,
   });
-  const osTypes = _tags.find((tag) => tag.startsWith('os:'))?.replace('os:', '') ?? [];
+  const osTypes =
+    _tags.filter((tag) => tag.startsWith('os:'))?.map((tag) => tag.replace('os:', '')) ?? [];
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
     comments: transformedComments,

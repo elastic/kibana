@@ -12,11 +12,14 @@ import { Either } from 'fp-ts/lib/Either';
  *   - If undefined, then a default array will be set
  *   - If an array is sent in, then the array will be validated to ensure all elements are type C
  */
-export const DefaultArray = <C extends t.Mixed>(codec: C) =>
-  new t.Type<C[], C[] | undefined, unknown>(
+export const DefaultArray = <C extends t.Mixed>(codec: C) => {
+  const arrType = t.array(codec);
+  type CodecType = t.TypeOf<typeof arrType>;
+  return new t.Type<CodecType, CodecType | undefined, unknown>(
     'DefaultArray',
     t.array(codec).is,
-    (input, context): Either<t.Errors, T[]> =>
-      input == null ? t.success([]) : t.array(codec).validate(input, context),
+    (input, context): Either<t.Errors, CodecType> =>
+      input == null ? t.success([]) : arrType.validate(input, context),
     t.identity
   );
+};

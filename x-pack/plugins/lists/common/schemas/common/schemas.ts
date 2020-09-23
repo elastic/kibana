@@ -329,8 +329,8 @@ export const osType = t.keyof({
 });
 export type OsType = t.TypeOf<typeof osType>;
 
-export const osTypeArrayOrUndefined = DefaultArray(osType);
-export type OsTypeArrayOrUndefined = t.TypeOf<typeof osTypeArrayOrUndefined>;
-
-export const osTypeArray = t.array(osType);
+export const osTypeArray = DefaultArray(osType);
 export type OsTypeArray = t.TypeOf<typeof osTypeArray>;
+
+export const osTypeArrayOrUndefined = t.union([osTypeArray, t.undefined]);
+export type OsTypeArrayOrUndefined = t.OutputOf<typeof osTypeArray>;

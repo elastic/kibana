@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 
 import {
   ItemId,
+  OsTypeArray,
   Tags,
   _Tags,
   _tags,
@@ -17,6 +18,7 @@ import {
   meta,
   name,
   namespace_type,
+  osTypeArrayOrUndefined,
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
@@ -46,6 +48,7 @@ export const createExceptionListItemSchema = t.intersection([
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
+      os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
     })
   ),
@@ -64,4 +67,5 @@ export type CreateExceptionListItemSchemaDecoded = Omit<
   item_id: ItemId;
   entries: EntriesArray;
   namespace_type: NamespaceType;
+  os_types: OsTypeArray;
 };
