@@ -9,7 +9,7 @@ import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
   HostAuthenticationsRequestOptions,
   HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
@@ -107,7 +107,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
-  ? HostOverviewStrategyResponse
+  ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
