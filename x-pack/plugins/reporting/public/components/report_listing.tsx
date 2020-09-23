@@ -41,17 +41,17 @@ export interface Job {
   type: string;
   object_type: string;
   object_title: string;
-  created_by?: string;
+  created_by?: string | false;
   created_at: string;
   started_at?: string;
   completed_at?: string;
   status: string;
   statusLabel: string;
-  max_size_reached: boolean;
+  max_size_reached?: boolean;
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
-  warnings: string[];
+  warnings?: string[];
 }
 
 export interface Props {
@@ -316,7 +316,7 @@ class ReportListingUi extends Component<Props, State> {
             return {
               id: job._id,
               type: source.jobtype,
-              object_type: source.payload.type,
+              object_type: source.payload.objectType,
               object_title: source.payload.title,
               created_by: source.created_by,
               created_at: source.created_at,
