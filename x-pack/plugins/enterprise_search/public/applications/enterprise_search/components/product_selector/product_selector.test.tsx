@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../__mocks__/kea.mock';
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { shallow } from 'enzyme';
 import { EuiPage } from '@elastic/eui';
 
@@ -15,7 +16,7 @@ import { ProductCard } from '../product_card';
 
 describe('ProductSelector', () => {
   it('renders the overview page and product cards with no host set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<ProductSelector access={{}} />);
 
     expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
@@ -24,7 +25,7 @@ describe('ProductSelector', () => {
 
   describe('access checks when host is set', () => {
     beforeEach(() => {
-      (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
+      (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
     });
 
     it('does not render the App Search card if the user does not have access to AS', () => {

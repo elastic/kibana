@@ -8,7 +8,7 @@ import '../__mocks__/shallow_usecontext.mock';
 import '../__mocks__/kea.mock';
 import '../__mocks__/enterprise_search_url.mock';
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
@@ -21,14 +21,14 @@ import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } f
 
 describe('AppSearch', () => {
   it('renders AppSearchUnconfigured when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
   });
 
   it('renders AppSearchConfigured when config.host set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchConfigured)).toHaveLength(1);

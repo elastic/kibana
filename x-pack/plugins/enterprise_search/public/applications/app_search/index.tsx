@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContext, IKibanaContext } from '../index';
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
+import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
@@ -34,7 +34,7 @@ import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
   return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
 };
 

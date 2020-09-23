@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useValues } from 'kea';
 
-import { KibanaContext, IKibanaContext } from '../index';
+import { KibanaLogic } from '../shared/kibana';
 import { IInitialAppData } from '../../../common/types';
 
 import { HttpLogic } from '../shared/http';
@@ -23,7 +23,7 @@ import './index.scss';
 
 export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
   const { errorConnecting } = useValues(HttpLogic);
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
 
   const showErrorConnecting = config.host && errorConnecting;
 
