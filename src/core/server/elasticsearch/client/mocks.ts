@@ -55,10 +55,9 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     // to find everything that we should be mocking
     const descriptors = getAllPropertyDescriptors(obj);
     descriptors
-      .filter((descriptor) => !omitted.includes(descriptor[0]))
-      .forEach((descriptor) => {
-        const key = descriptor[0];
-        if (typeof descriptor[1].value === 'function') {
+      .filter(([key]) => !omitted.includes(key))
+      .forEach(([key, descriptor]) => {
+        if (typeof descriptor.value === 'function') {
           obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
         } else if (typeof obj[key] === 'object' && obj[key] != null) {
           mockify(obj[key], omitted);
