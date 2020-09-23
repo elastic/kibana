@@ -554,10 +554,6 @@ export interface Source {
   NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
-
-  OverviewNetwork?: Maybe<OverviewNetworkData>;
-
-  OverviewHost?: Maybe<OverviewHostData>;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1856,64 +1852,6 @@ export interface NetworkHttpItem {
   statuses: string[];
 }
 
-export interface OverviewNetworkData {
-  auditbeatSocket?: Maybe<number>;
-
-  filebeatCisco?: Maybe<number>;
-
-  filebeatNetflow?: Maybe<number>;
-
-  filebeatPanw?: Maybe<number>;
-
-  filebeatSuricata?: Maybe<number>;
-
-  filebeatZeek?: Maybe<number>;
-
-  packetbeatDNS?: Maybe<number>;
-
-  packetbeatFlow?: Maybe<number>;
-
-  packetbeatTLS?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: Maybe<number>;
-
-  auditbeatFIM?: Maybe<number>;
-
-  auditbeatLogin?: Maybe<number>;
-
-  auditbeatPackage?: Maybe<number>;
-
-  auditbeatProcess?: Maybe<number>;
-
-  auditbeatUser?: Maybe<number>;
-
-  endgameDns?: Maybe<number>;
-
-  endgameFile?: Maybe<number>;
-
-  endgameImageLoad?: Maybe<number>;
-
-  endgameNetwork?: Maybe<number>;
-
-  endgameProcess?: Maybe<number>;
-
-  endgameRegistry?: Maybe<number>;
-
-  endgameSecurity?: Maybe<number>;
-
-  filebeatSystemModule?: Maybe<number>;
-
-  winlogbeatSecurity?: Maybe<number>;
-
-  winlogbeatMWSysmonOperational?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -2480,24 +2418,6 @@ export interface NetworkHttpSourceArgs {
   sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
 }
@@ -3997,132 +3917,6 @@ export namespace GetUsersQuery {
     fakeTotalCount: number;
 
     showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewHostQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewHost: Maybe<OverviewHost>;
-  };
-
-  export type OverviewHost = {
-    __typename?: 'OverviewHostData';
-
-    auditbeatAuditd: Maybe<number>;
-
-    auditbeatFIM: Maybe<number>;
-
-    auditbeatLogin: Maybe<number>;
-
-    auditbeatPackage: Maybe<number>;
-
-    auditbeatProcess: Maybe<number>;
-
-    auditbeatUser: Maybe<number>;
-
-    endgameDns: Maybe<number>;
-
-    endgameFile: Maybe<number>;
-
-    endgameImageLoad: Maybe<number>;
-
-    endgameNetwork: Maybe<number>;
-
-    endgameProcess: Maybe<number>;
-
-    endgameRegistry: Maybe<number>;
-
-    endgameSecurity: Maybe<number>;
-
-    filebeatSystemModule: Maybe<number>;
-
-    winlogbeatSecurity: Maybe<number>;
-
-    winlogbeatMWSysmonOperational: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewNetworkQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewNetwork: Maybe<OverviewNetwork>;
-  };
-
-  export type OverviewNetwork = {
-    __typename?: 'OverviewNetworkData';
-
-    auditbeatSocket: Maybe<number>;
-
-    filebeatCisco: Maybe<number>;
-
-    filebeatNetflow: Maybe<number>;
-
-    filebeatPanw: Maybe<number>;
-
-    filebeatSuricata: Maybe<number>;
-
-    filebeatZeek: Maybe<number>;
-
-    packetbeatDNS: Maybe<number>;
-
-    packetbeatFlow: Maybe<number>;
-
-    packetbeatTLS: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
   };
 
   export type Inspect = {
