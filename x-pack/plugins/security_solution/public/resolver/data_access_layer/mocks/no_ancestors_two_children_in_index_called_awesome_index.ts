@@ -61,7 +61,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
           events: [
             mockEndpointEvent({
               entityID,
-              name: 'event',
+              processName: 'event',
               timestamp: 0,
             }),
           ],
