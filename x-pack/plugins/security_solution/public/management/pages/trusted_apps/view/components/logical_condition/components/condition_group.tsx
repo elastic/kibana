@@ -37,11 +37,11 @@ export const ConditionGroup = memo<ConditionGroupProps>(
     return (
       <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
         {entries.length > 1 && (
-          <AndBadgeFlexItem grow={false}>
+          <AndBadgeFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
             <AndOrBadge type={'and'} includeAntennas={true} />
           </AndBadgeFlexItem>
         )}
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} data-test-subj={getTestId('entries')}>
           {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
             <ConditionEntry
               key={index}

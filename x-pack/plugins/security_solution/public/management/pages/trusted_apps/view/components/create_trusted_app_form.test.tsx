@@ -11,7 +11,7 @@ import {
 import * as reactTestingLibrary from '@testing-library/react';
 import React from 'react';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent, getByTestId } from '@testing-library/dom';
 
 describe('When showing the Trusted App Create Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -38,6 +38,44 @@ describe('When showing the Trusted App Create Form', () => {
     dataTestSub: string = dataTestSubjForForm
   ): HTMLTextAreaElement => {
     return renderResult.getByTestId(`${dataTestSub}-descriptionField`) as HTMLTextAreaElement;
+  };
+  const getCondition = (
+    renderResult: RenderResultType,
+    index: number = 0,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-conditionsBuilder-group1-entry${index}`);
+  };
+  const getAllConditions = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLElement[] => {
+    return Array.from(
+      renderResult.getByTestId(`${dataTestSub}-conditionsBuilder-group1-entries`).children
+    ) as HTMLElement[];
+  };
+  const getConditionRemoveButton = (condition: HTMLElement): HTMLButtonElement => {
+    return getByTestId(condition, `${condition.dataset.testSubj}-remove`) as HTMLButtonElement;
+  };
+  const getConditionFieldSelect = (condition: HTMLElement): HTMLButtonElement => {
+    return getByTestId(condition, `${condition.dataset.testSubj}-field`) as HTMLButtonElement;
+  };
+  const getConditionValue = (condition: HTMLElement): HTMLInputElement => {
+    return getByTestId(condition, `${condition.dataset.testSubj}-value`) as HTMLInputElement;
+  };
+  const getConditionBuilderAndButton = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLButtonElement => {
+    return renderResult.getByTestId(
+      `${dataTestSub}-conditionsBuilder-AndButton`
+    ) as HTMLButtonElement;
+  };
+  const getConditionBuilderAndConnectorBadge = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-conditionsBuilder-group1-andConnector`);
   };
 
   beforeEach(() => {
@@ -84,23 +122,73 @@ describe('When showing the Trusted App Create Form', () => {
     formProps.isInvalid = true;
     formProps.error = 'a top level error';
     const { queryByText } = render();
-    expect(queryByText(formProps.error)).not.toBeNull();
+    expect(queryByText(formProps.error as string)).not.toBeNull();
   });
 
   describe('the condition builder component', () => {
-    it.todo('should show an initial condition entry');
+    it('should show an initial condition entry with labels', () => {
+      const defaultCondition = getCondition(render());
+      const labels = Array.from(
+        defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')
+      ).map((label) => (label.textContent || '').trim());
+      expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
+    });
 
-    it.todo('should not allow the entry to be removed if its the only one displayed');
+    it('should not allow the entry to be removed if its the only one displayed', () => {
+      const defaultCondition = getCondition(render());
+      expect(getConditionRemoveButton(defaultCondition).disabled).toBe(true);
+    });
 
-    it.todo('should display 2 options for Field');
+    it('should display 2 options for Field', () => {
+      const renderResult = render();
+      const conditionFieldSelect = getConditionFieldSelect(getCondition(renderResult));
+      reactTestingLibrary.act(() => {
+        fireEvent.click(conditionFieldSelect, { button: 1 });
+      });
+      const options = Array.from(
+        renderResult.baseElement.querySelectorAll(
+          '.euiSuperSelect__listbox button.euiSuperSelect__item'
+        )
+      ).map((button) => button.textContent);
+      expect(options).toEqual(['Hash', 'Path']);
+    });
 
-    it.todo('should show the value field as required');
+    it('should show the value field as required', () => {
+      expect(getConditionValue(getCondition(render())).required).toEqual(true);
+    });
 
-    it.todo('should display the `AND` button');
+    it('should display the `AND` button', () => {
+      const andButton = getConditionBuilderAndButton(render());
+      expect(andButton.textContent).toEqual('AND');
+      expect(andButton.disabled).toEqual(false);
+    });
 
-    it.todo('should add a new condition entry when `AND` is clicked');
+    describe('and when the AND button is clicked', () => {
+      let renderResult: RenderResultType;
 
-    it.todo('should have remove icons enabled when multiple conditions are present');
+      beforeEach(() => {
+        renderResult = render();
+        const andButton = getConditionBuilderAndButton(renderResult);
+        reactTestingLibrary.act(() => {
+          fireEvent.click(andButton, { button: 1 });
+        });
+      });
+
+      it('should add a new condition entry when `AND` is clicked with no labels', () => {
+        const condition2 = getCondition(renderResult, 1);
+        expect(condition2.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
+      });
+
+      it('should have remove buttons enabled when multiple conditions are present', () => {
+        getAllConditions(renderResult).forEach((condition) => {
+          expect(getConditionRemoveButton(condition).disabled).toBe(false);
+        });
+      });
+
+      it('should show the AND visual connector when multiple entries are present', () => {
+        expect(getConditionBuilderAndConnectorBadge(renderResult).textContent).toEqual('AND');
+      });
+    });
   });
 
   describe('and the user visits required fields but does not fill them out', () => {

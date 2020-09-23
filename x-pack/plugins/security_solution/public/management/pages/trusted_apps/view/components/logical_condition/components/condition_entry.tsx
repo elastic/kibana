@@ -195,6 +195,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
                 'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
                 { defaultMessage: 'Remove Entry' }
               )}
+              data-test-subj={getTestId('remove')}
             />
           </ConditionEntryCell>
         </EuiFlexItem>
