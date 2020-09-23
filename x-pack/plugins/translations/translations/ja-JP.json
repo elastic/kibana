@@ -7706,7 +7706,6 @@
     "xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription": "明確なnull値の代わりに使用される、フィールドと同じタイプの数値を受け入れます。",
     "xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel": "TypeパラメーターJSON",
     "xpack.idxMgmt.mappingsEditor.otherTypeNameFieldLabel": "型名",
-    "xpack.idxMgmt.mappingsEditor.parameters.boostLabel": "ブーストレベル",
     "xpack.idxMgmt.mappingsEditor.parameters.copyToLabel": "グループフィールド名",
     "xpack.idxMgmt.mappingsEditor.parameters.dimsHelpTextDescription": "ベルトルでの次元数。",
     "xpack.idxMgmt.mappingsEditor.parameters.geoPointNullValueHelpText": "地点は、オブジェクト、文字列、ジオハッシュ、配列または{docsLink} POINTとして表現できます。",

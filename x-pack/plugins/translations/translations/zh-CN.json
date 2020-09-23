@@ -7710,7 +7710,6 @@
     "xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription": "接受类型与替换任何显式 null 值的字段相同的数值。",
     "xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel": "类型参数 JSON",
     "xpack.idxMgmt.mappingsEditor.otherTypeNameFieldLabel": "类型名称",
-    "xpack.idxMgmt.mappingsEditor.parameters.boostLabel": "权重提升级别",
     "xpack.idxMgmt.mappingsEditor.parameters.copyToLabel": "组字段名称",
     "xpack.idxMgmt.mappingsEditor.parameters.dimsHelpTextDescription": "向量中的维度数。",
     "xpack.idxMgmt.mappingsEditor.parameters.geoPointNullValueHelpText": "地理坐标点可表示为对象、字符串、geohash、数组或 {docsLink} POINT。",
