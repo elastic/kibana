@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../../components/shared/content_section';
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
@@ -93,8 +94,8 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   timestamp,
   sourceId,
 }) => {
+  const { http } = useValues(HttpLogic);
   const {
-    http,
     externalUrl: { getWorkplaceSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 
