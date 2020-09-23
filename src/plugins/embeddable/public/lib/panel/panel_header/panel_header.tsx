@@ -157,41 +157,33 @@ export function PanelHeader({
     );
   }
 
-  const getPlaceholderTitle = () => {
+  const titleBlock = (text: string | undefined, className: string, ariaLabel: string) => {
     return (
       <span className="embPanel__titleInner">
-        <span className="embPanel__placeholderTitleText" aria-hidden="true">
-          {placeholderTitle}
+        <span className={className} aria-hidden="true">
+          {text}
         </span>
         <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('embeddableApi.panel.enhancedDashboardPanelPlaceholderText', {
-              defaultMessage: 'Panel with no title',
-            })}
-          </span>
+          <span>{ariaLabel}</span>
         </EuiScreenReaderOnly>
         {renderTooltip(viewDescription)}
       </span>
     );
   };
 
+  const getPlaceholderTitle = () => {
+    const ariaLabel = i18n.translate('embeddableApi.panel.enhancedDashboardPanelPlaceholderText', {
+      defaultMessage: 'Panel with no title',
+    });
+    return titleBlock(placeholderTitle, 'embPanel__placeholderTitleText', ariaLabel);
+  };
+
   const getTitle = () => {
-    return (
-      <span className="embPanel__titleInner">
-        <span className="embPanel__titleText" aria-hidden="true">
-          {title}
-        </span>
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-              defaultMessage: 'Dashboard panel: {title}',
-              values: { title },
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-        {renderTooltip(viewDescription)}
-      </span>
-    );
+    const ariaLabel = i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+      defaultMessage: 'Dashboard panel: {title}',
+      values: { title },
+    });
+    return titleBlock(title, 'embPanel__titleText', ariaLabel);
   };
 
   const showPlaceholderTitle = !!placeholderTitle && !title;

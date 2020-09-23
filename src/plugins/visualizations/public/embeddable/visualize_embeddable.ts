@@ -253,12 +253,6 @@ export class VisualizeEmbeddable
       this.updateOutput({ title: this.vis.title });
     }
 
-    // propagate the placeholder title to the output embeddable
-    // but only when the visualization is in edit/Visualize mode
-    if (!this.parent && this.placeholderTitle !== this.output.placeholderTitle) {
-      this.updateOutput({ placeholderTitle: this.placeholderTitle });
-    }
-
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
@@ -361,9 +355,6 @@ export class VisualizeEmbeddable
       })
     );
 
-    if (this.placeholderTitle) {
-      div.setAttribute('data-placeholder-title', this.placeholderTitle);
-    }
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
     }
