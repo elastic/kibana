@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('dashboard panel inspector view chooser ', async () => {
       await testSubjects.click('inspectorViewChooser');
       await a11y.testAppSnapshot();
+      await testSubjects.click('inspectorViewChooser');
     });
 
     it('dashboard panel inspector request statistics ', async () => {
