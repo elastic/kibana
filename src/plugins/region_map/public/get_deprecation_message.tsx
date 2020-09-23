@@ -24,6 +24,17 @@ import { getCoreService, getQueryService, getShareService } from './kibana_servi
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
+function getEmsLayerId(id: string | number, layerId: string) {
+  if (typeof id === 'string') {
+    return id;
+  }
+
+  // Region maps from 6.x will have numerical EMS id refering to S3 bucket id.
+  // In this case, use layerId with contains the EMS layer name.
+  const split = layerId.split('.');
+  return split.length === 2 ? split[1] : undefined;
+}
+
 export function getDeprecationMessage(vis: Vis) {
   let mapsRegionMapUrlGenerator:
     | UrlGeneratorContract<'MAPS_APP_REGION_MAP_URL_GENERATOR'>
@@ -44,7 +55,9 @@ export function getDeprecationMessage(vis: Vis) {
     const query = getQueryService();
     const createUrlParams: { [key: string]: any } = {
       label: vis.title ? vis.title : title,
-      emsLayerId: vis.params.selectedLayer.isEMS ? vis.params.selectedLayer.id : undefined,
+      emsLayerId: vis.params.selectedLayer.isEMS
+        ? getEmsLayerId(vis.params.selectedLayer.id, vis.params.selectedLayer.layerId)
+        : undefined,
       leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
       colorSchema: vis.params.colorSchema,
       indexPatternId: vis.data.indexPattern?.id,
