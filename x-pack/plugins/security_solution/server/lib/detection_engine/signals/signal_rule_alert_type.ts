@@ -239,25 +239,28 @@ export const signalRulesAlertType = ({
             errors,
             bulkCreateDuration,
             createdItemsCount,
-          } = await bulkCreateMlSignals({
-            actions,
-            throttle,
-            someResult: anomalyResults,
-            ruleParams: params,
-            services,
-            logger,
-            id: alertId,
-            signalsIndex: outputIndex,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
-            refresh,
-            tags,
-          });
+          } = await bulkCreateMlSignals(
+            {
+              actions,
+              throttle,
+              someResult: anomalyResults,
+              ruleParams: params,
+              services,
+              logger,
+              id: alertId,
+              signalsIndex: outputIndex,
+              name,
+              createdBy,
+              createdAt,
+              updatedBy,
+              updatedAt,
+              interval,
+              enabled,
+              refresh,
+              tags,
+            },
+            buildRuleMessage
+          );
           // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
           const shardFailures =
             (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
@@ -295,6 +298,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            buildRuleMessage,
           });
 
           const {
@@ -302,28 +306,31 @@ export const signalRulesAlertType = ({
             bulkCreateDuration,
             createdItemsCount,
             errors,
-          } = await bulkCreateThresholdSignals({
-            actions,
-            throttle,
-            someResult: thresholdResults,
-            ruleParams: params,
-            filter: esFilter,
-            services,
-            logger,
-            id: alertId,
-            inputIndexPattern: inputIndex,
-            signalsIndex: outputIndex,
-            startedAt,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
-            refresh,
-            tags,
-          });
+          } = await bulkCreateThresholdSignals(
+            {
+              actions,
+              throttle,
+              someResult: thresholdResults,
+              ruleParams: params,
+              filter: esFilter,
+              services,
+              logger,
+              id: alertId,
+              inputIndexPattern: inputIndex,
+              signalsIndex: outputIndex,
+              startedAt,
+              name,
+              createdBy,
+              createdAt,
+              updatedBy,
+              updatedAt,
+              interval,
+              enabled,
+              refresh,
+              tags,
+            },
+            buildRuleMessage
+          );
           result = mergeReturns([
             result,
             createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),

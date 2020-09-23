@@ -15,6 +15,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
 const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
@@ -184,7 +185,8 @@ export const transformThresholdResultsToEcs = (
 };
 
 export const bulkCreateThresholdSignals = async (
-  params: BulkCreateThresholdSignalsParams
+  params: BulkCreateThresholdSignalsParams,
+  buildRuleMessage: BuildRuleMessage
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
@@ -196,5 +198,5 @@ export const bulkCreateThresholdSignals = async (
     params.ruleParams.ruleId
   );
 
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };

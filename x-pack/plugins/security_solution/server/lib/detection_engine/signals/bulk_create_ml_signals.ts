@@ -14,6 +14,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
+import { BuildRuleMessage } from './rule_messages';
 
 interface BulkCreateMlSignalsParams {
   actions: RuleAlertAction[];
@@ -81,10 +82,10 @@ const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<E
 };
 
 export const bulkCreateMlSignals = async (
-  params: BulkCreateMlSignalsParams
+  params: BulkCreateMlSignalsParams,
+  buildRuleMessage: BuildRuleMessage
 ): Promise<SingleBulkCreateResponse> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
-
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };
