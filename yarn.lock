@@ -1180,13 +1180,13 @@
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
 
-"@elastic/elasticsearch@elastic/elasticsearch-js#child-optimization":
-  version "8.0.0-SNAPSHOT.9f33e3c7"
-  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/99cbf9c199654ca672146d460329fa091f56fae6"
+"@elastic/elasticsearch@7.9.1":
+  version "7.9.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.9.1.tgz#40f1c38e8f70d783851c13be78a7cb346891c15e"
+  integrity sha512-NfPADbm9tRK/4ohpm9+aBtJ8WPKQqQaReyBKT225pi2oKQO1IzRlfM+OPplAvbhoH1efrSj1NKk27L+4BCrzXQ==
   dependencies:
     debug "^4.1.1"
     decompress-response "^4.2.0"
-    hpagent "^0.1.1"
     ms "^2.1.1"
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
@@ -15291,11 +15291,6 @@ hpack.js@^2.1.6:
     obuf "^1.0.0"
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
-
-hpagent@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.1.tgz#66f67f16e5c7a8b59a068e40c2658c2c749ad5e2"
-  integrity sha512-IxJWQiY0vmEjetHdoE9HZjD4Cx+mYTr25tR7JCxXaiI3QxW0YqYyM11KyZbHufoa/piWhMb2+D3FGpMgmA2cFQ==
 
 html-element-map@^1.2.0:
   version "1.2.0"
