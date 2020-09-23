@@ -136,7 +136,11 @@ export function Discover({
 
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
+      <EuiFlyout
+        className="visible-xs visible-sm"
+        onClose={() => setIsFlyoutVisible(false)}
+        aria-labelledby="flyoutTitle"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>
