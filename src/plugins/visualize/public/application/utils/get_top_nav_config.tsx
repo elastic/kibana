@@ -222,7 +222,7 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: 'save',
+            iconType: savedVis?.id && originatingApp ? undefined : 'save',
             label:
               savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
