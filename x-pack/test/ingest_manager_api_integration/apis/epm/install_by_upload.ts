@@ -20,6 +20,27 @@ export default function ({ getService }: FtrProviderContext) {
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_0.1.4.tar.gz'
   );
+  const testPkgArchiveZip = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_0.1.4.zip'
+  );
+  const testPkgArchiveInvalidTwoToplevels = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_invalid_two_toplevels_0.1.4.zip'
+  );
+  const testPkgArchiveInvalidNoManifest = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_invalid_no_manifest_0.1.4.zip'
+  );
+  const testPkgArchiveInvalidManifestInvalidYaml = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_invalid_manifest_invalid_yaml_0.1.4.zip'
+  );
+  const testPkgArchiveInvalidToplevelMismatch = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
+  );
+
   const testPkgKey = 'apache-0.14';
   const server = dockerServers.get('registry');
 
@@ -44,8 +65,123 @@ export default function ({ getService }: FtrProviderContext) {
           .type('application/gzip')
           .send(buf)
           .expect(200);
-        expect(res.body.response).to.equal(
-          'package upload was received ok, but not installed (not implemented yet)'
+        expect(res.body.response.length).to.be(0);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should install a zip archive correctly', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
+        expect(res.body.response.length).to.be(0);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive is zip but content type is gzip', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/gzip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Uploaded archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive is tar.gz but content type is zip', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveTgz);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of uploaded package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive contains two top-level directories', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveInvalidTwoToplevels);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive does not contain a manifest', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveInvalidNoManifest);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Package must contain a top-level manifest.yml file."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive manifest contains invalid YAML', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveInvalidManifestInvalidYaml);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the toplevel directory name does not match the package key', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveInvalidToplevelMismatch);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
         );
       } else {
         warnAndSkipTest(this, log);

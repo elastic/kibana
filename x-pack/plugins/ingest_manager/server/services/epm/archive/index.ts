@@ -83,8 +83,9 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   });
 
   // The package must contain a manifest file ...
-  const manifestBuffer = cacheGet(`${pkgKey}/manifest.yml`);
-  if (!manifestBuffer) {
+  const manifestFile = `${pkgKey}/manifest.yml`;
+  const manifestBuffer = cacheGet(manifestFile);
+  if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.');
   }
 
