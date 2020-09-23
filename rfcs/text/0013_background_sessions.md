@@ -362,9 +362,7 @@ interface ISessionService {
 ### Search Service Changes
 
 There are cases where search requests are issued by the server (Like TSVB).
-We can simplify this flow by introducing a mechanism, similar to the frontend one, tracking the information in memory. 
-
-However, due to the fact that we are running in a potentially multi-server architecture, each server will have to poll for a saved object with a corresponding sessionId to store the ids into it.
+We can simplify this flow by introducing a mechanism, similar to the frontend one, tracking the information in memory and polling for a saved object with a corresponding sessionId to store the ids into it.
 
 ```ts
 interface SearchService {
@@ -401,7 +399,7 @@ The strategy will track the asyncId on the server side, if `trackId` option is p
 
 The `data` plugin will register a task with the task manager, periodically monitoring the status of incomplete background sessions. 
 
-It will query the list of all incomplete sessions, and check the status of each search that is executing. If the search requests are all complete, it will update the corresponding saved object to have a `status` of `complete`. If any of the searches return an error, it will update the saved object to an `error` state. If the search requests have expired, it will update the saved object to an `expired` state.
+It will query the list of all incomplete sessions, and check the status of each search that is executing. If the search requests are all complete, it will update the corresponding saved object to have a `status` of `complete`. If any of the searches return an error, it will update the saved object to an `error` state. If the search requests have expired, it will update the saved object to an `expired` state. Expired sessions will be purged once they are older than the time definedby the `EXPIRED_SESSION_TTL` advanced setting.  
 
 Once there's a notification area in Kibana, we may use that mechanism to push completion \ error notifications to the client.
 
@@ -431,7 +429,9 @@ If you have restored a Background Session, making any type of change to it (time
 
 #### Loading an errored \ expired \ canceled session
 
-When trying to restore a Background Session, if any of the requests hashes don't match the ones saved, or if any of the saved async search IDs are expired, a meaningful error code will be returned by the server. It is each application's responsibility to handle these errors appropriately.
+When trying to restore a Background Session, if any of the requests hashes don't match the ones saved, or if any of the saved async search IDs are expired, a meaningful error code will be returned by the server **by those requests**. It is each application's responsibility to handle these errors appropriately.
+
+In such a scenario, the session will be partially restored.
 
 #### Extending Expiration
 
@@ -447,8 +447,7 @@ following are examples of such scenarios:
 - When a visualization is configured with a terms agg with an "other" bucket
 - When using blended layers or term joins in Maps
 
-Eventually, when expressions can be run on the server, we will facilitate these use cases by adding support for
-background expressions in the background session service.
+Eventually, when expressions can be run on the server, they will run in the context of a specific `sessionId`, hence enabling those edge cases too.
 
 # Drawbacks
 
