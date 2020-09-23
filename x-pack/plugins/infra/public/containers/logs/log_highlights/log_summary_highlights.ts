@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
 import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
 import { useBucketSize } from '../log_summary/bucket_size';
@@ -51,6 +51,7 @@ export const useLogSummaryHighlights = (
       onResolve: (response) => {
         setLogSummaryHighlights(response.data);
       },
+      onReject: ignoreCanceledPromise,
     },
     [sourceId, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
   );

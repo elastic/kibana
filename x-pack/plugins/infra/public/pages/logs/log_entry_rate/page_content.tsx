@@ -27,6 +27,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useInterval } from '../../../hooks/use_interval';
+import { ignoreCanceledPromise } from '../../../utils/use_tracked_promise';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -61,7 +62,10 @@ export const LogEntryRatePageContent = memo(() => {
   const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
 
   const fetchAllJobStatuses = useCallback(
-    () => Promise.all([fetchLogEntryCategoriesJobStatus(), fetchLogEntryRateJobStatus()]),
+    () =>
+      Promise.all([fetchLogEntryCategoriesJobStatus(), fetchLogEntryRateJobStatus()]).catch(
+        ignoreCanceledPromise
+      ),
     [fetchLogEntryCategoriesJobStatus, fetchLogEntryRateJobStatus]
   );
 

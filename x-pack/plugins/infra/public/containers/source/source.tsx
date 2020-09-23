@@ -14,7 +14,7 @@ import {
   UpdateSourceMutation,
 } from '../../graphql/types';
 import { DependencyError, useApolloClient } from '../../utils/apollo_context';
-import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { ignoreCanceledPromise, useTrackedPromise } from '../../utils/use_tracked_promise';
 import { createSourceMutation } from './create_source.gql_query';
 import { sourceQuery } from './query_source.gql_query';
 import { updateSourceMutation } from './update_source.gql_query';
@@ -57,6 +57,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
       onResolve: (response) => {
         setSource(response.data.source);
       },
+      onReject: ignoreCanceledPromise,
     },
     [apolloClient, sourceId]
   );
@@ -87,6 +88,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           setSource(response.data.createSource.source);
         }
       },
+      onReject: ignoreCanceledPromise,
     },
     [apolloClient, sourceId]
   );
@@ -117,6 +119,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           setSource(response.data.updateSource.source);
         }
       },
+      onReject: ignoreCanceledPromise,
     },
     [apolloClient, sourceId]
   );
