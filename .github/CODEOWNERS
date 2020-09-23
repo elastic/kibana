@@ -7,10 +7,12 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
+/src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
+/src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/vis_default_editor/ @elastic/kibana-app
 /src/plugins/vis_type_markdown/ @elastic/kibana-app
@@ -38,7 +40,6 @@
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/elastic-datemath/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
-/src/plugins/advanced_settings/ @elastic/kibana-app-arch
 /src/plugins/bfetch/ @elastic/kibana-app-arch
 /src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/embeddable/ @elastic/kibana-app-arch
@@ -47,7 +48,6 @@
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-canvas
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
-/src/plugins/management/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
 /src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
