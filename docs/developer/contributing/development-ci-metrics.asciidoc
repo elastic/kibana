@@ -46,7 +46,7 @@ The number of files included in the OSS distributable.
 [[ci-metric-distributable-size]] `distributable size` ::
 The size, in bytes, of the default distributable. _(not reported on PRs)_ 
 
-[[ci-metric-oss-distributable-size]] `oss distributable size` (not reported) ::
+[[ci-metric-oss-distributable-size]] `oss distributable size` ::
 The size, in bytes, of the OSS distributable. _(not reported on PRs)_
 
 
