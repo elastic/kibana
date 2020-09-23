@@ -5,8 +5,8 @@
  */
 
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
-import { MapExtent } from './descriptor_types';
-import { ES_GEO_FIELD_TYPE } from './constants';
+import { MapExtent } from '../descriptor_types';
+import { ES_GEO_FIELD_TYPE } from '../constants';
 
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
 
