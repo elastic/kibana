@@ -15,7 +15,7 @@ export const factory = (): PolicyConfig => {
       advanced: {
         elasticsearch: {
           tls: {
-            verify_hostname: 'false',
+            verify_hostname: '',
             verify_peer: '',
           },
         },

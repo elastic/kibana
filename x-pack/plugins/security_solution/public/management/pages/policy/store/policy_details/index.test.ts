@@ -228,6 +228,14 @@ describe('policy details: ', () => {
               policy: {
                 value: {
                   windows: {
+                    advanced: {
+                      elasticsearch: {
+                        tls: {
+                          verify_hostname: '',
+                          verify_peer: '',
+                        },
+                      },
+                    },
                     events: {
                       dll_and_driver_load: true,
                       dns: false,
@@ -241,11 +249,27 @@ describe('policy details: ', () => {
                     logging: { file: 'info' },
                   },
                   mac: {
+                    advanced: {
+                      elasticsearch: {
+                        tls: {
+                          verify_hostname: '',
+                          verify_peer: '',
+                        },
+                      },
+                    },
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
                     logging: { file: 'info' },
                   },
                   linux: {
+                    advanced: {
+                      elasticsearch: {
+                        tls: {
+                          verify_hostname: '',
+                          verify_peer: '',
+                        },
+                      },
+                    },
                     events: { process: true, file: true, network: true },
                     logging: { file: 'info' },
                   },
