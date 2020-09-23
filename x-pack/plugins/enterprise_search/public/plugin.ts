@@ -23,14 +23,12 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { IInitialAppData } from '../common/types';
-import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
   host?: string;
 }
 export interface ClientData extends IInitialAppData {
   publicUrl?: string;
-  externalUrl: IExternalUrl;
   errorConnecting?: boolean;
 }
 
@@ -48,7 +46,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
-    this.data.externalUrl = new ExternalUrl(this.config.host || '');
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {

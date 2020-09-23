@@ -18,12 +18,11 @@ import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { externalUrl, IExternalUrl } from './shared/enterprise_search_url';
+import { externalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
-  externalUrl: IExternalUrl;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -42,7 +41,7 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, externalUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnecting, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
@@ -65,7 +64,6 @@ export const renderApp = (
       <KibanaContext.Provider
         value={{
           config,
-          externalUrl,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,

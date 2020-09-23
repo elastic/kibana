@@ -10,4 +10,3 @@ export {
   getAppSearchUrl,
   getWorkplaceSearchUrl,
 } from './external_url';
-export { ExternalUrl, IExternalUrl } from './generate_external_url';
