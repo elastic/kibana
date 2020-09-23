@@ -11,29 +11,81 @@ import {
 import * as reactTestingLibrary from '@testing-library/react';
 import React from 'react';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
+import { fireEvent } from '@testing-library/dom';
 
 describe('When showing the Trusted App Create Form', () => {
-  let render: () => ReturnType<AppContextTestRender['render']>;
-  let onChangeCallback: jest.MockedFunction<CreateTrustedAppFormProps['onChange']>;
+  const dataTestSubjForForm = 'createForm';
+  type RenderResultType = ReturnType<AppContextTestRender['render']>;
+
+  let render: () => RenderResultType;
+  let formProps: jest.Mocked<CreateTrustedAppFormProps>;
+
+  // Some helpers
+  const getNameField = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLInputElement => {
+    return renderResult.getByTestId(`${dataTestSub}-nameTextField`) as HTMLInputElement;
+  };
+  const getOsField = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLButtonElement => {
+    return renderResult.getByTestId(`${dataTestSub}-osSelectField`) as HTMLButtonElement;
+  };
+  const getDescriptionField = (
+    renderResult: RenderResultType,
+    dataTestSub: string = dataTestSubjForForm
+  ): HTMLTextAreaElement => {
+    return renderResult.getByTestId(`${dataTestSub}-descriptionField`) as HTMLTextAreaElement;
+  };
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
-    onChangeCallback = jest.fn();
-    render = () => mockedContext.render(<CreateTrustedAppForm onChange={onChangeCallback} />);
+    formProps = {
+      'data-test-subj': dataTestSubjForForm,
+      onChange: jest.fn(),
+    };
+    render = () => mockedContext.render(<CreateTrustedAppForm {...formProps} />);
   });
 
-  it.todo('should show Name as required');
+  it('should show Name as required', () => {
+    expect(getNameField(render()).required).toBe(true);
+  });
 
-  it.todo('should default OS to Windows');
+  it('should default OS to Windows', () => {
+    expect(getOsField(render()).textContent).toEqual('Windows');
+  });
 
-  it.todo('should allow user to select between 3 OSs');
+  it('should allow user to select between 3 OSs', () => {
+    const renderResult = render();
+    const osField = getOsField(renderResult);
+    reactTestingLibrary.act(() => {
+      fireEvent.click(osField, { button: 1 });
+    });
+    const options = Array.from(
+      renderResult.baseElement.querySelectorAll(
+        '.euiSuperSelect__listbox button.euiSuperSelect__item'
+      )
+    ).map((button) => button.textContent);
+    expect(options).toEqual(['Mac OS', 'Windows', 'Linux']);
+  });
 
-  it.todo('should show Description as optional');
+  it('should show Description as optional', () => {
+    expect(getDescriptionField(render()).required).toBe(false);
+  });
 
-  it.todo('should NOT initially show any inline validation errors');
+  it('should NOT initially show any inline validation errors', () => {
+    expect(render().container.querySelectorAll('.euiFormErrorText').length).toBe(0);
+  });
 
-  it.todo('should show top-level Errors');
+  it('should show top-level Errors', () => {
+    formProps.isInvalid = true;
+    formProps.error = 'a top level error';
+    const { queryByText } = render();
+    expect(queryByText(formProps.error)).not.toBeNull();
+  });
 
   describe('the condition builder component', () => {
     it.todo('should show an initial condition entry');
