@@ -73,8 +73,8 @@ export { countOperation } from './count';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps {
-  currentColumn: IndexPatternColumn;
+export interface ParamEditorProps<C> {
+  currentColumn: C;
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
   columnId: string;
@@ -107,34 +107,30 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * return an updated column. If not implemented, the `id` function is used instead.
    */
   onOtherColumnChanged?: (
-    currentColumn: IndexPatternColumn,
+    currentColumn: C,
     columns: Partial<Record<string, IndexPatternColumn>>
   ) => C;
   /**
    * React component for operation specific settings shown in the popover editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps>;
+  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (
-    column: IndexPatternColumn,
-    columnId: string,
-    indexPattern: IndexPattern
-  ) => unknown;
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
    * for a layer
    */
-  isTransferable: (column: IndexPatternColumn, newIndexPattern: IndexPattern) => boolean;
+  isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
   /**
    * Transfering a column to another index pattern. This can be used to
    * adjust operation specific settings such as reacting to aggregation restrictions
    * present on the new index pattern.
    */
-  transfer?: (column: IndexPatternColumn, newIndexPattern: IndexPattern) => C;
+  transfer?: (column: C, newIndexPattern: IndexPattern) => C;
 }
 
 interface BaseBuildColumnArgs {
@@ -174,7 +170,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: IndexPatternColumn;
+      // previousColumn?: IndexPatternColumn;
+      previousColumn?: C;
     }
   ) => C;
   /**
@@ -194,7 +191,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * @param field The field that the user changed to.
    */
   onFieldChange: (
-    oldColumn: FieldBasedIndexPatternColumn,
+    // oldColumn: FieldBasedIndexPatternColumn,
+    oldColumn: C,
     indexPattern: IndexPattern,
     field: IndexPatternField
   ) => C;
@@ -229,10 +227,6 @@ export type GenericOperationDefinition =
   | OperationDefinition<IndexPatternColumn, 'field'>
   | OperationDefinition<IndexPatternColumn, 'none'>;
 
-export type OperationTypeFromDefinition<
-  GenericOperationDefinition
-> = GenericOperationDefinition extends BaseOperationDefinitionProps<infer P> ? P : never;
-
 /**
  * List of all available operation definitions
  */
@@ -249,7 +243,11 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
  * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap = internalOperationDefinitions.reduce(
+export const operationDefinitionMap: Record<
+  string,
+  GenericOperationDefinition
+> = internalOperationDefinitions.reduce(
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  {} as Record<OperationType, typeof internalOperationDefinitions[number]>
+  // {} as Record<OperationType, typeof internalOperationDefinitions[number]>
+  {}
 );

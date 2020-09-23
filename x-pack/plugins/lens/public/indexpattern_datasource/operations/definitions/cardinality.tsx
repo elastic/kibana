@@ -43,8 +43,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const c = column as CardinalityIndexPatternColumn;
-    const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&
@@ -76,13 +75,13 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     type: OPERATION_TYPE,
     schema: 'metric',
     params: {
-      field: (column as CardinalityIndexPatternColumn).sourceField,
+      field: column.sourceField,
       missing: 0,
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...(oldColumn as CardinalityIndexPatternColumn),
+      ...oldColumn,
       label: ofName(field.displayName),
       sourceField: field.name,
     };

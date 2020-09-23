@@ -27,7 +27,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   input: 'field',
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...(oldColumn as CountIndexPatternColumn),
+      ...oldColumn,
       label: field.displayName,
       sourceField: field.name,
     };

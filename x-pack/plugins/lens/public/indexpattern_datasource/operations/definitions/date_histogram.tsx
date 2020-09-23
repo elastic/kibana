@@ -81,8 +81,7 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const c = column as DateHistogramIndexPatternColumn;
-    const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&
@@ -92,8 +91,7 @@ export const dateHistogramOperation: OperationDefinition<
     );
   },
   transfer: (column, newIndexPattern) => {
-    const col = column as DateHistogramIndexPatternColumn;
-    const newField = newIndexPattern.fields.find((field) => field.name === col.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
     if (
       newField &&
       newField.aggregationRestrictions &&
@@ -102,9 +100,9 @@ export const dateHistogramOperation: OperationDefinition<
       const restrictions = newField.aggregationRestrictions.date_histogram;
 
       return {
-        ...col,
+        ...column,
         params: {
-          ...col.params,
+          ...column.params,
           timeZone: restrictions.time_zone,
           // TODO this rewrite logic is simplified - if the current interval is a multiple of
           // the restricted interval, we could carry it over directly. However as the current
@@ -115,28 +113,27 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
 
-    return col;
+    return column;
   },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...(oldColumn as DateHistogramIndexPatternColumn),
+      ...oldColumn,
       label: field.displayName,
       sourceField: field.name,
     };
   },
   toEsAggsConfig: (column, columnId, indexPattern) => {
-    const c = column as DateHistogramIndexPatternColumn;
-    const usedField = indexPattern.fields.find((field) => field.name === c.sourceField);
+    const usedField = indexPattern.fields.find((field) => field.name === column.sourceField);
     return {
       id: columnId,
       enabled: true,
       type: 'date_histogram',
       schema: 'segment',
       params: {
-        field: c.sourceField,
-        time_zone: c.params.timeZone,
+        field: column.sourceField,
+        time_zone: column.params.timeZone,
         useNormalizedEsInterval: !usedField || !usedField.aggregationRestrictions?.date_histogram,
-        interval: c.params.interval,
+        interval: column.params.interval,
         drop_partials: false,
         min_doc_count: 0,
         extended_bounds: {},
@@ -144,16 +141,15 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
-    const column = currentColumn as DateHistogramIndexPatternColumn;
     const field =
-      column &&
+      currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
-        (currentField) => currentField.name === column.sourceField
+        (currentField) => currentField.name === currentColumn.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const interval = parseInterval(column.params.interval);
+    const interval = parseInterval(currentColumn.params.interval);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -194,13 +190,13 @@ export const dateHistogramOperation: OperationDefinition<
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
-              checked={column.params.interval !== autoInterval}
+              checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
               compressed
             />
           </EuiFormRow>
         )}
-        {column.params.interval !== autoInterval && (
+        {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
@@ -213,7 +209,7 @@ export const dateHistogramOperation: OperationDefinition<
                 id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
                 defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
                 values={{
-                  intervalValue: column.params.interval,
+                  intervalValue: currentColumn.params.interval,
                 }}
               />
             ) : (

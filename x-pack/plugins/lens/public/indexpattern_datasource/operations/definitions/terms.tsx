@@ -65,8 +65,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const c = column as TermsIndexPatternColumn;
-    const newField = newIndexPattern.fields.find((field) => field.name === c.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&
@@ -98,17 +97,17 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     };
   },
   toEsAggsConfig: (column, columnId, _indexPattern) => {
-    const c = column as TermsIndexPatternColumn;
     return {
       id: columnId,
       enabled: true,
       type: 'terms',
       schema: 'segment',
       params: {
-        field: c.sourceField,
-        orderBy: c.params.orderBy.type === 'alphabetical' ? '_key' : c.params.orderBy.columnId,
-        order: c.params.orderDirection,
-        size: c.params.size,
+        field: column.sourceField,
+        orderBy:
+          column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        order: column.params.orderDirection,
+        size: column.params.size,
         otherBucket: false,
         otherBucketLabel: 'Other',
         missingBucket: false,
@@ -118,31 +117,29 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      ...(oldColumn as TermsIndexPatternColumn),
+      ...oldColumn,
       label: ofName(field.displayName),
       sourceField: field.name,
     };
   },
   onOtherColumnChanged: (currentColumn, columns) => {
-    const column = currentColumn as TermsIndexPatternColumn;
-    if (column.params.orderBy.type === 'column') {
+    if (currentColumn.params.orderBy.type === 'column') {
       // check whether the column is still there and still a metric
-      const columnSortedBy = columns[column.params.orderBy.columnId];
+      const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
       if (!columnSortedBy || !isSortableByColumn(columnSortedBy)) {
         return {
-          ...column,
+          ...currentColumn,
           params: {
-            ...column.params,
+            ...currentColumn.params,
             orderBy: { type: 'alphabetical' },
             orderDirection: 'asc',
           },
         };
       }
     }
-    return column;
+    return currentColumn;
   },
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
-    const col = currentColumn as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -189,7 +186,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             min={1}
             max={20}
             step={1}
-            value={col.params.size}
+            value={currentColumn.params.size}
             showInput
             showLabels
             compressed
@@ -222,7 +219,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             compressed
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
-            value={toValue(col.params.orderBy)}
+            value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
                 updateColumnParam({
@@ -263,7 +260,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 }),
               },
             ]}
-            value={col.params.orderDirection}
+            value={currentColumn.params.orderDirection}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
                 updateColumnParam({

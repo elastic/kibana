@@ -112,7 +112,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   },
 
   toEsAggsConfig: (column, columnId, indexPattern) => {
-    const validFilters = (column as FiltersIndexPatternColumn).params.filters?.filter((f: Filter) =>
+    const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
     return {
@@ -128,7 +128,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
 
   paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const filters = (currentColumn as FiltersIndexPatternColumn).params.filters;
+    const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
       setState(
