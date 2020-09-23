@@ -10,6 +10,7 @@ import { PostAgentUpgradeResponse } from '../../../common/types';
 import { PostAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -40,10 +41,7 @@ export const postAgentUpgradeHandler: RequestHandler<
 
     const body: PostAgentUpgradeResponse = {};
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
