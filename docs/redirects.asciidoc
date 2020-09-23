@@ -112,11 +112,6 @@ More information on this new feature is available in <<apm-alerts>>.
 
 This content has moved to the <<development-rbac, Security>> page.
 
-[role="exclude",id="TSVB"]
-== TSVB
-
-This page was deleted. See <<tsvb>>.
-
 [role="exclude",id="managing-cross-cluster-replication"]
 == Cross-Cluster Replication
 
