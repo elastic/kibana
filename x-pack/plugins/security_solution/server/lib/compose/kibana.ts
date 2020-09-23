@@ -26,7 +26,6 @@ import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter'
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
-import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
 import * as note from '../note/saved_object';
 import * as pinnedEvent from '../pinned_event/saved_object';
 import * as timeline from '../timeline/saved_object';
@@ -54,7 +53,6 @@ export function compose(
     matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
-    uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {
