@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -114,13 +114,15 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       // so for each feature, biggest importance on the left to smallest importance on the right
       if (totalFeatureImportance[0].classes.length > 2) {
         (totalFeatureImportance as ClassificationTotalFeatureImportance[]).forEach((feature) => {
-          feature.classes.forEach((featureClass) => {
-            sortedData.push({
-              featureName: feature.feature_name,
-              meanImportance: featureClass.importance.mean_magnitude,
-              className: featureClass.class_name,
+          feature.classes
+            .sort((a, b) => a.importance.mean_magnitude - b.importance.mean_magnitude)
+            .forEach((featureClass) => {
+              sortedData.push({
+                featureName: feature.feature_name,
+                meanImportance: featureClass.importance.mean_magnitude,
+                className: featureClass.class_name,
+              });
             });
-          });
         });
         barSettings = {
           xAccessor: 'featureName',
@@ -147,6 +149,8 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   }, [totalFeatureImportance]);
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
+
   return (
     <EuiPanel>
       <EuiFlexGroup>
@@ -184,7 +188,12 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       <Chart className="story-chart" size={{ width: '100%', height: 300 }}>
         <Settings rotation={90} theme={theme} />
 
-        <Axis id="x-axis" title="Feature importance average magnitude" position={Position.Bottom} />
+        <Axis
+          id="x-axis"
+          title="Feature importance average magnitude"
+          position={Position.Bottom}
+          tickFormat={tickFormatter}
+        />
         <Axis id="y-axis" title="" position={Position.Left} />
         <BarSeries
           id="bars"
