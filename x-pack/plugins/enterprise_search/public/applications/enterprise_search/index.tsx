@@ -33,11 +33,7 @@ export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => 
         <SetupGuide />
       </Route>
       <Route exact path={ROOT_PATH}>
-        {showErrorConnecting ? (
-          <ErrorConnecting />
-        ) : (
-          <ProductSelector access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }} />
-        )}
+        {showErrorConnecting ? <ErrorConnecting /> : <ProductSelector access={access} />}
       </Route>
     </Switch>
   );
