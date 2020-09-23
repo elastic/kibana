@@ -26,6 +26,7 @@ export interface GetAgentsRequest {
 export interface GetAgentsResponse {
   list: Agent[];
   total: number;
+  totalInactive: number;
   page: number;
   perPage: number;
 }
@@ -104,10 +105,23 @@ export interface PostAgentUnenrollRequest {
   params: {
     agentId: string;
   };
+  body: {
+    force?: boolean;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUnenrollResponse {}
+
+export interface PostBulkAgentUnenrollRequest {
+  body: {
+    agents: string[] | string;
+    force?: boolean;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUnenrollResponse {}
 
 export interface PutAgentReassignRequest {
   params: {
@@ -118,6 +132,20 @@ export interface PutAgentReassignRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PutAgentReassignResponse {}
+
+export interface PostBulkAgentReassignRequest {
+  body: {
+    policy_id: string;
+    agents: string[] | string;
+  };
+}
+
+export interface PostBulkAgentReassignResponse {
+  [key: string]: {
+    success: boolean;
+    error?: Error;
+  };
+}
 
 export interface GetOneAgentEventsRequest {
   params: {

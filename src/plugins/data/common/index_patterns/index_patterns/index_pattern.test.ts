@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { defaults, map, last } from 'lodash';
+import { map, last } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
-// @ts-ignore
+// @ts-expect-error
 import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-// @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat, IndexPatternsService } from '../..';
+import { FieldFormat } from '../..';
 
 class MockFieldFormatter {}
 
@@ -63,90 +62,33 @@ jest.mock('../../field_mapping', () => {
   };
 });
 
-let mockFieldsFetcherResponse: any[] = [];
-
-jest.mock('./_fields_fetcher', () => ({
-  createFieldsFetcher: jest.fn().mockImplementation(() => ({
-    fetch: jest.fn().mockImplementation(() => {
-      return new Promise((resolve) => resolve(mockFieldsFetcherResponse));
-    }),
-    every: jest.fn(),
-  })),
-}));
-
-let object: any = {};
-
-const savedObjectsClient = {
-  create: jest.fn(),
-  get: jest.fn().mockImplementation(() => object),
-  update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
-    if (object.version !== version) {
-      throw new Object({
-        res: {
-          status: 409,
-        },
-      });
-    }
-    object.attributes.title = body.title;
-    object.version += 'a';
-    return {
-      id: object.id,
-      version: object.version,
-    };
-  }),
-};
-
-const patternCache = {
-  clear: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  clearAll: jest.fn(),
-};
-
-const apiClient = {
-  _getUrl: jest.fn(),
-  getFieldsForTimePattern: jest.fn(),
-  getFieldsForWildcard: jest.fn(),
-};
-
 // helper function to create index patterns
-function create(id: string, payload?: any): Promise<IndexPattern> {
-  const indexPattern = new IndexPattern(id, {
-    savedObjectsClient: savedObjectsClient as any,
-    apiClient,
-    patternCache,
+function create(id: string) {
+  const {
+    type,
+    version,
+    attributes: { timeFieldName, fields, title },
+  } = stubbedSavedObjectIndexPattern(id);
+
+  return new IndexPattern({
+    spec: { id, type, version, timeFieldName, fields, title },
+    savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
-    indexPatternsService: {} as IndexPatternsService,
-    onNotification: () => {},
-    onError: () => {},
     shortDotsEnable: false,
     metaFields: [],
   });
-
-  setDocsourcePayload(id, payload);
-
-  return indexPattern.init();
-}
-
-function setDocsourcePayload(id: string | null, providedPayload: any) {
-  object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
 describe('IndexPattern', () => {
-  const indexPatternId = 'test-pattern';
-
   let indexPattern: IndexPattern;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
-    return create(indexPatternId).then((pattern: IndexPattern) => {
-      indexPattern = pattern;
-    });
+    indexPattern = create('test-pattern');
   });
 
   describe('api', () => {
     test('should have expected properties', () => {
-      expect(indexPattern).toHaveProperty('refreshFields');
       expect(indexPattern).toHaveProperty('popularizeField');
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
@@ -155,13 +97,6 @@ describe('IndexPattern', () => {
 
       // properties
       expect(indexPattern).toHaveProperty('fields');
-    });
-  });
-
-  describe('init', () => {
-    test('should append the found fields', () => {
-      expect(savedObjectsClient.get).toHaveBeenCalled();
-      expect(indexPattern.fields).toHaveLength(mockLogStashFields().length);
     });
   });
 
@@ -229,43 +164,9 @@ describe('IndexPattern', () => {
     });
   });
 
-  describe('refresh fields', () => {
-    test('should fetch fields from the fieldsFetcher', async () => {
-      expect(indexPattern.fields.length).toBeGreaterThan(2);
-
-      mockFieldsFetcherResponse = [{ name: 'foo' }, { name: 'bar' }];
-
-      await indexPattern.refreshFields();
-
-      mockFieldsFetcherResponse = [];
-
-      const newFields = indexPattern.getNonScriptedFields();
-
-      expect(newFields).toHaveLength(2);
-      expect([...newFields.map((f) => f.name)]).toEqual(['foo', 'bar']);
-    });
-
-    test('should preserve the scripted fields', async () => {
-      // add spy to indexPattern.getScriptedFields
-      // sinon.spy(indexPattern, 'getScriptedFields');
-
-      // refresh fields, which will fetch
-      await indexPattern.refreshFields();
-
-      // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
-      // sinon.assert.calledOnce(indexPattern.getScriptedFields);
-      expect(indexPattern.getScriptedFields().map((f) => f.name)).toEqual(
-        mockLogStashFields()
-          .filter((f: IndexPatternField) => f.scripted)
-          .map((f: IndexPatternField) => f.name)
-      );
-    });
-  });
-
   describe('add and remove scripted fields', () => {
     test('should append the scripted field', async () => {
       // keep a copy of the current scripted field count
-      // const saveSpy = sinon.spy(indexPattern, 'save');
       const oldCount = indexPattern.getScriptedFields().length;
 
       // add a new scripted field
@@ -283,7 +184,6 @@ describe('IndexPattern', () => {
       );
 
       const scriptedFields = indexPattern.getScriptedFields();
-      // expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).toHaveLength(oldCount + 1);
       expect((indexPattern.fields.getByName(scriptedField.name) as IndexPatternField).name).toEqual(
         scriptedField.name
@@ -291,14 +191,12 @@ describe('IndexPattern', () => {
     });
 
     test('should remove scripted field, by name', async () => {
-      // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
 
       await indexPattern.removeScriptedField(scriptedField.name);
 
-      // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);
     });
@@ -330,8 +228,13 @@ describe('IndexPattern', () => {
       } as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
-      const restoredPattern = await create(spec.id as string);
-      restoredPattern.initFromSpec(spec);
+      const restoredPattern = new IndexPattern({
+        spec,
+        savedObjectsClient: {} as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
       expect(restoredPattern.id).toEqual(indexPattern.id);
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
@@ -342,26 +245,22 @@ describe('IndexPattern', () => {
 
   describe('popularizeField', () => {
     test('should increment the popularity count by default', () => {
-      // const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
 
         await indexPattern.popularizeField(field.name);
 
-        // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + 1);
       });
     });
 
     test('should increment the popularity count', () => {
-      // const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
 
         await indexPattern.popularizeField(field.name, incrementAmount);
 
-        // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + incrementAmount);
       });
     });

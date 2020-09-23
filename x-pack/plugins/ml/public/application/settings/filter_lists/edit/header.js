@@ -89,6 +89,7 @@ export const EditFilterListHeader = ({
           value={newFilterId}
           isInvalid={isNewFilterIdInvalid}
           onChange={(e) => updateNewFilterId(e.target.value)}
+          data-test-subj={'mlNewFilterListIdInput'}
         />
       </EuiFormRow>
     );
@@ -96,7 +97,7 @@ export const EditFilterListHeader = ({
 
   if (description !== undefined && description.length > 0) {
     descriptionField = (
-      <EuiText>
+      <EuiText data-test-subj={'mlNewFilterListDescriptionText'}>
         <p>{description}</p>
       </EuiText>
     );
