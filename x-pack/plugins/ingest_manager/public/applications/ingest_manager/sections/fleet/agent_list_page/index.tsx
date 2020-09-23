@@ -35,9 +35,10 @@ import {
   useLink,
   useBreadcrumbs,
   useLicense,
+  useKibanaVersion,
 } from '../../../hooks';
 import { SearchBar, ContextMenuActions } from '../../../components';
-import { AgentStatusKueryHelper } from '../../../services';
+import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AgentReassignAgentPolicyFlyout,
@@ -146,6 +147,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
+  const kibanaVersion = useKibanaVersion();
 
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
@@ -329,11 +331,29 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '100px',
+      width: '200px',
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
-      render: (version: string, agent: Agent) => safeMetadata(version),
+      render: (version: string, agent: Agent) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+          <EuiFlexItem grow={false} className="eui-textNoWrap">
+            {safeMetadata(version)}
+          </EuiFlexItem>
+          {isAgentUpgradeable({ agentVersion: version, kibanaVersion }) ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                <EuiIcon size="m" type="alert" color="warning" />
+                &nbsp;
+                <FormattedMessage
+                  id="xpack.ingestManager.agentList.agentUpgradeLabel"
+                  defaultMessage="Upgrade available"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'last_checkin',
@@ -524,8 +544,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   onClick={() => setShowInactive(!showInactive)}
                 >
                   <FormattedMessage
+                    id="xpack.ingestManager.agentList.showUpgradeableFIlterLabel"
+                    defaultMessage="Upgrade available"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
+                  hasActiveFilters={showInactive}
+                  onClick={() => setShowInactive(!showInactive)}
+                >
+                  <FormattedMessage
                     id="xpack.ingestManager.agentList.showInactiveSwitchLabel"
-                    defaultMessage="Show inactive"
+                    defaultMessage="Inactive"
                   />
                 </EuiFilterButton>
               </EuiFilterGroup>
