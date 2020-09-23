@@ -29,6 +29,7 @@ describe('ProductSelector', () => {
     beforeEach(() => {
       (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
     });
+
     it('does not render the App Search card if the user does not have access to AS', () => {
       const wrapper = shallow(
         <ProductSelector access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }} />
