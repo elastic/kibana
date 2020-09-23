@@ -34,7 +34,7 @@ run(
 
     const circularFound = result.circular();
     if (circularFound.length !== 0) {
-      if (true || flags.svg) {
+      if (flags.svg) {
         await outputSVGs(circularFound);
       } else {
         console.log(
