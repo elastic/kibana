@@ -229,7 +229,7 @@ The format is a string of `<count>[ms|s|m|h|d|w|M|Y]`
 | `xpack.security.session.lifespan` {ess-icon}
   | Sets the maximum duration, also known as "absolute timeout". By default,
   a session can be renewed indefinitely. When this value is set, a session will end
-  once its lifespan is exceeded, even if the user is not idle. NOTE: if <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>
+  once its lifespan is exceeded, even if the user is not idle. NOTE: if `xpack.security.session.idleTimeout`
   is not set, this setting will still cause sessions to expire.
 
 |===
