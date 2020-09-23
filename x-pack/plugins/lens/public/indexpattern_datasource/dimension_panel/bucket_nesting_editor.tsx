@@ -69,9 +69,13 @@ export function BucketNestingEditor({
         values: { field: fieldName },
       }),
       filters: i18n.translate('xpack.lens.indexPattern.groupingOverallFilters', {
-        defaultMessage: 'Top values for each custom query',
+        defaultMessage: 'Top values for each filter',
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
+        defaultMessage: 'Top values for each {field}',
+        values: { field: fieldName },
+      }),
+      range: i18n.translate('xpack.lens.indexPattern.groupingOverallRanges', {
         defaultMessage: 'Top values for each {field}',
         values: { field: fieldName },
       }),
@@ -87,6 +91,10 @@ export function BucketNestingEditor({
         values: { target: target.fieldName },
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
+        defaultMessage: 'Overall top {target}',
+        values: { target: target.fieldName },
+      }),
+      range: i18n.translate('xpack.lens.indexPattern.groupingSecondRanges', {
         defaultMessage: 'Overall top {target}',
         values: { target: target.fieldName },
       }),

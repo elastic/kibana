@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { partial } from 'lodash';
+import { get, partial } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
@@ -40,12 +40,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       const nodeName = $route.current.params.node;
 
       super({
-        title: i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
-          defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
-          values: {
-            nodeName,
-          },
-        }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',
@@ -85,6 +79,24 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           if (!data || !data.shards) {
             return;
           }
+
+          this.setTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+              defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+              values: {
+                nodeName: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
+              defaultMessage: 'Elasticsearch node: {node}',
+              values: {
+                node: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
 
           const shards = data.shards;
           $scope.totalCount = shards.length;

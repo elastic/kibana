@@ -74,7 +74,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
-    width: '20%',
     field: 'name',
     sortable: true,
     render: (value, node) => {
@@ -132,7 +131,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    width: '175px',
+    // width: '175px',
     sortable: true,
     render: (_field, node) => {
       return (
@@ -157,6 +156,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
+    dataType: 'boolean',
     field: 'isOnline',
     sortable: true,
     render: (value) => {
@@ -190,22 +190,18 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
       defaultMessage: 'Shards',
     }),
+    dataType: 'number',
     field: 'shardCount',
     sortable: true,
     render: (value, node) => {
-      return node.isOnline ? (
-        <div className="monTableCell__number" data-test-subj="shards">
-          {value}
-        </div>
-      ) : (
-        <OfflineCell />
-      );
+      return node.isOnline ? <span data-test-subj="shards">{value}</span> : <OfflineCell />;
     },
   });
 
   if (showCgroupMetricsElasticsearch) {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cgroup_quota',
       sortable: getSortHandler('node_cgroup_quota'),
       render: (value, node) => (
@@ -222,6 +218,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle', {
         defaultMessage: 'CPU Throttling',
       }),
+      dataType: 'number',
       field: 'node_cgroup_throttled',
       sortable: getSortHandler('node_cgroup_throttled'),
       render: (value, node) => (
@@ -236,6 +233,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
   } else {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
       render: (value, node) => {
@@ -254,6 +252,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.loadAverageColumnTitle', {
         defaultMessage: 'Load Average',
       }),
+      dataType: 'number',
       field: 'node_load_average',
       sortable: getSortHandler('node_load_average'),
       render: (value, node) => (
@@ -274,6 +273,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         javaVirtualMachine: 'JVM',
       },
     }),
+    dataType: 'number',
     field: 'node_jvm_mem_percent',
     sortable: getSortHandler('node_jvm_mem_percent'),
     render: (value, node) => (
@@ -290,6 +290,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle', {
       defaultMessage: 'Disk Free Space',
     }),
+    dataType: 'number',
     field: 'node_free_space',
     sortable: getSortHandler('node_free_space'),
     render: (value, node) => (

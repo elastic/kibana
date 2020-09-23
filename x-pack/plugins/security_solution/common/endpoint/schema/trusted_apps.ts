@@ -26,7 +26,10 @@ export const PostTrustedAppCreateRequestSchema = {
     os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
     entries: schema.arrayOf(
       schema.object({
-        field: schema.oneOf([schema.literal('process.hash.*'), schema.literal('process.path')]),
+        field: schema.oneOf([
+          schema.literal('process.hash.*'),
+          schema.literal('process.path.text'),
+        ]),
         type: schema.literal('match'),
         operator: schema.literal('included'),
         value: schema.string({ minLength: 1 }),

@@ -115,7 +115,7 @@ export function KibanaPanel(props) {
               data-test-subj="kibana_overview"
               data-overview-status={props.status}
             >
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel"
                   defaultMessage="Requests"
@@ -124,7 +124,7 @@ export function KibanaPanel(props) {
               <EuiDescriptionListDescription data-test-subj="kbnRequests">
                 {props.requests_total}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeLabel"
                   defaultMessage="Max. Response Time"
@@ -179,7 +179,7 @@ export function KibanaPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.connectionsLabel"
                   defaultMessage="Connections"
@@ -188,7 +188,7 @@ export function KibanaPanel(props) {
               <EuiDescriptionListDescription data-test-subj="kbnConnections">
                 {formatNumber(props.concurrent_connections, 'int_commas')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.memoryUsageLabel"
                   defaultMessage="Memory Usage"

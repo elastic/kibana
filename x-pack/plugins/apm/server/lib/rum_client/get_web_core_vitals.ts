@@ -22,8 +22,10 @@ import {
 
 export async function getWebCoreVitals({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -127,7 +129,7 @@ export async function getWebCoreVitals({
     cls: String(cls?.values['50.0']?.toFixed(2) || 0),
     fid: ((fid?.values['50.0'] || 0) / 1000).toFixed(2),
     lcp: ((lcp?.values['50.0'] || 0) / 1000).toFixed(2),
-    tbt: ((tbt?.values['50.0'] || 0) / 1000).toFixed(2),
+    tbt: tbt?.values['50.0'] || 0,
     fcp: fcp?.values['50.0'] || 0,
 
     lcpRanks: getRanksPercentages(lcpRanks?.values ?? defaultRanks),

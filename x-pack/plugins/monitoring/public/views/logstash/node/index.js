@@ -104,6 +104,15 @@ uiRoutes.when('/logstash/node/:uuid', {
             })
           );
 
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pageTitle', {
+              defaultMessage: 'Logstash node: {nodeName}',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
           const metricsToShow = [
             data.metrics.logstash_events_input_rate,
             data.metrics.logstash_jvm_usage,

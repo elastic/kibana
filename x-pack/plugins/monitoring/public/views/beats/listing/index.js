@@ -37,6 +37,9 @@ uiRoutes.when('/beats/beats', {
 
       super({
         title: i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
+        pageTitle: i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
+          defaultMessage: 'Beats listing',
+        }),
         storageKey: 'beats.beats',
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',

@@ -34,6 +34,7 @@ export const findThresholdSignals = async ({
 }: FindThresholdSignalsParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
+  searchErrors: string[];
 }> => {
   const aggregations =
     threshold && !isEmpty(threshold.field)
