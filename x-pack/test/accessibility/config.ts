@@ -21,7 +21,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/search_profiler'),
       require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
+      require.resolve('./apps/dashboard_edit_panel'),
     ],
+
     pageObjects,
     services,
 

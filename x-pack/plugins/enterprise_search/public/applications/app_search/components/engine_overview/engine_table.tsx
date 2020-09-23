@@ -5,11 +5,13 @@
  */
 
 import React, { useContext } from 'react';
+import { useValues } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { getEngineRoute } from '../../routes';
 
@@ -40,9 +42,9 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
+  const { http } = useValues(HttpLogic);
   const {
     externalUrl: { getAppSearchUrl },
-    http,
   } = useContext(KibanaContext) as IKibanaContext;
 
   const engineLinkProps = (name: string) => ({

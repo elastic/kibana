@@ -314,7 +314,7 @@ export const ESAggregationRT = rt.union([
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
 export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
-export const SnapshotMetricTypeRT = rt.keyof({
+export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
   load: null,
@@ -339,7 +339,8 @@ export const SnapshotMetricTypeRT = rt.keyof({
   sqsMessagesEmpty: null,
   sqsOldestMessage: null,
   custom: null,
-});
+};
+export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
