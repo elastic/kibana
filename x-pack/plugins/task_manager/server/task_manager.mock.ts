@@ -6,8 +6,8 @@
 
 import { TaskManager } from './task_manager';
 
-const createTaskManagerMock = () => {
-  return {
+const createTaskManagerMock = (isStarted: boolean = true) => {
+  return ({
     registerTaskDefinitions: jest.fn(),
     addMiddleware: jest.fn(),
     ensureScheduled: jest.fn(),
@@ -18,9 +18,11 @@ const createTaskManagerMock = () => {
     runNow: jest.fn(),
     remove: jest.fn(),
     start: jest.fn(),
-    isStarted: jest.fn(() => true),
+    get isStarted() {
+      return isStarted;
+    },
     stop: jest.fn(),
-  } as jest.Mocked<TaskManager>;
+  } as unknown) as jest.Mocked<TaskManager>;
 };
 
 export const taskManagerMock = {
