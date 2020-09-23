@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('test metadata api', () => {
+  describe.skip('test metadata api', () => {
     describe(`POST ${METADATA_REQUEST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);

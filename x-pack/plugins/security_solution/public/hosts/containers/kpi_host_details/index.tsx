@@ -9,10 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { KpiHostDetailsData, GetKpiHostDetailsQuery } from '../../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
-import { useUiSetting } from '../../../common/lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
 import { QueryTemplateProps } from '../../../common/containers/query_template';
 
@@ -33,7 +31,17 @@ export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
 }
 
 const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & PropsFromRedux>(
-  ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
+  ({
+    id = ID,
+    children,
+    endDate,
+    filterQuery,
+    indexNames,
+    isInspected,
+    skip,
+    sourceId,
+    startDate,
+  }) => (
     <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
       query={kpiHostDetailsQuery}
       fetchPolicy={getDefaultFetchPolicy()}
@@ -47,7 +55,7 @@ const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & Props
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+        defaultIndex: indexNames ?? [],
         inspect: isInspected,
       }}
     >

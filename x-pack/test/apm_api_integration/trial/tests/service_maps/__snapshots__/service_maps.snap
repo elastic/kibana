@@ -86,7 +86,7 @@ Array [
       "service.environment": "production",
       "service.name": "opbeans-python",
       "serviceAnomalyStats": Object {
-        "actualValue": 66218.08333333333,
+        "actualValue": 66218.0833333333,
         "anomalyScore": 0,
         "healthStatus": "healthy",
         "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -101,7 +101,7 @@ Array [
       "service.environment": "production",
       "service.name": "opbeans-java",
       "serviceAnomalyStats": Object {
-        "actualValue": 14901.319999999996,
+        "actualValue": 14901.32,
         "anomalyScore": 0,
         "healthStatus": "healthy",
         "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -116,7 +116,7 @@ Array [
       "service.environment": "testing",
       "service.name": "opbeans-node",
       "serviceAnomalyStats": Object {
-        "actualValue": 32226.649122807008,
+        "actualValue": 32226.649122807,
         "anomalyScore": 0,
         "healthStatus": "healthy",
         "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -131,8 +131,8 @@ Array [
       "service.environment": "testing",
       "service.name": "opbeans-go",
       "serviceAnomalyStats": Object {
-        "actualValue": 3933482.1764705875,
-        "anomalyScore": 2.6101702751482714,
+        "actualValue": 3933482.17647059,
+        "anomalyScore": 2.61017027514827,
         "healthStatus": "healthy",
         "jobId": "apm-testing-d457-high_mean_transaction_duration",
         "transactionType": "request",
@@ -146,8 +146,8 @@ Array [
       "service.environment": "production",
       "service.name": "opbeans-ruby",
       "serviceAnomalyStats": Object {
-        "actualValue": 684716.5813953485,
-        "anomalyScore": 0.20498907719907372,
+        "actualValue": 684716.581395349,
+        "anomalyScore": 0.204989077199074,
         "healthStatus": "healthy",
         "jobId": "apm-production-229a-high_mean_transaction_duration",
         "transactionType": "request",
@@ -199,8 +199,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -227,8 +227,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -241,7 +241,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -261,8 +261,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -275,7 +275,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -295,8 +295,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -309,7 +309,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -328,7 +328,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -356,7 +356,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -370,8 +370,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -390,7 +390,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -404,7 +404,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -424,7 +424,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -438,8 +438,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -457,7 +457,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -485,7 +485,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -499,8 +499,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -519,7 +519,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -533,7 +533,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -552,7 +552,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -579,7 +579,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -606,7 +606,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -634,7 +634,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -648,8 +648,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -668,7 +668,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -682,7 +682,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -702,7 +702,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -716,7 +716,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -735,8 +735,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -762,8 +762,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -776,8 +776,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -796,8 +796,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -810,7 +810,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -829,8 +829,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -843,7 +843,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -862,8 +862,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -876,7 +876,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -908,8 +908,8 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -940,7 +940,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -972,7 +972,7 @@ Array [
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1004,7 +1004,7 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1036,8 +1036,8 @@ Array [
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -1072,7 +1072,7 @@ Object {
         "service.environment": "production",
         "service.name": "opbeans-python",
         "serviceAnomalyStats": Object {
-          "actualValue": 66218.08333333333,
+          "actualValue": 66218.0833333333,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1087,7 +1087,7 @@ Object {
         "service.environment": "production",
         "service.name": "opbeans-java",
         "serviceAnomalyStats": Object {
-          "actualValue": 14901.319999999996,
+          "actualValue": 14901.32,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1102,7 +1102,7 @@ Object {
         "service.environment": "testing",
         "service.name": "opbeans-node",
         "serviceAnomalyStats": Object {
-          "actualValue": 32226.649122807008,
+          "actualValue": 32226.649122807,
           "anomalyScore": 0,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1117,8 +1117,8 @@ Object {
         "service.environment": "testing",
         "service.name": "opbeans-go",
         "serviceAnomalyStats": Object {
-          "actualValue": 3933482.1764705875,
-          "anomalyScore": 2.6101702751482714,
+          "actualValue": 3933482.17647059,
+          "anomalyScore": 2.61017027514827,
           "healthStatus": "healthy",
           "jobId": "apm-testing-d457-high_mean_transaction_duration",
           "transactionType": "request",
@@ -1132,8 +1132,8 @@ Object {
         "service.environment": "production",
         "service.name": "opbeans-ruby",
         "serviceAnomalyStats": Object {
-          "actualValue": 684716.5813953485,
-          "anomalyScore": 0.20498907719907372,
+          "actualValue": 684716.581395349,
+          "anomalyScore": 0.204989077199074,
           "healthStatus": "healthy",
           "jobId": "apm-production-229a-high_mean_transaction_duration",
           "transactionType": "request",
@@ -1185,8 +1185,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1213,8 +1213,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1227,7 +1227,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1247,8 +1247,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1261,7 +1261,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1281,8 +1281,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1295,7 +1295,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1314,7 +1314,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1342,7 +1342,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1356,8 +1356,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1376,7 +1376,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1390,7 +1390,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1410,7 +1410,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1424,8 +1424,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1443,7 +1443,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1471,7 +1471,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1485,8 +1485,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1505,7 +1505,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1519,7 +1519,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1538,7 +1538,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1565,7 +1565,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1592,7 +1592,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1620,7 +1620,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1634,8 +1634,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1654,7 +1654,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1668,7 +1668,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1688,7 +1688,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1702,7 +1702,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1721,8 +1721,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1748,8 +1748,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1762,8 +1762,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1782,8 +1782,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1796,7 +1796,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1815,8 +1815,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1829,7 +1829,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1848,8 +1848,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1862,7 +1862,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1894,8 +1894,8 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-go",
           "serviceAnomalyStats": Object {
-            "actualValue": 3933482.1764705875,
-            "anomalyScore": 2.6101702751482714,
+            "actualValue": 3933482.17647059,
+            "anomalyScore": 2.61017027514827,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
             "transactionType": "request",
@@ -1926,7 +1926,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-java",
           "serviceAnomalyStats": Object {
-            "actualValue": 14901.319999999996,
+            "actualValue": 14901.32,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -1958,7 +1958,7 @@ Object {
           "service.environment": "testing",
           "service.name": "opbeans-node",
           "serviceAnomalyStats": Object {
-            "actualValue": 32226.649122807008,
+            "actualValue": 32226.649122807,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-testing-d457-high_mean_transaction_duration",
@@ -1990,7 +1990,7 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-python",
           "serviceAnomalyStats": Object {
-            "actualValue": 66218.08333333333,
+            "actualValue": 66218.0833333333,
             "anomalyScore": 0,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -2022,8 +2022,8 @@ Object {
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "serviceAnomalyStats": Object {
-            "actualValue": 684716.5813953485,
-            "anomalyScore": 0.20498907719907372,
+            "actualValue": 684716.581395349,
+            "anomalyScore": 0.204989077199074,
             "healthStatus": "healthy",
             "jobId": "apm-production-229a-high_mean_transaction_duration",
             "transactionType": "request",
