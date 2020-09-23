@@ -41,7 +41,7 @@ export const validateRelatedEvents = {
 };
 
 /**
- * Used to validate GET requests for non process events for a specific event.
+ * Used to validate POST requests for `/resolver/events` api.
  */
 export const validateEvents = {
   query: schema.object({
