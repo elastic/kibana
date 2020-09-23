@@ -106,7 +106,7 @@ export function JSErrors() {
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+            title={i18n.translate('xpack.apm.rum.jsErrors.errorRateValue', {
               defaultMessage: '{errorRate} %',
               values: {
                 errorRate: (
