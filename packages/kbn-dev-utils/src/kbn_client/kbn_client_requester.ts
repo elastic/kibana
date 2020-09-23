@@ -117,7 +117,6 @@ export class KbnClientRequester {
           params: options.query,
           headers: {
             'kbn-xsrf': 'kbn-client',
-            ...options.headers,
           },
           httpsAgent: this.httpsAgent,
         });
