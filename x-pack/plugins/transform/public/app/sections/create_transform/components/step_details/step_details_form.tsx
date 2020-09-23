@@ -63,6 +63,7 @@ export interface StepDetailsExposedState {
   transformDescription: string;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize: number;
+  transformSettingsDocsPerSecond?: number;
   valid: boolean;
   indexPatternTimeField?: string | undefined;
 }
@@ -99,6 +100,20 @@ export function applyTransformConfigToDetailsState(
       state.continuousModeDateField = time.field;
       state.continuousModeDelay = time?.delay ?? defaultContinuousModeDelay;
       state.isContinuousModeEnabled = true;
+    }
+    if (transformConfig.description !== undefined) {
+      state.transformDescription = transformConfig.description;
+    }
+    if (transformConfig.frequency !== undefined) {
+      state.transformFrequency = transformConfig.frequency;
+    }
+    if (transformConfig.settings) {
+      if (typeof transformConfig.settings?.max_page_search_size === 'number') {
+        state.transformSettingsMaxPageSearchSize = transformConfig.settings.max_page_search_size;
+      }
+      if (typeof transformConfig.settings?.docs_per_second === 'number') {
+        state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
+      }
     }
   }
   return state;
@@ -275,6 +290,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
     const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState(
       defaults.transformSettingsMaxPageSearchSize
     );
+    const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
+
     const isTransformSettingsMaxPageSearchSizeValid = transformSettingsMaxPageSearchSizeValidator(
       transformSettingsMaxPageSearchSize
     );
@@ -301,6 +318,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
         transformDescription,
         transformFrequency,
         transformSettingsMaxPageSearchSize,
+        transformSettingsDocsPerSecond,
         destinationIndex,
         touched: true,
         valid,
