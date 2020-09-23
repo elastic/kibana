@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 import { useValues } from 'kea';
-import snakeCase from 'lodash/snakeCase';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
