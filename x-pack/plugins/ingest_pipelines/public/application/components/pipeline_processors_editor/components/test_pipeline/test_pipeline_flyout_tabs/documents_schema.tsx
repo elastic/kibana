@@ -86,8 +86,8 @@ export const documentsSchema: FormSchema = {
         validator: ({ value }: ValidationFuncArg<any, any>) => {
           const parsedJSON = JSON.parse(value);
 
-          const isMissingSourceField = parsedJSON.find((obj: { _source?: object }) => {
-            if (!obj._source) {
+          const isMissingSourceField = parsedJSON.find((document: { _source?: object }) => {
+            if (!document._source) {
               return true;
             }
 

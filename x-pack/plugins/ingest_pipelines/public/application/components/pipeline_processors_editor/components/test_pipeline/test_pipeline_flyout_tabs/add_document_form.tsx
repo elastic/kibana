@@ -27,6 +27,7 @@ import {
   FieldConfig,
 } from '../../../../../../shared_imports';
 import { useIsMounted } from '../../../use_is_mounted';
+import { Document } from '../../../types';
 
 const UseField = getUseField({ component: Field });
 
@@ -70,7 +71,7 @@ const i18nTexts = {
       defaultMessage: 'Document ID',
     }),
     validationMessage: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.loadDocuments.idRequiredErrorMessage',
+      'xpack.ingestPipelines.pipelineEditor.addDocuments.idRequiredErrorMessage',
       {
         defaultMessage: 'A document ID is required.',
       }
@@ -98,7 +99,7 @@ const fieldsConfig: Record<string, FieldConfig> = {
 };
 
 interface Props {
-  onAddDocuments: (document: any) => void;
+  onAddDocuments: (document: Document) => void;
 }
 
 export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) => {
@@ -107,7 +108,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
 
   const [isLoadingDocument, setIsLoadingDocument] = useState<boolean>(false);
   const [documentError, setDocumentError] = useState<Error | undefined>(undefined);
-  const [isNewDocumentAdded, setIsNewDocumentAdded] = useState<boolean>(false);
+  const [isDocumentAdded, setIsDocumentAdded] = useState<boolean>(false);
 
   const { form } = useForm({ defaultValue: { index: '', id: '' } });
 
@@ -119,7 +120,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
     if (isValid) {
       setIsLoadingDocument(true);
       setDocumentError(undefined);
-      setIsNewDocumentAdded(false);
+      setIsDocumentAdded(false);
 
       const { error, data: document } = await services.api.loadDocument(index, id);
 
@@ -134,7 +135,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
         return;
       }
 
-      setIsNewDocumentAdded(true);
+      setIsDocumentAdded(true);
       onAddDocuments(document);
     }
   };
@@ -157,7 +158,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
         </>
       )}
 
-      {isNewDocumentAdded && (
+      {isDocumentAdded && (
         <>
           <EuiCallOut
             title={i18nTexts.addDocumentSuccessMessage}

@@ -193,7 +193,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    async clickAddDocumentsButton() {
+    async clickAddDocumentButton() {
       await act(async () => {
         find('addDocumentButton').simulate('click');
       });
@@ -251,4 +251,5 @@ type TestSubject =
   | 'addDocumentsAccordion'
   | 'addDocumentButton'
   | 'addDocumentError'
+  | 'addDocumentSuccess'
   | string;
