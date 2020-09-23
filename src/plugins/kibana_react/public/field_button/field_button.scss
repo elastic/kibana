@@ -38,6 +38,10 @@
   padding: $euiSizeS;
   display: flex;
   align-items: flex-start;
+
+  .kbnFieldButton &:hover {
+    text-decoration: underline;
+  }
 }
 
 .kbnFieldButton__fieldIcon {

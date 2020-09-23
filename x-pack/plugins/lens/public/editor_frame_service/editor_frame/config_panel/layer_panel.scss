@@ -49,6 +49,16 @@
   min-height: $euiSizeXXL;
 }
 
+// Extend FieldButton
+.lnsLayerPanel__emptyDimension {
+  min-height: $euiSizeXXL;
+  color: $euiTextSubduedColor;
+
+  .kbnFieldButton__fieldIcon {
+    align-self: center;
+  }
+}
+
 .lnsLayerPanel__anchor {
   width: 100%;
 }
