@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
