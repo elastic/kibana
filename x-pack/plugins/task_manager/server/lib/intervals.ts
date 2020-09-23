@@ -4,6 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { memoize } from 'lodash';
+
+export enum IntervalCadence {
+  Minute = 'm',
+  Second = 's',
+}
+const VALID_CADENCE = new Set(Object.values(IntervalCadence));
+const CADENCE_IN_SECONDS: Record<IntervalCadence, number> = {
+  [IntervalCadence.Second]: 1,
+  [IntervalCadence.Minute]: 60,
+};
+
+function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadence {
+  return VALID_CADENCE.has(cadence as IntervalCadence);
+}
+
 /**
  * Returns a date that is the specified interval from now. Currently,
  * only minute-intervals and second-intervals are supported.
@@ -14,14 +30,7 @@ export function intervalFromNow(interval?: string): Date | undefined {
   if (interval === undefined) {
     return;
   }
-
-  assertValidInterval(interval);
-
-  if (isSeconds(interval)) {
-    return secondsFromNow(parseInterval(interval));
-  }
-
-  return minutesFromNow(parseInterval(interval));
+  return secondsFromNow(parseIntervalAsSecond(interval));
 }
 
 /**
@@ -35,37 +44,7 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
   if (interval === undefined) {
     return;
   }
-
-  assertValidInterval(interval);
-
-  if (isSeconds(interval)) {
-    return secondsFromDate(date, parseInterval(interval));
-  }
-
-  return minutesFromDate(date, parseInterval(interval));
-}
-
-/**
- * Returns a date that is mins minutes from now.
- *
- * @param mins The number of mintues from now
- */
-export function minutesFromNow(mins: number): Date {
-  return minutesFromDate(new Date(), mins);
-}
-
-/**
- * Returns a date that is mins minutes from given date.
- *
- * @param date The date to add minutes to
- * @param mins The number of mintues from given date
- */
-export function minutesFromDate(date: Date, mins: number): Date {
-  const result = new Date(date.valueOf());
-
-  result.setMinutes(result.getMinutes() + mins);
-
-  return result;
+  return secondsFromDate(date, parseIntervalAsSecond(interval));
 }
 
 /**
@@ -85,9 +64,7 @@ export function secondsFromNow(secs: number): Date {
  */
 export function secondsFromDate(date: Date, secs: number): Date {
   const result = new Date(date.valueOf());
-
   result.setSeconds(result.getSeconds() + secs);
-
   return result;
 }
 
@@ -95,29 +72,18 @@ export function secondsFromDate(date: Date, secs: number): Date {
  * Verifies that the specified interval matches our expected format.
  *
  * @param {string} interval - An interval such as `5m` or `10s`
+ * @returns {number} The interval as seconds
  */
-export function assertValidInterval(interval: string) {
-  if (isMinutes(interval)) {
-    return interval;
+export const parseIntervalAsSecond = memoize((interval: string): number => {
+  const numericAsStr: string = interval.slice(0, -1);
+  const numeric: number = parseInt(numericAsStr, 10);
+  const cadence: IntervalCadence | string = interval.slice(-1);
+  if (!isCadence(cadence) || isNaN(numeric) || numeric <= 0 || !isNumeric(numericAsStr)) {
+    throw new Error(
+      `Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`
+    );
   }
+  return numeric * CADENCE_IN_SECONDS[cadence];
+});
 
-  if (isSeconds(interval)) {
-    return interval;
-  }
-
-  throw new Error(
-    `Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`
-  );
-}
-
-function parseInterval(interval: string) {
-  return parseInt(interval, 10);
-}
-
-function isMinutes(interval: string) {
-  return /^[1-9][0-9]*m$/.test(interval);
-}
-
-function isSeconds(interval: string) {
-  return /^[1-9][0-9]*s$/.test(interval);
-}
+const isNumeric = (numAsStr: string) => /^\d+$/.test(numAsStr);

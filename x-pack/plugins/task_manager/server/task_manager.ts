@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from 'src/core/server';
 import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -19,7 +20,6 @@ import {
 import { Result, asOk, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import { Logger } from './types';
 import {
   TaskMarkRunning,
   TaskRun,

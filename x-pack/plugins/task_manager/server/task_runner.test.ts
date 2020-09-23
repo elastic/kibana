@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow } from './lib/intervals';
+import { secondsFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { ConcreteTaskInstance, TaskStatus, TaskDictionary, TaskDefinition } from './task';
@@ -14,6 +14,8 @@ import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+
+const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
 

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import url from 'url';
+import { keyBy, mapValues } from 'lodash';
 import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
@@ -50,36 +51,62 @@ export default function ({ getService }: FtrProviderContext) {
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  const monitoredAggregatedStatsRefreshRate = 5000;
+
   describe('health', () => {
     it('should return basic configuration of task manager', async () => {
       expect((await getHealth()).stats.configuration.value).to.eql({
         poll_interval: 3000,
         max_poll_inactivity_cycles: 10,
+        monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         request_capacity: 1000,
         max_workers: 10,
       });
     });
 
     it('should return the task manager workload', async () => {
+      const workload = (await getHealth()).stats.workload;
       const sumSampleTaskInWorkload =
-        ((await getHealth()).stats.workload.value.types as {
+        (workload.value.taskTypes as {
           sampleTask?: { sum: number };
         }).sampleTask?.sum ?? 0;
+      const schedulesWorkload = (mapValues(
+        keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
+        ([, count]) => count
+      ) as unknown) as { '37m': number | undefined; '37s': number | undefined };
 
       await scheduleTask({
         taskType: 'sampleTask',
-        schedule: { interval: '1m' },
+        schedule: { interval: '37s' },
+      });
+
+      await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '37m' },
       });
 
       await retry.try(async () => {
         // workload is configured to refresh every 5s in FTs
-        await delay(5000);
+        await delay(monitoredAggregatedStatsRefreshRate);
 
         const workloadAfterScheduling = (await getHealth()).stats.workload.value;
 
         expect(
-          (workloadAfterScheduling.types as { sampleTask: { sum: number } }).sampleTask.sum
-        ).to.eql(sumSampleTaskInWorkload + 1);
+          (workloadAfterScheduling.taskTypes as { sampleTask: { sum: number } }).sampleTask.sum
+        ).to.eql(sumSampleTaskInWorkload + 2);
+
+        const schedulesWorkloadAfterScheduling = (mapValues(
+          keyBy(
+            workloadAfterScheduling.schedule as Array<[string, number]>,
+            ([interval]) => interval
+          ),
+          ([, count]) => count
+        ) as unknown) as {
+          '37m': number;
+          '37s': number;
+        };
+        expect(schedulesWorkloadAfterScheduling['37s']).to.eql(schedulesWorkload['37s'] ?? 0 + 1);
+        expect(schedulesWorkloadAfterScheduling['37m']).to.eql(schedulesWorkload['37m'] ?? 0 + 1);
       });
     });
   });

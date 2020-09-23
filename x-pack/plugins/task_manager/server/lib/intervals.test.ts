@@ -7,11 +7,9 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import {
-  assertValidInterval,
+  parseIntervalAsSecond,
   intervalFromNow,
   intervalFromDate,
-  minutesFromNow,
-  minutesFromDate,
   secondsFromNow,
   secondsFromDate,
 } from './intervals';
@@ -25,29 +23,29 @@ beforeAll(() => {
 afterAll(() => fakeTimer.restore());
 
 describe('taskIntervals', () => {
-  describe('assertValidInterval', () => {
+  describe('parseIntervalAsSecond', () => {
     test('it accepts intervals in the form `Nm`', () => {
-      expect(() => assertValidInterval(`${_.random(1, 1000)}m`)).not.toThrow();
+      expect(() => parseIntervalAsSecond(`${_.random(1, 1000)}m`)).not.toThrow();
     });
 
     test('it accepts intervals in the form `Ns`', () => {
-      expect(() => assertValidInterval(`${_.random(1, 1000)}s`)).not.toThrow();
+      expect(() => parseIntervalAsSecond(`${_.random(1, 1000)}s`)).not.toThrow();
     });
 
     test('it rejects 0 based intervals', () => {
-      expect(() => assertValidInterval('0m')).toThrow(
+      expect(() => parseIntervalAsSecond('0m')).toThrow(
         /Invalid interval "0m"\. Intervals must be of the form {number}m. Example: 5m/
       );
-      expect(() => assertValidInterval('0s')).toThrow(
+      expect(() => parseIntervalAsSecond('0s')).toThrow(
         /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
 
     test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
-      expect(() => assertValidInterval(`5m 2s`)).toThrow(
+      expect(() => parseIntervalAsSecond(`5m 2s`)).toThrow(
         /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
       );
-      expect(() => assertValidInterval(`hello`)).toThrow(
+      expect(() => parseIntervalAsSecond(`hello`)).toThrow(
         /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
@@ -122,25 +120,6 @@ describe('taskIntervals', () => {
       expect(() => intervalFromDate(date, '0s')).toThrow(
         /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
       );
-    });
-  });
-
-  describe('minutesFromNow', () => {
-    test('it returns the current date plus a number of minutes', () => {
-      const mins = _.random(1, 100);
-      const expected = Date.now() + mins * 60 * 1000;
-      const nextRun = minutesFromNow(mins).getTime();
-      expect(nextRun).toEqual(expected);
-    });
-  });
-
-  describe('minutesFromDate', () => {
-    test('it returns the given date plus a number of minutes', () => {
-      const originalDate = new Date(2019, 1, 1);
-      const mins = _.random(1, 100);
-      const expected = originalDate.valueOf() + mins * 60 * 1000;
-      const nextRun = minutesFromDate(originalDate, mins).getTime();
-      expect(expected).toEqual(nextRun);
     });
   });
 

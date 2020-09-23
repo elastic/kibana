@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, Logger } from 'src/core/server';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { TaskDictionary, TaskDefinition } from './task';
@@ -31,13 +31,16 @@ export class TaskManagerPlugin
   currentConfig: TaskManagerConfig;
   taskManagerId?: string;
   config?: TaskManagerConfig;
+  logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.currentConfig = {} as TaskManagerConfig;
+    this.logger = initContext.logger.get('taskManager');
   }
 
   public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
+    const { logger } = this;
     const config = (this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
@@ -51,7 +54,7 @@ export class TaskManagerPlugin
     healthRoute(
       router,
       config,
-      this.taskManager.then((tm) => createAggregatedStatsStream(tm, config)),
+      this.taskManager.then((tm) => createAggregatedStatsStream(tm, config, logger)),
       // if health is any more stale than the pollInterval (+1s buffer) consider the system unhealthy
       config.poll_interval + 1000
     );
@@ -67,7 +70,7 @@ export class TaskManagerPlugin
   }
 
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
-    const logger = this.initContext.logger.get('taskManager');
+    const { logger } = this;
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     this.legacyTaskManager$.next(

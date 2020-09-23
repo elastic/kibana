@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from 'src/core/server';
 import { TaskManager } from '../task_manager';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { createWorkloadAggregator } from './workload_statistics';
@@ -12,7 +13,12 @@ export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_agg
 
 export function createAggregatedStatsStream(
   taskManager: TaskManager,
-  config: TaskManagerConfig
+  config: TaskManagerConfig,
+  logger: Logger
 ): AggregatedStatProvider {
-  return createWorkloadAggregator(taskManager, config.monitored_aggregated_stats_refresh_rate);
+  return createWorkloadAggregator(
+    taskManager,
+    config.monitored_aggregated_stats_refresh_rate,
+    logger
+  );
 }
