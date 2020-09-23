@@ -73,7 +73,7 @@ const { execSync } = require('child_process');
     console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_VERSION' value='${VERSION}']`);
     console.log(`##teamcity[setParameter name='env.ES_SNAPSHOT_ID' value='${SNAPSHOT_ID}']`);
 
-    console.log(`##teamcity[buildNumber '{build.number}-${VERSION}']`);
+    console.log(`##teamcity[buildNumber '{build.number}-${VERSION}-${SNAPSHOT_ID}']`);
   } catch (ex) {
     console.error(ex);
     process.exit(1);
