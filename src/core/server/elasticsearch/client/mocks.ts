@@ -50,6 +50,9 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   };
 
   const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
+    // the @elastic/elasticsearch::Client uses prototypical inheritance
+    // so we have to crawl up the prototype chain and get all descriptors
+    // to find everything that we should be mocking
     const descriptors = getAllPropertyDescriptors(obj);
     descriptors
       .filter((descriptor) => !omitted.includes(descriptor[0]))
@@ -67,15 +70,22 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
 
   client.close = jest.fn().mockReturnValue(Promise.resolve());
   client.child = jest.fn().mockImplementation(() => createInternalClientMock());
-  Object.defineProperty(client, 'on', {
-    value: jest.fn(),
-  });
-  Object.defineProperty(client, 'off', {
-    value: jest.fn(),
-  });
-  Object.defineProperty(client, 'once', {
-    value: jest.fn(),
-  });
+
+  const mockGetter = (obj: Record<string, any>, propertyName: string) => {
+    Object.defineProperty(obj, propertyName, {
+      configurable: true,
+      enumerable: false,
+      get: () => jest.fn(),
+      set: undefined,
+    });
+  };
+
+  // `on`, `off`, and `once` are properties without a setter.
+  // We can't `client.on = jest.fn()` because the following error will be thrown:
+  // TypeError: Cannot set property on of #<Client> which has only a getter
+  mockGetter(client, 'on');
+  mockGetter(client, 'off');
+  mockGetter(client, 'once');
   client.transport = {
     request: jest.fn(),
   };

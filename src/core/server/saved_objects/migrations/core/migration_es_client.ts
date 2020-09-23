@@ -76,7 +76,7 @@ export function createMigrationEsClient(
   return methods.reduce((acc: MigrationEsClient, key: MethodName) => {
     set(acc, key, async (params?: unknown, options?: TransportRequestOptions) => {
       const fn = get(client, key);
-      if (!get(client, key)) {
+      if (!fn) {
         throw new Error(`unknown ElasticsearchClient client method [${key}]`);
       }
       return await migrationRetryCallCluster(
