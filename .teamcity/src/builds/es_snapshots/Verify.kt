@@ -18,27 +18,8 @@ object EsSnapshotsProject : Project({
   id("ES_Snapshots")
   name = "ES Snapshots"
 
-  val esBuild = BuildType {
-    id("ES_Build")
-    name = "ES Build"
-
-    kibanaAgent(2)
-
-    steps {
-      script {
-        name = "Build"
-        scriptContent =
-          """
-                #!/bin/bash
-                echo "##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest.json']"
-        """.trimIndent()
-      }
-    }
-  }
-
-  buildType(esBuild)
   buildType(ESSnapshotBuild)
-  buildType(ESSnapshotManifest)
+//  buildType(ESSnapshotManifest)
 
 //  val defaultCiGroups = (1..DEFAULT_CI_GROUP_COUNT).map {
 //    DefaultCiGroup(it) {
@@ -59,10 +40,10 @@ object EsSnapshotsProject : Project({
     build.copyTo(newBuild)
     newBuild.id = AbsoluteId(build.id?.toString() + "_ES_Snapshots")
     newBuild.params {
-      val buildId = esBuild.id?.value ?: ""
+      val buildId = ESSnapshotBuild.id?.value ?: ""
       param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
     }
-    newBuild.dependsOn(esBuild)
+    newBuild.dependsOn(ESSnapshotBuild)
     newBuild.steps.items.removeIf { it.name == "Failed Test Reporter" }
     newBuild
   }
@@ -153,7 +134,7 @@ object EsSnapshotsProject : Project({
     type = BuildTypeSettings.Type.COMPOSITE
 
     dependsOn(
-      esBuild,
+      ESSnapshotBuild,
       OssBuild,
       DefaultBuild,
       *allTestJobs.toTypedArray()
