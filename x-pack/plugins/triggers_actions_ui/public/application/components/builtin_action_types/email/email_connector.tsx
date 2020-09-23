@@ -24,7 +24,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
   const { from, host, port, secure, hasAuth } = action.config;
   const { user, password } = action.secrets;
-  // const [initialHasAuth] = useState<boolean>(hasAuth === true);
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);

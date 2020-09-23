@@ -8,6 +8,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -15,7 +16,28 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  return { '7.10.0': addHasAuthConfigurationObject(encryptedSavedObjects) };
+  const migrationHasAuthConfigurationObject = addHasAuthConfigurationObject(encryptedSavedObjects);
+
+  return {
+    '7.10.0': executeMigrationWithErrorHandling(migrationHasAuthConfigurationObject, '7.10.0'),
+  };
+}
+
+function executeMigrationWithErrorHandling(
+  migrationFunc: SavedObjectMigrationFn<RawAction, RawAction>,
+  version: string
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
+    try {
+      return migrationFunc(doc, context);
+    } catch (ex) {
+      context.log.error(
+        `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
+        { actionDocument: doc }
+      );
+    }
+    return doc;
+  };
 }
 
 const addHasAuthConfigurationObject = (
@@ -24,7 +46,7 @@ const addHasAuthConfigurationObject = (
   return encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => doc.attributes.actionTypeId === '.email',
     (doc: SavedObjectUnsanitizedDoc<RawAction>): SavedObjectUnsanitizedDoc<RawAction> => {
-      const hasAuth = Object.keys(doc.attributes.secrets).length > 0;
+      const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
       return {
         ...doc,
         attributes: {

@@ -55,6 +55,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
@@ -66,6 +67,7 @@ describe('config validation', () => {
     delete config.service;
     config.host = 'elastic.co';
     config.port = 8080;
+    config.hasAuth = true;
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       service: null,
