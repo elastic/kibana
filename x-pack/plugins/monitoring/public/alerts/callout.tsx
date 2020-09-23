@@ -50,7 +50,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
 
     if (list.length) {
       return (
-        <div key={type}>
+        <Fragment>
           <EuiCallOut title={type.label} color={type.severity} iconType="bell">
             <ul>
               {list.map((state, index) => {
@@ -75,7 +75,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             </ul>
           </EuiCallOut>
           <EuiSpacer />
-        </div>
+        </Fragment>
       );
     }
   });

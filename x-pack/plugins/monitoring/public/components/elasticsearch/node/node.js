@@ -73,7 +73,9 @@ export const Node = ({
           <NodeDetailStatus
             stats={nodeSummary}
             alerts={alerts}
-            alertsStateFilter={(state) => state.nodeId === nodeId}
+            alertsStateFilter={(state) =>
+              state.nodeId === nodeId || state.stackProductUuid === nodeId
+            }
           />
         </EuiPanel>
         <EuiSpacer size="m" />
