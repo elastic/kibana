@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useValues } from 'kea';
 import {
   EuiPage,
   EuiPageBody,
@@ -21,9 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { IInitialAppData } from '../../../common/types';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 
+import { HttpLogic } from '../shared/http';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../shared/telemetry';
 
+import { ErrorConnecting } from './components/error_connecting';
 import { ProductCard } from './components/product_card';
 
 import AppSearchImage from './assets/app_search.png';
@@ -31,9 +34,12 @@ import WorkplaceSearchImage from './assets/workplace_search.png';
 import './index.scss';
 
 export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
+  const { errorConnecting } = useValues(HttpLogic);
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
 
-  return (
+  return errorConnecting ? (
+    <ErrorConnecting />
+  ) : (
     <EuiPage restrictWidth className="enterpriseSearchOverview">
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="overview" />

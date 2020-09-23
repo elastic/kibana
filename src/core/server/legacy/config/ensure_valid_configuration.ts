@@ -19,19 +19,17 @@
 
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 import { ConfigService } from '../../config';
-import { LegacyServiceDiscoverPlugins } from '../types';
 import { CriticalError } from '../../errors';
+import { LegacyServiceSetupConfig } from '../types';
 
 export async function ensureValidConfiguration(
   configService: ConfigService,
-  { pluginSpecs, disabledPluginSpecs, pluginExtendedConfig, settings }: LegacyServiceDiscoverPlugins
+  { legacyConfig, settings }: LegacyServiceSetupConfig
 ) {
   const unusedConfigKeys = await getUnusedConfigKeys({
     coreHandledConfigPaths: await configService.getUsedPaths(),
-    pluginSpecs,
-    disabledPluginSpecs,
     settings,
-    legacyConfig: pluginExtendedConfig,
+    legacyConfig,
   });
 
   if (unusedConfigKeys.length > 0) {
