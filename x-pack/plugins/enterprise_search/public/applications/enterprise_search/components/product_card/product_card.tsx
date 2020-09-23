@@ -52,8 +52,6 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
     }
   );
 
-  const TEST_SUBJ_PREFIX = host ? 'Launch' : 'Setup';
-
   return (
     <EuiCard
       className="productCard"
@@ -82,7 +80,6 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
               metric: snakeCase(product.ID),
             })
           }
-          data-test-subj={`${TEST_SUBJ_PREFIX}${upperFirst(product.ID)}Button`}
         >
           {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
