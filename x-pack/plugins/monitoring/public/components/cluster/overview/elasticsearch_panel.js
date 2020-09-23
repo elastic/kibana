@@ -436,7 +436,10 @@ export function ElasticsearchPanel(props) {
                   defaultMessage="Documents"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="esDocumentsCount">
+              <EuiDescriptionListDescription
+                data-test-subj="esDocumentsCount"
+                className="eui-textBreakWord"
+              >
                 {formatNumber(get(indices, 'docs.count'), 'int_commas')}
               </EuiDescriptionListDescription>
 

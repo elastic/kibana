@@ -14,6 +14,8 @@ import {
   EuiDescriptionList,
   EuiSpacer,
   EuiKeyboardAccessible,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -94,26 +96,39 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     );
 
     return (
-      <div data-test-subj={props['data-test-subj']}>
-        <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-          <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
-            <EuiDescriptionList
-              type="column"
-              compressed
-              listItems={tooltipItems}
-              style={{ maxWidth: '150px' }}
-            />
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
-              {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
-                defaultMessage: 'Applies to current time period',
-              })}
-            </EuiText>
-          </div>
-        </EuiPopover>
-        &nbsp;
-        <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
-      </div>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false} />
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup data-test-subj={props['data-test-subj']} gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                ownFocus
+                button={button}
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+              >
+                <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
+                  <EuiDescriptionList
+                    type="column"
+                    compressed
+                    listItems={tooltipItems}
+                    style={{ maxWidth: '150px' }}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
+                      defaultMessage: 'Applies to current time period',
+                    })}
+                  </EuiText>
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
