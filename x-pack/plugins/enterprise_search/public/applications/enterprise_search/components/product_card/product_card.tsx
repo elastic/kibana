@@ -39,7 +39,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
   const LAUNCH_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.launchButton',
     {
-      defaultMessage: `Launch {productName}`,
+      defaultMessage: 'Launch {productName}',
       values: { productName: product.NAME },
     }
   );
