@@ -11,11 +11,13 @@
 |  [AggConfig](./kibana-plugin-plugins-data-public.aggconfig.md) |  |
 |  [AggConfigs](./kibana-plugin-plugins-data-public.aggconfigs.md) |  |
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
+|  [DuplicateIndexPatternError](./kibana-plugin-plugins-data-public.duplicateindexpatternerror.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
 |  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
 |  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
+|  [IndexPatternsService](./kibana-plugin-plugins-data-public.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [RequestTimeoutError](./kibana-plugin-plugins-data-public.requesttimeouterror.md) | Class used to signify that a request timed out. Useful for applications to conditionally handle this type of error differently than other errors. |
@@ -57,7 +59,6 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |
-|  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md) |  |
@@ -67,7 +68,8 @@
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Use data plugin interface instead |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) |  |
+|  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) |  |
 |  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
@@ -75,7 +77,6 @@
 |  [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md) | high level search service |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
-|  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
 |  [QueryStateChange](./kibana-plugin-plugins-data-public.querystatechange.md) |  |
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
@@ -90,7 +91,6 @@
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
-|  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |
 
 ## Variables
 
@@ -145,6 +145,7 @@
 |  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
 |  [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |  |
+|  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
@@ -162,6 +163,7 @@
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
 |  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |
 |  [PhrasesFilter](./kibana-plugin-plugins-data-public.phrasesfilter.md) |  |
+|  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |  |
 |  [QuerySuggestion](./kibana-plugin-plugins-data-public.querysuggestion.md) | \* |
 |  [QuerySuggestionGetFn](./kibana-plugin-plugins-data-public.querysuggestiongetfn.md) |  |
@@ -173,4 +175,5 @@
 |  [TabbedAggRow](./kibana-plugin-plugins-data-public.tabbedaggrow.md) | \* |
 |  [TimefilterContract](./kibana-plugin-plugins-data-public.timefiltercontract.md) |  |
 |  [TimeHistoryContract](./kibana-plugin-plugins-data-public.timehistorycontract.md) |  |
+|  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |
 
