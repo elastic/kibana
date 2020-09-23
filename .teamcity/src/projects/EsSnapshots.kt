@@ -43,6 +43,8 @@ object EsSnapshotsProject : Project({
       integrationCloned.forEach {
         buildType(it)
       }
+
+      buildType(IntegrationTests)
     }
   }
 
