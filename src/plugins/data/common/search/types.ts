@@ -70,10 +70,5 @@ export interface IKibanaSearchRequest<Params = any> {
    */
   id?: string;
 
-  /**
-   * Optionally tell search strategies to output debug information.
-   */
-  debug?: boolean;
-
   params?: Params;
 }
