@@ -61,7 +61,6 @@ import { getNotificationResultsLink } from '../notifications/utils';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromSequence, buildSignalFromEvent } from './build_bulk_body';
-import { buildParent } from './build_signal';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
