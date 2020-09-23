@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller } from 'kibana/server';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 

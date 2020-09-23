@@ -18,8 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller } from 'kibana/server';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
