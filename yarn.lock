@@ -1120,15 +1120,6 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@elastic/apm-rum-core@^5.6.0":
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.6.0.tgz#d1f643eb00e590d5884598a20bb54efb1490ee13"
-  integrity sha512-hG+lITWBQd0mw00BQ1zYVRKDCh5b9FKFiht9fMXcT0SENOsT5J37RIbQHPdVawluT7/mhDF07t4fR8V0xRB1/g==
-  dependencies:
-    error-stack-parser "^1.3.5"
-    opentracing "^0.14.3"
-    promise-polyfill "^8.1.3"
-
 "@elastic/apm-rum-core@^5.6.1":
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.6.1.tgz#0870e654e84e1f2ffea7c8a247a2da1b72918bcd"
@@ -1145,13 +1136,6 @@
   dependencies:
     "@elastic/apm-rum" "^5.6.0"
     hoist-non-react-statics "^3.3.0"
-
-"@elastic/apm-rum@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.5.0.tgz#24a8b4db0fa328c1e54710d18837e1adba7e51e0"
-  integrity sha512-uEOJG7Lm0CLtGfXOLXSsiPLpTPvrNUqlWQEKf/D77lpHRVWxBb56xa4X4CK2on8V1XzHDufcYBPcBcKSGozTLw==
-  dependencies:
-    "@elastic/apm-rum-core" "^5.6.0"
 
 "@elastic/apm-rum@^5.6.0":
   version "5.6.0"
