@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*']);
+      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*', 'winlogbeat-*']);
     });
 
     it('should not find indexes as existing when there is an empty array of them', async () => {

@@ -22,7 +22,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import debounce from 'lodash/debounce';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -249,15 +248,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setFilterEventType(eventType);
   }, [eventType, sourcererScope.selectedPatterns]);
 
-  const handleComboBoxChange = useMemo(
-    () =>
-      debounce(onChangeCombo, 500, {
-        leading: true,
-        trailing: false,
-      }),
-    [onChangeCombo]
-  );
-
   const comboBox = useMemo(
     () => (
       <EuiComboBox
@@ -265,11 +255,11 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={handleComboBoxChange}
+        onChange={onChangeCombo}
         renderOption={renderOption}
       />
     ),
-    [handleComboBoxChange, indexesPatternOptions, renderOption, selectedOptions]
+    [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
   );
 
   const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
@@ -303,12 +293,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   }, [eventType, sourcererScope.loading, togglePopover]);
 
   const tooltipContent = useMemo(
-    () =>
-      selectedOptions
-        .map((so) => so.label)
-        .sort()
-        .join(', '),
-    [selectedOptions]
+    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
+    [isPopoverOpen, sourcererScope.selectedPatterns]
   );
 
   const ButtonContent = useMemo(

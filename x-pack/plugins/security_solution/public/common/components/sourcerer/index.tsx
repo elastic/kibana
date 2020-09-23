@@ -19,7 +19,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import debounce from 'lodash/debounce';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -29,6 +28,10 @@ import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants'
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
+
+const PopoverContent = styled.div`
+  width: 600px;
+`;
 
 const ResetButton = styled(EuiButtonEmpty)`
   width: fit-content;
@@ -100,6 +103,10 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     setPopoverIsOpen(false);
   }, [onChangeIndexPattern, selectedOptions]);
 
+  const handleClosePopOver = useCallback(() => {
+    setPopoverIsOpen(false);
+  }, []);
+
   const indexesPatternOptions = useMemo(
     () =>
       [...configIndexPatterns, ...kibanaIndexPatterns.map((kip) => kip.title)].reduce<
@@ -140,10 +147,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={debounce(onChangeCombo, 600, {
-          leading: true,
-          trailing: false,
-        })}
+        onChange={onChangeCombo}
         renderOption={renderOption}
       />
     ),
@@ -163,17 +167,22 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     });
   }, [selectedPatterns]);
 
+  const tooltipContent = useMemo(
+    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
+    [isPopoverOpen, sourcererScope.selectedPatterns]
+  );
+
   return (
-    <EuiToolTip position="top" content={sourcererScope.selectedPatterns.sort().join(', ')}>
+    <EuiToolTip position="top" content={tooltipContent}>
       <EuiPopover
         button={trigger}
         isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
+        closePopover={handleClosePopOver}
         display="block"
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 600 }}>
+        <PopoverContent>
           <EuiPopoverTitle>
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
@@ -207,7 +216,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
+        </PopoverContent>
       </EuiPopover>
     </EuiToolTip>
   );
