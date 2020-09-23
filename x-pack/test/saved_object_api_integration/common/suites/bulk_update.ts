@@ -24,7 +24,10 @@ const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, 
 const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, BulkUpdateTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
 
 const createRequest = ({ type, id, namespace }: BulkUpdateTestCase) => ({
   type,

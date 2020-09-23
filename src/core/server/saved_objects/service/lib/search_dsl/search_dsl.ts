@@ -35,6 +35,7 @@ interface GetSearchDslOptions {
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: {
     type: string;
     id: string;
@@ -56,6 +57,7 @@ export function getSearchDsl(
     sortField,
     sortOrder,
     namespaces,
+    typeToNamespacesMap,
     hasReference,
     kueryNode,
   } = options;
@@ -74,6 +76,7 @@ export function getSearchDsl(
       registry,
       namespaces,
       type,
+      typeToNamespacesMap,
       search,
       searchFields,
       rootSearchFields,
