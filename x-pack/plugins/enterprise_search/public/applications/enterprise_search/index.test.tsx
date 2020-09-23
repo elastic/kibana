@@ -31,7 +31,7 @@ describe('EnterpriseSearch', () => {
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
   });
 
-  it('renders the error connecting prompt', () => {
+  it('renders the error connecting prompt when host is not configured', () => {
     (useValues as jest.Mock).mockReturnValueOnce({ errorConnecting: true });
     (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
 
