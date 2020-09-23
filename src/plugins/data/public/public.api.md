@@ -1005,14 +1005,14 @@ export interface IFieldType {
 // @public (undocumented)
 export interface IIndexPattern {
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     fieldFormatMap?: Record<string, {
         id: string;
         params: unknown;
     }>;
     // (undocumented)
     fields: IFieldType[];
+    // (undocumented)
+    getFormatterForField?: (field: IndexPatternField | IndexPatternField['spec'] | IFieldType) => FieldFormat;
     // (undocumented)
     getTimeField?(): IFieldType | undefined;
     // (undocumented)
@@ -1123,7 +1123,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     // (undocumented)
-    getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
+    getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     // (undocumented)
     getIndex(): string;
     // (undocumented)
@@ -1290,24 +1290,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     toSpec({ getFormatterForField, }?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: {
-            id: any;
-            params: any;
-        } | undefined;
-    };
+    }): FieldSpec;
     // (undocumented)
     get type(): string;
     // (undocumented)
@@ -1389,6 +1372,11 @@ export type InputTimeRange = TimeRange | {
     to: Moment;
 };
 
+// Warning: (ae-missing-release-tag) "isCompleteResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isCompleteResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1441,6 +1429,11 @@ export interface ISearchStartSearchSource {
     createEmpty: () => ISearchSource;
 }
 
+// Warning: (ae-missing-release-tag) "isErrorResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isErrorResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1450,6 +1443,11 @@ export const isFilter: (x: unknown) => x is Filter;
 //
 // @public (undocumented)
 export const isFilters: (x: unknown) => x is Filter[];
+
+// Warning: (ae-missing-release-tag) "isPartialResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isPartialResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
 
 // Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

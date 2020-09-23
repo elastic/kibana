@@ -9,6 +9,7 @@
 |  Class | Description |
 |  --- | --- |
 |  [AggParamType](./kibana-plugin-plugins-data-server.aggparamtype.md) |  |
+|  [IndexPattern](./kibana-plugin-plugins-data-server.indexpattern.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
@@ -41,14 +42,13 @@
 |  --- | --- |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
+|  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-server.iindexpattern.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Use data plugin interface instead |
-|  [IndexPatternFieldDescriptor](./kibana-plugin-plugins-data-server.indexpatternfielddescriptor.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
