@@ -27,6 +27,17 @@ a| <<servicenow-action-type, ServiceNow>>
 
 | Create an incident in ServiceNow.
 
+a| <<jira-action-type, Jira>>
+
+| Create an incident in Jira.
+
+a| <<resilient-action-type, IBM Resilient>>
+
+| Create an incident in IBM Resilient.
+
+a| <<slack-action-type, Slack>>
+| Create an incident in ServiceNow.
+
 a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
@@ -60,3 +71,5 @@ include::action-types/slack.asciidoc[]
 include::action-types/webhook.asciidoc[]
 include::action-types/pre-configured-connectors.asciidoc[]
 include::action-types/servicenow.asciidoc[]
+include::action-types/jira.asciidoc[]
+include::action-types/resilient.asciidoc[]
