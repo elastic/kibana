@@ -105,14 +105,14 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
 
 export const getPushInfo = (
   caseServices: CaseServices,
-  parsedValue: { id: string; name: string },
+  parsedValue: { connector_id: string; connector_name: string },
   index: number
 ) =>
   parsedValue != null
     ? {
-        firstPush: caseServices[parsedValue.id]?.firstPushIndex === index,
-        parsedConnectorId: parsedValue.id,
-        parsedConnectorName: parsedValue.name,
+        firstPush: caseServices[parsedValue.connector_id]?.firstPushIndex === index,
+        parsedConnectorId: parsedValue.connector_id,
+        parsedConnectorName: parsedValue.connector_name,
       }
     : {
         firstPush: false,

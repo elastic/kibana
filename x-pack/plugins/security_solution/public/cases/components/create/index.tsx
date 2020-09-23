@@ -38,6 +38,7 @@ import {
 } from '../configure_cases/utils';
 import { ActionConnector } from '../../containers/types';
 import * as i18n from './translations';
+import { AllSettingFields } from '../settings/types';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -79,7 +80,7 @@ export const Create = React.memo(() => {
     }))
   );
 
-  const [fields, setFields] = useState<Record<string, unknown>>({});
+  const [fields, setFields] = useState<Record<string, AllSettingFields>>({});
 
   const { form } = useForm<FormProps>({
     defaultValue: initialCaseValue,
@@ -251,13 +252,13 @@ export const Create = React.memo(() => {
           </EuiFlexItem>
           <EuiFlexItem>
             <Container>
-              <SettingFieldsForm connector={connector} onFieldsChange={setFields} />
+              <SettingFieldsForm connector={connector} onFieldsChange={setFields} fields={fields} />
             </Container>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
     }),
-    [isLoadingConnectors, connectors, isLoading, connector]
+    [isLoadingConnectors, connectors, isLoading, connector, fields]
   );
 
   const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);

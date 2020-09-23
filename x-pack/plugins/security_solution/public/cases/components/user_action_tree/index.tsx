@@ -36,10 +36,7 @@ import {
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
-import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { UserActionUsername } from './user_action_username';
-import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 
 export interface UserActionTreeProps {
@@ -341,11 +338,11 @@ export const UserActionTree = React.memo(
 
               const showTopFooter =
                 action.action === 'push-to-service' &&
-                index === caseServices[parsedConnectorId].lastPushIndex;
+                index === caseServices[parsedConnectorId]?.lastPushIndex;
 
               const showBottomFooter =
                 action.action === 'push-to-service' &&
-                index === caseServices[parsedConnectorId].lastPushIndex &&
+                index === caseServices[parsedConnectorId]?.lastPushIndex &&
                 caseServices[parsedConnectorId].hasDataToPush;
 
               let footers: EuiCommentProps[] = [];
@@ -384,7 +381,10 @@ export const UserActionTree = React.memo(
             }
 
             // description, comments, tags
-            if (action.actionField.length === 1) {
+            if (
+              action.actionField.length === 1 &&
+              ['description', 'comment', 'tag'].includes(action.actionField[0])
+            ) {
               const myField = action.actionField[0];
               const label: string | JSX.Element = getLabelTitle({
                 action,

@@ -20,20 +20,28 @@ import { noop } from 'lodash/fp';
 
 import * as i18n from '../../translations';
 import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
-import { schema } from './schema';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
+import { AllSettingFields } from '../settings/types';
+import { CaseUserActions } from '../../containers/types';
+import { schema } from './schema';
+import { getConnectorFieldsFromUserActions } from './helpers';
 
 interface EditConnectorProps {
   connectors: ActionConnector[];
   disabled?: boolean;
   isLoading: boolean;
   selectedConnector: string;
-  onSubmit: (connectorId: string, onSuccess: () => void, onError: () => void) => void;
-  onFieldsChange: (fields: Record<string, unknown>) => void;
-  fields: Record<string, unknown>;
+  onSubmit: (
+    connectorId: string,
+    connectorFields: Record<string, AllSettingFields>,
+    onSuccess: () => void,
+    onError: () => void
+  ) => void;
+  caseFields: Record<string, AllSettingFields>;
+  userActions: CaseUserActions[];
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -52,8 +60,8 @@ export const EditConnector = React.memo(
     isLoading,
     onSubmit,
     selectedConnector,
-    onFieldsChange,
-    fields,
+    caseFields,
+    userActions,
   }: EditConnectorProps) => {
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
@@ -69,48 +77,60 @@ export const EditConnector = React.memo(
       watch: ['connectorId', 'description'],
     });
 
-    const [connectorHasChanged, setConnectorHasChanged] = useState(false);
+    const [settingsHasChanged, setSettingsHasChanged] = useState(false);
     const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
+    const [fields, setFields] = useState<Record<string, AllSettingFields>>(caseFields);
 
     const onChangeConnector = useCallback(
       (newConnectorId) => {
-        setConnectorHasChanged(selectedConnector !== newConnectorId);
+        if (selectedConnector === newConnectorId) {
+          setFields(caseFields);
+        }
+
+        setSettingsHasChanged(selectedConnector !== newConnectorId);
       },
-      [selectedConnector]
+      [selectedConnector, caseFields]
     );
 
     const onFields = useCallback(
       (newFields) => {
-        if (!deepEqual(newFields, fields)) {
-          setConnectorHasChanged(true);
+        if (!deepEqual(newFields, caseFields)) {
+          setSettingsHasChanged(true);
+          setFields(newFields);
         }
-
-        onFieldsChange(newFields);
       },
-      [fields, onFieldsChange]
+      [caseFields]
     );
 
     const onError = useCallback(() => {
-      setFieldValue('connector', selectedConnector);
-      setConnectorHasChanged(false);
+      setFieldValue('connectorId', selectedConnector);
+      setSettingsHasChanged(false);
     }, [setFieldValue, selectedConnector]);
 
     const onCancelConnector = useCallback(() => {
-      setFieldValue('connector', selectedConnector);
-      setConnectorHasChanged(false);
-    }, [selectedConnector, setFieldValue]);
+      setFieldValue('connectorId', selectedConnector);
+      setFields(caseFields);
+      setSettingsHasChanged(false);
+    }, [selectedConnector, setFieldValue, caseFields]);
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
       if (isValid && newData.connectorId) {
-        onSubmit(newData.connectorId, noop, onError);
-        setConnectorHasChanged(false);
+        onSubmit(newData.connectorId, fields, noop, onError);
+        setSettingsHasChanged(false);
       }
-    }, [submit, onSubmit, onError]);
+    }, [submit, fields, onSubmit, onError]);
 
     useEffect(() => {
       setActionConnector(getConnectorById(connectorId, connectors) ?? null);
     }, [connectors, connectorId]);
+
+    useEffect(() => {
+      // Get fields of the connector from user actions when changing connector
+      if (connectorId && selectedConnector && selectedConnector !== connectorId) {
+        setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
+      }
+    }, [selectedConnector, connectorId, userActions]);
 
     return (
       <EuiText>
@@ -151,7 +171,7 @@ export const EditConnector = React.memo(
                 fields={fields}
               />
             </EuiFlexItem>
-            {connectorHasChanged && (
+            {settingsHasChanged && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>

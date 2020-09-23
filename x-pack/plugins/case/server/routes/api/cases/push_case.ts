@@ -119,7 +119,7 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
-              ...updateConnector,
+              connector: { ...updateConnector },
             },
             version: myCase.version,
           }),

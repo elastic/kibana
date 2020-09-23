@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
 
 import * as i18n from './translations';
 import { Case, CaseConnector } from '../../containers/types';
@@ -40,6 +41,7 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { getConnectorFieldsFromUserActions } from '../edit_connector/helpers';
 
 interface Props {
   caseId: string;
@@ -83,7 +85,6 @@ export const CaseComponent = React.memo<CaseProps>(
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
-    const [fields, setFields] = useState<Record<string, unknown>>(caseData.connector?.fields ?? {});
 
     const {
       caseUserActions,
@@ -201,9 +202,18 @@ export const CaseComponent = React.memo<CaseProps>(
       [caseServices, caseData.connector]
     );
 
+    const currentConnectorFields = getConnectorFieldsFromUserActions(
+      caseData.connector.id,
+      caseUserActions
+    );
+
     const { pushButton, pushCallouts } = usePushToService({
-      caseConnectorId: caseData.connector.id,
-      caseConnectorName,
+      connector: {
+        ...caseData.connector,
+        fields: isEmpty(currentConnectorFields)
+          ? caseData.connector.fields
+          : currentConnectorFields,
+      },
       caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,
@@ -214,7 +224,7 @@ export const CaseComponent = React.memo<CaseProps>(
     });
 
     const onSubmitConnector = useCallback(
-      (connectorId, onSuccess, onError) => {
+      (connectorId, connectorFields, onSuccess, onError) => {
         const connector = getConnectorById(connectorId, connectors);
         const connectorToUpdate = connector
           ? normalizeActionConnector(connector)
@@ -222,12 +232,12 @@ export const CaseComponent = React.memo<CaseProps>(
 
         onUpdateField({
           key: 'connector',
-          value: { ...connectorToUpdate, fields },
+          value: { ...connectorToUpdate, fields: connectorFields },
           onSuccess,
           onError,
         });
       },
-      [onUpdateField, connectors, fields]
+      [onUpdateField, connectors]
     );
 
     const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
@@ -400,8 +410,8 @@ export const CaseComponent = React.memo<CaseProps>(
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
                   selectedConnector={caseData.connector.id}
-                  onFieldsChange={setFields}
-                  fields={fields}
+                  caseFields={caseData.connector.fields}
+                  userActions={caseUserActions}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
