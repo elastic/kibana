@@ -367,7 +367,7 @@ export class MissingDataAlert extends BaseAlert {
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalShortMessage',
         {
-          defaultMessage: `We have not detect any monitoring data for {count} stack product(s) in cluster: {clusterName}. {shortActionText}`,
+          defaultMessage: `We have not detected any monitoring data for {count} stack product(s) in cluster: {clusterName}. {shortActionText}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -378,7 +378,7 @@ export class MissingDataAlert extends BaseAlert {
       const internalFullMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalFullMessage',
         {
-          defaultMessage: `We have not detect any monitoring data for {count} stack product(s) in cluster: {clusterName}. {action}`,
+          defaultMessage: `We have not detected any monitoring data for {count} stack product(s) in cluster: {clusterName}. {action}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
