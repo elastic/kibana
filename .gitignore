@@ -56,6 +56,8 @@ npm-debug.log*
 # apm plugin
 /x-pack/plugins/apm/tsconfig.json
 apm.tsconfig.json
+## @cypress/snapshot from apm plugin
+snapshots.js
 
 # release notes script output
 report.csv
@@ -63,3 +65,9 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
+
+# TEMPORARY-FOR-DEVELOPMENT
+# TODO: REMOVE THIS
+compose_single_root_pkg_json_deps.js
+bazel-*
+.bazelrc.user
