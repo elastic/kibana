@@ -13,9 +13,12 @@ import { ExpandedRow } from './expanded_row';
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 import { within } from '@testing-library/dom';
 
-jest.mock('../../../../../shared_imports', () => ({
-  formatHumanReadableDateTimeSeconds: jest.fn(),
-}));
+jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
+
+import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { getShared } from '../../../../../shared_imports';
+
 describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {
@@ -27,9 +30,14 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', async () => {
+    const mlShared = await getShared();
     const item: TransformListRow = transformListRow;
 
-    const { getByText, getByTestId } = render(<ExpandedRow item={item} />);
+    const { getByText, getByTestId } = render(
+      <MlSharedContext.Provider value={mlShared}>
+        <ExpandedRow item={item} />
+      </MlSharedContext.Provider>
+    );
 
     expect(getByText('Details')).toBeInTheDocument();
     expect(getByText('Stats')).toBeInTheDocument();

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 
 import { render, wait } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from 'src/core/public';
 
-import { DataGrid, UseIndexDataReturnType, INDEX_STATUS } from '../../shared_imports';
+import { getShared, UseIndexDataReturnType } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -22,6 +22,9 @@ jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
 jest.mock('./use_api');
 
+import { useAppDependencies } from '../__mocks__/app_dependencies';
+import { MlSharedContext } from '../__mocks__/shared_context';
+
 const query: SimpleQuery = {
   query_string: {
     query: '*',
@@ -31,22 +34,29 @@ const query: SimpleQuery = {
 
 describe('Transform: useIndexData()', () => {
   test('indexPattern set triggers loading', async (done) => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useIndexData(
-        ({
-          id: 'the-id',
-          title: 'the-title',
-          fields: [],
-        } as unknown) as SearchItems['indexPattern'],
-        query
-      )
+    const mlShared = await getShared();
+    const wrapper: FC = ({ children }) => (
+      <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+    );
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useIndexData(
+          ({
+            id: 'the-id',
+            title: 'the-title',
+            fields: [],
+          } as unknown) as SearchItems['indexPattern'],
+          query
+        ),
+      { wrapper }
     );
     const IndexObj: UseIndexDataReturnType = result.current;
 
     await waitForNextUpdate();
 
     expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
+    expect(IndexObj.status).toBe(1);
     expect(IndexObj.tableItems).toEqual([]);
     done();
   });
@@ -61,7 +71,12 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       fields: [] as any[],
     } as SearchItems['indexPattern'];
 
+    const mlShared = await getShared();
+
     const Wrapper = () => {
+      const {
+        ml: { DataGrid },
+      } = useAppDependencies();
       const props = {
         ...useIndexData(indexPattern, { match_all: {} }),
         copyToClipboard: 'the-copy-to-clipboard-code',
@@ -73,7 +88,11 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
 
       return <DataGrid {...props} />;
     };
-    const { getByText } = render(<Wrapper />);
+    const { getByText } = render(
+      <MlSharedContext.Provider value={mlShared}>
+        <Wrapper />
+      </MlSharedContext.Provider>
+    );
 
     // Act
     // Assert

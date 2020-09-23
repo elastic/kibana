@@ -30,6 +30,9 @@ import { StepDefineForm } from './step_define_form';
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
+import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { getShared } from '../../../../../shared_imports';
+
 const createMockWebStorage = () => ({
   clear: jest.fn(),
   getItem: jest.fn(),
@@ -51,6 +54,8 @@ describe('Transform: <DefinePivotForm />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async (done) => {
     // Arrange
+    const mlShared = await getShared();
+
     const searchItems = {
       indexPattern: {
         title: 'the-index-pattern-title',
@@ -69,7 +74,9 @@ describe('Transform: <DefinePivotForm />', () => {
     const { getByLabelText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+          <MlSharedContext.Provider value={mlShared}>
+            <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+          </MlSharedContext.Provider>
         </KibanaContextProvider>
       </I18nProvider>
     );

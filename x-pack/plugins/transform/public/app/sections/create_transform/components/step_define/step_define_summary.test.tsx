@@ -22,10 +22,15 @@ import { StepDefineSummary } from './step_define_summary';
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
+import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { getShared } from '../../../../../shared_imports';
+
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async (done) => {
     // Arrange
+    const mlShared = await getShared();
+
     const searchItems = {
       indexPattern: {
         title: 'the-index-pattern-title',
@@ -57,7 +62,9 @@ describe('Transform: <DefinePivotSummary />', () => {
     };
 
     const { getByText } = render(
-      <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
+      <MlSharedContext.Provider value={mlShared}>
+        <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
+      </MlSharedContext.Provider>
     );
 
     // Act

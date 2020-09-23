@@ -43,3 +43,7 @@ export { ANOMALY_SEVERITY } from '../common';
 export const getShared = async () => {
   return await import('./shared');
 };
+
+// Helper to get Type returned by getShared.
+type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
+export type GetSharedReturnType = AwaitReturnType<ReturnType<typeof getShared>>;
