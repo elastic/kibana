@@ -15,23 +15,17 @@ import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
-import * as event from '../../../../common/endpoint/models/event';
-import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
-import {
-  processPath,
-  processPid,
-  userInfoForProcess,
-  processParentPid,
-  md5HashForProcess,
-  argsForProcess,
-} from '../../models/process_event';
+import * as eventModel from '../../../../common/endpoint/models/event';
+import { formatDate, GeneratedText } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
+import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useLinkProps } from '../use_link_props';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -44,7 +38,11 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   );
   return (
     <StyledPanel>
-      {processEvent === null ? <PanelLoading /> : <NodeDetailView processEvent={processEvent} />}
+      {processEvent === null ? (
+        <PanelLoading />
+      ) : (
+        <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+      )}
     </StyledPanel>
   );
 });
@@ -53,21 +51,22 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-const NodeDetailView = memo(function NodeDetailView({
+const NodeDetailView = memo(function ({
   processEvent,
+  nodeID,
 }: {
-  processEvent: ResolverEvent;
+  processEvent: SafeResolverEvent;
+  nodeID: string;
 }) {
-  const processName = event.eventName(processEvent);
-  const entityId = event.entityId(processEvent);
+  const processName = eventModel.processNameSafeVersion(processEvent);
   const isProcessTerminated = useSelector((state: ResolverState) =>
-    selectors.isProcessTerminated(state)(entityId)
+    selectors.isProcessTerminated(state)(nodeID)
   );
   const relatedEventTotal = useSelector((state: ResolverState) => {
-    return selectors.relatedEventAggregateTotalByEntityId(state)(entityId);
+    return selectors.relatedEventTotalCount(state)(nodeID);
   });
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
-    const eventTime = event.eventTimestamp(processEvent);
+    const eventTime = eventModel.eventTimestamp(processEvent);
     const dateTime = eventTime === undefined ? null : formatDate(eventTime);
 
     const createdEntry = {
@@ -82,32 +81,32 @@ const NodeDetailView = memo(function NodeDetailView({
 
     const pidEntry = {
       title: 'process.pid',
-      description: processPid(processEvent),
+      description: processPID(processEvent),
     };
 
     const userEntry = {
       title: 'user.name',
-      description: userInfoForProcess(processEvent)?.name,
+      description: eventModel.userName(processEvent),
     };
 
     const domainEntry = {
       title: 'user.domain',
-      description: userInfoForProcess(processEvent)?.domain,
+      description: eventModel.userDomain(processEvent),
     };
 
     const parentPidEntry = {
       title: 'process.parent.pid',
-      description: processParentPid(processEvent),
+      description: eventModel.parentPID(processEvent),
     };
 
     const md5Entry = {
       title: 'process.hash.md5',
-      description: md5HashForProcess(processEvent),
+      description: eventModel.md5HashForProcess(processEvent),
     };
 
     const commandLineEntry = {
       title: 'process.args',
-      description: argsForProcess(processEvent),
+      description: eventModel.argsForProcess(processEvent),
     };
 
     // This is the data in {title, description} form for the EuiDescriptionList to display
@@ -134,12 +133,8 @@ const NodeDetailView = memo(function NodeDetailView({
     return processDescriptionListData;
   }, [processEvent]);
 
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
 
   const crumbs = useMemo(() => {
@@ -162,27 +157,20 @@ const NodeDetailView = memo(function NodeDetailView({
             defaultMessage="Details for: {processName}"
           />
         ),
-        onClick: () => {},
       },
     ];
   }, [processName, nodesLinkNavProps]);
   const { descriptionText } = useCubeAssets(isProcessTerminated, false);
 
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: entityId },
-    })
-  );
-
-  const nodeDetailNavProps = useNavigateOrReplace({
-    search: nodeDetailHref!,
+  const nodeDetailNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID },
   });
 
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <StyledTitle aria-describedby={titleID}>
@@ -201,7 +189,7 @@ const NodeDetailView = memo(function NodeDetailView({
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiLink {...nodeDetailNavProps}>
+      <EuiLink {...nodeDetailNavProps} data-test-subj="resolver:node-detail:node-events-link">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
           values={{ relatedEventTotal }}

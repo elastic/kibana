@@ -14,7 +14,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { TlsEdges, PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
+import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -40,7 +40,7 @@ export interface NetworkTlsArgs {
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  tls: TlsEdges[];
+  tls: NetworkTlsStrategyResponse['edges'];
   totalCount: number;
 }
 
@@ -81,6 +81,7 @@ export const useNetworkTls = ({
     factoryQueryType: NetworkQueries.tls,
     filterQuery: createFilter(filterQuery),
     flowTarget,
+    id,
     ip,
     pagination: generateTablePaginationOptions(activePage, limit),
     sort,
