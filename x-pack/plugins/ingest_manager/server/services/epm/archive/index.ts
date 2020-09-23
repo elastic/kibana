@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import yaml from 'js-yaml';
+
 import { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-import { cacheSet } from '../registry/cache';
+import { cacheGet, cacheSet, setArchiveFilelist } from '../registry/cache';
 import { unzipBuffer, untarBuffer, ArchiveEntry } from '../registry/extract';
 
 export async function loadArchive({
@@ -17,17 +19,12 @@ export async function loadArchive({
   contentType: string;
 }): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
   const paths = await unpackArchiveToCache(archiveBuffer, contentType);
+  const archivePackageInfo = parseAndVerifyArchive(paths);
+  setArchiveFilelist(archivePackageInfo.name, archivePackageInfo.version, paths);
 
   return {
     paths,
-    archivePackageInfo: {
-      name: 'foo',
-      version: '0.0.1',
-      description: 'description',
-      type: 'type',
-      categories: ['foo'],
-      format_version: 'format_version',
-    },
+    archivePackageInfo,
   };
 }
 
@@ -67,4 +64,46 @@ export async function unpackArchiveToCache(
   }
 
   return paths;
+}
+
+function parseAndVerifyArchive(paths: string[]): ArchivePackage {
+  // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
+  const pkgKey = paths[0].split('/')[0];
+  paths.forEach((path) => {
+    if (path.split('/')[0] !== pkgKey) {
+      throw new PackageInvalidArchiveError('Package contains more than one top-level directory.');
+    }
+  });
+
+  // The package must contain a manifest file ...
+  const manifestBuffer = cacheGet(`${pkgKey}/manifest.yml`);
+  if (!manifestBuffer) {
+    throw new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.');
+  }
+
+  // ... which must be valid YAML
+  let manifest;
+  try {
+    manifest = yaml.load(manifestBuffer.toString());
+  } catch (error) {
+    throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
+  }
+
+  // Package name and version from the manifest must match those from the toplevel directory
+  if (pkgKey !== `${manifest.name}-${manifest.version}`) {
+    throw new PackageInvalidArchiveError(
+      `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${pkgKey}`
+    );
+  }
+  // Allow snake case for format_version
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { name, version, description, type, categories, format_version } = manifest;
+  return {
+    name,
+    version,
+    description,
+    type,
+    categories,
+    format_version,
+  };
 }

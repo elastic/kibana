@@ -21,3 +21,13 @@ export const setArchiveLocation = (name: string, version: string, location: stri
 
 export const deleteArchiveLocation = (name: string, version: string) =>
   archiveLocationCache.delete(pkgToPkgKey({ name, version }));
+
+const archiveFilelistCache: Map<string, string[]> = new Map();
+export const getArchiveFilelist = (name: string, version: string) =>
+  archiveFilelistCache.get(pkgToPkgKey({ name, version }));
+
+export const setArchiveFilelist = (name: string, version: string, paths: string[]) =>
+  archiveFilelistCache.set(pkgToPkgKey({ name, version }), paths);
+
+export const deleteArchiveFilelist = (name: string, version: string) =>
+  archiveFilelistCache.delete(pkgToPkgKey({ name, version }));
