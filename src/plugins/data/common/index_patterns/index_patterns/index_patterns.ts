@@ -338,6 +338,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      fieldFormats: parsedFieldFormatMap,
     };
   };
 

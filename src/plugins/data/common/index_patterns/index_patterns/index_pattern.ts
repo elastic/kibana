@@ -122,6 +122,20 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
+  setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
+    this.fieldFormatMap[fieldName] = format;
+    /*
+    const field = this.fields.getByName(fieldName);
+    if(field){
+      field.
+    }
+    */
+  };
+
+  deleteFieldFormat = (fieldName: string) => {
+    delete this.fieldFormatMap[fieldName];
+  };
+
   /**
    * Get last saved saved object fields
    */
@@ -214,6 +228,7 @@ export class IndexPattern implements IIndexPattern {
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
+      fieldFormats: this.fieldFormatMap,
     };
   }
 
