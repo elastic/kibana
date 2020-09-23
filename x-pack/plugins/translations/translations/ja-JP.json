@@ -8660,7 +8660,6 @@
     "xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired": "しきい値には有効な数値を含める必要があります。",
     "xpack.infra.metrics.alertFlyout.error.timeRequred": "ページサイズが必要です。",
     "xpack.infra.metrics.alertFlyout.errorDetails": "詳細",
-    "xpack.infra.metrics.alertFlyout.expandRowLabel": "行を展開します。",
     "xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel": "対象",
     "xpack.infra.metrics.alertFlyout.expression.for.popoverTitle": "インベントリタイプ",
     "xpack.infra.metrics.alertFlyout.expression.metric.popoverTitle": "メトリック",
