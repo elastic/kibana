@@ -11,29 +11,30 @@ import { LastEventIndexKey } from '../../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
+import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
 
 import { LastEventTime } from '.';
 
-const mockUseLastEventTimeQuery: jest.Mock = useLastEventTimeQuery as jest.Mock;
 jest.mock('../../containers/events/last_event_time', () => ({
-  useLastEventTimeQuery: jest.fn(),
+  useTimelineLastEventTime: jest.fn(),
 }));
 
 describe('Last Event Time Stat', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    mockUseLastEventTimeQuery.mockReset();
+    (useTimelineLastEventTime as jest.Mock).mockReset();
   });
 
   test('Loading', async () => {
-    mockUseLastEventTimeQuery.mockImplementation(() => ({
-      loading: true,
-      lastSeen: null,
-      errorMessage: null,
-    }));
+    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+      true,
+      {
+        lastSeen: null,
+        errorMessage: null,
+      },
+    ]);
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
@@ -44,11 +45,13 @@ describe('Last Event Time Stat', () => {
     );
   });
   test('Last seen', async () => {
-    mockUseLastEventTimeQuery.mockImplementation(() => ({
-      loading: false,
-      lastSeen: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.lastSeen,
-      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
-    }));
+    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+      false,
+      {
+        lastSeen: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.lastSeen,
+        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+      },
+    ]);
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
@@ -57,11 +60,13 @@ describe('Last Event Time Stat', () => {
     expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
   });
   test('Bad date time string', async () => {
-    mockUseLastEventTimeQuery.mockImplementation(() => ({
-      loading: false,
-      lastSeen: 'something-invalid',
-      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
-    }));
+    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+      false,
+      {
+        lastSeen: 'something-invalid',
+        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+      },
+    ]);
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
@@ -71,11 +76,13 @@ describe('Last Event Time Stat', () => {
     expect(wrapper.html()).toBe('something-invalid');
   });
   test('Null time string', async () => {
-    mockUseLastEventTimeQuery.mockImplementation(() => ({
-      loading: false,
-      lastSeen: null,
-      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
-    }));
+    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+      false,
+      {
+        lastSeen: null,
+        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+      },
+    ]);
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />

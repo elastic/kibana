@@ -9,8 +9,8 @@ import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
 import { LevelLogger as Logger } from '../../lib';
-import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { DiagnosticResponse } from './';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(
@@ -54,25 +54,30 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
       validate: {},
     },
     userHandler(async (user, context, req, res) => {
-      const logs = await browserStartLogs(reporting, logger).toPromise();
-      const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
+      try {
+        const logs = await browserStartLogs(reporting, logger).toPromise();
+        const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
-      const boundSuccessfully = logs.includes(`DevTools listening on`);
-      const help = knownIssues.reduce((helpTexts: string[], knownIssue) => {
-        const helpText = logsToHelpMap[knownIssue];
-        if (logs.includes(knownIssue)) {
-          helpTexts.push(helpText);
-        }
-        return helpTexts;
-      }, []);
+        const boundSuccessfully = logs.includes(`DevTools listening on`);
+        const help = knownIssues.reduce((helpTexts: string[], knownIssue) => {
+          const helpText = logsToHelpMap[knownIssue];
+          if (logs.includes(knownIssue)) {
+            helpTexts.push(helpText);
+          }
+          return helpTexts;
+        }, []);
 
-      const response: DiagnosticResponse = {
-        success: boundSuccessfully && !help.length,
-        help,
-        logs,
-      };
+        const response: DiagnosticResponse = {
+          success: boundSuccessfully && !help.length,
+          help,
+          logs,
+        };
 
-      return res.ok({ body: response });
+        return res.ok({ body: response });
+      } catch (err) {
+        logger.error(err);
+        return res.custom({ statusCode: 500 });
+      }
     })
   );
 };

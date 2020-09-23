@@ -6,11 +6,13 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { PostAgentUnenrollResponse } from '../../../common/types';
-import { PostAgentUnenrollRequestSchema } from '../../types';
+import { PostAgentUnenrollResponse, PostBulkAgentUnenrollResponse } from '../../../common/types';
+import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
+import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
+import { defaultIngestErrorHandler } from '../../errors';
 
-export const postAgentsUnenrollHandler: RequestHandler<
+export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentUnenrollRequestSchema.body>
@@ -25,10 +27,36 @@ export const postAgentsUnenrollHandler: RequestHandler<
 
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
-  } catch (e) {
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const postBulkAgentsUnenrollHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkAgentUnenrollRequestSchema.body>
+> = async (context, request, response) => {
+  if (!licenseService.isGoldPlus()) {
     return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
+      statusCode: 403,
+      body: { message: 'Requires Gold license' },
     });
+  }
+  const soClient = context.core.savedObjects.client;
+  const unenrollAgents =
+    request.body?.force === true ? AgentService.forceUnenrollAgents : AgentService.unenrollAgents;
+
+  try {
+    if (Array.isArray(request.body.agents)) {
+      await unenrollAgents(soClient, { agentIds: request.body.agents });
+    } else {
+      await unenrollAgents(soClient, { kuery: request.body.agents });
+    }
+
+    const body: PostBulkAgentUnenrollResponse = {};
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

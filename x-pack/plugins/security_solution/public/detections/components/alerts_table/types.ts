@@ -7,7 +7,9 @@
 import ApolloClient from 'apollo-client';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs, NoteResult, TimelineNonEcsData } from '../../../graphql/types';
+import { Ecs } from '../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { NoteResult } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
 

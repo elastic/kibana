@@ -29,12 +29,20 @@ export async function createAgentAction(
   return createAction(soClient, newAgentAction);
 }
 
+export async function bulkCreateAgentActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentAction, 'id'>>
+): Promise<AgentAction[]> {
+  return bulkCreateActions(soClient, newAgentActions);
+}
+
 export function createAgentPolicyAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
 ): Promise<AgentPolicyAction> {
   return createAction(soClient, newAgentAction);
 }
+
 async function createAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
@@ -47,24 +55,68 @@ async function createAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>
 ): Promise<AgentPolicyAction | AgentAction> {
-  const so = await soClient.create<BaseAgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
-    ...newAgentAction,
-    data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
-    ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
-  });
+  const actionSO = await soClient.create<BaseAgentActionSOAttributes>(
+    AGENT_ACTION_SAVED_OBJECT_TYPE,
+    {
+      ...newAgentAction,
+      data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
+      ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
+    }
+  );
 
-  if (isAgentActionSavedObject(so)) {
-    const agentAction = savedObjectToAgentAction(so);
+  if (isAgentActionSavedObject(actionSO)) {
+    const agentAction = savedObjectToAgentAction(actionSO);
+    // Action `data` is encrypted, so is not returned from the saved object
+    // so we add back the original value from the request to form the expected
+    // response shape for POST create agent action endpoint
     agentAction.data = newAgentAction.data;
 
     return agentAction;
-  } else if (isPolicyActionSavedObject(so)) {
-    const agentAction = savedObjectToAgentAction(so);
+  } else if (isPolicyActionSavedObject(actionSO)) {
+    const agentAction = savedObjectToAgentAction(actionSO);
     agentAction.data = newAgentAction.data;
 
     return agentAction;
   }
   throw new Error('Invalid action');
+}
+
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentPolicyAction, 'id'>>
+): Promise<AgentPolicyAction[]>;
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentAction, 'id'>>
+): Promise<AgentAction[]>;
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>>
+): Promise<Array<AgentPolicyAction | AgentAction>> {
+  const { saved_objects: actionSOs } = await soClient.bulkCreate<BaseAgentActionSOAttributes>(
+    newAgentActions.map((newAgentAction) => ({
+      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...newAgentAction,
+        data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
+        ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
+      },
+    }))
+  );
+
+  return actionSOs.map((actionSO) => {
+    if (isAgentActionSavedObject(actionSO)) {
+      const agentAction = savedObjectToAgentAction(actionSO);
+      // Compared to single create (createAction()), we don't add back the
+      // original value of `agentAction.data` as this method isn't exposed
+      // via an HTTP endpoint
+      return agentAction;
+    } else if (isPolicyActionSavedObject(actionSO)) {
+      const agentAction = savedObjectToAgentAction(actionSO);
+      return agentAction;
+    }
+    throw new Error('Invalid action');
+  });
 }
 
 export async function getAgentActionsForCheckin(

@@ -22,16 +22,18 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES } from '..';
+import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export interface IIndexPattern {
-  [key: string]: any;
   fields: IFieldType[];
   title: string;
   id?: string;
   type?: string;
   timeFieldName?: string;
   getTimeField?(): IFieldType | undefined;
+  getFormatterForField?: (
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+  ) => FieldFormat;
   fieldFormatMap?: Record<
     string,
     {

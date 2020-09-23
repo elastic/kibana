@@ -16,6 +16,7 @@ export interface IIndexPattern
 |  --- | --- | --- |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.iindexpattern.fieldformatmap.md) | <code>Record&lt;string, {</code><br/><code>        id: string;</code><br/><code>        params: unknown;</code><br/><code>    }&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.iindexpattern.fields.md) | <code>IFieldType[]</code> |  |
+|  [getFormatterForField](./kibana-plugin-plugins-data-public.iindexpattern.getformatterforfield.md) | <code>(field: IndexPatternField &#124; IndexPatternField['spec'] &#124; IFieldType) =&gt; FieldFormat</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.iindexpattern.id.md) | <code>string</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.iindexpattern.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.iindexpattern.title.md) | <code>string</code> |  |
