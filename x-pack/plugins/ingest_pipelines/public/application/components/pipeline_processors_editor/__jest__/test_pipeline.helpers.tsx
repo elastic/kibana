@@ -25,13 +25,7 @@ import {
   apiService,
 } from '../../../services';
 
-import {
-  ProcessorsEditorContextProvider,
-  Props,
-  GlobalOnFailureProcessorsEditor,
-  ProcessorsEditor,
-} from '../';
-import { TestPipelineActions } from '../';
+import { ProcessorsEditorContextProvider, Props, PipelineProcessorsEditor } from '../';
 
 import { initHttpRequests } from './http_requests.helpers';
 
@@ -100,9 +94,7 @@ const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>
-        <TestPipelineActions />
-        <ProcessorsEditor />
-        <GlobalOnFailureProcessorsEditor />
+        <PipelineProcessorsEditor onLoadJson={jest.fn()} />
       </ProcessorsEditorContextProvider>
     </KibanaContextProvider>
   ),
