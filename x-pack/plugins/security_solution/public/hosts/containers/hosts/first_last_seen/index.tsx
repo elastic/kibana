@@ -18,7 +18,11 @@ import {
 import { useWithSource } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
 
 const ID = 'firstLastSeenHostQuery';
 
@@ -72,7 +76,7 @@ export const useFirstLastSeenHost = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setFirstLastSeenHostResponse((prevResponse) => ({
@@ -83,7 +87,7 @@ export const useFirstLastSeenHost = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

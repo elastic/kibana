@@ -43,15 +43,17 @@ export function registerLegacy(
 
         try {
           const {
+            title,
             savedObjectId,
             browserTimezone,
-          }: { savedObjectId: string; browserTimezone: string } = req.params as any;
+          }: { title: string; savedObjectId: string; browserTimezone: string } = req.params as any;
           const queryString = querystring.stringify(req.query as any);
 
           return await handler(
             user,
             exportTypeId,
             {
+              title,
               objectType,
               savedObjectId,
               browserTimezone,

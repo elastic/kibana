@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IIndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { IndexedFieldItem } from './types';
 
@@ -44,7 +44,7 @@ const helpers = {
 
 const indexPattern = ({
   getNonScriptedFields: () => fields,
-} as unknown) as IIndexPattern;
+} as unknown) as IndexPattern;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(

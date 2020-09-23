@@ -337,7 +337,7 @@ export const repeatedSearchResultsWithSortId = (
   guids: string[],
   ips?: string[],
   destIps?: string[]
-) => ({
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -364,7 +364,7 @@ export const repeatedSearchResultsWithNoSortId = (
   pageSize: number,
   guids: string[],
   ips?: string[]
-) => ({
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
