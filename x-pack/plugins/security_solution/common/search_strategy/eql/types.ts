@@ -5,14 +5,16 @@
  */
 
 import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../../src/plugins/data/common';
 
-export type EqlSearchStrategyRequest = IEsSearchRequest<
-  unknown,
-  EqlSearch<Record<string, unknown>>
-> & {
+export type EqlRequestParams = EqlSearch<Record<string, unknown>>;
+
+export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
   options?: TransportRequestOptions;
-};
+}
 
-export type EqlSearchStrategyResponse = IEsSearchResponse<unknown>;
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<ApiResponse<T>>;
