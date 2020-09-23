@@ -46,7 +46,7 @@ export const I18LABELS = {
   jsErrors: i18n.translate(
     'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
     {
-      defaultMessage: 'Javascript errors',
+      defaultMessage: 'JavaScript errors',
     }
   ),
   highTrafficPages: i18n.translate(
