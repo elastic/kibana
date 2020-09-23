@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../../common/constants';
+import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
@@ -50,11 +50,11 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(pipeline.name)}`);
+    history.push(getListPath({ inspectedPipelineName: pipeline.name }));
   };
 
   const onCancel = () => {
-    history.push(BASE_PATH);
+    history.push(getListPath());
   };
 
   useEffect(() => {
