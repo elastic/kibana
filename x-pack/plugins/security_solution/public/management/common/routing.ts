@@ -90,10 +90,7 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-const isDefaultOrMissing = (
-  value: number | string | undefined,
-  defaultValue: number | undefined
-) => {
+const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
   return value === undefined || value === defaultValue;
 };
 
