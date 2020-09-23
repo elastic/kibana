@@ -7,6 +7,7 @@
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ANOMALY_SEVERITY } from '../../../../../ml/common';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
@@ -34,7 +35,11 @@ interface Params {
   serviceName: string;
   transactionType: string;
   environment: string;
-  anomalyScore: 0 | 25 | 50 | 75;
+  anomalySeverityType:
+    | ANOMALY_SEVERITY.CRITICAL
+    | ANOMALY_SEVERITY.MAJOR
+    | ANOMALY_SEVERITY.MINOR
+    | ANOMALY_SEVERITY.WARNING;
 }
 
 interface Props {
@@ -67,7 +72,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     transactionType,
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
-    anomalyScore: 75,
+    anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
   };
 
   const params = {
@@ -84,7 +89,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
     <PopoverExpression
-      value={<AnomalySeverity severityScore={params.anomalyScore} />}
+      value={<AnomalySeverity type={params.anomalySeverityType} />}
       title={i18n.translate(
         'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity',
         {
@@ -93,9 +98,9 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       )}
     >
       <SelectAnomalySeverity
-        value={params.anomalyScore}
+        value={params.anomalySeverityType}
         onChange={(value) => {
-          setAlertParams('anomalyScore', value);
+          setAlertParams('anomalySeverityType', value);
         }}
       />
     </PopoverExpression>,

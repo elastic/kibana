@@ -164,6 +164,15 @@ import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
 
+// @public
+export interface AppCategory {
+    ariaLabel?: string;
+    euiIconType?: string;
+    id: string;
+    label: string;
+    order?: number;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
@@ -484,37 +493,7 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
 }
 
 // @internal (undocumented)
-export const DEFAULT_APP_CATEGORIES: Readonly<{
-    kibana: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    enterpriseSearch: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    observability: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    security: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    management: {
-        id: string;
-        label: string;
-        order: number;
-    };
-}>;
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public (undocumented)
 export interface DeleteDocumentResponse {
@@ -885,10 +864,6 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    // @internal @deprecated
-    app?: {
-        getId(): string;
-    };
     includeUserSettings?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
@@ -964,6 +939,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // (undocumented)
     readonly socket: IKibanaSocket;
     readonly url: Url;
+    readonly uuid: string;
     }
 
 // @public
@@ -1306,21 +1282,6 @@ export class LegacyElasticsearchErrorHelpers {
     static isNotAuthorizedError(error: any): error is LegacyElasticsearchError;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ILegacyInternals" needs to be exported by the entry point index.d.ts
-//
-// @internal @deprecated (undocumented)
-export class LegacyInternals implements ILegacyInternals {
-    constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
-    // (undocumented)
-    getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
-    // (undocumented)
-    getVars(id: string, request: KibanaRequest | LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
-    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    injectUiAppVars(id: string, injector: VarsInjector): void;
-    }
-
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
@@ -1331,16 +1292,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
-
-// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
-//
-// @internal @deprecated (undocumented)
-export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
-    // (undocumented)
-    pluginExtendedConfig: LegacyConfig;
-    // (undocumented)
-    settings: LegacyVars;
-}
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
@@ -1364,31 +1315,6 @@ export interface LegacyServiceStartDeps {
     core: LegacyCoreStart;
     // (undocumented)
     plugins: Record<string, unknown>;
-}
-
-// @internal @deprecated (undocumented)
-export interface LegacyUiExports {
-    // Warning: (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    defaultInjectedVarProviders?: VarsProvider[];
-    // Warning: (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    injectedVarsReplacers?: VarsReplacer[];
-    // Warning: (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    navLinkSpecs?: LegacyNavLinkSpec[] | null;
-    // Warning: (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    uiAppSpecs?: Array<LegacyAppSpec | undefined>;
-    // (undocumented)
-    unknown?: [{
-        pluginSpec: LegacyPluginSpec;
-        type: unknown;
-    }];
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -2197,6 +2123,7 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 // @public
@@ -2408,7 +2335,7 @@ export class SavedObjectsRepository {
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, rootSearchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespaces, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
@@ -2516,6 +2443,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 
 // @public (undocumented)
 export class SavedObjectsUtils {
+    static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
@@ -2752,7 +2680,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:277:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts

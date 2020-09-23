@@ -21,6 +21,15 @@ describe('TrustedAppsPage', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  const originalScrollTo = window.scrollTo;
+
+  beforeAll(() => {
+    window.scrollTo = () => {};
+  });
+
+  afterAll(() => {
+    window.scrollTo = originalScrollTo;
+  });
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -34,7 +43,7 @@ describe('TrustedAppsPage', () => {
     });
   });
 
-  test('rendering', () => {
+  test.skip('rendering', () => {
     expect(render()).toMatchSnapshot();
   });
 
@@ -78,7 +87,7 @@ describe('TrustedAppsPage', () => {
       expect(history.location.search).toBe('?page_index=2&page_size=20&show=create');
     });
 
-    it('should display create form', async () => {
+    it.skip('should display create form', async () => {
       const { getByTestId } = await renderAndClickAddButton();
       expect(getByTestId('addTrustedAppFlyout-createForm')).toMatchSnapshot();
     });
