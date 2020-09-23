@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo } from '../../../../common';
+import { BulkInstallPackageInfo, InstallSource } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -261,6 +261,7 @@ export async function installPackageFromRegistry({
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
+  const installSource = 'registry';
 
   return installPackage({
     savedObjectsClient,
@@ -273,6 +274,7 @@ export async function installPackageFromRegistry({
     internal,
     registryPackageInfo,
     installType,
+    installSource,
   });
 }
 
@@ -302,6 +304,7 @@ async function installPackage({
   internal,
   registryPackageInfo,
   installType,
+  installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
@@ -313,6 +316,7 @@ async function installPackage({
   internal: boolean;
   registryPackageInfo: RegistryPackage;
   installType: InstallType;
+  installSource: InstallSource;
 }): Promise<AssetReference[]> {
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.data_streams);
 
@@ -328,12 +332,14 @@ async function installPackage({
       installed_kibana: [],
       installed_es: [],
       toSaveESIndexPatterns,
+      installSource,
     });
   } else {
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
+      install_source: installSource,
     });
   }
   const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
@@ -443,6 +449,7 @@ export async function createInstallation(options: {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
+  installSource: InstallSource;
 }) {
   const {
     savedObjectsClient,
@@ -453,6 +460,7 @@ export async function createInstallation(options: {
     installed_kibana: installedKibana,
     installed_es: installedEs,
     toSaveESIndexPatterns,
+    installSource,
   } = options;
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
@@ -467,6 +475,7 @@ export async function createInstallation(options: {
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
+      install_source: installSource,
     },
     { id: pkgName, overwrite: true }
   );

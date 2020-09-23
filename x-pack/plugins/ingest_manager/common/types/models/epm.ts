@@ -20,6 +20,7 @@ export enum InstallStatus {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
@@ -248,6 +249,7 @@ export interface Installation extends SavedObjectAttributes {
   install_status: EpmPackageInstallStatus;
   install_version: string;
   install_started_at: string;
+  install_source: InstallSource;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
