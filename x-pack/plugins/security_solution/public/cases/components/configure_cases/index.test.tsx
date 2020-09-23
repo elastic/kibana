@@ -38,7 +38,7 @@ const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeEach(() => {
-    useKibanaMock().services.triggers_actions_ui = ({
+    useKibanaMock().services.triggersActionsUi = ({
       actionTypeRegistry: actionTypeRegistryMock.create(),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
   });
@@ -62,17 +62,17 @@ describe('ConfigureCases', () => {
     });
 
     test('it renders the ActionsConnectorsContextProvider', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi do not have a data-test-subj
       expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
     });
 
     test('it renders the ConnectorAddFlyout', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi do not have a data-test-subj
       expect(wrapper.find(ConnectorAddFlyout).exists()).toBeTruthy();
     });
 
     test('it does NOT render the ConnectorEditFlyout', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi do not have a data-test-subj
       expect(wrapper.find(ConnectorEditFlyout).exists()).toBeFalsy();
     });
 
