@@ -82,9 +82,11 @@ describe('EngineOverview', () => {
 
     describe('when on a platinum license', () => {
       it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
-        const wrapper = await mountWithAsyncContext(<EngineOverview />, {
-          license: { type: 'platinum', isActive: true },
+        setMockValues({
+          hasPlatinumLicense: true,
+          http: { ...mockHttpValues.http, get: mockApi },
         });
+        const wrapper = await mountWithAsyncContext(<EngineOverview />);
 
         expect(wrapper.find(EngineTable)).toHaveLength(2);
         expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
