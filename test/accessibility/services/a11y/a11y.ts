@@ -36,6 +36,8 @@ interface TestOptions {
 
 export const normalizeResult = (report: any) => {
   if (report.error) {
+    const error = new Error(report.error.message);
+    error.stack = report.error.stack;
     throw report.error;
   }
 
@@ -100,9 +102,6 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           },
           bypass: {
             enabled: false, // disabled because it's too flaky
-          },
-          'scrollable-region-focusable': {
-            selector: '[data-skip-axe="scrollable-region-focusable"]',
           },
         },
       };
