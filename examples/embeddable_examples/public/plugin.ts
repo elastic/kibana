@@ -22,7 +22,7 @@ import {
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '../../../src/core/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -76,6 +76,7 @@ export interface EmbeddableExamplesSetupDependencies {
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
+  savedObjectsClient: SavedObjectsClient;
 }
 
 interface ExampleEmbeddableFactories {
@@ -158,6 +159,7 @@ export class EmbeddableExamplesPlugin
       new BookEmbeddableFactoryDefinition(async () => ({
         getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
         openModal: (await core.getStartServices())[0].overlays.openModal,
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
       }))
     );
 

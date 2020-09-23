@@ -33,12 +33,17 @@ import {
   BookEmbeddableOutput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { OverlayStart } from '../../../../src/core/public';
+import {
+  OverlayStart,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../src/core/public';
 import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
 
 interface StartServices {
   getAttributeService: DashboardStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export type BookEmbeddableFactory = EmbeddableFactory<
@@ -117,11 +122,34 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
+  private async unwrapMethod(savedObjectId: string) {
+    const { savedObjectsClient } = await this.getStartServices();
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<
+      BookSavedObjectAttributes
+    >(this.type, savedObjectId);
+    return { ...savedObject.attributes };
+  }
+
+  private async saveMethod(
+    type: string,
+    attributes: BookSavedObjectAttributes,
+    savedObjectId?: string
+  ) {
+    const { savedObjectsClient } = await this.getStartServices();
+    if (savedObjectId) {
+      return savedObjectsClient.update(type, savedObjectId, attributes);
+    }
+    return savedObjectsClient.create(type, attributes);
+  }
+
   private async getAttributeService() {
     if (!this.attributeService) {
       this.attributeService = await (await this.getStartServices()).getAttributeService<
         BookSavedObjectAttributes
-      >(this.type);
+      >(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        unwrapMethod: this.unwrapMethod.bind(this),
+      });
     }
     return this.attributeService!;
   }
