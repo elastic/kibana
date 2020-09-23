@@ -20,7 +20,7 @@ import {
   Form,
 } from '../../../../../../shared_imports';
 
-import { ImportDocumentsAccordion } from './import_documents_accordion';
+import { AddDocumentsAccordion } from './add_documents_accordion';
 
 const UseField = getUseField({ component: Field });
 
@@ -41,7 +41,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
 
   const onAddDocumentHandler = useCallback(
     (document) => {
-      const { documents: existingDocuments } = formatData();
+      const { documents: existingDocuments = [] } = formatData();
 
       form.reset({ defaultValue: { documents: [...existingDocuments, document] } });
     },
@@ -84,7 +84,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
 
         <EuiSpacer size="m" />
 
-        <ImportDocumentsAccordion onAddDocuments={onAddDocumentHandler} />
+        <AddDocumentsAccordion onAddDocuments={onAddDocumentHandler} />
 
         <EuiSpacer size="l" />
 

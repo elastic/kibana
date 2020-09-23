@@ -173,8 +173,8 @@ describe('Test pipeline', () => {
       expect(find('pipelineExecutionError').text()).toContain(error.message);
     });
 
-    describe('Import indexed documents', () => {
-      test('should successfully import an index document', async () => {
+    describe('Add indexed documents', () => {
+      test('should successfully add an indexed document', async () => {
         const { actions, form } = testBed;
 
         const { _index: index, _id: documentId } = DOCUMENTS[0];
@@ -186,7 +186,7 @@ describe('Test pipeline', () => {
 
         // Open documents accordion, click run without required fields, and verify error messages
         await actions.toggleDocumentsAccordion();
-        await actions.clickImportButton();
+        await actions.clickAddDocumentsButton();
         expect(form.getErrorsMessages()).toEqual([
           'An index name is required.',
           'A document ID is required.',
@@ -195,7 +195,7 @@ describe('Test pipeline', () => {
         // Add required fields, and click run
         form.setInputValue('indexField.input', index);
         form.setInputValue('idField.input', documentId);
-        await actions.clickImportButton();
+        await actions.clickAddDocumentsButton();
 
         // Verify request
         const latestRequest = server.requests[server.requests.length - 1];
@@ -226,11 +226,11 @@ describe('Test pipeline', () => {
         await actions.toggleDocumentsAccordion();
         form.setInputValue('indexField.input', nonExistentDoc.index);
         form.setInputValue('idField.input', nonExistentDoc.id);
-        await actions.clickImportButton();
+        await actions.clickAddDocumentsButton();
 
         // Verify error rendered
-        expect(exists('importDocumentError')).toBe(true);
-        expect(find('importDocumentError').text()).toContain(error.message);
+        expect(exists('addDocumentError')).toBe(true);
+        expect(find('addDocumentError').text()).toContain(error.message);
       });
     });
   });

@@ -188,14 +188,14 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     async toggleDocumentsAccordion() {
       await act(async () => {
-        find('importDocumentsAccordion').simulate('click');
+        find('addDocumentsAccordion').simulate('click');
       });
       component.update();
     },
 
-    async clickImportButton() {
+    async clickAddDocumentsButton() {
       await act(async () => {
-        find('importDocumentButton').simulate('click');
+        find('addDocumentButton').simulate('click');
       });
       component.update();
     },
@@ -248,7 +248,7 @@ type TestSubject =
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'
-  | 'importDocumentsAccordion'
-  | 'importDocumentButton'
-  | 'importDocumentError'
+  | 'addDocumentsAccordion'
+  | 'addDocumentButton'
+  | 'addDocumentError'
   | string;

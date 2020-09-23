@@ -26,47 +26,51 @@ import {
   fieldValidators,
   FieldConfig,
 } from '../../../../../../shared_imports';
+import { useIsMounted } from '../../../use_is_mounted';
 
 const UseField = getUseField({ component: Field });
 
 const { emptyField } = fieldValidators;
 
 const i18nTexts = {
-  importDocumentButton: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.loadDocuments.importDocButtonLabel',
+  addDocumentButton: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentButtonLabel',
     {
-      defaultMessage: 'Import',
+      defaultMessage: 'Add',
     }
   ),
-  importDocumentErrorMessage: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.loadDocuments.importDocErrorMessage',
+  addDocumentErrorMessage: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentErrorMessage',
     {
-      defaultMessage: 'Error importing document',
+      defaultMessage: 'Error adding document',
+    }
+  ),
+  addDocumentSuccessMessage: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentSuccessMessage',
+    {
+      defaultMessage: 'Document added',
     }
   ),
   indexField: {
     fieldLabel: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.loadDocuments.table.indexColumnLabel',
+      'xpack.ingestPipelines.pipelineEditor.addDocuments.indexFieldLabel',
       {
         defaultMessage: 'Index',
       }
     ),
     validationMessage: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.loadDocuments.indexRequiredError',
+      'xpack.ingestPipelines.pipelineEditor.addDocuments.indexRequiredErrorMessage',
       {
         defaultMessage: 'An index name is required.',
       }
     ),
   },
   idField: {
-    fieldLabel: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.loadDocuments.table.documentIdColumnLabel',
-      {
-        defaultMessage: 'Document ID',
-      }
-    ),
+    fieldLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.addDocuments.idFieldLabel', {
+      defaultMessage: 'Document ID',
+    }),
     validationMessage: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.loadDocuments.idRequiredError',
+      'xpack.ingestPipelines.pipelineEditor.loadDocuments.idRequiredErrorMessage',
       {
         defaultMessage: 'A document ID is required.',
       }
@@ -97,11 +101,13 @@ interface Props {
   onAddDocuments: (document: any) => void;
 }
 
-export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) => {
+export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) => {
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const [isLoadingDocument, setIsLoadingDocument] = useState<boolean>(false);
-  const [loadingDocumentError, setLoadingDocumentError] = useState<Error | undefined>(undefined);
+  const [documentError, setDocumentError] = useState<Error | undefined>(undefined);
+  const [isNewDocumentAdded, setIsNewDocumentAdded] = useState<boolean>(false);
 
   const { form } = useForm({ defaultValue: { index: '', id: '' } });
 
@@ -112,34 +118,54 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
 
     if (isValid) {
       setIsLoadingDocument(true);
-      setLoadingDocumentError(undefined);
+      setDocumentError(undefined);
+      setIsNewDocumentAdded(false);
 
       const { error, data: document } = await services.api.loadDocument(index, id);
+
+      if (!isMounted.current) {
+        return;
+      }
 
       setIsLoadingDocument(false);
 
       if (error) {
-        setLoadingDocumentError(error);
+        setDocumentError(error);
         return;
       }
 
+      setIsNewDocumentAdded(true);
       onAddDocuments(document);
-      form.reset();
     }
   };
 
   return (
     <Form form={form} onSubmit={submitForm}>
-      {loadingDocumentError && (
+      {documentError && (
         <>
           <EuiCallOut
-            title={i18nTexts.importDocumentErrorMessage}
+            title={i18nTexts.addDocumentErrorMessage}
             color="danger"
             iconType="alert"
-            data-test-subj="importDocumentError"
+            data-test-subj="addDocumentError"
+            size="s"
           >
-            <p>{loadingDocumentError.message}</p>
+            <p>{documentError.message}</p>
           </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {isNewDocumentAdded && (
+        <>
+          <EuiCallOut
+            title={i18nTexts.addDocumentSuccessMessage}
+            color="success"
+            iconType="check"
+            data-test-subj="addDocumentSuccess"
+            size="s"
+          />
 
           <EuiSpacer size="m" />
         </>
@@ -173,10 +199,10 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
             <EuiFormRow hasEmptyLabelSpace>
               <EuiButton
                 onClick={submitForm}
-                data-test-subj="importDocumentButton"
+                data-test-subj="addDocumentButton"
                 isLoading={isLoadingDocument}
               >
-                {i18nTexts.importDocumentButton}
+                {i18nTexts.addDocumentButton}
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
