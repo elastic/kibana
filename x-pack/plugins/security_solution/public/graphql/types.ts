@@ -558,8 +558,6 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1916,34 +1914,6 @@ export interface OverviewHostData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: Maybe<UserEcsFields>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -2526,15 +2496,6 @@ export interface OverviewHostSourceArgs {
   id?: Maybe<string>;
 
   timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
 
   filterQuery?: Maybe<string>;
 
@@ -3231,111 +3192,6 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUncommonProcessesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    UncommonProcesses: UncommonProcesses;
-  };
-
-  export type UncommonProcesses = {
-    __typename?: 'UncommonProcessesData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UncommonProcessesEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UncommonProcessItem';
-
-    _id: string;
-
-    instances: number;
-
-    process: Process;
-
-    user: Maybe<User>;
-
-    hosts: Hosts[];
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    args: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    id: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
 
   export type Inspect = {
     __typename?: 'Inspect';
