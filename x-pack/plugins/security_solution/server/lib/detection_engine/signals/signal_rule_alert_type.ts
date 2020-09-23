@@ -14,14 +14,15 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
-import { isThresholdRule, isEqlRule } from '../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isEqlRule,
+  isThreatMatchRule,
+} from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import {
-  searchAfterAndBulkCreate,
-  SearchAfterAndBulkCreateReturnType,
-} from './search_after_bulk_create';
+import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
@@ -30,6 +31,10 @@ import {
   getExceptions,
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
+  createErrorsFromShard,
+  createSearchAfterReturnType,
+  mergeReturns,
+  createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -45,6 +50,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
   logger,
@@ -90,19 +96,16 @@ export const signalRulesAlertType = ({
         query,
         to,
         threshold,
+        threatFilters,
+        threatQuery,
+        threatIndex,
+        threatMapping,
         type,
         exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
-      let result: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        bulkCreateTimes: [],
-        searchAfterTimes: [],
-        lastLookBackDate: null,
-        createdSignalsCount: 0,
-        errors: [],
-      };
+      let result = createSearchAfterReturnType();
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
         alertId,
@@ -246,12 +249,22 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result.success = success;
-          result.errors = errors;
-          result.createdSignalsCount = createdItemsCount;
-          if (bulkCreateDuration) {
-            result.bulkCreateTimes.push(bulkCreateDuration);
-          }
+          // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
+          const shardFailures =
+            (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
+            [];
+          const searchErrors = createErrorsFromShard({
+            errors: shardFailures,
+          });
+          result = mergeReturns([
+            result,
+            createSearchAfterReturnType({
+              success: success && anomalyResults._shards.failed === 0,
+              errors: [...errors, ...searchErrors],
+              createdSignalsCount: createdItemsCount,
+              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+            }),
+          ]);
         } else if (isEqlRule(type)) {
           throw new Error('EQL Rules are under development, execution is not yet implemented');
         } else if (isThresholdRule(type) && threshold) {
@@ -267,7 +280,7 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          const { searchResult: thresholdResults } = await findThresholdSignals({
+          const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
             to,
@@ -304,12 +317,67 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result.success = success;
-          result.errors = errors;
-          result.createdSignalsCount = createdItemsCount;
-          if (bulkCreateDuration) {
-            result.bulkCreateTimes.push(bulkCreateDuration);
+          result = mergeReturns([
+            result,
+            createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
+            createSearchAfterReturnType({
+              success,
+              errors: [...errors, ...searchErrors],
+              createdSignalsCount: createdItemsCount,
+              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+            }),
+          ]);
+        } else if (isThreatMatchRule(type)) {
+          if (
+            threatQuery == null ||
+            threatIndex == null ||
+            threatMapping == null ||
+            query == null
+          ) {
+            throw new Error(
+              [
+                'Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping:',
+                `threatQuery: "${threatQuery}"`,
+                `threatIndex: "${threatIndex}"`,
+                `threatMapping: "${threatMapping}"`,
+              ].join(' ')
+            );
           }
+          const inputIndex = await getInputIndex(services, version, index);
+          result = await createThreatSignals({
+            threatMapping,
+            query,
+            inputIndex,
+            type,
+            filters: filters ?? [],
+            language,
+            name,
+            savedId,
+            services,
+            exceptionItems: exceptionItems ?? [],
+            gap,
+            previousStartedAt,
+            listClient,
+            logger,
+            alertId,
+            outputIndex,
+            params,
+            searchAfterSize,
+            actions,
+            createdBy,
+            createdAt,
+            updatedBy,
+            interval,
+            updatedAt,
+            enabled,
+            refresh,
+            tags,
+            throttle,
+            threatFilters: threatFilters ?? [],
+            threatQuery,
+            buildRuleMessage,
+            threatIndex,
+          });
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

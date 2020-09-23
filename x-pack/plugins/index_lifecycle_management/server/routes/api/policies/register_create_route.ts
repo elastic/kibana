@@ -111,24 +111,6 @@ const coldPhaseSchema = schema.maybe(
   })
 );
 
-const frozenPhaseSchema = schema.maybe(
-  schema.object({
-    min_age: minAgeSchema,
-    actions: schema.object({
-      migrate: migrateSchema,
-      set_priority: setPrioritySchema,
-      unfollow: unfollowSchema,
-      allocate: allocateSchema,
-      freeze: schema.maybe(schema.object({})), // Freeze has no options
-      searchable_snapshot: schema.maybe(
-        schema.object({
-          snapshot_repository: schema.string(),
-        })
-      ),
-    }),
-  })
-);
-
 const deletePhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
@@ -154,7 +136,6 @@ const bodySchema = schema.object({
     hot: hotPhaseSchema,
     warm: warmPhaseSchema,
     cold: coldPhaseSchema,
-    frozen: frozenPhaseSchema,
     delete: deletePhaseSchema,
   }),
 });
