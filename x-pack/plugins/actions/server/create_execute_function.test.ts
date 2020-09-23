@@ -15,7 +15,7 @@ import {
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
 
-const mockTaskManager = taskManagerMock.start();
+const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 
