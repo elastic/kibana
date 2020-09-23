@@ -5,6 +5,7 @@
  */
 
 import React, { useContext } from 'react';
+import { useValues } from 'kea';
 
 import {
   EuiButton,
@@ -17,7 +18,9 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
+
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 interface IOnboardingCardProps {
@@ -39,8 +42,8 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   actionPath,
   complete,
 }) => {
+  const { http } = useValues(HttpLogic);
   const {
-    http,
     externalUrl: { getWorkplaceSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 
