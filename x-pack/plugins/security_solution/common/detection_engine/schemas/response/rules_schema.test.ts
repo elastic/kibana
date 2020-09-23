@@ -643,19 +643,6 @@ describe('rules_schema', () => {
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
-
-    test('it rejects an eql rule response that has a language defined', () => {
-      const payload = getRulesEqlSchemaMock();
-      payload.language = 'kuery';
-
-      const dependents = getDependents(payload);
-      const decoded = dependents.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "language"']);
-      expect(message.schema).toEqual({});
-    });
   });
 
   describe('addSavedId', () => {
@@ -788,9 +775,9 @@ describe('rules_schema', () => {
       expect(fields).toEqual(expected);
     });
 
-    test('should return 2 fields for a rule of type "eql"', () => {
+    test('should return 3 fields for a rule of type "eql"', () => {
       const fields = addEqlFields({ type: 'eql' });
-      expect(fields.length).toEqual(2);
+      expect(fields.length).toEqual(3);
     });
   });
 });

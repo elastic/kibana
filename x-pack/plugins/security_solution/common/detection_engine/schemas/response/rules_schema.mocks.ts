@@ -112,9 +112,10 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
 };
 
 export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
-  const baseRule = getRulesSchemaMock(anchorDate);
-  delete baseRule.language;
-  baseRule.type = 'eql';
-  baseRule.query = 'process where true';
-  return baseRule;
+  return {
+    ...getRulesSchemaMock(anchorDate),
+    language: 'eql',
+    type: 'eql',
+    query: 'process where true',
+  };
 };
