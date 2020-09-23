@@ -99,6 +99,10 @@ export class UiActionsService {
     this.actions.delete(actionId);
   };
 
+  public readonly hasAction = (actionId: string): boolean => {
+    return this.actions.has(actionId);
+  };
+
   public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
