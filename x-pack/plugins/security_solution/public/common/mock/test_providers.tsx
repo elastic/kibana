@@ -27,6 +27,15 @@ import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 const state: State = mockGlobalState;
 
 interface Props {
@@ -46,7 +55,7 @@ export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
-
+window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 

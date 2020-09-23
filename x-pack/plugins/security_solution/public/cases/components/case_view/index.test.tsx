@@ -15,7 +15,6 @@ import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
 
@@ -29,6 +28,7 @@ jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../user_action_tree/user_action_timestamp');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -96,6 +96,7 @@ describe('CaseView ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
+
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));

@@ -12,6 +12,7 @@ import { act } from 'react-dom/test-utils';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
+import { useAsync } from '../../../../shared_imports';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
@@ -32,6 +33,7 @@ jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../builder');
+jest.mock('../../../../shared_imports');
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -46,6 +48,11 @@ describe('When the add exception modal is opened', () => {
     ExceptionBuilderComponent = jest
       .spyOn(builder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
+
+    (useAsync as jest.Mock).mockImplementation(() => ({
+      start: jest.fn(),
+      loading: false,
+    }));
 
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
