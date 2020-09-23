@@ -109,6 +109,25 @@ export interface PostAgentUnenrollRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUnenrollResponse {}
 
+export interface PostBulkAgentUnenrollRequest {
+  body: {
+    agents: string[] | string;
+    force?: boolean;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUnenrollResponse {}
+
+export interface PostAgentUpgradeRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUpgradeResponse {}
+
 export interface PutAgentReassignRequest {
   params: {
     agentId: string;

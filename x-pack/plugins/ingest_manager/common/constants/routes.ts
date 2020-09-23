@@ -88,6 +88,7 @@ export const AGENT_API_ROUTES = {
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/unenroll`,
   REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
+  UPGRADE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/upgrade`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
