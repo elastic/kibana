@@ -39,9 +39,9 @@ interface BaseProps {
   value?: unknown;
 
   /**
-   * The React children.
+   * The React element which which be passed the draggable handlers
    */
-  children: React.ReactNode;
+  children: React.ReactElement;
 
   /**
    * Indicates whether or not the currently dragged item
@@ -142,6 +142,7 @@ const DragDropInner = React.memo(function DragDropInner(
     'lnsDragDrop',
     className,
     {
+      'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
       'lnsDragDrop-isDragging': isDragging,
@@ -208,18 +209,14 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  return (
-    <div
-      data-test-subj={props['data-test-subj'] || 'lnsDragDrop'}
-      className={classes}
-      onDragOver={dragOver}
-      onDragLeave={dragLeave}
-      onDrop={drop}
-      draggable={draggable}
-      onDragEnd={dragEnd}
-      onDragStart={dragStart}
-    >
-      {children}
-    </div>
-  );
+  return React.cloneElement(children, {
+    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+    className: classNames(children.props.className, classes),
+    onDragOver: dragOver,
+    onDragLeave: dragLeave,
+    onDrop: drop,
+    draggable,
+    onDragEnd: dragEnd,
+    onDragStart: dragStart,
+  });
 });

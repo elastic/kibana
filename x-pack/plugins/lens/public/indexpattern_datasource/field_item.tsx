@@ -204,12 +204,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
-          className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
-            exists ? 'exists' : 'missing'
-          }`}
         >
           <FieldButton
-            className="lnsFieldItem__info"
+            className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
+              exists ? 'exists' : 'missing'
+            }`}
             isDraggable
             isActive={infoIsOpen}
             data-test-subj={`lnsFieldListPanelField-${field.name}`}

@@ -221,7 +221,7 @@ export function InnerWorkspacePanel({
             )}
           </strong>
         </h2>
-        <DropIllustration className="lnsWorkspacePanel__dropIllustration" />
+        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {expression === null && (
           <>
             <p>
@@ -338,8 +338,10 @@ export function InnerWorkspacePanel({
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
       >
-        {renderVisualization()}
-        {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        <div>
+          {renderVisualization()}
+          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        </div>
       </DragDrop>
     </WorkspacePanelWrapper>
   );

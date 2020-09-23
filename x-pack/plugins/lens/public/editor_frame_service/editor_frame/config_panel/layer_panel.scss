@@ -27,8 +27,6 @@
 
 .lnsLayerPanel__dimension {
   @include euiFontSizeS;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-  border-radius: $euiBorderRadius;
   display: flex;
   align-items: center;
   margin-top: $euiSizeXS;

@@ -13,24 +13,24 @@
   }
 }
 
-.kbnFieldButton--isDraggable {
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+// .kbnFieldButton--isDraggable {
+//   background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
 
-  &:hover,
-  &:focus,
-  &:focus-within {
-    @include euiBottomShadowMedium;
-    border-radius: $euiBorderRadius;
-    z-index: 2;
-  }
+//   &:hover,
+//   &:focus,
+//   &:focus-within {
+//     @include euiBottomShadowMedium;
+//     border-radius: $euiBorderRadius;
+//     z-index: 2;
+//   }
 
-  .kbnFieldButton__button {
-    &:hover,
-    &:focus {
-      cursor: grab;
-    }
-  }
-}
+//   .kbnFieldButton__button {
+//     &:hover,
+//     &:focus {
+//       cursor: grab;
+//     }
+//   }
+// }
 
 .kbnFieldButton__button {
   flex-grow: 1;

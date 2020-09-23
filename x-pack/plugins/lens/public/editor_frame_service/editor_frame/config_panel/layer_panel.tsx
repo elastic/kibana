@@ -254,77 +254,79 @@ export function LayerPanel(
                         }
                       }}
                     >
-                      <DimensionContainer
-                        dimensionContainerState={dimensionContainerState}
-                        setDimensionContainerState={setDimensionContainerState}
-                        groups={groups}
-                        accessor={accessor}
-                        groupId={group.groupId}
-                        trigger={
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
-                              onClick: () => {
-                                if (dimensionContainerState.isOpen) {
-                                  setDimensionContainerState(initialDimensionContainerState);
-                                } else {
-                                  setDimensionContainerState({
-                                    isOpen: true,
-                                    openId: accessor,
-                                    addingToGroupId: null, // not set for existing dimension
-                                  });
-                                }
-                              },
-                            }}
-                          />
-                        }
-                        panel={
-                          <>
-                            {datasourceDimensionEditor}
-                            {visDimensionEditor}
-                          </>
-                        }
-                        panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                          defaultMessage: '{groupLabel} configuration',
-                          values: {
-                            groupLabel: group.groupLabel,
-                          },
-                        })}
-                      />
+                      <div>
+                        <DimensionContainer
+                          dimensionContainerState={dimensionContainerState}
+                          setDimensionContainerState={setDimensionContainerState}
+                          groups={groups}
+                          accessor={accessor}
+                          groupId={group.groupId}
+                          trigger={
+                            <NativeRenderer
+                              render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                              nativeProps={{
+                                ...layerDatasourceConfigProps,
+                                columnId: accessor,
+                                filterOperations: group.filterOperations,
+                                suggestedPriority: group.suggestedPriority,
+                                onClick: () => {
+                                  if (dimensionContainerState.isOpen) {
+                                    setDimensionContainerState(initialDimensionContainerState);
+                                  } else {
+                                    setDimensionContainerState({
+                                      isOpen: true,
+                                      openId: accessor,
+                                      addingToGroupId: null, // not set for existing dimension
+                                    });
+                                  }
+                                },
+                              }}
+                            />
+                          }
+                          panel={
+                            <>
+                              {datasourceDimensionEditor}
+                              {visDimensionEditor}
+                            </>
+                          }
+                          panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                            defaultMessage: '{groupLabel} configuration',
+                            values: {
+                              groupLabel: group.groupLabel,
+                            },
+                          })}
+                        />
 
-                      <EuiButtonIcon
-                        data-test-subj="indexPattern-dimension-remove"
-                        iconType="cross"
-                        iconSize="s"
-                        size="s"
-                        color="danger"
-                        aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                          defaultMessage: 'Remove configuration',
-                        })}
-                        title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                          defaultMessage: 'Remove configuration',
-                        })}
-                        onClick={() => {
-                          trackUiEvent('indexpattern_dimension_removed');
-                          props.updateAll(
-                            datasourceId,
-                            layerDatasource.removeColumn({
-                              layerId,
-                              columnId: accessor,
-                              prevState: layerDatasourceState,
-                            }),
-                            activeVisualization.removeDimension({
-                              layerId,
-                              columnId: accessor,
-                              prevState: props.visualizationState,
-                            })
-                          );
-                        }}
-                      />
+                        <EuiButtonIcon
+                          data-test-subj="indexPattern-dimension-remove"
+                          iconType="cross"
+                          iconSize="s"
+                          size="s"
+                          color="danger"
+                          aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                            defaultMessage: 'Remove configuration',
+                          })}
+                          title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                            defaultMessage: 'Remove configuration',
+                          })}
+                          onClick={() => {
+                            trackUiEvent('indexpattern_dimension_removed');
+                            props.updateAll(
+                              datasourceId,
+                              layerDatasource.removeColumn({
+                                layerId,
+                                columnId: accessor,
+                                prevState: layerDatasourceState,
+                              }),
+                              activeVisualization.removeDimension({
+                                layerId,
+                                columnId: accessor,
+                                prevState: props.visualizationState,
+                              })
+                            );
+                          }}
+                        />
+                      </div>
                     </DragDrop>
                   );
                 })}
