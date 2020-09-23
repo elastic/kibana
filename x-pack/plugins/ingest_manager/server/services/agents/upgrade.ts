@@ -21,13 +21,15 @@ export async function sendUpgradeAgentAction({
   sourceUri: string;
 }) {
   const now = new Date().toISOString();
+  const data = {
+    version,
+    source_uri: sourceUri,
+  };
   await createAgentAction(soClient, {
     agent_id: agentId,
     created_at: now,
-    ack_data: {
-      version,
-      source_uri: sourceUri,
-    },
+    data,
+    ack_data: data,
     type: 'UPGRADE',
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
