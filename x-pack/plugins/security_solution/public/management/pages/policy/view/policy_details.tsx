@@ -48,6 +48,18 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyAdvanced } from './policy_advanced';
+import * as AdvancedPolicySchema from '../../../../../schema.json';
+
+type AdvancedPolicySchemaType = {key: string, first_supported_version: string, last_supported_version: string};
+
+const AdvancedPolicyForms = React.memo(() => {
+    ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map((advancedKey, index) => {
+      const configPath = advancedKey.key.split('.');
+      configPath.shift(); // removes the os - need to change later
+      console.log(configPath);
+      return (<PolicyAdvanced key={index} configPath={configPath}/>);
+    })
+});
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -248,7 +260,7 @@ export const PolicyDetails = React.memo(() => {
 
         <EuiSpacer size="l" />
         <PolicyAdvanced configPath={['advanced', 'elasticsearch', 'tls', 'verify_peer']} />
-        {/* <PolicyAdvanced configPath={["advanced", "elasticsearch", "tls", "verify_hostname"]} /> */}
+        <PolicyAdvanced configPath={["advanced", "elasticsearch", "tls", "verify_hostname"]} />
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

@@ -1,0 +1,13 @@
+[
+  {
+      "key": "windows.advanced.elasticsearch.tls.verify_peer",
+      "first_supported_version": "7.10",
+      "last_supported_version": "7.13",
+      "documentation": "whether to verify tls peer"
+  },
+  {
+    "key": "windows.advanced.elasticsearch.tls.verify_hostname",
+    "first_supported_version": "7.10",
+    "documentation": "whether to verify tls hostname"
+  },
+]
