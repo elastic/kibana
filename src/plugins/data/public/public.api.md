@@ -918,22 +918,15 @@ export interface IDataPluginServices extends Partial<CoreStart_2> {
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchRequest extends IKibanaSearchRequest {
+export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
     // (undocumented)
     indexType?: string;
-    // (undocumented)
-    params?: ISearchRequestParams;
 }
 
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
-    isPartial?: boolean;
-    isRunning?: boolean;
-    // (undocumented)
-    rawResponse: SearchResponse<Source>;
-}
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1062,17 +1055,23 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
 // Warning: (ae-missing-release-tag) "IKibanaSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IKibanaSearchRequest {
+export interface IKibanaSearchRequest<Params = any> {
     debug?: boolean;
     id?: string;
+    // (undocumented)
+    params?: Params;
 }
 
 // Warning: (ae-missing-release-tag) "IKibanaSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IKibanaSearchResponse {
+export interface IKibanaSearchResponse<RawResponse = any> {
     id?: string;
+    isPartial?: boolean;
+    isRunning?: boolean;
     loaded?: number;
+    // (undocumented)
+    rawResponse: RawResponse;
     total?: number;
 }
 
@@ -1416,7 +1415,7 @@ export type InputTimeRange = TimeRange | {
 // Warning: (ae-missing-release-tag) "isCompleteResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isCompleteResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+export const isCompleteResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
 
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1426,7 +1425,7 @@ export type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) 
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
+export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse>(request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1473,7 +1472,7 @@ export interface ISearchStartSearchSource {
 // Warning: (ae-missing-release-tag) "isErrorResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isErrorResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
 
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1488,7 +1487,7 @@ export const isFilters: (x: unknown) => x is Filter[];
 // Warning: (ae-missing-release-tag) "isPartialResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isPartialResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+export const isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
 
 // Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1983,8 +1982,8 @@ export class SearchInterceptor {
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
-    search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
+    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
+    search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {
         abortSignal?: AbortSignal;
