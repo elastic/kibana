@@ -25,6 +25,7 @@ import {
   ALERT_RISK_SCORE_HEADER,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 
 export const closeFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
@@ -84,8 +85,8 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const sortRiskScore = () => {
   cy.get(ALERT_RISK_SCORE_HEADER).click();
-  cy.get('[data-test-subj="timeline-loading-spinner"]').should('exist');
-  cy.get('[data-test-subj="timeline-loading-spinner"]').should('not.exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const investigateFirstAlertInTimeline = () => {
