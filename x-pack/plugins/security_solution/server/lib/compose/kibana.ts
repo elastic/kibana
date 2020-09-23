@@ -17,7 +17,6 @@ import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
-import { ElasticsearchTlsAdapter, TLS } from '../tls';
 
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
@@ -27,7 +26,6 @@ import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter'
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
-import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
 import * as note from '../note/saved_object';
 import * as pinnedEvent from '../pinned_event/saved_object';
 import * as timeline from '../timeline/saved_object';
@@ -50,13 +48,11 @@ export function compose(
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
     ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
-    tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
-    uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {
