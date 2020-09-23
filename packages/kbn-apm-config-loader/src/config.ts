@@ -29,6 +29,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
   if (isDistributable) {
     return {
       active: false,
+      globalLabels: {},
     };
   }
   return {
