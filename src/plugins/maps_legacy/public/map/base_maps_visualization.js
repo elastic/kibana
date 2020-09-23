@@ -94,9 +94,7 @@ export function BaseMapsVisualizationProvider() {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       const modules = await lazyLoadMapsLegacyModules();
-      this._leaflet = modules.L;
       this._kibanaMap = new modules.KibanaMap(this._container, options);
-      this._serviceSettings = await getServiceSettings();
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
@@ -130,14 +128,15 @@ export function BaseMapsVisualizationProvider() {
     async _updateBaseLayer() {
       const emsTileLayerId = getEmsTileLayerId();
 
-      if (!this._kibanaMap || !this._serviceSettings) {
+      if (!this._kibanaMap) {
         return;
       }
 
       const mapParams = this._getMapsParams();
       if (!this._tmsConfigured()) {
         try {
-          const tmsServices = await this._serviceSettings.getTMSServices();
+          const serviceSettings = await getServiceSettings();
+          const tmsServices = await serviceSettings.getTMSServices();
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
@@ -188,12 +187,13 @@ export function BaseMapsVisualizationProvider() {
         isDesaturated = true;
       }
       const isDarkMode = getUiSettings().get('theme:darkMode');
-      const meta = await this._serviceSettings.getAttributesForTMSLayer(
+      const serviceSettings = await getServiceSettings();
+      const meta = await serviceSettings.getAttributesForTMSLayer(
         tmsLayer,
         isDesaturated,
         isDarkMode
       );
-      const showZoomMessage = this._serviceSettings.shouldShowZoomMessage(tmsLayer);
+      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;

@@ -19,7 +19,11 @@
 
 import { get, round } from 'lodash';
 import { getFormatService, getQueryService, getKibanaLegacy } from './services';
-import { geoContains, mapTooltipProvider } from '../../maps_legacy/public';
+import {
+  geoContains,
+  mapTooltipProvider,
+  lazyLoadMapsLegacyModules,
+} from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
 function scaleBounds(bounds) {
@@ -176,10 +180,6 @@ export const createTileMapVisualization = (dependencies) => {
     async _recreateGeohashLayer() {
       const { GeohashLayer } = await import('./geohash_layer');
 
-      if (!this._leaflet) {
-        return;
-      }
-
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
@@ -191,7 +191,7 @@ export const createTileMapVisualization = (dependencies) => {
         geohashOptions,
         this._kibanaMap.getZoomLevel(),
         this._kibanaMap,
-        this._leaflet
+        (await lazyLoadMapsLegacyModules()).L
       );
       this._kibanaMap.addLayer(this._geohashLayer);
     }

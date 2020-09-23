@@ -21,12 +21,13 @@ import { i18n } from '@kbn/i18n';
 import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider, ORIGIN } from '../../maps_legacy/public';
+import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
 
 export function createRegionMapVisualization({
   regionmapsConfig,
   uiSettings,
   BaseMapsVisualization,
+  getServiceSettings,
 }) {
   return class RegionMapsVisualization extends BaseMapsVisualization {
     constructor(container, vis) {
@@ -101,9 +102,8 @@ export function createRegionMapVisualization({
         fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
         (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
       ) {
-        return this._serviceSettings
-          ? await this._serviceSettings.loadFileLayerConfig(fileLayerConfig)
-          : null;
+        const serviceSettings = await getServiceSettings();
+        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
       }
 
       //Configured in the kibana.yml. Needs to be resolved through the settings.
@@ -170,9 +170,6 @@ export function createRegionMapVisualization({
     }
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
-      if (!this._leaflet) {
-        return;
-      }
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
@@ -183,7 +180,7 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          this._serviceSettings
+          await getServiceSettings()
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
@@ -194,8 +191,8 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          this._serviceSettings,
-          this._leaflet
+          await getServiceSettings(),
+          (await lazyLoadMapsLegacyModules()).L
         );
       }
 
