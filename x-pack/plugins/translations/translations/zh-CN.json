@@ -801,8 +801,6 @@
     "data.indexPatterns.ensureDefaultIndexPattern.bannerLabel": "若要在 Kibana 中可视化和浏览数据，您需要创建索引模式，以从 Elasticsearch 检索数据。",
     "data.indexPatterns.fetchFieldErrorTitle": "提取索引模式 {title} (ID: {id}) 的字段时出错",
     "data.indexPatterns.unableWriteLabel": "无法写入索引模式！请刷新页面以获取此索引模式的最新更改。",
-    "data.indexPatterns.unknownFieldErrorMessage": "indexPattern “{title}” 中的字段 “{name}” 使用未知字段类型。",
-    "data.indexPatterns.unknownFieldHeader": "未知字段类型 {type}",
     "data.noDataPopover.content": "此时间范围不包含任何数据。增大或调整时间范围，以查看更多的字段并创建图表。",
     "data.noDataPopover.dismissAction": "不再显示",
     "data.noDataPopover.subtitle": "提示",
