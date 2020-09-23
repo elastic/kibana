@@ -5,12 +5,15 @@
  */
 
 import { createSelector } from 'reselect';
+import { ServerApiError } from '../../../../common/types';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
   AsyncResourceState,
   getCurrentResourceError,
   getLastLoadedResourceState,
+  isFailedResourceState,
+  isLoadedResourceState,
   isLoadingResourceState,
   isOutdatedResourceState,
   LoadedResourceState,
@@ -32,12 +35,15 @@ const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): b
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const currentPageInfo = state.listView.currentPaginationInfo;
   const currentPage = state.listView.currentListResourceState;
+  const freshDataTimestamp = state.listView.freshDataTimestamp;
 
   return (
     state.active &&
-    isOutdatedResourceState(currentPage, (data) =>
-      pageInfosEqual(currentPageInfo, data.paginationInfo)
-    )
+    isOutdatedResourceState(currentPage, (data) => {
+      return (
+        pageInfosEqual(currentPageInfo, data.paginationInfo) && data.timestamp >= freshDataTimestamp
+      );
+    })
   );
 };
 
@@ -102,6 +108,38 @@ export const getListErrorMessage = (
 
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
   return isLoadingResourceState(state.listView.currentListResourceState);
+};
+
+export const isDeletionDialogOpen = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.deletionDialog.entry !== undefined;
+};
+
+export const isDeletionInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadingResourceState(state.deletionDialog.submissionResourceState);
+};
+
+export const isDeletionSuccessful = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadedResourceState(state.deletionDialog.submissionResourceState);
+};
+
+export const getDeletionError = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<ServerApiError> | undefined => {
+  const submissionResourceState = state.deletionDialog.submissionResourceState;
+
+  return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
+};
+
+export const getDeletionSubmissionResourceState = (
+  state: Immutable<TrustedAppsListPageState>
+): AsyncResourceState => {
+  return state.deletionDialog.submissionResourceState;
+};
+
+export const getDeletionDialogEntry = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<TrustedApp> | undefined => {
+  return state.deletionDialog.entry;
 };
 
 export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
