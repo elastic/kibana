@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import {
-  USER_AGENT_DEVICE,
-  USER_AGENT_NAME,
-  USER_AGENT_OS,
-} from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 
-export async function getVisitorBreakdown({
+export async function getUrlSearch({
   setup,
   urlQuery,
 }: {
@@ -32,26 +27,24 @@ export async function getVisitorBreakdown({
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
-        browsers: {
-          terms: {
-            field: USER_AGENT_NAME,
-            size: 10,
+        totalUrls: {
+          cardinality: {
+            field: 'url.full',
           },
         },
-        os: {
+        urls: {
           terms: {
-            field: USER_AGENT_OS,
+            field: 'url.full',
             size: 10,
           },
-        },
-        devices: {
-          terms: {
-            field: USER_AGENT_DEVICE,
-            size: 10,
+          aggs: {
+            medianPLD: {
+              percentiles: {
+                field: 'transaction.duration.us',
+                percents: [50],
+              },
+            },
           },
         },
       },
@@ -61,20 +54,14 @@ export async function getVisitorBreakdown({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { browsers, os, devices } = response.aggregations!;
+  const { urls, totalUrls } = response.aggregations ?? {};
 
   return {
-    browsers: browsers.buckets.map((bucket) => ({
+    total: totalUrls?.value || 0,
+    items: (urls?.buckets ?? []).map((bucket) => ({
+      url: bucket.key as string,
       count: bucket.doc_count,
-      name: bucket.key as string,
-    })),
-    os: os.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      name: bucket.key as string,
-    })),
-    devices: devices.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      name: bucket.key as string,
+      pld: bucket.medianPLD.values['50.0'] ?? 0,
     })),
   };
 }
