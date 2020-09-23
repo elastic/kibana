@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+export * from './eui_styled_components';
