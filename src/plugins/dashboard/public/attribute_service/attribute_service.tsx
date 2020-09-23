@@ -53,7 +53,7 @@ import {
 export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
 export interface AttributeServiceOptions<A extends { title: string }> {
-  customSaveMethod?: (
+  saveMethod: (
     type: string,
     attributes: A,
     savedObjectId?: string
@@ -118,25 +118,11 @@ export class AttributeService<
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
     }
     try {
-      if (this.options?.customSaveMethod) {
-        const savedItem = await this.options.customSaveMethod(
-          this.type,
-          newAttributes,
-          savedObjectId
-        );
-        if ('id' in savedItem) {
-          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
-        }
-        return { ...originalInput } as RefType;
+      const savedItem = await this.options.saveMethod(this.type, newAttributes, savedObjectId);
+      if ('id' in savedItem) {
+        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
       }
-
-      if (savedObjectId) {
-        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-        return { ...originalInput, savedObjectId } as RefType;
-      }
-
-      const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-      return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+      return { ...originalInput } as RefType;
     } catch (error) {
       this.toasts.addDanger({
         title: i18n.translate('dashboard.attributeService.saveToLibraryError', {

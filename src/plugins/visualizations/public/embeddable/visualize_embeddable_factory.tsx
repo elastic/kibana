@@ -129,7 +129,7 @@ export class VisualizeEmbeddableFactory
           VisualizeSavedObjectAttributes,
           VisualizeByValueInput,
           VisualizeByReferenceInput
-        >(this.type, { customSaveMethod: this.onSave });
+        >(this.type, { saveMethod: this.onSave });
     }
     return this.attributeService!;
   }
