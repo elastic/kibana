@@ -21,6 +21,14 @@ describe('When showing the Trusted App Create Form', () => {
   let formProps: jest.Mocked<CreateTrustedAppFormProps>;
 
   // Some helpers
+  const setTextFieldValue = (textField: HTMLInputElement | HTMLTextAreaElement, value: string) => {
+    reactTestingLibrary.act(() => {
+      fireEvent.change(textField, {
+        target: { value },
+      });
+      fireEvent.blur(textField);
+    });
+  };
   const getNameField = (
     renderResult: RenderResultType,
     dataTestSub: string = dataTestSubjForForm
@@ -76,6 +84,9 @@ describe('When showing the Trusted App Create Form', () => {
     dataTestSub: string = dataTestSubjForForm
   ): HTMLElement => {
     return renderResult.getByTestId(`${dataTestSub}-conditionsBuilder-group1-andConnector`);
+  };
+  const getAllValidationErrors = (renderResult: RenderResultType): HTMLElement[] => {
+    return Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
   };
 
   beforeEach(() => {
@@ -192,26 +203,102 @@ describe('When showing the Trusted App Create Form', () => {
   });
 
   describe('and the user visits required fields but does not fill them out', () => {
-    it.todo('should show Name validation error');
+    let renderResult: RenderResultType;
 
-    it.todo('should show Condition validation error');
+    beforeEach(() => {
+      renderResult = render();
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getNameField(renderResult));
+      });
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getConditionValue(getCondition(renderResult)));
+      });
+    });
 
-    it.todo('should NOT display any other errors');
+    it('should show Name validation error', () => {
+      expect(renderResult.getByText('Name is required'));
+    });
 
-    it.todo('should call change callback with isValid set to false and contain the new item');
+    it('should show Condition validation error', () => {
+      expect(renderResult.getByText('[1] Field entry must have a value'));
+    });
+
+    it('should NOT display any other errors', () => {
+      expect(getAllValidationErrors(renderResult)).toHaveLength(2);
+    });
+
+    it('should call change callback with isValid set to false and contain the new item', () => {
+      expect(formProps.onChange).toHaveBeenCalledWith({
+        isValid: false,
+        item: {
+          description: '',
+          entries: [
+            {
+              field: 'process.hash.*',
+              operator: 'included',
+              type: 'match',
+              value: '',
+            },
+          ],
+          name: '',
+          os: 'windows',
+        },
+      });
+    });
   });
 
   describe('and invalid data is entered', () => {
-    it.todo('should validate that Name has a non empty space value');
+    let renderResult: RenderResultType;
 
-    it.todo('should validate that a condition value has a non empty space value');
+    beforeEach(() => {
+      renderResult = render();
+    });
 
-    it.todo(
-      'should validate all condition values (when multiples exist) have non empty space value'
-    );
+    it('should validate that Name has a non empty space value', () => {
+      setTextFieldValue(getNameField(renderResult), '  ');
+      expect(renderResult.getByText('Name is required'));
+    });
+
+    it('should validate that a condition value has a non empty space value', () => {
+      setTextFieldValue(getConditionValue(getCondition(renderResult)), '  ');
+      expect(renderResult.getByText('[1] Field entry must have a value'));
+    });
+
+    it('should validate all condition values (when multiples exist) have non empty space value', () => {
+      const andButton = getConditionBuilderAndButton(renderResult);
+      reactTestingLibrary.act(() => {
+        fireEvent.click(andButton, { button: 1 });
+      });
+
+      setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
+      expect(renderResult.getByText('[2] Field entry must have a value'));
+    });
   });
 
   describe('and all required data passes validation', () => {
-    it.todo('should call change callback with isValid set to true and contain the new item');
+    it('should call change callback with isValid set to true and contain the new item', () => {
+      const renderResult = render();
+      setTextFieldValue(getNameField(renderResult), 'Some Process');
+      setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
+      setTextFieldValue(getDescriptionField(renderResult), 'some description');
+
+      expect(getAllValidationErrors(renderResult)).toHaveLength(0);
+      expect(formProps.onChange).toHaveBeenLastCalledWith({
+        isValid: true,
+        item: {
+          description: 'some description',
+          entries: [
+            {
+              field: 'process.hash.*',
+              operator: 'included',
+              type: 'match',
+              value: 'someHASH',
+            },
+          ],
+          name: 'Some Process',
+          os: 'windows',
+        },
+      });
+    });
   });
 });
