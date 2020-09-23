@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { executeEsQueryFactory, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices } from '../../../../alerts/server';
+import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId } from './alert_type';
 import { Logger } from '../../types';
 
@@ -21,10 +21,14 @@ interface LatestEntityLocation {
 
 // Flatten agg results and get latest locations for each entity
 function transformResults(
-  results: SearchResponse<unknown>,
+  results: SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
 ): LatestEntityLocation[] {
+  if (!results) {
+    return [];
+  }
+
   return (
     _.chain(results)
       .get('aggregations.shapes.buckets', {})
@@ -62,15 +66,10 @@ interface EntityMovementDescriptor {
 }
 
 function getMovedEntities(
-  prevToCurrentIntervalResults: SearchResponse<unknown>,
-  currentIntervalResults: SearchResponse<unknown>,
-  trackingEvent: string,
-  dateField: string,
-  geoField: string
+  currLocationArr: LatestEntityLocation[],
+  prevLocationArr: LatestEntityLocation[],
+  trackingEvent: string
 ): EntityMovementDescriptor[] {
-  const currLocationArr = transformResults(currentIntervalResults, dateField, geoField);
-  const prevLocationArr = transformResults(prevToCurrentIntervalResults, dateField, geoField);
-
   return (
     currLocationArr
       // Check if shape has a previous location and has moved
@@ -134,6 +133,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     services,
     params,
     alertId,
+    state,
   }: {
     previousStartedAt: Date | null;
     startedAt: Date;
@@ -151,8 +151,23 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryGeoField: string;
     };
     alertId: string;
+    state: AlertTypeState;
   }) {
     const executeEsQuery = await executeEsQueryFactory(params, services, log, alertId);
+
+    // Run largest query on first run capturing anything up to current interval
+    if (!currIntervalStartTime) {
+      const prevToCurrentIntervalResults:
+        | SearchResponse<unknown>
+        | undefined = await executeEsQuery(null, currIntervalEndTime);
+      return {
+        prevLocationArr: transformResults(
+          prevToCurrentIntervalResults,
+          params.dateField,
+          params.geoField
+        ),
+      };
+    }
 
     const currentIntervalResults: SearchResponse<unknown> | undefined = await executeEsQuery(
       currIntervalStartTime,
@@ -160,25 +175,22 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     );
     // No need to compare if no changes in current interval
     if (!_.get(currentIntervalResults, 'hits.total.value')) {
-      return;
-    }
-    const prevToCurrentIntervalResults: SearchResponse<unknown> | undefined = await executeEsQuery(
-      null,
-      currIntervalStartTime
-    );
-
-    if (!prevToCurrentIntervalResults || !currentIntervalResults) {
-      return;
+      return state;
     }
 
-    const movedEntities: EntityMovementDescriptor[] = getMovedEntities(
-      prevToCurrentIntervalResults,
+    const currLocationArr: LatestEntityLocation[] = transformResults(
       currentIntervalResults,
-      params.trackingEvent,
       params.dateField,
       params.geoField
     );
 
+    const movedEntities: EntityMovementDescriptor[] = getMovedEntities(
+      currLocationArr,
+      state.prevLocationArr,
+      params.trackingEvent
+    );
+
+    // Create alert instances
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) =>
       services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId, {
         crossingEventTimeStamp: currLocation.date,
@@ -190,4 +202,15 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
         timeOfDetection: currIntervalEndTime,
       })
     );
+
+    // Combine previous results w/ current results for state of next run
+    const prevLocationArr = _.chain(currLocationArr)
+      .concat(state.prevLocationArr)
+      .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
+      .sortedUniqBy('entityName')
+      .value();
+
+    return {
+      prevLocationArr,
+    };
   };

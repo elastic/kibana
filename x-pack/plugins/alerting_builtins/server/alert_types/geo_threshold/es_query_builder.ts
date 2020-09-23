@@ -85,7 +85,7 @@ export async function executeEsQueryFactory(
   );
   return async (
     gteDateTime: Date | null,
-    ltDateTime: Date | null, // 'less than' to prevent overlap between intervals
+    ltDateTime: Date | null,
     topHitsQty: number = 1
   ): Promise<SearchResponse<unknown> | undefined> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -135,7 +135,7 @@ export async function executeEsQueryFactory(
                 range: {
                   [dateField]: {
                     ...(gteDateTime ? { gte: gteDateTime } : {}),
-                    lt: ltDateTime,
+                    lt: ltDateTime, // 'less than' to prevent overlap between intervals
                     format: 'strict_date_optional_time',
                   },
                 },

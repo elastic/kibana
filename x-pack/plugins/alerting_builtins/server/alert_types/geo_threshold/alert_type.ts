@@ -9,7 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { Service } from '../../types';
 import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
-import { ActionGroup, AlertServices, ActionVariable } from '../../../../alerts/server';
+import {
+  ActionGroup,
+  AlertServices,
+  ActionVariable,
+  AlertTypeState,
+} from '../../../../alerts/server';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
@@ -75,6 +80,8 @@ export function getAlertType(
     startedAt: currIntervalEndTime,
     services,
     params,
+    alertId,
+    state,
   }: {
     previousStartedAt: Date | null;
     startedAt: Date;
@@ -92,7 +99,8 @@ export function getAlertType(
       boundaryGeoField: string;
     };
     alertId: string;
-  }) => Promise<void>;
+    state: AlertTypeState;
+  }) => Promise<AlertTypeState>;
   validate?: {
     params?: {
       validate: (
