@@ -31,7 +31,7 @@ const StyledSpan = styled.span<{
   &:hover {
     background-color: ${(props) =>
       props.darkMode
-        ? euiDarkVars.euiColorLightestShad
+        ? euiDarkVars.euiColorLightestShade
         : euiLightVars.euiColorLightestShade};
   }
 `;
