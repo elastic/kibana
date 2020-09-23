@@ -282,7 +282,7 @@ export const sampleSignalHit = (): SignalHit => ({
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
-      output_index: '.siem-signals-hassanabad-frank-default',
+      output_index: '.siem-signals-default',
       max_signals: 100,
       risk_score: 55,
       risk_score_mapping: [],

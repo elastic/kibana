@@ -93,7 +93,7 @@ export const buildSignalFromEvent = (
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = {
+  const signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
   };
