@@ -47,6 +47,7 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { ConfigSchema } from '../../config';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 type StrategyMap<
   SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
@@ -117,6 +118,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       .then((value) => {
         if (value.search.aggs.shardDelay.enabled) {
           aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+          registerFunction(aggShardDelay);
         }
       });
 

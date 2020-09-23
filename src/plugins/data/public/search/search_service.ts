@@ -41,6 +41,7 @@ import {
   SHARD_DELAY_AGG_NAME,
   getShardDelayBucketAgg,
 } from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -89,6 +90,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
       aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
     }
 
     return {

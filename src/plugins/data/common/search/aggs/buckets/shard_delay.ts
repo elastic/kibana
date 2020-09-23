@@ -19,17 +19,19 @@
 
 import { BucketAggType } from './bucket_agg_type';
 import { BaseAggParams } from '../types';
+import { aggShardDelayFnName } from './shard_delay_fn';
 
 export const SHARD_DELAY_AGG_NAME = 'shard_delay';
 
 export interface AggParamsShardDelay extends BaseAggParams {
-  delay: number;
+  delay?: number;
 }
 
 export const getShardDelayBucketAgg = () =>
   new BucketAggType({
     name: SHARD_DELAY_AGG_NAME,
     title: 'Shard Delay',
+    expressionName: aggShardDelayFnName,
     createFilter: () => ({ match_all: {} }),
     customLabels: false,
     params: [

@@ -24,7 +24,7 @@ import { AggExpressionType, AggConfigSerialized } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 import { AggParamsShardDelay, SHARD_DELAY_AGG_NAME } from './shard_delay';
 
-const fnName = 'aggShardDelay';
+export const aggShardDelayFnName = 'aggShardDelay';
 
 type Input = any;
 type AggArgs = AggParamsShardDelay & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
@@ -32,10 +32,15 @@ type AggArgs = AggParamsShardDelay & Pick<AggConfigSerialized, 'id' | 'enabled' 
 type Arguments = Assign<AggArgs, { delay?: number }>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggShardDelayFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggShardDelay = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggShardDelayFnName,
   help: i18n.translate('data.search.aggs.function.buckets.shardDelay.help', {
     defaultMessage: 'Generates a serialized agg config for a Shard Delay agg',
   }),
