@@ -23,7 +23,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Ping, GetPingsParams, DateRange } from '../../../../common/runtime_types';
+import { isRight } from 'fp-ts/lib/Either';
+import {
+  Ping,
+  GetPingsParams,
+  DateRange,
+  SyntheticsPingType,
+} from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
@@ -96,6 +102,15 @@ const statusOptions = [
   },
 ];
 
+function rowShouldExpand(item: Ping) {
+  const decoded = SyntheticsPingType.decode(item);
+  return (
+    !!item.error ||
+    (item.http?.response?.body?.bytes ?? 0 > 0) ||
+    (isRight(decoded) && decoded.right.synthetics?.journey)
+  );
+}
+
 export const PingListComponent = (props: Props) => {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [status, setStatus] = useState<string>('');
@@ -144,8 +159,6 @@ export const PingListComponent = (props: Props) => {
       hasHttpStatus || !!currentPing.http?.response?.status_code,
     false
   );
-
-  console.log(pings);
 
   const columns: any[] = [
     {
@@ -237,15 +250,11 @@ export const PingListComponent = (props: Props) => {
       width: '24px',
       isExpander: true,
       render: (item: Ping) => {
-        console.log('CAN RENDER', !item.script?.journey, item.script);
         return (
           <EuiButtonIcon
             data-test-subj="uptimePingListExpandBtn"
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={
-              // !item.suite?.journey && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)
-              false
-            }
+            disabled={!rowShouldExpand(item)}
             aria-label={
               expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
