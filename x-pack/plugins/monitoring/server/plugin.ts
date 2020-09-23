@@ -74,7 +74,7 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
-  private elasticsearchClient: IClusterClient | undefined;
+  private telemetryElasticsearchClient: IClusterClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -148,7 +148,7 @@ export class Plugin {
       registerMonitoringCollection(
         plugins.telemetryCollectionManager,
         this.cluster,
-        () => this.elasticsearchClient,
+        () => this.telemetryElasticsearchClient,
         {
           maxBucketSize: config.ui.max_bucket_size,
         }
@@ -241,7 +241,7 @@ export class Plugin {
     // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
     // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
     // We will update the client in a follow up PR.
-    this.elasticsearchClient = elasticsearch.client;
+    this.telemetryElasticsearchClient = elasticsearch.client;
   }
 
   stop() {
