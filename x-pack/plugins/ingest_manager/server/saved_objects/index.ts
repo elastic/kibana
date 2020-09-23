@@ -24,6 +24,7 @@ import {
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
+  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
 
 /*
@@ -106,6 +107,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentActionToV7100,
     },
   },
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {

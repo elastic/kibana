@@ -12,6 +12,7 @@ import {
   PackagePolicy,
   EnrollmentAPIKey,
   Settings,
+  AgentAction,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
@@ -91,4 +92,19 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
   delete settingsDoc.attributes.kibana_url;
 
   return settingsDoc;
+};
+
+export const migrateAgentActionToV7100: SavedObjectMigrationFn<AgentAction, AgentAction> = (
+  agentActionDoc
+) => {
+  // @ts-expect-error
+  if (agentActionDoc.attributes.type === 'CONFIG_CHANGE') {
+    agentActionDoc.attributes.type = 'POLICY_CHANGE';
+    if (agentActionDoc.attributes.data?.config) {
+      agentActionDoc.attributes.data.policy = agentActionDoc.attributes.data.config;
+      delete agentActionDoc.attributes.data.config;
+    }
+  }
+
+  return agentActionDoc;
 };
