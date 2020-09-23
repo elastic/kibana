@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../__mocks__/kea.mock';
 import '../../__mocks__/shallow_usecontext.mock';
 import '../../__mocks__/react_router_history.mock';
+import { mockKibanaValues } from '../../__mocks__';
 
 import React from 'react';
-
-import { mockKibanaContext, mountWithKibanaContext } from '../../__mocks__';
+import { shallow } from 'enzyme';
 
 jest.mock('./generate_breadcrumbs', () => ({
   useEnterpriseSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
@@ -37,13 +38,13 @@ describe('Set Kibana Chrome helpers', () => {
   });
 
   afterEach(() => {
-    expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalled();
-    expect(mockKibanaContext.setDocTitle).toHaveBeenCalled();
+    expect(mockKibanaValues.setBreadcrumbs).toHaveBeenCalled();
+    expect(mockKibanaValues.setDocTitle).toHaveBeenCalled();
   });
 
   describe('SetEnterpriseSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      mountWithKibanaContext(<SetEnterpriseSearchChrome text="Hello World" />);
+      shallow(<SetEnterpriseSearchChrome text="Hello World" />);
 
       expect(enterpriseSearchTitle).toHaveBeenCalledWith(['Hello World']);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
@@ -55,7 +56,7 @@ describe('Set Kibana Chrome helpers', () => {
     });
 
     it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      mountWithKibanaContext(<SetEnterpriseSearchChrome isRoot />);
+      shallow(<SetEnterpriseSearchChrome isRoot />);
 
       expect(enterpriseSearchTitle).toHaveBeenCalledWith([]);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
@@ -64,7 +65,7 @@ describe('Set Kibana Chrome helpers', () => {
 
   describe('SetAppSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      mountWithKibanaContext(<SetAppSearchChrome text="Engines" />);
+      shallow(<SetAppSearchChrome text="Engines" />);
 
       expect(appSearchTitle).toHaveBeenCalledWith(['Engines']);
       expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([
@@ -76,7 +77,7 @@ describe('Set Kibana Chrome helpers', () => {
     });
 
     it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      mountWithKibanaContext(<SetAppSearchChrome isRoot />);
+      shallow(<SetAppSearchChrome isRoot />);
 
       expect(appSearchTitle).toHaveBeenCalledWith([]);
       expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([]);
@@ -85,7 +86,7 @@ describe('Set Kibana Chrome helpers', () => {
 
   describe('SetWorkplaceSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      mountWithKibanaContext(<SetWorkplaceSearchChrome text="Sources" />);
+      shallow(<SetWorkplaceSearchChrome text="Sources" />);
 
       expect(workplaceSearchTitle).toHaveBeenCalledWith(['Sources']);
       expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([
@@ -97,7 +98,7 @@ describe('Set Kibana Chrome helpers', () => {
     });
 
     it('sets empty breadcrumbs and document title when isRoot is true', () => {
-      mountWithKibanaContext(<SetWorkplaceSearchChrome isRoot />);
+      shallow(<SetWorkplaceSearchChrome isRoot />);
 
       expect(workplaceSearchTitle).toHaveBeenCalledWith([]);
       expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([]);
