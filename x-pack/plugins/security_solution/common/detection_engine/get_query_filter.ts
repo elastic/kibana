@@ -112,7 +112,7 @@ export const buildEqlSearchRequest = (
   const indexString = index.join();
   const baseRequest = {
     method: 'POST',
-    path: `/${indexString}/_eql/search`,
+    path: `/${indexString}/_eql/search?allow_no_indices=true`,
     body: {
       size,
       query,
