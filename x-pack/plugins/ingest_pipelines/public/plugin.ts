@@ -10,11 +10,12 @@ import { CoreSetup, Plugin } from 'src/core/public';
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { SetupDependencies, StartDependencies } from './types';
+import { registerUrlGenerator } from './url_generator';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
-    const { management, usageCollection } = plugins;
+    const { management, usageCollection, share } = plugins;
     const { http, getStartServices } = coreSetup;
 
     // Initialize services
@@ -47,6 +48,8 @@ export class IngestPipelinesPlugin
         };
       },
     });
+
+    registerUrlGenerator(coreSetup, management, share);
   }
 
   public start() {}
