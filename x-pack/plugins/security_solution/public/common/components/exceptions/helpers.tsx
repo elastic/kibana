@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { capitalize, union } from 'lodash';
+import { capitalize } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
@@ -35,6 +35,7 @@ import {
   UpdateExceptionListItemSchema,
   ExceptionListType,
   EntryNested,
+  OsTypeArray,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -95,15 +96,6 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
     default:
       return undefined;
   }
-};
-
-/**
- * Retrieves the values of tags marked as os
- *
- * @param tags an ExceptionItem's tags
- */
-export const getOperatingSystems = (tags: string[]): string[] => {
-  return tags.filter((tag) => tag.startsWith('os:')).map((os) => os.substring(3).trim());
 };
 
 /**
@@ -327,14 +319,12 @@ export const enrichExistingExceptionItemWithComments = (
  */
 export const enrichExceptionItemsWithOS = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  osTypes: string[]
+  osTypes: OsTypeArray
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  const osTags = osTypes.map((os) => `os:${os}`);
   return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
-    const newTags = item._tags ? union(item._tags, osTags) : [...osTags];
     return {
       ...item,
-      _tags: newTags,
+      os_types: osTypes,
     };
   });
 };

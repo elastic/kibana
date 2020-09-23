@@ -30,6 +30,7 @@ import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { Ecs } from '../../../../../common/ecs';
+import { OsTypeArray, osTypeArray } from '../../../../../common/shared_imports';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -274,14 +275,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): string[] => {
-    const osDefaults = ['windows', 'macos'];
+  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
+    const osDefaults: OsTypeArray = ['windows', 'macos'];
     if (alertData) {
       const osTypes = getMappedNonEcsValue({
         data: alertData.nonEcsData,
         fieldName: 'host.os.family',
       });
-      if (osTypes.length === 0) {
+      if (osTypes.length === 0 || !osTypeArray.is(osTypes)) {
         return osDefaults;
       }
       return osTypes;

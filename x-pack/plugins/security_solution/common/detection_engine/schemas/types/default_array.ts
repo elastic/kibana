@@ -14,11 +14,11 @@ import { Either } from 'fp-ts/lib/Either';
  */
 export const DefaultArray = <C extends t.Mixed>(codec: C) => {
   const arrType = t.array(codec);
-  type CodecType = t.TypeOf<typeof arrType>;
-  return new t.Type<CodecType, CodecType | undefined, unknown>(
+  type ArrType = t.TypeOf<typeof arrType>;
+  return new t.Type<ArrType, ArrType | undefined, unknown>(
     'DefaultArray',
-    t.array(codec).is,
-    (input, context): Either<t.Errors, CodecType> =>
+    arrType.is,
+    (input, context): Either<t.Errors, ArrType> =>
       input == null ? t.success([]) : arrType.validate(input, context),
     t.identity
   );

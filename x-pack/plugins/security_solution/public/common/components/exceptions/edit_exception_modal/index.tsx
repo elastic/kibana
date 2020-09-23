@@ -39,7 +39,6 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
@@ -230,8 +229,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       },
     ];
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, exceptionItem.os_types));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
