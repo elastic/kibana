@@ -277,8 +277,6 @@ export const signalRulesAlertType = ({
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
-        } else if (isEqlRule(type)) {
-          throw new Error('EQL Rules are under development, execution is not yet implemented');
         } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

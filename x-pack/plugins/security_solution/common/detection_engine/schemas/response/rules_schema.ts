@@ -122,7 +122,7 @@ export const dependentRulesSchema = t.partial({
   language,
   query,
 
-  // eql fields
+  // eql only fields
   event_category_override,
 
   // when type = saved_query, saved_id is required
@@ -264,6 +264,7 @@ export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[
         t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
       ),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
     ];
   } else {
     return [];
