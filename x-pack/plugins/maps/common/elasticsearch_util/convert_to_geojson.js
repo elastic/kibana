@@ -5,12 +5,12 @@
  */
 
 import _ from 'lodash';
-import { RENDER_AS } from '../../../../common/constants';
-import { getTileBoundingBox } from './geo_tile_utils';
-import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
-import { clamp } from '../../../../common/elasticsearch_geo_utils';
+import { RENDER_AS, GEOTILE_GRID_AGG_NAME, GEOCENTROID_AGG_NAME } from '../constants';
+import { getTileBoundingBox } from '../geo_tile_utils';
+import { extractPropertiesFromBucket } from './es_agg_utils';
+import { clamp } from './elasticsearch_geo_utils';
 
-const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
+const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
 
 export function convertCompositeRespToGeoJson(esResponse, renderAs) {
   return convertToGeoJson(
@@ -20,7 +20,7 @@ export function convertCompositeRespToGeoJson(esResponse, renderAs) {
       return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
     },
     (gridBucket) => {
-      return gridBucket.key.gridSplit;
+      return gridBucket.key[GEOTILE_GRID_AGG_NAME];
     }
   );
 }
@@ -30,7 +30,7 @@ export function convertRegularRespToGeoJson(esResponse, renderAs) {
     esResponse,
     renderAs,
     (esResponse) => {
-      return _.get(esResponse, 'aggregations.gridSplit.buckets', []);
+      return _.get(esResponse, `aggregations.${GEOTILE_GRID_AGG_NAME}.buckets`, []);
     },
     (gridBucket) => {
       return gridBucket.key;
@@ -49,7 +49,7 @@ function convertToGeoJson(esResponse, renderAs, pluckGridBuckets, pluckGridKey) 
       type: 'Feature',
       geometry: rowToGeometry({
         gridKey,
-        gridCentroid: gridBucket.gridCentroid,
+        [GEOCENTROID_AGG_NAME]: gridBucket[GEOCENTROID_AGG_NAME],
         renderAs,
       }),
       id: gridKey,
