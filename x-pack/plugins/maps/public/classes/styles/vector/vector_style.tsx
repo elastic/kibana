@@ -92,6 +92,7 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): { hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor };
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
+  isTimeAware: () => boolean;
 }
 
 export class VectorStyle implements IVectorStyle {

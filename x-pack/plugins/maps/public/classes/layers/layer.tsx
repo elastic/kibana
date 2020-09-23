@@ -110,13 +110,12 @@ export type CustomIconAndTooltipContent = {
 export interface ILayerArguments {
   layerDescriptor: LayerDescriptor;
   source: ISource;
-  style: IStyle;
 }
 
 export class AbstractLayer implements ILayer {
   protected readonly _descriptor: LayerDescriptor;
   protected readonly _source: ISource;
-  protected readonly _style: IStyle;
+  protected _style?: IStyle;
   protected readonly _dataRequests: DataRequest[];
 
   static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
@@ -134,16 +133,21 @@ export class AbstractLayer implements ILayer {
     };
   }
 
+  static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
+    // @ts-expect-error
+    const mbStyle = mbMap.getStyle();
+    return mbStyle.sources[sourceId].data;
+  }
+
   destroy() {
     if (this._source) {
       this._source.destroy();
     }
   }
 
-  constructor({ layerDescriptor, source, style }: ILayerArguments) {
+  constructor({ layerDescriptor, source }: ILayerArguments) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
-    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
         (dataRequest) => new DataRequest(dataRequest)
@@ -151,12 +155,6 @@ export class AbstractLayer implements ILayer {
     } else {
       this._dataRequests = [];
     }
-  }
-
-  static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
-    // @ts-expect-error
-    const mbStyle = mbMap.getStyle();
-    return mbStyle.sources[sourceId].data;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
@@ -257,10 +255,16 @@ export class AbstractLayer implements ILayer {
   }
 
   getStyleForEditing(): IStyle {
+    if (!this._style) {
+      throw new Error('this._style is not provided');
+    }
     return this._style;
   }
 
   getStyle() {
+    if (!this._style) {
+      throw new Error('this._style is not provided');
+    }
     return this._style;
   }
 
