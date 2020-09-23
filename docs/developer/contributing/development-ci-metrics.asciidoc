@@ -1,0 +1,65 @@
+[[ci-metrics]]
+== CI Metrics
+
+In addition to run our tests CI collects metrics about Kibana. These metrics are sent to an external service which catalogs and compares them to the metrics from other branches so that PR authors can better quantify the impact their changes have.
+
+
+[[ci-metric-types]]
+=== Metric types
+
+
+[[ci-metric-types-bundle-size-metrics]]
+==== Bundle size
+
+These metrics help contributors know how they are impacting the size of the bundles Kibana creates, and help make sure that Kibana loads as fast as possible.
+
+[[ci-metric-page-load-bundle-size]] `page load bundle size` ::
+The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn't necessary on every page load behind an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`].
++
+Code that is shared statically with other plugins, including anything that's exported from the `public/index.ts` file of a plugin and any code referenced by the `extraPublicDirs` manifest property, is always exported from the entry file meaning it will contribute to the `page load bundle size` for the plugin which is sharing the code.
+
+[[ci-metric-async-chunks-size]] `async chunks size` ::
+An "async chunk" is created for the files imported by each https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`] statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
+
+[[ci-metric-misc-asset-size]] `miscellaneous assets size` ::
+A "miscellaneous asset" is anything that isn't an async chunk or entry chunk, often images. This metric tracks the sum size of these assets, in bytes, broken down by plugin/bundle id.
+
+[[ci-metric-bundle-module-count]] `@kbn/optimizer bundle module count` ::
+The number of separate modules included in each bundle/plugin. This is the best indicator we have for how long a specific bundle will take to be built by the `@kbn/optimizer`, so we report it to help people know when they've imported a module which might be include a surprising number of modules.
+
+
+[[ci-metric-types-distributable-size]]
+==== Distributable size
+
+The size of the Kibana distributable is an important metric to keep an eye not only so it's fast for people to download and use Kibana, but also because the number of files in our distributable directly impacts the speed of extracting a Kibana distributable.
+
+There are several metrics that we don't report on PRs because gzip-compression produces different file sizes even when provided the same input, so this metric would regularly show changes even though PR authors hadn't made any relevant changes.
+
+All metrics are collected from the `tar.gz` archive produced for the linux platform.
+
+[[ci-metric-distributable-file-count]] `distributable file count` ::
+The number of files included in the default distributable.
+
+[[ci-metric-oss-distributable-file-count]] `oss distributable file count` ::
+The number of files included in the OSS distributable.
+
+[[ci-metric-distributable-size]] `distributable size` ::
+The size, in bytes, of the default distributable. _(not reported on PRs)_ 
+
+[[ci-metric-oss-distributable-size]] `oss distributable size` (not reported) ::
+The size, in bytes, of the OSS distributable. _(not reported on PRs)_
+
+
+[[ci-metric-types-saved-object-field-counts]]
+==== Saved Object field counts
+
+Elasticsearch limits the number of fields in an index to 1000 by default, and we want to avoid raising that limit.
+
+[[ci-metric-saved-object-field-count]] `Saved Objects .kibana field count` ::
+The number of saved object fields broken down by saved object type.
+
+
+[[ci-metric-adding-new-metrics]]
+=== Adding new metrics
+
+You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` class. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/ci_stats_reporter[`CiStatsReporter` readme].
