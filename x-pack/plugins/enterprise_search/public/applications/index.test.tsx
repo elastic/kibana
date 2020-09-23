@@ -10,7 +10,7 @@ import { AppMountParameters } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
 
-import { renderApp } from './';
+import { renderApp, renderHeaderActions } from './';
 import { AppSearch } from './app_search';
 import { WorkplaceSearch } from './workplace_search';
 
@@ -33,6 +33,7 @@ describe('renderApp', () => {
 
     const unmount = renderApp(MockApp, params, core, plugins, config, data);
     expect(params.element.querySelector('.hello-world')).not.toBeNull();
+
     unmount();
     expect(params.element.innerHTML).toEqual('');
   });
@@ -45,5 +46,18 @@ describe('renderApp', () => {
   it('renders WorkplaceSearch', () => {
     renderApp(WorkplaceSearch, params, core, plugins, config, data);
     expect(params.element.querySelector('.setupGuide')).not.toBeNull();
+  });
+});
+
+describe('renderHeaderActions', () => {
+  it('mounts and unmounts any HeaderActions component', () => {
+    const mockHeaderEl = document.createElement('header');
+    const MockHeaderActions = () => <button className="hello-world">Hello World</button>;
+
+    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl, {} as any);
+    expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
+
+    unmount();
+    expect(mockHeaderEl.innerHTML).toEqual('');
   });
 });

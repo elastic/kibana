@@ -58,6 +58,7 @@ describe('EndpointList store concerns', () => {
         patternsError: undefined,
         isAutoRefreshEnabled: true,
         autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+        queryStrategyVersion: undefined,
       });
     });
 
