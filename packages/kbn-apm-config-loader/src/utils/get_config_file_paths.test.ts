@@ -18,20 +18,21 @@
  */
 
 import { resolve } from 'path';
-// deep import to avoid loading the whole package
-import { getConfigPath } from '@kbn/utils/target/path';
-import { getArgValues } from './read_argv';
+import { getConfigPath } from '@kbn/utils';
+import { getConfigurationFilePaths } from './get_config_file_paths';
 
-/**
- * Return the configuration files that needs to be loaded.
- *
- * This mimics the behavior of the `src/cli/serve/serve.js` cli script by reading
- * `-c` and `--config` options from process.argv, and fallbacks to `@kbn/utils`'s `getConfigPath()`
- */
-export const getConfigurationFilePaths = (argv: string[]): string[] => {
-  const rawPaths = getArgValues(argv, ['-c', '--config']);
-  if (rawPaths.length) {
-    return rawPaths.map((path) => resolve(process.cwd(), path));
-  }
-  return [getConfigPath()];
-};
+describe('getConfigurationFilePaths', () => {
+  const cwd = process.cwd();
+
+  it('retrieve the config file paths from the command line arguments', () => {
+    const argv = ['--config', '/some/path', '-c', '/some-other-path'];
+    expect(getConfigurationFilePaths(argv)).toEqual([
+      resolve(cwd, '/some/path'),
+      resolve(cwd, '/some-other-path'),
+    ]);
+  });
+
+  it('fallbacks to `getConfigPath` value', () => {
+    expect(getConfigurationFilePaths([])).toEqual([getConfigPath()]);
+  });
+});

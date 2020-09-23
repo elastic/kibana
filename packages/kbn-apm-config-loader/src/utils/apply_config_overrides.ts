@@ -18,7 +18,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { getFlagValue } from './read_argv';
+import { getArgValue } from './read_argv';
 
 /**
  * Manually applies the specific configuration overrides we need to load the APM config.
@@ -27,11 +27,11 @@ import { getFlagValue } from './read_argv';
  *   - path.data
  */
 export const applyConfigOverrides = (config: Record<string, any>, argv: string[]) => {
-  const serverUuid = getFlagValue(argv, '--server.uuid');
+  const serverUuid = getArgValue(argv, '--server.uuid');
   if (serverUuid) {
     set(config, 'server.uuid', serverUuid);
   }
-  const dataPath = getFlagValue(argv, '--path.data');
+  const dataPath = getArgValue(argv, '--path.data');
   if (dataPath) {
     set(config, 'path.data', dataPath);
   }

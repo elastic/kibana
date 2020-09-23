@@ -1,0 +1,9 @@
+foo: 1
+bar: true
+xyz: ['1', '2']
+empty_arr: []
+abc:
+  def: test
+  qwe: 1
+  zyx: { val: 1 }
+pom.bom: 3

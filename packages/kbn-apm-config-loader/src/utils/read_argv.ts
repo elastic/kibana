@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const getFlagValues = (argv: string[], flag: string | string[]): string[] => {
+export const getArgValues = (argv: string[], flag: string | string[]): string[] => {
   const flags = typeof flag === 'string' ? [flag] : flag;
   const values: string[] = [];
   for (let i = 0; i < argv.length; i++) {
@@ -28,8 +28,8 @@ export const getFlagValues = (argv: string[], flag: string | string[]): string[]
   return values;
 };
 
-export const getFlagValue = (argv: string[], flag: string | string[]): string | undefined => {
-  const values = getFlagValues(argv, flag);
+export const getArgValue = (argv: string[], flag: string | string[]): string | undefined => {
+  const values = getArgValues(argv, flag);
   if (values.length) {
     return values[0];
   }
