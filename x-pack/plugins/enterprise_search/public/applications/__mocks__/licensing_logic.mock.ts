@@ -6,6 +6,8 @@
 
 import { licensingMock } from '../../../../licensing/public/mocks';
 
-export const mockLicenseContext = {
+export const mockLicensingValues = {
   license: licensingMock.createLicense(),
+  hasPlatinumLicense: false,
+  hasGoldLicense: false,
 };

@@ -5,13 +5,17 @@
  */
 
 /**
+ * Combine all shared mock values/actions into a single obj
+ *
  * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
+import { mockLicensingValues } from './licensing_logic.mock';
 import { mockHttpValues } from './http_logic.mock';
 import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 
 export const mockAllValues = {
+  ...mockLicensingValues,
   ...mockHttpValues,
   ...mockFlashMessagesValues,
 };
