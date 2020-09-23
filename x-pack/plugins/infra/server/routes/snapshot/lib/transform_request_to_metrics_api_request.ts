@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findInventoryFields } from '../../../../common/inventory_models';
+import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
 import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
@@ -50,6 +50,11 @@ export const transformRequestToMetricsAPIRequest = async (
 
   if (snapshotRequest.region) {
     filters.push({ term: { 'cloud.region': snapshotRequest.region } });
+  }
+
+  const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
+  if (inventoryModel && inventoryModel.nodeFilter) {
+    inventoryModel.nodeFilter?.forEach((f) => filters.push(f));
   }
 
   const inventoryFields = findInventoryFields(
