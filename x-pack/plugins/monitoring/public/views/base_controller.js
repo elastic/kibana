@@ -78,6 +78,7 @@ export class MonitoringViewBaseController {
    */
   constructor({
     title = '',
+    pageTitle = '',
     api = '',
     apiUrlFn,
     getPageData: _getPageData = getPageData,
@@ -96,6 +97,8 @@ export class MonitoringViewBaseController {
 
     titleService($scope.cluster, title);
 
+    $scope.pageTitle = pageTitle;
+    this.setPageTitle = (title) => ($scope.pageTitle = title);
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;

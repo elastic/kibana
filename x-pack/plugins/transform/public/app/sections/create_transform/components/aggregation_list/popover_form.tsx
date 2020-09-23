@@ -18,7 +18,7 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { useUpdateEffect } from 'react-use';
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';

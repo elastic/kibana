@@ -9,7 +9,7 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
@@ -62,13 +62,18 @@ export const isProcessTerminated = composeSelectors(
 );
 
 /**
+ * Retrieve an event from memory using the event's ID.
+ */
+export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
  */
 export const processEventForID: (
   state: ResolverState
-) => (nodeID: string) => ResolverEvent | null = composeSelectors(
+) => (nodeID: string) => SafeResolverEvent | null = composeSelectors(
   dataStateSelector,
   dataSelectors.processEventForID
 );
@@ -119,11 +124,18 @@ export const relatedEventsStats: (
  * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
  * towards the aggregate total.
  */
-export const relatedEventAggregateTotalByEntityId: (
+export const relatedEventTotalCount: (
   state: ResolverState
-) => (nodeID: string) => number = composeSelectors(
+) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventAggregateTotalByEntityId
+  dataSelectors.relatedEventTotalCount
+);
+
+export const relatedEventCountByType: (
+  state: ResolverState
+) => (nodeID: string, eventType: string) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountByType
 );
 
 /**
@@ -136,16 +148,6 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
- * Returns a function that returns the information needed to display related event details based on
- * the related event's entityID and its own ID.
- * @deprecated
- */
-export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventDisplayInfoByEntityAndSelfID
-);
-
-/**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  * @deprecated
@@ -153,26 +155,6 @@ export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
 export const relatedEventsByCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsByCategory
-);
-
-/**
- * Entity ids to booleans for waiting status
- * @deprecated
- */
-export const relatedEventsReady = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsReady
-);
-
-/**
- * Business logic lookup functions by ECS category by entity id.
- * Example usage:
- * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
- * @deprecated
- */
-export const relatedEventInfoByEntityId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
