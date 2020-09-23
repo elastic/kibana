@@ -1,0 +1,161 @@
+[role="xpack"]
+[[metrics-alerting]]
+== Metrics alerts
+
+The Metrics app in {kib} includes two **alert types**. These alert types are called <<alert-type-inventory>> and <<alert-type-metric-threshold>>.
+
+This section covers how to use these two alert types in detail. For general information on how to use alerting, refer to the documentation for the <<alerting-getting-started, Alerting>> plugin.
+
+[float]
+[[common-functionality]]
+=== Common functionality to Metrics alerts
+
+Metrics alert types correspond to the two ways to view data in the Metrics app: the **Inventory** page for inventory alerts, and the **Metrics Explorer** for metric threshold alerts.
+
+[float]
+==== Creating alerts
+
+The easiest way to create alerts within the Metrics app is to first configure the Inventory view or Metrics Explorer to display the data that you'd like to alert on, then open the **Alerts** menu and select **Create alert**.
+
+[role="screenshot"]
+image::images/inventory-create-alert.png[Closeup of the open Alerts menu on the Inventory page]
+
+[NOTE]
+==============================================
+Metrics alerts can also be created from the *Create* button in the <<alert-management, alert management UI>>, but creating them directly from the Inventory page or Metrics Explorer will allow you to pre-configure your alert with whichever parameters you've selected.
+==============================================
+
+[float]
+=== Defining alerts
+
+[role="screenshot"]
+image::images/inventory-alert-example.png[An example of an Inventory alert]
+[role="screenshot"]
+image::images/metric-alert-example.png[An example of a Metric Threshold alert]
+
+Both alert types in the Metrics app can be configured with multiple **conditions** and an optional **filter query**. You can also **test the alert condition** to see what results you might get before creating the alert.
+
+[float]
+==== Conditions
+[role="screenshot"]
+image::images/inventory-alert-prefilled.png[Overview of creating an inventory alert]
+
+Each alert begins with a single configurable condition to detect. This condition gets pre-populated based on the state of the Inventory view or Metrics Explorer.
+
+[role="screenshot"]
+image::images/inventory-alert-multi-condition.png[An inventory alert with an A and B condition]
+
+By clicking **Add condition**, you can define as many of these conditions as you need. Metrics alerts are designed to detect if *all* of these conditions are true. The pictured alert will fire if a Docker container is using more than 80% of its memory *and* 20% of its CPU, but will not fire if only one of those two conditions is met.
+
+[float]
+==== Optional parameters
+[role="screenshot"]
+image::images/inventory-alert-nodata-filter.png[Configuring the Filter and "Alert me if there's no data" parameters of an inventory alert]
+Two optional parameters also affect the behavior of a metric alert.
+
+Filter:: With an empty filter, all nodes of the type specificed in the **For** clause will be queried and evaluated for this alert. You can target a more specific subset of nodes using a KQL query. Like other parameters, this filter will be pre-populated based on whatever you entered on the Inventory page or Metrics Explorer before creating the alert.
+Alert me if there's no data:: When this box is checked, the alert will not only send notifications when its conditions are met, but also when its query returns no data. Using this option can potentially alert you to problems with your infrastructure or your data collection.
+
+[float]
+==== Testing the conditions
+[role="screenshot"]
+image::images/alert-preview.png[Testing an Inventory alert condition]
+
+By clicking **Test alert condition**, you can see a preview of how you can expect your alert to behave. Select a timeframe of the last hour, day, week, or month, and {kib} will tell you how many instances in which the alert's condition would have been satisfied over that frame of time.
+
+In the pictured example, the alert being tested is checking its condition every minute, and would have detected it 42 out of the past 60 minutes. By default, each **instance** corresponds to one **notification**, so this alert would have sent 42 notifications over the span of the past hour.
+
+[role="screenshot"]
+image::images/alert-preview-notifs.png[Testing an Inventory alert condition with a throttled notification]
+
+If you've set a value in the **notify every** field, {kib} will also calculate how many notifications the alert would have sent.
+
+[float]
+==== Action variables
+
+This section details the variables that Metrics alerts will send to your actions. For general information on how to configure alerting actions, refer to the documentation for <<defining-alerts#defining-alerts-actions-details, defining alerts>>.
+
+[float]
+===== Basic variables
+
+[role="screenshot"]
+image::images/basic-variables.png[The default Metrics alert message detailing basic variables]
+
+The default message for a Metrics alert shows an example of how to use its most basic variables.
+
+context.group:: This variable resolves to the **group** on which the alert's condition was detected. For Inventory alerts, this will be the name of a monitored host, pod, container, etc. For Metric Threshold alerts, this will be the value of the field specified in the **Create alert per** field, or `*` if the alert is configured to aggregate your entire infrastructure.
+context.alertState:: This variable will resolve to `ALERT`, `NO DATA`, or `ERROR`, depending on why this action is firing. `ALERT` means the alert's condition has been detected, `NO DATA` means no data was returned for the time period that the alert queried, and `ERROR` indicates an error when trying to query the data.
+context.reason:: This variable provides a plain English description of why the alert is in its current state. For each of the alert's conditions, it will include the **detected value** of the monitored **metric**, and a description of the **threshold** it crossed.
+context.timestamp:: This variable resolves to the timestamp at which the alert evaluated.
+
+
+[float]
+===== Advanced variables
+
+[role="screenshot"]
+image::images/advanced-variables.png[The default Metrics alert message detailing advanced variables]
+
+There may be cases when you'd like to customize your action message instead of using `context.reason` to provide all the information you need. Metrics alerts will also provide some advanced context variables that have a tree structure.
+
+[IMPORTANT]
+==============================================
+These variables have to be used with the structure of `{{context.[Variable Name].condition[Condition ID]}}`. For example, `{{context.value.conditionA}}`, `{{context.value.conditionB}}`, and so on. Do this even if your alert has only one condition (accessible with `.conditionA`). Using just `{{context.[Variable Name]}}` will evaluate to a blank line or `[object Object]` depending on the action type.
+==============================================
+
+context.value.condition[X]:: This variable resolves to the detected value of conditions A, B, C, etc.
+context.value.threshold[X]:: This variable resolves to the threshold values of conditions A, B, C, etc.
+context.value.metric[X]:: This variable resolves to the monitored metric of conditions A, B, C, etc.
+
+
+[float]
+[[alert-type-inventory]]
+=== Inventory
+
+The inventory alert type is designed to query data viewable from the Inventory page, compare the data to threshold values, and schedule actions to run when the thresholds are met.
+
+[role="screenshot"]
+image::images/inventory-alert-overview.png[The Inventory page, with the Alerts menu open]
+
+[float]
+==== Defining the alert
+
+By default, your alert will be pre-configured based on the parameters you selected in the Inventory view before clicking **Create alert**. 
+
+[role="screenshot"]
+image::images/inventory-clauses.png[Inventory alert clauses]
+
+Inventory alerts have 4 clauses that define the condition(s) to detect.
+
+For:: This clause determines the **node type**. Each node of this type will be queried every time the alert evaluates.
+When:: This clause specifies the **metric** to query and compare to the threshold.
+Threshold:: This clause defines a threshold value and a comparison operator  (one of `is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The result of the aggregation is compared to this threshold.
+Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be to a value higher than the *check every* value in the <<defining-alerts#defining-alerts-general-details, general alert details>>, to avoid gaps in detection.
+
+[float]
+[[alert-type-metric-threshold]]
+=== Metric threshold
+
+The metric threshold alert type is designed to query data viewable from the Metrics Explorer, compare the data to threshold values, and schedule actions to run when the thresholds are met.
+
+[role="screenshot"]
+image::images/metrics-alert-overview.png[The Metrics Explorer, with the Alerts menu open]
+
+[float]
+==== Defining the alert
+
+By default, your alert will be pre-configured based on the parameters you selected in the Metrics Explorer before clicking **Create alert**. 
+
+[role="screenshot"]
+image::images/metric-threshold-clauses.png[Metric threshold alert clauses]
+
+Metric threshold alerts have 4 clauses that define the condition(s) to detect.
+
+When:: This clause determines the **aggregator** of the metric to monitor. Possible options are the same as the aggregator selector in the Metrics Explorer.
+Of:: This clause determines the **metric** to monitor. This is the field that will be queried every time the alert evaluates, and its value will be compared to the threshold.
+Threshold:: This clause defines a threshold value and a comparison operator  (one of `is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The result of the aggregation is compared to this threshold.
+Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be to a value higher than the *check every* value in the <<defining-alerts#defining-alerts-general-details, general alert details>>, to avoid gaps in detection.
+
+[role="screenshot"]
+image::images/metric-threshold-alert-per.png[Metric threshold create alert per field]
+
+You can optionally set a value in the **Create alert per** field. This value works the same as the **Graph per** field in the Metrics Explorer. When this field is empty, {kib} will query an aggregate of your entire infrastructure's data, and evaluate the alert conditions based on that. When this field has a value, it will evaluate each of the resulting unique values independently. For example, you can create an alert that will evaluate each `host.id` individually, and send unique alerts based on each host's values.

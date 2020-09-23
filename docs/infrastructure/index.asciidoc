@@ -30,3 +30,4 @@ image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
 To get started with Metrics, refer to {metrics-guide}/install-metrics-monitoring.html[Install Metrics].
 
+include::metrics-alerting.asciidoc[]
