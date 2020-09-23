@@ -48,7 +48,7 @@ export const ReactToChangesBasic = () => {
 
 ## Listen to specific form fields changes
 
-In some cases you only want to listen to some field change and don't want to trigger a re-render of your component on every field value change. You can specify a **watch** (`string | string[]`) parameter for that.
+In some cases you only want to listen to some field change and don't want to trigger a re-render of your component for every field value change. You can specify a **watch** (`string | string[]`) parameter for that.
 
 ```js
 export const ReactToSpecificFields = () => {
@@ -70,6 +70,31 @@ export const ReactToSpecificFields = () => {
           <p>800 W El Camino Real #350</p>
         </>
       )}
+    </Form>
+  );
+};
+```
+
+## Using the `onChange` handler
+
+Sometimes the good old `onChange` handler is all you need to react to a form field value change (instead of reading the form data and add a `useEffect` to react to it).
+
+```js
+export const OnChangeHandler = () => {
+  const { form } = useForm();
+
+  const onNameChange = (value: string) => {
+    console.log(value);
+  };
+
+  return (
+    <Form form={form}>
+      <UseField
+        path="name"
+        config={{ label: 'Name' }}
+        component={TextField}
+        onChange={onNameChange}
+      />
     </Form>
   );
 };

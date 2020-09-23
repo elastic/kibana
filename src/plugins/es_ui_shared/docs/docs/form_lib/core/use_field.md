@@ -10,7 +10,7 @@ This component accepts the following props (the only required prop is the `path`
 
 ## Props
 
-### `path` (required)
+### path (required)
 
 **Type:** `string`
 
@@ -32,7 +32,7 @@ The field path. It can be any valid [`lodash.set()` path](https://lodash.com/doc
 }
 ```
 
-### `defaultValue`
+### defaultValue
 
 **Type:** `any`
 
@@ -40,7 +40,7 @@ An optional default value for the field. This will be the initial value of the f
 
 **Note:** You can define the field `defaultValue` in different places, [read their differences here](default_value.md).
 
-### `config`
+### config
 
 **Type:** `FieldConfig<FormInterface, ValueType>`
 
@@ -68,13 +68,13 @@ export const MyFormComponent = {
 
 This configuration has the following parameters.
 
-#### `label`
+#### label
 
 **Type:** `string`
 
 A label for the field.
 
-#### `labelAppend`
+#### labelAppend
 
 **Type:** `string | ReactNode`
 
@@ -82,13 +82,13 @@ An second label for the field.
 
 When the `<UseField />` is used in pair with one of the helper components provided that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
 
-#### `helpText`
+#### helpText
 
 **Type:** `string | ReactNode`
 
 A help text for the field.
 
-#### `type`
+#### type
 
 **Type:** `string`
 
@@ -151,7 +151,7 @@ export const MyFormComponent = () => {
 };
 ```
 
-#### `validations`
+#### validations
 
 **Type:** `ValidationConfig[]`
 
@@ -163,7 +163,7 @@ If any of the validation fails, the other validations don't run unless the `exit
 
 The `ValidationConfig` accepts the following parameters:
 
-##### `validator` (Required)
+##### validator` (Required
 
 **Type:** `ValidationFunc`  
 **Arguments:** `data: ValidationFuncArg`  
@@ -182,27 +182,27 @@ This function receives a data argument with the following properties:
 * `formData` - The raw form data
 * `errors` - And array of any previous validation error
 
-##### `type`
+##### type
 
 **Type:** `string`
 
 A specific type for the validation. [Read more about typed validation](../examples/validation#typed-validation) in the examples.
 
-##### `isBlocking`
+##### isBlocking
 
 **Type:** `boolean`
 **Default:** `true`
 
 By default all validation are blockers, which means that if they fail, the field `isValid` state is set to `false`. There might be some cases, like when trying to add an item to the ComboBox array, where we don't want to block the UI and set the field as invalid. If the item is not valid we won't add it to the array, but the field is still valid. Thus the validation on the array item is **not** blocking. 
 
-##### `exitOnFail`
+##### exitOnFail
 
 **Type:** `boolean`
 **Default:** `true`
 
 By default, when any of the validation fails, the following validation are not executed. If you still want to execute the following validation(s), set the `exitOnFail` to `false`.
 
-#### `deserializer`
+#### deserializer
 
 **Type:** `SerializerFunc`
 
@@ -243,7 +243,7 @@ export const MyFormComponent = () => {
 }
 ```
 
-#### `serializer`
+#### serializer
 
 **Type:** `SerializerFunc`
 
@@ -263,7 +263,7 @@ const countryConfig = {
 };
 ```
 
-#### `formatters`
+#### formatters
 
 **Type:** `FormatterFunc[]`
 
@@ -285,7 +285,7 @@ const nameConfig = {
 };
 ```
 
-#### `fieldsToValidateOnChange`
+#### fieldsToValidateOnChange
 
 **Type:** `string[]` - An array of field paths 
 **Default:** `[<current-field-path>]`
@@ -304,13 +304,13 @@ const field2Config = {
 };
 ```
 
-#### `valueChangeDebounceTime`
+#### valueChangeDebounceTime
 
 **Type:** `number`
 
 The minimum time to update the `isChanging` field state. [Read more about this setting](use_form_hook.md#valuechangedebouncetime) in the `useFormHook()`.
 
-### `component`
+### component
 
 **Type:** `FunctionComponent`
 
@@ -318,32 +318,32 @@ The component to render. This component will receive the `field` hook object as 
 
 **Note:** You can see examples on how this prop is used in [the "Style fields" page](../examples/style_fields.md#using-the-component-prop).
 
-### `componentProps`
+### componentProps
 
 **Type:** `{ [prop: string]: any }`
 
 If you provide a `component` you can pass here any prop you want to forward to this component.
 
-### `readDefaultValueOnForm`
+### readDefaultValueOnForm
 
 **Type:** `boolean`
 **Default:** true
 
 By default if you don't provide a `defaultValue` prop on the component, it will try to read the default value on the form `defaultValue` object. If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
 
-### `onChange`
+### onChange
 
 **Type:** `(value:T) => void`
 
 With this handler you can listen to the field value changes. [See the example](../examples/react_to_changes.md#using-the-onchange-handler) in the "React to changes" page.
 
-### `children`
+### children
 
 **Type:** `(field: FieldHook<T>) => JSX.Element`
 
 The (optional) children of `<UseField />` is a function child which receives the field hook. You are then responsible to return a JSX element from that function.  
 
-The docs for the field hook [are right here](field_hook.md).
+The docs for the [FieldHook are right here](field_hook.md).
 
 ## Typescript value type
 

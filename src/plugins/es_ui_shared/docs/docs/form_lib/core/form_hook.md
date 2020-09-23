@@ -171,9 +171,9 @@ const errors  = form.getErrors();
 
 Resets the form to its initial state. It accetps an optional object of configuration:
 
-- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` will put back the default value passed to the form or declared on the field config (in this order).
+- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` will put back the default value passed to the form or declared on the field config (in that order).
 
-- `defaultValue`. In some cases you might not want to reset the form the default value initiallly provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
+- `defaultValue`. In some cases you might not want to reset the form to the default value initiallly provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
 
 ```js
 // Reset to the defaultValue object passed to the form
