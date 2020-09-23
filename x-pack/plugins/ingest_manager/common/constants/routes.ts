@@ -15,9 +15,11 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
+const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 const EPM_PACKAGES_FILE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
+  BULK_INSTALL_PATTERN: EPM_PACKAGES_BULK,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
   INFO_PATTERN: EPM_PACKAGES_ONE,
@@ -84,7 +86,9 @@ export const AGENT_API_ROUTES = {
   ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/unenroll`,
+  BULK_UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/reassign`,
+  BULK_REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/bulk_reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/upgrade`,
 };
