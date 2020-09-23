@@ -63,7 +63,7 @@ years of historical data in combination with your raw data.
 This is important for
 disaster recovery. It also keeps data local for faster queries.
 
-| {ref}/ccr-getting-started.html[Remote Clusters]
+| {ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Remote Clusters]
 |Manage your remote clusters for use with cross-cluster search and cross-cluster replication.
 You can add and remove remote clusters, and check their connectivity.
 |===

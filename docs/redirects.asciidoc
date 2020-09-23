@@ -111,4 +111,4 @@ This content has moved. See
 == Remote clusters
 
 This content has moved. See
-{ref}/ccr-getting-started.html[Set up cross-cluster replication].
+{ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Connect to a remote cluster].
