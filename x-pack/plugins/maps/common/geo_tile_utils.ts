@@ -5,18 +5,32 @@
  */
 
 import _ from 'lodash';
-import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
-import { clampToLatBounds } from '../../../../common/elasticsearch_geo_utils';
+import { DECIMAL_DEGREES_PRECISION } from './constants';
+import { clampToLatBounds } from './elasticsearch_util';
+import { MapExtent } from './descriptor_types';
 
 const ZOOM_TILE_KEY_INDEX = 0;
 const X_TILE_KEY_INDEX = 1;
 const Y_TILE_KEY_INDEX = 2;
 
-function getTileCount(zoom) {
+function getTileCount(zoom: number): number {
   return Math.pow(2, zoom);
 }
 
-export function parseTileKey(tileKey) {
+export interface ESBounds {
+  top_left: {
+    lon: number;
+    lat: number;
+  };
+  bottom_right: {
+    lon: number;
+    lat: number;
+  };
+}
+
+export function parseTileKey(
+  tileKey: string
+): { x: number; y: number; zoom: number; tileCount: number } {
   const tileKeyParts = tileKey.split('/');
 
   if (tileKeyParts.length !== 3) {
@@ -42,7 +56,7 @@ export function parseTileKey(tileKey) {
   return { x, y, zoom, tileCount };
 }
 
-function sinh(x) {
+function sinh(x: number): number {
   return (Math.exp(x) - Math.exp(-x)) / 2;
 }
 
@@ -55,24 +69,52 @@ function sinh(x) {
 // We add one extra decimal level of precision because, at high zoom
 // levels rounding exactly can cause the boxes to render as uneven sizes
 // (some will be slightly larger and some slightly smaller)
-function precisionRounding(v, minPrecision, binSize) {
+function precisionRounding(v: number, minPrecision: number, binSize: number): number {
   let precision = Math.ceil(Math.abs(Math.log10(binSize))) + 1;
   precision = Math.max(precision, minPrecision);
   return _.round(v, precision);
 }
 
-function tileToLatitude(y, tileCount) {
+export function tile2long(x: number, z: number): number {
+  const tileCount = getTileCount(z);
+  return tileToLongitude(x, tileCount);
+}
+
+export function tile2lat(y: number, z: number): number {
+  const tileCount = getTileCount(z);
+  return tileToLatitude(y, tileCount);
+}
+
+export function tileToESBbox(x: number, y: number, z: number): ESBounds {
+  const wLon = tile2long(x, z);
+  const sLat = tile2lat(y + 1, z);
+  const eLon = tile2long(x + 1, z);
+  const nLat = tile2lat(y, z);
+
+  return {
+    top_left: {
+      lon: wLon,
+      lat: nLat,
+    },
+    bottom_right: {
+      lon: eLon,
+      lat: sLat,
+    },
+  };
+}
+
+export function tileToLatitude(y: number, tileCount: number) {
   const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y) / tileCount));
   const lat = (180 / Math.PI) * radians;
   return precisionRounding(lat, DECIMAL_DEGREES_PRECISION, 180 / tileCount);
 }
 
-function tileToLongitude(x, tileCount) {
+export function tileToLongitude(x: number, tileCount: number) {
   const lon = (x / tileCount) * 360 - 180;
   return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, 360 / tileCount);
 }
 
-export function getTileBoundingBox(tileKey) {
+export function getTileBoundingBox(tileKey: string) {
   const { x, y, tileCount } = parseTileKey(tileKey);
 
   return {
@@ -83,22 +125,22 @@ export function getTileBoundingBox(tileKey) {
   };
 }
 
-function sec(value) {
+function sec(value: number): number {
   return 1 / Math.cos(value);
 }
 
-function latitudeToTile(lat, tileCount) {
+function latitudeToTile(lat: number, tileCount: number) {
   const radians = (clampToLatBounds(lat) * Math.PI) / 180;
   const y = ((1 - Math.log(Math.tan(radians) + sec(radians)) / Math.PI) / 2) * tileCount;
   return Math.floor(y);
 }
 
-function longitudeToTile(lon, tileCount) {
+function longitudeToTile(lon: number, tileCount: number) {
   const x = ((lon + 180) / 360) * tileCount;
   return Math.floor(x);
 }
 
-export function expandToTileBoundaries(extent, zoom) {
+export function expandToTileBoundaries(extent: MapExtent, zoom: number): MapExtent {
   const tileCount = getTileCount(zoom);
 
   const upperLeftX = longitudeToTile(extent.minLon, tileCount);
