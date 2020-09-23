@@ -14,7 +14,7 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -26,13 +26,14 @@ export function VisitorBreakdown() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [end, start, uiFilters]
+    [end, start, uiFilters, searchTerm]
   );
 
   return (

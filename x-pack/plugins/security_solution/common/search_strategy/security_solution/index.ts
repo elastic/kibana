@@ -18,8 +18,8 @@ import {
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-  HostUncommonProcessesStrategyResponse,
-  HostUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+  HostsUncommonProcessesRequestOptions,
   HostsKpiQueries,
   HostsKpiAuthenticationsStrategyResponse,
   HostsKpiAuthenticationsRequestOptions,
@@ -113,7 +113,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesStrategyResponse
+  ? HostsUncommonProcessesStrategyResponse
   : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
@@ -161,7 +161,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesRequestOptions
+  ? HostsUncommonProcessesRequestOptions
   : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsRequestOptions
   : T extends HostsKpiQueries.kpiHosts
