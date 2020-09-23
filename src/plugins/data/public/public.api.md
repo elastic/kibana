@@ -1413,6 +1413,11 @@ export type InputTimeRange = TimeRange | {
     to: Moment;
 };
 
+// Warning: (ae-missing-release-tag) "isCompleteResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isCompleteResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1465,6 +1470,11 @@ export interface ISearchStartSearchSource {
     createEmpty: () => ISearchSource;
 }
 
+// Warning: (ae-missing-release-tag) "isErrorResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isErrorResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
+
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1474,6 +1484,11 @@ export const isFilter: (x: unknown) => x is Filter;
 //
 // @public (undocumented)
 export const isFilters: (x: unknown) => x is Filter[];
+
+// Warning: (ae-missing-release-tag) "isPartialResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isPartialResponse: (response?: IEsSearchResponse<any> | undefined) => boolean | undefined;
 
 // Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
