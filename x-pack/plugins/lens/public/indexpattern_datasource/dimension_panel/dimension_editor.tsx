@@ -134,8 +134,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
     );
   }
 
-  const currentFieldIsInvalid =
-    !selectedColumn || fieldIsInvalid(selectedColumn, currentIndexPattern.id, state);
+  const currentFieldIsInvalid = useMemo(
+    () =>
+      fieldIsInvalid(
+        selectedColumn?.sourceField,
+        selectedColumn?.operationType,
+        currentIndexPattern
+      ),
+    [selectedColumn?.sourceField, selectedColumn?.operationType, currentIndexPattern]
+  );
 
   const sideNavItems: EuiListGroupItemProps[] = getOperationTypes().map(
     ({ operationType, compatibleWithCurrentField }) => {

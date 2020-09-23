@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
@@ -227,17 +227,26 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   props: IndexPatternDimensionTriggerProps
 ) {
   const layerId = props.layerId;
-
   const layer = props.state.layers[layerId];
-
   const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+
+  const currentFieldIsInvalid = useMemo(
+    () =>
+      fieldIsInvalid(
+        selectedColumn?.sourceField,
+        selectedColumn?.operationType,
+        currentIndexPattern
+      ),
+    [selectedColumn?.sourceField, selectedColumn?.operationType, currentIndexPattern]
+  );
 
   const { columnId, uniqueLabel } = props;
   if (!selectedColumn) {
     return null;
   }
 
-  if (fieldIsInvalid(selectedColumn, layer.indexPatternId, props.state)) {
+  if (currentFieldIsInvalid) {
     return (
       <EuiToolTip
         content={i18n.translate('xpack.lens.configure.invalidConfigTooltip', {

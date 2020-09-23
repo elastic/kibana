@@ -1666,7 +1666,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ...initialState.layers.first,
             columns: {
               ...initialState.layers.first.columns,
-              id2: {
+              col2: {
                 label: 'Top 5',
                 dataType: 'string',
                 isBucketed: true,
@@ -1676,7 +1676,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
               },
             },
-            columnOrder: ['id1', 'id2'],
+            columnOrder: ['col1', 'col2'],
           },
         },
       };
