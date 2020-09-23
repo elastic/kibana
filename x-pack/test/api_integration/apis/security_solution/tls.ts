@@ -5,13 +5,16 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { tlsQuery } from '../../../../plugins/security_solution/public/network/containers/tls/index.gql_query';
 import { NetworkQueries } from '../../../../plugins/security_solution/common/search_strategy';
 
 import {
   Direction,
+  // @ts-expect-error
   TlsFields,
   FlowTarget,
+  // @ts-expect-error
   GetTlsQuery,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';

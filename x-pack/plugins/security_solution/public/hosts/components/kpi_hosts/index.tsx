@@ -13,12 +13,13 @@ import { HostsKpiUniqueIps } from './unique_ips';
 import { HostsKpiProps } from './types';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, to, setQuery, skip, narrowDateRange }) => (
+  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
         <HostsKpiHosts
           filterQuery={filterQuery}
           from={from}
+          indexNames={indexNames}
           to={to}
           narrowDateRange={narrowDateRange}
           setQuery={setQuery}
@@ -29,6 +30,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
         <HostsKpiAuthentications
           filterQuery={filterQuery}
           from={from}
+          indexNames={indexNames}
           to={to}
           narrowDateRange={narrowDateRange}
           setQuery={setQuery}
@@ -39,6 +41,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
         <HostsKpiUniqueIps
           filterQuery={filterQuery}
           from={from}
+          indexNames={indexNames}
           to={to}
           narrowDateRange={narrowDateRange}
           setQuery={setQuery}
@@ -52,12 +55,13 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
 export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, to, setQuery, skip, narrowDateRange }) => (
+  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
         <HostsKpiAuthentications
           filterQuery={filterQuery}
           from={from}
+          indexNames={indexNames}
           to={to}
           narrowDateRange={narrowDateRange}
           setQuery={setQuery}
@@ -68,6 +72,7 @@ export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
         <HostsKpiUniqueIps
           filterQuery={filterQuery}
           from={from}
+          indexNames={indexNames}
           to={to}
           narrowDateRange={narrowDateRange}
           setQuery={setQuery}
