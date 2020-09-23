@@ -800,4 +800,141 @@ describe('workspace_panel', () => {
       });
     });
   });
+
+  describe('suggestions from navigating in workspace panel from Discover', () => {
+    let mockDispatch: jest.Mock;
+    let frame: jest.Mocked<FramePublicAPI>;
+
+    const visualizeTriggerFieldContext = {
+      indexPatternId: '1',
+      fieldName: 'timestamp',
+    };
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDispatch = jest.fn();
+    });
+
+    function initComponent() {
+      instance = mount(
+        <InnerWorkspacePanel
+          activeDatasourceId={'mock'}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
+          framePublicAPI={frame}
+          activeVisualizationId={'vis'}
+          visualizationMap={{
+            vis: mockVisualization,
+            vis2: mockVisualization2,
+          }}
+          visualizationState={{}}
+          dispatch={mockDispatch}
+          ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
+          visualizeTriggerFieldContext={visualizeTriggerFieldContext}
+        />
+      );
+    }
+
+    it('should immediately transition if exactly one suggestion is returned', () => {
+      const expectedTable: TableSuggestion = {
+        isMultiRow: true,
+        layerId: '1',
+        columns: [],
+        changeType: 'unchanged',
+      };
+      mockDatasource.getDatasourceSuggestionsForVisualizeField.mockReturnValueOnce([
+        {
+          state: {},
+          table: expectedTable,
+          keptLayerIds: [],
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'my title',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      initComponent();
+
+      expect(mockDatasource.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          table: expectedTable,
+        })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SWITCH_VISUALIZATION',
+        newVisualizationId: 'vis',
+        initialState: {},
+        datasourceState: {},
+        datasourceId: 'mock',
+      });
+    });
+
+    it('should immediately transition to the first suggestion if there are multiple', () => {
+      mockDatasource.getDatasourceSuggestionsForVisualizeField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            isMultiRow: true,
+            columns: [],
+            layerId: '1',
+            changeType: 'unchanged',
+          },
+          keptLayerIds: [],
+        },
+        {
+          state: {},
+          table: {
+            isMultiRow: true,
+            columns: [],
+            layerId: '1',
+            changeType: 'unchanged',
+          },
+          keptLayerIds: [],
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'second suggestion',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.8,
+          title: 'first suggestion',
+          state: {
+            isFirst: true,
+          },
+          previewIcon: 'empty',
+        },
+      ]);
+
+      initComponent();
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SWITCH_VISUALIZATION',
+        newVisualizationId: 'vis',
+        initialState: {
+          isFirst: true,
+        },
+        datasourceState: {},
+        datasourceId: 'mock',
+      });
+    });
+  });
 });

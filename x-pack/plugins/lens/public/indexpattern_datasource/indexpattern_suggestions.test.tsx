@@ -10,6 +10,7 @@ import { IndexPatternPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
 jest.mock('./loader');
@@ -1072,6 +1073,380 @@ describe('IndexPattern Data Source suggestions', () => {
                 }),
               },
             }),
+          })
+        );
+      });
+    });
+  });
+  describe('#getDatasourceSuggestionsForVisualizeField', () => {
+    describe('with no layer', () => {
+      function stateWithoutLayer() {
+        return {
+          ...testInitialState(),
+          layers: {},
+        };
+      }
+
+      it('should return an empty array', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'source'
+        );
+
+        expect(suggestions).toEqual([]);
+      });
+    });
+    describe('with a previous empty layer', () => {
+      function stateWithEmptyLayer() {
+        const state = testInitialState();
+        return {
+          ...state,
+          layers: {
+            previousLayer: {
+              indexPatternId: '1',
+              columns: {},
+              columnOrder: [],
+            },
+          },
+        };
+      }
+
+      it('should return an empty array if the field does not exist', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithEmptyLayer(),
+          '1',
+          'field_not_exist'
+        );
+
+        expect(suggestions).toEqual([]);
+      });
+
+      it('should apply a bucketed aggregation for a string field', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithEmptyLayer(),
+          '1',
+          'source'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['id1', 'id2'],
+                  columns: {
+                    id1: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
+                    }),
+                    id2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id1',
+                }),
+                expect.objectContaining({
+                  columnId: 'id2',
+                }),
+              ],
+              layerId: 'previousLayer',
+            },
+          })
+        );
+      });
+
+      it('should apply a bucketed aggregation for a date field', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithEmptyLayer(),
+          '1',
+          'timestamp'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['id1', 'id2'],
+                  columns: {
+                    id1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    id2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id1',
+                }),
+                expect.objectContaining({
+                  columnId: 'id2',
+                }),
+              ],
+              layerId: 'previousLayer',
+            },
+          })
+        );
+      });
+    });
+
+    describe('suggesting extensions to non-empty tables', () => {
+      function stateWithNonEmptyTables(): IndexPatternPrivateState {
+        const state = testInitialState();
+
+        return {
+          ...state,
+          currentIndexPatternId: '1',
+          layers: {
+            previousLayer: {
+              indexPatternId: '2',
+              columns: {},
+              columnOrder: [],
+            },
+            currentLayer: {
+              indexPatternId: '1',
+              columns: {
+                cola: {
+                  dataType: 'string',
+                  isBucketed: true,
+                  sourceField: 'source',
+                  label: 'values of source',
+                  operationType: 'terms',
+                  params: {
+                    orderBy: { type: 'column', columnId: 'colb' },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
+                colb: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'bytes',
+                  label: 'Avg of bytes',
+                  operationType: 'avg',
+                },
+              },
+              columnOrder: ['cola', 'colb'],
+            },
+          },
+        };
+      }
+
+      it('replaces an existing date histogram column on date field', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          {
+            ...initialState,
+            layers: {
+              previousLayer: initialState.layers.previousLayer,
+              currentLayer: {
+                ...initialState.layers.currentLayer,
+                columns: {
+                  cola: {
+                    dataType: 'date',
+                    isBucketed: true,
+                    sourceField: 'timestamp',
+                    label: 'date histogram of timestamp',
+                    operationType: 'date_histogram',
+                    params: {
+                      interval: 'w',
+                    },
+                  },
+                  colb: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    sourceField: 'bytes',
+                    label: 'Avg of bytes',
+                    operationType: 'avg',
+                  },
+                },
+              },
+            },
+          },
+          '1',
+          'start_date'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['id1', 'colb'],
+                  columns: {
+                    id1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'start_date',
+                    }),
+                    colb: initialState.layers.currentLayer.columns.colb,
+                  },
+                }),
+              },
+            }),
+          })
+        );
+      });
+
+      it('does not use the same field for bucketing multiple times', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithNonEmptyTables(),
+          '1',
+          'source'
+        );
+
+        expect(suggestions).toHaveLength(1);
+        // Check that the suggestion is a single metric
+        expect(suggestions[0].table.columns).toHaveLength(1);
+        expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
+      });
+
+      it('replaces a metric column on a number field if only one other metric is already set', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForVisualizeField(initialState, '1', 'memory');
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: expect.objectContaining({
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['cola', 'colb'],
+                  columns: {
+                    cola: initialState.layers.currentLayer.columns.cola,
+                    colb: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('adds a metric column on a number field if no other metrics set', () => {
+        const initialState = stateWithNonEmptyTables();
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            ...initialState.layers,
+            currentLayer: {
+              ...initialState.layers.currentLayer,
+              columns: {
+                cola: initialState.layers.currentLayer.columns.cola,
+              },
+              columnOrder: ['cola'],
+            },
+          },
+        };
+        const suggestions = getDatasourceSuggestionsForVisualizeField(modifiedState, '1', 'memory');
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: modifiedState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['cola', 'id1'],
+                  columns: {
+                    ...modifiedState.layers.currentLayer.columns,
+                    id1: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              },
+            }),
+          })
+        );
+      });
+    });
+
+    describe('finding the layer that is using the current index pattern', () => {
+      function stateWithCurrentIndexPattern(): IndexPatternPrivateState {
+        const state = testInitialState();
+
+        return {
+          ...state,
+          currentIndexPatternId: '1',
+          layers: {
+            previousLayer: {
+              indexPatternId: '1',
+              columns: {},
+              columnOrder: [],
+            },
+            currentLayer: {
+              indexPatternId: '2',
+              columns: {},
+              columnOrder: [],
+            },
+          },
+        };
+      }
+
+      it('suggests on the layer that matches by indexPatternId', () => {
+        const initialState = stateWithCurrentIndexPattern();
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          initialState,
+          '2',
+          'timestamp'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['id1', 'id2'],
+                  columns: {
+                    id1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    id2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id1',
+                }),
+                expect.objectContaining({
+                  columnId: 'id2',
+                }),
+              ],
+              layerId: 'currentLayer',
+            },
           })
         );
       });
