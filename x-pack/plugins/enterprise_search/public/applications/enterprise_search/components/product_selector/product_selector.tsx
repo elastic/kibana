@@ -49,6 +49,9 @@ export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => 
     config: { host },
   } = useContext(KibanaContext) as IKibanaContext;
 
+  const shouldShowAppSearchCard = !host || hasAppSearchAccess;
+  const shouldShowWorkplaceSearchCard = !host || hasWorkplaceSearchAccess;
+
   return (
     <EuiPage restrictWidth className="enterpriseSearchOverview">
       <SetPageChrome isRoot />
@@ -75,12 +78,12 @@ export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => 
         </EuiPageHeader>
         <EuiPageContentBody>
           <EuiFlexGroup justifyContent="center" gutterSize="xl">
-            {(!host || hasAppSearchAccess) && (
+            {shouldShowAppSearchCard && (
               <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
                 <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
               </EuiFlexItem>
             )}
-            {(!host || hasWorkplaceSearchAccess) && (
+            {shouldShowWorkplaceSearchCard && (
               <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
                 <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
               </EuiFlexItem>
