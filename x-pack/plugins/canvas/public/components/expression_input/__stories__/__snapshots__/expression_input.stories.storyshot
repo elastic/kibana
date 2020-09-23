@@ -16,11 +16,7 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         id="generated-id"
         onBlur={[Function]}
         onFocus={[Function]}
-      >
-        <span
-          className="euiLoadingSpinner euiLoadingSpinner--medium"
-        />
-      </div>
+      />
     </div>
   </div>
 </div>
