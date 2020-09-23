@@ -560,8 +560,6 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1918,34 +1916,6 @@ export interface OverviewHostData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: Maybe<UserEcsFields>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -2533,15 +2503,6 @@ export interface OverviewHostSourceArgs {
 
   defaultIndex: string[];
 }
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
 export interface IndicesExistSourceStatusArgs {
   defaultIndex: string[];
 }
@@ -2982,8 +2943,6 @@ export namespace SourceResolvers {
     OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
 
     OverviewHost?: OverviewHostResolver<Maybe<OverviewHostData>, TypeParent, TContext>;
-    /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-    UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, TContext>;
     /** Just a simple example to get the app name */
     whoAmI?: WhoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
   }
@@ -3359,21 +3318,6 @@ export namespace SourceResolvers {
     id?: Maybe<string>;
 
     timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-  }
-
-  export type UncommonProcessesResolver<
-    R = UncommonProcessesData,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, UncommonProcessesArgs>;
-  export interface UncommonProcessesArgs {
-    timerange: TimerangeInput;
-
-    pagination: PaginationInputPaginated;
 
     filterQuery?: Maybe<string>;
 
@@ -7936,98 +7880,6 @@ export namespace OverviewHostDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace UncommonProcessesDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessesData> {
-    edges?: EdgesResolver<UncommonProcessesEdges[], TypeParent, TContext>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type EdgesResolver<
-    R = UncommonProcessesEdges[],
-    Parent = UncommonProcessesData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = UncommonProcessesData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = UncommonProcessesData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = UncommonProcessesData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UncommonProcessesEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessesEdges> {
-    node?: NodeResolver<UncommonProcessItem, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<
-    R = UncommonProcessItem,
-    Parent = UncommonProcessesEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = UncommonProcessesEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UncommonProcessItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessItem> {
-    _id?: _IdResolver<string, TypeParent, TContext>;
-
-    instances?: InstancesResolver<number, TypeParent, TContext>;
-
-    process?: ProcessResolver<ProcessEcsFields, TypeParent, TContext>;
-
-    hosts?: HostsResolver<HostEcsFields[], TypeParent, TContext>;
-
-    user?: UserResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<
-    R = string,
-    Parent = UncommonProcessItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InstancesResolver<
-    R = number,
-    Parent = UncommonProcessItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ProcessResolver<
-    R = ProcessEcsFields,
-    Parent = UncommonProcessItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type HostsResolver<
-    R = HostEcsFields[],
-    Parent = UncommonProcessItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type UserResolver<
-    R = Maybe<UserEcsFields>,
-    Parent = UncommonProcessItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace SayMyNameResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SayMyName> {
     /** The id of the source */
@@ -9308,9 +9160,6 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;
   OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
   OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
-  UncommonProcessesData?: UncommonProcessesDataResolvers.Resolvers<TContext>;
-  UncommonProcessesEdges?: UncommonProcessesEdgesResolvers.Resolvers<TContext>;
-  UncommonProcessItem?: UncommonProcessItemResolvers.Resolvers<TContext>;
   SayMyName?: SayMyNameResolvers.Resolvers<TContext>;
   TimelineResult?: TimelineResultResolvers.Resolvers<TContext>;
   ColumnHeaderResult?: ColumnHeaderResultResolvers.Resolvers<TContext>;

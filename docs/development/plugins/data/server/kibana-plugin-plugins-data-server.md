@@ -11,6 +11,7 @@
 |  [AggParamType](./kibana-plugin-plugins-data-server.aggparamtype.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-server.indexpattern.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
+|  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
@@ -48,7 +49,7 @@
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Use data plugin interface instead |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
