@@ -8,9 +8,9 @@
 
 import React from 'react';
 import moment from 'moment';
-import { TlsNode } from '../../../graphql/types';
-import { Columns } from '../../../common/components/paginated_table';
 
+import { NetworkTlsNode } from '../../../../common/search_strategy';
+import { Columns } from '../../../common/components/paginated_table';
 import {
   getRowItemDraggables,
   getRowItemDraggable,
@@ -21,11 +21,11 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import * as i18n from './translations';
 
 export type TlsColumns = [
-  Columns<TlsNode>,
-  Columns<TlsNode>,
-  Columns<TlsNode['_id']>,
-  Columns<TlsNode>,
-  Columns<TlsNode>
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode['_id']>,
+  Columns<NetworkTlsNode>,
+  Columns<NetworkTlsNode>
 ];
 
 export const getTlsColumns = (tableId: string): TlsColumns => [
