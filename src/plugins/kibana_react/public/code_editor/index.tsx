@@ -33,7 +33,7 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
   return (
     <React.Suspense fallback={<Fallback />}>
-      <LazyBaseEditor {...props} useDarkTheme={darkMode} />;
+      <LazyBaseEditor {...props} useDarkTheme={darkMode} />
     </React.Suspense>
   );
 };
