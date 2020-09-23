@@ -138,7 +138,9 @@ describe('when on the list page', () => {
     beforeEach(() => {
       jest
         .spyOn(ingestServices, 'sendGetFleetAgentsWithEndpoint')
-        .mockImplementation(() => Promise.resolve({ total: 5 }));
+        .mockImplementation(() =>
+          Promise.resolve({ total: 5, list: [], totalInactive: 0, page: 1, perPage: 10 })
+        );
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -151,7 +153,6 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
-          mockMetadataOnce: false,
         });
       });
       const renderResult = render();
@@ -168,7 +169,6 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
-          mockMetadataOnce: false,
         });
       });
       const renderResult = render();
@@ -185,7 +185,6 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
-          mockMetadataOnce: false,
         });
       });
       const renderResult = render();

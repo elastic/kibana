@@ -171,7 +171,6 @@ export const setEndpointListApiMockImplementation: (
   {
     endpointsResults = mockEndpointResultList({ total: 3 }).hosts,
     queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
-    mockMetadataOnce = true,
     ...pathHandlersOptions
   } = {}
 ) => {
@@ -181,25 +180,23 @@ export const setEndpointListApiMockImplementation: (
     queryStrategyVersion,
   });
 
-  if (mockMetadataOnce) {
-    mockedHttpService.post
-      .mockImplementation(async (...args) => {
-        throw new Error(`un-expected call to http.post: ${args}`);
-      })
-      // First time called, return list of endpoints
-      .mockImplementationOnce(async () => {
-        return apiHandlers['/api/endpoint/metadata']();
-      });
+  mockedHttpService.post
+    .mockImplementation(async (...args) => {
+      throw new Error(`un-expected call to http.post: ${args}`);
+    })
+    // First time called, return list of endpoints
+    .mockImplementationOnce(async () => {
+      return apiHandlers['/api/endpoint/metadata']();
+    })
+    // Metadata is called a second time to get the full total of Endpoints regardless of filters.
+    .mockImplementationOnce(async () => {
+      return apiHandlers['/api/endpoint/metadata']();
+    });
 
-    // If the endpoints list results is zero, then mock the second call to `/metadata` to return
-    // empty list - indicating there are no endpoints currently present on the system
-    if (!endpointsResults.length) {
-      mockedHttpService.post.mockImplementationOnce(async () => {
-        return apiHandlers['/api/endpoint/metadata']();
-      });
-    }
-  } else {
-    mockedHttpService.post.mockImplementation(async () => {
+  // If the endpoints list results is zero, then mock the third call to `/metadata` to return
+  // empty list - indicating there are no endpoints currently present on the system
+  if (!endpointsResults.length) {
+    mockedHttpService.post.mockImplementationOnce(async () => {
       return apiHandlers['/api/endpoint/metadata']();
     });
   }
