@@ -190,7 +190,7 @@ export class TelemetryEventsSender {
 
     try {
       this.isSending = true;
-      const toSend: object[] = cloneDeep(this.queue);
+      const toSend: TelemetryEvent[] = cloneDeep(this.queue);
       this.queue = [];
 
       if (clusterInfo) {

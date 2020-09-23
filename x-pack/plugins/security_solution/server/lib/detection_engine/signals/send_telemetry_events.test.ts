@@ -29,6 +29,9 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key1: 'hello',
+              datastream: {
+                dataset: 'endpoint.events',
+              },
             },
           },
           {
@@ -39,6 +42,10 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key2: 'hello',
+              datastream: {
+                dataset: 'endpoint.alerts',
+                other: 'x',
+              },
             },
           },
           {
@@ -49,6 +56,7 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key3: 'hello',
+              datastream: {},
             },
           },
         ],
@@ -59,15 +67,11 @@ describe('sendAlertTelemetry', () => {
     expect(sources).toStrictEqual([
       {
         '@timestamp': 'x',
-        key1: 'hello',
-      },
-      {
-        '@timestamp': 'x',
         key2: 'hello',
-      },
-      {
-        '@timestamp': 'x',
-        key3: 'hello',
+        datastream: {
+          dataset: 'endpoint.alerts',
+          other: 'x',
+        },
       },
     ]);
   });

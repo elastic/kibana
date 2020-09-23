@@ -22,8 +22,8 @@ export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEve
   });
 
   return sources.filter(function (obj: TelemetryEvent) {
-    // TODO: filter out non-endpoint alerts
-    return obj.datastream.dataset === 'endpoint.alerts';
+    // Filter out non-endpoint alerts
+    return obj.datastream?.dataset === 'endpoint.alerts';
   });
 }
 
