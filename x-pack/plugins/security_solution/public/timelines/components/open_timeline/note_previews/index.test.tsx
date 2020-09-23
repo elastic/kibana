@@ -14,7 +14,15 @@ import { ThemeProvider } from 'styled-components';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('NotePreviews', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];

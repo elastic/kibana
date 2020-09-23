@@ -90,29 +90,34 @@ const combinedQueries = {
 describe('TopN', () => {
   const query = { query: '', language: 'kuery' };
 
+  const toggleTopN = jest.fn();
+  const eventTypes: { [id: string]: TopNProps['defaultView'] } = {
+    raw: 'raw',
+    alert: 'alert',
+    all: 'all',
+  };
+  let testProps: TopNProps = {
+    defaultView: eventTypes.raw,
+    field,
+    filters: [],
+    from: '2020-04-14T00:31:47.695Z',
+    indexNames: [],
+    indexPattern: mockIndexPattern,
+    options: defaultOptions,
+    query,
+    setAbsoluteRangeDatePicker,
+    setAbsoluteRangeDatePickerTarget: 'global',
+    setQuery: jest.fn(),
+    to: '2020-04-15T00:31:47.695Z',
+    toggleTopN,
+    value,
+  };
   describe('common functionality', () => {
-    let toggleTopN: () => void;
     let wrapper: ReactWrapper;
-
     beforeEach(() => {
-      toggleTopN = jest.fn();
       wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="raw"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
     });
@@ -130,28 +135,12 @@ describe('TopN', () => {
   });
 
   describe('events view', () => {
-    let toggleTopN: () => void;
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      toggleTopN = jest.fn();
       wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="raw"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
     });
@@ -168,22 +157,14 @@ describe('TopN', () => {
   });
 
   describe('alerts view', () => {
-    const testProps: TopNProps = {
-      defaultView: 'alert',
-      field,
-      filters: [],
-      from: '2020-04-14T00:31:47.695Z',
-      indexPattern: mockIndexPattern,
-      options: defaultOptions,
-      query,
-      setAbsoluteRangeDatePicker,
-      setAbsoluteRangeDatePickerTarget: 'global',
-      setQuery: jest.fn(),
-      to: '2020-04-15T00:31:47.695Z',
-      toggleTopN: jest.fn(),
-      value,
-    };
-    test(`it renders SignalsByCategory when defaultView is 'signal'`, async () => {
+    beforeAll(() => {
+      testProps = {
+        ...testProps,
+        defaultView: eventTypes.alert,
+      };
+    });
+
+    test(`it renders SignalsByCategory when defaultView is 'alert'`, async () => {
       const wrapper = mount(
         <TestProviders>
           <TopN {...testProps} />
@@ -194,7 +175,7 @@ describe('TopN', () => {
       });
     });
 
-    test(`it does NOT render EventsByDataset when defaultView is 'signal'`, async () => {
+    test(`it does NOT render EventsByDataset when defaultView is 'alert'`, async () => {
       const wrapper = mount(
         <TestProviders>
           <TopN {...testProps} />
@@ -212,24 +193,14 @@ describe('TopN', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
+      testProps = {
+        ...testProps,
+        defaultView: eventTypes.all,
+        options: allEvents,
+      };
       wrapper = mount(
         <TestProviders>
-          <TopN
-            combinedQueries={JSON.stringify(combinedQueries)}
-            defaultView="all"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={allEvents}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={jest.fn()}
-            value={value}
-          />
+          <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
         </TestProviders>
       );
     });

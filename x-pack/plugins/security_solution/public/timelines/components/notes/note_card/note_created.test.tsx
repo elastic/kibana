@@ -9,7 +9,15 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { NoteCreated } from './note_created';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('NoteCreated', () => {
   beforeEach(() => {
     moment.tz.setDefault('UTC');

@@ -11,7 +11,15 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as i18n from '../translations';
 
 import { NoteCardHeader } from './note_card_header';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('NoteCardHeader', () => {
   beforeEach(() => {
     moment.tz.setDefault('UTC');

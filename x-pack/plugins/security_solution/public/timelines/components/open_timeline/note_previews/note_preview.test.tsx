@@ -13,7 +13,15 @@ import { getEmptyValue } from '../../../../common/components/empty_value';
 import { NotePreview } from './note_preview';
 
 import * as i18n from '../translations';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('NotePreview', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
 

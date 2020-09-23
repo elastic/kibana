@@ -13,7 +13,15 @@ import { Note } from '../../../../common/lib/note';
 
 import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/types/timeline';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('NoteCards', () => {
   const noteIds = ['abc', 'def'];
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
