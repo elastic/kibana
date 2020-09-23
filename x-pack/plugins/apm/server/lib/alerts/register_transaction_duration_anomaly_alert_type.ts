@@ -6,8 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ANOMALY_ALERT_SEVERITY_TYPES,
+} from '../../../common/alert_types';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -26,7 +31,12 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   environment: schema.string(),
-  anomalyScore: schema.number(),
+  anomalySeverityType: schema.oneOf([
+    schema.literal(ANOMALY_SEVERITY.CRITICAL),
+    schema.literal(ANOMALY_SEVERITY.MAJOR),
+    schema.literal(ANOMALY_SEVERITY.MINOR),
+    schema.literal(ANOMALY_SEVERITY.WARNING),
+  ]),
 });
 
 const alertTypeConfig =
@@ -67,6 +77,18 @@ export function registerTransactionDurationAnomalyAlertType({
         alertParams.environment
       );
 
+      const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
+        (option) => option.type === alertParams.anomalySeverityType
+      );
+
+      if (!selectedOption) {
+        throw new Error(
+          `Anomaly alert severity type ${alertParams.anomalySeverityType} is not supported.`
+        );
+      }
+
+      const threshold = selectedOption.threshold;
+
       if (mlJobIds.length === 0) {
         return {};
       }
@@ -96,7 +118,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 {
                   range: {
                     record_score: {
-                      gte: alertParams.anomalyScore,
+                      gte: threshold,
                     },
                   },
                 },

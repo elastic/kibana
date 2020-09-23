@@ -9,7 +9,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { HostsQueries } from '../../../../common/search_strategy/security_solution';
@@ -136,7 +140,7 @@ export const useAuthentications = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setAuthenticationsResponse((prevResponse) => ({
@@ -149,7 +153,7 @@ export const useAuthentications = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

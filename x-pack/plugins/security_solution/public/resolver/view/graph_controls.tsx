@@ -13,8 +13,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { useResolverTheme } from './assets';
 import { ResolverAction } from '../store/actions';
+import { useColors } from './use_colors';
 
 interface StyledGraphControls {
   graphControlsBackground: string;
@@ -66,7 +66,7 @@ const GraphControlsComponent = React.memo(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
-    const { colorMap } = useResolverTheme();
+    const colorMap = useColors();
 
     const handleZoomAmountChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {

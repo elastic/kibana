@@ -73,7 +73,7 @@ export function DashboardReplacePanelProvider({ getService }: FtrProviderContext
       return this.replaceEmbeddable(vizName, 'visualization');
     }
 
-    async replaceEmbeddable(embeddableName: string, embeddableType: string) {
+    async replaceEmbeddable(embeddableName: string, embeddableType?: string) {
       log.debug(
         `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
       );
