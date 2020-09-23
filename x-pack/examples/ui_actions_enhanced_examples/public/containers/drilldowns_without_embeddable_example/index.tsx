@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './drilldowns_no_embeddable_example';
+export * from './drilldowns_without_embeddable_example';
