@@ -15,7 +15,6 @@ import { ipDetailsSchemas } from './ip_details';
 import { kpiHostsSchema } from './kpi_hosts';
 import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
-import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
@@ -44,7 +43,6 @@ export const schemas = [
   matrixHistogramSchema,
   networkSchema,
   noteSchema,
-  overviewSchema,
   pinnedEventSchema,
   rootSchema,
   sourcesSchema,

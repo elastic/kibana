@@ -134,6 +134,8 @@ export interface TimelineInput {
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
+  indexNames?: Maybe<string[]>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -415,10 +417,6 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
-export type ToStringArrayNoNullable = any;
-
-export type ToIFieldSubTypeNonNullable = any;
-
 export type ToStringArray = string[] | string;
 
 export type Date = string;
@@ -432,6 +430,10 @@ export type ToBooleanArray = boolean[] | boolean;
 export type ToAny = any;
 
 export type EsValue = any;
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 // ====================================================
 // Scalars
@@ -556,10 +558,6 @@ export interface Source {
   NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
-
-  OverviewNetwork?: Maybe<OverviewNetworkData>;
-
-  OverviewHost?: Maybe<OverviewHostData>;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -591,33 +589,7 @@ export interface SourceStatus {
   /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
   indicesExist: boolean;
   /** The list of fields defined in the index mappings */
-  indexFields: IndexField[];
-}
-
-/** A descriptor of a field in an index */
-export interface IndexField {
-  /** Where the field belong */
-  category: string;
-  /** Example of field's value */
-  example?: Maybe<string>;
-  /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-  /** Description of the field */
-  description?: Maybe<string>;
-
-  format?: Maybe<string>;
-  /** the elastic type as mapped in the index */
-  esTypes?: Maybe<ToStringArrayNoNullable>;
-
-  subType?: Maybe<ToIFieldSubTypeNonNullable>;
+  indexFields: string[];
 }
 
 export interface AuthenticationsData {
@@ -1858,64 +1830,6 @@ export interface NetworkHttpItem {
   statuses: string[];
 }
 
-export interface OverviewNetworkData {
-  auditbeatSocket?: Maybe<number>;
-
-  filebeatCisco?: Maybe<number>;
-
-  filebeatNetflow?: Maybe<number>;
-
-  filebeatPanw?: Maybe<number>;
-
-  filebeatSuricata?: Maybe<number>;
-
-  filebeatZeek?: Maybe<number>;
-
-  packetbeatDNS?: Maybe<number>;
-
-  packetbeatFlow?: Maybe<number>;
-
-  packetbeatTLS?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: Maybe<number>;
-
-  auditbeatFIM?: Maybe<number>;
-
-  auditbeatLogin?: Maybe<number>;
-
-  auditbeatPackage?: Maybe<number>;
-
-  auditbeatProcess?: Maybe<number>;
-
-  auditbeatUser?: Maybe<number>;
-
-  endgameDns?: Maybe<number>;
-
-  endgameFile?: Maybe<number>;
-
-  endgameImageLoad?: Maybe<number>;
-
-  endgameNetwork?: Maybe<number>;
-
-  endgameProcess?: Maybe<number>;
-
-  endgameRegistry?: Maybe<number>;
-
-  endgameSecurity?: Maybe<number>;
-
-  filebeatSystemModule?: Maybe<number>;
-
-  winlogbeatSecurity?: Maybe<number>;
-
-  winlogbeatMWSysmonOperational?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -1947,6 +1861,8 @@ export interface TimelineResult {
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
+
+  indexNames?: Maybe<string[]>;
 
   notes?: Maybe<NoteResult[]>;
 
@@ -2220,6 +2136,32 @@ export interface HostFields {
   type?: Maybe<string>;
 }
 
+/** A descriptor of a field in an index */
+export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: Maybe<string>;
+  /** whether the field's belong to an alias index */
+  indexes: (Maybe<string>)[];
+  /** The name of the field */
+  name: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** Description of the field */
+  description?: Maybe<string>;
+
+  format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -2482,24 +2424,6 @@ export interface NetworkHttpSourceArgs {
   sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
 }
@@ -2939,10 +2863,6 @@ export namespace SourceResolvers {
     NetworkDnsHistogram?: NetworkDnsHistogramResolver<NetworkDsOverTimeData, TypeParent, TContext>;
 
     NetworkHttp?: NetworkHttpResolver<NetworkHttpData, TypeParent, TContext>;
-
-    OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
-
-    OverviewHost?: OverviewHostResolver<Maybe<OverviewHostData>, TypeParent, TContext>;
     /** Just a simple example to get the app name */
     whoAmI?: WhoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
   }
@@ -3294,36 +3214,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type OverviewNetworkResolver<
-    R = Maybe<OverviewNetworkData>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, OverviewNetworkArgs>;
-  export interface OverviewNetworkArgs {
-    id?: Maybe<string>;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-  }
-
-  export type OverviewHostResolver<
-    R = Maybe<OverviewHostData>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, OverviewHostArgs>;
-  export interface OverviewHostArgs {
-    id?: Maybe<string>;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-  }
-
   export type WhoAmIResolver<
     R = Maybe<SayMyName>,
     Parent = Source,
@@ -3397,7 +3287,7 @@ export namespace SourceStatusResolvers {
     /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
     indicesExist?: IndicesExistResolver<boolean, TypeParent, TContext>;
     /** The list of fields defined in the index mappings */
-    indexFields?: IndexFieldsResolver<IndexField[], TypeParent, TContext>;
+    indexFields?: IndexFieldsResolver<string[], TypeParent, TContext>;
   }
 
   export type IndicesExistResolver<
@@ -3410,96 +3300,13 @@ export namespace SourceStatusResolvers {
   }
 
   export type IndexFieldsResolver<
-    R = IndexField[],
+    R = string[],
     Parent = SourceStatus,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext, IndexFieldsArgs>;
   export interface IndexFieldsArgs {
     defaultIndex: string[];
   }
-}
-/** A descriptor of a field in an index */
-export namespace IndexFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IndexField> {
-    /** Where the field belong */
-    category?: CategoryResolver<string, TypeParent, TContext>;
-    /** Example of field's value */
-    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
-    /** whether the field's belong to an alias index */
-    indexes?: IndexesResolver<(Maybe<string>)[], TypeParent, TContext>;
-    /** The name of the field */
-    name?: NameResolver<string, TypeParent, TContext>;
-    /** The type of the field's values as recognized by Kibana */
-    type?: TypeResolver<string, TypeParent, TContext>;
-    /** Whether the field's values can be efficiently searched for */
-    searchable?: SearchableResolver<boolean, TypeParent, TContext>;
-    /** Whether the field's values can be aggregated */
-    aggregatable?: AggregatableResolver<boolean, TypeParent, TContext>;
-    /** Description of the field */
-    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
-
-    format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
-    /** the elastic type as mapped in the index */
-    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
-
-    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
-  }
-
-  export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type ExampleResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type IndexesResolver<
-    R = (Maybe<string>)[],
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type TypeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type SearchableResolver<
-    R = boolean,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AggregatableResolver<
-    R = boolean,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DescriptionResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FormatResolver<
-    R = Maybe<string>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EsTypesResolver<
-    R = Maybe<ToStringArrayNoNullable>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SubTypeResolver<
-    R = Maybe<ToIFieldSubTypeNonNullable>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
 }
 
 export namespace AuthenticationsDataResolvers {
@@ -7677,209 +7484,6 @@ export namespace NetworkHttpItemResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace OverviewNetworkDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = OverviewNetworkData> {
-    auditbeatSocket?: AuditbeatSocketResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatCisco?: FilebeatCiscoResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatNetflow?: FilebeatNetflowResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatPanw?: FilebeatPanwResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatSuricata?: FilebeatSuricataResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatZeek?: FilebeatZeekResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatDNS?: PacketbeatDnsResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatFlow?: PacketbeatFlowResolver<Maybe<number>, TypeParent, TContext>;
-
-    packetbeatTLS?: PacketbeatTlsResolver<Maybe<number>, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type AuditbeatSocketResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatCiscoResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatNetflowResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatPanwResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatSuricataResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatZeekResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatDnsResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatFlowResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketbeatTlsResolver<
-    R = Maybe<number>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = OverviewNetworkData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace OverviewHostDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditdResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatFIM?: AuditbeatFimResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatLogin?: AuditbeatLoginResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatPackage?: AuditbeatPackageResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatProcess?: AuditbeatProcessResolver<Maybe<number>, TypeParent, TContext>;
-
-    auditbeatUser?: AuditbeatUserResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameDns?: EndgameDnsResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameFile?: EndgameFileResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameImageLoad?: EndgameImageLoadResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameNetwork?: EndgameNetworkResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameProcess?: EndgameProcessResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameRegistry?: EndgameRegistryResolver<Maybe<number>, TypeParent, TContext>;
-
-    endgameSecurity?: EndgameSecurityResolver<Maybe<number>, TypeParent, TContext>;
-
-    filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
-
-    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
-
-    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
-      Maybe<number>,
-      TypeParent,
-      TContext
-    >;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type AuditbeatAuditdResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatFimResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatLoginResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatPackageResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatProcessResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AuditbeatUserResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameDnsResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameFileResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameImageLoadResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameNetworkResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameProcessResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameRegistryResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EndgameSecurityResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FilebeatSystemModuleResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatSecurityResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatMwSysmonOperationalResolver<
-    R = Maybe<number>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = OverviewHostData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace SayMyNameResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SayMyName> {
     /** The id of the source */
@@ -7924,6 +7528,8 @@ export namespace TimelineResultResolvers {
     kqlMode?: KqlModeResolver<Maybe<string>, TypeParent, TContext>;
 
     kqlQuery?: KqlQueryResolver<Maybe<SerializedFilterQueryResult>, TypeParent, TContext>;
+
+    indexNames?: IndexNamesResolver<Maybe<string[]>, TypeParent, TContext>;
 
     notes?: NotesResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
@@ -8022,6 +7628,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type KqlQueryResolver<
     R = Maybe<SerializedFilterQueryResult>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexNamesResolver<
+    R = Maybe<string[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8973,6 +8584,89 @@ export namespace HostFieldsResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
+/** A descriptor of a field in an index */
+export namespace IndexFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = IndexField> {
+    /** Where the field belong */
+    category?: CategoryResolver<string, TypeParent, TContext>;
+    /** Example of field's value */
+    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
+    /** whether the field's belong to an alias index */
+    indexes?: IndexesResolver<(Maybe<string>)[], TypeParent, TContext>;
+    /** The name of the field */
+    name?: NameResolver<string, TypeParent, TContext>;
+    /** The type of the field's values as recognized by Kibana */
+    type?: TypeResolver<string, TypeParent, TContext>;
+    /** Whether the field's values can be efficiently searched for */
+    searchable?: SearchableResolver<boolean, TypeParent, TContext>;
+    /** Whether the field's values can be aggregated */
+    aggregatable?: AggregatableResolver<boolean, TypeParent, TContext>;
+    /** Description of the field */
+    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
+
+    format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
+    /** the elastic type as mapped in the index */
+    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
+
+    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
+  }
+
+  export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type ExampleResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexesResolver<
+    R = (Maybe<string>)[],
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TypeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type SearchableResolver<
+    R = boolean,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AggregatableResolver<
+    R = boolean,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DescriptionResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FormatResolver<
+    R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EsTypesResolver<
+    R = Maybe<ToStringArrayNoNullable>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubTypeResolver<
+    R = Maybe<ToIFieldSubTypeNonNullable>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
 
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
@@ -9007,14 +8701,6 @@ export interface DeprecatedDirectiveArgs {
   reason?: string;
 }
 
-export interface ToStringArrayNoNullableScalarConfig
-  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
-  name: 'ToStringArrayNoNullable';
-}
-export interface ToIFieldSubTypeNonNullableScalarConfig
-  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
-  name: 'ToIFieldSubTypeNonNullable';
-}
 export interface ToStringArrayScalarConfig extends GraphQLScalarTypeConfig<ToStringArray, any> {
   name: 'ToStringArray';
 }
@@ -9036,6 +8722,14 @@ export interface ToAnyScalarConfig extends GraphQLScalarTypeConfig<ToAny, any> {
 export interface EsValueScalarConfig extends GraphQLScalarTypeConfig<EsValue, any> {
   name: 'EsValue';
 }
+export interface ToStringArrayNoNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
+  name: 'ToStringArrayNoNullable';
+}
+export interface ToIFieldSubTypeNonNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
+  name: 'ToIFieldSubTypeNonNullable';
+}
 
 export type IResolvers<TContext = SiemContext> = {
   Query?: QueryResolvers.Resolvers<TContext>;
@@ -9046,7 +8740,6 @@ export type IResolvers<TContext = SiemContext> = {
   SourceConfiguration?: SourceConfigurationResolvers.Resolvers<TContext>;
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
-  IndexField?: IndexFieldResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
@@ -9158,8 +8851,6 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
   NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;
-  OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
-  OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
   SayMyName?: SayMyNameResolvers.Resolvers<TContext>;
   TimelineResult?: TimelineResultResolvers.Resolvers<TContext>;
   ColumnHeaderResult?: ColumnHeaderResultResolvers.Resolvers<TContext>;
@@ -9182,8 +8873,7 @@ export type IResolvers<TContext = SiemContext> = {
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;
   HostFields?: HostFieldsResolvers.Resolvers<TContext>;
-  ToStringArrayNoNullable?: GraphQLScalarType;
-  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
+  IndexField?: IndexFieldResolvers.Resolvers<TContext>;
   ToStringArray?: GraphQLScalarType;
   Date?: GraphQLScalarType;
   ToNumberArray?: GraphQLScalarType;
@@ -9191,6 +8881,8 @@ export type IResolvers<TContext = SiemContext> = {
   ToBooleanArray?: GraphQLScalarType;
   ToAny?: GraphQLScalarType;
   EsValue?: GraphQLScalarType;
+  ToStringArrayNoNullable?: GraphQLScalarType;
+  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
 } & { [typeName: string]: never };
 
 export type IDirectiveResolvers<Result> = {

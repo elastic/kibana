@@ -17,7 +17,6 @@ import { IpDetails } from './ip_details';
 import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
-import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
 import { Note } from './note/saved_object';
@@ -36,7 +35,6 @@ export interface AppDomainLibs {
   matrixHistogram: MatrixHistogram;
   network: Network;
   kpiNetwork: KpiNetwork;
-  overview: Overview;
   kpiHosts: KpiHosts;
 }
 
