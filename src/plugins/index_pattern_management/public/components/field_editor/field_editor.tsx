@@ -133,7 +133,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
-    saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+    indexPatternService: DataPublicPluginStart['indexPatterns'];
   };
 }
 
@@ -758,11 +758,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   deleteField = () => {
-    const { redirectAway, saveIndexPattern } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
     indexPattern.removeScriptedField(spec.name);
-    saveIndexPattern(indexPattern).then(() => {
+    indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
         defaultMessage: "Deleted '{fieldName}'",
         values: { fieldName: spec.name },
@@ -798,7 +798,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway, saveIndexPattern } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
@@ -810,13 +810,15 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fields.add(field);
     }
 
-    if (!fieldFormatId) {
-      indexPattern.fieldFormatMap[field.name] = undefined;
+    if (fieldFormatId && field.format) {
+      // indexPattern.fieldFormatMap[field.name] = undefined;
+      indexPattern.setFieldFormat(field.name, field.format);
     } else {
-      indexPattern.fieldFormatMap[field.name] = field.format;
+      indexPattern.deleteFieldFormat(field.name);
     }
 
-    return saveIndexPattern(indexPattern)
+    return indexPatternService
+      .updateSavedObject(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",

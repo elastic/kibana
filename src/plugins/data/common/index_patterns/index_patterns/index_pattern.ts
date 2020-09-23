@@ -21,13 +21,7 @@ import _, { each, reject } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IIndexPattern,
-  FieldFormatNotFoundError,
-  IFieldType,
-} from '../../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -105,7 +99,7 @@ export class IndexPattern implements IIndexPattern {
 
     // set values
     this.id = spec.id;
-    const fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
+    this.fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
 
     this.version = spec.version;
 
@@ -116,20 +110,10 @@ export class IndexPattern implements IIndexPattern {
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-
-    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
-      return this.deserializeFieldFormatMap(mapping);
-    });
   }
 
   setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
     this.fieldFormatMap[fieldName] = format;
-    /*
-    const field = this.fields.getByName(fieldName);
-    if(field){
-      field.
-    }
-    */
   };
 
   deleteFieldFormat = (fieldName: string) => {
@@ -147,22 +131,6 @@ export class IndexPattern implements IIndexPattern {
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
-
-  /**
-   * Converts field format spec to field format instance
-   * @param mapping
-   */
-  private deserializeFieldFormatMap(mapping: SerializedFieldFormat<Record<string, any>>) {
-    try {
-      return this.fieldFormats.getInstance(mapping.id as string, mapping.params);
-    } catch (err) {
-      if (err instanceof FieldFormatNotFoundError) {
-        return undefined;
-      } else {
-        throw err;
-      }
-    }
-  }
 
   /**
    * Extracts FieldFormatMap from FieldSpec map
@@ -366,6 +334,7 @@ export class IndexPattern implements IIndexPattern {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody() {
+    /*
     const serializeFieldFormatMap = (
       flat: any,
       format: FieldFormat | undefined,
@@ -375,8 +344,11 @@ export class IndexPattern implements IIndexPattern {
         flat[field] = format;
       }
     };
-    const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
-    const fieldFormatMap = _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+    */
+    // const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
+    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
+      ? undefined
+      : JSON.stringify(this.fieldFormatMap);
 
     return {
       title: this.title,
@@ -397,12 +369,14 @@ export class IndexPattern implements IIndexPattern {
   getFormatterForField(
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ): FieldFormat {
-    return (
-      this.fieldFormatMap[field.name] ||
-      this.fieldFormats.getDefaultInstance(
+    const formatSpec = this.fieldFormatMap[field.name];
+    if (formatSpec) {
+      return this.fieldFormats.getInstance(formatSpec);
+    } else {
+      return this.fieldFormats.getDefaultInstance(
         field.type as KBN_FIELD_TYPES,
         field.esTypes as ES_FIELD_TYPES[]
-      )
-    );
+      );
+    }
   }
 }
