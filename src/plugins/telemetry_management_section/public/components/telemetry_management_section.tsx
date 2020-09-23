@@ -108,12 +108,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             onClose={this.toggleExample}
           />
         )}
-        {showSecurityExample && (
-          <OptInSecurityExampleFlyout
-            fetchExample={telemetryService.fetchExample}
-            onClose={this.toggleSecurityExample}
-          />
-        )}
+        {showSecurityExample && <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />}
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
