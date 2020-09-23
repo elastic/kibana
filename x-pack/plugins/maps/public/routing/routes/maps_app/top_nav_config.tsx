@@ -129,8 +129,7 @@ export function getTopNavConfig({
       label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
         defaultMessage: 'Save and return',
       }),
-      emphasize: true,
-      iconType: 'check',
+      iconType: 'checkInCircleFilled',
       run: () => {
         onSave({
           newTitle: savedMap.title ? savedMap.title : '',
@@ -148,6 +147,7 @@ export function getTopNavConfig({
   if (hasWritePermissions) {
     topNavConfigs.push({
       id: 'save',
+      iconType: 'save',
       label: hasSaveAndReturnConfig
         ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
             defaultMessage: 'Save as',
@@ -158,7 +158,6 @@ export function getTopNavConfig({
       description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
         defaultMessage: `Save map`,
       }),
-      emphasize: !hasSaveAndReturnConfig,
       testId: 'mapSaveButton',
       disableButton() {
         return isSaveDisabled;
