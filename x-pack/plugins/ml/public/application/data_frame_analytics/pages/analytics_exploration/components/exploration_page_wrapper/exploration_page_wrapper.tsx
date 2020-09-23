@@ -65,15 +65,13 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
-      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false &&
-        jobConfig !== undefined &&
-        totalFeatureImportance !== undefined && (
-          <>
-            <EuiSpacer />
-            <FeatureImportanceSummaryPanel totalFeatureImportance={totalFeatureImportance} />
-          </>
-        )}
+      {isLoadingJobConfig === true && totalFeatureImportance === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && totalFeatureImportance !== undefined && (
+        <>
+          <EuiSpacer />
+          <FeatureImportanceSummaryPanel totalFeatureImportance={totalFeatureImportance} />
+        </>
+      )}
 
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
