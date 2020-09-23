@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiSteps, EuiIcon, EuiLink } from '@elastic/eui';
 
-import { mountWithContext } from '../../__mocks__';
+import { mountWithIntl } from '../../__mocks__';
 
 import { SetupGuide } from './';
 
@@ -27,7 +27,7 @@ describe('SetupGuide', () => {
   });
 
   it('renders with optional auth links', () => {
-    const wrapper = mountWithContext(
+    const wrapper = mountWithIntl(
       <SetupGuide
         productName="Foo"
         productEuiIcon="logoAppSearch"

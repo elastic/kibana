@@ -12,10 +12,7 @@ export { mockHttpValues } from './http_logic.mock';
 export { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 export { mockAllValues, mockAllActions, setMockValues } from './kea.mock';
 
-export {
-  mountWithContext,
-  mountWithKibanaContext,
-  mountWithAsyncContext,
-} from './mount_with_context.mock';
+export { mountAsync } from './mount_async.mock';
+export { mountWithIntl } from './mount_with_i18n.mock';
 export { shallowWithIntl } from './shallow_with_i18n.mock';
 // Note: shallow_useeffect must be imported directly as a file
