@@ -7,17 +7,19 @@
 import React from 'react';
 import {
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
   EuiSpacer,
-  EuiFlyout,
+  EuiContextMenuPanelDescriptor,
+  EuiButton,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  EuiFlyout,
+  EuiCode,
 } from '@elastic/eui';
+import { SampleMlJob, SampleMlJobClickContext } from '../../triggers';
+import { EmbeddableRoot } from '../../../../../../src/plugins/embeddable/public';
+import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
 import { useUiActions } from '../../context';
-import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJob, SampleMlJobClickContext } from '../../triggers';
+import { VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 export const job: SampleMlJob = {
   job_id: '123',
@@ -27,7 +29,11 @@ export const job: SampleMlJob = {
 
 export const context: SampleMlJobClickContext = { job };
 
-export const DrilldownsNoEmbeddableExample: React.FC = () => {
+export const DrilldownsWithEmbeddableExample: React.FC = () => {
+  const embeddable = React.useMemo(
+    () => new ButtonEmbeddable({ id: 'DrilldownsWithEmbeddableExample' }, {}),
+    []
+  );
   const { plugins, manager } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
@@ -87,32 +93,22 @@ export const DrilldownsNoEmbeddableExample: React.FC = () => {
   return (
     <>
       <EuiText>
-        <h3>Without embeddable example</h3>
+        <h3>With embeddable example</h3>
         <p>
-          <em>Drilldown Manager</em> can be integrated into any app in Kibana. This example shows
-          that drilldown manager can be used in an app which does not use embeddables and executes
-          its custom UI Actions triggers.
+          This example shows how drilldown manager can be added to an embeddable which executes{' '}
+          <EuiCode>VALUE_CLICK_TRIGGER</EuiCode> trigger.
         </p>
       </EuiText>
 
       <EuiSpacer />
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
-            fill
-            iconType="play"
-            iconSide="left"
-            onClick={() =>
-              plugins.uiActionsEnhanced.executeTriggerActions(SAMPLE_ML_JOB_CLICK_TRIGGER, context)
-            }
-          >
-            Execute click action
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {openManagerButton}
+
+      <EuiSpacer />
+
+      <div style={{ maxWidth: 200 }}>
+        <EmbeddableRoot embeddable={embeddable} />
+      </div>
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
@@ -120,7 +116,7 @@ export const DrilldownsNoEmbeddableExample: React.FC = () => {
             onClose={() => setShowManager(false)}
             viewMode={viewRef.current}
             dynamicActionManager={manager}
-            triggers={[SAMPLE_ML_JOB_CLICK_TRIGGER]}
+            triggers={[VALUE_CLICK_TRIGGER]}
           />
         </EuiFlyout>
       )}
