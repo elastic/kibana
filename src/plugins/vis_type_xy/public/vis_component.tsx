@@ -58,9 +58,10 @@ import {
 } from './components';
 import { getConfig } from './config';
 import { getThemeService, getColorsService, getDataActions } from './services';
+import { ValueClickContext } from '../../embeddable/public';
+import { ChartType } from '../common/types';
 
 import './_chart.scss';
-import { ValueClickContext } from '../../embeddable/public';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -157,10 +158,20 @@ export const VisComponent = memo((props: VisComponentProps) => {
   );
 
   const { visData, visParams } = props;
-  const config = getConfig(visData as any, visParams);
+  const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
   const xDomain = getXDomain(config.aspects.x.params);
-  const adjustedXDomain = getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain);
+  const hasBars = visParams.seriesParams.some(
+    ({ type, data: { id: paramId } }) =>
+      type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId)
+  );
+  const adjustedXDomain = getAdjustedDomain(
+    visData.rows,
+    config.aspects.x,
+    timeZone,
+    xDomain,
+    hasBars
+  );
   const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
     config.legend.position,
   ]);
@@ -176,14 +187,14 @@ export const VisComponent = memo((props: VisComponentProps) => {
 
       const overwriteColors: Record<string, string> = props.vis.getUiState().get('vis.colors', {});
 
-      if (props.visParams.isVislibVis) {
+      if (config.isVislibVis) {
         allSeries.push(seriesName);
         return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
       }
 
       return overwriteColors[seriesName];
     },
-    [allSeries, getSeriesName, props.vis, props.visParams.isVislibVis]
+    [allSeries, config.isVislibVis, getSeriesName, props.vis]
   );
 
   if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {

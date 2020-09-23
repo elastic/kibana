@@ -126,4 +126,5 @@ export interface VisConfig {
   enableHistogramMode: boolean;
   fittingFunction?: Exclude<Fit, 'explicit'>;
   detailedTooltip?: boolean;
+  isVislibVis?: boolean;
 }

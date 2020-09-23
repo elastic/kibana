@@ -32,8 +32,8 @@ export const getXDomain = (params: Aspect['params']): DomainRange => {
 
     if (bounds) {
       return {
-        min: bounds.min?.valueOf(),
-        max: bounds.max?.valueOf(),
+        min: bounds.min ? bounds.min.valueOf() : undefined,
+        max: bounds.max ? bounds.max.valueOf() : undefined,
         minInterval,
       };
     }
@@ -48,7 +48,8 @@ export const getAdjustedDomain = (
   data: any[],
   { accessor, params }: Aspect,
   timeZone: string,
-  domain?: DomainRange
+  domain?: DomainRange,
+  hasBars?: boolean
 ): DomainRange => {
   const { interval, intervalESValue, intervalESUnit } = params as DateHistogramParams;
 
@@ -59,7 +60,8 @@ export const getAdjustedDomain = (
     const lastXValue = xValues[xValues.length - 1];
 
     const domainMin = Math.min(firstXValue, domain.min);
-    const domainMax = Math.max(domain.max - interval, lastXValue);
+    const domainMaxValue = hasBars ? domain.max - interval : lastXValue + interval;
+    const domainMax = Math.max(domainMaxValue, lastXValue);
     const minInterval = getAdjustedInterval(xValues, intervalESValue, intervalESUnit, timeZone);
 
     return {

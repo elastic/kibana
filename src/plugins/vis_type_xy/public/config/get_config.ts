@@ -36,6 +36,7 @@ export function getConfig(table: KibanaDatatable, params: VisParams): VisConfig 
     labels,
     fittingFunction,
     detailedTooltip,
+    isVislibVis,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const xAxis = getAxis<XScaleType>(params.categoryAxes[0], params.grid, aspects.x);
@@ -65,6 +66,7 @@ export function getConfig(table: KibanaDatatable, params: VisParams): VisConfig 
     detailedTooltip,
     orderBucketsBySum,
     isTimeChart,
+    isVislibVis,
     showCurrentTime: addTimeMarker && isTimeChart,
     showValueLabel: labels.show ?? false,
     enableHistogramMode,

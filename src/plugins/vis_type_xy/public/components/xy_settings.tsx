@@ -28,7 +28,8 @@ import {
   ElementClickListener,
   BrushEndListener,
   LegendAction,
-  LegendColorPicker,, TooltipProps
+  LegendColorPicker,
+  TooltipProps,
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
