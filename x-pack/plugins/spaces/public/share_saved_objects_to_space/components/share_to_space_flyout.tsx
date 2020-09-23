@@ -27,6 +27,7 @@ import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/save
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
+import { NoSpacesAvailable } from './no_spaces_available';
 import { ShareOptions, SpaceTarget } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 
@@ -169,26 +170,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     // Step 1a: assets loaded, but no spaces are available for share.
     // The `spaces` array includes the current space, so at minimum it will have a length of 1.
     if (spaces.length < 2) {
-      return (
-        <EuiEmptyPrompt
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.noSpacesBody"
-                defaultMessage="There are no eligible spaces to share into."
-              />
-            </p>
-          }
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.noSpacesTitle"
-                defaultMessage="No spaces available"
-              />
-            </h3>
-          }
-        />
-      );
+      return <NoSpacesAvailable />;
     }
 
     const showShareWarning = currentNamespaces.length === 1;

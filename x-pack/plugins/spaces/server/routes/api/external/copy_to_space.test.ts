@@ -71,7 +71,8 @@ describe('copy to space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
-    coreStart.savedObjects = createMockSavedObjectsService(spaces);
+    const { savedObjects } = createMockSavedObjectsService(spaces);
+    coreStart.savedObjects = savedObjects;
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({
