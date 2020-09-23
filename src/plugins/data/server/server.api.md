@@ -36,6 +36,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/server';
 import { CoreSetup as CoreSetup_2 } from 'kibana/server';
 import { CoreStart } from 'src/core/server';
+import { CoreStart as CoreStart_2 } from 'kibana/server';
 import { CountParams } from 'elasticsearch';
 import { CreateDocumentParams } from 'elasticsearch';
 import { DeleteDocumentByQueryParams } from 'elasticsearch';
@@ -126,6 +127,7 @@ import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PingParams } from 'elasticsearch';
 import { Plugin as Plugin_2 } from 'src/core/server';
+import { Plugin as Plugin_3 } from 'kibana/server';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/server';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
@@ -628,29 +630,25 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, onUnsupportedTimePattern, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    constructor({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
     // (undocumented)
-    addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
-    // (undocumented)
-    create(allowOverride?: boolean): Promise<string | false>;
-    // (undocumented)
-    _fetchFields(): Promise<void>;
-    // (undocumented)
-    fieldFormatMap: any;
+    fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     fields: IIndexPatternFieldList & {
-        toSpec: () => FieldSpec[];
+        toSpec: () => IndexPatternFieldMap;
     };
     // (undocumented)
-    fieldsFetcher: any;
+    flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
     // (undocumented)
-    flattenHit: any;
+    formatField: FormatFieldFn;
     // (undocumented)
-    formatField: any;
-    // (undocumented)
-    formatHit: any;
+    formatHit: {
+        (hit: Record<string, any>, type?: string): any;
+        formatField: FormatFieldFn;
+    };
     // (undocumented)
     getAggregationRestrictions(): Record<string, Record<string, {
         agg?: string | undefined;
@@ -660,6 +658,16 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
+    getAsSavedObjectBody(): {
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
+    };
     // (undocumented)
     getComputedFields(): {
         storedFields: string[];
@@ -671,7 +679,6 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
-    // (undocumented)
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     // (undocumented)
     getIndex(): string;
@@ -679,9 +686,18 @@ export class IndexPattern implements IIndexPattern {
     //
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
+    getOriginalSavedObjectBody: () => {
+        title?: string | undefined;
+        timeFieldName?: string | undefined;
+        intervalName?: string | undefined;
+        fields?: string | undefined;
+        sourceFilters?: string | undefined;
+        fieldFormatMap?: string | undefined;
+        typeMeta?: string | undefined;
+        type?: string | undefined;
+    };
     // (undocumented)
     getScriptedFields(): IndexPatternField[];
-    // (undocumented)
     getSourceFiltering(): {
         excludes: any[];
     };
@@ -690,13 +706,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
-    init(): Promise<this>;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    initFromSpec(spec: IndexPatternSpec): this;
-    // (undocumented)
-    intervalName: string | undefined | null;
+    intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
@@ -706,32 +716,11 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     isUnsupportedTimePattern(): boolean;
     // (undocumented)
-    isWildcard(): boolean;
-    // (undocumented)
     metaFields: string[];
     // (undocumented)
-    migrate(newTitle: string): Promise<this>;
-    // (undocumented)
-    originalBody: {
-        [key: string]: any;
-    };
-    // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
-    // (undocumented)
-    prepBody(): {
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | null | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-    };
-    // (undocumented)
-    refreshFields(): Promise<void | Error | never[] | undefined>;
-    // (undocumented)
     removeScriptedField(fieldName: string): void;
+    resetOriginalSavedObjectBody: () => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -740,6 +729,8 @@ export class IndexPattern implements IIndexPattern {
     timeFieldName: string | undefined;
     // (undocumented)
     title: string;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
     toSpec(): IndexPatternSpec;
     // (undocumented)
@@ -754,7 +745,7 @@ export class IndexPattern implements IIndexPattern {
 
 // Warning: (ae-missing-release-tag) "IndexPatternAttributes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public @deprecated
+// @public (undocumented)
 export interface IndexPatternAttributes {
     // (undocumented)
     fieldFormatMap?: string;
@@ -800,6 +791,21 @@ export class IndexPatternsFetcher {
             allowNoIndices: boolean;
         };
     }): Promise<FieldDescriptor[]>;
+}
+
+// Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStart" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "IndexPatternsService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class IndexPatternsService implements Plugin_3<void, IndexPatternsServiceStart> {
+    // (undocumented)
+    setup(core: CoreSetup_2): void;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStartDeps" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    start(core: CoreStart_2, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
+        indexPatternsServiceFactory: (kibanaRequest: KibanaRequest) => Promise<IndexPatternsService_2>;
+    };
 }
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1001,7 +1007,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
+            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../public").IndexPatternsService>;
         };
     };
     // (undocumented)
@@ -1035,8 +1041,6 @@ export interface PluginStart {
     //
     // (undocumented)
     fieldFormats: FieldFormatsStart;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     indexPatterns: IndexPatternsServiceStart;
     // (undocumented)
@@ -1222,6 +1226,8 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 //
 // src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:70:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:71:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
@@ -1256,6 +1262,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:245:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:249:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:252:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index_patterns/index_patterns_service.ts:50:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:88:66 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
