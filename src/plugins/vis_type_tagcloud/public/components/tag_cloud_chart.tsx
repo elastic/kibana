@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
+import { throttle } from 'lodash';
 
 import { TagCloudVisDependencies } from '../plugin';
 import { TagCloudVisRenderValue } from '../tag_cloud_fn';
@@ -57,14 +58,18 @@ export const TagCloudChart = ({
     }
   }, [visData, visParams, renderComplete]);
 
-  const onResize = useCallback(() => {
-    if (visController.current) {
-      visController.current.render().then(renderComplete);
-    }
-  }, [renderComplete]);
+  const updateChartSize = useMemo(
+    () =>
+      throttle(() => {
+        if (visController.current) {
+          visController.current.render().then(renderComplete);
+        }
+      }, 300),
+    [renderComplete]
+  );
 
   return (
-    <EuiResizeObserver onResize={onResize}>
+    <EuiResizeObserver onResize={updateChartSize}>
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef}>
           <div className="tgcChart__container" ref={chartDiv} />
