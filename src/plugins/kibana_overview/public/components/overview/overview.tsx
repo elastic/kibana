@@ -130,7 +130,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               <EuiScreenReaderOnly>
                 <h2 id="kbnOverviewApps__title">
                   <FormattedMessage
-                    id="kibana.overview.apps.title"
+                    id="kibana_overview.apps.title"
                     defaultMessage="Explore these apps"
                   />
                 </h2>
@@ -171,7 +171,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                   <EuiTitle size="s">
                     <h2 id="kbnOverviewMore__title">
                       <FormattedMessage
-                        id="kibana.overview.more.title"
+                        id="kibana_overview.more.title"
                         defaultMessage="Do more with Elastic"
                       />
                     </h2>

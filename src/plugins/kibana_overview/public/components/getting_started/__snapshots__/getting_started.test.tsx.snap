@@ -19,7 +19,7 @@ exports[`GettingStarted dark mode on 1`] = `
         >
           <FormattedMessage
             defaultMessage="Getting started with Kibana"
-            id="kibana.overview.gettingStarted.title"
+            id="kibana_overview.gettingStarted.title"
             values={Object {}}
           />
         </h2>
@@ -31,7 +31,7 @@ exports[`GettingStarted dark mode on 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
-            id="kibana.overview.gettingStarted.description"
+            id="kibana_overview.gettingStarted.description"
             values={Object {}}
           />
         </p>
@@ -168,7 +168,7 @@ exports[`GettingStarted dark mode on 1`] = `
       >
         <FormattedMessage
           defaultMessage="Begin by adding data"
-          id="kibana.overview.gettingStarted.addDataButtonLabel"
+          id="kibana_overview.gettingStarted.addDataButtonLabel"
           values={Object {}}
         />
       </EuiButton>
@@ -204,7 +204,7 @@ exports[`GettingStarted render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Getting started with Kibana"
-            id="kibana.overview.gettingStarted.title"
+            id="kibana_overview.gettingStarted.title"
             values={Object {}}
           />
         </h2>
@@ -216,7 +216,7 @@ exports[`GettingStarted render 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
-            id="kibana.overview.gettingStarted.description"
+            id="kibana_overview.gettingStarted.description"
             values={Object {}}
           />
         </p>
@@ -353,7 +353,7 @@ exports[`GettingStarted render 1`] = `
       >
         <FormattedMessage
           defaultMessage="Begin by adding data"
-          id="kibana.overview.gettingStarted.addDataButtonLabel"
+          id="kibana_overview.gettingStarted.addDataButtonLabel"
           values={Object {}}
         />
       </EuiButton>

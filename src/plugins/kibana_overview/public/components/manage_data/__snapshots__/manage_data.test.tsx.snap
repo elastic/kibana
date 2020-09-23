@@ -19,7 +19,7 @@ exports[`ManageData render 1`] = `
       >
         <FormattedMessage
           defaultMessage="Manage your data"
-          id="home.manageData.sectionTitle"
+          id="kibana_overview.manageData.sectionTitle"
           values={Object {}}
         />
       </h2>
@@ -27,8 +27,9 @@ exports[`ManageData render 1`] = `
     <EuiSpacer
       size="m"
     />
-    <EuiFlexGroup
+    <EuiFlexGrid
       className="homDataManage__content"
+      columns={2}
     >
       <EuiFlexItem
         key="security"
@@ -86,7 +87,7 @@ exports[`ManageData render 1`] = `
           wrapInPanel={true}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   </section>
 </Fragment>
 `;

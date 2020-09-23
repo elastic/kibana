@@ -11,7 +11,7 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 export const featureCatalogueEntry = {
   id: APP_ID,
   title: getAppTitle(),
-  subtitle: i18n.translate('xpack.canvas.featureCatalogue.canvasSubtitle', {
+  subtitle: i18n.translate('xpack.maps.featureCatalogue.mapsSubtitle', {
     defaultMessage: 'Plot geographic data.',
   }),
   description: i18n.translate('xpack.maps.feature.appDescription', {

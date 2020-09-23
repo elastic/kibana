@@ -22,7 +22,7 @@ exports[`PageHeader render 1`] = `
       >
         <FormattedMessage
           defaultMessage="View app directory"
-          id="kibana.overview.footer.appDirectoryButtonLabel"
+          id="kibana_overview.footer.appDirectoryButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>
@@ -49,7 +49,7 @@ exports[`PageHeader with advanced settings 1`] = `
       >
         <FormattedMessage
           defaultMessage="Display a different page on log in"
-          id="kibana.overview.footer.changeHomeRouteLink"
+          id="kibana_overview.footer.changeHomeRouteLink"
           values={Object {}}
         />
       </EuiButtonEmpty>
@@ -65,7 +65,7 @@ exports[`PageHeader with advanced settings 1`] = `
       >
         <FormattedMessage
           defaultMessage="View app directory"
-          id="kibana.overview.footer.appDirectoryButtonLabel"
+          id="kibana_overview.footer.appDirectoryButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>

@@ -38,7 +38,10 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
       <EuiFlexItem grow={1}>
         <EuiTitle size="s">
           <h2 id="homDataAdd__title">
-            <FormattedMessage id="home.addData.sectionTitle" defaultMessage="Ingest your data" />
+            <FormattedMessage
+              id="kibana_overview.addData.sectionTitle"
+              defaultMessage="Ingest your data"
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -46,7 +49,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
       <EuiFlexItem className="homDataAdd__actions" grow={false}>
         <EuiButtonEmpty iconType="visTable" href="#/tutorial_directory/sampleData" size="xs">
           <FormattedMessage
-            id="home.addData.sampleDataButtonLabel"
+            id="kibana_overview.addData.sampleDataButtonLabel"
             defaultMessage="Try our sample data"
           />
         </EuiButtonEmpty>

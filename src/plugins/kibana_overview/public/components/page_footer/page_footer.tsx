@@ -42,7 +42,7 @@ export const PageFooter: FC<Props> = ({ features }) => {
               size="xs"
             >
               <FormattedMessage
-                id="kibana.overview.footer.changeHomeRouteLink"
+                id="kibana_overview.footer.changeHomeRouteLink"
                 defaultMessage="Display a different page on log in"
               />
             </EuiButtonEmpty>
@@ -56,7 +56,7 @@ export const PageFooter: FC<Props> = ({ features }) => {
             iconType="apps"
           >
             <FormattedMessage
-              id="kibana.overview.footer.appDirectoryButtonLabel"
+              id="kibana_overview.footer.appDirectoryButtonLabel"
               defaultMessage="View app directory"
             />
           </EuiButtonEmpty>

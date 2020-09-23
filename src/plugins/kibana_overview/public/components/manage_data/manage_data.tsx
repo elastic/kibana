@@ -44,7 +44,10 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
       >
         <EuiTitle size="s">
           <h2 id="homDataManage__title">
-            <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
+            <FormattedMessage
+              id="kibana_overview.manageData.sectionTitle"
+              defaultMessage="Manage your data"
+            />
           </h2>
         </EuiTitle>
 

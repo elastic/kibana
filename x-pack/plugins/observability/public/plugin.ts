@@ -63,7 +63,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
           defaultMessage: 'Centralize & monitor',
         }),
-        description: i18n.translate('xpack.observabilit.featureCatalogueDescription', {
+        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
           defaultMessage:
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),

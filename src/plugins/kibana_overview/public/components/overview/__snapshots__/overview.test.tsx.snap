@@ -51,7 +51,7 @@ exports[`Overview render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibana.overview.apps.title"
+            id="kibana_overview.apps.title"
             values={Object {}}
           />
         </h2>
@@ -129,7 +129,7 @@ exports[`Overview render 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibana.overview.more.title"
+                id="kibana_overview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -344,7 +344,7 @@ exports[`Overview without features 1`] = `
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibana.overview.apps.title"
+            id="kibana_overview.apps.title"
             values={Object {}}
           />
         </h2>
@@ -422,7 +422,7 @@ exports[`Overview without features 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibana.overview.more.title"
+                id="kibana_overview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -637,7 +637,7 @@ exports[`Overview without solutions 1`] = `
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibana.overview.apps.title"
+            id="kibana_overview.apps.title"
             values={Object {}}
           />
         </h2>
@@ -715,7 +715,7 @@ exports[`Overview without solutions 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibana.overview.more.title"
+                id="kibana_overview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -725,6 +725,7 @@ exports[`Overview without solutions 1`] = `
           />
           <EuiFlexGroup
             className="kibanaOverview__Data kibanaOverview__Data--expanded"
+            direction="column"
           >
             <EuiFlexItem>
               <AddData

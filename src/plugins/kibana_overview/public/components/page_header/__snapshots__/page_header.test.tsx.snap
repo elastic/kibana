@@ -30,7 +30,7 @@ exports[`PageHeader render 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana"
-                  id="kibana.overview.header.title"
+                  id="kibana_overview.header.title"
                   values={Object {}}
                 />
               </h1>
@@ -94,7 +94,7 @@ exports[`PageHeader with both apps 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana"
-                  id="kibana.overview.header.title"
+                  id="kibana_overview.header.title"
                   values={Object {}}
                 />
               </h1>
@@ -180,7 +180,7 @@ exports[`PageHeader with dev tools 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana"
-                  id="kibana.overview.header.title"
+                  id="kibana_overview.header.title"
                   values={Object {}}
                 />
               </h1>
@@ -255,7 +255,7 @@ exports[`PageHeader with management 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana"
-                  id="kibana.overview.header.title"
+                  id="kibana_overview.header.title"
                   values={Object {}}
                 />
               </h1>

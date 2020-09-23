@@ -19,7 +19,7 @@ exports[`AddData render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Ingest your data"
-            id="home.addData.sectionTitle"
+            id="kibana_overview.addData.sectionTitle"
             values={Object {}}
           />
         </h2>
@@ -36,7 +36,7 @@ exports[`AddData render 1`] = `
       >
         <FormattedMessage
           defaultMessage="Try our sample data"
-          id="home.addData.sampleDataButtonLabel"
+          id="kibana_overview.addData.sampleDataButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>

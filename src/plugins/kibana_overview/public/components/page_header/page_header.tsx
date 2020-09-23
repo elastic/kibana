@@ -46,7 +46,7 @@ export const PageHeader: FC<Props> = ({ features }) => {
               <EuiFlexItem>
                 <EuiTitle size="m">
                   <h1 id="kbnOverviewHeader__title">
-                    <FormattedMessage defaultMessage="Kibana" id="kibana.overview.header.title" />
+                    <FormattedMessage defaultMessage="Kibana" id="kibana_overview.header.title" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
@@ -60,7 +60,7 @@ export const PageHeader: FC<Props> = ({ features }) => {
                   onClick={createAppNavigationHandler('/app/home#/tutorial_directory')}
                   iconType="indexOpen"
                 >
-                  {i18n.translate('kibana.overview.header.addDataButtonLabel', {
+                  {i18n.translate('kibana_overview.header.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
                 </EuiButtonEmpty>
@@ -72,7 +72,7 @@ export const PageHeader: FC<Props> = ({ features }) => {
                     iconType="gear"
                     onClick={createAppNavigationHandler('/app/management')}
                   >
-                    {i18n.translate('kibana.overview.header.stackManagementButtonLabel', {
+                    {i18n.translate('kibana_overview.header.stackManagementButtonLabel', {
                       defaultMessage: 'Manage',
                     })}
                   </EuiButtonEmpty>
@@ -85,7 +85,7 @@ export const PageHeader: FC<Props> = ({ features }) => {
                     iconType="wrench"
                     onClick={createAppNavigationHandler('/app/dev_tools#/console')}
                   >
-                    {i18n.translate('kibana.overview.header.devToolsButtonLabel', {
+                    {i18n.translate('kibana_overview.header.devToolsButtonLabel', {
                       defaultMessage: 'Dev tools',
                     })}
                   </EuiButtonEmpty>

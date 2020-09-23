@@ -105,29 +105,29 @@ export class KibanaOverviewPlugin
     if (home) {
       home.featureCatalogue.registerSolution({
         id: 'kibana',
-        title: i18n.translate('home.kibana.featureCatalogue.title', {
+        title: i18n.translate('kibana_overview.kibana.solution.title', {
           defaultMessage: 'Kibana',
         }),
-        subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
+        subtitle: i18n.translate('kibana_overview.kibana.solution.subtitle', {
           defaultMessage: 'Visualize & analyze',
         }),
         appDescriptions: [
-          i18n.translate('home.kibana.featureCatalogueDescription1', {
+          i18n.translate('kibana_overview.kibana.appDescription1', {
             defaultMessage: 'Analyze data in dashboards.',
           }),
-          i18n.translate('home.kibana.featureCatalogueDescription2', {
+          i18n.translate('kibana_overview.kibana.appDescription2', {
             defaultMessage: 'Search and find insights.',
           }),
-          i18n.translate('home.kibana.featureCatalogueDescription3', {
+          i18n.translate('kibana_overview.kibana.appDescription3', {
             defaultMessage: 'Design pixel-perfect reports.',
           }),
-          i18n.translate('home.kibana.featureCatalogueDescription4', {
+          i18n.translate('kibana_overview.kibana.appDescription4', {
             defaultMessage: 'Plot geographic data.',
           }),
-          i18n.translate('home.kibana.featureCatalogueDescription5', {
+          i18n.translate('kibana_overview.kibana.appDescription5', {
             defaultMessage: 'Model, predict, and detect.',
           }),
-          i18n.translate('home.kibana.featureCatalogueDescription6', {
+          i18n.translate('kibana_overview.kibana.appDescription6', {
             defaultMessage: 'Reveal patterns and relationships.',
           }),
         ],

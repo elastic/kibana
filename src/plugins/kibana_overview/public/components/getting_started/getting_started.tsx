@@ -56,7 +56,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
           <EuiTitle size="s">
             <h2 id="kbnOverviewGettingStarted__title">
               <FormattedMessage
-                id="kibana.overview.gettingStarted.title"
+                id="kibana_overview.gettingStarted.title"
                 defaultMessage="Getting started with Kibana"
               />
             </h2>
@@ -68,7 +68,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
             <p>
               <FormattedMessage
                 defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
-                id="kibana.overview.gettingStarted.description"
+                id="kibana_overview.gettingStarted.description"
               />
             </p>
           </EuiText>
@@ -101,7 +101,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
           >
             <FormattedMessage
               defaultMessage="Begin by adding data"
-              id="kibana.overview.gettingStarted.addDataButtonLabel"
+              id="kibana_overview.gettingStarted.addDataButtonLabel"
             />
           </EuiButton>
         </EuiFlexItem>
