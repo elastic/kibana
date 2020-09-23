@@ -113,8 +113,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         MlCardState,
       } = await import('./register_helper');
 
-      const managementApp = registerManagementSection(pluginsSetup.management, core);
-
       if (isMlEnabled(license)) {
         // add ML to home page
         if (pluginsSetup.home) {
@@ -137,22 +135,17 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {
-          if (canManageMLJobs && managementApp) {
-            managementApp.enable();
+          if (canManageMLJobs && pluginsSetup.management !== undefined) {
+            registerManagementSection(pluginsSetup.management, core).enable();
           }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
-        } else if (managementApp) {
-          managementApp.disable();
         }
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater.next(() => ({
           status: AppStatus.inaccessible,
         }));
-        if (managementApp) {
-          managementApp.disable();
-        }
       }
     });
 
