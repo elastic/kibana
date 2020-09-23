@@ -25,8 +25,7 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    overflow: auto;
-    // position: relative; // Check loading and error state
+    overflow: hidden;
 
     > * {
       flex: 1 1 100%;
@@ -45,8 +44,6 @@
 }
 
 .lnsExpressionRenderer {
-  // position: relative;
-
   .lnsDragDrop-isDropTarget & {
     transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
     filter: blur($euiSizeXS);
