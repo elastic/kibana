@@ -17,6 +17,7 @@ describe('PingListExpandedRow', () => {
       docId: 'fdeio12',
       timestamp: '19290310',
       monitor: {
+        check_group: 'check_group_id',
         duration: {
           us: 12345,
         },
@@ -86,5 +87,14 @@ describe('PingListExpandedRow', () => {
     const docLinkComponent = component.find(DocLinkForBody);
 
     expect(docLinkComponent).toHaveLength(1);
+  });
+
+  it('renders a synthetics expanded row for synth monitor', () => {
+    ping.monitor.type = 'suitejourney';
+    expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchInlineSnapshot(`
+      <ScriptExpandedRow
+        checkGroup="check_group_id"
+      />
+    `);
   });
 });
