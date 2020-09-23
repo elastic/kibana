@@ -28,7 +28,13 @@ import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
-  const { stateParams, setValue, vis } = props;
+  const { stateParams, setValue, vis, aggs } = props;
+
+  const hasLineChart = stateParams.seriesParams.some(
+    ({ type, data: { id: paramId } }) =>
+      (type === ChartType.Line || type === ChartType.Area) &&
+      aggs.aggs.find(({ id }) => id === paramId)?.enabled
+  );
 
   return (
     <>
@@ -42,7 +48,7 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
         setValue={setValue}
       />
 
-      {[ChartType.Line, ChartType.Area].includes(vis.type.name as any) && (
+      {hasLineChart && (
         <SelectOption
           data-test-subj="fittingFunction"
           label={i18n.translate('visTypeXy.editors.elasticChartsOptions.missingValuesLabel', {

@@ -51,6 +51,7 @@ export function getAspects(
     series: getAspectsFromDimension(columns, seriesDimensions),
   };
 }
+
 function getAspectsFromDimension(
   columns: KibanaDatatableColumn[],
   dimension?: Dimension | null
@@ -79,6 +80,7 @@ function getAspectsFromDimension(
   const column = columns[dimensions.accessor];
   return column && getAspect(column, dimensions);
 }
+
 const getAspect = (
   { id: accessor, name: title }: KibanaDatatableColumn,
   { accessor: column, format, params }: Dimension
