@@ -59,10 +59,17 @@ export async function unpackArchiveToCache(
     });
   } catch (error) {
     throw new PackageInvalidArchiveError(
-      `Error during extraction of uploaded package: ${error}. Assumed content type was ${contentType}.`
+      `Error during extraction of uploaded package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
 
+  // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
+  // unpacking a zip file with untarBuffer() just results in nothing.
+  if (paths.length === 0) {
+    throw new PackageInvalidArchiveError(
+      `Uploaded archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
+    );
+  }
   return paths;
 }
 
