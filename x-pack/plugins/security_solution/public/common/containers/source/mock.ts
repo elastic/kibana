@@ -5,8 +5,8 @@
  */
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-
-import { BrowserFields, DocValueFields } from '.';
+import { DocValueFields } from '../../../../common/search_strategy';
+import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 export const mocksSource = {
   indexFields: [

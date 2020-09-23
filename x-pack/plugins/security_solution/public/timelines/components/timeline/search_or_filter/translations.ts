@@ -73,14 +73,14 @@ export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
 export const ALL_EVENT = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.eventTypeAllEvent',
   {
-    defaultMessage: 'All default',
+    defaultMessage: 'All data sources',
   }
 );
 
 export const RAW_EVENT = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.eventTypeRawEvent',
   {
-    defaultMessage: 'Raw events',
+    defaultMessage: 'Events',
   }
 );
 
@@ -130,5 +130,19 @@ export const HIDE_INDEX_PATTERNS_ADVANCED_SETTINGS = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.hideAdvancedSettings',
   {
     defaultMessage: 'Hide Advanced',
+  }
+);
+
+export const DATA_SOURCES_RESET = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.resetSettings',
+  {
+    defaultMessage: 'Reset',
+  }
+);
+
+export const PICK_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.pickIndexPatternsCombo',
+  {
+    defaultMessage: 'Pick index patterns',
   }
 );

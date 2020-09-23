@@ -448,7 +448,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         {
           kibanaIndexPatterns,
-          configIndexPatterns: configIndexPatterns.indicesExists,
+          configIndexPatterns: configIndexPatterns.indicesExist,
         }
       ),
       {

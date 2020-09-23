@@ -48,7 +48,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
 
       return Promise.resolve({
         indexFields,
-        indicesExists: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+        indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
         rawResponse: {
           timed_out: false,
           took: -1,
@@ -79,7 +79,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
 
 export const dedupeIndexName = (indices: string[]) =>
   indices.reduce<string[]>((acc, index) => {
-    if (!acc.includes(index)) {
+    if (index.trim() !== '' && index.trim() !== '_all' && !acc.includes(index.trim())) {
       return [...acc, index];
     }
     return acc;

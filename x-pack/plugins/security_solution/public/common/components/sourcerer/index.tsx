@@ -136,7 +136,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     () => (
       <EuiComboBox
         data-test-subj="indexPattern-switcher"
-        placeholder="Pick index patterns"
+        placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
