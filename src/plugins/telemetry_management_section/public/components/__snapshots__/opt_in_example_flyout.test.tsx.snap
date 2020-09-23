@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OptInDetailsComponent renders as expected 1`] = `
+exports[`OptInDetailsComponent usage data renders as expected 1`] = `
 <EuiPortal>
   <EuiFlyout
     maxWidth={true}

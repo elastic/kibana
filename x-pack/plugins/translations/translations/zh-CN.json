@@ -2977,7 +2977,6 @@
     "telemetry.provideUsageStatisticsAriaName": "提供使用情况统计",
     "telemetry.provideUsageStatisticsTitle": "提供使用情况统计",
     "telemetry.readOurUsageDataPrivacyStatementLinkText": "隐私声明",
-    "telemetry.seeExampleOfWhatWeCollectLinkText": "查看我们收集的内容示例",
     "telemetry.telemetryBannerDescription": "想帮助我们改进 Elastic Stack？数据使用情况收集当前已禁用。启用数据使用情况收集可帮助我们管理并改善产品和服务。有关详情，请参阅我们的{privacyStatementLink}。",
     "telemetry.telemetryConfigAndLinkDescription": "启用使用情况数据收集可帮助我们管理并改善产品和服务。有关更多详情，请参阅我们的{privacyStatementLink}。",
     "telemetry.telemetryConfigDescription": "通过提供基本功能的使用情况统计信息，来帮助我们改进 Elastic Stack。我们不会在 Elastic 之外共享此数据。",

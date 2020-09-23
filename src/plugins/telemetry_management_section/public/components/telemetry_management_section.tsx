@@ -129,13 +129,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   type: 'boolean',
                   name: 'telemetry:enabled',
                   displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                    defaultMessage: 'Provide usage and security statistics',
+                    defaultMessage: 'Provide usage statistics',
                   }),
                   value: enabled,
                   description: this.renderDescription(),
                   defVal: true,
                   ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                    defaultMessage: 'Provide usage and security statistics',
+                    defaultMessage: 'Provide usage statistics',
                   }),
                 } as any
               }
@@ -201,21 +201,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
         />
       </p>
       <p>
-        See examples of the{' '}
-        <EuiLink onClick={this.toggleExample}>
-          <FormattedMessage
-            id="telemetry.seeExampleOfWhatWeCollectLinkText"
-            defaultMessage="cluster data"
-          />
-        </EuiLink>{' '}
-        and{' '}
-        <EuiLink onClick={this.toggleSecurityExample}>
-          <FormattedMessage
-            id="telemetry.seeExampleOfWhatWeCollectLinkText"
-            defaultMessage="endpoint security data"
-          />
-        </EuiLink>{' '}
-        that we collect.
+        See examples of the <EuiLink onClick={this.toggleExample}>cluster data</EuiLink> and{' '}
+        <EuiLink onClick={this.toggleSecurityExample}>endpoint security data</EuiLink> that we
+        collect.
       </p>
     </Fragment>
   );

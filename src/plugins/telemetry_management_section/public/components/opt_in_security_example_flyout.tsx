@@ -112,21 +112,14 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
         <EuiFlyout ownFocus onClose={this.props.onClose} maxWidth={true}>
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="telemetry.callout.clusterStatisticsTitle"
-                  defaultMessage="Endpoint security data"
-                />
-              </h2>
+              <h2>Endpoint security data</h2>
             </EuiTitle>
             <EuiTextColor color="subdued">
               <EuiText>
-                <FormattedMessage
-                  id="telemetry.callout.clusterStatisticsDescription"
-                  defaultMessage="This is a representative sample of the the endpoint security alert event that
-                  we collect. Endpoint security data is collected only when the Elastic Endpoint is enabled.
-                  It includes information about the endpoint configuration and detection events."
-                />
+                This is a representative sample of the the endpoint security alert event that we
+                collect. Endpoint security data is collected only when the Elastic Endpoint is
+                enabled. It includes information about the endpoint configuration and detection
+                events.
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>
