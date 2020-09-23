@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import groupBy from 'lodash/groupBy';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import {
   CategoryQualityWarning,
@@ -59,7 +59,7 @@ export const CategoryQualityWarnings: React.FC<{
           >
             <EuiDescriptionList>
               {qualityWarningsForJob.flatMap((qualityWarning) => (
-                <>
+                <Fragment key={`item-${getFriendlyNameForPartitionId(qualityWarning.dataset)}`}>
                   <EuiDescriptionListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
                     {getFriendlyNameForPartitionId(qualityWarning.dataset)}
                   </EuiDescriptionListTitle>
@@ -71,7 +71,7 @@ export const CategoryQualityWarnings: React.FC<{
                       <CategoryQualityWarningReasonDescription reason={reason} />
                     </QualityWarningReasonDescription>
                   ))}
-                </>
+                </Fragment>
               ))}
             </EuiDescriptionList>
           </EuiAccordion>
