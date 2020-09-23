@@ -248,6 +248,5 @@ export const operationDefinitionMap: Record<
   GenericOperationDefinition
 > = internalOperationDefinitions.reduce(
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  // {} as Record<OperationType, typeof internalOperationDefinitions[number]>
   {}
 );
