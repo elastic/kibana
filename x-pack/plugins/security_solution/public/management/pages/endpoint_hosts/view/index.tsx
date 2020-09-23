@@ -580,10 +580,11 @@ export const EndpointList = () => {
           <>
             <EuiCallOut
               size="s"
+              data-test-subj="endpointsEnrollingNotification"
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
-                  defaultMessage="Endpoints are enrolling, please stand by!"
+                  defaultMessage="Endpoints are enrolling and will display soon"
                 />
               }
             />

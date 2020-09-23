@@ -25,6 +25,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
+import * as ingestServices from '../../policy/store/policy_list/services/ingest';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -130,6 +131,68 @@ describe('when on the list page', () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
       });
       expect(renderResult.queryByTestId('adminSearchBar')).toBeNull();
+    });
+  });
+
+  describe('when determining when to show the enrolling message', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(ingestServices, 'sendGetFleetAgentsWithEndpoint')
+        .mockImplementation(() => Promise.resolve({ total: 5 }));
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 4,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          mockMetadataOnce: false,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 5,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          mockMetadataOnce: false,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 6,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          mockMetadataOnce: false,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
     });
   });
 
