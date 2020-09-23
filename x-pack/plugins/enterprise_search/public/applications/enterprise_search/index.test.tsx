@@ -6,13 +6,20 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
 import { EuiPage } from '@elastic/eui';
 
+import '../__mocks__/kea.mock';
+import { useValues } from 'kea';
+
 import { EnterpriseSearch } from './';
+import { ErrorConnecting } from './components/error_connecting';
 import { ProductCard } from './components/product_card';
 
 describe('EnterpriseSearch', () => {
+  beforeEach(() => {
+    (useValues as jest.Mock).mockReturnValue({ errorConnecting: false });
+  });
+
   it('renders the overview page and product cards', () => {
     const wrapper = shallow(
       <EnterpriseSearch access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: true }} />
@@ -20,6 +27,14 @@ describe('EnterpriseSearch', () => {
 
     expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
     expect(wrapper.find(ProductCard)).toHaveLength(2);
+  });
+
+  it('renders the error connecting prompt', () => {
+    (useValues as jest.Mock).mockReturnValueOnce({ errorConnecting: true });
+    const wrapper = shallow(<EnterpriseSearch />);
+
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+    expect(wrapper.find(EuiPage)).toHaveLength(0);
   });
 
   describe('access checks', () => {

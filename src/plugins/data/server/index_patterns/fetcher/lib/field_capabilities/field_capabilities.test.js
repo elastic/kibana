@@ -61,7 +61,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
       await getFieldCapabilities(footballs[0], footballs[1]);
       sinon.assert.calledOnce(callFieldCapsApi);
-      calledWithExactly(callFieldCapsApi, [footballs[0], footballs[1]]);
+      calledWithExactly(callFieldCapsApi, [footballs[0], footballs[1], undefined]);
     });
   });
 
