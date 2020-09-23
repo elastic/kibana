@@ -40,8 +40,12 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
 
   public async collect(): Promise<OsCgroupMetrics> {
     try {
+      if (this.noCgroupPresent) {
+        return {};
+      }
+
       await this.initializePaths();
-      if (this.noCgroupPresent || !this.cpuAcctPath || !this.cpuPath) {
+      if (!this.cpuAcctPath || !this.cpuPath) {
         return {};
       }
 
@@ -67,9 +71,13 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
       };
     } catch (err) {
       this.noCgroupPresent = true;
-      this.options.logger.warn(
-        `cgroup metrics could not be read due to error: [${err.toString()}]`
-      );
+
+      if (err.code !== 'ENOENT') {
+        this.options.logger.error(
+          `cgroup metrics could not be read due to error: [${err.toString()}]`
+        );
+      }
+
       return {};
     }
   }
