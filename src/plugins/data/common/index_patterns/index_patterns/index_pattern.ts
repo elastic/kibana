@@ -371,7 +371,7 @@ export class IndexPattern implements IIndexPattern {
   ): FieldFormat {
     const formatSpec = this.fieldFormatMap[field.name];
     if (formatSpec) {
-      return this.fieldFormats.getInstance(formatSpec);
+      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     } else {
       return this.fieldFormats.getDefaultInstance(
         field.type as KBN_FIELD_TYPES,
