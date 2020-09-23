@@ -8,29 +8,41 @@ import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import {
   validateTree,
+  validateRelatedEvents,
   validateEvents,
   validateChildren,
   validateAncestry,
   validateAlerts,
   validateEntities,
 } from '../../../common/endpoint/schema/resolver';
-import { handleEvents } from './resolver/events';
+import { handleRelatedEvents } from './resolver/related_events';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
 import { handleAlerts } from './resolver/alerts';
 import { handleEntities } from './resolver/entity';
+import { handleEvents } from './resolver/events';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
 
+  // this route will be removed in favor of the one below
   router.post(
     {
       path: '/api/endpoint/resolver/{id}/events',
+      validate: validateRelatedEvents,
+      options: { authRequired: true },
+    },
+    handleRelatedEvents(log, endpointAppContext)
+  );
+
+  router.post(
+    {
+      path: '/api/endpoint/resolver/events',
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(log, endpointAppContext)
+    handleEvents(log)
   );
 
   router.post(

@@ -277,6 +277,14 @@ export interface SafeResolverRelatedEvents {
 }
 
 /**
+ * Safe version of `ResolverRelatedEvents`
+ */
+export interface ResolverKqlRelatedEvents {
+  events: SafeResolverEvent[];
+  nextEvent: string | null;
+}
+
+/**
  * Response structure for the alerts route.
  */
 export interface ResolverRelatedAlerts {

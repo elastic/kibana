@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EventsQuery } from './events';
+import { EventsQuery } from './related_events';
 import { PaginationBuilder } from '../utils/pagination';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 

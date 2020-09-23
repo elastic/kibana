@@ -8,7 +8,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SafeResolverRelatedEvents, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedEvents } from './node';
-import { EventsQuery } from '../queries/events';
+import { EventsQuery } from '../queries/related_events';
 import { PaginationBuilder } from './pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
