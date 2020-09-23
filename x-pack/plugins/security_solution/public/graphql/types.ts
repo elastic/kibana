@@ -95,12 +95,6 @@ export interface NetworkHttpSortField {
   direction: Direction;
 }
 
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface PageInfoTimeline {
   pageIndex: number;
 
@@ -356,10 +350,6 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -570,8 +560,6 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
-
-  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -1904,36 +1892,6 @@ export interface OverviewHostData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  notAfter?: Maybe<string[]>;
-
-  subjects?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuers?: Maybe<string[]>;
-}
-
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -2574,23 +2532,6 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTargetSourceDest;
-
-  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }
@@ -4041,92 +3982,6 @@ export namespace GetNetworkTopNFlowQuery {
     bytes_in: Maybe<number>;
 
     bytes_out: Maybe<number>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetTlsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTargetSourceDest;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: TlsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Tls: Tls;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'TlsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'TlsNode';
-
-    _id: Maybe<string>;
-
-    subjects: Maybe<string[]>;
-
-    ja3: Maybe<string[]>;
-
-    issuers: Maybe<string[]>;
-
-    notAfter: Maybe<string[]>;
   };
 
   export type Cursor = {
