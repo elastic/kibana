@@ -5,7 +5,7 @@
  */
 
 import '../../__mocks__/kea.mock';
-import '../../__mocks__/shallow_usecontext.mock';
+import '../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/react_router_history.mock';
 import { mockKibanaValues } from '../../__mocks__';
 

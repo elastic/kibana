@@ -18,5 +18,4 @@ export {
   mountWithAsyncContext,
 } from './mount_with_context.mock';
 export { shallowWithIntl } from './shallow_with_i18n.mock';
-
-// Note: shallow_usecontext must be imported directly as a file
+// Note: shallow_useeffect must be imported directly as a file
