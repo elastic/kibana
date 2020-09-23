@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import {
   EuiSpacer,
@@ -14,6 +15,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from '../instances/status';
 

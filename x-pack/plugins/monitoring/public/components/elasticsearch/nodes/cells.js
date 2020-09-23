@@ -59,6 +59,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   if (isOnline) {
     const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
     const format = get(metric, 'metric.format');
+    const units = get(metric, 'metric.units');
 
     const tooltipItems = [
       {
