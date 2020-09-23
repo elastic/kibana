@@ -15,6 +15,8 @@ import { getContext, resetContext } from 'kea';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+
+import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
@@ -46,6 +48,13 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store as Store;
+
+  const unmountKibanaLogic = mountKibanaLogic({
+    config,
+    navigateToUrl: core.application.navigateToUrl,
+    setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setDocTitle: core.chrome.docTitle.change,
+  });
 
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
@@ -80,6 +89,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountKibanaLogic();
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
