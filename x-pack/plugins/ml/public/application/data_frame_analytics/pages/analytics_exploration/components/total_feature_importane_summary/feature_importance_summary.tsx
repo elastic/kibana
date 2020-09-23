@@ -109,8 +109,8 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         });
       }
 
-      // for multiclass classification
-      // stacked them in order of increasing importance
+      // if multiclass classification
+      // stack them in order of increasing importance
       // so for each feature, biggest importance on the left to smallest importance on the right
       if (totalFeatureImportance[0].classes.length > 2) {
         (totalFeatureImportance as ClassificationTotalFeatureImportance[]).forEach((feature) => {
