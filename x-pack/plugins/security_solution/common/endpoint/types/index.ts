@@ -277,7 +277,7 @@ export interface SafeResolverRelatedEvents {
 }
 
 /**
- * Safe version of `ResolverRelatedEvents`
+ * Response structure for the events route.
  */
 export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
