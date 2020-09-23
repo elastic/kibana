@@ -379,7 +379,7 @@ export {
 
 export type { SearchSource } from './search';
 
-export { ISearchOptions } from '../common';
+export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
