@@ -400,6 +400,7 @@
     "has-ansi": "^3.0.0",
     "history": "^4.9.0",
     "hjson": "3.2.1",
+    "http-proxy": "^1.18.1",
     "iedriver": "^3.14.2",
     "immer": "^1.5.0",
     "intl-messageformat-parser": "^1.4.0",
