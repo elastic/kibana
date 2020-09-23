@@ -33,7 +33,7 @@ export const validateEql = async ({
         options: { ignore: [400] },
       },
       {
-        strategy: 'security_eql_base',
+        strategy: 'eql',
         abortSignal: signal,
       }
     )

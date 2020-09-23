@@ -65,10 +65,7 @@ import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
-import {
-  securityEqlSearchStrategyProvider,
-  SECURITY_EQL_SEARCH_STRATEGY,
-} from './search_strategy/eql';
+import { eqlSearchStrategyProvider, EQL_SEARCH_STRATEGY } from './search_strategy/eql';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -279,13 +276,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initServer(libs);
 
     core.getStartServices().then(([_, depsStart]) => {
-      const eqlSearchStrategy = securityEqlSearchStrategyProvider(this.logger);
+      const eqlSearchStrategy = eqlSearchStrategyProvider(this.logger);
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
 
-      plugins.data.search.registerSearchStrategy(SECURITY_EQL_SEARCH_STRATEGY, eqlSearchStrategy);
+      plugins.data.search.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategy);
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy

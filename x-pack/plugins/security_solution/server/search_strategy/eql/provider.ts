@@ -11,9 +11,9 @@ import {
   EqlSearchStrategyResponse,
 } from '../../../common/search_strategy/eql';
 
-export const SECURITY_EQL_SEARCH_STRATEGY = 'security_eql_base';
+export const EQL_SEARCH_STRATEGY = 'eql';
 
-export const securityEqlSearchStrategyProvider = (
+export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
