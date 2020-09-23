@@ -34,6 +34,7 @@ const defaultProps = {
 };
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 jest.mock('../../containers/use_update_comment');
+jest.mock('./user_action_timestamp');
 
 const patchComment = jest.fn();
 describe('UserActionTree ', () => {

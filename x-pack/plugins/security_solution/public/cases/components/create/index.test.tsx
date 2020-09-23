@@ -75,15 +75,15 @@ const defaultPostCase = {
 };
 describe('Create case', () => {
   // Suppress warnings about "noSuggestions" prop
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
+  // /* eslint-disable no-console */
+  // const originalError = console.error;
+  // beforeAll(() => {
+  //   console.error = jest.fn();
+  // });
+  // afterAll(() => {
+  //   console.error = originalError;
+  // });
+  // /* eslint-enable no-console */
   const fetchTags = jest.fn();
   const formHookMock = getFormMock(sampleData);
   beforeEach(() => {
