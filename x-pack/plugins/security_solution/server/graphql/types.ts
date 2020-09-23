@@ -75,12 +75,6 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface UsersSortField {
-  field: UsersFields;
-
-  direction: Direction;
-}
-
 export interface NetworkTopTablesSortField {
   field: NetworkTopTablesFields;
 
@@ -309,18 +303,6 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
-export enum FlowTarget {
-  client = 'client',
-  destination = 'destination',
-  server = 'server',
-  source = 'source',
-}
-
 export enum HistogramType {
   authentications = 'authentications',
   anomalies = 'anomalies',
@@ -408,6 +390,13 @@ export enum NetworkHttpFields {
   path = 'path',
   requestCount = 'requestCount',
   statuses = 'statuses',
+}
+
+export enum FlowTarget {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
 }
 
 export enum FlowDirection {
@@ -534,10 +523,6 @@ export interface Source {
   HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
-
-  IpOverview?: Maybe<IpOverviewData>;
-
-  Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
 
@@ -1488,76 +1473,6 @@ export interface FirstLastSeenHost {
   lastSeen?: Maybe<string>;
 }
 
-export interface IpOverviewData {
-  client?: Maybe<Overview>;
-
-  destination?: Maybe<Overview>;
-
-  host: HostEcsFields;
-
-  server?: Maybe<Overview>;
-
-  source?: Maybe<Overview>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface Overview {
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-
-  autonomousSystem: AutonomousSystem;
-
-  geo: GeoEcsFields;
-}
-
-export interface AutonomousSystem {
-  number?: Maybe<number>;
-
-  organization?: Maybe<AutonomousSystemOrganization>;
-}
-
-export interface AutonomousSystemOrganization {
-  name?: Maybe<string>;
-}
-
-export interface UsersData {
-  edges: UsersEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UsersEdges {
-  node: UsersNode;
-
-  cursor: CursorType;
-}
-
-export interface UsersNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  user?: Maybe<UsersItem>;
-}
-
-export interface UsersItem {
-  name?: Maybe<string>;
-
-  id?: Maybe<string[] | string>;
-
-  groupId?: Maybe<string[] | string>;
-
-  groupName?: Maybe<string[] | string>;
-
-  count?: Maybe<number>;
-}
-
 export interface KpiNetworkData {
   networkEvents?: Maybe<number>;
 
@@ -2280,34 +2195,6 @@ export interface HostFirstLastSeenSourceArgs {
 
   docValueFields: DocValueFieldsInput[];
 }
-export interface IpOverviewSourceArgs {
-  id?: Maybe<string>;
-
-  filterQuery?: Maybe<string>;
-
-  ip: string;
-
-  defaultIndex: string[];
-
-  docValueFields: DocValueFieldsInput[];
-}
-export interface UsersSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: UsersSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface KpiNetworkSourceArgs {
   id?: Maybe<string>;
 
@@ -2834,10 +2721,6 @@ export namespace SourceResolvers {
 
     HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, TContext>;
 
-    IpOverview?: IpOverviewResolver<Maybe<IpOverviewData>, TypeParent, TContext>;
-
-    Users?: UsersResolver<UsersData, TypeParent, TContext>;
-
     KpiNetwork?: KpiNetworkResolver<Maybe<KpiNetworkData>, TypeParent, TContext>;
 
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, TContext>;
@@ -2998,47 +2881,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
 
     docValueFields: DocValueFieldsInput[];
-  }
-
-  export type IpOverviewResolver<
-    R = Maybe<IpOverviewData>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, IpOverviewArgs>;
-  export interface IpOverviewArgs {
-    id?: Maybe<string>;
-
-    filterQuery?: Maybe<string>;
-
-    ip: string;
-
-    defaultIndex: string[];
-
-    docValueFields: DocValueFieldsInput[];
-  }
-
-  export type UsersResolver<R = UsersData, Parent = Source, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext,
-    UsersArgs
-  >;
-  export interface UsersArgs {
-    filterQuery?: Maybe<string>;
-
-    id?: Maybe<string>;
-
-    ip: string;
-
-    pagination: PaginationInputPaginated;
-
-    sort: UsersSortField;
-
-    flowTarget: FlowTarget;
-
-    timerange: TimerangeInput;
-
-    defaultIndex: string[];
   }
 
   export type KpiNetworkResolver<
@@ -6302,235 +6144,6 @@ export namespace FirstLastSeenHostResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace IpOverviewDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IpOverviewData> {
-    client?: ClientResolver<Maybe<Overview>, TypeParent, TContext>;
-
-    destination?: DestinationResolver<Maybe<Overview>, TypeParent, TContext>;
-
-    host?: HostResolver<HostEcsFields, TypeParent, TContext>;
-
-    server?: ServerResolver<Maybe<Overview>, TypeParent, TContext>;
-
-    source?: SourceResolver<Maybe<Overview>, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type ClientResolver<
-    R = Maybe<Overview>,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DestinationResolver<
-    R = Maybe<Overview>,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type HostResolver<
-    R = HostEcsFields,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ServerResolver<
-    R = Maybe<Overview>,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SourceResolver<
-    R = Maybe<Overview>,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = IpOverviewData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace OverviewResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = Overview> {
-    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
-
-    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
-
-    autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, TContext>;
-
-    geo?: GeoResolver<GeoEcsFields, TypeParent, TContext>;
-  }
-
-  export type FirstSeenResolver<
-    R = Maybe<string>,
-    Parent = Overview,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type LastSeenResolver<
-    R = Maybe<string>,
-    Parent = Overview,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AutonomousSystemResolver<
-    R = AutonomousSystem,
-    Parent = Overview,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GeoResolver<R = GeoEcsFields, Parent = Overview, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-}
-
-export namespace AutonomousSystemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AutonomousSystem> {
-    number?: NumberResolver<Maybe<number>, TypeParent, TContext>;
-
-    organization?: OrganizationResolver<Maybe<AutonomousSystemOrganization>, TypeParent, TContext>;
-  }
-
-  export type NumberResolver<
-    R = Maybe<number>,
-    Parent = AutonomousSystem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type OrganizationResolver<
-    R = Maybe<AutonomousSystemOrganization>,
-    Parent = AutonomousSystem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace AutonomousSystemOrganizationResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AutonomousSystemOrganization> {
-    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type NameResolver<
-    R = Maybe<string>,
-    Parent = AutonomousSystemOrganization,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UsersDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UsersData> {
-    edges?: EdgesResolver<UsersEdges[], TypeParent, TContext>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type EdgesResolver<
-    R = UsersEdges[],
-    Parent = UsersData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<R = number, Parent = UsersData, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = UsersData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = UsersData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UsersEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UsersEdges> {
-    node?: NodeResolver<UsersNode, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<R = UsersNode, Parent = UsersEdges, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = UsersEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UsersNodeResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UsersNode> {
-    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
-
-    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
-
-    user?: UserResolver<Maybe<UsersItem>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<R = Maybe<string>, Parent = UsersNode, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type TimestampResolver<
-    R = Maybe<string>,
-    Parent = UsersNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type UserResolver<
-    R = Maybe<UsersItem>,
-    Parent = UsersNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace UsersItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = UsersItem> {
-    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
-
-    id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
-
-    groupId?: GroupIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
-
-    groupName?: GroupNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
-
-    count?: CountResolver<Maybe<number>, TypeParent, TContext>;
-  }
-
-  export type NameResolver<
-    R = Maybe<string>,
-    Parent = UsersItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type IdResolver<
-    R = Maybe<string[] | string>,
-    Parent = UsersItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GroupIdResolver<
-    R = Maybe<string[] | string>,
-    Parent = UsersItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GroupNameResolver<
-    R = Maybe<string[] | string>,
-    Parent = UsersItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CountResolver<
-    R = Maybe<number>,
-    Parent = UsersItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace KpiNetworkDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiNetworkData> {
     networkEvents?: NetworkEventsResolver<Maybe<number>, TypeParent, TContext>;
@@ -8805,14 +8418,6 @@ export type IResolvers<TContext = SiemContext> = {
   CloudMachine?: CloudMachineResolvers.Resolvers<TContext>;
   EndpointFields?: EndpointFieldsResolvers.Resolvers<TContext>;
   FirstLastSeenHost?: FirstLastSeenHostResolvers.Resolvers<TContext>;
-  IpOverviewData?: IpOverviewDataResolvers.Resolvers<TContext>;
-  Overview?: OverviewResolvers.Resolvers<TContext>;
-  AutonomousSystem?: AutonomousSystemResolvers.Resolvers<TContext>;
-  AutonomousSystemOrganization?: AutonomousSystemOrganizationResolvers.Resolvers<TContext>;
-  UsersData?: UsersDataResolvers.Resolvers<TContext>;
-  UsersEdges?: UsersEdgesResolvers.Resolvers<TContext>;
-  UsersNode?: UsersNodeResolvers.Resolvers<TContext>;
-  UsersItem?: UsersItemResolvers.Resolvers<TContext>;
   KpiNetworkData?: KpiNetworkDataResolvers.Resolvers<TContext>;
   KpiNetworkHistogramData?: KpiNetworkHistogramDataResolvers.Resolvers<TContext>;
   KpiHostsData?: KpiHostsDataResolvers.Resolvers<TContext>;
