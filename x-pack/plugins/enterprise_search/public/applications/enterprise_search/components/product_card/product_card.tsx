@@ -47,7 +47,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
   const SETUP_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.setupButton',
     {
-      defaultMessage: `Setup {productName}`,
+      defaultMessage: 'Setup {productName}',
       values: { productName: product.NAME },
     }
   );
