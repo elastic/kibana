@@ -14,6 +14,8 @@ import {
   EuiContextMenu,
   EuiFlyout,
   EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { SampleMlJob, SampleMlJobClickContext } from '../../triggers';
 import { EmbeddableRoot } from '../../../../../../src/plugins/embeddable/public';
@@ -30,11 +32,15 @@ export const job: SampleMlJob = {
 export const context: SampleMlJobClickContext = { job };
 
 export const DrilldownsWithEmbeddableExample: React.FC = () => {
+  const { plugins, managerWithEmbeddable } = useUiActions();
   const embeddable = React.useMemo(
-    () => new ButtonEmbeddable({ id: 'DrilldownsWithEmbeddableExample' }, {}),
-    []
+    () =>
+      new ButtonEmbeddable(
+        { id: 'DrilldownsWithEmbeddableExample' },
+        { uiActions: plugins.uiActionsEnhanced }
+      ),
+    [plugins.uiActionsEnhanced]
   );
-  const { plugins, manager } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const viewRef = React.useRef<'create' | 'manage'>('create');
@@ -96,27 +102,30 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
         <h3>With embeddable example</h3>
         <p>
           This example shows how drilldown manager can be added to an embeddable which executes{' '}
-          <EuiCode>VALUE_CLICK_TRIGGER</EuiCode> trigger.
+          <EuiCode>VALUE_CLICK_TRIGGER</EuiCode> trigger. Below card is an embeddable which executes
+          <EuiCode>VALUE_CLICK_TRIGGER</EuiCode> when it is clicked on.
         </p>
       </EuiText>
 
       <EuiSpacer />
 
-      {openManagerButton}
-
-      <EuiSpacer />
-
-      <div style={{ maxWidth: 200 }}>
-        <EmbeddableRoot embeddable={embeddable} />
-      </div>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div style={{ maxWidth: 200 }}>
+            <EmbeddableRoot embeddable={embeddable} />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
           <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
             onClose={() => setShowManager(false)}
             viewMode={viewRef.current}
-            dynamicActionManager={manager}
+            dynamicActionManager={managerWithEmbeddable}
             triggers={[VALUE_CLICK_TRIGGER]}
+            placeContext={{ embeddable }}
           />
         </EuiFlyout>
       )}

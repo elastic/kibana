@@ -28,7 +28,7 @@ export const job: SampleMlJob = {
 export const context: SampleMlJobClickContext = { job };
 
 export const DrilldownsNoEmbeddableExample: React.FC = () => {
-  const { plugins, manager } = useUiActions();
+  const { plugins, managerWithoutEmbeddable } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const viewRef = React.useRef<'create' | 'manage'>('create');
@@ -119,7 +119,7 @@ export const DrilldownsNoEmbeddableExample: React.FC = () => {
           <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
             onClose={() => setShowManager(false)}
             viewMode={viewRef.current}
-            dynamicActionManager={manager}
+            dynamicActionManager={managerWithoutEmbeddable}
             triggers={[SAMPLE_ML_JOB_CLICK_TRIGGER]}
           />
         </EuiFlyout>

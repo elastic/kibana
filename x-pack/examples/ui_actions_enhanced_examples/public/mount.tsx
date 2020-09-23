@@ -13,10 +13,20 @@ import { UiActionsExampleAppContextValue, context } from './context';
 export const mount = (
   coreSetup: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>
 ) => async ({ appBasePath, element }: AppMountParameters) => {
-  const [core, plugins, { manager }] = await coreSetup.getStartServices();
+  const [
+    core,
+    plugins,
+    { managerWithoutEmbeddable, managerWithEmbeddable },
+  ] = await coreSetup.getStartServices();
   const { App } = await import('./containers/app');
 
-  const deps: UiActionsExampleAppContextValue = { appBasePath, core, plugins, manager };
+  const deps: UiActionsExampleAppContextValue = {
+    appBasePath,
+    core,
+    plugins,
+    managerWithoutEmbeddable,
+    managerWithEmbeddable,
+  };
   const reactElement = (
     <context.Provider value={deps}>
       <App />

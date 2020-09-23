@@ -42,7 +42,8 @@ export interface StartDependencies {
 }
 
 export interface UiActionsEnhancedExamplesStart {
-  manager: UiActionsEnhancedDynamicActionManager;
+  managerWithoutEmbeddable: UiActionsEnhancedDynamicActionManager;
+  managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
 
 export class UiActionsEnhancedExamplesPlugin
@@ -86,14 +87,20 @@ export class UiActionsEnhancedExamplesPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): UiActionsEnhancedExamplesStart {
-    const manager = new UiActionsEnhancedDynamicActionManager({
+    const managerWithoutEmbeddable = new UiActionsEnhancedDynamicActionManager({
+      storage: new UiActionsEnhancedMemoryActionStorage(),
+      isCompatible: async () => true,
+      uiActions: plugins.uiActionsEnhanced,
+    });
+    const managerWithEmbeddable = new UiActionsEnhancedDynamicActionManager({
       storage: new UiActionsEnhancedMemoryActionStorage(),
       isCompatible: async () => true,
       uiActions: plugins.uiActionsEnhanced,
     });
 
     return {
-      manager,
+      managerWithoutEmbeddable,
+      managerWithEmbeddable,
     };
   }
 

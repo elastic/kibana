@@ -13,7 +13,8 @@ export interface UiActionsExampleAppContextValue {
   appBasePath: string;
   core: CoreStart;
   plugins: StartDependencies;
-  manager: UiActionsEnhancedDynamicActionManager;
+  managerWithoutEmbeddable: UiActionsEnhancedDynamicActionManager;
+  managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
 
 export const context = createContext<UiActionsExampleAppContextValue | null>(null);

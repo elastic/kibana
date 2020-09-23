@@ -7,14 +7,20 @@
 import * as React from 'react';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
-export const ButtonEmbeddableComponent: React.FC = () => {
+export interface ButtonEmbeddableComponentProps {
+  onClick: () => void;
+}
+
+export const ButtonEmbeddableComponent: React.FC<ButtonEmbeddableComponentProps> = ({
+  onClick,
+}) => {
   return (
     <EuiFlexItem>
       <EuiCard
         icon={<EuiIcon size="xxl" type={`logoKibana`} />}
         title={`Click me!`}
         description={'This embeddable fires "VALUE_CLICK" trigger on click'}
-        onClick={() => window.alert('Card clicked')}
+        onClick={onClick}
       />
     </EuiFlexItem>
   );

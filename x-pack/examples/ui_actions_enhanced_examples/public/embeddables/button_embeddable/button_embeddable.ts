@@ -6,13 +6,23 @@
 
 import { createElement } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Embeddable } from '../../../../../../src/plugins/embeddable/public';
+import { AdvancedUiActionsStart } from '../../../../../plugins/ui_actions_enhanced/public';
+import { Embeddable, EmbeddableInput } from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';
+import { VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 export const BUTTON_EMBEDDABLE = 'BUTTON_EMBEDDABLE';
 
+export interface ButtonEmbeddableParams {
+  uiActions: AdvancedUiActionsStart;
+}
+
 export class ButtonEmbeddable extends Embeddable {
   type = BUTTON_EMBEDDABLE;
+
+  constructor(input: EmbeddableInput, private readonly params: ButtonEmbeddableParams) {
+    super(input, {});
+  }
 
   reload() {}
 
@@ -21,7 +31,19 @@ export class ButtonEmbeddable extends Embeddable {
   public render(el: HTMLElement): void {
     super.render(el);
     this.el = el;
-    render(createElement(ButtonEmbeddableComponent, {}), el);
+    render(
+      createElement(ButtonEmbeddableComponent, {
+        onClick: () => {
+          this.params.uiActions.getTrigger(VALUE_CLICK_TRIGGER).exec({
+            embeddable: this,
+            data: {
+              data: [],
+            },
+          });
+        },
+      }),
+      el
+    );
   }
 
   public destroy() {
