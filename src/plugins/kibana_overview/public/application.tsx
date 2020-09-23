@@ -31,7 +31,7 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const { notifications, http } = core;
-  const newsfeed$ = newsfeed.createNewsFeed$(NewsfeedApiEndpoint.KIBANA);
+  const newsfeed$ = newsfeed.createNewsFeed$(NewsfeedApiEndpoint.KIBANA_ANALYTICS);
   const { chrome } = getServices();
   const navLinks = chrome.navLinks.getAll();
   const solutions = home.featureCatalogue

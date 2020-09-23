@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FetchResult } from 'src/plugins/newsfeed/public';
 
 interface Props {
-  newsFetchResult: void | FetchResult | null;
+  newsFetchResult: FetchResult;
 }
 
 export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
@@ -37,35 +37,31 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
     <EuiSpacer size="m" />
 
     <div className="kbnOverviewNews__content">
-      {newsFetchResult
-        ? newsFetchResult.feedItems
-            .slice(0, 3)
-            .map(({ title, description, linkUrl, publishOn }) => (
-              <article key={title}>
-                <header>
-                  <EuiTitle size="xxs">
-                    <h3>
-                      <EuiLink href={linkUrl} target="_blank">
-                        {title}
-                      </EuiLink>
-                    </h3>
-                  </EuiTitle>
+      {newsFetchResult.feedItems.slice(0, 3).map(({ title, description, linkUrl, publishOn }) => (
+        <article key={title}>
+          <header>
+            <EuiTitle size="xxs">
+              <h3>
+                <EuiLink href={linkUrl} target="_blank">
+                  {title}
+                </EuiLink>
+              </h3>
+            </EuiTitle>
 
-                  <EuiText size="xs" color="subdued">
-                    <p>
-                      <time dateTime={publishOn.format('YYYY-MM-DD')}>
-                        {publishOn.format('DD MMMM YYYY')}
-                      </time>
-                    </p>
-                  </EuiText>
-                </header>
+            <EuiText size="xs" color="subdued">
+              <p>
+                <time dateTime={publishOn.format('YYYY-MM-DD')}>
+                  {publishOn.format('DD MMMM YYYY')}
+                </time>
+              </p>
+            </EuiText>
+          </header>
 
-                <EuiText size="xs">
-                  <p>{description}</p>
-                </EuiText>
-              </article>
-            ))
-        : null}
+          <EuiText size="xs">
+            <p>{description}</p>
+          </EuiText>
+        </article>
+      ))}
     </div>
   </section>
 );

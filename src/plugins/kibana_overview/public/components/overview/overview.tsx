@@ -162,9 +162,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
             <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <NewsFeed newsFetchResult={newsFetchResult} />
-              </EuiFlexItem>
+              {newsFetchResult && newsFetchResult.feedItems.length ? (
+                <EuiFlexItem grow={1}>
+                  <NewsFeed newsFetchResult={newsFetchResult} />
+                </EuiFlexItem>
+              ) : null}
 
               <EuiFlexItem grow={3}>
                 <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
@@ -235,13 +237,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           </>
         )}
 
-        {!isNewKibanaInstance ? (
-          <>
-            <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-            <PageFooter features={features} />
-          </>
-        ) : null}
+        <PageFooter features={features} />
       </div>
     </main>
   );

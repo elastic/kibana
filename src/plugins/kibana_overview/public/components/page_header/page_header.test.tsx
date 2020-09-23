@@ -54,19 +54,31 @@ const mockManagement = {
 
 describe('PageHeader', () => {
   test('render', () => {
-    const component = shallowWithIntl(<PageHeader features={[]} />);
+    const component = shallowWithIntl(<PageHeader isNewKibanaInstance={true} features={[]} />);
     expect(component).toMatchSnapshot();
   });
   test('with dev tools', () => {
-    const component = shallowWithIntl(<PageHeader features={[mockDevTools]} />);
+    const component = shallowWithIntl(
+      <PageHeader isNewKibanaInstance={false} features={[mockDevTools]} />
+    );
     expect(component).toMatchSnapshot();
   });
   test('with management', () => {
-    const component = shallowWithIntl(<PageHeader features={[mockManagement]} />);
+    const component = shallowWithIntl(
+      <PageHeader isNewKibanaInstance={false} features={[mockManagement]} />
+    );
     expect(component).toMatchSnapshot();
   });
   test('with both apps', () => {
-    const component = shallowWithIntl(<PageHeader features={[mockDevTools, mockManagement]} />);
+    const component = shallowWithIntl(
+      <PageHeader isNewKibanaInstance={false} features={[mockDevTools, mockManagement]} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+  test('new Kibana instance', () => {
+    const component = shallowWithIntl(
+      <PageHeader isNewKibanaInstance={true} features={[mockDevTools, mockManagement]} />
+    );
     expect(component).toMatchSnapshot();
   });
 });
