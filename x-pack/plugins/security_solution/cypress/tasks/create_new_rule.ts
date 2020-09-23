@@ -13,7 +13,6 @@ import {
 } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
@@ -25,7 +24,6 @@ import {
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_TAB,
-  DEFINE_EDIT_BUTTON,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
@@ -40,12 +38,14 @@ import {
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
+  REFRESH_BUTTON,
   RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
+  RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
@@ -265,14 +265,10 @@ export const selectThresholdRuleType = () => {
 };
 
 export const waitForTheRuleToBeExecuted = () => {
-  cy.get('[data-test-subj=ruleStatus]')
-    .invoke('text')
-    .then((ruleStatus) => {
-      if (ruleStatus !== 'succeeded') {
-        cy.get('[data-test-subj=refreshButton]').click();
-        // cy.get('[data-test-subj=ruleStatus]').should('have.text', 'succeeded')
-      }
-    });
+  cy.get(RULE_STATUS).should((ruleStatus) => {
+    cy.get(REFRESH_BUTTON).click();
+    expect(ruleStatus).to.be('succeeded');
+  });
 };
 
 export const selectEqlRuleType = () => {
