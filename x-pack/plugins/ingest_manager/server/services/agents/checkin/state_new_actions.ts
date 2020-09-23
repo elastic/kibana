@@ -10,7 +10,6 @@ import {
   shareReplay,
   distinctUntilKeyChanged,
   switchMap,
-  mergeMap,
   merge,
   filter,
   timeout,
@@ -38,6 +37,8 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
+
+const RATE_LIMIT_MAX_DELAY_MS = 5 * 60 * 1000; // 5 minutes
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -159,11 +160,19 @@ export function agentCheckinStateNewActionsFactory() {
   const agentPolicies$ = new Map<string, Observable<AgentPolicyAction>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
-  const rateLimiter = createRateLimiter(
+  const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+  const rateLimiterIntervalMs =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitIntervalMs ??
-      AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+    AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS;
+  const rateLimiterRequestPerInterval =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitRequestPerInterval ??
-      AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL
+    AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL;
+  const rateLimiterMaxDelay = Math.min(RATE_LIMIT_MAX_DELAY_MS, pollingTimeoutMs);
+
+  const rateLimiter = createRateLimiter(
+    rateLimiterIntervalMs,
+    rateLimiterRequestPerInterval,
+    rateLimiterMaxDelay
   );
 
   async function subscribeToNewActions(
@@ -186,7 +195,7 @@ export function agentCheckinStateNewActionsFactory() {
     const stream$ = agentPolicy$.pipe(
       timeout(
         // Set a timeout 3s before the real timeout to have a chance to respond an empty response before socket timeout
-        Math.max((appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0) - 3000, 3000)
+        Math.max(pollingTimeoutMs - 3000, 3000)
       ),
       filter(
         (action) =>
@@ -197,9 +206,9 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      mergeMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      switchMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
       merge(newActions$),
-      mergeMap(async (data) => {
+      switchMap(async (data) => {
         if (!data) {
           return;
         }
