@@ -161,7 +161,7 @@ class PercentilesUi extends Component {
             />
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <AddDeleteButtons
               onAdd={handleAdd}
               onDelete={handleDelete}

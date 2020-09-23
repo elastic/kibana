@@ -104,6 +104,7 @@ export const metricsItems = schema.object({
       })
     )
   ),
+  numberOfSignificantValueDigits: numberOptional,
   percentiles: schema.maybe(
     schema.arrayOf(
       schema.object({

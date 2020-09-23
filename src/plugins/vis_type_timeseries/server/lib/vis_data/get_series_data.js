@@ -43,7 +43,7 @@ export async function getSeriesData(req, panel) {
       (acc, items) => acc.concat(items),
       []
     );
-
+    console.log(JSON.stringify(searches));
     const data = await searchStrategy.search(req, searches);
 
     const handleResponseBodyFn = handleResponseBody(panel);
