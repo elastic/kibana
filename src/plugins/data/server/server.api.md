@@ -628,7 +628,7 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, onUnsupportedTimePattern, shortDotsEnable, metaFields, }: IndexPatternDeps);
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
@@ -673,6 +673,8 @@ export class IndexPattern implements IIndexPattern {
     getFieldByName(name: string): IndexPatternField | undefined;
     // (undocumented)
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
+    // (undocumented)
+    getIndex(): string;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternField" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -688,9 +690,54 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
-    intervalName?: string | null;
+    init(): Promise<this>;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    timeFieldName?: string;
+    initFromSpec(spec: IndexPatternSpec): this;
+    // (undocumented)
+    intervalName: string | undefined | null;
+    // (undocumented)
+    isTimeBased(): boolean;
+    // (undocumented)
+    isTimeBasedWildcard(): boolean;
+    // (undocumented)
+    isTimeNanosBased(): boolean;
+    // (undocumented)
+    isUnsupportedTimePattern(): boolean;
+    // (undocumented)
+    isWildcard(): boolean;
+    // (undocumented)
+    metaFields: string[];
+    // (undocumented)
+    migrate(newTitle: string): Promise<this>;
+    // (undocumented)
+    originalBody: {
+        [key: string]: any;
+    };
+    // (undocumented)
+    popularizeField(fieldName: string, unit?: number): Promise<void>;
+    // (undocumented)
+    prepBody(): {
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | null | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
+    };
+    // (undocumented)
+    refreshFields(): Promise<void | Error | never[] | undefined>;
+    // (undocumented)
+    removeScriptedField(fieldName: string): void;
+    // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    sourceFilters?: SourceFilter[];
+    // (undocumented)
+    timeFieldName: string | undefined;
     // (undocumented)
     title: string;
     // (undocumented)

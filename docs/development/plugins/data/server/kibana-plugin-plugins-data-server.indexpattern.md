@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-server.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, onUnsupportedTimePattern, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-server.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -27,7 +27,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [formatField](./kibana-plugin-plugins-data-server.indexpattern.formatfield.md) |  | <code>any</code> |  |
 |  [formatHit](./kibana-plugin-plugins-data-server.indexpattern.formathit.md) |  | <code>any</code> |  |
 |  [id](./kibana-plugin-plugins-data-server.indexpattern.id.md) |  | <code>string</code> |  |
-|  [intervalName](./kibana-plugin-plugins-data-server.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
+|  [intervalName](./kibana-plugin-plugins-data-server.indexpattern.intervalname.md) |  | <code>string &#124; undefined &#124; null</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-server.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [originalBody](./kibana-plugin-plugins-data-server.indexpattern.originalbody.md) |  | <code>{</code><br/><code>        [key: string]: any;</code><br/><code>    }</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
@@ -48,6 +48,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-server.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-server.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfield.md) |  |  |
+|  [getIndex()](./kibana-plugin-plugins-data-server.indexpattern.getindex.md) |  |  |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-server.indexpattern.getsourcefiltering.md) |  |  |
@@ -57,7 +58,9 @@ export declare class IndexPattern implements IIndexPattern
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-server.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
+|  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-server.indexpattern.isunsupportedtimepattern.md) |  |  |
 |  [isWildcard()](./kibana-plugin-plugins-data-server.indexpattern.iswildcard.md) |  |  |
+|  [migrate(newTitle)](./kibana-plugin-plugins-data-server.indexpattern.migrate.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-server.indexpattern.popularizefield.md) |  |  |
 |  [prepBody()](./kibana-plugin-plugins-data-server.indexpattern.prepbody.md) |  |  |
 |  [refreshFields()](./kibana-plugin-plugins-data-server.indexpattern.refreshfields.md) |  |  |

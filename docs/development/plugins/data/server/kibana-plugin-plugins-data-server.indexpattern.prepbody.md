@@ -10,7 +10,7 @@
 prepBody(): {
         title: string;
         timeFieldName: string | undefined;
-        intervalName: string | undefined;
+        intervalName: string | null | undefined;
         sourceFilters: string | undefined;
         fields: string | undefined;
         fieldFormatMap: string | undefined;
@@ -23,7 +23,7 @@ prepBody(): {
 `{
         title: string;
         timeFieldName: string | undefined;
-        intervalName: string | undefined;
+        intervalName: string | null | undefined;
         sourceFilters: string | undefined;
         fields: string | undefined;
         fieldFormatMap: string | undefined;
