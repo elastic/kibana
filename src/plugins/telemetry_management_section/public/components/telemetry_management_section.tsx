@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
+import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { Field } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
 
@@ -53,6 +54,7 @@ interface Props {
 interface State {
   processing: boolean;
   showExample: boolean;
+  showSecurityExample: boolean;
   queryMatches: boolean | null;
   enabled: boolean;
 }
@@ -61,6 +63,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
   state: State = {
     processing: false,
     showExample: false,
+    showSecurityExample: false,
     queryMatches: null,
     enabled: this.props.telemetryService.getIsOptedIn() || false,
   };
@@ -87,7 +90,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
   render() {
     const { telemetryService } = this.props;
-    const { showExample, queryMatches, enabled, processing } = this.state;
+    const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -103,6 +106,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
           <OptInExampleFlyout
             fetchExample={telemetryService.fetchExample}
             onClose={this.toggleExample}
+          />
+        )}
+        {showSecurityExample && (
+          <OptInSecurityExampleFlyout
+            fetchExample={telemetryService.fetchExample}
+            onClose={this.toggleSecurityExample}
           />
         )}
         <EuiPanel paddingSize="l">
@@ -125,13 +134,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   type: 'boolean',
                   name: 'telemetry:enabled',
                   displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                    defaultMessage: 'Provide usage statistics',
+                    defaultMessage: 'Provide usage and security statistics',
                   }),
                   value: enabled,
                   description: this.renderDescription(),
                   defVal: true,
                   ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                    defaultMessage: 'Provide usage statistics',
+                    defaultMessage: 'Provide usage and security statistics',
                   }),
                 } as any
               }
@@ -197,12 +206,21 @@ export class TelemetryManagementSection extends Component<Props, State> {
         />
       </p>
       <p>
+        See examples of the{' '}
         <EuiLink onClick={this.toggleExample}>
           <FormattedMessage
             id="telemetry.seeExampleOfWhatWeCollectLinkText"
-            defaultMessage="See an example of what we collect"
+            defaultMessage="cluster data"
           />
-        </EuiLink>
+        </EuiLink>{' '}
+        and{' '}
+        <EuiLink onClick={this.toggleSecurityExample}>
+          <FormattedMessage
+            id="telemetry.seeExampleOfWhatWeCollectLinkText"
+            defaultMessage="endpoint security data"
+          />
+        </EuiLink>{' '}
+        that we collect.
       </p>
     </Fragment>
   );
@@ -243,6 +261,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
   toggleExample = () => {
     this.setState({
       showExample: !this.state.showExample,
+    });
+  };
+
+  toggleSecurityExample = () => {
+    this.setState({
+      showSecurityExample: !this.state.showSecurityExample,
     });
   };
 }

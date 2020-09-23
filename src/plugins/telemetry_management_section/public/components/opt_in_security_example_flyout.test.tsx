@@ -18,14 +18,10 @@
  */
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { OptInExampleFlyout } from './opt_in_example_flyout';
+import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 
 describe('OptInDetailsComponent', () => {
-  it('usage data renders as expected', () => {
-    expect(
-      shallowWithIntl(
-        <OptInExampleFlyout fetchExample={jest.fn(async () => [])} onClose={jest.fn()} />
-      )
-    ).toMatchSnapshot();
+  it('security flyout renders as expected', () => {
+    expect(shallowWithIntl(<OptInSecurityExampleFlyout onClose={jest.fn()} />)).toMatchSnapshot();
   });
 });
