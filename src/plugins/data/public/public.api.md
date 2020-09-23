@@ -1731,11 +1731,54 @@ export interface QueryStateChange extends QueryStateChangePartial {
     globalFilters?: boolean;
 }
 
-// Warning: (ae-forgotten-export) The symbol "Props" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "prepend" | "query" | "size" | "className" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "isInvalid" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+export const QueryStringInput: React.FC<QueryStringInputProps>;
+
+// Warning: (ae-missing-release-tag) "QueryStringInputProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface QueryStringInputProps {
+    // (undocumented)
+    bubbleSubmitEvent?: boolean;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    dataTestSubj?: string;
+    // (undocumented)
+    disableAutoFocus?: boolean;
+    // (undocumented)
+    indexPatterns: Array<IIndexPattern | string>;
+    // (undocumented)
+    isInvalid?: boolean;
+    // (undocumented)
+    languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+    // (undocumented)
+    onBlur?: () => void;
+    // (undocumented)
+    onChange?: (query: Query) => void;
+    // (undocumented)
+    onChangeQueryInputFocus?: (isFocused: boolean) => void;
+    // (undocumented)
+    onSubmit?: (query: Query) => void;
+    // Warning: (ae-forgotten-export) The symbol "PersistedLog" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    persistedLog?: PersistedLog;
+    // (undocumented)
+    placeholder?: string;
+    // (undocumented)
+    prepend?: any;
+    // (undocumented)
+    query: Query;
+    // (undocumented)
+    screenTitle?: string;
+    // Warning: (ae-forgotten-export) The symbol "SuggestionsListSize" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    size?: SuggestionsListSize;
+}
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
