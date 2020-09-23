@@ -10,7 +10,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ESQuery } from '../../../common/typed_json';
-import { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../src/plugins/data/public';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { inputsModel } from '../../common/store';
@@ -167,7 +171,7 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineResponse((prevResponse) => ({
@@ -181,7 +185,7 @@ export const useTimelineEvents = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

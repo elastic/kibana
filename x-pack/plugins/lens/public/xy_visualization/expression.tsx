@@ -26,6 +26,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
+  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -253,6 +254,12 @@ export function XYChart({
     ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
+  const layersAlreadyFormatted: Record<string, boolean> = {};
+  // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
+  const safeXAccessorLabelRenderer = (value: unknown): string =>
+    xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
+      ? (value as string)
+      : xAxisFormatter.convert(value);
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
@@ -366,7 +373,7 @@ export function XYChart({
         theme={chartTheme}
         baseTheme={chartBaseTheme}
         tooltip={{
-          headerFormatter: (d) => xAxisFormatter.convert(d.value),
+          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
@@ -411,9 +418,15 @@ export function XYChart({
 
           const points = [
             {
-              row: table.rows.findIndex(
-                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
-              ),
+              row: table.rows.findIndex((row) => {
+                if (layer.xAccessor) {
+                  if (layersAlreadyFormatted[layer.xAccessor]) {
+                    // stringify the value to compare with the chart value
+                    return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+                  }
+                  return row[layer.xAccessor] === xyGeometry.x;
+                }
+              }),
               column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
@@ -457,7 +470,7 @@ export function XYChart({
           strokeWidth: 2,
         }}
         hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
-        tickFormat={(d) => xAxisFormatter.convert(d)}
+        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
@@ -506,9 +519,43 @@ export function XYChart({
 
           const table = data.tables[layerId];
 
+          const isPrimitive = (value: unknown): boolean =>
+            value != null && typeof value !== 'object';
+
+          // what if row values are not primitive? That is the case of, for instance, Ranges
+          // remaps them to their serialized version with the formatHint metadata
+          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
+          const tableConverted: KibanaDatatable = {
+            ...table,
+            rows: table.rows.map((row) => {
+              const newRow = { ...row };
+              for (const column of table.columns) {
+                const record = newRow[column.id];
+                if (record && !isPrimitive(record)) {
+                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
+                }
+              }
+              return newRow;
+            }),
+          };
+
+          // save the id of the layer with the custom table
+          table.columns.reduce<Record<string, boolean>>(
+            (alreadyFormatted: Record<string, boolean>, { id }) => {
+              if (alreadyFormatted[id]) {
+                return alreadyFormatted;
+              }
+              alreadyFormatted[id] = table.rows.some(
+                (row, i) => row[id] !== tableConverted.rows[i][id]
+              );
+              return alreadyFormatted;
+            },
+            layersAlreadyFormatted
+          );
+
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
-          const rows = table.rows.filter(
+          const rows = tableConverted.rows.filter(
             (row) =>
               !(xAccessor && typeof row[xAccessor] === 'undefined') &&
               !(
@@ -561,19 +608,28 @@ export function XYChart({
               // * Key - Y name
               // * Formatted value - Y name
               if (accessors.length > 1) {
-                return d.seriesKeys
+                const result = d.seriesKeys
                   .map((key: string | number, i) => {
-                    if (i === 0 && splitHint) {
+                    if (
+                      i === 0 &&
+                      splitHint &&
+                      splitAccessor &&
+                      !layersAlreadyFormatted[splitAccessor]
+                    ) {
                       return formatFactory(splitHint).convert(key);
                     }
                     return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
                   })
                   .join(' - ');
+                return result;
               }
 
               // For formatted split series, format the key
               // This handles splitting by dates, for example
               if (splitHint) {
+                if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
+                  return d.seriesKeys[0];
+                }
                 return formatFactory(splitHint).convert(d.seriesKeys[0]);
               }
               // This handles both split and single-y cases:

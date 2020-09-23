@@ -27,3 +27,10 @@ export * from './query';
 export * from './search';
 export * from './types';
 export * from './utils';
+
+/**
+ * Use data plugin interface instead
+ * @deprecated
+ */
+
+export { IndexPatternAttributes } from './types';
