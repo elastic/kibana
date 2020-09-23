@@ -210,7 +210,8 @@ export function InnerWorkspacePanel({
     if (
       !activeDatasourceId ||
       !visualizeTriggerFieldContext ||
-      localState.visualizeTriggerSuggestionsLoaded
+      localState.visualizeTriggerSuggestionsLoaded ||
+      title
     ) {
       return;
     }
@@ -225,7 +226,9 @@ export function InnerWorkspacePanel({
     });
 
     if (suggestions.length) {
-      switchToSuggestion(dispatch, suggestions[0], 'SWITCH_VISUALIZATION');
+      const selectedSuggestion =
+        suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+      switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
       setLocalState((s) => ({ ...s, visualizeTriggerSuggestionsLoaded: true }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

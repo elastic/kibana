@@ -99,7 +99,9 @@ export function App({
       isLoading: !!docId,
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
-      query: data.query.queryString.getDefaultQuery(),
+      query: visualizeTriggerFieldContext
+        ? data.query.queryString.getQuery()
+        : data.query.queryString.getDefaultQuery(),
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
@@ -134,7 +136,10 @@ export function App({
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh
+    // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+    // we keep the filters
+    if (visualizeTriggerFieldContext) return;
+
     data.query.filterManager.setAppFilters([]);
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
@@ -179,6 +184,7 @@ export function App({
     core.uiSettings,
     data.query,
     history,
+    visualizeTriggerFieldContext,
   ]);
 
   const getLastKnownDocWithoutPinnedFilters = useCallback(
