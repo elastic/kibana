@@ -65,6 +65,7 @@ export const DynamicFields = () => {
                       onClick={() => removeItem(item.id)}
                       iconType="minusInCircle"
                       aria-label="Remove item"
+                      style={{ marginTop: '28px' }}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -128,7 +129,7 @@ export const DynamicFieldsValidation = () => {
     <Form form={form}>
       <UseField path="name" config={{ label: 'Name' }} component={TextField} />
       <EuiSpacer />
-      <UseArray path="relationships" validations={validations}>
+      <UseArray path="relationships" validations={relationShipsValidations}>
         {({ items, addItem, removeItem, error, form: { isSubmitted } }) => {
           const isInvalid = error !== null && isSubmitted;
           return (
@@ -157,11 +158,106 @@ export const DynamicFieldsValidation = () => {
                           onClick={() => removeItem(item.id)}
                           iconType="minusInCircle"
                           aria-label="Remove item"
+                          style={{ marginTop: '28px' }}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ))}
                 </>
+              </EuiFormRow>
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                Add relationship
+              </EuiButtonEmpty>
+              <EuiSpacer />
+            </>
+          );
+        }}
+      </UseArray>
+
+      <EuiSpacer />
+      <EuiButton onClick={submitForm} fill disabled={form.isSubmitted && form.isValid === false}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+## Reorder array items
+
+```js
+export const DynamicFieldsReorder = () => {
+  const { form } = useForm();
+
+  const submitForm = async () => {
+    const { data } = await form.submit();
+    console.log(data);
+  };
+
+  return (
+    <Form form={form}>
+      <UseField path="name" config={{ label: 'Name' }} component={TextField} />
+      <EuiSpacer />
+      <UseArray path="relationships">
+        {({ items, addItem, removeItem, moveItem }) => {
+          const onDragEnd = ({ source, destination }: DropResult) => {
+            if (source && destination) {
+              moveItem(source.index, destination.index);
+            }
+          };
+
+          return (
+            <>
+              <EuiFormRow label="Relationships" fullWidth>
+                <EuiDragDropContext onDragEnd={onDragEnd}>
+                  <EuiDroppable droppableId="1">
+                    {items.map((item, idx) => {
+                      return (
+                        <EuiDraggable
+                          spacing="none"
+                          draggableId={String(item.id)}
+                          index={idx}
+                          key={item.id}
+                        >
+                          {(provided) => {
+                            return (
+                              <EuiFlexGroup key={item.id}>
+                                <EuiFlexItem grow={false}>
+                                  <div {...provided.dragHandleProps} style={{ marginTop: '30px' }}>
+                                    <EuiIcon type="grab" />
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <UseField
+                                    path={`${item.path}.parent`}
+                                    config={{ label: 'Parent' }}
+                                    component={TextField}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <UseField
+                                    path={`${item.path}.child`}
+                                    config={{ label: 'Child' }}
+                                    component={TextField}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiButtonIcon
+                                    color="danger"
+                                    onClick={() => removeItem(item.id)}
+                                    iconType="minusInCircle"
+                                    aria-label="Remove item"
+                                    style={{ marginTop: '28px' }}
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            );
+                          }}
+                        </EuiDraggable>
+                      );
+                    })}
+                  </EuiDroppable>
+                </EuiDragDropContext>
               </EuiFormRow>
               <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
                 Add relationship
