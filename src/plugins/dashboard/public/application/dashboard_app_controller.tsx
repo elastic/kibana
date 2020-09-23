@@ -496,7 +496,6 @@ export class DashboardAppController {
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
-                  showPlaceholderTitle: true,
                 };
                 const embeddableId =
                   'embeddableId' in incomingEmbeddable

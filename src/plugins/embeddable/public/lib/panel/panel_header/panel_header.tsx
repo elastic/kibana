@@ -36,7 +36,7 @@ import { uiToReactComponent } from '../../../../../kibana_react/public';
 export interface PanelHeaderProps {
   title?: string;
   isViewMode: boolean;
-  hidePanelTitles: boolean;
+  hidePanelTitle: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
@@ -127,17 +127,16 @@ function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
 export function PanelHeader({
   title,
   isViewMode,
-  hidePanelTitles,
+  hidePanelTitle,
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
   notifications,
   embeddable,
   headerId,
-  showPlaceholderTitle,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
-  const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
+  const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
   const showPanelBar = badges.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -200,10 +199,10 @@ export function PanelHeader({
         className="embPanel__title embPanel__dragger"
       >
         {showTitle ? (
-          showPlaceholderTitle ? (
-            getPlaceholderTitle()
-          ) : (
+          title ? (
             getTitle()
+          ) : (
+            getPlaceholderTitle()
           )
         ) : (
           <EuiScreenReaderOnly>

@@ -21,10 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
-import {
-  VisualizeInput,
-  VisualizeEmbeddableContract,
-} from '../../../../../../../visualizations/public';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
@@ -60,17 +56,6 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
   public async execute({ embeddable }: ActionContext) {
     const data = await this.getDataFromUser({ embeddable });
     const { title, hideTitle } = data;
-    const showPlaceholderTitle = (title === undefined || title === '') && !hideTitle;
-    if (this.isVisualizeEmbeddable(embeddable)) {
-      (embeddable as VisualizeEmbeddableContract).updateInput({ title, showPlaceholderTitle });
-    } else {
-      embeddable.updateInput({ title });
-    }
-  }
-
-  private isVisualizeEmbeddable(
-    embeddable: IEmbeddable
-  ): embeddable is VisualizeEmbeddableContract {
-    return Boolean((embeddable.getInput() as VisualizeInput).showPlaceholderTitle !== undefined);
+    embeddable.updateInput({ title, hidePanelTitles: hideTitle });
   }
 }

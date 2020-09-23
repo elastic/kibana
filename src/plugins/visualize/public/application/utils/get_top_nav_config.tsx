@@ -71,7 +71,6 @@ export const getTopNavConfig = (
   {
     application,
     chrome,
-    embeddable,
     history,
     share,
     setActiveUrl,

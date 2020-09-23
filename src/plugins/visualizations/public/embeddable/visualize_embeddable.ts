@@ -72,7 +72,6 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
-  showPlaceholderTitle?: boolean;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
