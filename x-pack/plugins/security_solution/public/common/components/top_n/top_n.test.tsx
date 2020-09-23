@@ -6,13 +6,13 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-
+import { wait as waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { allEvents, defaultOptions } from './helpers';
-import { TopN } from './top_n';
+import { TopN, Props as TopNProps } from './top_n';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -88,19 +88,6 @@ const combinedQueries = {
 };
 
 describe('TopN', () => {
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
-
   const query = { query: '', language: 'kuery' };
 
   describe('common functionality', () => {
@@ -181,40 +168,43 @@ describe('TopN', () => {
   });
 
   describe('alerts view', () => {
-    let toggleTopN: () => void;
-    let wrapper: ReactWrapper;
-
-    beforeEach(() => {
-      toggleTopN = jest.fn();
-      wrapper = mount(
+    const testProps: TopNProps = {
+      defaultView: 'alert',
+      field,
+      filters: [],
+      from: '2020-04-14T00:31:47.695Z',
+      indexPattern: mockIndexPattern,
+      options: defaultOptions,
+      query,
+      setAbsoluteRangeDatePicker,
+      setAbsoluteRangeDatePickerTarget: 'global',
+      setQuery: jest.fn(),
+      to: '2020-04-15T00:31:47.695Z',
+      toggleTopN: jest.fn(),
+      value,
+    };
+    test(`it renders SignalsByCategory when defaultView is 'signal'`, async () => {
+      const wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="alert"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(true);
+      });
     });
 
-    test(`it renders SignalsByCategory when defaultView is 'signal'`, () => {
-      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(true);
-    });
-
-    test(`it does NOT render EventsByDataset when defaultView is 'signal'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(false);
+    test(`it does NOT render EventsByDataset when defaultView is 'signal'`, async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TopN {...testProps} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
+        ).toBe(false);
+      });
     });
   });
 

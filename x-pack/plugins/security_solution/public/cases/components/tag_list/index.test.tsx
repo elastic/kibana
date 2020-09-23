@@ -27,6 +27,14 @@ jest.mock(
       children({ tags: ['rad', 'dude'] }),
   })
 );
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiFieldText: () => <input />,
+  };
+});
 const onSubmit = jest.fn();
 const defaultProps = {
   disabled: false,
@@ -36,16 +44,6 @@ const defaultProps = {
 };
 
 describe('TagList ', () => {
-  // Suppress warnings about "noSuggestions" prop
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
   const formHookMock = getFormMock({ tags: sampleTags });

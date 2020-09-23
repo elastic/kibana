@@ -22,7 +22,17 @@ import {
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name, @typescript-eslint/no-explicit-any
+    EuiFieldText: (props: any) => {
+      const { isInvalid, isLoading, fullWidth, inputRef, isDisabled, ...validInputProps } = props;
+      return <input {...validInputProps} />;
+    },
+  };
+});
 describe('StepAboutRuleComponent', () => {
   let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
   const setFormHook = <K extends keyof RuleStepsFormHooks>(
@@ -31,17 +41,6 @@ describe('StepAboutRuleComponent', () => {
   ) => {
     formHook = hook as typeof formHook;
   };
-  // Suppress warnings about "isDisabled" prop
-  // Suppress warnings about controlled input AddItem
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
 
   beforeEach(() => {
     formHook = null;

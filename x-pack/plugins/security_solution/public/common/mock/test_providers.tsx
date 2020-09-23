@@ -11,7 +11,15 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import {
+  DragDropContext,
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+  DroppableStateSnapshot,
+  DropResult,
+  ResponderProvided,
+} from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +35,45 @@ import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
+jest.mock('react-beautiful-dnd', () => ({
+  Droppable: ({
+    children,
+  }: {
+    children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        droppableProps: {
+          'data-rbd-droppable-context-id': '123',
+          'data-rbd-droppable-id': '123',
+        },
+        innerRef: jest.fn(),
+      },
+      {
+        isDraggingOver: false,
+        isUsingPlaceholder: false,
+      }
+    ),
+  Draggable: ({
+    children,
+  }: {
+    children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        draggableProps: {
+          'data-rbd-draggable-context-id': '123',
+          'data-rbd-draggable-id': '123',
+        },
+        innerRef: jest.fn(),
+      },
+      {
+        isDragging: false,
+        isDropAnimating: false,
+      }
+    ),
+  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
+}));
 jest.mock('@kbn/i18n/react', () => {
   const originalModule = jest.requireActual('@kbn/i18n/react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
@@ -36,6 +83,7 @@ jest.mock('@kbn/i18n/react', () => {
     FormattedRelative,
   };
 });
+
 const state: State = mockGlobalState;
 
 interface Props {

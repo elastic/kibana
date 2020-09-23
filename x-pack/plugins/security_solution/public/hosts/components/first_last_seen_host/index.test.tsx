@@ -26,16 +26,6 @@ describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
 
-  // Suppress warnings about "react-apollo" until we migrate to apollo@3
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-
   test('Loading', async () => {
     useFirstLastSeenHostMock.mockReturnValue([true, MOCKED_RESPONSE]);
     const { container } = render(

@@ -84,22 +84,6 @@ describe('DraggableWrapperHoverContent', () => {
     });
   });
 
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
-
   /**
    * The tests for "Filter for value" and "Filter out value" are similar enough
    * to combine them into "table tests" using this array

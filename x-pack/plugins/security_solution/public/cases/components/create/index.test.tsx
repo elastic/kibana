@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
 import { Create } from '.';
 import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
@@ -22,6 +21,14 @@ import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/stati
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiFieldText: () => <input />,
+  };
+});
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
 
@@ -74,16 +81,6 @@ const defaultPostCase = {
   postCase,
 };
 describe('Create case', () => {
-  // Suppress warnings about "noSuggestions" prop
-  // /* eslint-disable no-console */
-  // const originalError = console.error;
-  // beforeAll(() => {
-  //   console.error = jest.fn();
-  // });
-  // afterAll(() => {
-  //   console.error = originalError;
-  // });
-  // /* eslint-enable no-console */
   const fetchTags = jest.fn();
   const formHookMock = getFormMock(sampleData);
   beforeEach(() => {

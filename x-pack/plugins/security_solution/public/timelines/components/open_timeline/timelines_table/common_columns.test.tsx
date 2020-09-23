@@ -22,7 +22,15 @@ import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('#getCommonColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];

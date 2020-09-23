@@ -27,19 +27,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.0"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -77,19 +70,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.1"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -127,19 +113,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.2"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -177,19 +156,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.3"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -227,19 +199,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.4"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -277,19 +242,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.5"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -327,19 +285,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.6"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -377,19 +328,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.7"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -427,19 +371,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.8"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -477,19 +414,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.9"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}
@@ -527,19 +457,12 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <Connect(Droppable)
+      <Droppable
         direction="horizontal"
         droppableId="droppableId.timelineProviders.foo.group.10"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
       >
         <Component />
-      </Connect(Droppable)>
+      </Droppable>
     </EuiFlexItem>
     <Styled(EuiFlexItem)
       grow={false}

@@ -58,20 +58,6 @@ const legendItems: LegendItem[] = [
 
 describe('DraggableLegend', () => {
   const height = 400;
-
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
-
   describe('rendering', () => {
     let wrapper: ReactWrapper;
 
