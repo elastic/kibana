@@ -16,7 +16,6 @@ import { useValues } from 'kea';
 import { EnterpriseSearch } from './';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
-import { ProductCard } from './components/product_card';
 import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {

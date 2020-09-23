@@ -14,7 +14,6 @@ import '../../../__mocks__/kea.mock';
 import { useValues } from 'kea';
 
 import { ProductSelector } from './';
-import { ErrorConnecting } from '../error_connecting';
 import { ProductCard } from '../product_card';
 
 describe('ProductSelector', () => {

@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useValues } from 'kea';
 import upperFirst from 'lodash/upperFirst';
 import snakeCase from 'lodash/snakeCase';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
+
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { sendTelemetry } from '../../../shared/telemetry';
@@ -29,7 +31,7 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useValues(HttpLogic);  
+  const { http } = useValues(HttpLogic);
   const {
     config: { host },
   } = useContext(KibanaContext) as IKibanaContext;
