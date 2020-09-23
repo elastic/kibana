@@ -17,7 +17,11 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -87,7 +91,7 @@ export const useHostOverview = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostOverviewResponse((prevResponse) => ({
@@ -98,7 +102,7 @@ export const useHostOverview = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
