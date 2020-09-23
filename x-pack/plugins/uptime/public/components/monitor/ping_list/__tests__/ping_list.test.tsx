@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingListComponent, toggleDetails } from '../ping_list';
+import { PingListComponent, rowShouldExpand, toggleDetails } from '../ping_list';
 import { Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../../overview/monitor_list/types';
 
@@ -272,6 +272,16 @@ describe('PingList component', () => {
           }
         />
       `);
+    });
+
+    describe('rowShouldExpand', () => {
+      // TODO: expand for all cases
+      it('returns true for suitejourney monitors', () => {
+        const ping = pings[0];
+        // @ts-ignore summary documents may contain synthetics fields
+        ping.monitor.type = 'suitejourney';
+        expect(rowShouldExpand(ping)).toBe(true);
+      });
     });
   });
 });
