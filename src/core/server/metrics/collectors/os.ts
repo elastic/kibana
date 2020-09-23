@@ -36,7 +36,10 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   private readonly cgroupCollector: OsCgroupMetricsCollector;
 
   constructor(options: OpsMetricsCollectorOptions) {
-    this.cgroupCollector = new OsCgroupMetricsCollector(options);
+    this.cgroupCollector = new OsCgroupMetricsCollector({
+      ...options,
+      logger: options.logger.get('cgroup'),
+    });
   }
 
   public async collect(): Promise<OpsOsMetrics> {
