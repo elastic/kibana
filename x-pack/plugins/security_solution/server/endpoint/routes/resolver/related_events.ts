@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * @deprecated use the `resolver/events` route and handler instead
+ */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';

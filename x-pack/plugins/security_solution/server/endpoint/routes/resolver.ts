@@ -29,6 +29,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
   // this route will be removed in favor of the one below
   router.post(
     {
+      // @deprecated use `/resolver/events` instead
       path: '/api/endpoint/resolver/{id}/events',
       validate: validateRelatedEvents,
       options: { authRequired: true },

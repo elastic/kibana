@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/**
+ * @deprecated use the `events.ts` file's query instead
+ */
 import { SearchResponse } from 'elasticsearch';
 import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
