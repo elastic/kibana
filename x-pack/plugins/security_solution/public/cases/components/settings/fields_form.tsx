@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, Suspense, useState, useCallback, useEffect } from 'react';
+import React, { memo, Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { AllSettingFields, CaseSettingsConnector } from './types';
@@ -18,13 +18,10 @@ interface Props {
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
-  const [currentFields, setCurrentFields] = useState<AllSettingFields>(fields ?? {});
-  const onChange = useCallback(
-    (p, v) => setCurrentFields((prevFields) => ({ ...prevFields, [p]: v })),
-    [setCurrentFields]
-  );
-
-  useEffect(() => onFieldsChange(currentFields), [currentFields, onFieldsChange]);
+  const onChange = useCallback((p, v) => onFieldsChange({ ...fields, [p]: v }), [
+    fields,
+    onFieldsChange,
+  ]);
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
@@ -45,7 +42,7 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange
             </EuiFlexGroup>
           }
         >
-          <FieldsComponent fields={currentFields} connector={connector} onChange={onChange} />
+          <FieldsComponent fields={fields} connector={connector} onChange={onChange} />
         </Suspense>
       ) : null}
     </>
