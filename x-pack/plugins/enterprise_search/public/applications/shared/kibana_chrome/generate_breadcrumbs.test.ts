@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/shallow_usecontext.mock';
+import '../../__mocks__/kea.mock';
 import '../../__mocks__/react_router_history.mock';
-import { mockKibanaContext, mockHistory } from '../../__mocks__';
+import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
 jest.mock('../react_router_helpers', () => ({ letBrowserHandleEvent: jest.fn(() => false) }));
 import { letBrowserHandleEvent } from '../react_router_helpers';
@@ -53,7 +53,7 @@ describe('useBreadcrumbs', () => {
     const event = { preventDefault: jest.fn() };
     breadcrumb.onClick(event);
 
-    expect(mockKibanaContext.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test');
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test');
     expect(mockHistory.createHref).toHaveBeenCalled();
     expect(event.preventDefault).toHaveBeenCalled();
   });
@@ -64,7 +64,7 @@ describe('useBreadcrumbs', () => {
     ])[0] as any;
     breadcrumb.onClick({ preventDefault: () => null });
 
-    expect(mockKibanaContext.navigateToUrl).toHaveBeenCalledWith('/test');
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test');
     expect(mockHistory.createHref).not.toHaveBeenCalled();
   });
 
@@ -74,7 +74,7 @@ describe('useBreadcrumbs', () => {
     (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
     breadcrumb.onClick();
 
-    expect(mockKibanaContext.navigateToUrl).not.toHaveBeenCalled();
+    expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('does not generate link behavior if path is excluded', () => {

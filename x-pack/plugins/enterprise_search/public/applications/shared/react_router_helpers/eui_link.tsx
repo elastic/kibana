@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
 
-import { KibanaContext, IKibanaContext } from '../../index';
+import { KibanaLogic } from '../../shared/kibana';
 import { letBrowserHandleEvent } from './link_events';
 
 /**
@@ -33,7 +34,7 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
   children,
 }) => {
   const history = useHistory();
-  const { navigateToUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { navigateToUrl } = useValues(KibanaLogic);
 
   // Generate the correct link href (with basename etc. accounted for)
   const href = shouldNotCreateHref ? to : history.createHref({ pathname: to });

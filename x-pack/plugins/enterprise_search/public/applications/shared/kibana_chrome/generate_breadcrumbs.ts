@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
+import { useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 import { EuiBreadcrumb } from '@elastic/eui';
 
-import { KibanaContext, IKibanaContext } from '../../index';
+import { KibanaLogic } from '../../shared/kibana';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
@@ -34,7 +34,7 @@ export type TBreadcrumbs = IBreadcrumb[];
 
 export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
   const history = useHistory();
-  const { navigateToUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { navigateToUrl } = useValues(KibanaLogic);
 
   return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
     const breadcrumb = { text } as EuiBreadcrumb;
