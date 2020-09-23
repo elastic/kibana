@@ -26,6 +26,7 @@ import {
   CoreStart,
   Plugin,
   DEFAULT_APP_CATEGORIES,
+  AppStatus,
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import {
@@ -64,9 +65,9 @@ export class KibanaOverviewPlugin
       map((hasKibanaApp) => {
         return () => {
           if (!hasKibanaApp) {
-            return { navLinkStatus: AppNavLinkStatus.hidden };
+            return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
           } else {
-            return { navLinkStatus: AppNavLinkStatus.default };
+            return { status: AppStatus.accessible, navLinkStatus: AppNavLinkStatus.default };
           }
         };
       })
