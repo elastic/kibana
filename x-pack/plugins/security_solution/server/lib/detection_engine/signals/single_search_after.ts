@@ -9,7 +9,7 @@ import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
-import { makeFloatString } from './utils';
+import { createErrorsFromShard, makeFloatString } from './utils';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
@@ -40,6 +40,7 @@ export const singleSearchAfter = async ({
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
+  searchErrors: string[];
 }> => {
   try {
     const searchAfterQuery = buildEventsSearchQuery({
@@ -59,7 +60,14 @@ export const singleSearchAfter = async ({
       searchAfterQuery
     );
     const end = performance.now();
-    return { searchResult: nextSearchAfterResult, searchDuration: makeFloatString(end - start) };
+    const searchErrors = createErrorsFromShard({
+      errors: nextSearchAfterResult._shards.failures ?? [],
+    });
+    return {
+      searchResult: nextSearchAfterResult,
+      searchDuration: makeFloatString(end - start),
+      searchErrors,
+    };
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;

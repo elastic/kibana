@@ -67,7 +67,7 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { SavedObjectsUtils } from './utils';
+import { FIND_DEFAULT_PAGE, FIND_DEFAULT_PER_PAGE, SavedObjectsUtils } from './utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -693,37 +693,51 @@ export class SavedObjectsRepository {
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T = unknown>({
-    search,
-    defaultSearchOperator = 'OR',
-    searchFields,
-    rootSearchFields,
-    hasReference,
-    page = 1,
-    perPage = 20,
-    sortField,
-    sortOrder,
-    fields,
-    namespaces,
-    type,
-    filter,
-    preference,
-  }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
-    if (!type) {
+  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+    const {
+      search,
+      defaultSearchOperator = 'OR',
+      searchFields,
+      rootSearchFields,
+      hasReference,
+      page = FIND_DEFAULT_PAGE,
+      perPage = FIND_DEFAULT_PER_PAGE,
+      sortField,
+      sortOrder,
+      fields,
+      namespaces,
+      type,
+      typeToNamespacesMap,
+      filter,
+      preference,
+    } = options;
+
+    if (!type && !typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be a string or an array of strings'
       );
+    } else if (namespaces?.length === 0 && !typeToNamespacesMap) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.namespaces cannot be an empty array'
+      );
+    } else if (type && typeToNamespacesMap) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.type must be an empty string when options.typeToNamespacesMap is used'
+      );
+    } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
+      );
     }
 
-    const types = Array.isArray(type) ? type : [type];
+    const types = type
+      ? Array.isArray(type)
+        ? type
+        : [type]
+      : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
-      return {
-        page,
-        per_page: perPage,
-        total: 0,
-        saved_objects: [],
-      };
+      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -766,6 +780,7 @@ export class SavedObjectsRepository {
           sortField,
           sortOrder,
           namespaces,
+          typeToNamespacesMap,
           hasReference,
           kueryNode,
         }),

@@ -78,7 +78,6 @@ export function getTimelionRequestHandler({
     filters: Filter[];
     query: Query;
     visParams: VisParams;
-    forceFetch?: boolean;
   }): Promise<TimelionSuccessResponse> {
     const expression = visParams.expression;
 

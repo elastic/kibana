@@ -323,6 +323,7 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
+export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
@@ -338,14 +339,7 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export {
-  LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
-  LegacyServiceDiscoverPlugins,
-  LegacyConfig,
-  LegacyUiExports,
-  LegacyInternals,
-} from './legacy';
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
 export {
   CoreStatus,
