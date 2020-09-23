@@ -425,22 +425,6 @@ Shows the Timelion tutorial to users when they first open the Timelion app.
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
-[[timelion-mininterval]]`timelion:min_interval`::
-The smallest interval to calculate when using "auto".
-
-[[timelion-quandlkey]]`timelion:quandl.key`::
-experimental:[]
-Used with quandl queries, this is your API key from
-https://www.quandl.com/[www.quandl.com].
-
-[[timelion-showtutorial]]`timelion:showTutorial`::
-Shows the Timelion tutorial to users when they first open the Timelion app.
-
-[[timelion-targetbuckets]]`timelion:target_buckets`::
-Used for calculating automatic intervals in visualizations, this is the number
-of buckets to try to represent.
-
-
 [float]
 [[kibana-visualization-settings]]
 ==== Visualization
