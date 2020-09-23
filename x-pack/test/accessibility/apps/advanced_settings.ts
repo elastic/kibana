@@ -57,11 +57,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('advancedSetting-saveButton');
       await a11y.testAppSnapshot();
     });
-
-    // clicking on cancel button
-    // it('adv settings - cancel', async () => {
-    //   await testSubjects.click('advancedSetting-cancelButton');
-    //   await a11y.testAppSnapshot();
-    // });
   });
 }
