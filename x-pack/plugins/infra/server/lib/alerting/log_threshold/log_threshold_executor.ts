@@ -434,6 +434,7 @@ export const getGroupedESQuery = (
             bool: {
               // Scope the inner filtering back to the unpadded range
               filter: [rangeFilter, ...mustFilters],
+              ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
             },
           },
         },
@@ -445,7 +446,6 @@ export const getGroupedESQuery = (
     query: {
       bool: {
         filter: [groupedRangeFilter],
-        ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
     aggregations,

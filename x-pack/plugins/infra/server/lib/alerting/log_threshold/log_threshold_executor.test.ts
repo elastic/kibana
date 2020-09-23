@@ -303,25 +303,6 @@ describe('Log threshold executor', () => {
                     },
                   },
                 ],
-                must_not: [
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                ],
               },
             },
             aggregations: {
@@ -380,6 +361,25 @@ describe('Log threshold executor', () => {
                               },
                             },
                           },
+                          {
+                            term: {
+                              keywordField: {
+                                value: 'error',
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                        ],
+                        must_not: [
                           {
                             term: {
                               keywordField: {
