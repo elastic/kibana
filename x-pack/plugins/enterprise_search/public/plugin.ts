@@ -23,6 +23,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { IInitialAppData } from '../common/types';
+import { externalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
   host?: string;
@@ -112,7 +113,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           './applications/workplace_search/components/layout'
         );
         params.setHeaderActionMenu((element) =>
-          renderHeaderActions(WorkplaceSearchHeaderActions, element, this.data.externalUrl)
+          renderHeaderActions(WorkplaceSearchHeaderActions, element)
         );
 
         return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
@@ -174,6 +175,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     try {
       this.data = await http.get('/api/enterprise_search/config_data');
       this.hasInitialized = true;
+
+      // TODO: This is a temporary workaround to keep the WorkplaceSearchHeaderActions working.
+      // We'll solve this shortly by ensuring the main app store loads before the header actions.
+      externalUrl.enterpriseSearchUrl = this.data.publicUrl || this.config.host;
     } catch {
       this.data.errorConnecting = true;
     }

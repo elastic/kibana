@@ -92,15 +92,8 @@ export const renderApp = (
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
  * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
-interface IHeaderActionsProps {
-  externalUrl: IExternalUrl;
-}
 
-export const renderHeaderActions = (
-  HeaderActions: React.FC<IHeaderActionsProps>,
-  kibanaHeaderEl: HTMLElement,
-  externalUrl: IExternalUrl
-) => {
-  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
+export const renderHeaderActions = (HeaderActions: React.FC, kibanaHeaderEl: HTMLElement) => {
+  ReactDOM.render(<HeaderActions />, kibanaHeaderEl);
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };
