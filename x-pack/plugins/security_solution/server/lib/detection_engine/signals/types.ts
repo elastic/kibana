@@ -15,7 +15,7 @@ import {
   AlertServices,
 } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { SearchResponse, EqlSearchResponse, BaseHit } from '../../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';

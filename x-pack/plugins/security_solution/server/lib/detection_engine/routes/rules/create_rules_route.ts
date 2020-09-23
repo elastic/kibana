@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -95,7 +96,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          !isMlRule(type) && type !== 'eql' && languageOrUndefined == null
+          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
             ? 'kuery'
             : languageOrUndefined;
 

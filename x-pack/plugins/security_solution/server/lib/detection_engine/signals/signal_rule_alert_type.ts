@@ -433,7 +433,7 @@ export const signalRulesAlertType = ({
             throttle,
             buildRuleMessage,
           });
-        } else if (type === 'eql') {
+        } else if (isEqlRule(type)) {
           if (query === undefined) {
             throw new Error('eql query rule must have a query defined');
           }
