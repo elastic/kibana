@@ -51,3 +51,7 @@ export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
     type: 'keyword',
   },
 };
+
+export type TypeAliasWithUnion = Usage & WithUnion;
+
+export type TypeAliasWithRecord = Usage & Record<string, number>;
