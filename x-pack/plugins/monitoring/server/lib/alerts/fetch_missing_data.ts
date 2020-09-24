@@ -22,13 +22,13 @@ interface IndexBucketESResponse {
 
 interface ClusterBucketESResponse {
   key: string;
-  kibana_uuids: UuidResponse;
-  logstash_uuids: UuidResponse;
-  es_uuids: UuidResponse;
-  beats: {
+  kibana_uuids?: UuidResponse;
+  logstash_uuids?: UuidResponse;
+  es_uuids?: UuidResponse;
+  beats?: {
     beats_uuids: UuidResponse;
   };
-  apms: {
+  apms?: {
     apm_uuids: UuidResponse;
   };
 }
@@ -52,40 +52,40 @@ interface UuidBucketESResponse {
 interface TopHitESResponse {
   _source: {
     source_node?: {
-      name?: string;
+      name: string;
     };
     kibana_stats?: {
-      kibana?: {
-        name?: string;
+      kibana: {
+        name: string;
       };
     };
     logstash_stats?: {
-      logstash?: {
-        host?: string;
+      logstash: {
+        host: string;
       };
     };
     beats_stats?: {
-      beat?: {
-        name?: string;
+      beat: {
+        name: string;
       };
     };
   };
 }
 
 function findNonEmptyBucket(bucket: ClusterBucketESResponse): UuidResponse {
-  if (bucket.beats.beats_uuids.buckets.length > 0) {
+  if (bucket.beats && bucket.beats.beats_uuids.buckets.length > 0) {
     return bucket.beats.beats_uuids;
   }
-  if (bucket.apms.apm_uuids.buckets.length > 0) {
+  if (bucket.apms && bucket.apms.apm_uuids.buckets.length > 0) {
     return bucket.apms.apm_uuids;
   }
-  if (bucket.kibana_uuids.buckets.length > 0) {
+  if (bucket.kibana_uuids && bucket.kibana_uuids.buckets.length > 0) {
     return bucket.kibana_uuids;
   }
-  if (bucket.logstash_uuids.buckets.length > 0) {
+  if (bucket.logstash_uuids && bucket.logstash_uuids.buckets.length > 0) {
     return bucket.logstash_uuids;
   }
-  if (bucket.es_uuids.buckets.length > 0) {
+  if (bucket.es_uuids && bucket.es_uuids.buckets.length > 0) {
     return bucket.es_uuids;
   }
   return { buckets: [] };
@@ -96,7 +96,7 @@ function getStackProductFromIndex(index: string, bucket: ClusterBucketESResponse
     return KIBANA_SYSTEM_ID;
   }
   if (index.includes('-beats-')) {
-    if (bucket.apms.apm_uuids.buckets.length > 0) {
+    if (bucket.apms && bucket.apms.apm_uuids.buckets.length > 0) {
       return APM_SYSTEM_ID;
     }
     return BEATS_SYSTEM_ID;
@@ -115,9 +115,10 @@ export async function fetchMissingData(
   clusters: AlertCluster[],
   index: string,
   limit: number,
-  size: number
+  size: number,
+  nowInMS: number
 ): Promise<AlertMissingData[]> {
-  const endMs = +new Date();
+  const endMs = nowInMS;
   const startMs = endMs - limit - limit * 0.25; // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 
   const nameFields = [
@@ -269,10 +270,10 @@ export async function fetchMissingData(
       for (const uuidBucket of uuidBuckets) {
         const stackProductUuid = uuidBucket.key;
         const stackProduct = getStackProductFromIndex(indexBucket.key, clusterBucket);
-        const differenceInMs = +new Date() - uuidBucket.most_recent.value;
+        const differenceInMs = nowInMS - uuidBucket.most_recent.value;
         let stackProductName = stackProductUuid;
         for (const nameField of nameFields) {
-          stackProductName = get(uuidBucket, `top.hits.hits[0]._source.${nameField}`);
+          stackProductName = get(uuidBucket, `document.hits.hits[0]._source.${nameField}`);
           if (stackProductName) {
             break;
           }

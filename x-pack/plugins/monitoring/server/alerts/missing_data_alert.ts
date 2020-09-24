@@ -162,7 +162,8 @@ export class MissingDataAlert extends BaseAlert {
       clusters,
       indexPattern,
       limit,
-      this.config.ui.max_bucket_size
+      this.config.ui.max_bucket_size,
+      +new Date()
     );
     return missingData.map((missing) => {
       return {
@@ -349,7 +350,7 @@ export class MissingDataAlert extends BaseAlert {
           false
         )}: ${state.stackProductName}`;
       })
-      .join(',');
+      .join(', ');
     if (firingCount > 0) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.missingData.shortAction', {
         defaultMessage:
