@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-import { SavedObjectAttributes } from 'kibana/public';
+import {
+  SavedObjectAttributes,
+  CoreStart,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/public';
+import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -32,6 +38,10 @@ import {
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
 import { SendToSlackAction } from './actions/send_to_slack_action';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -42,11 +52,13 @@ declare module '../../../../src/plugins/ui_actions/public' {
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActionsEnhanced: AdvancedUiActionsStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
 // eslint-disable-next-line
@@ -62,12 +74,15 @@ export class EmbeddableEnhancedPlugin
   private uiActions?: StartDependencies['uiActionsEnhanced'];
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
+    const start = createStartServicesGetter(core.getStartServices);
+
     this.setCustomEmbeddableFactoryProvider(plugins);
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
 
-    plugins.uiActionsEnhanced.addTriggerAction(CONTEXT_MENU_TRIGGER, new SendToSlackAction());
+    const sendToSlackAction = new SendToSlackAction({ start });
+    plugins.uiActionsEnhanced.addTriggerAction(CONTEXT_MENU_TRIGGER, sendToSlackAction);
 
     return {};
   }
