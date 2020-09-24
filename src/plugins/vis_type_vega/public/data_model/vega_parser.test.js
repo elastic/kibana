@@ -162,12 +162,15 @@ describe('VegaParser._resolveEsQueries', () => {
 
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
-        getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async (layer) => {
-          return layer.url;
-        },
-      });
+      const mockGetServiceSettings = async () => {
+        return {
+          getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
+          getUrlForRegionLayer: async (layer) => {
+            return layer.url;
+          },
+        };
+      };
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
