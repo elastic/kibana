@@ -249,7 +249,7 @@ export function difference(actual: any, expected: any) {
       function (result, value, key) {
         if (key && /@@INDEX@@/.test(`${key}`)) {
           // The type definition is an Index Signature, fuzzy searching for similar keys
-          const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+          const regexp = new RegExp(`^${key}`.replace(/@@INDEX@@/g, '(.+)?'));
           const keysInBase = Object.keys(base)
             .map((k) => {
               const match = k.match(regexp);
