@@ -197,7 +197,7 @@ function mockClient() {
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return sampleIndexPatternsFromService[id];
+      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
     }),
   } as unknown) as Pick<IndexPatternsContract, 'get'>;
 }
@@ -248,6 +248,7 @@ describe('loader', () => {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
+            metaFields: [],
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -294,6 +295,55 @@ describe('loader', () => {
       ).toEqual({
         date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
       });
+    });
+
+    it('should map meta flag', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        indexPatternsService: ({
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: ['timestamp'],
+            typeMeta: {
+              aggs: {
+                date_histogram: {
+                  timestamp: {
+                    agg: 'date_histogram',
+                    fixed_interval: 'm',
+                  },
+                },
+                sum: {
+                  bytes: {
+                    agg: 'sum',
+                  },
+                },
+              },
+            },
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+      });
+
+      expect(cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!.meta).toEqual(
+        true
+      );
     });
   });
 

@@ -16,7 +16,6 @@ import { KpiHosts } from '../kpi_hosts';
 import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
-import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
 
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
@@ -45,7 +44,6 @@ export function compose(
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter()),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
-    ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
