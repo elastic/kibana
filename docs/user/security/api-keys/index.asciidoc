@@ -74,7 +74,7 @@ The response should look something like this:
 
 Now, you can use the API key to request {kib} roles. You will need
 to base64-encode the `id` and `api_key` provided in the response
-and add it to your request as an authorization header. For example:
+and add it to your request as an authorization header, under the format `id + ":" + api_key`. For example:
 
 [source,js]
 curl --location --request GET 'http://localhost:5601/api/security/role' \
