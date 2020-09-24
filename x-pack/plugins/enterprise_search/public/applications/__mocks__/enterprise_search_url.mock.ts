@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  externalUrl,
-  getEnterpriseSearchUrl,
-  getAppSearchUrl,
-  getWorkplaceSearchUrl,
-} from './external_url';
+import { externalUrl } from '../shared/enterprise_search_url';
+
+externalUrl.enterpriseSearchUrl = 'http://localhost:3002';
