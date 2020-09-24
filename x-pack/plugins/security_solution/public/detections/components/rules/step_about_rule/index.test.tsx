@@ -8,8 +8,9 @@ import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { StepAboutRule } from '.';
-
+import { useFetchIndex } from '../../../../common/containers/source';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
@@ -20,6 +21,7 @@ import {
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
+jest.mock('../../../../common/containers/source');
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 /* eslint-disable no-console */
@@ -44,6 +46,12 @@ describe('StepAboutRuleComponent', () => {
 
   beforeEach(() => {
     formHook = null;
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
   });
 
   test('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {

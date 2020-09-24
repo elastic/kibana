@@ -59,11 +59,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
         const { EnterpriseSearch } = await import('./applications/enterprise_search');
@@ -80,11 +80,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
         const { AppSearch } = await import('./applications/app_search');
@@ -101,11 +101,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp, renderHeaderActions } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
