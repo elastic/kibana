@@ -162,6 +162,17 @@ describe('CredentialsLogic', () => {
           activeApiToken: { ...newToken, engines: ['someEngine', 'anotherEngine'] },
         });
       });
+
+      it('does not throw a type error if no engines are stored in state', () => {
+        mount({
+          activeApiToken: {},
+        });
+        CredentialsLogic.actions.removeEngineName('');
+        expect(CredentialsLogic.values).toEqual({
+          ...values,
+          activeApiToken: { engines: [] },
+        });
+      });
     });
   });
 
@@ -1114,7 +1125,7 @@ describe('CredentialsLogic', () => {
       const promise = Promise.reject('An error occured');
       (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
-      CredentialsLogic.actions.fetchCredentials(2);
+      CredentialsLogic.actions.fetchCredentials();
       try {
         await promise;
       } catch {

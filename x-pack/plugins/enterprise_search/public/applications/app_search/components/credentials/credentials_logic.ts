@@ -174,7 +174,7 @@ export const CredentialsLogic = kea<
           read: tokenType === PRIVATE,
           type: tokenType,
         }),
-        toggleCredentialsForm: (_, activeApiToken) => activeApiToken || defaultApiToken,
+        toggleCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
     ],
     activeApiTokenRawName: [
