@@ -7,34 +7,34 @@
 import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState } from './types';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
 
-function getExpressionForLayer(
-  indexPattern: IndexPattern,
-  columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
-): Ast | null {
+function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPattern): Ast | null {
+  const columnOrder: string[] = layer.columnOrder;
+
   if (columnOrder.length === 0) {
     return null;
   }
 
-  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(
-      column,
-      columnId,
-      indexPattern
-    );
-  }
+  const columns = { ...layer.columns, ...layer.innerOperations };
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
   const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
   const metricsCount = columnEntries.length - bucketsCount;
 
   if (columnEntries.length) {
-    const aggs = columnEntries.map(([colId, col]) => {
-      return getEsAggsConfig(col, colId);
+    const aggs: unknown[] = [];
+    const expressions: ExpressionFunctionAST[] = [];
+
+    columnEntries.forEach(([colId, col]) => {
+      const definition = operationDefinitionMap[col.operationType];
+      if (definition.input === 'reference') {
+        expressions.push(...definition.toExpression(layer, colId, indexPattern));
+      } else {
+        aggs.push(definition.toEsAggsConfig(col, colId, indexPattern));
+      }
     });
 
     /**
@@ -50,18 +50,21 @@ function getExpressionForLayer(
      * Example 3: [Terms, Terms, Count, Max]
      * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
      */
-    const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const newIndex = column.isBucketed
-        ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
-        : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
-      return {
-        ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
-          ...column,
-          id: colId,
-        },
-      };
-    }, {} as Record<string, OriginalColumn>);
+    const idMap = layer.columnOrder
+      .map((colId) => [colId, columns[colId]] as const)
+      .filter(([, col]) => operationDefinitionMap[col.operationType].input !== 'reference')
+      .reduce((currentIdMap, [colId, column], index) => {
+        const newIndex = column.isBucketed
+          ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
+          : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
+        return {
+          ...currentIdMap,
+          [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
+            ...column,
+            id: colId,
+          },
+        };
+      }, {} as Record<string, OriginalColumn>);
 
     type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
 
@@ -119,6 +122,7 @@ function getExpressionForLayer(
           },
         },
         ...formatterOverrides,
+        ...expressions,
       ],
     };
   }
@@ -129,9 +133,8 @@ function getExpressionForLayer(
 export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
-      state.indexPatterns[state.layers[layerId].indexPatternId],
-      state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
+      state.layers[layerId],
+      state.indexPatterns[state.layers[layerId].indexPatternId]
     );
   }
 

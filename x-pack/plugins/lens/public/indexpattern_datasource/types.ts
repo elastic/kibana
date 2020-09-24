@@ -31,6 +31,7 @@ export type IndexPatternField = IFieldType & {
 export interface IndexPatternLayer {
   columnOrder: string[];
   columns: Record<string, IndexPatternColumn>;
+  innerOperations: Record<string, IndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
 }

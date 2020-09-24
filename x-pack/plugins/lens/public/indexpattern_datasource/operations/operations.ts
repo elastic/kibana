@@ -87,6 +87,10 @@ type OperationFieldTuple =
       field: string;
     }
   | {
+      type: 'reference';
+      operationType: OperationType;
+    }
+  | {
       type: 'none';
       operationType: OperationType;
     };
@@ -156,6 +160,14 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
           operationDefinition.getPossibleOperationForField(field)
         );
       });
+    } else if (operationDefinition.input === 'reference') {
+      addToMap(
+        {
+          type: 'reference',
+          operationType: operationDefinition.type,
+        },
+        operationDefinition.getPossibleOperation()
+      );
     } else if (operationDefinition.input === 'none') {
       addToMap(
         {

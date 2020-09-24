@@ -8,6 +8,7 @@ import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
+import { calculationFunctions } from './calculations';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import {
@@ -35,6 +36,7 @@ export class IndexPatternDatasource {
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     expressions.registerFunction(renameColumns);
+    calculationFunctions.forEach((fn) => expressions.registerFunction(fn));
 
     editorFrame.registerDatasource(
       core.getStartServices().then(([coreStart, { data }]) =>

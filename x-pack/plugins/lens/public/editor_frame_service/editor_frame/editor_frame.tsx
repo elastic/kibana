@@ -279,6 +279,7 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         suggestionsPanel={
+          false &&
           allLoaded && (
             <SuggestionPanel
               frame={framePublicAPI}

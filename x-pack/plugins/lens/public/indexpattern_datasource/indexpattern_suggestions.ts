@@ -197,6 +197,7 @@ function addFieldAsMetricOperation(
         ...layer.columns,
         [addedColumnId]: newColumn,
       },
+      innerOperations: {},
       columnOrder: [...layer.columnOrder, addedColumnId],
     };
   }
@@ -208,6 +209,7 @@ function addFieldAsMetricOperation(
     indexPatternId: indexPattern.id,
     columns: newColumns,
     columnOrder: layer.columnOrder, // Order is kept by replacing
+    innerOperations: {},
   };
 }
 
@@ -269,6 +271,7 @@ function addFieldAsBucketOperation(
     indexPatternId: indexPattern.id,
     columns: updatedColumns,
     columnOrder: updatedColumnOrder,
+    innerOperations: {},
   };
 }
 
@@ -343,6 +346,7 @@ function createNewLayerWithBucketAggregation(
       [col2]: countColumn,
     },
     columnOrder: [col1, col2],
+    innerOperations: {},
   };
 }
 
@@ -374,6 +378,7 @@ function createNewLayerWithMetricAggregation(
       [col2]: column,
     },
     columnOrder: [col1, col2],
+    innerOperations: {},
   };
 }
 
@@ -552,6 +557,7 @@ function createMetricSuggestion(
               }),
       },
       columnOrder: [newId],
+      innerOperations: {},
     },
   });
 }

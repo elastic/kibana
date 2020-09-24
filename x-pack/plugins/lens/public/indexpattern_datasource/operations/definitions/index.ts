@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
@@ -21,9 +22,15 @@ import {
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
+import { derivativeOperation, DerivativeIndexPatternColumn } from './derivative';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
+import {
+  IndexPatternPrivateState,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+} from '../../types';
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
@@ -43,7 +50,8 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | DerivativeIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -61,6 +69,7 @@ const internalOperationDefinitions = [
   sumOperation,
   countOperation,
   rangeOperation,
+  derivativeOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -69,6 +78,7 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
+export { derivativeOperation } from './derivative';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -115,11 +125,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
-   * Function turning a column into an agg config passed to the `esaggs` function
-   * together with the agg configs returned from other columns.
-   */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
-  /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
    * for a layer
@@ -155,6 +160,11 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
    * if the field is not applicable.
    */
   getPossibleOperation: () => OperationMetadata | undefined;
+  /**
+   * Function turning a column into an agg config passed to the `esaggs` function
+   * together with the agg configs returned from other columns.
+   */
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
 }
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
@@ -196,11 +206,73 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     indexPattern: IndexPattern,
     field: IndexPatternField
   ) => C;
+  /**
+   * Function turning a column into an agg config passed to the `esaggs` function
+   * together with the agg configs returned from other columns.
+   */
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+}
+
+interface ReferenceBasedOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'reference';
+
+  /**
+   * Returns the meta data of the operation if applied. Undefined
+   * if the field is not applicable.
+   */
+  getPossibleOperation: () => OperationMetadata | undefined;
+
+  /**
+   * Determine if the operation should show errors and cause an invalid
+   * state. Implementations need to handle three cases:
+   *
+   * - The operation does not exist, validate whether it can be inserted
+   * - The operation is visible to users, validate its position
+   * - The operation is being referenced, validate its position
+   *
+   * If invalid, return an error message to be shown in the UI.
+   */
+  isValid: (parameters: {
+    layer: IndexPatternLayer;
+    columnId?: string;
+    internalId?: string;
+  }) => true | string;
+
+  /**
+   * The parameters here will be used by the editor to pass in the right references,
+   * but the operation doesn't manage the references directly
+   */
+  requiredReferences: Array<{
+    validateReferenceMetadata: (metadata: OperationMetadata) => boolean;
+
+    referenceInputs?: Array<GenericOperationDefinition['input']>;
+    allowedOperations?: OperationType[];
+  }>;
+  /**
+   * Builds the column object for the given parameters. Should include default
+   */
+  // buildColumn: (
+  //   arg: BaseBuildColumnArgs & {
+  //     layer: IndexPatternLayer;
+  //     referenceIds: string[];
+  //     previousColumn?: IndexPatternColumn;
+  //   }
+  // ) => C;
+  create: (props: { layer: IndexPatternLayer; newId: string }) => IndexPatternLayer;
+  /**
+   * A chain of expression functions which will transform the table
+   */
+  toExpression: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern: IndexPattern
+  ) => ExpressionFunctionAST[];
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   field: FieldBasedOperationDefinition<C>;
   none: FieldlessOperationDefinition<C>;
+  reference: ReferenceBasedOperationDefinition<C>;
 }
 
 /**
@@ -225,7 +297,8 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
  */
 export type GenericOperationDefinition =
   | OperationDefinition<IndexPatternColumn, 'field'>
-  | OperationDefinition<IndexPatternColumn, 'none'>;
+  | OperationDefinition<IndexPatternColumn, 'none'>
+  | OperationDefinition<IndexPatternColumn, 'reference'>;
 
 /**
  * List of all available operation definitions

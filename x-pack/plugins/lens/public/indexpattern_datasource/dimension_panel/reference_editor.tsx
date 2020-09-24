@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
   EuiFormRow,
-  EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { EuiFormLabel } from '@elastic/eui';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -24,14 +25,16 @@ import {
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
+import {
+  deleteColumn,
+  changeColumn,
+  updateColumnParam,
+  changeInnerOperation,
+} from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
-import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { FormatSelector } from './format_selector';
-import { ReferenceEditor } from './reference_editor';
 
 const operationPanels = getOperationDisplay();
 
@@ -54,41 +57,7 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
     }));
 }
 
-const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
-  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-    onChangeDebounced(val);
-  };
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
-        defaultMessage: 'Display name',
-        description: 'Display name of a column of data',
-      })}
-      display="columnCompressed"
-      fullWidth
-    >
-      <EuiFieldText
-        compressed
-        data-test-subj="indexPattern-label-edit"
-        value={inputValue}
-        onChange={handleInputChange}
-      />
-    </EuiFormRow>
-  );
-};
-
-export function DimensionEditor(props: DimensionEditorProps) {
+export function ReferenceEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
     operationSupportMatrix,
@@ -97,7 +66,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setState,
     layerId,
     currentIndexPattern,
-    hideGrouping,
   } = props;
   const { operationByField, fieldByOperation } = operationSupportMatrix;
   const [
@@ -141,154 +109,168 @@ export function DimensionEditor(props: DimensionEditorProps) {
     );
   }
 
-  const sideNavItems: EuiListGroupItemProps[] = getOperationTypes().map(
+  const functionOptions: Array<EuiComboBoxOptionOption<OperationType>> = getOperationTypes().map(
     ({ operationType, compatibleWithCurrentField }) => {
-      const isActive = Boolean(
-        incompatibleSelectedOperationType === operationType ||
-          (!incompatibleSelectedOperationType &&
-            selectedColumn &&
-            selectedColumn.operationType === operationType)
-      );
-
-      let color: EuiListGroupItemProps['color'] = 'primary';
-      if (isActive) {
-        color = 'text';
-      } else if (!compatibleWithCurrentField) {
-        color = 'subdued';
-      }
-
-      let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
-      if (isActive) {
-        label = <strong>{operationPanels[operationType].displayName}</strong>;
-      }
+      const label = operationPanels[operationType].displayName;
 
       return {
-        id: operationType as string,
         label,
-        color,
-        isActive,
-        size: 's',
+        value: operationType,
         className: 'lnsIndexPatternDimensionEditor__operation',
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
-        onClick() {
-          const operationDefinition = operationDefinitionMap[operationType];
-          if (operationDefinition.input === 'none') {
-            // Clear invalid state because we are creating a valid column
-            setInvalidOperationType(null);
-            if (selectedColumn?.operationType === operationType) {
-              return;
-            }
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn: buildColumn({
-                  columns: props.state.layers[props.layerId].columns,
-                  suggestedPriority: props.suggestedPriority,
-                  layerId: props.layerId,
-                  op: operationType,
-                  indexPattern: currentIndexPattern,
-                  previousColumn: selectedColumn,
-                }),
-              })
-            );
-            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-            return;
-          } else if (operationDefinition.input === 'reference') {
-            // Clear invalid state because we are creating a valid column
-            setInvalidOperationType(null);
-            if (selectedColumn?.operationType === operationType) {
-              return;
-            }
-            setState(
-              mergeLayer({
-                state,
-                layerId,
-                newLayer: operationDefinition.create({
-                  layer: props.state.layers[props.layerId],
-                  newId: columnId,
-                }),
-              })
-            );
-            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-            return;
-          } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || [];
+      };
+    }
+  );
 
-            if (possibleFields.length === 1) {
-              setState(
-                changeColumn({
-                  state,
-                  layerId,
-                  columnId,
-                  newColumn: buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
-                    suggestedPriority: props.suggestedPriority,
-                    layerId: props.layerId,
-                    op: operationType,
-                    indexPattern: currentIndexPattern,
-                    field: fieldMap[possibleFields[0]],
-                    previousColumn: selectedColumn,
-                  }),
-                })
-              );
-            } else {
-              setInvalidOperationType(operationType);
-            }
-            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-            return;
-          }
-
-          setInvalidOperationType(null);
-
-          if (selectedColumn?.operationType === operationType) {
-            return;
-          }
-
-          const newColumn: IndexPatternColumn = buildColumn({
+  function onChooseFunction(operationType: OperationType) {
+    if (operationDefinitionMap[operationType].input === 'none') {
+      // Clear invalid state because we are creating a valid column
+      setInvalidOperationType(null);
+      if (selectedColumn?.operationType === operationType) {
+        return;
+      }
+      setState(
+        changeInnerOperation({
+          state,
+          layerId,
+          columnId,
+          newColumn: buildColumn({
             columns: props.state.layers[props.layerId].columns,
             suggestedPriority: props.suggestedPriority,
             layerId: props.layerId,
             op: operationType,
             indexPattern: currentIndexPattern,
-            field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
             previousColumn: selectedColumn,
-          });
+          }),
+        })
+      );
+      trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+      return;
+      // } else if (operationDefinitionMap[operationType].input === 'reference') {
+      //   // Clear invalid state because we are creating a valid column
+      //   setInvalidOperationType(null);
+      //   if (selectedColumn?.operationType === operationType) {
+      //     return;
+      //   }
+      //   setState(
+      //     changeColumn({
+      //       state,
+      //       layerId,
+      //       columnId,
+      //       newColumn: buildColumn({
+      //         columns: props.state.layers[props.layerId].columns,
+      //         suggestedPriority: props.suggestedPriority,
+      //         layerId: props.layerId,
+      //         op: operationType,
+      //         indexPattern: currentIndexPattern,
+      //         previousColumn: selectedColumn,
+      //       }),
+      //     })
+      //   );
+      //   trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+      //   return;
+      // } else if (!selectedColumn || !compatibleWithCurrentField) {
+    } else if (!selectedColumn) {
+      const possibleFields = fieldByOperation[operationType] || [];
 
-          setState(
-            changeColumn({
-              state,
-              layerId,
-              columnId,
-              newColumn,
-            })
-          );
-        },
-      };
+      if (possibleFields.length === 1) {
+        setState(
+          changeColumn({
+            state,
+            layerId,
+            columnId,
+            newColumn: buildColumn({
+              columns: props.state.layers[props.layerId].columns,
+              suggestedPriority: props.suggestedPriority,
+              layerId: props.layerId,
+              op: operationType,
+              indexPattern: currentIndexPattern,
+              field: fieldMap[possibleFields[0]],
+              previousColumn: selectedColumn,
+            }),
+          })
+        );
+      } else {
+        setInvalidOperationType(operationType);
+      }
+      trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+      return;
     }
-  );
+
+    setInvalidOperationType(null);
+
+    if (selectedColumn?.operationType === operationType) {
+      return;
+    }
+
+    const newColumn: IndexPatternColumn = buildColumn({
+      columns: props.state.layers[props.layerId].columns,
+      suggestedPriority: props.suggestedPriority,
+      layerId: props.layerId,
+      op: operationType,
+      indexPattern: currentIndexPattern,
+      field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
+      previousColumn: selectedColumn,
+    });
+
+    setState(
+      changeInnerOperation({
+        state,
+        layerId,
+        columnId,
+        newColumn,
+      })
+    );
+  }
 
   return (
     <div id={columnId}>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+        <EuiFormRow
+          data-test-subj="indexPattern-field-selection-row"
+          label={i18n.translate('xpack.lens.indexPattern.chooseFunction', {
             defaultMessage: 'Choose a function',
           })}
-        </EuiFormLabel>
-        <EuiSpacer size="s" />
-        <EuiListGroup
-          className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
-          gutterSize="none"
-          listItems={sideNavItems}
-          maxWidth={false}
-        />
-      </div>
-      <EuiSpacer size="s" />
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+          fullWidth
+          isInvalid={Boolean(incompatibleSelectedOperationType)}
+          error={
+            selectedColumn
+              ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                  defaultMessage: 'To use this function, select a different field.',
+                })
+              : undefined
+          }
+        >
+          <EuiComboBox
+            fullWidth
+            compressed
+            isClearable={false}
+            data-test-subj="indexPattern-reference-function"
+            placeholder={i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
+              defaultMessage: 'Function',
+            })}
+            options={functionOptions}
+            isInvalid={Boolean(incompatibleSelectedOperationType)}
+            selectedOptions={
+              selectedColumn
+                ? [functionOptions.find(({ value }) => value === selectedColumn.operationType)!]
+                : []
+            }
+            singleSelection={{ asPlainText: true }}
+            onChange={(choices) => {
+              if (choices.length === 0) {
+                // onDeleteColumn();
+                return;
+              }
+
+              // trackUiEvent('indexpattern_dimension_field_changed');
+
+              onChooseFunction(choices[0].value!);
+            }}
+          />
+        </EuiFormRow>
         {!selectedColumn ||
         selectedOperationDefinition?.input === 'field' ||
         (incompatibleSelectedOperationType &&
@@ -365,7 +347,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }
 
                 setState(
-                  changeColumn({
+                  changeInnerOperation({
                     state,
                     layerId,
                     columnId,
@@ -378,23 +360,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           </EuiFormRow>
         ) : null}
-
-        {selectedColumn &&
-        operationDefinitionMap[selectedColumn.operationType].input === 'reference' ? (
-          <ReferenceEditor
-            {...props}
-            selectedColumn={state.layers[layerId].innerOperations[selectedColumn.references[0]]}
-          />
-        ) : null}
-
-        {/* {!incompatibleSelectedOperationType && selectedColumn && ParamEditor && ( */}
-        {selectedColumn && ParamEditor && (
+        {!incompatibleSelectedOperationType && selectedColumn && ParamEditor && (
           <>
             <ParamEditor
               state={state}
               setState={setState}
               columnId={columnId}
-              currentColumn={state.layers[layerId].columns[columnId]}
+              currentColumn={state.layers[layerId].innerOperations[columnId]}
               storage={props.storage}
               uiSettings={props.uiSettings}
               savedObjectsClient={props.savedObjectsClient}
@@ -405,71 +377,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           </>
         )}
-      </div>
-
-      <EuiSpacer size="s" />
-
-      <div className="lnsIndexPatternDimensionEditor__section">
-        {!incompatibleSelectedOperationType && selectedColumn && (
-          <LabelInput
-            value={selectedColumn.label}
-            onChange={(value) => {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: {
-                    columns: {
-                      ...state.layers[layerId].columns,
-                      [columnId]: {
-                        ...selectedColumn,
-                        label: value,
-                        customLabel: true,
-                      },
-                    },
-                  },
-                })
-              );
-            }}
-          />
-        )}
-
-        {!hideGrouping && (
-          <BucketNestingEditor
-            fieldMap={fieldMap}
-            layer={state.layers[props.layerId]}
-            columnId={props.columnId}
-            setColumns={(columnOrder) => {
-              setState({
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [props.layerId]: {
-                    ...state.layers[props.layerId],
-                    columnOrder,
-                  },
-                },
-              });
-            }}
-          />
-        )}
-
-        {selectedColumn && selectedColumn.dataType === 'number' ? (
-          <FormatSelector
-            selectedColumn={selectedColumn}
-            onChange={(newFormat) => {
-              setState(
-                updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn: selectedColumn,
-                  paramName: 'format',
-                  value: newFormat,
-                })
-              );
-            }}
-          />
-        ) : null}
       </div>
     </div>
   );

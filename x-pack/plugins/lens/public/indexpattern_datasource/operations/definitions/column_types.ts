@@ -33,3 +33,7 @@ export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
 }
+
+export interface ReferenceBasedIndexPatternColumn extends BaseIndexPatternColumn {
+  references: string[];
+}
