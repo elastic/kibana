@@ -19,10 +19,10 @@ export type AgentStatus =
   | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'upgrading'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL';
-
+export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL' | 'UPGRADE';
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
@@ -65,7 +65,6 @@ export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
   policy_id: string;
   policy_revision: number;
 };
-
 export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
 export interface NewAgentEvent {
@@ -110,6 +109,8 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  upgraded_at?: string;
+  upgrade_started_at?: string;
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
