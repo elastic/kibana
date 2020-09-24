@@ -1,7 +1,7 @@
 [[ci-metrics]]
 == CI Metrics
 
-In addition to run our tests CI collects metrics about Kibana. These metrics are sent to an external service which catalogs and compares them to the metrics from other branches so that PR authors can better quantify the impact their changes have.
+In addition to running our tests, CI collects metrics about the Kibana build. These metrics are sent to an external service to track changes over time, and to provide PR authors insights into the impact of their changes.
 
 
 [[ci-metric-types]]
