@@ -395,12 +395,13 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  isLoading={isLoadingConnectors}
+                  isLoading={isLoadingConnectors && updateKey === 'connector'}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
                   selectedConnector={caseData.connector.id}
                   caseFields={caseData.connector.fields}
                   userActions={caseUserActions}
+                  disabled={!userCanCrud}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
