@@ -56,7 +56,7 @@ module.exports = {
         'form_lib/core/field_hook',
         'form_lib/core/use_form_data',
         'form_lib/core/use_array',
-        'form_lib/core/typescript',
+        'form_lib/core/use_multi_fields',
       ],
     },
   ],
