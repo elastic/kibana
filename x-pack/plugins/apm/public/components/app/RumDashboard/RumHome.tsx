@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
 import { RumHeader } from './RumHeader';
 
+export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
+  defaultMessage: 'User Experience',
+});
+
 export function RumHome() {
   return (
     <div>
@@ -17,11 +21,7 @@ export function RumHome() {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>
-                {i18n.translate('xpack.apm.csm.title', {
-                  defaultMessage: 'Client Side Monitoring',
-                })}
-              </h1>
+              <h1>{UX_LABEL}</h1>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
