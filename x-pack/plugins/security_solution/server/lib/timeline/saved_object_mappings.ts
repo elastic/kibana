@@ -213,6 +213,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
+    indexNames: {
+      type: 'text',
+    },
     kqlMode: {
       type: 'keyword',
     },

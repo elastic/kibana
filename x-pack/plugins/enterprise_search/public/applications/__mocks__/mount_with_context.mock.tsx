@@ -15,8 +15,6 @@ import { getContext, resetContext } from 'kea';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContext } from '../';
 import { mockKibanaContext } from './kibana_context.mock';
-import { LicenseContext } from '../shared/licensing';
-import { mockLicenseContext } from './license_context.mock';
 
 /**
  * This helper mounts a component with all the contexts/providers used
@@ -34,9 +32,7 @@ export const mountWithContext = (children: React.ReactNode, context?: object) =>
   return mount(
     <I18nProvider>
       <KibanaContext.Provider value={{ ...mockKibanaContext, ...context }}>
-        <LicenseContext.Provider value={{ ...mockLicenseContext, ...context }}>
-          <Provider store={store}>{children}</Provider>
-        </LicenseContext.Provider>
+        <Provider store={store}>{children}</Provider>
       </KibanaContext.Provider>
     </I18nProvider>
   );

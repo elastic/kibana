@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -24,8 +24,7 @@ import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { useNetworkDetails } from '../../containers/details';
-import { useWithSource } from '../../../common/containers/source';
-import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -44,6 +43,7 @@ import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anom
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 export { getBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -83,7 +83,7 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern } = useWithSource();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -96,6 +96,7 @@ const NetworkDetailsComponent: React.FC = () => {
     docValueFields,
     skip: isInitializing,
     filterQuery,
+    indexNames: selectedPatterns,
     ip,
   });
 
@@ -124,7 +125,14 @@ const NetworkDetailsComponent: React.FC = () => {
               border
               data-test-subj="network-details-headline"
               draggableArguments={headerDraggableArguments}
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.ipDetails}
+                  indexNames={selectedPatterns}
+                  ip={ip}
+                />
+              }
               title={ip}
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
@@ -155,6 +163,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -169,6 +178,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -187,6 +197,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -201,6 +212,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -217,6 +229,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={flowTarget}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -229,6 +242,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <NetworkHttpQueryTable
               endDate={to}
               filterQuery={filterQuery}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -242,6 +256,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
+              indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
               skip={isInitializing}
@@ -257,6 +272,7 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               skip={isInitializing}
+              indexNames={selectedPatterns}
               ip={ip}
               type={type}
               flowTarget={flowTarget}

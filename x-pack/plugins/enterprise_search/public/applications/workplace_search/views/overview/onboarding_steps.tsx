@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useValues } from 'kea';
@@ -24,7 +24,7 @@ import {
 import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { HttpLogic } from '../../../shared/http';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { ContentSection } from '../../components/shared/content_section';
@@ -137,9 +137,6 @@ export const OnboardingSteps: React.FC = () => {
 
 export const OrgNameOnboarding: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({

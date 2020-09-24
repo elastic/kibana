@@ -29,4 +29,4 @@ import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react/pure';
 
 // instead of default 'data-testid', use kibana's 'data-test-subj'
-configure({ testIdAttribute: 'data-test-subj' });
+configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
