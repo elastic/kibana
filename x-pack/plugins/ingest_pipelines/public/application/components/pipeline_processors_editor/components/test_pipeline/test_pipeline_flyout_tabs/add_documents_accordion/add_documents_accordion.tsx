@@ -10,9 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { useKibana } from '../../../../../../shared_imports';
-import { useIsMounted } from '../../../use_is_mounted';
-import { AddDocumentForm } from './add_document_form';
+import { useKibana } from '../../../../../../../shared_imports';
+import { useIsMounted } from '../../../../use_is_mounted';
+import { AddDocumentForm } from '../add_document_form';
+
+import './add_documents_accordion.scss';
 
 const i18nTexts = {
   addDocumentsButton: i18n.translate(
@@ -60,7 +62,7 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
       paddingSize="s"
       data-test-subj="addDocumentsAccordion"
     >
-      <>
+      <div className="addDocumentsAccordion">
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
@@ -89,7 +91,7 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
         <EuiSpacer size="m" />
 
         <AddDocumentForm onAddDocuments={onAddDocuments} />
-      </>
+      </div>
     </EuiAccordion>
   );
 };

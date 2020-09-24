@@ -7,13 +7,13 @@
 import React, { useState, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiCallOut,
   EuiSpacer,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 
 import {
@@ -37,7 +37,7 @@ const i18nTexts = {
   addDocumentButton: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentButtonLabel',
     {
-      defaultMessage: 'Add',
+      defaultMessage: 'Add document',
     }
   ),
   addDocumentErrorMessage: i18n.translate(
@@ -158,57 +158,50 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
         </>
       )}
 
-      {isDocumentAdded && (
-        <>
-          <EuiCallOut
-            title={i18nTexts.addDocumentSuccessMessage}
-            color="success"
-            iconType="check"
-            data-test-subj="addDocumentSuccess"
-            size="s"
-          />
+      <UseField
+        path="index"
+        component={TextField}
+        config={fieldsConfig.index}
+        componentProps={{
+          ['data-test-subj']: 'indexField',
+        }}
+      />
 
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <UseField
+        path="id"
+        component={TextField}
+        config={fieldsConfig.id}
+        componentProps={{
+          ['data-test-subj']: 'idField',
+        }}
+      />
 
-      <EuiPanel paddingSize="m">
-        <EuiFlexGroup>
+      <EuiSpacer />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={submitForm}
+            data-test-subj="addDocumentButton"
+            isLoading={isLoadingDocument}
+          >
+            {i18nTexts.addDocumentButton}
+          </EuiButton>
+        </EuiFlexItem>
+
+        {isDocumentAdded && (
           <EuiFlexItem>
-            <UseField
-              path="index"
-              component={TextField}
-              config={fieldsConfig.index}
-              componentProps={{
-                ['data-test-subj']: 'indexField',
-              }}
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="check" color="secondary" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="secondary">{i18nTexts.addDocumentSuccessMessage}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-
-          <EuiFlexItem>
-            <UseField
-              path="id"
-              component={TextField}
-              config={fieldsConfig.id}
-              componentProps={{
-                ['data-test-subj']: 'idField',
-              }}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton
-                onClick={submitForm}
-                data-test-subj="addDocumentButton"
-                isLoading={isLoadingDocument}
-              >
-                {i18nTexts.addDocumentButton}
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+        )}
+      </EuiFlexGroup>
     </Form>
   );
 };
