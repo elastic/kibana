@@ -27,7 +27,7 @@
     ],
   },
   separateMajorMinor: false,
-  masterIssue: false,
+  masterIssue: true,
   rangeStrategy: 'bump',
   npm: {
     lockFileMaintenance: {
