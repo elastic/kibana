@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { CollectorSet, MakeSchemaFrom } from '../../plugins/usage_collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const { makeUsageCollector } = new CollectorSet({
@@ -24,26 +24,66 @@ const { makeUsageCollector } = new CollectorSet({
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 
-interface Usage {
-  [key: string]: {
-    count_1?: number;
-    count_2?: number;
-  };
+interface MyObject {
+  total: number;
+  type: boolean;
 }
 
+interface Usage {
+  flat?: string;
+  my_str?: string;
+  my_objects: MyObject;
+}
+
+const SOME_NUMBER: number = 123;
+
+const someSchema: MakeSchemaFrom<Pick<Usage, 'flat' | 'my_str'>> = {
+  flat: {
+    type: 'keyword',
+  },
+  my_str: {
+    type: 'text',
+  },
+};
+
+const someOtherSchema: MakeSchemaFrom<Pick<Usage, 'my_objects'>> = {
+  my_objects: {
+    total: {
+      type: 'number',
+    },
+    type: { type: 'boolean' },
+  },
+};
+
 export const myCollector = makeUsageCollector<Usage>({
-  type: 'indexed_interface_with_not_matching_schema',
+  type: 'schema_defined_with_spreads',
   isReady: () => true,
   fetch() {
-    if (Math.random()) {
-      return { something: { count_1: 1 } };
+    const testString = '123';
+    // query ES and get some data
+
+    // summarize the data into a model
+    // return the modeled object that includes whatever you want to track
+    try {
+      return {
+        flat: 'hello',
+        my_str: testString,
+        my_objects: {
+          total: SOME_NUMBER,
+          type: true,
+        },
+      };
+    } catch (err) {
+      return {
+        my_objects: {
+          total: 0,
+          type: true,
+        },
+      };
     }
-    return { something: { count_2: 2 } };
   },
   schema: {
-    // @ts-expect-error Intentionally missing count_2
-    something: {
-      count_1: { type: 'long' },
-    },
+    ...someSchema,
+    ...someOtherSchema,
   },
 });
