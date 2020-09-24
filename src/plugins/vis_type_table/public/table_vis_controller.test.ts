@@ -22,8 +22,6 @@ import 'angular-mocks';
 import 'angular-sanitize';
 import $ from 'jquery';
 
-// @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { getTableVisTypeDefinition } from './table_vis_type';
@@ -32,6 +30,7 @@ import { stubFields } from '../../data/public/stubs';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../core/public/mocks';
 import { IAggConfig, search } from '../../data/public';
+import { getStubIndexPattern } from '../../data/public/test_utils';
 // TODO: remove linting disable
 import { searchServiceMock } from '../../data/public/search/mocks';
 
@@ -105,7 +104,7 @@ describe('Table Vis - Controller', () => {
   );
 
   beforeEach(() => {
-    stubIndexPattern = new StubIndexPattern(
+    stubIndexPattern = getStubIndexPattern(
       'logstash-*',
       (cfg: any) => cfg,
       'time',

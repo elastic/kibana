@@ -26,10 +26,9 @@ import {
   SavedObjectSaveOpts,
 } from '../types';
 
-// @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
+import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
 
@@ -294,14 +293,14 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = new StubIndexPattern(
+            const indexPattern = getStubIndexPattern(
               'my-index',
               getConfig,
               null,
               [],
               coreMock.createSetup()
             );
-            indexPattern.title = indexPattern.id;
+            indexPattern.title = indexPattern.id!;
             savedObject.searchSource!.setField('index', indexPattern);
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
@@ -335,7 +334,7 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = new StubIndexPattern(
+            const indexPattern = getStubIndexPattern(
               'non-existant-index',
               getConfig,
               null,
@@ -662,14 +661,14 @@ describe('Saved Object', () => {
 
         const savedObject = new SavedObjectClass(config);
         savedObject.hydrateIndexPattern = jest.fn().mockImplementation(() => {
-          const indexPattern = new StubIndexPattern(
+          const indexPattern = getStubIndexPattern(
             indexPatternId,
             getConfig,
             null,
             [],
             coreMock.createSetup()
           );
-          indexPattern.title = indexPattern.id;
+          indexPattern.title = indexPattern.id!;
           savedObject.searchSource!.setField('index', indexPattern);
           return Bluebird.resolve(indexPattern);
         });
