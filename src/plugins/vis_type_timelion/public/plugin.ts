@@ -39,7 +39,7 @@ import { getTimelionVisDefinition } from './timelion_vis_type';
 import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_services';
 import { ConfigSchema } from '../config';
 
-import './index.scss';
+import './components/index.scss';
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 
 /** @internal */
