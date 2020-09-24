@@ -10,12 +10,13 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useWithSource } from '../../../../common/containers/source';
 import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import * as i18n from './translations';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
@@ -85,7 +86,7 @@ interface FlyoutButtonProps {
 export const FlyoutButton = React.memo<FlyoutButtonProps>(
   ({ onOpen, show, dataProviders, timelineId }) => {
     const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
-    const { browserFields } = useWithSource();
+    const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
 
     if (!show) {
       return null;
