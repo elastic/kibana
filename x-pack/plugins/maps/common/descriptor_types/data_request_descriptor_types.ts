@@ -94,5 +94,3 @@ export type DataRequestDescriptor = {
   data?: object;
   dataMeta?: DataMeta;
 };
-
-export type RegisterCancelCallback = (requestToken: symbol, callback: () => void) => void;

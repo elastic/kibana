@@ -19,6 +19,12 @@ import {
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequest } from '../../util/data_request';
+
+export interface SourceTooltipConfig {
+  tooltipContent: string | null;
+  areResultsTrimmed: boolean;
+}
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -42,9 +48,10 @@ export interface IVectorSource extends ISource {
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
-    layerName: 'string',
+    layerName: string,
     searchFilters: MapFilters,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
@@ -55,6 +62,8 @@ export interface IVectorSource extends ISource {
   createField({ fieldName }: { fieldName: string }): IField;
   canFormatFeatureProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
+  isBoundsAware(): boolean;
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -66,7 +75,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getGeoJsonWithMeta(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
@@ -77,6 +87,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
+  isBoundsAware(): boolean;
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {

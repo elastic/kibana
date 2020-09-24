@@ -174,7 +174,7 @@ export class VectorLayer extends AbstractLayer {
     if (
       this.getJoins().length &&
       !featureCollection.features.some(
-        (feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
+        (feature) => feature.properties?.[FEATURE_VISIBLE_PROPERTY_NAME]
       )
     ) {
       return {
@@ -191,7 +191,7 @@ export class VectorLayer extends AbstractLayer {
       areResultsTrimmed,
     } = (this.getSource() as IVectorSource).getSourceTooltipContent(sourceDataRequest);
     return {
-      icon: this.getCurrentStyle().getIcon(),
+      icon: (this.getCurrentStyle() as VectorStyle).getIcon(),
       tooltipContent,
       areResultsTrimmed,
     };
@@ -224,7 +224,7 @@ export class VectorLayer extends AbstractLayer {
     const searchFilters = this._getSearchFilters(
       dataFilters,
       this.getSource() as IVectorSource,
-      this.getCurrentStyle()
+      this.getCurrentStyle() as IVectorStyle
     );
     // Do not pass all searchFilters to source.getBoundsForFilters().
     // For example, do not want to filter bounds request by extent and buffer.
@@ -239,7 +239,7 @@ export class VectorLayer extends AbstractLayer {
     let bounds = null;
     try {
       startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
-      bounds = await this.getSource().getBoundsForFilters(
+      bounds = await (this.getSource() as IVectorSource).getBoundsForFilters(
         boundsFilters,
         registerCancelCallback.bind(null, requestToken)
       );
@@ -261,7 +261,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getJoinFields() {
-    const joinFields: IFeild[] = [];
+    const joinFields: IField[] = [];
     this.getValidJoins().forEach((join) => {
       const fields = join.getJoinFields();
       joinFields.push(...fields);
@@ -302,7 +302,7 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
-  }: Promise<{ join: IJoin } & DataRequestContext>): JoinState {
+  }: { join: IJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
@@ -323,7 +323,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         dataHasChanged: false,
         join,
-        propertiesMap: prevDataRequest?.getData(),
+        propertiesMap: prevDataRequest?.getData() as PropertiesMap,
       };
     }
 

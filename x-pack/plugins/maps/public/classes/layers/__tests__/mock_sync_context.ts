@@ -6,13 +6,13 @@
 
 import sinon from 'sinon';
 import { DataRequestContext } from '../../../actions';
-import { DataMeta, MapFilters, RegisterCancelCallback } from '../../../../common/descriptor_types';
+import { DataMeta, MapFilters } from '../../../../common/descriptor_types';
 
 export class MockSyncContext implements DataRequestContext {
   dataFilters: MapFilters;
   isRequestStillActive: (dataId: string, requestToken: symbol) => boolean;
   onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) => void;
-  registerCancelCallback: RegisterCancelCallback;
+  registerCancelCallback: (requestToken: symbol, callback: () => void) => void;
   startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) => void;
   stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) => void;
   updateSourceData: (newData: unknown) => void;
