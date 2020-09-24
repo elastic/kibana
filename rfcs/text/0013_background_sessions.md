@@ -379,7 +379,7 @@ interface SearchService {
 
 ### Server Routes
 
-Each route exposes the corresponding method from the Session Service
+Each route exposes the corresponding method from the Session Service (used only by the client-side service, not meant to be used directly by any consumers):
 
 `POST /internal/session/store`
 
