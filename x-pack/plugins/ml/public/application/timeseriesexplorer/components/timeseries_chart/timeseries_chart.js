@@ -12,9 +12,17 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import reduce from 'lodash/reduce';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import each from 'lodash/each';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
 import d3 from 'd3';
 import moment from 'moment';

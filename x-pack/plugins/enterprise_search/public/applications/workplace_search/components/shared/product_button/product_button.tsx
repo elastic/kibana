@@ -5,17 +5,19 @@
  */
 
 import React, { useContext } from 'react';
+import { useValues } from 'kea';
 
 import { EuiButton, EuiButtonProps, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
+import { HttpLogic } from '../../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../../index';
 
 export const ProductButton: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const {
     externalUrl: { getWorkplaceSearchUrl },
-    http,
   } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {

@@ -40,7 +40,7 @@ function EditHeader({ calendarId, description }) {
           />
         </h1>
       </EuiTitle>
-      <EuiText>
+      <EuiText data-test-subj={'mlCalendarDescriptionText'}>
         <p>{description}</p>
       </EuiText>
       <EuiSpacer size="l" />
@@ -116,6 +116,7 @@ export const CalendarForm = ({
               value={calendarId}
               onChange={onCalendarIdChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
 
@@ -132,6 +133,7 @@ export const CalendarForm = ({
               value={description}
               onChange={onDescriptionChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
         </Fragment>
