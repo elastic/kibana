@@ -66,7 +66,7 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const { getByLabelText } = render(
+    const { getByText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
@@ -76,7 +76,8 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByLabelText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
     await wait();
     done();
   });
