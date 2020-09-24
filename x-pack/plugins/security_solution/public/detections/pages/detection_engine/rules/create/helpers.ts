@@ -94,6 +94,7 @@ export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: T
     case 'threshold':
       const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
       return thresholdRuleFields;
+    case 'threat_match':
     case 'query':
     case 'saved_query':
     case 'eql':

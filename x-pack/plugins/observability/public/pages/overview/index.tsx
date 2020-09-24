@@ -8,6 +8,7 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { APMSection } from '../../components/app/section/apm';
@@ -15,18 +16,18 @@ import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
-import { NewsFeed } from '../../components/app/news_feed';
 import { fetchHasData } from '../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTrackPageview } from '../../hooks/use_track_metric';
 import { RouteParams } from '../../routes';
+import { getNewsFeed } from '../../services/get_news_feed';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getAbsoluteTime } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
-import { getNewsFeed } from '../../services/get_news_feed';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -40,6 +41,9 @@ function calculatetBucketSize({ start, end }: { start?: number; end?: number }) 
 
 export function OverviewPage({ routeParams }: Props) {
   const { core } = usePluginContext();
+
+  useTrackPageview({ app: 'observability', path: 'overview' });
+  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });

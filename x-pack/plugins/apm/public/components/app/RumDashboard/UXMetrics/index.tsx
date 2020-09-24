@@ -23,7 +23,7 @@ export interface UXMetrics {
   cls: string;
   fid: string;
   lcp: string;
-  tbt: string;
+  tbt: number;
   fcp: number;
   lcpRanks: number[];
   fidRanks: number[];
@@ -33,7 +33,7 @@ export interface UXMetrics {
 export function UXMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -42,13 +42,18 @@ export function UXMetrics() {
         return callApmApi({
           pathname: '/api/apm/rum-client/web-core-vitals',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters]
+    [start, end, uiFilters, searchTerm]
   );
 
   return (
