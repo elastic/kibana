@@ -60,16 +60,14 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
-  const encodedUrlState =
-    typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-
-  return stringify(
-    url.encodeQuery({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    }),
-    { sort: false, encode: false }
-  );
+  const newValue =
+    typeof urlState === 'undefined'
+      ? previousQueryValues
+      : {
+          ...previousQueryValues,
+          [stateKey]: encodeRisonUrlState(urlState),
+        };
+  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
 };
 
 export const replaceQueryStringInLocation = (
