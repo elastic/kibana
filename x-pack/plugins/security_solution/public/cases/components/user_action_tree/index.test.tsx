@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { wait as waitFor } from '@testing-library/react';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
@@ -91,16 +90,14 @@ describe('UserActionTree ', () => {
       },
       caseUserActions: ourActions,
     };
-
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
-
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toBeTruthy();
     });
@@ -122,14 +119,14 @@ describe('UserActionTree ', () => {
       },
     };
 
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toBeFalsy();
     });
@@ -142,15 +139,15 @@ describe('UserActionTree ', () => {
       caseUserActions: ourActions,
     };
 
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
 
+    await waitFor(() => {
       expect(
         wrapper
           .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
@@ -165,34 +162,32 @@ describe('UserActionTree ', () => {
         .first()
         .simulate('click');
 
-      await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
-            .first()
-            .hasClass('outlined')
-        ).toBeTruthy();
-      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
+          .first()
+          .hasClass('outlined')
+      ).toBeTruthy();
     });
   });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
+    const ourActions = [getUserAction(['comment'], 'create')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+
     await waitFor(() => {
-      const ourActions = [getUserAction(['comment'], 'create')];
-      const props = {
-        ...defaultProps,
-        caseUserActions: ourActions,
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
-
       expect(
         wrapper
           .find(
@@ -278,24 +273,22 @@ describe('UserActionTree ', () => {
       .first()
       .simulate('click');
 
-    await act(async () => {
-      await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(
-              `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-            )
-            .exists()
-        ).toEqual(false);
-        expect(patchComment).toBeCalledWith({
-          commentUpdate: sampleData.content,
-          caseId: props.data.id,
-          commentId: props.data.comments[0].id,
-          fetchUserActions,
-          updateCase,
-          version: props.data.comments[0].version,
-        });
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: sampleData.content,
+        caseId: props.data.id,
+        commentId: props.data.comments[0].id,
+        fetchUserActions,
+        updateCase,
+        version: props.data.comments[0].version,
       });
     });
   });
@@ -320,89 +313,86 @@ describe('UserActionTree ', () => {
       .first()
       .simulate('click');
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
-        .first()
-        .simulate('click');
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
+      .first()
+      .simulate('click');
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+
+      expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
     });
-
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`)
-        .exists()
-    ).toEqual(false);
-
-    expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
   });
 
   it('quotes', async () => {
-    await act(async () => {
-      const commentData = {
-        comment: '',
-      };
-      const setFieldValue = jest.fn();
+    const commentData = {
+      comment: '',
+    };
+    const setFieldValue = jest.fn();
 
-      const formHookMock = getFormMock(commentData);
-      useFormMock.mockImplementation(() => ({ form: { ...formHookMock, setFieldValue } }));
+    const formHookMock = getFormMock(commentData);
+    useFormMock.mockImplementation(() => ({ form: { ...formHookMock, setFieldValue } }));
 
-      const props = defaultProps;
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
+    const props = defaultProps;
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
 
       wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+        .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
         .first()
         .simulate('click');
-
-      await waitFor(() => {
-        wrapper.update();
-
-        wrapper
-          .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
-          .first()
-          .simulate('click');
-      });
-
-      expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
     });
+
+    expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
   });
 
   it('Outlines comment when url param is provided', async () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
-    await act(async () => {
-      const ourActions = [getUserAction(['comment'], 'create')];
-      const props = {
-        ...defaultProps,
-        caseUserActions: ourActions,
-      };
+    const ourActions = [getUserAction(['comment'], 'create')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
-      const wrapper = mount(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <UserActionTree {...props} />
-          </Router>
-        </TestProviders>
-      );
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
 
-      await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`[data-test-subj="comment-create-action-${commentId}"]`)
-            .first()
-            .hasClass('outlined')
-        ).toBeTruthy();
-      });
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(`[data-test-subj="comment-create-action-${commentId}"]`)
+          .first()
+          .hasClass('outlined')
+      ).toBeTruthy();
     });
   });
 });
