@@ -73,7 +73,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       async eventsWithEntityIDAndCategory(
         entityID: string,
         category,
-        _after: string
+        after?: string
       ): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;

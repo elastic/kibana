@@ -64,9 +64,9 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
        * a `event.category` that includes `category`.
        */
       async eventsWithEntityIDAndCategory(
-        _entityID: string,
-        _category: string,
-        _after: string
+        entityID: string,
+        category: string,
+        after?: string
       ): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;

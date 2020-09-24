@@ -79,7 +79,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       async eventsWithEntityIDAndCategory(
         entityID: string,
         category: string,
-        _after: string
+        after?: string
       ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         const events =
           entityID === metadata.entityIDs.origin
