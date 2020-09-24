@@ -1056,7 +1056,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
 //
 // @public (undocumented)
 export interface IKibanaSearchRequest<Params = any> {
-    debug?: boolean;
     id?: string;
     // (undocumented)
     params?: Params;

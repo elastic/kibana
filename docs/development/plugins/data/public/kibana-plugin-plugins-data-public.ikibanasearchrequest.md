@@ -14,7 +14,6 @@ export interface IKibanaSearchRequest<Params = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [debug](./kibana-plugin-plugins-data-public.ikibanasearchrequest.debug.md) | <code>boolean</code> | Optionally tell search strategies to output debug information. |
 |  [id](./kibana-plugin-plugins-data-public.ikibanasearchrequest.id.md) | <code>string</code> | An id can be used to uniquely identify this request. |
 |  [params](./kibana-plugin-plugins-data-public.ikibanasearchrequest.params.md) | <code>Params</code> |  |
 
