@@ -8,12 +8,10 @@ import expect from '@kbn/expect';
 import {
   NetworkQueries,
   NetworkDnsEdges,
-} from '../../../../plugins/security_solution/common/search_strategy';
-
-import {
   Direction,
   NetworkDnsFields,
-} from '../../../../plugins/security_solution/public/graphql/types';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

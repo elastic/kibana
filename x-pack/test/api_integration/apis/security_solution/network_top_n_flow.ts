@@ -8,12 +8,11 @@ import expect from '@kbn/expect';
 import {
   NetworkQueries,
   NetworkTopNFlowEdges,
-} from '../../../../plugins/security_solution/common/search_strategy';
-import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopTablesFields,
-} from '../../../../plugins/security_solution/public/graphql/types';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const EDGE_LENGTH = 10;
