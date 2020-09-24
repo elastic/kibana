@@ -19,6 +19,7 @@ import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useUserInfo } from '../../detections/components/user_info';
+import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 
 const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -56,6 +57,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   // side effect: this will attempt to create the signals index if it doesn't exist
   useUserInfo();
+  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
+  useUpgradeEndpointPackage();
 
   return (
     <SecuritySolutionAppWrapper>

@@ -5,15 +5,15 @@
  */
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   epmRouteService,
   appRoutesService,
   CheckPermissionsResponse,
   BulkInstallPackagesResponse,
-} from '../../../ingest_manager/common';
-import { StartServices } from '../types';
-import { useIngestEnabledCheck } from '../common/hooks/endpoint/ingest_enabled';
+} from '../../../../../ingest_manager/common';
+import { StartServices } from '../../../types';
+import { useIngestEnabledCheck } from './ingest_enabled';
 
 /**
  * Requests that the endpoint package be upgraded to the latest version
@@ -49,7 +49,7 @@ const sendCheckPermissions = async (
   });
 };
 
-export const UpgradeEndpointPackage = () => {
+export const useUpgradeEndpointPackage = () => {
   const context = useKibana<StartServices>();
   const { allEnabled: ingestEnabled } = useIngestEnabledCheck();
 
@@ -88,6 +88,4 @@ export const UpgradeEndpointPackage = () => {
       })();
     }
   }, [ingestEnabled, context.services.http]);
-
-  return null;
 };
