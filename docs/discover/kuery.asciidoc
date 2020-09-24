@@ -1,33 +1,31 @@
 [[kuery-query]]
 === Kibana Query Language
 
-Kibana Query Language (KQL) makes it easy to find
+The Kibana Query Language (KQL) makes it easy to find
 the fields and syntax for your {es} query. If you have the
 https://www.elastic.co/subscriptions[Basic tier] or above,
 simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
-values, and query operators.
+values, and operators.
 
-This guide provides examples of common KQL searches, from a basic term
-query to more complex queries with boolean operators and groupings. It
-also provides examples of searching nested fields.
+[role="screenshot"]
+image::images/kql-autocomplete.png[Autocomplete in Search bar]
 
-If you prefer Kibana’s legacy query language, based on the
-{ref}/query-dsl-query-string-query.html#query-string-syntax[Lucene query syntax],
-you can switch to it using the Options menu in the *Search* field.
+If you prefer to use Kibana’s legacy query language, based on the
+<<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field and turn it off.
 
 [discrete]
 === Terms query
 
 A terms query matches documents that contain one or more *exact* terms in a field.
 
-Match documents where the `response` field is 200:
+To match documents where the response field is `200`:
 
 [source,yaml]
 -------------------
 response:200
 -------------------
 
-Match documents with the phrase "quick brown fox" in the `message` field.
+To match documents with the phrase "quick brown fox" in the `message` field.
 
 [source,yaml]
 -------------------
@@ -51,7 +49,7 @@ across all fields in your index.
 === Boolean queries
 
 KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
-To override the default precedence, group operators in parenthesis.
+To override the default precedence, group operators in parentheses.
 
 To match documents where response is `200`, extension is `php`, or both:
 
@@ -82,7 +80,7 @@ response:200 and (extension:php or extension:css)
 -------------------
 
 To match documents where `response` is 200 and `extension` is
-`php` OR extension is `css`, and response is anything:
+`php` or extension is `css`, and response is anything:
 
 [source,yaml]
 -------------------
@@ -134,7 +132,7 @@ response:*
 [discrete]
 === Wildcard queries
 
-To match documents where `machine.os` starts with "win", such
+To match documents where machine.os starts with `win`, such
 as "windows 7" and "windows 10":
 
 [source,yaml]
@@ -149,10 +147,10 @@ To match multiple fields:
 machine.os*:windows 10
 -------------------
 
-This sytax is handy when you have `text` and `keyword`
-versions of a field. The query checks `machine.os` and `machine.os.keyword`
+This sytax is handy when you have text and keyword
+versions of a field. The query checks machine.os and machine.os.keyword
 for the term
-"windows 10".
+`windows 10`.
 
 
 [discrete]
@@ -249,7 +247,7 @@ subquery can match a different nested document because it is in a separate group
 [discrete]
 ==== Nested fields inside other nested fields
 
-KQL supports nested fields inside of other nested fields&mdash;you have to
+KQL supports nested fields inside other nested fields&mdash;you have to
 specify the full path. In this document,
 `level1` and `level2` are nested fields:
 
