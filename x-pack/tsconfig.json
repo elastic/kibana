@@ -11,7 +11,8 @@
     "test/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
-    "plugins/apm/scripts/**/*"
+    "plugins/apm/scripts/**/*",
+    "plugins/licensing/**/*"
   ],
   "compilerOptions": {
     "outDir": ".",
@@ -28,5 +29,6 @@
     { "path": "../src/core/tsconfig.json" },
     { "path": "../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "./plugins/licensing/tsconfig.json" }
   ]
 }
