@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
+import { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
@@ -56,7 +57,7 @@ export interface ILayer {
   getMaxZoom(): number;
   getMinSourceZoom(): number;
   getAlpha(): number;
-  getQuery(): Query | undefined;
+  getQuery(): Query | null;
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
@@ -133,16 +134,9 @@ export class AbstractLayer implements ILayer {
     };
   }
 
-  static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
-    // @ts-expect-error
-    const mbStyle = mbMap.getStyle();
-    return mbStyle.sources[sourceId].data;
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
+  static getBoundDataForSource(mbMap: MbMap, sourceId: string): FeatureCollection | null {
+    const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
+    return mbGeoJSONSource ? mbGeoJSONSource.data : null;
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {
@@ -154,6 +148,12 @@ export class AbstractLayer implements ILayer {
       );
     } else {
       this._dataRequests = [];
+    }
+  }
+
+  destroy() {
+    if (this._source) {
+      this._source.destroy();
     }
   }
 
@@ -413,8 +413,8 @@ export class AbstractLayer implements ILayer {
     return typeof this._descriptor.alpha === 'number' ? this._descriptor.alpha : 1;
   }
 
-  getQuery(): Query | undefined {
-    return this._descriptor.query;
+  getQuery(): Query | null {
+    return this._descriptor.query ? this._descriptor.query : null;
   }
 
   async getImmutableSourceProperties() {

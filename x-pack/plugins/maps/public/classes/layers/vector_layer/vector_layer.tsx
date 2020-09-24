@@ -7,7 +7,6 @@
 import React from 'react';
 import { Map as MbMap, Layer as MbLayer, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
-import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +48,7 @@ import {
   MapQuery,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
+  VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
@@ -383,11 +383,12 @@ export class VectorLayer extends AbstractLayer {
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
+    const sourceQuery = this.getQuery() as MapQuery;
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
-      sourceQuery: this.getQuery() as MapQuery,
+      sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
       sourceMeta: source.getSyncMeta(),
     };
@@ -506,10 +507,11 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
+    const sourceQuery = this.getQuery() as MapQuery;
     return this._syncStyleMeta({
       source,
       style,
-      sourceQuery: this.getQuery(),
+      sourceQuery: sourceQuery ? sourceQuery : undefined,
       dataRequestId: SOURCE_META_DATA_REQUEST_ID,
       dynamicStyleProps: style.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
         return (
@@ -557,7 +559,7 @@ export class VectorLayer extends AbstractLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource;
-    sourceQuery?: Query;
+    sourceQuery?: MapQuery;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
@@ -573,7 +575,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery,
       isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
-    };
+    } as VectorStyleRequestMeta;
     const prevDataRequest = this.getDataRequest(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
     if (canSkipFetch) {
@@ -592,6 +594,7 @@ export class VectorLayer extends AbstractLayer {
         registerCancelCallback.bind(null, requestToken),
         nextMeta
       );
+      // @ts-expect-error
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

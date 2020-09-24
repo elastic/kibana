@@ -64,12 +64,13 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
-type DataMetaUnion = VectorSourceRequestMeta &
-  VectorJoinSourceRequestMeta &
-  VectorStyleRequestMeta &
-  ESSearchSourceResponseMeta;
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<DataMetaUnion>;
+export type DataMeta = Partial<
+  VectorSourceRequestMeta &
+    VectorJoinSourceRequestMeta &
+    VectorStyleRequestMeta &
+    ESSearchSourceResponseMeta
+>;
 
 type NumericalStyleFieldData = {
   avg: number;
