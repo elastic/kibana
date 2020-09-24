@@ -139,6 +139,7 @@
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
+    "@types/proxy-from-env": "^1.0.1",
     "@types/yauzl": "^2.9.1",
     "JSONStream": "1.3.5",
     "abortcontroller-polyfill": "^1.4.0",

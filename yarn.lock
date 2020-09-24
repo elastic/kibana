@@ -4509,6 +4509,13 @@
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.1.tgz#dd770a2abce3adbcce3bd1ed892ce2f5f17fbc86"
   integrity sha512-ODOjqxmaNs0Zkij+BJovsNJRSX7BJrr681o8ZnNTNIcTermvVFzLpz/XFtfg3vNrlPVTJY1l4e9h2LvHoxC1lg==
 
+"@types/proxy-from-env@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/proxy-from-env/-/proxy-from-env-1.0.1.tgz#b5f3e99230ca4518af196c18267055fc51f892b7"
+  integrity sha512-luG++TFHyS61eKcfkR1CVV6a1GMNXDjtqEQIIfaSHax75xp0HU3SlezjOi1yqubJwrG8e9DeW59n6wTblIDwFg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/puppeteer@^1.20.1":
   version "1.20.1"
   resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.20.1.tgz#0aba5ae3d290daa91cd3ba9f66ba5e9fba3499cc"
