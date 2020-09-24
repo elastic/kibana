@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import {
   NetworkQueries,
   Direction,
-  // @ts-expect-error
   NetworkUsersFields,
   FlowTarget,
 } from '../../../../plugins/security_solution/common/search_strategy';
@@ -41,7 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             docValueFields: [],
-            inspect: false,
             ip: IP,
             flowTarget: FlowTarget.destination,
             sort: { field: NetworkUsersFields.name, direction: Direction.asc },
