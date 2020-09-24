@@ -159,35 +159,6 @@ export function PanelHeader({
     );
   }
 
-  const titleBlock = (text: string | undefined, className: string, ariaLabel: string) => {
-    return (
-      <span className="embPanel__titleInner">
-        <span className={className} aria-hidden="true">
-          {text}
-        </span>
-        <EuiScreenReaderOnly>
-          <span>{ariaLabel}</span>
-        </EuiScreenReaderOnly>
-        {renderTooltip(viewDescription)}
-      </span>
-    );
-  };
-
-  const getPlaceholderTitle = () => {
-    const ariaLabel = i18n.translate('embeddableApi.panel.enhancedDashboardPanelPlaceholderText', {
-      defaultMessage: 'Panel with no title',
-    });
-    return titleBlock(placeholderTitle, 'embPanel__placeholderTitleText', ariaLabel);
-  };
-
-  const getTitle = () => {
-    const ariaLabel = i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-      defaultMessage: 'Dashboard panel: {title}',
-      values: { title },
-    });
-    return titleBlock(title, 'embPanel__titleText', ariaLabel);
-  };
-
   return (
     <figcaption
       className={classes}
@@ -199,11 +170,23 @@ export function PanelHeader({
         className="embPanel__title embPanel__dragger"
       >
         {showTitle ? (
-          title ? (
-            getTitle()
-          ) : (
-            getPlaceholderTitle()
-          )
+          <span className="embPanel__titleInner">
+            <span
+              className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
+              aria-hidden="true"
+            >
+              {title || placeholderTitle}
+            </span>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+                  defaultMessage: 'Dashboard panel: {title}',
+                  values: { title: title || placeholderTitle },
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+            {renderTooltip(viewDescription)}
+          </span>
         ) : (
           <EuiScreenReaderOnly>
             <span>
