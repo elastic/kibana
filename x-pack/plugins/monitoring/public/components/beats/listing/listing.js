@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { Stats } from '../../beats';
 import { formatMetric } from '../../../lib/format_number';
@@ -153,9 +154,11 @@ export class Listing extends PureComponent {
               />
             </h1>
           </EuiScreenReaderOnly>
-          <EuiPageContent>
+          <EuiPanel>
             <Stats stats={stats} />
-            <EuiSpacer size="m" />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
             {setupModeCallOut}
             <EuiMonitoringTable
               className="beatsTable"
