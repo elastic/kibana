@@ -82,7 +82,7 @@ response:200 and (extension:php or extension:css)
 -------------------
 
 To match documents where `response` is 200 and `extension` is
-php OR `extension` is css and response is anything:
+`php` OR extension is `css`, and response is anything:
 
 [source,yaml]
 -------------------
