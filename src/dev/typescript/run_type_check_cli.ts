@@ -80,7 +80,8 @@ export async function runTypeCheckCli() {
     process.exit();
   }
 
-  await buildRefs(log);
+  await buildRefs(log, 'tsconfig.refs.json');
+  await buildRefs(log, 'x-pack/tsconfig.refs.json');
 
   const tscArgs = [
     // composite project cannot be used with --noEmit
