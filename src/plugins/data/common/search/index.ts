@@ -23,4 +23,3 @@ export * from './expressions';
 export * from './search_source';
 export * from './tabify';
 export * from './types';
-export * from './es_search';

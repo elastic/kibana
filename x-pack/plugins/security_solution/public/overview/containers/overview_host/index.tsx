@@ -5,10 +5,9 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
   HostsQueries,
   HostOverviewRequestOptions,
@@ -18,8 +17,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import { useManageSource } from '../../../common/containers/sourcerer';
-import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
 import {
   AbortError,
   isCompleteResponse,
@@ -42,6 +39,7 @@ export interface HostOverviewArgs {
 interface UseHostOverview {
   filterQuery?: ESQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -49,23 +47,16 @@ interface UseHostOverview {
 export const useHostOverview = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseHostOverview): [boolean, HostOverviewArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
-  const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
-  const { indexPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
-    getManageSourceGroupById,
-    activeSourceGroupId,
-  ]);
-  const uiDefaultIndexPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-  const defaultIndex = SOURCERER_FEATURE_FLAG_ON ? indexPatterns : uiDefaultIndexPatterns;
-
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: HostsQueries.overview,
     filterQuery: createFilter(filterQuery),
     timerange: {
@@ -145,7 +136,7 @@ export const useHostOverview = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -158,7 +149,7 @@ export const useHostOverview = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     overviewHostSearch(overviewHostRequest);
