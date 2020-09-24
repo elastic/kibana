@@ -27,8 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
         filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        packetbeatDNS: 44,
-        packetbeatFlow: 588,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
         packetbeatTLS: 0,
       };
 
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
               interval: '12h',
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
               interval: '12h',
@@ -108,8 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
         filebeatPanw: 0,
         filebeatSuricata: 0,
         filebeatZeek: 0,
-        packetbeatDNS: 44,
-        packetbeatFlow: 588,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
         packetbeatTLS: 0,
       };
 
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
               interval: '12h',
