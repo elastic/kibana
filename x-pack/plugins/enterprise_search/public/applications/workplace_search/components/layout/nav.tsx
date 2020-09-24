@@ -63,11 +63,6 @@ export const WorkplaceSearchNav: React.FC = () => {
           defaultMessage: 'View my personal dashboard',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl('/search')}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.search', {
-          defaultMessage: 'Go to search application',
-        })}
-      </SideNavLink>
     </SideNav>
   );
 };
