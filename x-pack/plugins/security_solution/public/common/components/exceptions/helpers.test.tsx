@@ -713,15 +713,15 @@ describe('Exception helpers', () => {
   });
 
   describe('getPrepopulatedItem', () => {
-    test('it returns prepopulated items with empty values if values do not exist', () => {
+    test('it returns prepopulated items', () => {
       const prepopulatedItem = getPrepopulatedItem({
         listType: 'endpoint',
         listId: 'some_id',
         ruleName: 'my rule',
-        codeSignature: undefined,
-        filePath: undefined,
-        sha256Hash: undefined,
-        eventCode: undefined,
+        codeSignature: { subjectName: '', trusted: '' },
+        filePath: '',
+        sha256Hash: '',
+        eventCode: '',
       });
 
       expect(prepopulatedItem.entries).toEqual([
@@ -772,51 +772,34 @@ describe('Exception helpers', () => {
   });
 
   describe('getCodeSignatureValue', () => {
-    test('it returns default if value does not resemble expected code_signature shape', () => {
-      const codeSignatures = getCodeSignatureValue([
-        {
-          field: 'file.Ext.code_signature',
-          value: [JSON.stringify({ not_a_thing: 'some_subject', trusted: 'false' })],
-        },
-      ]);
-
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
-    });
-
-    test('it returns default if value is not expected type of object', () => {
-      const codeSignatures = getCodeSignatureValue([
-        {
-          field: 'file.Ext.code_signature',
-          value: [JSON.stringify([1, 2, 3])],
-        },
-      ]);
-
-      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
-    });
-
     test('it works when file.Ext.code_signature is an object', () => {
-      const codeSignatures = getCodeSignatureValue([
-        {
-          field: 'file.Ext.code_signature',
-          value: [JSON.stringify({ subject_name: 'some_subject', trusted: 'false' })],
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: {
+              subject_name: ['some_subject'],
+              trusted: ['false'],
+            },
+          },
         },
-      ]);
+      });
 
       expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
     });
 
     test('it works when file.Ext.code_signature is nested type', () => {
-      const codeSignatures = getCodeSignatureValue([
-        {
-          field: 'file.Ext.code_signature',
-          value: [
-            JSON.stringify([
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
-            ]),
-          ],
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
         },
-      ]);
+      });
 
       expect(codeSignatures).toEqual([
         { subjectName: 'some_subject', trusted: 'false' },
@@ -826,33 +809,62 @@ describe('Exception helpers', () => {
         },
       ]);
     });
+
+    test('it returns default when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: { subject_name: [], trusted: [] },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
   });
 
   describe('defaultEndpointExceptionItems', () => {
     test('it should return pre-populated items', () => {
-      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', [
-        {
-          field: 'file.Ext.code_signature',
-          value: [
-            JSON.stringify([
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
-            ]),
-          ],
+      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', {
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
+          path: ['some file path'],
+          hash: {
+            sha256: ['some hash'],
+          },
         },
-        {
-          field: 'file.path',
-          value: ['some file path'],
+        event: {
+          code: ['some event code'],
         },
-        {
-          field: 'file.hash.sha256',
-          value: ['some hash'],
-        },
-        {
-          field: 'event.code',
-          value: ['some event code'],
-        },
-      ]);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {

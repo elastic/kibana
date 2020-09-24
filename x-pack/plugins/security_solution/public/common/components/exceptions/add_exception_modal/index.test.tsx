@@ -19,7 +19,6 @@ import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -141,10 +140,7 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
-        ecsData: { _id: 'test-id' },
-        nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
-      };
+      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -192,10 +188,7 @@ describe('When the add exception modal is opened', () => {
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
-        ecsData: { _id: 'test-id' },
-        nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
-      };
+      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -260,10 +253,7 @@ describe('When the add exception modal is opened', () => {
           },
         },
       ]);
-      const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
-        ecsData: { _id: 'test-id' },
-        nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
-      };
+      const alertDataMock: Ecs = { _id: 'test-id', file: { path: ['test/path'] } };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal

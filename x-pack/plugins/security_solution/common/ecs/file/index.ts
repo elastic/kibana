@@ -9,7 +9,7 @@ export interface CodeSignature {
   trusted: string[];
 }
 export interface Ext {
-  code_signature: CodeSignature[];
+  code_signature: CodeSignature[] | CodeSignature;
 }
 export interface Hash {
   sha256: string[];
