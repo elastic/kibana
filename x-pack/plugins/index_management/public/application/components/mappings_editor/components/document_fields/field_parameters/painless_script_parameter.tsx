@@ -5,19 +5,25 @@
  */
 
 import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiDescribedFormGroup } from '@elastic/eui';
 
 import { CodeEditor, UseField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
+import { EditFieldFormRow } from '../fields/edit_field';
 
-export const PainlessScriptParameter = () => {
+interface Props {
+  stack?: boolean;
+}
+
+export const PainlessScriptParameter = ({ stack }: Props) => {
   return (
     <UseField path="script.source" config={getFieldConfig('script')}>
       {(scriptField) => {
         const error = scriptField.getErrorsMessages();
         const isInvalid = error ? Boolean(error.length) : false;
 
-        return (
+        const field = (
           <EuiFormRow label={scriptField.label} error={error} isInvalid={isInvalid} fullWidth>
             <CodeEditor
               languageId="painless"
@@ -38,6 +44,35 @@ export const PainlessScriptParameter = () => {
               }}
             />
           </EuiFormRow>
+        );
+
+        const fieldTitle = i18n.translate('xpack.idxMgmt.mappingsEditor.painlessScript.title', {
+          defaultMessage: 'Emitted value',
+        });
+
+        const fieldDescription = i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.painlessScript.description',
+          {
+            defaultMessage: 'Use emit() to define the value of this runtime field.',
+          }
+        );
+
+        if (stack) {
+          return (
+            <EditFieldFormRow title={fieldTitle} description={fieldDescription} withToggle={false}>
+              {field}
+            </EditFieldFormRow>
+          );
+        }
+
+        return (
+          <EuiDescribedFormGroup
+            title={<h3>{fieldTitle}</h3>}
+            description={fieldDescription}
+            fullWidth={true}
+          >
+            {field}
+          </EuiDescribedFormGroup>
         );
       }}
     </UseField>

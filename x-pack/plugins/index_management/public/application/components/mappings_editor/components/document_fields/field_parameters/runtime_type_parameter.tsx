@@ -6,7 +6,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiDescribedFormGroup,
+} from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
 import { DataType } from '../../../types';
@@ -14,7 +19,11 @@ import { getFieldConfig } from '../../../lib';
 import { RUNTIME_FIELD_OPTIONS, TYPE_DEFINITION } from '../../../constants';
 import { EditFieldFormRow, FieldDescriptionSection } from '../fields/edit_field';
 
-export const RuntimeTypeParameter = () => {
+interface Props {
+  stack?: boolean;
+}
+
+export const RuntimeTypeParameter = ({ stack }: Props) => {
   return (
     <UseField path="runtime_type" config={getFieldConfig('runtime_type')}>
       {(runtimeTypeField) => {
@@ -22,16 +31,8 @@ export const RuntimeTypeParameter = () => {
         const typeDefinition =
           TYPE_DEFINITION[(value as EuiComboBoxOptionOption[])[0]!.value as DataType];
 
-        return (
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeType.title', {
-              defaultMessage: 'Emitted type',
-            })}
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeType.description', {
-              defaultMessage: 'Select the type of value emitted by the runtime field.',
-            })}
-            withToggle={false}
-          >
+        const field = (
+          <>
             <EuiFormRow label={label} fullWidth>
               <EuiComboBox
                 placeholder={i18n.translate(
@@ -55,7 +56,36 @@ export const RuntimeTypeParameter = () => {
                 {typeDefinition.description?.() as JSX.Element}
               </FieldDescriptionSection>
             )}
-          </EditFieldFormRow>
+          </>
+        );
+
+        const fieldTitle = i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeType.title', {
+          defaultMessage: 'Emitted type',
+        });
+
+        const fieldDescription = i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.runtimeType.description',
+          {
+            defaultMessage: 'Select the type of value emitted by the runtime field.',
+          }
+        );
+
+        if (stack) {
+          return (
+            <EditFieldFormRow title={fieldTitle} description={fieldDescription} withToggle={false}>
+              {field}
+            </EditFieldFormRow>
+          );
+        }
+
+        return (
+          <EuiDescribedFormGroup
+            title={<h3>{fieldTitle}</h3>}
+            description={fieldDescription}
+            fullWidth={true}
+          >
+            {field}
+          </EuiDescribedFormGroup>
         );
       }}
     </UseField>
