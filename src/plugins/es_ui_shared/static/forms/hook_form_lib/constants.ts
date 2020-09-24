@@ -30,6 +30,7 @@ export const FIELD_TYPES = {
   SELECT: 'select',
   SUPER_SELECT: 'superSelect',
   MULTI_SELECT: 'multiSelect',
+  JSON: 'json',
 };
 
 // Validation types
