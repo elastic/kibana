@@ -106,15 +106,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
-        const { renderApp, renderHeaderActions } = await import('./applications');
+        const { renderApp } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
-
-        const { WorkplaceSearchHeaderActions } = await import(
-          './applications/workplace_search/components/layout'
-        );
-        params.setHeaderActionMenu((element) =>
-          renderHeaderActions(WorkplaceSearchHeaderActions, element)
-        );
 
         return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
       },
