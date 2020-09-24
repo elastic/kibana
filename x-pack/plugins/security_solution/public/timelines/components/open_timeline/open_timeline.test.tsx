@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { act } from '@testing-library/react';
+import { wait as waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -293,7 +293,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
       ).toEqual(true);
@@ -313,7 +313,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
       ).toEqual(true);
@@ -333,7 +333,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
       ).toEqual(false);
@@ -353,7 +353,7 @@ describe('OpenTimeline', () => {
     );
 
     wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
-    await act(async () => {
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
       ).toEqual(false);

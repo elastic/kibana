@@ -5,8 +5,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { render, act, RenderResult, fireEvent } from '@testing-library/react';
-import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { render, wait as waitFor, RenderResult, fireEvent } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
@@ -69,8 +69,8 @@ describe('useCamera on an unpainted element', () => {
     const topMargin = 20;
     const centerX = width / 2 + leftMargin;
     const centerY = height / 2 + topMargin;
-    beforeEach(() => {
-      act(() => {
+    beforeEach(async () => {
+      await waitFor(() => {
         simulator.controls.simulateElementResize(element, {
           width,
           height,
@@ -97,11 +97,11 @@ describe('useCamera on an unpainted element', () => {
       const resizeObserverSpy = jest.spyOn(simulator.mock.ResizeObserver.prototype, 'observe');
 
       let [rect, ref] = result.current;
-      hooksAct(() => ref(element));
+      act(() => ref(element));
       expect(resizeObserverSpy).toHaveBeenCalledWith(element);
 
       const div = document.createElement('div');
-      hooksAct(() => ref(div));
+      act(() => ref(div));
       expect(resizeObserverSpy).toHaveBeenCalledWith(div);
 
       [rect, ref] = result.current;
@@ -161,7 +161,7 @@ describe('useCamera on an unpainted element', () => {
     });
     describe('when the camera begins animation', () => {
       let process: SafeResolverEvent;
-      beforeEach(() => {
+      beforeEach(async () => {
         const events: SafeResolverEvent[] = [];
         const numberOfEvents: number = 10;
 
@@ -184,7 +184,7 @@ describe('useCamera on an unpainted element', () => {
             type: 'serverReturnedResolverData',
             payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
-          act(() => {
+          await waitFor(() => {
             store.dispatch(serverResponseAction);
           });
         } else {
@@ -205,7 +205,7 @@ describe('useCamera on an unpainted element', () => {
             process,
           },
         };
-        act(() => {
+        await waitFor(() => {
           store.dispatch(cameraAction);
         });
       });

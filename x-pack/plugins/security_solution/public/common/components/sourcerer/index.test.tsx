@@ -20,7 +20,6 @@ import {
 } from '../../mock';
 import { createStore, State } from '../../store';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 import { wait as waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
@@ -126,13 +125,11 @@ describe('Sourcerer component', () => {
     expect(true).toBeTruthy();
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
 
-    await act(async () => {
+    await waitFor(() => {
       ((wrapper.find(EuiComboBox).props() as unknown) as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }).onChange([mockOptions[0], mockOptions[1]]);
-      await waitFor(() => {
-        wrapper.update();
-      });
+      wrapper.update();
     });
     wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');
 

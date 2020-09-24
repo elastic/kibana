@@ -9,7 +9,6 @@ import { wait as waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
@@ -118,7 +117,7 @@ describe('When the edit exception modal is opened', () => {
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
         await waitFor(() => {
-          act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
         });
       });
       it('has the edit exception button enabled', () => {
@@ -163,7 +162,7 @@ describe('When the edit exception modal is opened', () => {
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
         await waitFor(() => {
-          act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
         });
       });
       it('has the edit exception button enabled', () => {
@@ -209,7 +208,7 @@ describe('When the edit exception modal is opened', () => {
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
       await waitFor(() => {
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
     });
     it('has the edit exception button enabled', () => {
@@ -251,7 +250,7 @@ describe('When the edit exception modal is opened', () => {
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
       await waitFor(() => {
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
     });
     it('has the edit exception button disabled', () => {

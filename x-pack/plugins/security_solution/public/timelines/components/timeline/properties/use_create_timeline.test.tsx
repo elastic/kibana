@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { act as actDom } from 'react-dom/test-utils';
+import { wait as waitFor } from '@testing-library/react';
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount, shallow } from 'enzyme';
@@ -86,7 +86,7 @@ describe('useCreateTimelineButton', () => {
 
       await waitForNextUpdate();
       const button = result.current.getButton({ outline: false, title: 'mock title' });
-      actDom(() => {
+      await waitFor(() => {
         const wrapper = mount(button);
         wrapper.update();
 

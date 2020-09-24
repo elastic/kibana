@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { TagList } from '.';
 import { getFormMock } from '../__mock__/form';
@@ -76,10 +75,8 @@ describe('TagList ', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    await act(async () => {
-      wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
-      await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
-    });
+    wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
+    await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
   });
 
   it('Tag options render with new tags added', () => {
@@ -94,7 +91,7 @@ describe('TagList ', () => {
     ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
 
-  it('Cancels on cancel', async () => {
+  it('Cancels on cancel', () => {
     const props = {
       ...defaultProps,
       tags: ['pepsi'],
@@ -107,14 +104,11 @@ describe('TagList ', () => {
 
     expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    await act(async () => {
-      expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeFalsy();
-      wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
-      });
-    });
+
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeFalsy();
+    wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
+    wrapper.update();
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
   });
 
   it('Renders disabled button', () => {

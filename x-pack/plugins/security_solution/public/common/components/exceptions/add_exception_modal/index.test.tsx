@@ -8,7 +8,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { act } from 'react-dom/test-utils';
+import { wait as waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
@@ -111,7 +111,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is no alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -125,7 +125,7 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [] }));
+      await waitFor(() => callProps.onChange({ exceptionItems: [] }));
     });
     it('has the add exception button disabled', () => {
       expect(
@@ -147,7 +147,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
         ecsData: { _id: 'test-id' },
         nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
@@ -166,7 +166,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -198,7 +200,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
         ecsData: { _id: 'test-id' },
         nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
@@ -217,7 +219,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -250,7 +254,7 @@ describe('When the add exception modal is opened', () => {
       onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
       exceptionListItems: ExceptionListItemSchema[];
     };
-    beforeEach(() => {
+    beforeEach(async () => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       (useFetchIndex as jest.Mock).mockImplementation(() => [
         false,
@@ -285,7 +289,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -314,8 +320,8 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     describe('when a "is in list" entry is added', () => {
-      it('should have the bulk close checkbox disabled', () => {
-        act(() =>
+      it('should have the bulk close checkbox disabled', async () => {
+        await waitFor(() =>
           callProps.onChange({
             exceptionItems: [
               ...callProps.exceptionListItems,

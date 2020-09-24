@@ -7,7 +7,7 @@
 import React from 'react';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { render, act, wait as waitFor } from '@testing-library/react';
+import { render, wait as waitFor } from '@testing-library/react';
 
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { TestProviders } from '../../../common/mock';
@@ -56,13 +56,11 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() =>
-      waitFor(() => {
-        expect(container.innerHTML).toBe(
-          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
-        );
-      })
-    );
+    await waitFor(() => {
+      expect(container.innerHTML).toBe(
+        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+      );
+    });
   });
 
   test('Last Seen', async () => {
@@ -77,13 +75,11 @@ describe('FirstLastSeen Component', () => {
         />
       </TestProviders>
     );
-    await act(() =>
-      waitFor(() => {
-        expect(container.innerHTML).toBe(
-          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
-        );
-      })
-    );
+    await waitFor(() => {
+      expect(container.innerHTML).toBe(
+        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+      );
+    });
   });
 
   test('First Seen is empty but not Last Seen', async () => {
@@ -105,13 +101,11 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() =>
-      waitFor(() => {
-        expect(container.innerHTML).toBe(
-          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
-        );
-      })
-    );
+    await waitFor(() => {
+      expect(container.innerHTML).toBe(
+        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+      );
+    });
   });
 
   test('Last Seen is empty but not First Seen', async () => {
@@ -133,13 +127,11 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() =>
-      waitFor(() => {
-        expect(container.innerHTML).toBe(
-          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
-        );
-      })
-    );
+    await waitFor(() => {
+      expect(container.innerHTML).toBe(
+        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+      );
+    });
   });
 
   test('First Seen With a bad date time string', async () => {
@@ -160,11 +152,9 @@ describe('FirstLastSeen Component', () => {
         />
       </TestProviders>
     );
-    await act(() =>
-      waitFor(() => {
-        expect(container.textContent).toBe('something-invalid');
-      })
-    );
+    await waitFor(() => {
+      expect(container.textContent).toBe('something-invalid');
+    });
   });
 
   test('Last Seen With a bad date time string', async () => {
@@ -185,10 +175,8 @@ describe('FirstLastSeen Component', () => {
         />
       </TestProviders>
     );
-    await act(() =>
-      waitFor(() => {
-        expect(container.textContent).toBe('something-invalid');
-      })
-    );
+    await waitFor(() => {
+      expect(container.textContent).toBe('something-invalid');
+    });
   });
 });
