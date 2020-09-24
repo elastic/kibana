@@ -173,6 +173,43 @@ export const signalRulesAlertType = ({
       logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
+      // check if rule has permissions to access given index pattern
+      // move this collection of lines into a function in utils
+      // so that we can use it in create rules route, bulk, etc.
+      try {
+        const privileges = await services.callCluster('transport.request', {
+          path: '/_security/user/_has_privileges',
+          method: 'POST',
+          body: {
+            index: [
+              {
+                names: index ?? [],
+                privileges: ['read'],
+              },
+            ],
+          },
+        });
+        const indexNames = Object.keys(privileges.index);
+        logger.debug(buildRuleMessage(`INDEX NAMES: ${JSON.stringify(indexNames, null, 2)}`));
+        const everyIndexHasReadPrivileges = indexNames.every(
+          (indexName) => privileges.index[indexName].read
+        );
+        logger.debug(buildRuleMessage(`has everything? ${everyIndexHasReadPrivileges}`));
+        if (!everyIndexHasReadPrivileges) {
+          await ruleStatusService.error(
+            `Missing required read permissions on indexes: ${JSON.stringify(
+              indexNames.filter((indexName) => privileges.index[indexName].read !== true),
+              null,
+              2
+            )}`
+          );
+          // exit rule early?
+          return;
+        }
+      } catch (exc) {
+        logger.error(`OOPS: ${exc}`);
+      }
+
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
         const fromUnit = from[from.length - 1];
