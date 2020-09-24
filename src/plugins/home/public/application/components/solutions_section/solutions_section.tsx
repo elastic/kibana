@@ -63,8 +63,12 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
-          {kibana && kibanaApps.length ? (
-            <SolutionPanel solution={kibana} addBasePath={addBasePath} apps={kibanaApps} />
+          {kibana ? (
+            <SolutionPanel
+              solution={kibana}
+              addBasePath={addBasePath}
+              apps={kibanaApps.length ? kibanaApps : undefined}
+            />
           ) : null}
         </EuiFlexGroup>
       </section>

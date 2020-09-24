@@ -37,6 +37,7 @@ exports[`Overview render 1`] = `
         },
       ]
     }
+    isNewKibanaInstance={false}
   />
   <div
     className="kbnOverviewContent"
@@ -330,6 +331,7 @@ exports[`Overview without features 1`] = `
 >
   <PageHeader
     features={Array []}
+    isNewKibanaInstance={false}
   />
   <div
     className="kbnOverviewContent"
@@ -623,6 +625,7 @@ exports[`Overview without solutions 1`] = `
         },
       ]
     }
+    isNewKibanaInstance={false}
   />
   <div
     className="kbnOverviewContent"
