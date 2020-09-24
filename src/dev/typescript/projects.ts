@@ -26,6 +26,7 @@ const migratedToTsProjects = [
   { path: 'src/test_utils/tsconfig.json' },
   { path: 'src/core/tsconfig.json' },
   { path: 'src/plugins/kibana_utils/tsconfig.json' },
+  { path: 'src/plugins/kibana_react/tsconfig.json' },
 ].map(({ path }) => new Project(resolve(REPO_ROOT, path)));
 
 export const PROJECTS = [
