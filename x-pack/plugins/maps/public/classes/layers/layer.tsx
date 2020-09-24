@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
-import { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
@@ -134,9 +133,10 @@ export class AbstractLayer implements ILayer {
     };
   }
 
-  static getBoundDataForSource(mbMap: MbMap, sourceId: string): FeatureCollection | null {
-    const mbGeoJSONSource = mbMap.getSource(sourceId) as MbGeoJSONSource;
-    return mbGeoJSONSource ? mbGeoJSONSource.data : null;
+  destroy() {
+    if (this._source) {
+      this._source.destroy();
+    }
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {
@@ -151,10 +151,10 @@ export class AbstractLayer implements ILayer {
     }
   }
 
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
+  static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
+    // @ts-expect-error
+    const mbStyle = mbMap.getStyle();
+    return mbStyle.sources[sourceId].data;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {

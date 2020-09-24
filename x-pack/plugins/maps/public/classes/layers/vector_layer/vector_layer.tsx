@@ -587,14 +587,14 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      const styleMeta = await (source as IESSource).loadStylePropsMeta(
+      const styleMeta = await (source as IESSource).loadStylePropsMeta({
         layerName,
         style,
         dynamicStyleProps,
-        registerCancelCallback.bind(null, requestToken),
-        nextMeta
-      );
-      // @ts-expect-error
+        registerCancelCallback: registerCancelCallback.bind(null, requestToken),
+        sourceQuery: nextMeta.sourceQuery,
+        timeFilters: nextMeta.timeFilters,
+      });
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

@@ -21,7 +21,8 @@ export class TileLayer extends AbstractLayer {
   }
 
   constructor({ source, layerDescriptor }) {
-    super({ source, layerDescriptor, style: new TileStyle() });
+    super({ source, layerDescriptor });
+    this._style = new TileStyle();
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
