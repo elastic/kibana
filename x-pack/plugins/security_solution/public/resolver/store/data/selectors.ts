@@ -274,7 +274,7 @@ export const relatedEventCountByType: (
       const stats = statsMap(nodeID);
       if (stats) {
         const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventType);
-        if (typeof value === 'number') {
+        if (typeof value === 'number' && Number.isFinite(value)) {
           return value;
         }
       }
