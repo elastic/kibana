@@ -74,7 +74,7 @@ To match documents where `response` is 200 or 404.
 response:(200 or 404)
 -------------------
 
-To match documents where `response` is 200 and `extension` is either php or css:
+To match documents where response is `200` and extension is either `php` or `css`:
 
 [source,yaml]
 -------------------
