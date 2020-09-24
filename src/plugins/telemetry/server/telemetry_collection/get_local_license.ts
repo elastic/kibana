@@ -22,6 +22,14 @@ import { ElasticsearchClient } from 'src/core/server';
 
 let cachedLicense: ESLicense | undefined;
 
+async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
+  const { body } = await esClient.license.get({
+    local,
+    // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
+    accept_enterprise: true,
+  });
+  return body.license;
+}
 /**
  * Get the cluster's license from the connected node.
  *
@@ -32,43 +40,29 @@ let cachedLicense: ESLicense | undefined;
  * In OSS we'll get a 400 response using the nwe client and need to catch that error too
  */
 async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
-  let response;
-  try {
-    // TODO: extract the call into it's own function that accepts the flag for local
-    // Fetching the license from the local node is cheaper than getting it from the master node and good enough
-    const { body } = await esClient.license.get<{ license: ESLicense }>({
-      local: true,
-      accept_enterprise: true,
-    });
-    cachedLicense = body.license;
-    response = body.license;
-  } catch (err) {
-    // if there is an error, try to get the license from the master node:
+  // Fetching the license from the local node is cheaper than getting it from the master node and good enough
+  const { license } = await fetchLicense(esClient, true).catch(async (err) => {
     if (cachedLicense) {
       try {
-        const { body } = await esClient.license.get<{ license: ESLicense }>({
-          local: false,
-          accept_enterprise: true,
-        });
-        cachedLicense = body.license;
-        response = body.license;
+        // Fallback to the master node's license info
+        const response = await fetchLicense(esClient, false);
+        return response;
       } catch (masterError) {
         if ([400, 404].includes(masterError.statusCode)) {
-          // the master node doesn't have a license and we assume there isn't a license
+          // If the master node does not have a license, we can assume there is no license
           cachedLicense = undefined;
-          response = undefined;
         } else {
           throw err;
         }
       }
     }
-    if ([400, 404].includes(err.statusCode)) {
-      cachedLicense = undefined;
-    } else {
-      throw err;
-    }
+    return { license: void 0 };
+  });
+
+  if (license) {
+    cachedLicense = license;
   }
-  return response;
+  return license;
 }
 
 export const getLocalLicense: LicenseGetter = async (clustersDetails, { esClient }) => {
