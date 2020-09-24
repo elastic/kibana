@@ -58,7 +58,6 @@ import {
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute,
-  rumOverviewLocalFiltersRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -70,18 +69,6 @@ import {
   customLinkTransactionRoute,
 } from './settings/custom_link';
 import {
-  rumClientMetricsRoute,
-  rumPageViewsTrendRoute,
-  rumPageLoadDistributionRoute,
-  rumPageLoadDistBreakdownRoute,
-  rumServicesRoute,
-  rumVisitorsBreakdownRoute,
-  rumWebCoreVitals,
-  rumJSErrors,
-  rumUrlSearch,
-  rumLongTaskMetrics,
-} from './rum_client';
-import {
   observabilityOverviewHasDataRoute,
   observabilityOverviewRoute,
 } from './observability_overview';
@@ -90,6 +77,7 @@ import {
   createAnomalyDetectionJobsRoute,
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
+import { createUXAPIRoutes } from './create_ux_api';
 
 const createApmApi = () => {
   const api = createApi()
@@ -166,19 +154,6 @@ const createApmApi = () => {
     .add(listCustomLinksRoute)
     .add(customLinkTransactionRoute)
 
-    // Rum Overview
-    .add(rumOverviewLocalFiltersRoute)
-    .add(rumPageViewsTrendRoute)
-    .add(rumPageLoadDistributionRoute)
-    .add(rumPageLoadDistBreakdownRoute)
-    .add(rumClientMetricsRoute)
-    .add(rumServicesRoute)
-    .add(rumVisitorsBreakdownRoute)
-    .add(rumWebCoreVitals)
-    .add(rumJSErrors)
-    .add(rumUrlSearch)
-    .add(rumLongTaskMetrics)
-
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)
     .add(observabilityOverviewRoute)
@@ -187,6 +162,9 @@ const createApmApi = () => {
     .add(anomalyDetectionJobsRoute)
     .add(createAnomalyDetectionJobsRoute)
     .add(anomalyDetectionEnvironmentsRoute);
+
+  // User Experience app api routes
+  createUXAPIRoutes(api);
 
   return api;
 };
