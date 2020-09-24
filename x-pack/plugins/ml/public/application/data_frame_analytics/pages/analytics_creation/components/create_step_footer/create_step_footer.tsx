@@ -84,8 +84,8 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
             clearInterval(interval);
             // Check job has started. Jobs that fail to start will also have STOPPED state
             setJobFinished(
-              jobStats.state === DATA_FRAME_TASK_STATE.STOPPED &&
-                progressStats.currentPhase === progressStats.totalPhases
+              progressStats.currentPhase === progressStats.totalPhases &&
+                progressStats.progress === 100
             );
           }
         } else {
