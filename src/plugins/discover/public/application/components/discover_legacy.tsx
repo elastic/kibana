@@ -25,7 +25,7 @@ import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
-import { getServices, IIndexPattern } from '../../kibana_services';
+import { getServices, IndexPattern } from '../../kibana_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
@@ -58,7 +58,7 @@ export interface DiscoverLegacyProps {
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   minimumVisibleRows: number;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   onChangeInterval: (interval: string) => void;

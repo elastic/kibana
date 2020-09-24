@@ -5,7 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { kpiNetworkQuery } from '../../../../plugins/security_solution/public/network/containers/kpi_network/index.gql_query';
+// @ts-expect-error
 import { GetKpiNetworkQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

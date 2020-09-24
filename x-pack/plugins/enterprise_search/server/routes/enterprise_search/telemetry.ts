@@ -25,7 +25,7 @@ export function registerTelemetryRoute({
 }: IRouteDependencies) {
   router.put(
     {
-      path: '/api/enterprise_search/telemetry',
+      path: '/api/enterprise_search/stats',
       validate: {
         body: schema.object({
           product: schema.oneOf([
