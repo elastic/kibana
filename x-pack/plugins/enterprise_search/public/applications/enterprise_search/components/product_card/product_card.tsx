@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useValues } from 'kea';
-import upperFirst from 'lodash/upperFirst';
-import snakeCase from 'lodash/snakeCase';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
+
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { sendTelemetry } from '../../../shared/telemetry';
@@ -30,6 +31,25 @@ interface IProductCard {
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
   const { http } = useValues(HttpLogic);
+  const {
+    config: { host },
+  } = useContext(KibanaContext) as IKibanaContext;
+
+  const LAUNCH_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.launchButton',
+    {
+      defaultMessage: 'Launch {productName}',
+      values: { productName: product.NAME },
+    }
+  );
+
+  const SETUP_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.setupButton',
+    {
+      defaultMessage: 'Setup {productName}',
+      values: { productName: product.NAME },
+    }
+  );
 
   return (
     <EuiCard
@@ -59,12 +79,8 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
               metric: snakeCase(product.ID),
             })
           }
-          data-test-subj={`Launch${upperFirst(product.ID)}Button`}
         >
-          {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
-            defaultMessage: `Launch {productName}`,
-            values: { productName: product.NAME },
-          })}
+          {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
       }
     />
