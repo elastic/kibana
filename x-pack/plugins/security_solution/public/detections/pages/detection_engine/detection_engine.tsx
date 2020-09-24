@@ -13,7 +13,6 @@ import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useWithSource } from '../../../common/containers/source';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
@@ -46,6 +45,8 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -117,10 +118,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     [setShowBuildingBlockAlerts]
   );
 
-  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
-    signalIndexName,
-  ]);
-  const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
+  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
@@ -202,7 +200,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              signalsIndex={signalIndexName ?? ''}
               to={to}
             />
           </WrapperPage>

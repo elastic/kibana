@@ -44,13 +44,13 @@ export function loadFixtureProgram(fixtureName: string) {
 }
 
 describe('getDescriptor', () => {
-  const usageInterfaces = new Map<string, ts.InterfaceDeclaration>();
+  const usageInterfaces = new Map<string, ts.InterfaceDeclaration | ts.TypeAliasDeclaration>();
   let tsProgram: ts.Program;
   beforeAll(() => {
     const { program, sourceFile } = loadFixtureProgram('constants');
     tsProgram = program;
     for (const node of traverseNodes(sourceFile)) {
-      if (ts.isInterfaceDeclaration(node)) {
+      if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
         const interfaceName = node.name.getText();
         usageInterfaces.set(interfaceName, node);
       }
@@ -101,5 +101,27 @@ describe('getDescriptor', () => {
     expect(() => getDescriptor(usageInterface!, tsProgram)).toThrowError(
       'Mapping does not support conflicting union types.'
     );
+  });
+
+  it('serializes TypeAliasDeclaration', () => {
+    const usageInterface = usageInterfaces.get('TypeAliasWithUnion')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      locale: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop1: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop2: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop3: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop4: { kind: ts.SyntaxKind.StringLiteral, type: 'StringLiteral' },
+      prop5: { kind: ts.SyntaxKind.FirstLiteralToken, type: 'FirstLiteralToken' },
+    });
+  });
+
+  it('serializes Record entries', () => {
+    const usageInterface = usageInterfaces.get('TypeAliasWithRecord')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      locale: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      '@@INDEX@@': { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+    });
   });
 });

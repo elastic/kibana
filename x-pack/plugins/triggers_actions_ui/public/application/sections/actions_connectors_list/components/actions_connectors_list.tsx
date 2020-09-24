@@ -335,6 +335,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
           { defaultMessage: 'connectors' }
         )}
+        setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}

@@ -13,6 +13,7 @@ import {
   esFilters,
   FilterManager,
   UI_SETTINGS,
+  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { SeverityBadge } from '../severity_badge';
 
@@ -140,11 +141,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: {
+        indexPatterns: ({
           fields: [{ name: 'event.category', type: 'test type' }],
           title: 'test title',
           getFormatterForField: () => ({ convert: (val: unknown) => val }),
-        },
+        } as unknown) as IndexPattern,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);

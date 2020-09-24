@@ -96,16 +96,14 @@ Array [
       "collectorName": "indexed_interface_with_not_matching_schema",
       "fetch": Object {
         "typeDescriptor": Object {
-          "": Object {
-            "@@INDEX@@": Object {
-              "count_1": Object {
-                "kind": 143,
-                "type": "NumberKeyword",
-              },
-              "count_2": Object {
-                "kind": 143,
-                "type": "NumberKeyword",
-              },
+          "@@INDEX@@": Object {
+            "count_1": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "count_2": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
             },
           },
         },
@@ -167,11 +165,9 @@ Array [
             },
           },
           "my_index_signature_prop": Object {
-            "": Object {
-              "@@INDEX@@": Object {
-                "kind": 143,
-                "type": "NumberKeyword",
-              },
+            "@@INDEX@@": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
             },
           },
           "my_objects": Object {
