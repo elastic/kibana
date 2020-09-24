@@ -184,7 +184,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
             })
           : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
-              defaultMessage: "This field doesn't have data. Drag and drop to visualize.",
+              defaultMessage:
+                'This field doesn’t have any data but you can still drag and drop to visualize.',
             })
       }
       type="iInCircle"
@@ -307,7 +308,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
           defaultMessage:
-            'This field is empty because it doesn’t exist in the 500 sampled documents.',
+            'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
         })}
       </EuiText>
     );
