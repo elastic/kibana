@@ -135,7 +135,7 @@ export class AbstractLayer implements ILayer {
   }
 
   static getBoundDataForSource(mbMap: MbMap, sourceId: string): FeatureCollection | null {
-    const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
+    const mbGeoJSONSource = mbMap.getSource(sourceId) as MbGeoJSONSource;
     return mbGeoJSONSource ? mbGeoJSONSource.data : null;
   }
 
