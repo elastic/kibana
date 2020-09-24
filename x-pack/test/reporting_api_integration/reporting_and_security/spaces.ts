@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       tap(() => log.debug(`report at ${downloadPath} is done`)),
       map((response) => response.text),
       first(),
-      timeout(15000)
+      timeout(120000)
     );
   };
 
@@ -105,8 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/76551
-    it.skip('should complete a job of PNG export of a dashboard in non-default space', async () => {
+    it('should complete a job of PNG export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/png`,
         {
@@ -119,8 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(reportCompleted).to.not.be(null);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/76551
-    it.skip('should complete a job of PDF export of a dashboard in non-default space', async () => {
+    it('should complete a job of PDF export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/printablePdf`,
         {
