@@ -58,6 +58,7 @@ import {
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute,
+  rumOverviewLocalFiltersRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -77,7 +78,18 @@ import {
   createAnomalyDetectionJobsRoute,
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
-import { createUXAPIRoutes } from './create_ux_api';
+import {
+  rumClientMetricsRoute,
+  rumJSErrors,
+  rumLongTaskMetrics,
+  rumPageLoadDistBreakdownRoute,
+  rumPageLoadDistributionRoute,
+  rumPageViewsTrendRoute,
+  rumServicesRoute,
+  rumUrlSearch,
+  rumVisitorsBreakdownRoute,
+  rumWebCoreVitals,
+} from './rum_client';
 
 const createApmApi = () => {
   const api = createApi()
@@ -161,10 +173,20 @@ const createApmApi = () => {
     // Anomaly detection
     .add(anomalyDetectionJobsRoute)
     .add(createAnomalyDetectionJobsRoute)
-    .add(anomalyDetectionEnvironmentsRoute);
+    .add(anomalyDetectionEnvironmentsRoute)
 
-  // User Experience app api routes
-  createUXAPIRoutes(api);
+    // User Experience app api routes
+    .add(rumOverviewLocalFiltersRoute)
+    .add(rumPageViewsTrendRoute)
+    .add(rumPageLoadDistributionRoute)
+    .add(rumPageLoadDistBreakdownRoute)
+    .add(rumClientMetricsRoute)
+    .add(rumServicesRoute)
+    .add(rumVisitorsBreakdownRoute)
+    .add(rumWebCoreVitals)
+    .add(rumJSErrors)
+    .add(rumUrlSearch)
+    .add(rumLongTaskMetrics);
 
   return api;
 };
