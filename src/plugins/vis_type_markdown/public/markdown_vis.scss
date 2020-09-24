@@ -1,3 +1,10 @@
+// Prefix all styles with "mkd" to avoid conflicts.
+// Examples
+//   mkdChart
+//   mkdChart__legend
+//   mkdChart__legend--small
+//   mkdChart__legend-isLoading
+
 .mkdVis {
   padding: $euiSizeS;
   width: 100%;
