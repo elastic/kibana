@@ -320,9 +320,6 @@ export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;
 
 // TODO: fix case below?
 export const osType = t.keyof({
-  Linux: null,
-  Macos: null,
-  Windows: null,
   linux: null,
   macos: null,
   windows: null,

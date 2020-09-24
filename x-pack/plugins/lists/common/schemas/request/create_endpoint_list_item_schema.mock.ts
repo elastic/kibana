@@ -11,6 +11,7 @@ import {
   ITEM_TYPE,
   META,
   NAME,
+  OS_TYPES,
   TAGS,
 } from '../../constants.mock';
 
@@ -23,6 +24,7 @@ export const getCreateEndpointListItemSchemaMock = (): CreateEndpointListItemSch
   item_id: undefined,
   meta: META,
   name: NAME,
+  os_types: OS_TYPES,
   tags: TAGS,
   type: ITEM_TYPE,
 });

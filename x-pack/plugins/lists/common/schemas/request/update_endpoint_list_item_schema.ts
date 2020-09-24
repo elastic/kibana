@@ -9,8 +9,6 @@ import * as t from 'io-ts';
 import {
   OsTypeArray,
   Tags,
-  _Tags,
-  _tags,
   _version,
   description,
   exceptionListItemType,
@@ -39,7 +37,6 @@ export const updateEndpointListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      _tags, // defaults to empty array if not set during decode
       _version, // defaults to undefined if not set during decode
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
@@ -56,9 +53,8 @@ export type UpdateEndpointListItemSchema = t.OutputOf<typeof updateEndpointListI
 // This type is used after a decode since some things are defaults after a decode.
 export type UpdateEndpointListItemSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof updateEndpointListItemSchema>>,
-  '_tags' | 'tags' | 'entries' | 'comments'
+  'tags' | 'entries' | 'comments'
 > & {
-  _tags: _Tags;
   comments: UpdateCommentsArray;
   tags: Tags;
   entries: EntriesArray;

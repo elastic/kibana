@@ -14,6 +14,7 @@ import {
   META,
   NAME,
   NAMESPACE_TYPE,
+  OS_TYPES,
   TAGS,
 } from '../../constants.mock';
 
@@ -28,6 +29,7 @@ export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemS
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: OS_TYPES,
   tags: TAGS,
   type: ITEM_TYPE,
 });
