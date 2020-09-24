@@ -45,17 +45,17 @@ export class SearchTimeoutError extends KbnError {
       case TimeoutErrorMode.UPGRADE:
         return i18n.translate('data.search.upgradeLicense', {
           defaultMessage:
-            'One or more queries timed out. With our free Basic tier, your queries never time out.',
+            'Your query has timed out. With our free Basic tier, your queries never time out.',
         });
       case TimeoutErrorMode.CONTACT:
         return i18n.translate('data.search.timeoutContactAdmin', {
           defaultMessage:
-            'One or more queries timed out. Contact your system administrator to increase the run time.',
+            'Your query has timed out. Contact your system administrator to increase the run time.',
         });
       case TimeoutErrorMode.CHANGE:
         return i18n.translate('data.search.timeoutIncreaseSetting', {
           defaultMessage:
-            'One or more queries timed out. Increase run time with the search timeout advanced setting.',
+            'Your query has timed out. Increase run time with the search timeout advanced setting.',
         });
     }
   }
@@ -64,12 +64,12 @@ export class SearchTimeoutError extends KbnError {
     switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
         return i18n.translate('data.search.upgradeLicenseActionText', {
-          defaultMessage: 'Upgrade',
+          defaultMessage: 'Upgrade now',
         });
         break;
       case TimeoutErrorMode.CHANGE:
         return i18n.translate('data.search.timeoutIncreaseSettingActionText', {
-          defaultMessage: 'Go to Advanced Settings',
+          defaultMessage: 'Edit setting',
         });
         break;
     }
