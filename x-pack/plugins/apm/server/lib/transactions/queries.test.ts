@@ -102,6 +102,7 @@ describe('transaction queries', () => {
         traceId: 'qux',
         transactionId: 'quz',
         setup,
+        searchAggregatedTransactions: false,
       })
     );
 
