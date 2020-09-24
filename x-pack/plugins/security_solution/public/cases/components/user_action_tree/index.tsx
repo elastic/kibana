@@ -383,7 +383,7 @@ export const UserActionTree = React.memo(
             // description, comments, tags
             if (
               action.actionField.length === 1 &&
-              ['description', 'comment', 'tag'].includes(action.actionField[0])
+              ['description', 'comment', 'tags'].includes(action.actionField[0])
             ) {
               const myField = action.actionField[0];
               const label: string | JSX.Element = getLabelTitle({
