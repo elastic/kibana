@@ -10,6 +10,7 @@ import {
   CategoryQualityWarningReason,
   QualityWarning,
 } from '../../../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   callGetLatestCategoriesDatasetsStatsAPI,
@@ -18,6 +19,12 @@ import {
 import { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
+  const {
+    services: {
+      http: { fetch },
+    },
+  } = useKibanaContextForPlugin();
+
   const [lastestWarnedDatasetsStats, setLatestWarnedDatasetsStats] = useState<
     LogEntryCategoriesDatasetStats[]
   >([]);
@@ -40,7 +47,10 @@ export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: J
       ) =>
         Promise.all(
           statsIntervals.map(({ jobId, startTime, endTime }) =>
-            callGetLatestCategoriesDatasetsStatsAPI([jobId], startTime, endTime, ['warn'])
+            callGetLatestCategoriesDatasetsStatsAPI(
+              { jobIds: [jobId], startTime, endTime, includeCategorizerStatuses: ['warn'] },
+              fetch
+            )
           )
         ),
       onResolve: (results) => {
