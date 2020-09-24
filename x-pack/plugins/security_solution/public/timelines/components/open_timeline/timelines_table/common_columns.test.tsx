@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import '../../../../common/mock/match_media';
+import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -22,15 +23,7 @@ import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
-  return {
-    ...originalModule,
-    FormattedRelative,
-  };
-});
 describe('#getCommonColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];

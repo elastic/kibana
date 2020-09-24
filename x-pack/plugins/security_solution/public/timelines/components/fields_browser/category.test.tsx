@@ -16,11 +16,6 @@ import { TestProviders } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import * as i18n from './translations';
-
-jest.mock('react-beautiful-dnd', () => {
-  const originalModule = jest.requireActual('react-beautiful-dnd');
-  return { ...originalModule };
-});
 describe('Category', () => {
   const timelineId = 'test';
   const selectedCategoryId = 'client';

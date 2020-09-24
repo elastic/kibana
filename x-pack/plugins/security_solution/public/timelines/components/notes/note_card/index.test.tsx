@@ -8,17 +8,10 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import '../../../../common/mock/formatted_relative';
 
 import { NoteCard } from '.';
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
-  return {
-    ...originalModule,
-    FormattedRelative,
-  };
-});
 describe('NoteCard', () => {
   const created = new Date();
   const rawNote = 'noteworthy';

@@ -10,6 +10,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../mock/match_media';
+import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
 import { MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
