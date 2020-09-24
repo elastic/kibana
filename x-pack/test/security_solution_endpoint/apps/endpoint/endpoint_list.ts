@@ -65,7 +65,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/77701
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
   describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
