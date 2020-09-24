@@ -12,6 +12,7 @@ import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { normalizeKuery } from '../saved_object';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -33,10 +34,7 @@ export async function listEnrollmentApiKeys(
     sortOrder: 'desc',
     filter:
       kuery && kuery !== ''
-        ? kuery.replace(
-            new RegExp(`${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.attributes.`
-          )
+        ? normalizeKuery(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, kuery)
         : undefined,
   });
 
