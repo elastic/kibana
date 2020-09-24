@@ -6,13 +6,12 @@
 
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
 import { AuditMessage, TransformMessage } from '../../../common/types/messages';
-import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
-import { wrapError } from './error_utils';
+import { wrapError, wrapEsError } from './error_utils';
 
 const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;

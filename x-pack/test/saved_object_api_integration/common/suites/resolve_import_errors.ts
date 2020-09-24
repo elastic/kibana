@@ -37,7 +37,7 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_3
 //  * id: conflict_4a, originId: conflict_4
 // using the five conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
-export const TEST_CASES = Object.freeze({
+export const TEST_CASES: Record<string, ResolveImportErrorsTestCase> = Object.freeze({
   ...CASES,
   CONFLICT_1A_OBJ: Object.freeze({
     type: 'sharedtype',
