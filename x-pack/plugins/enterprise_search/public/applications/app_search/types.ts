@@ -24,7 +24,3 @@ export interface IEngine {
   language: string;
   result_fields: object[];
 }
-
-export interface ICredentialsDetails {
-  engines: IEngine[];
-}
