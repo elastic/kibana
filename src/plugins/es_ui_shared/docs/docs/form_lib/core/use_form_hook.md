@@ -6,7 +6,7 @@ sidebar_label: useForm()
 
 **Returns:** [`FormHook`](form_hook.md)
 
-We use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optionals).
+Use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optionals).
 
 ## Configuration
 
