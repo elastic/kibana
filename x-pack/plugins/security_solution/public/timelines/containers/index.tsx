@@ -10,14 +10,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ESQuery } from '../../../common/typed_json';
-import { IIndexPattern } from '../../../../../../src/plugins/data/public';
-
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { DocValueFields } from '../../common/containers/query_template';
-import { EventType } from '../../timelines/store/timeline/model';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
@@ -54,15 +51,12 @@ interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
-  eventType?: EventType;
   id: string;
   fields: string[];
-  indexPattern?: IIndexPattern;
-  indexToAdd?: string[];
+  indexNames: string[];
   limit: number;
   sort: SortField;
   startDate: string;
-  canQueryTimeline?: boolean;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -73,10 +67,8 @@ const ID = 'timelineEventsQuery';
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
-  eventType = 'raw',
   id = ID,
-  indexPattern,
-  indexToAdd = [],
+  indexNames,
   fields,
   filterQuery,
   startDate,
@@ -85,41 +77,37 @@ export const useTimelineEvents = ({
     field: '@timestamp',
     direction: Direction.asc,
   },
-  canQueryTimeline = true,
+  skip = false,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultKibanaIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-  const defaultIndex =
-    indexPattern == null || (indexPattern != null && indexPattern.title === '')
-      ? [
-          ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
-          ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
-        ]
-      : indexPattern?.title.split(',') ?? [];
   const [loading, setLoading] = useState(false);
   const [activePage, setActivePage] = useState(0);
-  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions>({
-    fields,
-    fieldRequested: fields,
-    filterQuery: createFilter(filterQuery),
-    id,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    pagination: {
-      activePage,
-      querySize: limit,
-    },
-    sort,
-    defaultIndex,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: TimelineEventsQueries.all,
-  });
+  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
+    !skip
+      ? {
+          fields,
+          fieldRequested: fields,
+          filterQuery: createFilter(filterQuery),
+          id,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          pagination: {
+            activePage,
+            querySize: limit,
+          },
+          sort,
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: TimelineEventsQueries.all,
+        }
+      : null
+  );
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -154,7 +142,11 @@ export const useTimelineEvents = ({
   });
 
   const timelineSearch = useCallback(
-    (request: TimelineEventsAllRequestOptions) => {
+    (request: TimelineEventsAllRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -167,7 +159,7 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineResponse((prevResponse) => ({
@@ -181,7 +173,7 @@ export const useTimelineEvents = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -211,14 +203,19 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (!canQueryTimeline || skipQueryForDetectionsPage(id, defaultIndex)) {
+    if (skip || skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
     setTimelineRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {
+          fields,
+          fieldRequested: fields,
+          id,
+          factoryQueryType: TimelineEventsQueries.all,
+        }),
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: {
@@ -233,8 +230,8 @@ export const useTimelineEvents = ({
         sort,
       };
       if (
-        canQueryTimeline &&
-        !skipQueryForDetectionsPage(id, defaultIndex) &&
+        !skip &&
+        !skipQueryForDetectionsPage(id, indexNames) &&
         !deepEqual(prevRequest, myRequest)
       ) {
         return myRequest;
@@ -242,16 +239,17 @@ export const useTimelineEvents = ({
       return prevRequest;
     });
   }, [
-    defaultIndex,
+    indexNames,
     docValueFields,
     endDate,
     filterQuery,
     startDate,
-    canQueryTimeline,
     id,
     activePage,
     limit,
     sort,
+    skip,
+    fields,
   ]);
 
   useEffect(() => {
