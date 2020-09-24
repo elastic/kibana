@@ -88,7 +88,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
+    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();

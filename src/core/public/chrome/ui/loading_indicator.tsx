@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -27,9 +27,12 @@ import { HttpStart } from '../../http';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
+  showAsBar?: boolean;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
+  public static defaultProps = { showAsBar: false };
+
   private loadingCountSubscription?: Subscription;
 
   state = {
@@ -64,12 +67,21 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       defaultMessage: 'Loading content',
     });
 
-    return (
+    return !this.props.showAsBar ? (
       <EuiLoadingSpinner
         className={className}
         data-test-subj={testSubj}
         aria-hidden={ariaHidden}
         aria-label={ariaLabel}
+      />
+    ) : (
+      <EuiProgress
+        className={className}
+        data-test-subj={testSubj}
+        aria-hidden={ariaHidden}
+        aria-label={ariaLabel}
+        color="accent"
+        size="xs"
       />
     );
   }
