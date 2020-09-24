@@ -40,7 +40,7 @@
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "es": "node scripts/es",
-    "startDocs": "docusaurus start ./src/plugins/es_ui_shared/docs",
+    "docs": "docusaurus start ./src/plugins/es_ui_shared/docs",
     "test": "grunt test",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
