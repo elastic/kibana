@@ -78,11 +78,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     toasts: getServices().core.notifications.toasts,
   });
   this.state = { ...appState.getState() };
-
-  //TODO should be removed in 8.0
-  const isLegacyUrl = $routeParams.id.indexOf('_doc/') === 0;
-
-  this.anchorId = isLegacyUrl ? $routeParams.id.substring(5) : $routeParams.id;
+  this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   filterManager.setFilters(_.cloneDeep(getFilters()));
   startStateSync();
