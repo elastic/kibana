@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isDate from 'lodash/isDate';
+import { isDate } from 'lodash';
 import type { HttpSetup, HttpStart } from 'src/core/public';
 import { LicenseType } from '../../common/types';
 
