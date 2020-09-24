@@ -140,6 +140,18 @@ interface ISessionService {
     */
    start: () => string;
 
+  /** 
+   * Track a search ID of a sessionId, if it exists.
+   * @param request 
+   * @param sessionId
+   * @param searchId 
+   */
+  trackSearchId: (
+    request: KibanaRequest,
+    sessionId: string,
+    searchId: string,
+  ) => Promise<boolean>
+
    /**
     * Restore a session. Any searches executed using this ID will attempt to reload saved data.
     * A restored session may be expired, meaning that following search requests will fail. 
@@ -153,15 +165,14 @@ interface ISessionService {
    clear: () => void; 
 
    /**
-    * Store a session.
+    * Store a session, alongside with any tracked searchIds.
     * @param sessionId Session ID to store. Probably retrieved from `sessionService.get()`.
     * @param name A display name for the session.
     * @param url TODO: is the URL provided here? How?
-    * @param searchIdMapping An optional mapping of hashed requests mapped to the corresponding searchId.
     * @returns The stored `BackgroundSessionAttributes` object
     * @throws Throws an error in OSS.
     */
-   store: (sessionId: string, name: string, url: string, searchIdMapping?: Record<string, string>)) => Promise<BackgroundSessionAttributes>
+   store: (sessionId: string, name: string, url: string) => Promise<BackgroundSessionAttributes>
 
    /**
     * @returns Is the current session stored (i.e. is there a saved object corresponding with this sessionId).
@@ -200,38 +211,6 @@ interface ISessionService {
 }
 ```
 
-### Search Service Changes
-
-Since all search requests go through the `search_interceptor`, it will take on the responsibility for tracking the mapping between the request's hash and the async ID returned from Elasticsearch, as well as enriching the requests with any options required to restore an existing session.
-
-We're proposing the following changes to the `SearchInterceptor` API, and exposing them on the `search` service:
-
-```ts
-interface ISearchInterceptor {
-  /**
-   * Execute a search request. Uses synchronous execution in OSS and asynchronous execution in x-pack.
-   * If a new sessionId is provided, the `search_interceptor` will internally track the sessionId, a hash of `request.body.params` and the `asyncId` returned from Elasticsearch on the first request.
-   * If an existing session id is provided for a restore, the interceptor will define an option on the request, telling the server to use saved results, rather than re-running the Elasticsearch request. 
-   * @param request TODO define typing! The request contains an optional `id` parameter for the `sessionId`.
-   * @param options
-   * @returns
-   * @throws
-   */ 
-  search: (request: ISearchRequest<Payload=any>, options: TODO) => ISearchResponse<Payload=any>
-  
-  /**
-   * Calls `data.search.session.store()` with the provided sessionId and any mapped `async IDs`.
-   * @param sessionId
-   * @param name
-   * @param url TODO?
-   * @returns the session saved object 
-   * @throws Throws an error in OSS.
-   */
-  sendToBackground: (sessionId: string, name: string, url: string) => Promise<BackgroundSessionAttrbiutes>
-}
-
-```
-
 ## Backend Services and Routes
 
 The server side's feature implementation builds on how Elasticsearch's `async_search` endpoint works. When making an
@@ -259,7 +238,7 @@ interface ISessionService {
    * @returns true if id was added, false if Background Session doesn't exist or if there was an error while updating.
    * @throws an error if `searchId` already exists in the mapping for this `sessionId`
    */
-  addSearchId: (
+  trackSearchId: (
     request: KibanaRequest,
     sessionId: string,
     searchId: string,
