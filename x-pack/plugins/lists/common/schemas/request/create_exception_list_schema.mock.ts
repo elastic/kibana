@@ -22,6 +22,7 @@ export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema =>
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: [],
   tags: [],
   type: ENDPOINT_TYPE,
   version: VERSION,
