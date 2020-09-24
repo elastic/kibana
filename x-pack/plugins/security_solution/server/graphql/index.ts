@@ -7,13 +7,8 @@
 import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
 
-import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
-import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
-import { kpiHostsSchema } from './kpi_hosts';
-import { kpiNetworkSchema } from './kpi_network';
-import { networkSchema } from './network';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
@@ -25,21 +20,14 @@ import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { timelineSchema } from './timeline';
 import { whoAmISchema } from './who_am_i';
-import { matrixHistogramSchema } from './matrix_histogram';
 export const schemas = [
-  authenticationsSchema,
   ecsSchema,
-  eventsSchema,
   dateSchema,
   toAnySchema,
   toNumberSchema,
   toDateSchema,
   toBooleanSchema,
   hostsSchema,
-  kpiNetworkSchema,
-  kpiHostsSchema,
-  matrixHistogramSchema,
-  networkSchema,
   noteSchema,
   pinnedEventSchema,
   rootSchema,
