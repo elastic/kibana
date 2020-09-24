@@ -90,6 +90,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         operation: string;
         field?: string;
         isPreviousIncompatible?: boolean;
+        keepOpen?: boolean;
       },
       layerIndex = 0
     ) {
@@ -106,6 +107,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
         await comboBox.setElement(target, opts.field);
+      }
+
+      if (!opts.keepOpen) {
+        this.closeDimensionEditor();
       }
     },
 
