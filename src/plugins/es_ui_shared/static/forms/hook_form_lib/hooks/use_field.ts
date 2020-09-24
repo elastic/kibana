@@ -85,7 +85,7 @@ export const useField = <T>(
   // -- HELPERS
   // ----------------------------------
   const serializeValue: FieldHook<T>['__serializeValue'] = useCallback(
-    (rawValue = value) => {
+    (rawValue: T = value) => {
       return serializer ? serializer(rawValue) : rawValue;
     },
     [serializer, value]

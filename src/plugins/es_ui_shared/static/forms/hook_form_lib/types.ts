@@ -132,7 +132,7 @@ export interface FieldHook<T = unknown> {
   // Flag to indicate if the field value will be included in the form data outputted
   // when calling form.getFormData();
   __isIncludedInOutput: boolean;
-  __serializeValue: (rawValue?: unknown) => unknown;
+  __serializeValue: (rawValue?: T) => unknown;
 }
 
 export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
@@ -143,8 +143,8 @@ export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
   readonly defaultValue?: ValueType;
   readonly validations?: Array<ValidationConfig<T, string, ValueType>>;
   readonly formatters?: FormatterFunc[];
-  readonly deserializer?: SerializerFunc;
-  readonly serializer?: SerializerFunc;
+  readonly deserializer?: SerializerFunc<ValueType, any>;
+  readonly serializer?: SerializerFunc<any, ValueType>;
   readonly fieldsToValidateOnChange?: string[];
   readonly valueChangeDebounceTime?: number;
 }
