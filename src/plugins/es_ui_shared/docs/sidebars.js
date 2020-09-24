@@ -52,6 +52,7 @@ module.exports = {
         'form_lib/core/default_value',
         'form_lib/core/use_form_hook',
         'form_lib/core/form_hook',
+        'form_lib/core/form_component',
         'form_lib/core/use_field',
         'form_lib/core/field_hook',
         'form_lib/core/use_form_data',
