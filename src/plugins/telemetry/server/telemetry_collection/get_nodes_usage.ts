@@ -57,7 +57,6 @@ export async function fetchNodesUsage(
   esClient: ElasticsearchClient
 ): Promise<NodesFeatureUsageResponse> {
   const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
-    metric: '_all',
     timeout: TIMEOUT,
   });
   return body;

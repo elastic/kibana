@@ -52,12 +52,12 @@ describe('get_nodes_usage', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClient.nodes.usage.mockImplementationOnce(
       // @ts-ignore
-      async (_params = { metric: '_all', timeout: TIMEOUT }) => {
+      async (_params = { timeout: TIMEOUT }) => {
         return response;
       }
     );
     const item = await getNodesUsage(esClient);
-    expect(esClient.nodes.usage).toHaveBeenCalledWith({ metric: '_all', timeout: TIMEOUT });
+    expect(esClient.nodes.usage).toHaveBeenCalledWith({ timeout: TIMEOUT });
     expect(item).toStrictEqual({
       nodes: [
         {
