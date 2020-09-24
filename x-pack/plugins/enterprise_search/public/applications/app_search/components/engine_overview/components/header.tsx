@@ -5,6 +5,7 @@
  */
 
 import React, { useContext } from 'react';
+import { useValues } from 'kea';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -16,12 +17,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
+import { HttpLogic } from '../../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../../index';
 
 export const EngineOverviewHeader: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const {
     externalUrl: { getAppSearchUrl },
-    http,
   } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {

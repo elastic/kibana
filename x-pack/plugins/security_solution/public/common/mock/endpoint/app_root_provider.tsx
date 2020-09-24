@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 import { History } from 'history';
 import { useObservable } from 'react-use';
 import { Store } from 'redux';
-import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
+import { EuiThemeProvider } from '../../../../../xpack_legacy/common';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import { StartPlugins } from '../../../types';
