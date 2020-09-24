@@ -25,6 +25,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     onAndClicked,
     onEntryRemove,
     onEntryChange,
+    onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useCallback(
@@ -46,6 +47,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
               entries={entries}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              onVisited={onVisited}
               data-test-subj={getTestId('group1')}
             />
           )}
@@ -72,7 +74,6 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
 
 LogicalConditionBuilder.displayName = 'LogicalConditionBuilder';
 
-// FIXME:PT need to style this better.
 const NoEntries = memo(() => {
   return (
     <EuiPanel paddingSize="l">

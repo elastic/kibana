@@ -21,8 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import uuid from 'uuid';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -122,7 +121,7 @@ export const getTopNavConfig = (
 
           if (newlyCreated && stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-              state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
+              state: { type: VISUALIZE_EMBEDDABLE_TYPE, input: { savedObjectId: id } },
             });
           } else {
             application.navigateToApp(originatingApp);
@@ -167,15 +166,11 @@ export const getTopNavConfig = (
     }
     const state = {
       input: {
-        ...vis.serialize(),
-        id: embeddableId ? embeddableId : uuid.v4(),
-      },
+        savedVis: vis.serialize(),
+      } as VisualizeInput,
+      embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
-      embeddableId: '',
     };
-    if (embeddableId) {
-      state.embeddableId = embeddableId;
-    }
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
@@ -267,6 +262,7 @@ export const getTopNavConfig = (
                 }
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
+                embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
                 const saveOptions = {
@@ -282,6 +278,7 @@ export const getTopNavConfig = (
                 }
                 return response;
               };
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis || { title: '' }}

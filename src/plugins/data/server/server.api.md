@@ -527,28 +527,20 @@ export type IAggConfigs = AggConfigs;
 export type IAggType = AggType;
 
 // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchRequest extends IKibanaSearchRequest {
+export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
     // (undocumented)
     indexType?: string;
-    // Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    params?: ISearchRequestParams;
 }
 
 // Warning: (ae-forgotten-export) The symbol "IKibanaSearchResponse" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
-    isPartial?: boolean;
-    isRunning?: boolean;
-    // (undocumented)
-    rawResponse: SearchResponse<Source>;
-}
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -824,14 +816,14 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
-    registerSearchStrategy: <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
+    registerSearchStrategy: <SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
     usage?: SearchUsage;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
+export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse> {
     // Warning: (ae-forgotten-export) The symbol "AggsStart" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -840,13 +832,13 @@ export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = I
     // Warning: (ae-forgotten-export) The symbol "RequestHandlerContext" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    search: (context: RequestHandlerContext, request: IEsSearchRequest, options: ISearchOptions) => Promise<IEsSearchResponse>;
+    search: (context: RequestHandlerContext, request: SearchStrategyRequest, options: ISearchOptions) => Promise<SearchStrategyResponse>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ISearchStrategy<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
+export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse> {
     // (undocumented)
     cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
     // (undocumented)

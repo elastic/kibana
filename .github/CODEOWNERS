@@ -7,10 +7,12 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
+/src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
+/src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/vis_default_editor/ @elastic/kibana-app
 /src/plugins/vis_type_markdown/ @elastic/kibana-app
@@ -23,6 +25,7 @@
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
+/src/plugins/visualizations/ @elastic/kibana-app
 
 # App Architecture
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
@@ -38,7 +41,6 @@
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/elastic-datemath/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
-/src/plugins/advanced_settings/ @elastic/kibana-app-arch
 /src/plugins/bfetch/ @elastic/kibana-app-arch
 /src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/embeddable/ @elastic/kibana-app-arch
@@ -47,11 +49,9 @@
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-canvas
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
-/src/plugins/management/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
 /src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
-/src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-arch
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
@@ -246,6 +246,8 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
 /x-pack/plugins/ingest_pipelines/  @elastic/es-ui
+/packages/kbn-ace/ @elastic/es-ui
+/packages/kbn-monaco/ @elastic/es-ui
 
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem
