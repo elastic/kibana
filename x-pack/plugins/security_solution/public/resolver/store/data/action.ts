@@ -46,14 +46,6 @@ interface AppAbortedResolverDataRequest {
 }
 
 /**
- * Will occur when a request for related event data is unsuccessful.
- */
-interface ServerFailedToReturnRelatedEventData {
-  readonly type: 'serverFailedToReturnRelatedEventData';
-  readonly payload: string;
-}
-
-/**
  * When related events are returned from the server
  */
 interface ServerReturnedRelatedEventData {
@@ -64,7 +56,6 @@ interface ServerReturnedRelatedEventData {
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
-  | ServerFailedToReturnRelatedEventData
   | ServerReturnedRelatedEventData
   | AppRequestedResolverData
   | AppAbortedResolverDataRequest;

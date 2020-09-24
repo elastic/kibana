@@ -57,24 +57,20 @@ describe('NetworkHttp Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkHttpTable
-            data={mockData.NetworkHttp.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkHttp.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="http"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkHttp.pageInfo
-            )}
-            totalCount={mockData.NetworkHttp.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkHttpTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -84,18 +80,14 @@ describe('NetworkHttp Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkHttpTable
-              data={mockData.NetworkHttp.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkHttp.pageInfo)}
+              data={mockData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
               id="http"
               isInspect={false}
               loading={false}
               loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkHttp.pageInfo
-              )}
-              totalCount={mockData.NetworkHttp.totalCount}
+              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+              totalCount={mockData.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
