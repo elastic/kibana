@@ -68,6 +68,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         enrolled_at: { type: 'date' },
         unenrolled_at: { type: 'date' },
         unenrollment_started_at: { type: 'date' },
+        upgraded_at: { type: 'date' },
+        upgrade_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },

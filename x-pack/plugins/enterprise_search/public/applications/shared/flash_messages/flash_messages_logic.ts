@@ -24,7 +24,6 @@ export interface IFlashMessagesActions {
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
-  listenToHistory(history: History): History;
   setHistoryListener(historyListener: Function): { historyListener: Function };
 }
 
@@ -38,7 +37,6 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
-    listenToHistory: (history) => history,
     setHistoryListener: (historyListener) => ({ historyListener }),
   },
   reducers: {
@@ -63,21 +61,31 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
       },
     ],
   },
-  listeners: ({ values, actions }) => ({
-    listenToHistory: (history) => {
+  events: ({ props, values, actions }) => ({
+    afterMount: () => {
       // On React Router navigation, clear previous flash messages and load any queued messages
-      const unlisten = history.listen(() => {
+      const unlisten = props.history.listen(() => {
         actions.clearFlashMessages();
         actions.setFlashMessages(values.queuedMessages);
         actions.clearQueuedMessages();
       });
       actions.setHistoryListener(unlisten);
     },
-  }),
-  events: ({ values }) => ({
     beforeUnmount: () => {
       const { historyListener: removeHistoryListener } = values;
       if (removeHistoryListener) removeHistoryListener();
     },
   }),
 });
+
+/**
+ * Mount/props helper
+ */
+interface IFlashMessagesLogicProps {
+  history: History;
+}
+export const mountFlashMessagesLogic = (props: IFlashMessagesLogicProps) => {
+  FlashMessagesLogic(props);
+  const unmount = FlashMessagesLogic.mount();
+  return unmount;
+};

@@ -29,6 +29,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   AnomaliesTableComponent,
   flowTarget,
   ip,
+  indexNames,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -57,6 +58,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         id={ID}
+        indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}

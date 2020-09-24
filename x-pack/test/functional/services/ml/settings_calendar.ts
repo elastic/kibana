@@ -7,9 +7,15 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSettingsCalendarProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSettingsCalendarProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   return {
     async parseCalendarTable() {
@@ -172,6 +178,11 @@ export function MachineLearningSettingsCalendarProvider({ getService }: FtrProvi
       );
     },
 
+    calendarRowSelector(calendarId: string, subSelector?: string) {
+      const row = `~mlCalendarTable > ~row-${calendarId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
+    },
+
     eventRowSelector(eventDescription: string, subSelector?: string) {
       const row = `~mlCalendarEventsTable > ~row-${eventDescription}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
@@ -179,6 +190,10 @@ export function MachineLearningSettingsCalendarProvider({ getService }: FtrProvi
 
     async assertEventRowExists(eventDescription: string) {
       await testSubjects.existOrFail(this.eventRowSelector(eventDescription));
+    },
+
+    async assertEventRowMissing(eventDescription: string) {
+      await testSubjects.missingOrFail(this.eventRowSelector(eventDescription));
     },
 
     async assertDeleteEventButtonEnabled(eventDescription: string, expectedValue: boolean) {
@@ -191,6 +206,192 @@ export function MachineLearningSettingsCalendarProvider({ getService }: FtrProvi
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    async assertCalendarRowExists(calendarId: string) {
+      await testSubjects.existOrFail(this.calendarRowSelector(calendarId));
+    },
+
+    async assertCalendarRowNotExists(calendarId: string) {
+      await testSubjects.missingOrFail(this.calendarRowSelector(calendarId));
+    },
+
+    async assertCalendarIdValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('mlCalendarIdInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar id should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async setCalendarId(calendarId: string) {
+      await mlCommonUI.setValueWithChecks('mlCalendarIdInput', calendarId, {
+        clearWithKeyboard: true,
+      });
+      await this.assertCalendarIdValue(calendarId);
+    },
+
+    async assertCalendarDescriptionValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('mlCalendarDescriptionInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar description should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async setCalendarDescription(description: string) {
+      await mlCommonUI.setValueWithChecks('mlCalendarDescriptionInput', description, {
+        clearWithKeyboard: true,
+      });
+      await this.assertCalendarDescriptionValue(description);
+    },
+
+    async getApplyToAllJobsSwitchCheckedState(): Promise<boolean> {
+      const subj = 'mlCalendarApplyToAllJobsSwitch';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async toggleApplyToAllJobsSwitch(toggle: boolean) {
+      const subj = 'mlCalendarApplyToAllJobsSwitch';
+      if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertApplyToAllJobsSwitchEnabled(toggle);
+        });
+      }
+    },
+
+    async saveCalendar() {
+      await testSubjects.existOrFail('mlSaveCalendarButton');
+      await testSubjects.click('mlSaveCalendarButton');
+      await testSubjects.existOrFail('mlPageCalendarManagement');
+    },
+
+    async navigateToCalendarCreationPage() {
+      await testSubjects.existOrFail('mlCalendarButtonCreate');
+      await testSubjects.click('mlCalendarButtonCreate');
+      await testSubjects.existOrFail('mlPageCalendarEdit');
+    },
+
+    async openNewCalendarEventForm() {
+      await testSubjects.existOrFail('mlCalendarNewEventButton');
+      await testSubjects.click('mlCalendarNewEventButton');
+      await testSubjects.existOrFail('mlPageCalendarEdit');
+    },
+
+    async assertCalendarEventDescriptionValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'mlCalendarEventDescriptionInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar event description should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async setCalendarEventDescription(eventDescription: string) {
+      await testSubjects.existOrFail('mlCalendarEventDescriptionInput');
+      await mlCommonUI.setValueWithChecks('mlCalendarEventDescriptionInput', eventDescription, {
+        clearWithKeyboard: true,
+      });
+      await this.assertCalendarEventDescriptionValue(eventDescription);
+    },
+
+    async cancelNewCalendarEvent() {
+      await testSubjects.existOrFail('mlCalendarCancelEventButton');
+      await testSubjects.click('mlCalendarCancelEventButton');
+      await testSubjects.missingOrFail('mlCalendarEventForm');
+    },
+
+    async addNewCalendarEvent() {
+      await testSubjects.existOrFail('mlCalendarAddEventButton');
+      await testSubjects.click('mlCalendarAddEventButton');
+      await testSubjects.missingOrFail('mlCalendarEventForm');
+    },
+
+    async assertJobSelectionExists() {
+      await testSubjects.existOrFail('mlCalendarJobSelection');
+    },
+
+    async assertJobSelectionNotExists() {
+      await testSubjects.missingOrFail('mlCalendarJobSelection');
+    },
+
+    async assertJobSelection(expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCalendarJobSelection > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected job selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async assertJobSelectionContain(expectedIdentifier: string) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCalendarJobSelection > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.contain(
+        expectedIdentifier,
+        `Expected job selection to contain '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async selectJob(identifier: string) {
+      await comboBox.set('mlCalendarJobSelection > comboBoxInput', identifier);
+      await this.assertJobSelectionContain(identifier);
+    },
+
+    async assertJobGroupSelectionExists() {
+      await testSubjects.existOrFail('mlCalendarJobGroupSelection');
+    },
+
+    async assertJobGroupSelectionNotExists() {
+      await testSubjects.missingOrFail('mlCalendarJobGroupSelection');
+    },
+
+    async assertJobGroupSelection(expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCalendarJobGroupSelection > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected job group selection to be'${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async assertJobGroupSelectionContain(expectedIdentifier: string) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCalendarJobGroupSelection > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.contain(
+        expectedIdentifier,
+        `Expected job group selection to contain'${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
+    async selectJobGroup(identifier: string) {
+      await comboBox.set('mlCalendarJobGroupSelection > comboBoxInput', identifier);
+      await this.assertJobGroupSelectionContain(identifier);
+    },
+
+    async deleteCalendarEventRow(eventDescription: string) {
+      await this.assertEventRowExists(eventDescription);
+      await testSubjects.click(
+        this.eventRowSelector(eventDescription, 'mlCalendarEventDeleteButton')
+      );
+      await this.assertEventRowMissing(eventDescription);
+    },
+
+    async deleteCalendar() {
+      await this.assertDeleteCalendarButtonEnabled(true);
+      await testSubjects.click('mlCalendarButtonDelete');
+      await testSubjects.existOrFail('mlCalendarDeleteConfirmation');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlCalendarDeleteConfirmation');
     },
   };
 }

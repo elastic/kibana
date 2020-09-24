@@ -56,10 +56,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   return 400; // Bad Request
 };
 
-export const defaultIngestErrorHandler: IngestErrorHandler = async ({
-  error,
-  response,
-}: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
+export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
   if (isLegacyESClientError(error)) {
     // there was a problem communicating with ES (e.g. via `callCluster`)
@@ -72,36 +69,44 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
 
     logger.error(message);
 
-    return response.customError({
+    return {
       statusCode: error?.statusCode || error.status,
       body: { message },
-    });
+    };
   }
 
   // our "expected" errors
   if (error instanceof IngestManagerError) {
     // only log the message
     logger.error(error.message);
-    return response.customError({
+    return {
       statusCode: getHTTPResponseCode(error),
       body: { message: error.message },
-    });
+    };
   }
 
   // handle any older Boom-based errors or the few places our app uses them
   if (isBoom(error)) {
     // only log the message
     logger.error(error.output.payload.message);
-    return response.customError({
+    return {
       statusCode: error.output.statusCode,
       body: { message: error.output.payload.message },
-    });
+    };
   }
 
   // not sure what type of error this is. log as much as possible
   logger.error(error);
-  return response.customError({
+  return {
     statusCode: 500,
     body: { message: error.message },
-  });
+  };
+}
+
+export const defaultIngestErrorHandler: IngestErrorHandler = async ({
+  error,
+  response,
+}: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
+  const options = ingestErrorToResponseOptions(error);
+  return response.customError(options);
 };
