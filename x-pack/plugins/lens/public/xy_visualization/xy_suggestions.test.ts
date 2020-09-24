@@ -745,6 +745,38 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('suggest to move histogram number as splitAccessor and extended date dimension as xAccessor', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const [histoSuggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [histogramCol('duration'), dateCol('date'), numCol('bytes')],
+        layerId: 'first',
+        changeType: 'extended',
+      },
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            accessors: ['bytes'],
+            layerId: 'first',
+            seriesType: 'bar',
+            splitAccessor: undefined,
+            xAccessor: 'duration',
+          },
+        ],
+      },
+      keptLayerIds: ['first'],
+    });
+
+    expect(histoSuggestion).toMatchObject({
+      state: {
+        layers: [{ xAccessor: 'date', splitAccessor: 'duration' }],
+      },
+    });
+  });
+
   test('changes column mappings when suggestion is reorder', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
