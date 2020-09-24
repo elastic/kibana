@@ -156,12 +156,8 @@ export class AttributeService<
   };
 
   public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return embeddable.getRoot() &&
-      (embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput
-      ? ((embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput as
-          | ValType
-          | RefType)
-      : (embeddable.getInput() as ValType | RefType);
+    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
+      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
   }
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
@@ -204,7 +200,14 @@ export class AttributeService<
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
-          resolve(wrappedInput);
+
+          // Remove unneeded attributes from the original input.
+          delete (input as { [ATTRIBUTE_SERVICE_KEY]?: SavedObjectAttributes })[
+            ATTRIBUTE_SERVICE_KEY
+          ];
+
+          // Combine input and wrapped input to preserve any passed in explicit Input.
+          resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject(error);

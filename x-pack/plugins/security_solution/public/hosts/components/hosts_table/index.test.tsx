@@ -12,7 +12,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
-  mockIndexPattern,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -69,7 +68,6 @@ describe('Hosts Table', () => {
             data={mockData.Hosts.edges}
             id="hostsQuery"
             isInspect={false}
-            indexPattern={mockIndexPattern}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
             loading={false}
             loadPage={loadPage}
@@ -92,7 +90,6 @@ describe('Hosts Table', () => {
             <TestProviders store={store}>
               <HostsTable
                 id="hostsQuery"
-                indexPattern={mockIndexPattern}
                 isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
