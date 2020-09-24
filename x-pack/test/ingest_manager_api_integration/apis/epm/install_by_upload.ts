@@ -36,6 +36,10 @@ export default function ({ getService }: FtrProviderContext) {
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_invalid_manifest_invalid_yaml_0.1.4.zip'
   );
+  const testPkgArchiveInvalidManifestMissingField = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_invalid_manifest_missing_field_0.1.4.zip'
+  );
   const testPkgArchiveInvalidToplevelMismatch = path.join(
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
@@ -165,6 +169,23 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(res.error.text).to.equal(
           '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
+        );
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('should throw an error if the archive manifest misses a mandatory field', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveInvalidManifestMissingField);
+        const res = await supertest
+          .post(`/api/ingest_manager/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect(res.error.text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, type, categories, format_version"}'
         );
       } else {
         warnAndSkipTest(this, log);

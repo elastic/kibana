@@ -106,6 +106,11 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // Allow snake case for format_version
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, version, description, type, categories, format_version } = manifest;
+  if (!(name && version && description && type && categories && format_version)) {
+    throw new PackageInvalidArchiveError(
+      'Invalid top-level package manifest: one or more fields missing of name, version, description, type, categories, format_version'
+    );
+  }
   return {
     name,
     version,
