@@ -5,8 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Siem GraphQL Endpoints', () => {
-    // loadTestFile(require.resolve('./authentications'));
+  describe('SecuritySolution Endpoints', () => {
+    loadTestFile(require.resolve('./authentications'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./host_details'));
     loadTestFile(require.resolve('./kpi_network'));
@@ -20,7 +20,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./saved_objects/pinned_events'));
     loadTestFile(require.resolve('./saved_objects/timeline'));
     loadTestFile(require.resolve('./sources'));
-    loadTestFile(require.resolve('./timeline'));
+    // loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
     loadTestFile(require.resolve('./users'));
