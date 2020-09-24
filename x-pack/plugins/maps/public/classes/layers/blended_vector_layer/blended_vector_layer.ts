@@ -257,7 +257,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return clonedDescriptor;
   }
 
-  getSource() {
+  getSource(): IVectorSource {
     return this._isClustered ? this._clusterSource : this._documentSource;
   }
 
@@ -268,7 +268,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle(): IStyle {
+  getCurrentStyle(): IVectorStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
@@ -281,8 +281,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       syncContext.dataFilters,
-      this.getSource() as IVectorSource,
-      this.getCurrentStyle() as IVectorStyle
+      this.getSource(),
+      this.getCurrentStyle()
     );
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),

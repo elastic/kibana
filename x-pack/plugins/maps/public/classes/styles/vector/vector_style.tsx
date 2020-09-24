@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Map as MbMap, FeatureIdentifier } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
 // @ts-expect-error
@@ -93,6 +93,54 @@ export interface IVectorStyle extends IStyle {
   ): { hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor };
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
+  getIcon: () => ReactElement<any>;
+  hasLegendDetails: () => Promise<boolean>;
+  renderLegendDetails: () => ReactElement<any>;
+  clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
+  setFeatureStateAndStyleProps: (
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ) => boolean;
+  arePointsSymbolizedAsCircles: () => boolean;
+  setMBPaintProperties: ({
+    alpha,
+    mbMap,
+    fillLayerId,
+    lineLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    fillLayerId: string;
+    lineLayerId: string;
+  }) => void;
+  setMBPaintPropertiesForPoints: ({
+    alpha,
+    mbMap,
+    pointLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    pointLayerId: string;
+  }) => void;
+  setMBPropertiesForLabelText: ({
+    alpha,
+    mbMap,
+    textLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    textLayerId: string;
+  }) => void;
+  setMBSymbolPropertiesForPoints: ({
+    mbMap,
+    symbolLayerId,
+    alpha,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    symbolLayerId: string;
+  }) => void;
 }
 
 export class VectorStyle implements IVectorStyle {
@@ -595,12 +643,12 @@ export class VectorStyle implements IVectorStyle {
     mbSourceId: string
   ) {
     if (!featureCollection) {
-      return;
+      return false;
     }
 
     const dynamicStyleProps = this.getDynamicPropertiesArray();
     if (dynamicStyleProps.length === 0) {
-      return;
+      return false;
     }
 
     const tmpFeatureIdentifier: FeatureIdentifier = {

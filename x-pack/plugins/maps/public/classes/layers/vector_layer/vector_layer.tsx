@@ -124,6 +124,10 @@ export class VectorLayer extends AbstractLayer {
     return super.getSource() as IVectorSource;
   }
 
+  getCurrentStyle(): IVectorStyle {
+    return super.getCurrentStyle() as IVectorStyle;
+  }
+
   destroy() {
     if (this.getSource()) {
       this.getSource().destroy();
@@ -196,7 +200,7 @@ export class VectorLayer extends AbstractLayer {
       sourceDataRequest
     );
     return {
-      icon: (this.getCurrentStyle() as VectorStyle).getIcon(),
+      icon: this.getCurrentStyle().getIcon(),
       tooltipContent,
       areResultsTrimmed,
     };
@@ -207,11 +211,11 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async hasLegendDetails() {
-    return (this.getCurrentStyle() as VectorStyle).hasLegendDetails();
+    return this.getCurrentStyle().hasLegendDetails();
   }
 
   renderLegendDetails() {
-    return (this.getCurrentStyle() as VectorStyle).renderLegendDetails();
+    return this.getCurrentStyle().renderLegendDetails();
   }
 
   async getBounds({
@@ -229,7 +233,7 @@ export class VectorLayer extends AbstractLayer {
     const searchFilters = this._getSearchFilters(
       dataFilters,
       this.getSource(),
-      this.getCurrentStyle() as IVectorStyle
+      this.getCurrentStyle()
     );
     // Do not pass all searchFilters to source.getBoundsForFilters().
     // For example, do not want to filter bounds request by extent and buffer.
@@ -524,7 +528,7 @@ export class VectorLayer extends AbstractLayer {
       style,
       sourceQuery: joinSource.getWhereQuery(),
       dataRequestId: join.getSourceMetaDataRequestId(),
-      dynamicStyleProps: (this.getCurrentStyle() as IVectorStyle)
+      dynamicStyleProps: this.getCurrentStyle()
         .getDynamicPropertiesArray()
         .filter((dynamicStyleProp) => {
           const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getFieldName());
@@ -567,8 +571,7 @@ export class VectorLayer extends AbstractLayer {
     const nextMeta = {
       dynamicStyleFields: _.uniq(dynamicStyleFields).sort(),
       sourceQuery,
-      isTimeAware:
-        (this.getCurrentStyle() as IVectorStyle).isTimeAware() && (await source.isTimeAware()),
+      isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
     };
     const prevDataRequest = this.getDataRequest(dataRequestId);
@@ -688,7 +691,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle() as IVectorStyle);
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
   }
 
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
@@ -732,11 +735,7 @@ export class VectorLayer extends AbstractLayer {
 
     if (!featureCollection) {
       if (featureCollectionOnMap) {
-        (this.getCurrentStyle() as VectorStyle).clearFeatureState(
-          featureCollectionOnMap,
-          mbMap,
-          this.getId()
-        );
+        this.getCurrentStyle().clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
       }
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
@@ -745,7 +744,7 @@ export class VectorLayer extends AbstractLayer {
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    const hasGeoJsonProperties = (this.getCurrentStyle() as VectorStyle).setFeatureStateAndStyleProps(
+    const hasGeoJsonProperties = this.getCurrentStyle().setFeatureStateAndStyleProps(
       featureCollection,
       mbMap,
       this.getId()
@@ -766,7 +765,7 @@ export class VectorLayer extends AbstractLayer {
     // Point layers symbolized as icons only contain a single mapbox layer.
     let markerLayerId;
     let textLayerId;
-    if ((this.getCurrentStyle() as VectorStyle).arePointsSymbolizedAsCircles()) {
+    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
       textLayerId = this._getMbTextLayerId();
       if (symbolLayer) {
@@ -829,14 +828,13 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(textLayerId, filterExpr);
     }
 
-    const vectorStyle = this.getCurrentStyle() as VectorStyle;
-    vectorStyle.setMBPaintPropertiesForPoints({
+    this.getCurrentStyle().setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId,
     });
 
-    vectorStyle.setMBPropertiesForLabelText({
+    this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId,
@@ -865,14 +863,13 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
 
-    const vectorStyle = this.getCurrentStyle() as VectorStyle;
-    vectorStyle.setMBSymbolPropertiesForPoints({
+    this.getCurrentStyle().setMBSymbolPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       symbolLayerId,
     });
 
-    vectorStyle.setMBPropertiesForLabelText({
+    this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId: symbolLayerId,
@@ -934,7 +931,7 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
     }
 
-    (this.getCurrentStyle() as VectorStyle).setMBPaintProperties({
+    this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
       fillLayerId,
