@@ -46,8 +46,7 @@ import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../q
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
-interface Props {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
@@ -65,6 +64,10 @@ interface Props {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+}
+
+interface Props extends QueryStringInputProps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
 }
 
 interface State {
@@ -546,13 +549,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
-    window.removeEventListener('scroll', this.handleListUpdate);
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
 
-  handleListUpdate = () =>
-    this.setState({
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
       queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
     });
+  };
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
@@ -684,4 +690,4 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryStringInput = withKibana(QueryStringInputUI);
+export const QueryStringInput: React.FC<QueryStringInputProps> = withKibana(QueryStringInputUI);

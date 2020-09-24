@@ -213,9 +213,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
             previousColumn: selectedColumn,
           });
 
-          trackUiEvent(
-            `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
-          );
           setState(
             changeColumn({
               state,
@@ -335,7 +332,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
         {!incompatibleSelectedOperationType && ParamEditor && (
           <>
-            <EuiSpacer size="s" />
             <ParamEditor
               state={state}
               setState={setState}

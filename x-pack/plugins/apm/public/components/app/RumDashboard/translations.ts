@@ -64,6 +64,9 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
+  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
+    defaultMessage: 'User experience metrics',
+  }),
   avgPageLoadDuration: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
     {
@@ -76,6 +79,32 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region',
     }
   ),
+  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
+    defaultMessage: 'Search by url',
+  }),
+  getSearchResultsLabel: (total: number) =>
+    i18n.translate('xpack.apm.rum.filters.searchResults', {
+      defaultMessage: '{total} Search results',
+      values: { total },
+    }),
+  topPages: i18n.translate('xpack.apm.rum.filters.topPages', {
+    defaultMessage: 'Top pages',
+  }),
+  select: i18n.translate('xpack.apm.rum.filters.select', {
+    defaultMessage: 'Select',
+  }),
+  url: i18n.translate('xpack.apm.rum.filters.url', {
+    defaultMessage: 'Url',
+  }),
+  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
+    defaultMessage: 'Match this query',
+  }),
+  loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
+    defaultMessage: 'Loading results',
+  }),
+  noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
+    defaultMessage: 'No results available',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

@@ -17,7 +17,7 @@ import {
   mockTimelineDetailsApollo,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
-import { Ecs } from '../../../graphql/types';
+import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('apollo-client');
@@ -197,6 +197,7 @@ describe('alert actions', () => {
             highlightedDropAndProviderId: '',
             historyIds: [],
             id: '',
+            indexNames: [],
             isFavorite: false,
             isLive: false,
             isLoading: false,
@@ -336,6 +337,7 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              // @ts-expect-error
               timeline_id: null,
             },
           },

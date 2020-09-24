@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getServiceHealthStatus } from '../../../../common/service_health_status';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
-  TRANSACTION_DURATION,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   EVENT_OUTCOME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../projections/util/merge_projection';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ServicesItemsSetup,
   ServicesItemsProjection,
 } from './get_services_items';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
   getMLJobIds,
@@ -43,21 +47,37 @@ const getDeltaAsMinutes = (setup: ServicesItemsSetup) =>
 interface AggregationParams {
   setup: ServicesItemsSetup;
   projection: ServicesItemsProjection;
+  searchAggregatedTransactions: boolean;
 }
 
 export const getTransactionDurationAverages = async ({
   setup,
   projection,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        events: [ProcessorEvent.transaction],
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
       body: {
         size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...projection.body.query.bool.filter,
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            ],
+          },
+        },
         aggs: {
           services: {
             terms: {
@@ -67,7 +87,9 @@ export const getTransactionDurationAverages = async ({
             aggs: {
               average: {
                 avg: {
-                  field: TRANSACTION_DURATION,
+                  field: getTransactionDurationFieldForAggregatedTransactions(
+                    searchAggregatedTransactions
+                  ),
                 },
               },
               timeseries: {
@@ -75,7 +97,9 @@ export const getTransactionDurationAverages = async ({
                 aggs: {
                   average: {
                     avg: {
-                      field: TRANSACTION_DURATION,
+                      field: getTransactionDurationFieldForAggregatedTransactions(
+                        searchAggregatedTransactions
+                      ),
                     },
                   },
                 },
@@ -112,13 +136,6 @@ export const getAgentNames = async ({
   const { apmEventClient } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
-      apm: {
-        events: [
-          ProcessorEvent.metric,
-          ProcessorEvent.error,
-          ProcessorEvent.transaction,
-        ],
-      },
       body: {
         size: 0,
         aggs: {
@@ -157,15 +174,30 @@ export const getAgentNames = async ({
 export const getTransactionRates = async ({
   setup,
   projection,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        events: [ProcessorEvent.transaction],
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
       body: {
         size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...projection.body.query.bool.filter,
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            ],
+          },
+        },
         aggs: {
           services: {
             terms: {
@@ -173,8 +205,24 @@ export const getTransactionRates = async ({
               size: MAX_NUMBER_OF_SERVICES,
             },
             aggs: {
+              count: {
+                value_count: {
+                  field: getTransactionDurationFieldForAggregatedTransactions(
+                    searchAggregatedTransactions
+                  ),
+                },
+              },
               timeseries: {
                 date_histogram: getDateHistogramOpts(start, end),
+                aggs: {
+                  count: {
+                    value_count: {
+                      field: getTransactionDurationFieldForAggregatedTransactions(
+                        searchAggregatedTransactions
+                      ),
+                    },
+                  },
+                },
               },
             },
           },
@@ -192,14 +240,14 @@ export const getTransactionRates = async ({
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
   return aggregations.services.buckets.map((serviceBucket) => {
-    const transactionsPerMinute = serviceBucket.doc_count / deltaAsMinutes;
+    const transactionsPerMinute = serviceBucket.count.value / deltaAsMinutes;
     return {
       serviceName: serviceBucket.key as string,
       transactionsPerMinute: {
         value: transactionsPerMinute,
         timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key,
-          y: dateBucket.doc_count / deltaAsMinutes,
+          y: dateBucket.count.value / deltaAsMinutes,
         })),
       },
     };
@@ -209,6 +257,7 @@ export const getTransactionRates = async ({
 export const getTransactionErrorRates = async ({
   setup,
   projection,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
@@ -216,12 +265,25 @@ export const getTransactionErrorRates = async ({
     terms: {
       field: EVENT_OUTCOME,
     },
+    aggs: {
+      count: {
+        value_count: {
+          field: getTransactionDurationFieldForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        },
+      },
+    },
   };
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        events: [ProcessorEvent.transaction],
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
       body: {
         size: 0,
@@ -270,11 +332,11 @@ export const getTransactionErrorRates = async ({
     const successfulTransactions =
       outcomeResponse.buckets.find(
         (bucket) => bucket.key === EventOutcome.success
-      )?.doc_count ?? 0;
+      )?.count.value ?? 0;
     const failedTransactions =
       outcomeResponse.buckets.find(
         (bucket) => bucket.key === EventOutcome.failure
-      )?.doc_count ?? 0;
+      )?.count.value ?? 0;
 
     return failedTransactions / (successfulTransactions + failedTransactions);
   }
@@ -305,13 +367,6 @@ export const getEnvironments = async ({
   const { apmEventClient } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
-      apm: {
-        events: [
-          ProcessorEvent.metric,
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-        ],
-      },
       body: {
         size: 0,
         aggs: {
@@ -372,10 +427,11 @@ export const getHealthStatuses = async (
     const stats = anomalies.serviceAnomalies[serviceName];
 
     const severity = getSeverity(stats.anomalyScore);
+    const healthStatus = getServiceHealthStatus({ severity });
 
     return {
       serviceName,
-      severity,
+      healthStatus,
     };
   });
 };

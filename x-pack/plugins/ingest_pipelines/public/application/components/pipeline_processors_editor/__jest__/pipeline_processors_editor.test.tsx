@@ -55,6 +55,23 @@ describe('Pipeline Editor', () => {
     expect(arg.getData()).toEqual(testProcessors);
   });
 
+  describe('no processors', () => {
+    beforeEach(async () => {
+      testBed = await setup({
+        value: {
+          processors: [],
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
+    });
+
+    it('displays an empty prompt if no processors are defined', () => {
+      const { exists } = testBed;
+      expect(exists('processorsEmptyPrompt')).toBe(true);
+    });
+  });
+
   describe('processors', () => {
     it('adds a new processor', async () => {
       const { actions } = testBed;
@@ -180,7 +197,7 @@ describe('Pipeline Editor', () => {
     it('prevents moving a processor while in edit mode', () => {
       const { find, exists } = testBed;
       find('processors>0.manageItemButton').simulate('click');
-      expect(exists('processorSettingsForm')).toBe(true);
+      expect(exists('editProcessorForm')).toBe(true);
       expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
       expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
     });

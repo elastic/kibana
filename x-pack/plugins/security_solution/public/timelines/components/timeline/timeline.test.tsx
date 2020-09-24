@@ -6,13 +6,16 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { timelineQuery } from '../../containers/index.gql_query';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { Direction } from '../../../graphql/types';
-import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../../common/mock';
+import {
+  defaultHeaders,
+  mockTimelineData,
+  mockIndexPattern,
+  mockIndexNames,
+} from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 
@@ -25,8 +28,20 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { useTimelineEvents } from '../../containers/index';
+import { useTimelineEventsDetails } from '../../containers/details/index';
 
+jest.mock('../../containers/index', () => ({
+  useTimelineEvents: jest.fn(),
+}));
+jest.mock('../../containers/details/index', () => ({
+  useTimelineEventsDetails: jest.fn(),
+}));
+jest.mock('./body/events/index', () => ({
+  // eslint-disable-next-line react/display-name
+  Events: () => <></>,
+}));
 jest.mock('../../../common/lib/kibana');
 jest.mock('./properties/properties_right');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -42,6 +57,7 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         application: {
           navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
         },
         uiSettings: {
           get: jest.fn(),
@@ -65,32 +81,38 @@ describe('Timeline', () => {
 
   const indexPattern = mockIndexPattern;
 
-  const mocks = [
-    { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
-  ];
-
   const mount = useMountAppended();
 
   beforeEach(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: mockTimelineData,
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
-      id: 'foo',
       dataProviders: mockDataProviders,
       docValueFields: [],
       end: endDate,
-      eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
+      id: TimelineId.test,
+      indexNames: mockIndexNames,
       indexPattern,
-      indexToAdd: [],
       isLive: false,
-      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingIndexName: false,
+      loadingSourcerer: false,
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       onDataProviderEdited: jest.fn(),
@@ -100,12 +122,12 @@ describe('Timeline', () => {
       onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
-      start: startDate,
       sort,
+      start: startDate,
       status: TimelineStatus.active,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
-      timelineType: TimelineType.default,
     };
   });
 
@@ -123,9 +145,7 @@ describe('Timeline', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
+          <TimelineComponent {...props} />
         </TestProviders>
       );
 
@@ -135,9 +155,7 @@ describe('Timeline', () => {
     test('it renders the title field', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
+          <TimelineComponent {...props} />
         </TestProviders>
       );
 
@@ -149,9 +167,7 @@ describe('Timeline', () => {
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
+          <TimelineComponent {...props} />
         </TestProviders>
       );
 
@@ -161,9 +177,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when the source is loading', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} isLoadingSource={true} />
-          </MockedProvider>
+          <TimelineComponent {...props} loadingSourcerer={true} />
         </TestProviders>
       );
 
@@ -173,9 +187,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when start is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} start={''} />
-          </MockedProvider>
+          <TimelineComponent {...props} start={''} />
         </TestProviders>
       );
 
@@ -185,9 +197,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when end is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} end={''} />
-          </MockedProvider>
+          <TimelineComponent {...props} end={''} />
         </TestProviders>
       );
 
@@ -197,33 +207,17 @@ describe('Timeline', () => {
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
+          <TimelineComponent {...props} />
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
-    test('it defaults to showing `All`', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
-    });
-
     it('it shows the timeline footer', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} />
-          </MockedProvider>
+          <TimelineComponent {...props} />
         </TestProviders>
       );
 
@@ -236,9 +230,7 @@ describe('Timeline', () => {
       it('should not show the timeline footer', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} />
-            </MockedProvider>
+            <TimelineComponent {...props} />
           </TestProviders>
         );
 
@@ -252,9 +244,7 @@ describe('Timeline', () => {
       test('it invokes the onDataProviderRemoved callback when the delete button on a provider is clicked', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} />
-            </MockedProvider>
+            <TimelineComponent {...props} />
           </TestProviders>
         );
 
@@ -271,9 +261,7 @@ describe('Timeline', () => {
       test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} />
-            </MockedProvider>
+            <TimelineComponent {...props} />
           </TestProviders>
         );
         wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
@@ -295,9 +283,7 @@ describe('Timeline', () => {
       test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} />
-            </MockedProvider>
+            <TimelineComponent {...props} />
           </TestProviders>
         );
 
@@ -321,9 +307,7 @@ describe('Timeline', () => {
       test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} />
-            </MockedProvider>
+            <TimelineComponent {...props} />
           </TestProviders>
         );
 
@@ -355,9 +339,7 @@ describe('Timeline', () => {
       test('Rendering And Provider', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} dataProviders={dataProviders} />
-            </MockedProvider>
+            <TimelineComponent {...props} dataProviders={dataProviders} />
           </TestProviders>
         );
 
@@ -375,9 +357,7 @@ describe('Timeline', () => {
       test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordion menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} dataProviders={dataProviders} />
-            </MockedProvider>
+            <TimelineComponent {...props} dataProviders={dataProviders} />
           </TestProviders>
         );
 
@@ -404,9 +384,7 @@ describe('Timeline', () => {
       test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the accordion menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} dataProviders={dataProviders} />
-            </MockedProvider>
+            <TimelineComponent {...props} dataProviders={dataProviders} />
           </TestProviders>
         );
 
@@ -434,9 +412,7 @@ describe('Timeline', () => {
       test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the accordion menu', () => {
         const wrapper = mount(
           <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <TimelineComponent {...props} dataProviders={dataProviders} />
-            </MockedProvider>
+            <TimelineComponent {...props} dataProviders={dataProviders} />
           </TestProviders>
         );
 

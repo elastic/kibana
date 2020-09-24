@@ -27,7 +27,8 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/time
 import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { Ecs, TimelineNonEcsData } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import {
   AddExceptionModal as AddExceptionModalComponent,
   AddExceptionModalBaseProps,
@@ -108,7 +109,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const closeAddExceptionModal = useCallback(() => {
     setShouldShowAddExceptionModal(false);
     setAddExceptionModalState(addExceptionModalInitialState);
-  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
+  }, []);
 
   const onAddExceptionCancel = useCallback(() => {
     closeAddExceptionModal();
@@ -304,33 +305,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
 
-  const AddExceptionModal = useCallback(
-    () =>
-      shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null ? (
-        <AddExceptionModalComponent
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
-        />
-      ) : null,
-    [
-      shouldShowAddExceptionModal,
-      addExceptionModalState.alertData,
-      addExceptionModalState.ruleName,
-      addExceptionModalState.ruleId,
-      addExceptionModalState.ruleIndices,
-      addExceptionModalState.exceptionListType,
-      onAddExceptionCancel,
-      onAddExceptionConfirm,
-      alertStatus,
-    ]
-  );
-
   const button = (
     <EuiButtonIcon
       aria-label="context menu"
@@ -481,7 +455,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           </EuiPopover>
         </EventsTdContent>
       </EventsTd>
-      <AddExceptionModal />
+      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
+        <AddExceptionModalComponent
+          ruleName={addExceptionModalState.ruleName}
+          ruleId={addExceptionModalState.ruleId}
+          ruleIndices={addExceptionModalState.ruleIndices}
+          exceptionListType={addExceptionModalState.exceptionListType}
+          alertData={addExceptionModalState.alertData}
+          onCancel={onAddExceptionCancel}
+          onConfirm={onAddExceptionConfirm}
+          alertStatus={alertStatus}
+        />
+      )}
     </>
   );
 };

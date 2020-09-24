@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, combineLatest, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
@@ -25,8 +25,12 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { PluginName } from '../plugins';
+import { InternalMetricsServiceSetup } from '../metrics';
+import { registerStatusRoute } from './routes';
+import { InternalEnvironmentServiceSetup } from '../environment';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
@@ -35,7 +39,10 @@ import { PluginsStatusService } from './plugins_status';
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
+  environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
+  http: InternalHttpServiceSetup;
+  metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
 }
 
@@ -44,21 +51,29 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly config$: Observable<StatusConfigType>;
 
   private pluginsStatus?: PluginsStatusService;
+  private overallSubscription?: Subscription;
 
-  constructor(coreContext: CoreContext) {
+  constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
     this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
   }
 
-  public async setup({ elasticsearch, pluginDependencies, savedObjects }: SetupDeps) {
+  public async setup({
+    elasticsearch,
+    pluginDependencies,
+    http,
+    metrics,
+    savedObjects,
+    environment,
+  }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
-    const overall$: Observable<ServiceStatus> = combineLatest(
+    const overall$: Observable<ServiceStatus> = combineLatest([
       core$,
-      this.pluginsStatus.getAll$()
-    ).pipe(
+      this.pluginsStatus.getAll$(),
+    ]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
@@ -72,6 +87,26 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       distinctUntilChanged(isDeepStrictEqual),
       shareReplay(1)
     );
+
+    // Create an unused subscription to ensure all underlying lazy observables are started.
+    this.overallSubscription = overall$.subscribe();
+
+    const router = http.createRouter('');
+    registerStatusRoute({
+      router,
+      config: {
+        allowAnonymous: statusConfig.allowAnonymous,
+        packageInfo: this.coreContext.env.packageInfo,
+        serverName: http.getServerInfo().name,
+        uuid: environment.instanceUuid,
+      },
+      metrics,
+      status: {
+        overall$,
+        plugins$: this.pluginsStatus.getAll$(),
+        core$,
+      },
+    });
 
     return {
       core$,
@@ -87,7 +122,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   public start() {}
 
-  public stop() {}
+  public stop() {
+    if (this.overallSubscription) {
+      this.overallSubscription.unsubscribe();
+      this.overallSubscription = undefined;
+    }
+  }
 
   private setupCoreStatus({
     elasticsearch,

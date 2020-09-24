@@ -28,11 +28,8 @@ import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { statusMixin } from './status';
-import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
-import * as Plugins from './plugins';
 import { uiMixin } from '../ui';
 import { i18nMixin } from './i18n';
 
@@ -49,9 +46,8 @@ export default class KbnServer {
    * @param {Record<string, any>} settings
    * @param {KibanaConfig} config
    * @param {KibanaCore} core
-   * @param {LegacyPlugins} legacyPlugins
    */
-  constructor(settings, config, core, legacyPlugins) {
+  constructor(settings, config, core) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
@@ -76,14 +72,8 @@ export default class KbnServer {
       stop: null,
     };
 
-    this.uiExports = legacyPlugins.uiExports;
-    this.pluginSpecs = legacyPlugins.pluginSpecs;
-    this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
-
     this.ready = constant(
       this.mixin(
-        Plugins.waitForInitSetupMixin,
-
         // Sets global HTTP behaviors
         httpMixin,
 
@@ -91,16 +81,9 @@ export default class KbnServer {
 
         loggingMixin,
         warningsMixin,
-        statusMixin,
-
-        // writes pid file
-        pidMixin,
 
         // scan translations dirs, register locale files and initialize i18n engine.
         i18nMixin,
-
-        // find plugins and set this.plugins and this.pluginSpecs
-        Plugins.scanMixin,
 
         // tell the config we are done loading plugins
         configCompleteMixin,
@@ -108,13 +91,7 @@ export default class KbnServer {
         uiMixin,
 
         // setup routes that serve the @kbn/optimizer output
-        optimizeMixin,
-
-        // initialize the plugins
-        Plugins.initializeMixin,
-
-        // notify any deferred setup logic that plugins have initialized
-        Plugins.waitForInitResolveMixin
+        optimizeMixin
       )
     );
 

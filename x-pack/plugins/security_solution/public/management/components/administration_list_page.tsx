@@ -5,6 +5,7 @@
  */
 import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
+import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { HeaderPage } from '../../common/components/header_page';
@@ -13,6 +14,13 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, TRUSTED_APPS_TAB, BETA_BADGE_LABEL } from '../common/translations';
 import { getEndpointListPath, getTrustedAppsListPath } from '../common/routing';
+
+/** Ensure that all flyouts z-index in Administation area show the flyout header */
+const EuiPanelStyled = styled(EuiPanel)`
+  .euiFlyout {
+    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
+  }
+`;
 
 interface AdministrationListPageProps {
   beta: boolean;
@@ -27,7 +35,12 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage title={title} subtitle={subtitle} badgeOptions={badgeOptions}>
+        <HeaderPage
+          hideSourcerer={true}
+          title={title}
+          subtitle={subtitle}
+          badgeOptions={badgeOptions}
+        >
           {actions}
         </HeaderPage>
 
@@ -54,7 +67,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
         <EuiSpacer />
 
-        <EuiPanel>{children}</EuiPanel>
+        <EuiPanelStyled>{children}</EuiPanelStyled>
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </WrapperPage>

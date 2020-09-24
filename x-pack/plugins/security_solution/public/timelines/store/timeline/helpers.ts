@@ -20,8 +20,9 @@ import {
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
+  TimelineEventsType,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -29,7 +30,7 @@ import {
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
+import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -139,6 +140,7 @@ interface AddNewTimelineParams {
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
+  indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
     filterQueryDraft: KueryFilterQuery | null;
@@ -159,6 +161,7 @@ export const addNewTimeline = ({
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
+  indexNames,
   kqlQuery = { filterQuery: null, filterQueryDraft: null },
   sort = timelineDefaults.sort,
   show = false,
@@ -186,6 +189,7 @@ export const addNewTimeline = ({
       excludedRowRendererIds,
       filters,
       itemsPerPage,
+      indexNames,
       kqlQuery,
       sort,
       show,
@@ -667,7 +671,7 @@ export const updateTimelineTitle = ({
 
 interface UpdateTimelineEventTypeParams {
   id: string;
-  eventType: EventType;
+  eventType: TimelineEventsType;
   timelineById: TimelineById;
 }
 

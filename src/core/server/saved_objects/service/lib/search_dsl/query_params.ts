@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -128,6 +129,7 @@ interface QueryParams {
   registry: ISavedObjectTypeRegistry;
   namespaces?: string[];
   type?: string | string[];
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   search?: string;
   searchFields?: string[];
   rootSearchFields?: string[];
@@ -144,6 +146,7 @@ export function getQueryParams({
   registry,
   namespaces,
   type,
+  typeToNamespacesMap,
   search,
   searchFields,
   rootSearchFields,
@@ -151,7 +154,10 @@ export function getQueryParams({
   hasReference,
   kueryNode,
 }: QueryParams) {
-  const types = getTypes(mappings, type);
+  const types = getTypes(
+    mappings,
+    typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
+  );
 
   // A de-duplicated set of namespaces makes for a more effecient query.
   //
@@ -162,9 +168,12 @@ export function getQueryParams({
   // since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
   // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
   // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
-  const normalizedNamespaces = namespaces
-    ? Array.from(new Set(namespaces.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x))))
-    : undefined;
+  const normalizeNamespaces = (namespacesToNormalize?: string[]) =>
+    namespacesToNormalize
+      ? Array.from(
+          new Set(namespacesToNormalize.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x)))
+        )
+      : undefined;
 
   const bool: any = {
     filter: [
@@ -196,9 +205,12 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map((shouldType) =>
-            getClauseForType(registry, normalizedNamespaces, shouldType)
-          ),
+          should: types.map((shouldType) => {
+            const normalizedNamespaces = normalizeNamespaces(
+              typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
+            );
+            return getClauseForType(registry, normalizedNamespaces, shouldType);
+          }),
           minimum_should_match: 1,
         },
       },

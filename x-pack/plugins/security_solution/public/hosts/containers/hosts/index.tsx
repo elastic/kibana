@@ -9,7 +9,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -26,7 +25,11 @@ import {
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
@@ -50,6 +53,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -59,6 +63,7 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -67,13 +72,12 @@ export const useAllHost = ({
   const { activePage, direction, limit, sortField } = useSelector((state: State) =>
     getHostsSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.hosts,
     filterQuery: createFilter(filterQuery),
@@ -87,17 +91,14 @@ export const useAllHost = ({
       direction,
       field: sortField,
     },
-    // inspect: isInspected,
   });
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setHostRequest((prevRequest) => ({
+        ...prevRequest,
+        pagination: generateTablePaginationOptions(newActivePage, limit),
+      }));
     },
     [limit]
   );
@@ -136,7 +137,7 @@ export const useAllHost = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostsResponse((prevResponse) => ({
@@ -149,7 +150,7 @@ export const useAllHost = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -180,7 +181,7 @@ export const useAllHost = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -201,11 +202,11 @@ export const useAllHost = ({
     });
   }, [
     activePage,
-    defaultIndex,
     direction,
     docValueFields,
     endDate,
     filterQuery,
+    indexNames,
     limit,
     skip,
     startDate,

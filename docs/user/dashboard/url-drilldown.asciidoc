@@ -1,6 +1,8 @@
 [[url-drilldown]]
 === URL drilldown
 
+beta[]
+
 The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
 The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
 
@@ -197,6 +199,7 @@ context.panel.timeRange.indexPatternIds
 | ID of saved object behind a panel.
 
 | *Single click*
+
 | event.value
 | Value behind clicked data point.
 
@@ -207,6 +210,22 @@ context.panel.timeRange.indexPatternIds
 |
 | event.negate
 | Boolean, indicating whether clicked data point resulted in negative filter.
+
+|
+| event.points
+| Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient. +
+
+Example:
+
+`{{json event.points}}` +
+`{{event.points.[0].key}}` +
+`{{event.points.[0].value}}`
+`{{#each event.points}}key=value&{{/each}}`
+
+Note:
+
+`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
+`{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
 
 | *Range selection*
 | event.from +
@@ -219,3 +238,14 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 | Aggregation field behind the selected range, if available.
 
 |===
+
+[float]
+[[disable]]
+==== Disable URL drilldown
+
+You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
+
+["source","yml"]
+-----------
+url_drilldown.enabled: false
+-----------

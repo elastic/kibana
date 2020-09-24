@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { asPercent } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
@@ -20,14 +21,12 @@ import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { AgentIcon } from '../../../shared/AgentIcon';
-import { Severity } from '../../../../../common/anomaly_detection';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
 interface Props {
   items: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
-  displayHealthStatus: boolean;
 }
 
 type ServiceListItem = ValuesType<Props['items']>;
@@ -53,14 +52,18 @@ const AppLink = styled(TransactionOverviewLink)`
 
 export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
   {
-    field: 'severity',
+    field: 'healthStatus',
     name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
       defaultMessage: 'Health',
     }),
     width: px(unit * 6),
     sortable: true,
-    render: (_, { severity }) => {
-      return <HealthBadge severity={severity} />;
+    render: (_, { healthStatus }) => {
+      return (
+        <HealthBadge
+          healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
+        />
+      );
     },
   },
   {
@@ -172,40 +175,38 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
   },
 ];
 
-const SEVERITY_ORDER = [
-  Severity.warning,
-  Severity.minor,
-  Severity.major,
-  Severity.critical,
+const SERVICE_HEALTH_STATUS_ORDER = [
+  ServiceHealthStatus.unknown,
+  ServiceHealthStatus.healthy,
+  ServiceHealthStatus.warning,
+  ServiceHealthStatus.critical,
 ];
 
-export function ServiceList({
-  items,
-  displayHealthStatus,
-  noItemsMessage,
-}: Props) {
+export function ServiceList({ items, noItemsMessage }: Props) {
+  const displayHealthStatus = items.some((item) => 'healthStatus' in item);
+
   const columns = displayHealthStatus
     ? SERVICE_COLUMNS
-    : SERVICE_COLUMNS.filter((column) => column.field !== 'severity');
+    : SERVICE_COLUMNS.filter((column) => column.field !== 'healthStatus');
 
   return (
     <ManagedTable
       columns={columns}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSortField="severity"
+      initialSortField="healthStatus"
       initialSortDirection="desc"
       initialPageSize={50}
       sortFn={(itemsToSort, sortField, sortDirection) => {
-        // For severity, sort items by severity first, then by TPM
+        // For healthStatus, sort items by healthStatus first, then by TPM
 
-        return sortField === 'severity'
+        return sortField === 'healthStatus'
           ? orderBy(
               itemsToSort,
               [
                 (item) => {
-                  return item.severity
-                    ? SEVERITY_ORDER.indexOf(item.severity)
+                  return item.healthStatus
+                    ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                     : -1;
                 },
                 (item) => item.transactionsPerMinute?.value ?? 0,

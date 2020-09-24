@@ -59,6 +59,9 @@ export type MainType =
   | 'geo_point'
   | 'geo_shape'
   | 'token_count'
+  | 'point'
+  | 'histogram'
+  | 'constant_keyword'
   | 'wildcard'
   /**
    * 'other' is a special type that only exists inside of MappingsEditor as a placeholder
@@ -107,6 +110,7 @@ export type ParameterName =
   | 'null_value_boolean'
   | 'null_value_geo_point'
   | 'null_value_ip'
+  | 'null_value_point'
   | 'copy_to'
   | 'dynamic'
   | 'dynamic_toggle'
@@ -146,7 +150,9 @@ export type ParameterName =
   | 'dims'
   | 'depth_limit'
   | 'relations'
-  | 'max_shingle_size';
+  | 'max_shingle_size'
+  | 'value'
+  | 'meta';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

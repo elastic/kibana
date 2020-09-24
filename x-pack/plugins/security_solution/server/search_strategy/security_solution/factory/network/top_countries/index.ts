@@ -51,7 +51,7 @@ export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCoun
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

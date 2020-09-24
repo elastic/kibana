@@ -22,21 +22,27 @@ const ClFlexGroup = styled(EuiFlexGroup)`
 export function ClientMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters]
+    [start, end, uiFilters, searchTerm]
   );
 
   const STAT_STYLE = { width: '240px' };

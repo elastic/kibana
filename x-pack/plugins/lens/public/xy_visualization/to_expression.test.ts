@@ -41,8 +41,8 @@ describe('#toExpression', () => {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
-          tickLabelsVisibilitySettings: { x: false, y: true },
-          gridlinesVisibilitySettings: { x: false, y: true },
+          tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
           layers: [
             {
               layerId: 'first',
@@ -79,7 +79,7 @@ describe('#toExpression', () => {
     ).toEqual('None');
   });
 
-  it('should default the showXAxisTitle and showYAxisTitle to true', () => {
+  it('should default the axisTitles visibility settings to true', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -96,29 +96,35 @@ describe('#toExpression', () => {
       },
       frame.datasourceLayers
     ) as Ast;
-    expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
-    expect(expression.chain[0].arguments.showYAxisTitle[0]).toBe(true);
+    expect(
+      (expression.chain[0].arguments.axisTitlesVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [true],
+      yLeft: [true],
+      yRight: [true],
+    });
   });
 
-  it('should not generate an expression when missing x', () => {
-    expect(
-      xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              seriesType: 'area',
-              splitAccessor: undefined,
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        frame.datasourceLayers
-      )
-    ).toBeNull();
+  it('should generate an expression without x accessor', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: undefined,
+            xAccessor: undefined,
+            accessors: ['a'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
+      []
+    );
   });
 
   it('should not generate an expression when missing y', () => {
@@ -165,6 +171,7 @@ describe('#toExpression', () => {
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
     expect(expression.chain[0].arguments.xTitle).toEqual(['']);
     expect(expression.chain[0].arguments.yTitle).toEqual(['']);
+    expect(expression.chain[0].arguments.yRightTitle).toEqual(['']);
     expect(
       (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
     ).toEqual([
@@ -197,7 +204,8 @@ describe('#toExpression', () => {
       (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
     ).toEqual({
       x: [true],
-      y: [true],
+      yLeft: [true],
+      yRight: [true],
     });
   });
 
@@ -222,7 +230,8 @@ describe('#toExpression', () => {
       (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
     ).toEqual({
       x: [true],
-      y: [true],
+      yLeft: [true],
+      yRight: [true],
     });
   });
 });

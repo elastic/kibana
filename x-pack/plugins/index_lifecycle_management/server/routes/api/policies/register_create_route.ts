@@ -40,6 +40,8 @@ const setPrioritySchema = schema.maybe(
 
 const unfollowSchema = schema.maybe(schema.object({})); // Unfollow has no options
 
+const migrateSchema = schema.maybe(schema.object({ enabled: schema.literal(false) }));
+
 const allocateNodeSchema = schema.maybe(schema.recordOf(schema.string(), schema.string()));
 const allocateSchema = schema.maybe(
   schema.object({
@@ -47,6 +49,12 @@ const allocateSchema = schema.maybe(
     include: allocateNodeSchema,
     exclude: allocateNodeSchema,
     require: allocateNodeSchema,
+  })
+);
+
+const forcemergeSchema = schema.maybe(
+  schema.object({
+    max_num_segments: schema.number(),
   })
 );
 
@@ -62,6 +70,7 @@ const hotPhaseSchema = schema.object({
         max_docs: schema.maybe(schema.number()),
       })
     ),
+    forcemerge: forcemergeSchema,
   }),
 });
 
@@ -69,6 +78,7 @@ const warmPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
       readonly: schema.maybe(schema.object({})), // Readonly has no options
@@ -78,11 +88,7 @@ const warmPhaseSchema = schema.maybe(
           number_of_shards: schema.number(),
         })
       ),
-      forcemerge: schema.maybe(
-        schema.object({
-          max_num_segments: schema.number(),
-        })
-      ),
+      forcemerge: forcemergeSchema,
     }),
   })
 );
@@ -91,23 +97,7 @@ const coldPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
-      set_priority: setPrioritySchema,
-      unfollow: unfollowSchema,
-      allocate: allocateSchema,
-      freeze: schema.maybe(schema.object({})), // Freeze has no options
-      searchable_snapshot: schema.maybe(
-        schema.object({
-          snapshot_repository: schema.string(),
-        })
-      ),
-    }),
-  })
-);
-
-const frozenPhaseSchema = schema.maybe(
-  schema.object({
-    min_age: minAgeSchema,
-    actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
       allocate: allocateSchema,
@@ -146,7 +136,6 @@ const bodySchema = schema.object({
     hot: hotPhaseSchema,
     warm: warmPhaseSchema,
     cold: coldPhaseSchema,
-    frozen: frozenPhaseSchema,
     delete: deletePhaseSchema,
   }),
 });

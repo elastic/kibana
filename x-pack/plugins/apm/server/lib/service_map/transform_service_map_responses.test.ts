@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceHealthStatus } from '../../../common/service_health_status';
+
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -43,6 +45,7 @@ const anomalies = {
       actualValue: 10000,
       anomalyScore: 50,
       jobId: 'apm-test-1234-ml-module-name',
+      healthStatus: ServiceHealthStatus.warning,
     },
   },
 };

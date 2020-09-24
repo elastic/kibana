@@ -29,7 +29,8 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -49,8 +50,8 @@ import {
   getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { ExceptionsBuilderExceptionItem } from '../types';
+import { useFetchIndex } from '../../../containers/source';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
@@ -121,14 +122,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    memoSignalIndexName
   );
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const onError = useCallback(
     (error: Error): void => {
@@ -308,10 +308,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
     addOrUpdateExceptionItems,
+    ruleId,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,

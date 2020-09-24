@@ -21,7 +21,8 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+
+import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import {
@@ -108,14 +109,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    signalIndexName !== null ? [signalIndexName] : []
   );
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -240,9 +238,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
+  }, [
+    addOrUpdateExceptionItems,
+    ruleId,
+    enrichExceptionItems,
+    shouldBulkCloseAlert,
+    signalIndexName,
+  ]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
