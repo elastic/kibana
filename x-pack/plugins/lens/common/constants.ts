@@ -18,6 +18,6 @@ export function getEditPath(id: string | undefined) {
   return id ? `#/edit/${encodeURIComponent(id)}` : `#/${LENS_EDIT_BY_VALUE}`;
 }
 
-export function getFullPath(id: string) {
-  return `/app/${PLUGIN_ID}${getEditPath(id)}`;
+export function getFullPath(id?: string) {
+  return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
