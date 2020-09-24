@@ -9,7 +9,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -54,6 +53,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -63,6 +63,7 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -71,13 +72,12 @@ export const useAllHost = ({
   const { activePage, direction, limit, sortField } = useSelector((state: State) =>
     getHostsSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.hosts,
     filterQuery: createFilter(filterQuery),
@@ -181,7 +181,7 @@ export const useAllHost = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -202,11 +202,11 @@ export const useAllHost = ({
     });
   }, [
     activePage,
-    defaultIndex,
     direction,
     docValueFields,
     endDate,
     filterQuery,
+    indexNames,
     limit,
     skip,
     startDate,

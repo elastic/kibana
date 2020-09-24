@@ -104,6 +104,9 @@ export function timestampAsDateSafeVersion(event: TimestampFields): Date | undef
   }
 }
 
+/**
+ * The @timestamp ECS field
+ */
 export function eventTimestamp(event: SafeResolverEvent): string | undefined | number {
   return firstNonNullValue(event['@timestamp']);
 }
@@ -213,12 +216,18 @@ export function eventSequence(event: EventSequenceFields): number | undefined {
   return firstNonNullValue(event.event?.sequence);
 }
 
+/**
+ * The event.id ECS field.
+ */
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
   return firstNonNullValue(
     isLegacyEventSafeVersion(event) ? event.endgame?.serial_event_id : event.event?.id
   );
 }
 
+/**
+ * The event.entity_id field.
+ */
 export function entityId(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
@@ -258,6 +267,9 @@ export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   }
 }
 
+/**
+ * The process.parent.entity_id ECS field.
+ */
 export function parentEntityId(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
