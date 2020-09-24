@@ -163,14 +163,9 @@ export class TimeseriesVisualization extends Component {
     const mainAxisGroupId = yAxisIdGenerator('main_group');
 
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
-    const firstSeries = seriesModel.find((s) => s.formatter && !s.separate_axis);
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
     const mainAxisDomain = TimeseriesVisualization.getYAxisDomain(model);
-    const tickFormatter = TimeseriesVisualization.getTickFormatter(
-      firstSeries,
-      this.props.getConfig
-    );
     const yAxis = [];
     let mainDomainAdded = false;
 
@@ -224,7 +219,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter,
+          tickFormatter: (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
