@@ -18,7 +18,6 @@
  */
 
 import { unlinkSync as unlink } from 'fs';
-
 import once from 'lodash/once';
 import { Logger } from '../logging';
 import { writeFile, exists } from './fs';

@@ -5,9 +5,7 @@
  */
 
 import Boom from 'boom';
-
 import each from 'lodash/each';
-
 import get from 'lodash/get';
 import { IScopedClusterClient } from 'kibana/server';
 

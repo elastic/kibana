@@ -9,7 +9,6 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-
 import get from 'lodash/get';
 
 type ErrorFactory = (message: string) => Error;

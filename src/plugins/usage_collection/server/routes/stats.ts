@@ -19,7 +19,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-
 import defaultsDeep from 'lodash/defaultsDeep';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';

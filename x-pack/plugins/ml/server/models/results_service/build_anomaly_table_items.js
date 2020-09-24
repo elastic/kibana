@@ -5,7 +5,6 @@
  */
 
 import sortBy from 'lodash/sortBy';
-
 import each from 'lodash/each';
 import moment from 'moment-timezone';
 

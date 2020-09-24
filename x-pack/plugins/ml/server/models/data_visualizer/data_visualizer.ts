@@ -5,13 +5,9 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-
 import get from 'lodash/get';
-
 import each from 'lodash/each';
-
 import last from 'lodash/last';
-
 import find from 'lodash/find';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';

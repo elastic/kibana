@@ -5,9 +5,7 @@
  */
 
 import sortBy from 'lodash/sortBy';
-
 import slice from 'lodash/slice';
-
 import get from 'lodash/get';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
