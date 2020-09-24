@@ -17,8 +17,6 @@ jest.mock('../../../shared/flash_messages', () => ({
   flashAPIErrors: jest.fn(),
 }));
 import { flashAPIErrors } from '../../../shared/flash_messages';
-import { IMeta } from '../../../../../common/types';
-import { IApiToken, ICredentialsDetails } from '../../types';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -61,7 +59,7 @@ describe('CredentialsLogic', () => {
     CredentialsLogic.mount();
   };
 
-  const newToken: IApiToken = {
+  const newToken = {
     id: 1,
     name: 'myToken',
     type: PRIVATE,
@@ -71,7 +69,7 @@ describe('CredentialsLogic', () => {
     engines: [],
   };
 
-  const credentialsDetails: ICredentialsDetails = {
+  const credentialsDetails = {
     engines: [
       { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
       { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
@@ -455,7 +453,7 @@ describe('CredentialsLogic', () => {
   });
 
   describe('setCredentialsData', () => {
-    const meta: IMeta = {
+    const meta = {
       page: {
         current: 1,
         size: 1,
@@ -1094,7 +1092,7 @@ describe('CredentialsLogic', () => {
   });
 
   describe('fetchCredentials', () => {
-    const meta: IMeta = {
+    const meta = {
       page: {
         current: 1,
         size: 1,
@@ -1102,7 +1100,7 @@ describe('CredentialsLogic', () => {
         total_results: 1,
       },
     };
-    const results: IApiToken[] = [];
+    const results: object[] = [];
 
     it('will call an API endpoint and set the results with the `setCredentialsData` action', async () => {
       mount();
