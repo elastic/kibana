@@ -234,6 +234,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                disabled={(!form.isValid && form.isSubmitted) || form.isSubmitting}
                 data-test-subj="submitButton"
                 onClick={async () => {
                   if (activeTab === 'output') {

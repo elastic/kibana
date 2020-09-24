@@ -4,6 +4,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -98,6 +99,22 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -106,7 +123,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="4"
+              colspan="5"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -130,6 +147,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -224,6 +242,22 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -232,7 +266,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="4"
+              colspan="5"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -261,6 +295,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -355,6 +390,22 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -363,7 +414,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="4"
+              colspan="5"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -392,6 +443,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -486,11 +538,27 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -556,9 +624,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -624,9 +722,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -692,9 +820,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -760,9 +918,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -828,9 +1016,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -896,9 +1114,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -964,9 +1212,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1032,9 +1310,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1100,9 +1408,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1168,9 +1506,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1236,9 +1604,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1304,9 +1702,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1372,9 +1800,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1440,9 +1898,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1508,9 +1996,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1576,9 +2094,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1644,9 +2192,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1712,9 +2290,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1780,9 +2388,39 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -1845,6 +2483,36 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiTableCellContent__text"
                 >
                   someone
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
                 </span>
               </div>
             </td>
@@ -2080,6 +2748,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
 <div>
   <div
     class="euiBasicTable euiBasicTable-loading"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -2174,6 +2843,22 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -2182,7 +2867,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="4"
+              colspan="5"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -2206,6 +2891,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
 <div>
   <div
     class="euiBasicTable euiBasicTable-loading"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -2300,11 +2986,27 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2370,9 +3072,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2438,9 +3170,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2506,9 +3268,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2574,9 +3366,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2642,9 +3464,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2710,9 +3562,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2778,9 +3660,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2846,9 +3758,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2914,9 +3856,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -2982,9 +3954,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3050,9 +4052,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3118,9 +4150,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3186,9 +4248,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3254,9 +4346,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3322,9 +4444,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3390,9 +4542,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3458,9 +4640,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3526,9 +4738,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3594,9 +4836,39 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -3659,6 +4931,36 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiTableCellContent__text"
                 >
                   someone
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
                 </span>
               </div>
             </td>
@@ -3890,10 +5192,11 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
 </div>
 `;
 
-exports[`TrustedAppsList renders correctly when new page and page sie set (not loading yet) 1`] = `
+exports[`TrustedAppsList renders correctly when new page and page size set (not loading yet) 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -3988,11 +5291,27 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Actions"
+                >
+                  Actions
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4058,9 +5377,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4126,9 +5475,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4194,9 +5573,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4262,9 +5671,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4330,9 +5769,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4398,9 +5867,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4466,9 +5965,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4534,9 +6063,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4602,9 +6161,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4670,9 +6259,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4738,9 +6357,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4806,9 +6455,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4874,9 +6553,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -4942,9 +6651,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5010,9 +6749,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5078,9 +6847,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5146,9 +6945,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5214,9 +7043,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5282,9 +7141,39 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow"
+            class="euiTableRow euiTableRow-hasActions"
           >
             <td
               class="euiTableRowCell"
@@ -5347,6 +7236,36 @@ exports[`TrustedAppsList renders correctly when new page and page sie set (not l
                   class="euiTableCellContent__text"
                 >
                   someone
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hasActions"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    aria-labelledby="mockId"
+                    class="euiButtonIcon euiButtonIcon--danger euiTableCellContent__hoverItem"
+                    data-test-subj="trustedAppDeleteAction"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                  <span
+                    class="euiScreenReaderOnly"
+                    id="mockId"
+                  >
+                    Delete
+                  </span>
                 </span>
               </div>
             </td>

@@ -9,6 +9,8 @@ import { useState, useCallback } from 'react';
 
 export type ModuleId = 'logs_ui_analysis' | 'logs_ui_categories';
 
+export const moduleIds = ['logs_ui_analysis', 'logs_ui_categories'] as const;
+
 type FlyoutView =
   | { view: 'hidden' }
   | { view: 'moduleList' }
