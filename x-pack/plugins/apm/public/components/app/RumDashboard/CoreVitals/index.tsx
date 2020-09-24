@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
 import { CoreVitalItem } from './CoreVitalItem';
 import { UXMetrics } from '../UXMetrics';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
@@ -28,7 +29,7 @@ export function CoreVitals({ data, loading }: Props) {
       <EuiFlexItem>
         <CoreVitalItem
           title={LCP_LABEL}
-          value={lcp ? lcp + ' s' : '0'}
+          value={formatToSec(lcp, 'ms')}
           ranks={lcpRanks}
           loading={loading}
           thresholds={CoreVitalsThresholds.LCP}
@@ -37,7 +38,7 @@ export function CoreVitals({ data, loading }: Props) {
       <EuiFlexItem>
         <CoreVitalItem
           title={FID_LABEL}
-          value={fid ? fid + ' s' : '0'}
+          value={formatToSec(fid, 'ms')}
           ranks={fidRanks}
           loading={loading}
           thresholds={CoreVitalsThresholds.FID}

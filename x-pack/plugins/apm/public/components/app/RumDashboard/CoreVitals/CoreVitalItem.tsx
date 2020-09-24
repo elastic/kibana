@@ -15,11 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './PaletteLegends';
 import { ColorPaletteFlexItem } from './ColorPaletteFlexItem';
 import {
-  AVERAGE_LABEL,
-  GOOD_LABEL,
+  AN_AVERAGE_LABEL,
+  A_GOOD_LABEL,
   LESS_LABEL,
   MORE_LABEL,
-  POOR_LABEL,
+  A_POOR_LABEL,
 } from './translations';
 
 export interface Thresholds {
@@ -51,7 +51,7 @@ export function getCoreVitalTooltipMessage(
     values: {
       percentage,
       title: title?.toLowerCase(),
-      exp: good ? GOOD_LABEL : bad ? POOR_LABEL : AVERAGE_LABEL,
+      exp: good ? A_GOOD_LABEL : bad ? A_POOR_LABEL : AN_AVERAGE_LABEL,
       moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
       value: good || average ? thresholds.good : thresholds.bad,
       averageMessage: average
@@ -90,7 +90,7 @@ export function CoreVitalItem({
       <EuiFlexGroup
         gutterSize="none"
         alignItems="flexStart"
-        style={{ maxWidth: 340 }}
+        style={{ maxWidth: 350 }}
         responsive={false}
       >
         {palette.map((hexCode, ind) => (

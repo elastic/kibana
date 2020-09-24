@@ -81,6 +81,7 @@ export async function getLongTaskMetrics({
       }
     }
   });
+
   return {
     noOfLongTasks,
     sumOfLongTasks,
