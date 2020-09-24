@@ -10,6 +10,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
 
 import { renderApp, renderHeaderActions } from './';
+import { EnterpriseSearch } from './enterprise_search';
 import { AppSearch } from './app_search';
 import { WorkplaceSearch } from './workplace_search';
 
@@ -28,24 +29,42 @@ describe('renderApp', () => {
     jest.clearAllMocks();
   });
 
-  it('mounts and unmounts UI', () => {
-    const MockApp = () => <div className="hello-world">Hello world!</div>;
+  const mockContainer = kibanaDeps.params.element;
+  const MockApp = () => <div className="hello-world">Hello world!</div>;
 
+  it('mounts and unmounts UI', () => {
     const unmount = renderApp(MockApp, kibanaDeps, pluginData);
-    expect(kibanaDeps.params.element.querySelector('.hello-world')).not.toBeNull();
+    expect(mockContainer.querySelector('.hello-world')).not.toBeNull();
 
     unmount();
-    expect(kibanaDeps.params.element.innerHTML).toEqual('');
+    expect(mockContainer.innerHTML).toEqual('');
   });
 
-  it('renders AppSearch', () => {
-    renderApp(AppSearch, kibanaDeps, pluginData);
-    expect(kibanaDeps.params.element.querySelector('.setupGuide')).not.toBeNull();
-  });
+  /**
+   * Helper for automatically mounting and unmounting future tests
+   */
+  let unmount: any;
+  const mount = (App: React.FC) => {
+    unmount = renderApp(App, kibanaDeps, pluginData);
+  };
 
-  it('renders WorkplaceSearch', () => {
-    renderApp(WorkplaceSearch, kibanaDeps, pluginData);
-    expect(kibanaDeps.params.element.querySelector('.setupGuide')).not.toBeNull();
+  describe('Enterprise Search apps', () => {
+    afterEach(() => unmount());
+
+    it('renders EnterpriseSearch', () => {
+      mount(EnterpriseSearch);
+      expect(mockContainer.querySelector('.enterpriseSearchOverview')).not.toBeNull();
+    });
+
+    it('renders AppSearch', () => {
+      mount(AppSearch);
+      expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
+    });
+
+    it('renders WorkplaceSearch', () => {
+      mount(WorkplaceSearch);
+      expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
+    });
   });
 });
 

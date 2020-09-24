@@ -37,7 +37,7 @@ export const renderApp = (
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
-  const store = getContext().store as Store;
+  const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
