@@ -8,33 +8,21 @@ import { AuthenticatedUser } from '../../../security/common/model';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
 
-import { Authentications } from './authentications';
-import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
-import { KpiHosts } from './kpi_hosts';
-import { KpiNetwork } from './kpi_network';
-import { Network } from './network';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { MatrixHistogram } from './matrix_histogram';
 import { SearchTypes } from './detection_engine/signals/types';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
-  authentications: Authentications;
-  events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  matrixHistogram: MatrixHistogram;
-  network: Network;
-  kpiNetwork: KpiNetwork;
-  kpiHosts: KpiHosts;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -92,7 +80,7 @@ export interface SearchResponse<T> {
 }
 
 export interface EqlSequence<T> {
-  join_keys: SearchTypes[];
+  join_keys: [];
   events: Array<BaseHit<T>>;
 }
 
