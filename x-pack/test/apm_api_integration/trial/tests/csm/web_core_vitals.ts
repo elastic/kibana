@@ -59,13 +59,13 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
               0,
             ],
             "fcp": 1072,
-            "fid": "1.35",
+            "fid": 1352.13,
             "fidRanks": Array [
               0,
               0,
               100,
             ],
-            "lcp": "1.27",
+            "lcp": 1270.5,
             "lcpRanks": Array [
               100,
               0,
