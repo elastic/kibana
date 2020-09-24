@@ -41,6 +41,7 @@ describe('When on the Trusted Apps Page', () => {
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
     });
+    window.scrollTo = jest.fn();
   });
 
   it('should render expected set of list columns', () => {

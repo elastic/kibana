@@ -25,10 +25,12 @@ import { Document } from '../persistence/saved_object_store';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
-import { EmbeddableFactory } from './embeddable/embeddable_factory';
+import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { persistedStateToExpression } from './editor_frame/state_helpers';
+import { LensAttributeService } from '../lens_attribute_service';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -39,6 +41,7 @@ export interface EditorFrameSetupPlugins {
 export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
+  dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
 }
@@ -78,16 +81,17 @@ export class EditorFrameService {
 
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
-    plugins: EditorFrameSetupPlugins
+    plugins: EditorFrameSetupPlugins,
+    getAttributeService: () => LensAttributeService
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
     plugins.expressions.registerFunction(() => formatColumn);
 
-    const getStartServices = async () => {
+    const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
       return {
+        attributeService: getAttributeService(),
         capabilities: coreStart.application.capabilities,
-        savedObjectsClient: coreStart.savedObjects.client,
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,

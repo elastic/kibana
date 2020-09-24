@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -37,6 +36,7 @@ export interface HostsKpiUniqueIpsArgs
 interface UseHostsKpiUniqueIps {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -44,18 +44,18 @@ interface UseHostsKpiUniqueIps {
 export const useHostsKpiUniqueIps = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseHostsKpiUniqueIps): [boolean, HostsKpiUniqueIpsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] = useState<
     HostsKpiUniqueIpsRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: HostsKpiQueries.kpiUniqueIps,
     filterQuery: createFilter(filterQuery),
     id: ID,
@@ -144,7 +144,7 @@ export const useHostsKpiUniqueIps = ({
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -157,7 +157,7 @@ export const useHostsKpiUniqueIps = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);
