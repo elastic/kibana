@@ -16,7 +16,7 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
   loginAndWaitForPage(
-    `/app/csm`,
+    `/app/ux`,
     {
       from: RANGE_FROM,
       to: RANGE_TO,
