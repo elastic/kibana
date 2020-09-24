@@ -121,7 +121,7 @@ describe('Table Vis - Controller', () => {
   function getRangeVis(params?: object) {
     return ({
       type: tableVisTypeDefinition,
-      params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
+      params: Object.assign({}, tableVisTypeDefinition.visConfig?.defaults, params),
       data: {
         aggs: createAggConfigs(stubIndexPattern, [
           { type: 'count', schema: 'metric' },

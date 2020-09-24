@@ -22,7 +22,7 @@ import { VisToExpressionAst, VisualizationControllerConstructor } from '../types
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 
-export interface BaseVisTypeOptions {
+interface CommonBaseVisTypeOptions {
   name: string;
   title: string;
   description?: string;
@@ -31,7 +31,6 @@ export interface BaseVisTypeOptions {
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
   options?: Record<string, any>;
-  visualization: VisualizationControllerConstructor | undefined;
   visConfig?: Record<string, any>;
   editor?: any;
   editorConfig?: Record<string, any>;
@@ -42,8 +41,19 @@ export interface BaseVisTypeOptions {
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
-  toExpressionAst?: VisToExpressionAst;
 }
+
+interface ExpressionBaseVisTypeOptions extends CommonBaseVisTypeOptions {
+  toExpressionAst: VisToExpressionAst;
+  visualization?: undefined;
+}
+
+interface VisualizationBaseVisTypeOptions extends CommonBaseVisTypeOptions {
+  toExpressionAst?: undefined;
+  visualization: VisualizationControllerConstructor | undefined;
+}
+
+export type BaseVisTypeOptions = ExpressionBaseVisTypeOptions | VisualizationBaseVisTypeOptions;
 
 export class BaseVisType {
   name: string;
