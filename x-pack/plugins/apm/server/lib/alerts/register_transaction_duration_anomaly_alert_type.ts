@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { isEmpty } from 'lodash';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
@@ -16,9 +17,8 @@ import {
 import { AlertingPlugin } from '../../../../alerts/server';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
-import { getMLJobIds } from '../service_map/get_service_anomalies';
+import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
-import { getCommaSeparetedAggregationKey } from './utils';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -73,10 +73,7 @@ export function registerTransactionDurationAnomalyAlertType({
       const { mlAnomalySearch } = ml.mlSystemProvider(request);
       const anomalyDetectors = ml.anomalyDetectorsProvider(request);
 
-      const mlJobIds = await getMLJobIds(
-        anomalyDetectors,
-        alertParams.environment
-      );
+      const mlJobs = await getMLJobs(anomalyDetectors, alertParams.environment);
 
       const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
         (option) => option.type === alertParams.anomalySeverityType
@@ -90,7 +87,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
       const threshold = selectedOption.threshold;
 
-      if (mlJobIds.length === 0) {
+      if (mlJobs.length === 0) {
         return {};
       }
 
@@ -102,7 +99,7 @@ export function registerTransactionDurationAnomalyAlertType({
             bool: {
               filter: [
                 { term: { result_type: 'record' } },
-                { terms: { job_id: mlJobIds } },
+                { terms: { job_id: mlJobs.map((job) => job.job_id) } },
                 {
                   range: {
                     timestamp: {
@@ -116,6 +113,15 @@ export function registerTransactionDurationAnomalyAlertType({
                       {
                         term: {
                           partition_field_value: alertParams.serviceName,
+                        },
+                      },
+                    ]
+                  : []),
+                ...(alertParams.transactionType
+                  ? [
+                      {
+                        term: {
+                          by_field_value: alertParams.transactionType,
                         },
                       },
                     ]
@@ -136,10 +142,12 @@ export function registerTransactionDurationAnomalyAlertType({
                 field: 'partition_field_value',
                 size: 50,
               },
-            },
-            transaction_types: {
-              terms: {
-                field: 'by_field_value',
+              aggs: {
+                transaction_types: {
+                  terms: {
+                    field: 'by_field_value',
+                  },
+                },
               },
             },
           },
@@ -151,29 +159,59 @@ export function registerTransactionDurationAnomalyAlertType({
       )) as unknown) as {
         hits: { total: { value: number } };
         aggregations?: {
-          services: { buckets: Array<{ key: string }> };
-          transaction_types: { buckets: Array<{ key: string }> };
+          services: {
+            buckets: Array<{
+              key: string;
+              transaction_types: { buckets: Array<{ key: string }> };
+            }>;
+          };
         };
       };
 
       const hitCount = response.hits.total.value;
 
       if (hitCount > 0) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDurationAnomaly
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName:
-            alertParams.serviceName ||
-            getCommaSeparetedAggregationKey(
-              response.aggregations?.services.buckets
-            ),
-          transactionType:
-            alertParams.transactionType ||
-            getCommaSeparetedAggregationKey(
-              response.aggregations?.transaction_types.buckets
-            ),
-          environment: alertParams.environment,
+        function scheduleAction({
+          serviceName,
+          environment,
+          transactionType,
+        }: {
+          serviceName: string;
+          environment?: string;
+          transactionType?: string;
+        }) {
+          const alertInstanceName = [
+            AlertType.TransactionDurationAnomaly,
+            serviceName,
+            environment,
+            transactionType,
+          ]
+            .filter((name) => name)
+            .join('_');
+
+          const alertInstance = services.alertInstanceFactory(
+            alertInstanceName
+          );
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            serviceName,
+            environment,
+            transactionType,
+          });
+        }
+
+        mlJobs.map((job) => {
+          const environment = job.custom_settings?.job_tags?.environment;
+          response.aggregations?.services.buckets.forEach((serviceBucket) => {
+            const serviceName = serviceBucket.key as string;
+            if (isEmpty(serviceBucket.transaction_types?.buckets)) {
+              scheduleAction({ serviceName, environment });
+            } else {
+              serviceBucket.transaction_types?.buckets.forEach((typeBucket) => {
+                const transactionType = typeBucket.key as string;
+                scheduleAction({ serviceName, environment, transactionType });
+              });
+            }
+          });
         });
       }
     },

@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { isEmpty } from 'lodash';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { EventOutcome } from '../../../common/event_outcome';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -16,13 +17,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   EVENT_OUTCOME,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { apmActionVariables } from './action_variables';
-import { getCommaSeparetedAggregationKey } from './utils';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -110,8 +111,19 @@ export function registerTransactionErrorRateAlertType({
                 field: SERVICE_NAME,
                 size: 50,
               },
+              aggs: {
+                transaction_types: {
+                  terms: { field: TRANSACTION_TYPE },
+                  aggs: {
+                    environments: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
+                      },
+                    },
+                  },
+                },
+              },
             },
-            transaction_types: { terms: { field: TRANSACTION_TYPE } },
           },
         },
       };
@@ -132,26 +144,53 @@ export function registerTransactionErrorRateAlertType({
         (errornousTransactionsCount / totalTransactionCount) * 100;
 
       if (transactionErrorRate > alertParams.threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionErrorRate
-        );
+        function scheduleAction({
+          serviceName,
+          environment,
+          transactionType,
+        }: {
+          serviceName: string;
+          environment?: string;
+          transactionType?: string;
+        }) {
+          const alertInstanceName = [
+            AlertType.TransactionErrorRate,
+            serviceName,
+            transactionType,
+            environment,
+          ]
+            .filter((name) => name)
+            .join('_');
 
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName:
-            alertParams.serviceName ||
-            getCommaSeparetedAggregationKey(
-              response.aggregations?.services.buckets
-            ),
+          const alertInstance = services.alertInstanceFactory(
+            alertInstanceName
+          );
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            serviceName,
+            transactionType,
+            environment,
+            threshold: alertParams.threshold,
+            triggerValue: transactionErrorRate,
+          });
+        }
 
-          transactionType:
-            alertParams.transactionType ||
-            getCommaSeparetedAggregationKey(
-              response.aggregations?.transaction_types.buckets
-            ),
-
-          environment: alertParams.environment,
-          threshold: alertParams.threshold,
-          triggerValue: transactionErrorRate,
+        response.aggregations?.services.buckets.forEach((serviceBucket) => {
+          const serviceName = serviceBucket.key as string;
+          if (isEmpty(serviceBucket.transaction_types?.buckets)) {
+            scheduleAction({ serviceName });
+          } else {
+            serviceBucket.transaction_types.buckets.forEach((typeBucket) => {
+              const transactionType = typeBucket.key as string;
+              if (isEmpty(typeBucket.environments?.buckets)) {
+                scheduleAction({ serviceName, transactionType });
+              } else {
+                typeBucket.environments.buckets.forEach((envBucket) => {
+                  const environment = envBucket.key as string;
+                  scheduleAction({ serviceName, transactionType, environment });
+                });
+              }
+            });
+          }
         });
       }
     },
