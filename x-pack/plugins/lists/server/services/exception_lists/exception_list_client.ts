@@ -227,7 +227,6 @@ export class ExceptionListClient {
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
-      _tags: [],
       _version,
       description,
       id,

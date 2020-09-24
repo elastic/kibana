@@ -133,7 +133,6 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const emptyResponse: FoundExceptionListItemSchema = {
         data: [
           {
-            _tags: ['os:windows'],
             _version: undefined,
             comments: [],
             created_at: '2020-09-21T19:43:48.240Z',
@@ -165,6 +164,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             meta: undefined,
             name: 'test',
             namespace_type: 'agnostic',
+            os_types: ['windows'],
             tags: [],
             tie_breaker_id: '1',
             type: 'simple',
@@ -288,7 +288,6 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const request = createPostRequest();
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
         comments: [],
         description: 'this one is ok',
         entries: [
@@ -304,6 +303,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         meta: undefined,
         name: 'Some Anti-Virus App',
         namespaceType: 'agnostic',
+        os_types: ['windows'],
         tags: [],
         type: 'simple',
       });

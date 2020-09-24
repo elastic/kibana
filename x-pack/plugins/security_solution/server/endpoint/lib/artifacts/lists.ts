@@ -88,7 +88,7 @@ export async function getFullEndpointExceptionList(
     const response = await eClient.findExceptionListItem({
       listId,
       namespaceType: 'agnostic',
-      filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
+      filter: `exception-list-agnostic.attributes.os_types:\"${os}\"`,
       perPage: 100,
       page,
       sortField: 'created_at',

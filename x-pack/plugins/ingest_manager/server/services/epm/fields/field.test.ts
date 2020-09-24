@@ -547,6 +547,4 @@ describe('processFields', () => {
     ];
     expect(processFields(nested)).toEqual(nestedExpected);
   });
-
-  test('handles normalizer for keyword types', () => {});
 });

@@ -69,7 +69,6 @@ export const createExceptionListItem = async ({
     user,
   });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags: [],
     comments: transformedComments,
     created_at: dateNow,
     created_by: user,

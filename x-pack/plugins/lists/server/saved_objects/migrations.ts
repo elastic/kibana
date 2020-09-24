@@ -39,9 +39,13 @@ const reduceOsTypes = (acc: string[], tag: string): string[] => {
   return [...acc];
 };
 
+export type OldExceptionListSoSchema = ExceptionListSoSchema & {
+  _tags: string[];
+};
+
 export const migrations = {
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<ExceptionListSoSchema>
+    doc: SavedObjectUnsanitizedDoc<OldExceptionListSoSchema>
   ): SavedObjectSanitizedDoc<ExceptionListSoSchema> => ({
     ...doc,
     ...{

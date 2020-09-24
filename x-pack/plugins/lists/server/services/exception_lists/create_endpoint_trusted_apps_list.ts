@@ -43,7 +43,6 @@ export const createEndpointTrustedAppsList = async ({
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
       {
-        _tags: [],
         comments: undefined,
         created_at: dateNow,
         created_by: user,

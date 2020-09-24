@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  getOperatingSystems,
   getTagsInclude,
   getFormattedComments,
   filterExceptionItems,
@@ -49,6 +48,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   EntriesArray,
+  OsTypeArray,
 } from '../../../../../lists/common/schemas';
 import { IIndexPattern } from 'src/plugins/data/common';
 
@@ -183,58 +183,14 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#getOperatingSystems', () => {
-    test('it returns null if no operating system tag specified', () => {
-      const result = getOperatingSystems(['some tag', 'some other tag']);
-
-      expect(result).toEqual([]);
-    });
-
-    test('it returns null if operating system tag malformed', () => {
-      const result = getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag']);
-
-      expect(result).toEqual([]);
-    });
-
-    test('it returns operating systems if space included in os tag', () => {
-      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag']);
-      expect(result).toEqual(['macos']);
-    });
-
-    test('it returns operating systems if multiple os tags specified', () => {
-      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows']);
-      expect(result).toEqual(['macos', 'windows']);
-    });
-  });
-
   describe('#formatOperatingSystems', () => {
     test('it returns null if no operating system tag specified', () => {
-      const result = formatOperatingSystems(getOperatingSystems(['some tag', 'some other tag']));
-
+      const result = formatOperatingSystems(['some os', 'some other os']);
       expect(result).toEqual('');
     });
 
-    test('it returns null if operating system tag malformed', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag'])
-      );
-
-      expect(result).toEqual('');
-    });
-
-    test('it returns formatted operating systems if space included in os tag', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'os: macos', 'some other tag'])
-      );
-
-      expect(result).toEqual('macOS');
-    });
-
-    test('it returns formatted operating systems if multiple os tags specified', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows'])
-      );
-
+    test('it returns formatted operating systems if multiple specified', () => {
+      const result = formatOperatingSystems(['some tag', 'macos', 'some other tag', 'windows']);
       expect(result).toEqual('macOS, Windows');
     });
   });
@@ -381,7 +337,6 @@ describe('Exception helpers', () => {
 
     test('it removes `temporaryId` from items', () => {
       const { meta, ...rest } = getNewExceptionItem({
-        listType: 'detection',
         listId: '123',
         namespaceType: 'single',
         ruleName: 'rule name',
@@ -397,7 +352,6 @@ describe('Exception helpers', () => {
       const payload = getExceptionListItemSchemaMock();
       const result = formatExceptionItemForUpdate(payload);
       const expected = {
-        _tags: ['endpoint', 'process', 'malware', 'os:linux'],
         comments: [],
         description: 'some description',
         entries: ENTRIES,
@@ -486,14 +440,14 @@ describe('Exception helpers', () => {
   });
 
   describe('#enrichExceptionItemsWithOS', () => {
-    test('it should add an os tag to an exception item', () => {
+    test('it should add an os to an exception item', () => {
       const payload = [getExceptionListItemSchemaMock()];
-      const osTypes = ['windows'];
+      const osTypes: OsTypeArray = ['windows'];
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows'],
+          os_types: ['windows'],
         },
       ];
       expect(result).toEqual(expected);
@@ -501,16 +455,16 @@ describe('Exception helpers', () => {
 
     test('it should add multiple os tags to all exception items', () => {
       const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
-      const osTypes = ['windows', 'macos'];
+      const osTypes: OsTypeArray = ['windows', 'macos'];
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
-          ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
+          ...getExceptionListItemSchemaMock,
+          os_types: ['windows', 'macos'],
         },
         {
-          ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
+          ...getExceptionListItemSchemaMock,
+          os_types: ['windows', 'macos'],
         },
       ];
       expect(result).toEqual(expected);
@@ -518,19 +472,20 @@ describe('Exception helpers', () => {
 
     test('it should add os tag to all exception items without duplication', () => {
       const payload = [
-        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux', 'os:windows'] },
-        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux'] },
+        getExceptionListItemSchemaMock(),
+        { ...getExceptionListItemSchemaMock(), os_types: ['linux', 'windows'] as OsTypeArray },
+        { ...getExceptionListItemSchemaMock(), os_types: ['linux'] as OsTypeArray },
       ];
-      const osTypes = ['windows'];
+      const osTypes: OsTypeArray = ['windows'];
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: ['os:linux', 'os:windows'],
+          os_types: ['linux', 'windows'],
         },
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: ['os:linux', 'os:windows'],
+          os_types: ['linux', 'windows'],
         },
       ];
       expect(result).toEqual(expected);
