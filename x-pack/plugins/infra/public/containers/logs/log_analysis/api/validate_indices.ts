@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
@@ -20,10 +20,7 @@ interface RequestArgs {
   fields: ValidationIndicesFieldSpecification[];
 }
 
-export const callValidateIndicesAPI = async (
-  requestArgs: RequestArgs,
-  fetch: HttpSetup['fetch']
-) => {
+export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
   const { indices, fields } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',

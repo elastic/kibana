@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   bucketSpan,
   DatasetFilter,
@@ -42,7 +42,7 @@ const getJobIds = (spaceId: string, sourceId: string) =>
     {} as Record<LogEntryRateJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpSetup['fetch']) => {
+const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
   const response = await callJobsSummaryAPI(
     { spaceId, sourceId, jobTypes: logEntryRateJobTypes },
     fetch
@@ -52,7 +52,7 @@ const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpSetup
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
-const getModuleDefinition = async (fetch: HttpSetup['fetch']) => {
+const getModuleDefinition = async (fetch: HttpHandler) => {
   return await callGetMlModuleAPI(moduleId, fetch);
 };
 
@@ -61,7 +61,7 @@ const setUpModule = async (
   end: number | undefined,
   datasetFilter: DatasetFilter,
   { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
@@ -112,14 +112,14 @@ const setUpModule = async (
   );
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpSetup['fetch']) => {
+const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryRateJobTypes, fetch);
 };
 
 const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   return await callValidateIndicesAPI(
     {
@@ -144,7 +144,7 @@ const validateSetupDatasets = async (
   timestampField: string,
   startTime: number,
   endTime: number,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };

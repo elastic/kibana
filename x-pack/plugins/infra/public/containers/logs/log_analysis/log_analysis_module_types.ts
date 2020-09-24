@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -27,32 +27,32 @@ export interface ModuleDescriptor<JobType extends string> {
   getJobSummary: (
     spaceId: string,
     sourceId: string,
-    fetch: HttpSetup['fetch']
+    fetch: HttpHandler
   ) => Promise<FetchJobStatusResponsePayload>;
-  getModuleDefinition: (fetch: HttpSetup['fetch']) => Promise<GetMlModuleResponsePayload>;
+  getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
     start: number | undefined,
     end: number | undefined,
     datasetFilter: DatasetFilter,
     sourceConfiguration: ModuleSourceConfiguration,
-    fetch: HttpSetup['fetch']
+    fetch: HttpHandler
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (
     spaceId: string,
     sourceId: string,
-    fetch: HttpSetup['fetch']
+    fetch: HttpHandler
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
     timestampField: string,
-    fetch: HttpSetup['fetch']
+    fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
     timestampField: string,
     startTime: number,
     endTime: number,
-    fetch: HttpSetup['fetch']
+    fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
@@ -16,7 +16,7 @@ import {
 
 export const fetchLogSummary = async (
   requestArgs: LogEntriesSummaryRequest,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const response = await fetch(LOG_ENTRIES_SUMMARY_PATH, {
     method: 'POST',

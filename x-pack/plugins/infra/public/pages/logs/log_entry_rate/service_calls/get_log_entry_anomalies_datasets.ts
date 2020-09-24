@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
@@ -20,7 +20,7 @@ interface RequestArgs {
 
 export const callGetLogEntryAnomaliesDatasetsAPI = async (
   requestArgs: RequestArgs,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const { sourceId, startTime, endTime } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH, {

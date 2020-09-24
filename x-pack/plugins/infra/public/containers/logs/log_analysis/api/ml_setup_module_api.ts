@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -22,7 +22,7 @@ interface RequestArgs {
   query?: object;
 }
 
-export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpSetup['fetch']) => {
+export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
   const {
     moduleId,
     start,

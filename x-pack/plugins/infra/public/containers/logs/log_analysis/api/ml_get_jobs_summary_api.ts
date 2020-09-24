@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -18,7 +18,7 @@ interface RequestArgs<JobType extends string> {
 
 export const callJobsSummaryAPI = async <JobType extends string>(
   requestArgs: RequestArgs<JobType>,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const { spaceId, sourceId, jobTypes } = requestArgs;
   const response = await fetch('/api/ml/jobs/jobs_summary', {

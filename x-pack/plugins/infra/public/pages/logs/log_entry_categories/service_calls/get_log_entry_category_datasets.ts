@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import {
   getLogEntryCategoryDatasetsRequestPayloadRT,
@@ -21,7 +21,7 @@ interface RequestArgs {
 
 export const callGetLogEntryCategoryDatasetsAPI = async (
   requestArgs: RequestArgs,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const { sourceId, startTime, endTime } = requestArgs;
 

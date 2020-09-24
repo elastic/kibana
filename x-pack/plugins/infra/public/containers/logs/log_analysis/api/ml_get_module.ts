@@ -5,12 +5,12 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import { jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpSetup['fetch']) => {
+export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpHandler) => {
   const response = await fetch(`/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
   });

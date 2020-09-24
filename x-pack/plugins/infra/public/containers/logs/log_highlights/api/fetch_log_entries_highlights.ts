@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
@@ -17,7 +17,7 @@ import {
 
 export const fetchLogEntriesHighlights = async (
   requestArgs: LogEntriesHighlightsRequest,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const response = await fetch(LOG_ENTRIES_HIGHLIGHTS_PATH, {
     method: 'POST',

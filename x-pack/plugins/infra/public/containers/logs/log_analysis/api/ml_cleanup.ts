@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -18,7 +18,7 @@ interface DeleteJobsRequestArgs<JobType extends string> {
 
 export const callDeleteJobs = async <JobType extends string>(
   requestArgs: DeleteJobsRequestArgs<JobType>,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const { spaceId, sourceId, jobTypes } = requestArgs;
 
@@ -35,7 +35,7 @@ export const callDeleteJobs = async <JobType extends string>(
   return decodeOrThrow(deleteJobsResponsePayloadRT)(deleteJobsResponse);
 };
 
-export const callGetJobDeletionTasks = async (fetch: HttpSetup['fetch']) => {
+export const callGetJobDeletionTasks = async (fetch: HttpHandler) => {
   const jobDeletionTasksResponse = await fetch('/api/ml/jobs/deleting_jobs_tasks');
 
   return decodeOrThrow(getJobDeletionTasksResponsePayloadRT)(jobDeletionTasksResponse);
@@ -49,7 +49,7 @@ interface StopDatafeedsRequestArgs<JobType extends string> {
 
 export const callStopDatafeeds = async <JobType extends string>(
   requestArgs: StopDatafeedsRequestArgs<JobType>,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const { spaceId, sourceId, jobTypes } = requestArgs;
 

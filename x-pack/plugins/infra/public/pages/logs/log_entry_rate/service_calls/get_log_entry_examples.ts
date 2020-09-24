@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 
 import {
   getLogEntryExamplesRequestPayloadRT,
@@ -22,10 +22,7 @@ interface RequestArgs {
   categoryId?: string;
 }
 
-export const callGetLogEntryExamplesAPI = async (
-  requestArgs: RequestArgs,
-  fetch: HttpSetup['fetch']
-) => {
+export const callGetLogEntryExamplesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
   const { sourceId, startTime, endTime, dataset, exampleCount, categoryId } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH, {
     method: 'POST',
