@@ -10,7 +10,6 @@ import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
@@ -24,7 +23,11 @@ import {
   NetworkTopCountriesStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -45,6 +48,7 @@ export interface NetworkTopCountriesArgs {
 interface UseNetworkTopCountries {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,6 +60,7 @@ export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexNames,
   skip,
   startDate,
   type,
@@ -65,14 +70,13 @@ export const useNetworkTopCountries = ({
     (state: State) => getTopCountriesSelector(state, type, flowTarget),
     shallowEqual
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkTopCountriesRequest, setHostRequest] = useState<NetworkTopCountriesRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.topCountries,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -129,7 +133,7 @@ export const useNetworkTopCountries = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkTopCountriesResponse((prevResponse) => ({
@@ -142,7 +146,7 @@ export const useNetworkTopCountries = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -176,7 +180,7 @@ export const useNetworkTopCountries = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -191,7 +195,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

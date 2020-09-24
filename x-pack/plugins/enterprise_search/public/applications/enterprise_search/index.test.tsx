@@ -4,47 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import '../__mocks__/shallow_usecontext.mock';
 
+import React, { useContext } from 'react';
+import { shallow } from 'enzyme';
 import { EuiPage } from '@elastic/eui';
 
+import '../__mocks__/kea.mock';
+import { useValues } from 'kea';
+
 import { EnterpriseSearch } from './';
-import { ProductCard } from './components/product_card';
+import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
+import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {
-  it('renders the overview page and product cards', () => {
-    const wrapper = shallow(
-      <EnterpriseSearch access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: true }} />
-    );
-
-    expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
-    expect(wrapper.find(ProductCard)).toHaveLength(2);
+  beforeEach(() => {
+    (useValues as jest.Mock).mockReturnValue({ errorConnecting: false });
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
   });
 
-  describe('access checks', () => {
-    it('does not render the App Search card if the user does not have access to AS', () => {
-      const wrapper = shallow(
-        <EnterpriseSearch access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }} />
-      );
+  it('renders the Setup Guide and Product Selector', () => {
+    const wrapper = shallow(<EnterpriseSearch />);
 
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('workplaceSearch');
-    });
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+    expect(wrapper.find(ProductSelector)).toHaveLength(1);
+  });
 
-    it('does not render the Workplace Search card if the user does not have access to WS', () => {
-      const wrapper = shallow(
-        <EnterpriseSearch access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: false }} />
-      );
+  it('renders the error connecting prompt when host is not configured', () => {
+    (useValues as jest.Mock).mockReturnValueOnce({ errorConnecting: true });
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
 
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('appSearch');
-    });
+    const wrapper = shallow(<EnterpriseSearch />);
 
-    it('does not render any cards if the user does not have access', () => {
-      const wrapper = shallow(<EnterpriseSearch />);
-
-      expect(wrapper.find(ProductCard)).toHaveLength(0);
-    });
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+    expect(wrapper.find(EuiPage)).toHaveLength(0);
+    expect(wrapper.find(ProductSelector)).toHaveLength(0);
   });
 });
