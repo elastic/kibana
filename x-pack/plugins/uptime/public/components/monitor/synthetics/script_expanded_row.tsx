@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, FC, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SyntheticsPing } from '../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
@@ -89,7 +89,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
 };
 
 const StepComponent: FC<{
-  step: SyntheticsPing;
+  step: Ping;
   index: number;
   fetchScreenshot: (stepIndex: number) => void;
 }> = ({ step, index, fetchScreenshot }) => {
