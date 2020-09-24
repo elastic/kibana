@@ -376,16 +376,17 @@ export function LayerPanel(
                       }
                     }}
                   >
-                    <DimensionContainer
-                      dimensionContainerState={dimensionContainerState}
-                      setDimensionContainerState={setDimensionContainerState}
-                      groups={groups}
-                      accessor={newId}
-                      groupId={group.groupId}
-                      trigger={
-                        <div className="lnsLayerPanel__triggerLink">
+                    <div className="lnsLayerPanel__triggerLink">
+                      <DimensionContainer
+                        dimensionContainerState={dimensionContainerState}
+                        setDimensionContainerState={setDimensionContainerState}
+                        groups={groups}
+                        accessor={newId}
+                        groupId={group.groupId}
+                        trigger={
                           <EuiButtonEmpty
                             iconType="plusInCircleFilled"
+                            color="text"
                             data-test-subj="lns-empty-dimension"
                             aria-label={i18n.translate('xpack.lens.configure.addConfig', {
                               defaultMessage: 'Add a configuration',
@@ -408,48 +409,48 @@ export function LayerPanel(
                           >
                             <FormattedMessage
                               id="xpack.lens.configure.emptyConfig"
-                              defaultMessage="Drop a field here"
+                              defaultMessage="Drop a field or click to add"
                             />
                           </EuiButtonEmpty>
-                        </div>
-                      }
-                      panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                        defaultMessage: '{groupLabel} configuration',
-                        values: {
-                          groupLabel: group.groupLabel,
-                        },
-                      })}
-                      panel={
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: newId,
-                            filterOperations: group.filterOperations,
-                            suggestedPriority: group.suggestedPriority,
+                        }
+                        panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                          defaultMessage: '{groupLabel} configuration',
+                          values: {
+                            groupLabel: group.groupLabel,
+                          },
+                        })}
+                        panel={
+                          <NativeRenderer
+                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                            nativeProps={{
+                              ...layerDatasourceConfigProps,
+                              core: props.core,
+                              columnId: newId,
+                              filterOperations: group.filterOperations,
+                              suggestedPriority: group.suggestedPriority,
 
-                            setState: (newState: unknown) => {
-                              props.updateAll(
-                                datasourceId,
-                                newState,
-                                activeVisualization.setDimension({
-                                  layerId,
-                                  groupId: group.groupId,
-                                  columnId: newId,
-                                  prevState: props.visualizationState,
-                                })
-                              );
-                              setDimensionContainerState({
-                                isOpen: true,
-                                openId: newId,
-                                addingToGroupId: null, // clear now that dimension exists
-                              });
-                            },
-                          }}
-                        />
-                      }
-                    />
+                              setState: (newState: unknown) => {
+                                props.updateAll(
+                                  datasourceId,
+                                  newState,
+                                  activeVisualization.setDimension({
+                                    layerId,
+                                    groupId: group.groupId,
+                                    columnId: newId,
+                                    prevState: props.visualizationState,
+                                  })
+                                );
+                                setDimensionContainerState({
+                                  isOpen: true,
+                                  openId: newId,
+                                  addingToGroupId: null, // clear now that dimension exists
+                                });
+                              },
+                            }}
+                          />
+                        }
+                      />
+                    </div>
                   </DragDrop>
                 ) : null}
               </>

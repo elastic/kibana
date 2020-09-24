@@ -42,13 +42,14 @@
   // Disable the coloring of the DnD for this element as we'll
   // Color the whole panel instead
   background-color: transparent !important; // sass-lint:disable-line no-important
+  border: none !important; // sass-lint:disable-line no-important
 }
 
 .lnsExpressionRenderer {
   // position: relative;
 
   .lnsDragDrop-isDropTarget & {
-    transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
+    transition: filter $euiAnimSpeedFast ease-in-out, opacity $euiAnimSpeedFast ease-in-out;
     filter: blur($euiSizeXS);
     opacity: .25;
   }
@@ -63,27 +64,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color $euiAnimSpeedNormal ease-in-out;
+  transition: background-color $euiAnimSpeedFast ease-in-out;
 
   .lnsDragDrop-isDropTarget & {
-    background-color: transparentize($euiColorSecondary, .9);
+    @include lnsDroppable;
+    @include lnsDroppableActive;
 
     p {
-      transition: filter $euiAnimSpeedNormal ease-in-out;
+      transition: filter $euiAnimSpeedFast ease-in-out;
       filter: blur(5px);
     }
   }
 
   .lnsDragDrop-isActiveDropTarget & {
-    background-color: transparentize($euiColorSecondary, .75);
+    @include lnsDroppableActiveHover;
 
     .lnsDropIllustration__hand {
-      animation: pulseArrowContinuous 1.5s ease-in-out 0s infinite normal forwards;
+      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
-  }
-
-  &.lnsWorkspacePanel__emptyContent-onTop p {
-    display: none;
   }
 }
 
@@ -109,10 +107,10 @@
 }
 
 .lnsDropIllustration__hand {
-  animation: pulseArrow 5s ease-in-out 0s infinite normal forwards;
+  animation: lnsWorkspacePanel__illustrationPulseArrow 5s ease-in-out 0s infinite normal forwards;
 }
 
-@keyframes pulseArrow {
+@keyframes lnsWorkspacePanel__illustrationPulseArrow {
   0% { transform: translateY(0%); }
   65% { transform: translateY(0%); }
   72% { transform: translateY(10%); }
@@ -121,7 +119,7 @@
   95% { transform: translateY(0); }
 }
 
-@keyframes pulseArrowContinuous {
+@keyframes lnsWorkspacePanel__illustrationPulseContinuous {
   0% { transform: translateY(10%); }
   25% { transform: translateY(15%); }
   50% { transform: translateY(10%); }

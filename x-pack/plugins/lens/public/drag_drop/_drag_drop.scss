@@ -1,19 +1,15 @@
 .lnsDragDrop {
-  border: 1px dashed $euiColorLightShade;
-  border-radius: $euiBorderRadius;
+  transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
 }
 
+// Draggable item
 .lnsDragDrop-isDraggable {
-  @include euiSlightShadow;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-  border: 1px solid transparent;
+  @include lnsDraggable;
+  @include lnsDragDropHover;
 
-  &:hover {
-    border: 1px dashed $euiColorMediumShade;
-
-    & {
-      cursor: grab;
-    }
+  // Include a possible nested button like when using FieldButton
+  > button {
+    cursor: grab;
   }
 
   &:focus {
@@ -21,29 +17,23 @@
   }
 }
 
+// Drop area
+.lnsDragDrop-isDroppable {
+  @include lnsDroppable;
+  @include lnsDragDropHover;
+}
 
+// Drop area when there's an item being dragged
+.lnsDragDrop-isDropTarget {
+  @include lnsDroppableActive;
+}
 
+// Drop area while hovering with item
+.lnsDragDrop-isActiveDropTarget {
+  @include lnsDroppableActiveHover;
+}
 
-
-
-
-
+// Drop area that is not allowed for current item
 .lnsDragDrop-isNotDroppable {
-  opacity: .5;
+  @include lnsDroppableNotAllowed;
 }
-
-// Fix specificity by chaining classes
-
-.lnsDragDrop.lnsDragDrop-isDropTarget {
-  background-color: transparentize($euiColorSecondary, .9);
-}
-
-.lnsDragDrop.lnsDragDrop-isActiveDropTarget {
-  background-color: transparentize($euiColorSecondary, .75);
-}
-
-.lnsDragDrop-isDragging {
-  opacity: .25;
-}
-
-:draggable {}
