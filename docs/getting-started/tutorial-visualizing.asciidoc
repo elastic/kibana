@@ -182,16 +182,6 @@ image::images/tutorial-dashboard.png[]
 
 Now that you have the basics, you're ready to start exploring your own system data with {kib}.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-* To learn about searching and filtering your data, refer to {kibana-ref}/discover.html[Discover].
-* To learn about the visualization types {kib} has to offer, refer to <<types-of-panels, Types of panels>>.
-* To learn about configuring {kib} and managing your saved objects, refer to {kibana-ref}/management.html[Management].
-* To learn about the interactive console you can use to submit REST requests to {es}, refer to {kibana-ref}/console-kibana.html[Console].
-<<<<<<< HEAD
-=======
-=======
->>>>>>> b6b66f87729... Removed blocks
 * To add your own data to {kib}, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
 
 * To search and filter your data, refer to {kibana-ref}/discover.html[Discover].
@@ -200,15 +190,4 @@ Now that you have the basics, you're ready to start exploring your own system da
 
 * To create maps that you can add to your dashboards, refer to <<maps,Maps>>.
 
-<<<<<<< HEAD
 * To create presentations of your live data, refer to <canvas,Canvas>>.
-<<<<<<< HEAD
-
->>>>>>> d2bb346d77c... Review comments
-=======
->>>>>>> b6b66f87729... Removed blocks
-=======
-* To create presentations of your live data, refer to <<canvas,Canvas>>.
->>>>>>> c610d6c4719... Update docs/getting-started/tutorial-visualizing.asciidoc
-=======
->>>>>>> dcc824da204... Update docs/getting-started/tutorial-visualizing.asciidoc
