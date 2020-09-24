@@ -120,8 +120,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'csm',
-      title: 'Client Side Monitoring',
+      id: 'ux',
+      title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
