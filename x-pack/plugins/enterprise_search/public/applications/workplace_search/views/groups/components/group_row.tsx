@@ -9,7 +9,7 @@ import moment from 'moment';
 import { Link } from 'react-router-dom';
 import { useValues } from 'kea';
 
-import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
 
@@ -71,7 +71,9 @@ export const GroupRow: React.FC<IGroup> = ({
       )}
       <EuiTableRowCell>
         <strong>
-          <Link to={getGroupPath(id)}>Manage</Link>
+          <Link to={getGroupPath(id)}>
+            <EuiIcon type="pencil" />
+          </Link>
         </strong>
       </EuiTableRowCell>
     </EuiTableRow>
