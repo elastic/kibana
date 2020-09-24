@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
+            // @ts-expect-error
             expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
             );
@@ -93,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
+            // @ts-expect-error
             expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
             );
