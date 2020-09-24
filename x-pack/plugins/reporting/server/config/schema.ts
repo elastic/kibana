@@ -46,7 +46,7 @@ const RulesSchema = schema.object({
 
 const CaptureSchema = schema.object({
   timeouts: schema.object({
-    openUrl: schema.number({ defaultValue: 30000 }),
+    openUrl: schema.number({ defaultValue: 60000 }),
     waitForElements: schema.number({ defaultValue: 30000 }),
     renderComplete: schema.number({ defaultValue: 30000 }),
   }),

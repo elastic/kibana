@@ -1,10 +1,10 @@
 [[external-plugin-functional-tests]]
-=== Functional Tests for Plugins outside the {kib} repo
+== Functional Tests for Plugins outside the {kib} repo
 
 Plugins use the `FunctionalTestRunner` by running it out of the {kib} repo. Ensure that your {kib} Development Environment is setup properly before continuing.
 
-[float]
-==== Writing your own configuration
+[discrete]
+=== Writing your own configuration
 
 Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {kib}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
 
@@ -82,8 +82,8 @@ From the root of your repo you should now be able to run the `FunctionalTestRunn
 node ../../kibana/scripts/functional_test_runner
 -----------
 
-[float]
-==== Using esArchiver
+[discrete]
+=== Using esArchiver
 
 We're working on documentation for this, but for now the best place to look is the original {kib-repo}/issues/10359[pull request].
 

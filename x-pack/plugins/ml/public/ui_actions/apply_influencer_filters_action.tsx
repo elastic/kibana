@@ -29,7 +29,7 @@ export function createApplyInfluencerFiltersAction(
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.applyInfluencersFiltersTitle', {
-        defaultMessage: 'Filer for value',
+        defaultMessage: 'Filter for value',
       });
     },
     async execute({ data }: SwimLaneDrilldownContext) {
