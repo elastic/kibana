@@ -20,7 +20,7 @@ import {
 } from '../../../../utils/fixtures/metrics_explorer';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { SourceQuery } from '../../../../../common/graphql/types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { HttpHandler } from 'kibana/public';
 
 const mockedFetch = jest.fn();
