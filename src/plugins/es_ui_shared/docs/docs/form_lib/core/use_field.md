@@ -329,7 +329,7 @@ If you provide a `component` you can pass here any prop you want to forward to t
 **Type:** `boolean`
 **Default:** true
 
-By default if you don't provide a `defaultValue` prop on the component, it will try to read the default value on the form `defaultValue` object. If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
+By default if you don't provide a `defaultValue` prop to `<UseField />`, it will try to read the default value on [the form `defaultValue` object](use_form_hook.md#defaultvalue). If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
 
 ### onChange
 

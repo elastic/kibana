@@ -45,7 +45,9 @@ const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
 
 **Type:** `Record<string, any>`
 
-The `defaultValue` is an object that you provide to give the initial value for your fields. There are multiple places where you can define the default value of a field, [read the difference between them here](default_value.md).
+The `defaultValue` is an object that you provide to give the initial value for your fields. 
+
+**Note:** There are multiple places where you can define the default value of a field, [read the difference between them here](default_value.md).
 
 ```js
 const fetchedData = { firstName: 'John' };
