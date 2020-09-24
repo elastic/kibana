@@ -13,6 +13,8 @@ import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { allEvents, defaultOptions } from './helpers';
 import { TopN } from './top_n';
+import { TimelineEventsType } from '../../../../common/types/timeline';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -103,29 +105,34 @@ describe('TopN', () => {
 
   const query = { query: '', language: 'kuery' };
 
+  const toggleTopN = jest.fn();
+  const eventTypes: { [id: string]: TimelineEventsType } = {
+    raw: 'raw',
+    alert: 'alert',
+    all: 'all',
+  };
+  let testProps = {
+    defaultView: eventTypes.raw,
+    field,
+    filters: [],
+    from: '2020-04-14T00:31:47.695Z',
+    indexNames: [],
+    indexPattern: mockIndexPattern,
+    options: defaultOptions,
+    query,
+    setAbsoluteRangeDatePicker,
+    setAbsoluteRangeDatePickerTarget: 'global' as InputsModelId,
+    setQuery: jest.fn(),
+    to: '2020-04-15T00:31:47.695Z',
+    toggleTopN,
+    value,
+  };
   describe('common functionality', () => {
-    let toggleTopN: () => void;
     let wrapper: ReactWrapper;
-
     beforeEach(() => {
-      toggleTopN = jest.fn();
       wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="raw"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
     });
@@ -143,28 +150,12 @@ describe('TopN', () => {
   });
 
   describe('events view', () => {
-    let toggleTopN: () => void;
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      toggleTopN = jest.fn();
       wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="raw"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
     });
@@ -181,37 +172,25 @@ describe('TopN', () => {
   });
 
   describe('alerts view', () => {
-    let toggleTopN: () => void;
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      toggleTopN = jest.fn();
+      testProps = {
+        ...testProps,
+        defaultView: eventTypes.alert,
+      };
       wrapper = mount(
         <TestProviders>
-          <TopN
-            defaultView="alert"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={defaultOptions}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={toggleTopN}
-            value={value}
-          />
+          <TopN {...testProps} />
         </TestProviders>
       );
     });
 
-    test(`it renders SignalsByCategory when defaultView is 'signal'`, () => {
+    test(`it renders SignalsByCategory when defaultView is 'alert'`, () => {
       expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(true);
     });
 
-    test(`it does NOT render EventsByDataset when defaultView is 'signal'`, () => {
+    test(`it does NOT render EventsByDataset when defaultView is 'alert'`, () => {
       expect(
         wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
       ).toBe(false);
@@ -222,24 +201,14 @@ describe('TopN', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
+      testProps = {
+        ...testProps,
+        defaultView: eventTypes.all,
+        options: allEvents,
+      };
       wrapper = mount(
         <TestProviders>
-          <TopN
-            combinedQueries={JSON.stringify(combinedQueries)}
-            defaultView="all"
-            field={field}
-            filters={[]}
-            from={'2020-04-14T00:31:47.695Z'}
-            indexPattern={mockIndexPattern}
-            options={allEvents}
-            query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-            setAbsoluteRangeDatePickerTarget="global"
-            setQuery={jest.fn()}
-            to={'2020-04-15T00:31:47.695Z'}
-            toggleTopN={jest.fn()}
-            value={value}
-          />
+          <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
         </TestProviders>
       );
     });
