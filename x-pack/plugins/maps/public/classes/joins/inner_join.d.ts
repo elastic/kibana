@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GeoJsonProperties } from 'geojson';
+import { Feature, GeoJsonProperties } from 'geojson';
 import { IESTermSource } from '../sources/es_term_source';
 import { IJoin, PropertiesMap } from './join';
 import { JoinDescriptor } from '../../../common/descriptor_types';

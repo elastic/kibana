@@ -38,7 +38,7 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  sourceQuery: MapQuery;
+  sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };
 

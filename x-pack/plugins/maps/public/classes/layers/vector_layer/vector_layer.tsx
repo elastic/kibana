@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_REQUEST_ID,
@@ -46,15 +46,16 @@ import {
 import {
   DynamicStylePropertyOptions,
   MapFilters,
+  MapQuery,
   VectorLayerDescriptor,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { IVectorSource, VectorSource } from '../../sources/vector_source';
+import { IVectorSource } from '../../sources/vector_source';
 import { ILayer } from '../layer';
 import { IJoin, PropertiesMap } from '../../joins/join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 interface SourceResult {
@@ -115,7 +116,11 @@ export class VectorLayer extends AbstractLayer {
       source,
     });
     this._joins = joins;
-    this._style = new VectorStyle(layerDescriptor.style, source, this as IVectorLayer);
+    this._style = new VectorStyle(layerDescriptor.style, source, this);
+  }
+
+  getSource(): IVectorSource {
+    return super.getSource() as IVectorSource;
   }
 
   destroy() {
@@ -246,7 +251,7 @@ export class VectorLayer extends AbstractLayer {
     } finally {
       // Use stopLoading callback instead of onLoadError callback.
       // Function is loading bounds and not feature data.
-      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds, boundsFilters);
+      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds ? bounds : {}, boundsFilters);
     }
     return bounds;
   }
@@ -363,7 +368,11 @@ export class VectorLayer extends AbstractLayer {
     return await Promise.all(joinSyncs);
   }
 
-  _getSearchFilters(dataFilters: MapFilters, source: IVectorSource, style: IVectorStyle) {
+  _getSearchFilters(
+    dataFilters: MapFilters,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): VectorSourceRequestMeta {
     const fieldNames = [
       ...source.getFieldNames(),
       ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
@@ -374,7 +383,7 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
-      sourceQuery: this.getQuery(),
+      sourceQuery: this.getQuery() as MapQuery,
       applyGlobalQuery: source.getApplyGlobalQuery(),
       sourceMeta: source.getSyncMeta(),
     };
@@ -683,7 +692,7 @@ export class VectorLayer extends AbstractLayer {
     await this._syncData(
       syncContext,
       this.getSource() as IVectorSource,
-      this.getCurrentStyle() as VectorSource
+      this.getCurrentStyle() as IVectorStyle
     );
   }
 
@@ -1073,8 +1082,9 @@ export class VectorLayer extends AbstractLayer {
       return null;
     }
 
-    return featureCollection.features.find((feature) => {
+    const targetFeature = featureCollection.features.find((feature) => {
       return feature.properties?.[FEATURE_ID_PROPERTY_NAME] === id;
     });
+    return targetFeature ? targetFeature : null;
   }
 }

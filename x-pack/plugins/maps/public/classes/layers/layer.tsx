@@ -255,10 +255,7 @@ export class AbstractLayer implements ILayer {
   }
 
   getStyleForEditing(): IStyle {
-    if (!this._style) {
-      throw new Error('this._style is not provided');
-    }
-    return this._style;
+    return this.getStyle();
   }
 
   getStyle() {
@@ -266,6 +263,10 @@ export class AbstractLayer implements ILayer {
       throw new Error('this._style is not provided');
     }
     return this._style;
+  }
+
+  getCurrentStyle(): IStyle {
+    return this.getStyle();
   }
 
   getLabel(): string {
@@ -414,10 +415,6 @@ export class AbstractLayer implements ILayer {
 
   getQuery(): Query | undefined {
     return this._descriptor.query;
-  }
-
-  getCurrentStyle(): IStyle {
-    return this._style;
   }
 
   async getImmutableSourceProperties() {

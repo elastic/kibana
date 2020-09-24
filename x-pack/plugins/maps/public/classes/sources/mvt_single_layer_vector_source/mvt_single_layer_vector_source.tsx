@@ -192,6 +192,18 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
+  isBoundsAware() {
+    return false;
+  }
+
+  getSourceTooltipContent() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  async getLeftJoinFields() {
+    return [];
+  }
+
   async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number

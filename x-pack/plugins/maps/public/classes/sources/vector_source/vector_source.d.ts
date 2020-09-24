@@ -36,8 +36,8 @@ export type GeoJsonWithMeta = {
 export type BoundsFilters = {
   applyGlobalQuery: boolean;
   filters: Filter[];
-  query: MapQuery;
-  sourceQuery: MapQuery;
+  query?: MapQuery;
+  sourceQuery?: MapQuery;
   timeFilters: TimeRange;
 };
 
@@ -56,6 +56,7 @@ export interface IVectorSource extends ISource {
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
+  getLeftJoinFields(): Promise<IField[]>;
   getSyncMeta(): VectorSourceSyncMeta;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
@@ -81,6 +82,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
+  getLeftJoinFields(): Promise<IField[]>;
   getSyncMeta(): VectorSourceSyncMeta;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   canFormatFeatureProperties(): boolean;
