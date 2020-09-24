@@ -48,11 +48,8 @@ const fields = [
   },
 ];
 mockContext.data.indexPatterns = {
-  make: () => ({
-    fieldsFetcher: {
-      fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
-    },
-  }),
+  create: () => ({}),
+  getFieldsForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
 } as any;
 
 describe('StepTimeField', () => {
