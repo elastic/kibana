@@ -12,6 +12,11 @@ import { EventsQuery } from './queries/events';
 import { createEvents } from './utils/node';
 import { PaginationBuilder } from './utils/pagination';
 
+/**
+ * This function handles the `/events` api and returns an array of events and a cursor if more events exist than were
+ * requested.
+ * @param log a logger object
+ */
 export function handleEvents(
   log: Logger
 ): RequestHandler<
