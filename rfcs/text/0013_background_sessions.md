@@ -38,11 +38,10 @@ const request = buildKibanaRequest(...);
 request.sessionId = searchService.session.get();
 const response$ = await searchService.search(request);
 
-// Calling `sendToBackground`, creates a saved object for this session, allowing the user to navigate away.
+// Calling `session.store()`, creates a saved object for this session, allowing the user to navigate away.
 // The session object will be saved with all async search IDs that were executed so far. 
 // Any follow up searches executed with this sessionId will be saved into this object as well.  
-const sessionId = searchService.session.get();
-const backgroundSession = await searchService.sendToBackground(sessionId);
+const backgroundSession = await searchService.session.store();
 ```
 
 # Motivation
@@ -109,8 +108,8 @@ interface BackgroundSessionAttributes extends SavedObjectAttributes {
   creation: Date;
   expiration: Date;
   idMapping: { [key: string]: string };
-  url: string; // TODO: A URL relative to the Kibana root to retrieve the results of a completed background session (and/or to return to an incomplete view)
-  metadata: { [key: string]: any } // TODO: Any data the specific application requires to restore a background session view
+  url: string; // A URL relative to the Kibana root to retrieve the results of a completed background session (and/or to return to an incomplete view)
+  metadata: { [key: string]: any } // Any data the specific application requires to restore a background session view
 }
 ```
 
@@ -133,36 +132,19 @@ interface ISessionService {
    /** 
     * Returns the current session ID
     */
-   getId: () => string;
+   getActiveSessionId: () => string;
+
+  /**
+   * Sets the current session
+   * @param sessionId: The ID of the session to set
+   * @param isRestored: Whether or not the session is being restored
+   */
+   setActiveSessionId: (sessionId: string, isRestored: boolean) => void;
 
    /**
-    * Start a new session, by generating a new session ID.
+    * Start a new session, by generating a new session ID (calls `setActiveSessionId` internally)
     */
    start: () => string;
-
-  /** 
-   * Track a search ID of a sessionId, if it exists.
-   * @param request 
-   * @param sessionId
-   * @param searchId 
-   */
-  trackSearchId: (
-    request: KibanaRequest,
-    sessionId: string,
-    searchId: string,
-  ) => Promise<boolean>
-
-   /**
-    * Restore a session. Any searches executed using this ID will attempt to reload saved data.
-    * A restored session may be expired, meaning that following search requests will fail. 
-    * @param sessionId Session ID to restore.`.
-    */
-   restore: (sessionId: string) => void;
-
-   /**
-    * Close the current session and start a new one
-    */
-   clear: () => void; 
 
    /**
     * Store a session, alongside with any tracked searchIds.
@@ -180,9 +162,9 @@ interface ISessionService {
    isStored: () => boolean;
 
    /** 
-    * @returns Is the current session restored (i.e. was loaded by calling `sessionService.restore()`).
+    * @returns Is the current session a restored session
     */
-   isRestore: () => boolean;
+   isRestored: () => boolean;
 
    /**
     * Mark a session and and all associated searchIds as expired.
@@ -203,11 +185,38 @@ interface ISessionService {
    extend: (sessionId: string, extendBy: string)=> Promise<boolean>
 
    /**
-    * @param TODO: input arguments
+    * @param sessionId the ID of the session to retrieve the saved object.
     * @returns a filtered list of BackgroundSessionAttributes objects. 
     * @throws Throws an error in OSS.
     */
-   list: (options: SavedObjectsFindOptions) => BackgroundSessionAttributes[]
+   get: (sessionId: string) => Promise<BackgroundSessionAttributes>
+
+   /**
+    * @param options The options to query for specific background session saved objects.
+    * @returns a filtered list of BackgroundSessionAttributes objects. 
+    * @throws Throws an error in OSS.
+    */
+   list: (options: SavedObjectsFindOptions) => Promise<BackgroundSessionAttributes[]>
+
+   /**
+    * Clears out any session info as well as the current session. Called internally whenever the user navigates
+    * between applications.
+    * @internal
+    */
+   clear: () => void;
+
+   /** 
+    * Track a search ID of a sessionId, if it exists. Called internally by the search service.
+    * @param sessionId
+    * @param request 
+    * @param searchId
+    * @internal
+    */
+  trackSearchId: (
+    sessionId: string,
+    request: IKibanaSearchRequest,
+    searchId: string,
+  ) => Promise<boolean>
 }
 ```
 
