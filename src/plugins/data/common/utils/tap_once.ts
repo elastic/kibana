@@ -17,7 +17,14 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
-export { tapOnce } from './tap_once';
+import { Observable, concat } from 'rxjs';
+import { tap, take, share } from 'rxjs/operators';
+
+export function tapOnce<T>(fn: (v: T) => any) {
+  return (source$: Observable<T>) => {
+    const sharedSource$ = source$.pipe(share());
+    const tapped$ = sharedSource$.pipe(tap(fn), take(1));
+
+    return concat(tapped$, sharedSource$);
+  };
+}

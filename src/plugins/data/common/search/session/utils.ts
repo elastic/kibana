@@ -17,7 +17,8 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
-export { tapOnce } from './tap_once';
+import { createHash } from 'crypto';
+
+export function createRequestHash(keys: Record<any, any>) {
+  return createHash(`sha256`).update(JSON.stringify(keys)).digest('hex');
+}

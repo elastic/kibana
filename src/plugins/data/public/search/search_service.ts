@@ -74,6 +74,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       uiSettings,
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
+      session: this.sessionService,
     });
 
     expressions.registerFunction(esdsl);

@@ -12,7 +12,7 @@ import {
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { isErrorResponse, isCompleteResponse } from '../../../../../src/plugins/data/public';
-import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { AbortError, toPromise, tapOnce } from '../../../../../src/plugins/data/common';
 import { TimeoutErrorMode } from '../../../../../src/plugins/data/public';
 import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
@@ -69,7 +69,13 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
+    this.deps.session.trackSearch(request, options?.sessionId);
     return this.runSearch(request, combinedSignal, strategy).pipe(
+      tapOnce((response) => {
+        if (response.id) {
+          this.deps.session.trackSearchId(request, options?.sessionId, response.id);
+        }
+      }),
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
         if (isErrorResponse(response)) {
@@ -78,6 +84,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
         // If the response indicates it is complete, stop polling and complete the observable
         if (isCompleteResponse(response)) {
+          this.deps.session.trackSearchComplete(request, options?.sessionId);
           return EMPTY;
         }
 
@@ -98,6 +105,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         if (id !== undefined) {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         }
+        this.deps.session.trackSearchError(request, options?.sessionId);
         return throwError(this.handleSearchError(e, request, timeoutSignal, options?.abortSignal));
       }),
       finalize(() => {

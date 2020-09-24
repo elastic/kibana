@@ -17,7 +17,19 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
-export { tapOnce } from './tap_once';
+import { IEsSearchRequest } from '..';
+
+export interface ISessionService {
+  get: () => string | undefined;
+  restore: (sessionId: string) => void;
+  start: () => void;
+  clear: () => void;
+  trackSearch: (request: IEsSearchRequest, sessionId: string | undefined) => void;
+  trackSearchId: (
+    request: IEsSearchRequest,
+    sessionId: string | undefined,
+    searchId: string
+  ) => void;
+  trackSearchComplete: (request: IEsSearchRequest, sessionId?: string) => void;
+  trackSearchError: (request: IEsSearchRequest, sessionId?: string) => void;
+}

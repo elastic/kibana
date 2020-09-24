@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export interface ISessionService {
-  get: () => string | undefined;
-  restore: (sessionId: string) => void;
-  start: () => void;
-  clear: () => void;
-}
+export * from './types';
+export * from './utils';

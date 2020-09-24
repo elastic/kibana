@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
 import { get, trimEnd, debounce } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { tap, catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import {
   getCombinedSignal,
@@ -29,6 +28,7 @@ import {
   IEsSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
+  ISessionService,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
@@ -40,31 +40,10 @@ export interface SearchInterceptorDeps {
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
-}
-
-export enum SearchStatus {
-  Running,
-  Done,
-  Error,
-  Timeout,
-  Expired,
-  Canceled,
-}
-
-interface RequestInfo {
-  searchId?: string;
-  status: SearchStatus;
-}
-
-interface SessionInfo {
-  requests: Record<string, RequestInfo>;
-  abortSignals?: AbortSignal[];
-  status: SearchStatus;
+  session: ISessionService;
 }
 
 export class SearchInterceptor {
-  private readonly idMapping: Map<string, SessionInfo>;
-
   /**
    * `abortController` used to signal all searches to abort.
    *  @internal
@@ -86,81 +65,11 @@ export class SearchInterceptor {
    * @internal
    */
   constructor(protected readonly deps: SearchInterceptorDeps) {
-    this.idMapping = new Map();
-
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
     });
-  }
-
-  private createHash(keys: Record<any, any>) {
-    return createHash(`sha256`).update(JSON.stringify(keys)).digest('hex');
-  }
-
-  protected onRequestStart(
-    request: IEsSearchRequest,
-    sessionId: string | undefined,
-    timeoutSignal: AbortSignal,
-    searchId: string = new Date().getTime().toString()
-  ) {
-    if (sessionId && searchId && request.params && request.params.body) {
-      let sessionInfo = this.idMapping.get(sessionId);
-
-      // Create session info for a new session
-      if (!sessionInfo) {
-        sessionInfo = {
-          abortSignals: [],
-          requests: {},
-          status: SearchStatus.Running,
-        };
-        this.idMapping.set(sessionId, sessionInfo);
-      }
-
-      // Reopen a complete session, if a new search is run. We know this can happen because of follow up requests.
-      if (sessionInfo.status === SearchStatus.Done) {
-        sessionInfo.status = SearchStatus.Running;
-      }
-
-      // Listen to search timeouts
-      timeoutSignal.addEventListener('abort', (e) => {
-        if (sessionInfo?.status === SearchStatus.Running) {
-          sessionInfo.status = SearchStatus.Timeout;
-        }
-      });
-
-      // Add request info to the session
-      sessionInfo.requests[this.createHash(request.params.body)] = {
-        status: SearchStatus.Running,
-        searchId,
-      };
-    }
-  }
-
-  protected onRequestComplete(request: IEsSearchRequest, sessionId?: string) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
-      sessionInfo!.requests[this.createHash(request.params.body)].status = SearchStatus.Done;
-
-      // Mark session as done, if all requests are done
-      Object.values(sessionInfo!.requests)
-        .map((requestInfo) => requestInfo.status === SearchStatus.Done)
-        .every(() => {
-          sessionInfo!.status = SearchStatus.Done;
-        });
-    }
-  }
-
-  protected onRequestError(request: IEsSearchRequest, sessionId?: string) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
-
-      if (sessionInfo) {
-        // Mark request as errored, don't update session status
-        sessionInfo.requests[this.createHash(request.params.body)].status = SearchStatus.Error;
-      }
-    }
   }
 
   /*
@@ -301,10 +210,15 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      this.onRequestStart(request, options?.sessionId, timeoutSignal);
+      this.deps.session.trackSearch(request, options?.sessionId);
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+        tap({
+          next: (r) => {
+            this.deps.session.trackSearchComplete(request, options?.sessionId);
+          },
+        }),
         catchError((e: any) => {
-          this.onRequestError(request, options?.sessionId);
+          this.deps.session.trackSearchError(request, options?.sessionId);
           return throwError(
             this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
           );
