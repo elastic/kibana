@@ -15,7 +15,8 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Agent } from '../../../../types';
 import { AgentReassignAgentPolicyFlyout, AgentUnenrollAgentModal } from '../../components';
 
@@ -153,11 +154,22 @@ export const AgentBulkActions: React.FunctionComponent<{
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.totalAgents"
-              defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-              values={{ count: totalAgents }}
-            />
+            {totalAgents > SO_SEARCH_LIMIT ? (
+              <FormattedMessage
+                id="xpack.ingestManager.agentBulkActions.totalAgentsWithLimit"
+                defaultMessage="Showing {count} of {total} agents"
+                values={{
+                  count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
+                  total: <FormattedNumber value={totalAgents} />,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestManager.agentBulkActions.totalAgents"
+                defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
+                values={{ count: totalAgents }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         {(selectionMode === 'manual' && selectedAgents.length) ||
@@ -184,7 +196,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                         count:
                           selectionMode === 'manual'
                             ? selectedAgents.length
-                            : totalAgents - totalInactiveAgents,
+                            : Math.min(totalAgents - totalInactiveAgents, SO_SEARCH_LIMIT),
                       }}
                     />
                   </Button>
