@@ -1297,6 +1297,55 @@
         }
       }
     },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword"
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "timelion_sheet": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "telemetry": {
       "properties": {
         "opt_in_status": {
