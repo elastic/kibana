@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { uiRoutes } from '../../../../angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from '../../../../lib/ajax_error_handler';
 import { routeInitProvider } from '../../../../lib/route_init';
@@ -86,7 +87,16 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             i18n.translate('xpack.monitoring.elasticsearch.node.advanced.routeTitle', {
               defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Advanced',
               values: {
-                nodeSummaryName: data.nodeSummary.name,
+                nodeSummaryName: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
+              defaultMessage: 'Elasticsearch node: {node}',
+              values: {
+                node: get(data, 'nodeSummary.name'),
               },
             })
           );

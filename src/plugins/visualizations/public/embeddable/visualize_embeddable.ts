@@ -243,12 +243,6 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
-    // propagate the title to the output embeddable
-    // but only when the visualization is in edit/Visualize mode
-    if (!this.parent && this.vis.title !== this.output.title) {
-      this.updateOutput({ title: this.vis.title });
-    }
-
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }

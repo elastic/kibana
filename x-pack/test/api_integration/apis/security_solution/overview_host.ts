@@ -7,7 +7,9 @@
 import expect from '@kbn/expect';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/security_solution/common/constants';
+// @ts-expect-error
 import { overviewHostQuery } from '../../../../plugins/security_solution/public/overview/containers//overview_host/index.gql_query';
+// @ts-expect-error
 import { GetOverviewHostQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
