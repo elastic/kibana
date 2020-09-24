@@ -21,7 +21,7 @@ interface Props {
   alertsContext: AlertsContextValue;
   errors: IErrorObject;
   boundaryIndexPattern: IIndexPattern;
-  boundaryNameField: string;
+  boundaryNameField?: string;
   setBoundaryIndexPattern: (boundaryIndexPattern?: IIndexPattern) => void;
   setBoundaryGeoField: (boundaryGeoField?: string) => void;
   setBoundaryNameField: (boundaryNameField?: string) => void;
@@ -91,7 +91,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.boundaryNameSelect', {
             defaultMessage: 'Select boundary name',
           })}
-          value={boundaryNameField}
+          value={boundaryNameField || null}
           onChange={setBoundaryNameField}
           fields={boundaryIndexPattern.fields.filter(
             (field: IFieldType) =>

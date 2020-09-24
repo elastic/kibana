@@ -24,11 +24,11 @@ export async function getShapesFilters(
   boundaryNameField?: string
 ) {
   const filters: Record<string, unknown> = {};
-  const shapesIdsNamesMap: Record<string, string> = {};
+  const shapesIdsNamesMap: Record<string, unknown> = {};
   switch (boundaryType) {
     case 'entireIndex':
       // Get all shapes in index
-      const boundaryData: SearchResponse<unknown> = await callCluster('search', {
+      const boundaryData: SearchResponse<Record<string, unknown>> = await callCluster('search', {
         index: boundaryIndexTitle,
         body: {
           size: MAX_QUERY_SIZE,
@@ -48,9 +48,11 @@ export async function getShapesFilters(
         };
       });
       if (boundaryNameField) {
-        boundaryData.hits.hits.forEach(({ _source, _id }) => {
-          shapesIdsNamesMap[_id] = _source[boundaryNameField];
-        });
+        boundaryData.hits.hits.forEach(
+          ({ _source, _id }: { _source: Record<string, unknown>; _id: string }) => {
+            shapesIdsNamesMap[_id] = _source[boundaryNameField];
+          }
+        );
       }
       break;
     default:
