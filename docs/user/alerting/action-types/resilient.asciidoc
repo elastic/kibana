@@ -10,9 +10,9 @@ The IBM Resilient action type uses the https://developer.ibm.com/security/resili
 
 IBM Resilient connectors have the following configuration properties:
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       IBM Resilient instance URL.
-Organization ID:: IBM Resilient organization ID..
+Organization ID:: IBM Resilient organization ID.
 API key ID::  The authentication key ID for HTTP Basic authentication.
 API key secret::  The authentication key secret for HTTP Basic authentication.
 
@@ -39,7 +39,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 |===
 
 | `apiUrl`
-| An address that corresponds to *Sender*.
+| An address that corresponds to *URL*.
 
 | `orgId`
 | An ID that corresponds to *Organization ID*.
@@ -52,7 +52,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 |===
 
 | `apiKeyId`
-| A string that corresponds to *User*.
+| A string that corresponds to *API key ID*.
 
 | `apiKeySecret`
 | A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
@@ -66,11 +66,11 @@ IBM Resilient actions have the following configuration properties:
 
 Incident types::              The incident types of the incident.
 Severity code::              The severity of the incident.
-Title::    A title of the issue, used for searching the contents of the knowledge base. 
+Name::    A name for the issue, used for searching the contents of the knowledge base. 
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-resilient]]
 ==== Configuring and testing IBM Resilient
 
-IBM Resilient offers free https://www.atlassian.com/software/resilient/free[Instances], which you can use to test incidents.
+IBM Resilient offers https://www.ibm.com/security/intelligent-orchestration/resilient[Instances], which you can use to test incidents.
