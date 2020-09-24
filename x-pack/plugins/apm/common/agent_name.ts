@@ -29,7 +29,7 @@ export function isAgentName(agentName: string): agentName is AgentName {
   return AGENT_NAMES.includes(agentName as AgentName);
 }
 
-export const RUM_AGENTS = ['js-base', 'rum-js'];
+export const RUM_AGENTS = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
 export function isRumAgentName(
   agentName?: string
@@ -48,10 +48,25 @@ export function isJavaAgentName(
  *
  * * Converting to lowercase
  * * Converting "rum-js" to "js-base"
+ * * Converting OpenTelemetry agent names to "our" agent names
  *
  * This helps dealing with some older agent versions
  */
 export function getNormalizedAgentName(agentName?: string) {
-  const lowercased = agentName && agentName.toLowerCase();
-  return isRumAgentName(lowercased) ? 'js-base' : lowercased;
+  let newName = agentName && agentName.toLowerCase();
+
+  if (isRumAgentName(newName)) {
+    newName = 'js-base';
+  }
+
+  if (newName?.startsWith('opentelemetry/')) {
+    newName = newName?.replace('opentelemetry/', '');
+  }
+
+  // What should be "opentelemetry-python" can be reported as "otlp"
+  if (newName === 'otlp') {
+    newName = 'python';
+  }
+
+  return newName;
 }
