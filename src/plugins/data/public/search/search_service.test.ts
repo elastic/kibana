@@ -26,11 +26,15 @@ describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
+  const initializerContext = coreMock.createPluginInitializerContext();
+  initializerContext.config.get = jest.fn().mockReturnValue({
+    search: { aggs: { shardDelay: { enabled: false } } },
+  });
 
   beforeEach(() => {
-    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    searchService = new SearchService(initializerContext);
   });
 
   describe('setup()', () => {
