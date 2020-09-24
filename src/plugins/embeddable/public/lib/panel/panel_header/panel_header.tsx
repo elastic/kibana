@@ -137,7 +137,7 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
-  const showPanelBar = badges.length > 0 || showTitle;
+  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
@@ -145,6 +145,21 @@ export function PanelHeader({
   const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
     defaultMessage: '[No Title]',
   });
+
+  const getAriaLabel = () => {
+    return (
+      <span id={headerId}>
+        {showPanelBar && title
+          ? i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel: {title}',
+              values: { title: title || placeholderTitle },
+            })
+          : i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel',
+            })}
+      </span>
+    );
+  };
 
   if (!showPanelBar) {
     return (
@@ -155,6 +170,7 @@ export function PanelHeader({
           closeContextMenu={closeContextMenu}
           title={title}
         />
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
     );
   }
@@ -164,11 +180,7 @@ export function PanelHeader({
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <h2
-        id={headerId}
-        data-test-subj="dashboardPanelTitle"
-        className="embPanel__title embPanel__dragger"
-      >
+      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
         {showTitle ? (
           <span className="embPanel__titleInner">
             <span
@@ -177,24 +189,11 @@ export function PanelHeader({
             >
               {title || placeholderTitle}
             </span>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-                  defaultMessage: 'Dashboard panel: {title}',
-                  values: { title: title || placeholderTitle },
-                })}
-              </span>
-            </EuiScreenReaderOnly>
+            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
             {renderTooltip(viewDescription)}
           </span>
         ) : (
-          <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-                defaultMessage: 'Dashboard panel',
-              })}
-            </span>
-          </EuiScreenReaderOnly>
+          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         )}
         {renderBadges(badges, embeddable)}
       </h2>
