@@ -12,7 +12,7 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
@@ -31,7 +31,7 @@ storiesOf(
     const httpMock = {};
 
     // mock
-    createCallApmApi((httpMock as unknown) as HttpSetup);
+    createCallApmApi((httpMock as unknown) as HttpClient);
 
     const contextMock = {
       core: {

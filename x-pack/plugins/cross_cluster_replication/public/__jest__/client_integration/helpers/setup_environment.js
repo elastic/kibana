@@ -11,7 +11,7 @@ import { setHttpClient } from '../../../app/services/api';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  // axios has a similar interface to HttpSetup, but we
+  // axios has a similar interface to HttpClient, but we
   // flatten out the response.
   const client = axios.create({ adapter: axiosXhrAdapter });
   client.interceptors.response.use(({ data }) => data);

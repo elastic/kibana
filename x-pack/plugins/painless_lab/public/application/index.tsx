@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { HttpSetup, ChromeStart } from 'src/core/public';
+import { HttpClient, ChromeStart } from 'src/core/public';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
 import { Links } from '../links';
@@ -15,7 +15,7 @@ import { AppContextProvider } from './context';
 import { Main } from './components/main';
 
 interface AppDependencies {
-  http: HttpSetup;
+  http: HttpClient;
   I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
   links: Links;

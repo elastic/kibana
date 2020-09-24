@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import {
   DocLinksStart,
-  HttpSetup,
+  HttpClient,
   ToastsSetup,
   IUiSettingsClient,
   ApplicationStart,
@@ -41,7 +41,7 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 export interface AppDeps {
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
-  http: HttpSetup;
+  http: HttpClient;
   uiSettings: IUiSettingsClient;
   theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { RoleMapping } from '../../../common/model';
 
 interface CheckRoleMappingFeaturesResponse {
@@ -21,7 +21,7 @@ type DeleteRoleMappingsResponse = Array<{
 }>;
 
 export class RoleMappingsAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   public async checkRoleMappingFeatures(): Promise<CheckRoleMappingFeaturesResponse> {
     return this.http.get(`/internal/security/_check_role_mapping_features`);

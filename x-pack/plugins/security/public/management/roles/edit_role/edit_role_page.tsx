@@ -33,7 +33,7 @@ import React, {
 import {
   Capabilities,
   FatalErrorsSetup,
-  HttpStart,
+  HttpClient,
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
@@ -77,7 +77,7 @@ interface Props {
   privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
   getFeatures: FeaturesPluginStart['getFeatures'];
   docLinks: DocumentationLinksService;
-  http: HttpStart;
+  http: HttpClient;
   license: SecurityLicense;
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
@@ -223,7 +223,7 @@ function useRole(
   return [role, setRole] as [Role | null, typeof setRole];
 }
 
-function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
+function useSpaces(http: HttpClient, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
     http.get('/api/spaces/space').then(

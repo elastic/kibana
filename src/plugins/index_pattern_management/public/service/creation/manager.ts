@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart } from '../../../../../core/public';
+import { HttpClient } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
@@ -36,7 +36,7 @@ export class IndexPatternCreationManager {
     };
   }
 
-  start(httpClient: HttpStart) {
+  start(httpClient: HttpClient) {
     this.configConstructors.forEach((Config) => this.configs.push(new Config({ httpClient })));
 
     const getType = (key: string | undefined): IndexPatternCreationConfig => {

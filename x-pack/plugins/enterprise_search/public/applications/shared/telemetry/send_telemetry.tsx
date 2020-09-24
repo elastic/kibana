@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useValues } from 'kea';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { JSON_HEADER as headers } from '../../../../common/constants';
 import { HttpLogic } from '../http';
 
@@ -17,7 +17,7 @@ interface ISendTelemetryProps {
 }
 
 interface ISendTelemetry extends ISendTelemetryProps {
-  http: HttpSetup;
+  http: HttpClient;
   product: 'app_search' | 'workplace_search' | 'enterprise_search';
 }
 

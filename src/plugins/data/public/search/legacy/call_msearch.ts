@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { LegacyFetchHandlers } from '../../../common/search/search_source';
 
 /**
@@ -27,7 +27,7 @@ import { LegacyFetchHandlers } from '../../../common/search/search_source';
  *
  * @internal
  */
-export function getCallMsearch({ http }: { http: HttpStart }): LegacyFetchHandlers['callMsearch'] {
+export function getCallMsearch({ http }: { http: HttpClient }): LegacyFetchHandlers['callMsearch'] {
   return async ({ body, signal }) => {
     return http.post('/internal/_msearch', {
       body: JSON.stringify(body),

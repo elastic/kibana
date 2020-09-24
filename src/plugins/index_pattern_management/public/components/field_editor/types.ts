@@ -19,7 +19,7 @@
 
 import { ReactText } from 'react';
 import { Query } from 'src/plugins/data/public';
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 export interface Sample {
   input: ReactText | ReactText[];
@@ -32,7 +32,7 @@ export interface ExecuteScriptParams {
   indexPatternTitle: string;
   query?: Query['query'];
   additionalFields?: string[];
-  http: HttpStart;
+  http: HttpClient;
 }
 
 export interface ExecuteScriptResult {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { TimeSeriesResult } from '../../../../alerting_builtins/common/alert_types/index_threshold';
 
 const INDEX_THRESHOLD_API_ROOT = '/api/alerting_builtins/index_threshold';
@@ -13,7 +13,7 @@ export async function getMatchingIndicesForThresholdAlertType({
   http,
 }: {
   pattern: string;
-  http: HttpSetup;
+  http: HttpClient;
 }): Promise<Record<string, any>> {
   if (!pattern.startsWith('*')) {
     pattern = `*${pattern}`;
@@ -32,7 +32,7 @@ export async function getThresholdAlertTypeFields({
   http,
 }: {
   indexes: string[];
-  http: HttpSetup;
+  http: HttpClient;
 }): Promise<Record<string, any>> {
   const { fields } = await http.post(`${INDEX_THRESHOLD_API_ROOT}/_fields`, {
     body: JSON.stringify({ indexPatterns: indexes }),
@@ -62,7 +62,7 @@ export const loadIndexPatterns = async () => {
 interface GetThresholdAlertVisualizationDataParams {
   model: any;
   visualizeOptions: any;
-  http: HttpSetup;
+  http: HttpClient;
 }
 
 export async function getThresholdAlertVisualizationData({

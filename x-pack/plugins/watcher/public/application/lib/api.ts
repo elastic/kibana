@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
+import { HttpClient, SavedObjectsClientContract } from 'kibana/public';
 
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';
@@ -15,9 +15,9 @@ import { useRequest, sendRequest } from './use_request';
 
 import { ROUTES } from '../../../common/constants';
 
-let httpClient: HttpSetup;
+let httpClient: HttpClient;
 
-export const setHttpClient = (anHttpClient: HttpSetup) => {
+export const setHttpClient = (anHttpClient: HttpClient) => {
   httpClient = anHttpClient;
 };
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsImportError } from 'src/core/public';
+import { HttpClient, SavedObjectsImportError } from 'src/core/public';
 import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 interface ImportResponse {
@@ -27,7 +27,7 @@ interface ImportResponse {
 }
 
 export async function importFile(
-  http: HttpStart,
+  http: HttpClient,
   file: File,
   { createNewCopies, overwrite }: ImportMode
 ) {

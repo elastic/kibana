@@ -25,7 +25,7 @@ import {
   SavedObjectsStart,
   NotificationsStart,
   DocLinksStart,
-  HttpStart,
+  HttpClient,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
@@ -39,7 +39,7 @@ export interface IndexPatternManagmentContext {
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;
-  http: HttpStart;
+  http: HttpClient;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
   indexPatternManagementStart: IndexPatternManagementStart;

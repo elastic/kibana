@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { BASE_ALERT_API_PATH, alertStateSchema } from '../common';
 import { Alert, AlertType, AlertTaskState } from '../common';
 
-type HttpGet = Pick<HttpStart, 'get'>;
+type HttpGet = Pick<HttpClient, 'get'>;
 
 export async function loadAlertTypes({ http }: { http: HttpGet }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);

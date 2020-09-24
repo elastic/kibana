@@ -21,7 +21,7 @@ import {
   ApplicationStart,
   Capabilities,
   ChromeStart,
-  HttpStart,
+  HttpClient,
   I18nStart,
   IUiSettingsClient,
   OverlayStart,
@@ -46,7 +46,7 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
-export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+export const [getHttp, setHttp] = createGetterSetter<HttpClient>('Http');
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 

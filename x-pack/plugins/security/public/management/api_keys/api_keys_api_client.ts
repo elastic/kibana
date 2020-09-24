@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
 
 interface CheckPrivilegesResponse {
@@ -25,7 +25,7 @@ interface GetApiKeysResponse {
 const apiKeysUrl = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   public async checkPrivileges() {
     return await this.http.get<CheckPrivilegesResponse>(`${apiKeysUrl}/privileges`);

@@ -50,7 +50,7 @@ function getDefaultProps() {
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    core: coreMock.createSetup(),
+    core: coreMock.createStart(),
     plugins: {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),

@@ -6,7 +6,13 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
+import {
+  ChromeStart,
+  HttpClient,
+  I18nStart,
+  OverlayStart,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import { CoreStart } from 'src/core/public';
 import {
   fieldsReducer,
@@ -53,7 +59,7 @@ export interface GraphStoreDependencies {
   getWorkspace: () => Workspace | null;
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
+  http: HttpClient;
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
   showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;

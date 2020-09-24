@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
 
 export class PrivilegesAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   async getAll({ includeActions }: { includeActions: boolean }) {
     return await this.http.get<RawKibanaPrivileges>('/api/security/privileges', {

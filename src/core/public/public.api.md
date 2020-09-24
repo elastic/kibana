@@ -599,6 +599,9 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
+// @public
+export type HttpClient = Omit<HttpStart, 'anonymousPaths'>;
+
 // @internal (undocumented)
 export class HttpFetchError extends Error implements IHttpFetchError {
     constructor(message: string, name: string, request: Request, response?: Response | undefined, body?: any);

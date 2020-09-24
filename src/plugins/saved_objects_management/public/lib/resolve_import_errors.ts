@@ -18,7 +18,7 @@
  */
 
 import {
-  HttpStart,
+  HttpClient,
   SavedObjectsImportConflictError,
   SavedObjectsImportRetry,
   SavedObjectsImportResponse,
@@ -75,7 +75,7 @@ const filterFailedImports = (failures: FailedImport[]) => {
 };
 
 async function callResolveImportErrorsApi(
-  http: HttpStart,
+  http: HttpClient,
   file: File,
   retries: any,
   createNewCopies: boolean
@@ -157,7 +157,7 @@ export async function resolveImportErrors({
   getConflictResolutions,
   state,
 }: {
-  http: HttpStart;
+  http: HttpClient;
   getConflictResolutions: (
     objects: FailedImportConflict[]
   ) => Promise<Record<string, RetryDecision>>;

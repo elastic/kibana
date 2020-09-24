@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 export class IndicesAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   async getFields(query: string) {
     return (

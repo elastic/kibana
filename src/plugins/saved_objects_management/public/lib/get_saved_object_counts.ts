@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 export async function getSavedObjectCounts(
-  http: HttpStart,
+  http: HttpClient,
   typesToInclude: string[],
   searchString?: string
 ): Promise<Record<string, number>> {

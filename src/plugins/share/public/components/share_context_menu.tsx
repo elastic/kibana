@@ -23,7 +23,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
@@ -38,7 +38,7 @@ interface Props {
   sharingData: any;
   onClose: () => void;
   basePath: string;
-  post: HttpStart['post'];
+  post: HttpClient['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
 }
 

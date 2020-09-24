@@ -6,7 +6,7 @@
 
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { DownloadReportFn, ManagementLinkFn } from '../';
 import { JobId, ReportApiJSON, ReportDocument, ReportSource } from '../../common/types';
 import {
@@ -38,9 +38,9 @@ export interface DiagnoseResponse {
 }
 
 export class ReportingAPIClient {
-  private http: HttpStart;
+  private http: HttpClient;
 
-  constructor(http: HttpStart) {
+  constructor(http: HttpClient) {
     this.http = http;
   }
 

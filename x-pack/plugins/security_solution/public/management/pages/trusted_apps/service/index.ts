@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 
 import {
   TRUSTED_APPS_CREATE_API,
@@ -29,7 +29,7 @@ export interface TrustedAppsService {
 }
 
 export class TrustedAppsHttpService implements TrustedAppsService {
-  constructor(private http: HttpStart) {}
+  constructor(private http: HttpClient) {}
 
   async getTrustedAppsList(request: GetTrustedAppsListRequest) {
     return this.http.get<GetTrustedListAppsResponse>(TRUSTED_APPS_LIST_API, {

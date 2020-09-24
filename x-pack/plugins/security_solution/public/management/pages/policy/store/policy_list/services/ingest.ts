@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { HttpFetchOptions, HttpClient } from 'kibana/public';
 import {
   GetPackagePoliciesRequest,
   GetAgentStatusResponse,
@@ -33,7 +33,7 @@ const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`
  * @param options
  */
 export const sendGetEndpointSpecificPackagePolicies = (
-  http: HttpStart,
+  http: HttpClient,
   options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
 ): Promise<GetPolicyListResponse> => {
   return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
@@ -54,7 +54,7 @@ export const sendGetEndpointSpecificPackagePolicies = (
  * @param options
  */
 export const sendGetPackagePolicy = (
-  http: HttpStart,
+  http: HttpClient,
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
@@ -68,7 +68,7 @@ export const sendGetPackagePolicy = (
  * @param options
  */
 export const sendDeletePackagePolicy = (
-  http: HttpStart,
+  http: HttpClient,
   body: DeletePackagePoliciesRequest,
   options?: HttpFetchOptions
 ) => {
@@ -84,7 +84,7 @@ export const sendDeletePackagePolicy = (
  * @param options
  */
 export const sendGetAgentPolicyList = (
-  http: HttpStart,
+  http: HttpClient,
   options: HttpFetchOptions & GetAgentPoliciesRequest
 ) => {
   return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
@@ -99,7 +99,7 @@ export const sendGetAgentPolicyList = (
  * @param options
  */
 export const sendPutPackagePolicy = (
-  http: HttpStart,
+  http: HttpClient,
   packagePolicyId: string,
   packagePolicy: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
@@ -118,7 +118,7 @@ export const sendPutPackagePolicy = (
  * @param options
  */
 export const sendGetFleetAgentStatusForPolicy = (
-  http: HttpStart,
+  http: HttpClient,
   /** the Agent (fleet) policy id */
   policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
@@ -135,7 +135,7 @@ export const sendGetFleetAgentStatusForPolicy = (
  * Get Endpoint Security Package information
  */
 export const sendGetEndpointSecurityPackage = async (
-  http: HttpStart
+  http: HttpClient
 ): Promise<GetPackagesResponse['response'][0]> => {
   const options = { query: { category: 'security' } };
   const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 interface GetAllowedTypesResponse {
   types: string[];
 }
 
-export async function getAllowedTypes(http: HttpStart) {
+export async function getAllowedTypes(http: HttpClient) {
   const response = await http.get<GetAllowedTypesResponse>(
     '/api/kibana/management/saved_objects/_allowed_types'
   );

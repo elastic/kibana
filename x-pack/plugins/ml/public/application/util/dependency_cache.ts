@@ -10,7 +10,7 @@ import {
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
-  HttpStart,
+  HttpClient,
   I18nStart,
 } from 'kibana/public';
 import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
@@ -38,7 +38,7 @@ export interface DependencyCache {
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
-  http: HttpStart | null;
+  http: HttpClient | null;
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;

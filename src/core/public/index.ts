@@ -159,6 +159,7 @@ export {
   HttpInterceptor,
   HttpResponse,
   HttpHandler,
+  HttpClient,
   IBasePath,
   AnonymousPathsSetup,
   AnonymousPathsStart,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
@@ -304,7 +304,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 };
 
 const getAgentAndPoliciesForEndpointsList = async (
-  http: HttpStart,
+  http: HttpClient,
   hosts: HostResultList['hosts'],
   currentNonExistingPolicies: EndpointState['nonExistingPolicies']
 ): Promise<PolicyIds | undefined> => {
@@ -371,7 +371,7 @@ const getAgentAndPoliciesForEndpointsList = async (
   return nonExistingPackagePoliciesAndExistingAgentPolicies;
 };
 
-const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+const doEndpointsExist = async (http: HttpClient): Promise<boolean> => {
   try {
     return (
       (

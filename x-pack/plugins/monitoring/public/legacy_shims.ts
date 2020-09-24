@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, HttpClient, IUiSettingsClient } from 'kibana/public';
 import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
@@ -52,7 +52,7 @@ export interface IShims {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   uiSettings: IUiSettingsClient;
-  http: HttpSetup;
+  http: HttpClient;
   kfetch: (
     { pathname, ...options }: KFetchOptions,
     kfetchOptions?: KFetchKibanaOptions | undefined

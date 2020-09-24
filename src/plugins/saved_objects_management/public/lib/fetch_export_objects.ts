@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 export async function fetchExportObjects(
-  http: HttpStart,
+  http: HttpClient,
   objects: any[],
   includeReferencesDeep: boolean = false
 ): Promise<Blob> {

@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DocLinksStart, HttpSetup } from 'src/core/public';
+import { DocLinksStart, HttpClient } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
 
 export interface ContextValue {
-  http: HttpSetup;
+  http: HttpClient;
   isCloudEnabled: boolean;
   docLinks: DocLinksStart;
 }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -35,7 +35,7 @@ interface Props {
   alertInterval: string;
   alertThrottle: string;
   alertType: PreviewableAlertTypes;
-  fetch: HttpSetup['fetch'];
+  fetch: HttpClient['fetch'];
   alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
   validate: (params: any) => ValidationResult;
   showNoDataResults?: boolean;

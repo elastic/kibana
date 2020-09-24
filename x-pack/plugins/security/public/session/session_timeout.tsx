@@ -7,7 +7,7 @@
 import {
   NotificationsSetup,
   Toast,
-  HttpSetup,
+  HttpClient,
   ToastInput,
   AnonymousPathsStart,
 } from 'src/core/public';
@@ -58,7 +58,7 @@ export class SessionTimeout implements ISessionTimeout {
   constructor(
     private notifications: NotificationsSetup,
     private sessionExpired: ISessionExpired,
-    private http: HttpSetup,
+    private http: HttpClient,
     private tenant: string
   ) {}
 

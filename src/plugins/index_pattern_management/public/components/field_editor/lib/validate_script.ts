@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { ExecuteScriptParams, ExecuteScriptResult } from '../types';
 
 export const executeScript = async ({
@@ -57,7 +57,7 @@ export const isScriptValid = async ({
   name: string;
   script: string;
   indexPatternTitle: string;
-  http: HttpStart;
+  http: HttpClient;
 }) => {
   const scriptResponse = await executeScript({
     name,

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 import { UpgradeAssistantStatus } from '../../../common/types';
 import { LatestMinorBanner } from './latest_minor_banner';
@@ -41,7 +41,7 @@ interface TabsState {
 }
 
 interface Props {
-  http: HttpSetup;
+  http: HttpClient;
 }
 
 export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {

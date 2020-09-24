@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { getCallMsearch } from './call_msearch';
 
 describe('callMsearch', () => {
   const msearchMock = jest.fn().mockResolvedValue({ body: { responses: [] } });
-  let http: jest.Mocked<HttpStart>;
+  let http: jest.Mocked<HttpClient>;
 
   beforeEach(() => {
     msearchMock.mockClear();

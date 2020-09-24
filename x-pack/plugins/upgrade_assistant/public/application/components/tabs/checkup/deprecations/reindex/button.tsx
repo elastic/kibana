@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart, HttpSetup } from 'src/core/public';
+import { DocLinksStart, HttpClient } from 'src/core/public';
 import {
   EnrichedDeprecationInfo,
   ReindexStatus,
@@ -23,7 +23,7 @@ import { ReindexPollingService, ReindexState } from './polling_service';
 
 interface ReindexButtonProps {
   indexName: string;
-  http: HttpSetup;
+  http: HttpClient;
   docLinks: DocLinksStart;
   reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
 }

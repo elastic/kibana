@@ -6,12 +6,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
+import { HttpClient, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
 
 import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 export interface IHttpValues {
-  http: HttpSetup;
+  http: HttpClient;
   httpInterceptors: Function[];
   errorConnecting: boolean;
   readOnlyMode: boolean;
@@ -109,7 +109,7 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
  * Mount/props helper
  */
 interface IHttpLogicProps {
-  http: HttpSetup;
+  http: HttpClient;
   errorConnecting?: boolean;
   readOnlyMode?: boolean;
 }

@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 import { LoadingState } from '../../types';
 
 interface DeprecationLoggingTabProps extends ReactIntl.InjectedIntlProps {
-  http: HttpSetup;
+  http: HttpClient;
 }
 
 interface DeprecationLoggingTabState {

@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 
 import * as Api from '../api';
-import { HttpStart } from '../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../src/core/public';
 import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
@@ -24,7 +24,7 @@ export interface ExceptionsApi {
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
 }
 
-export const useApi = (http: HttpStart): ExceptionsApi => {
+export const useApi = (http: HttpClient): ExceptionsApi => {
   return useMemo(
     (): ExceptionsApi => ({
       async deleteExceptionItem({

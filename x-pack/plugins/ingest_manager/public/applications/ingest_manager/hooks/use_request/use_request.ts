@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useState, useEffect } from 'react';
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import {
   SendRequestConfig,
   SendRequestResponse,
@@ -13,7 +13,7 @@ import {
   useRequest as _useRequest,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
-let httpClient: HttpSetup;
+let httpClient: HttpClient;
 
 export type UseRequestConfig = _UseRequestConfig;
 
@@ -21,7 +21,7 @@ interface RequestError extends Error {
   statusCode?: number;
 }
 
-export const setHttpClient = (client: HttpSetup) => {
+export const setHttpClient = (client: HttpClient) => {
   httpClient = client;
 };
 

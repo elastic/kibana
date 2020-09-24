@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { HttpStart } from '../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../src/core/public';
 import { List } from '../../../../common/detection_engine/schemas/types/lists';
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from './translations';
@@ -29,7 +29,7 @@ export interface ErrorInfo {
 }
 
 export interface ErrorCalloutProps {
-  http: HttpStart;
+  http: HttpClient;
   rule: Rule | null;
   errorInfo: ErrorInfo;
   onCancel: () => void;

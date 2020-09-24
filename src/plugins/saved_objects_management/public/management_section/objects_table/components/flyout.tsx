@@ -42,7 +42,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
+import { OverlayStart, HttpClient } from 'src/core/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -79,7 +79,7 @@ export interface FlyoutProps {
   newIndexPatternUrl: string;
   indexPatterns: IndexPatternsContract;
   overlays: OverlayStart;
-  http: HttpStart;
+  http: HttpClient;
   search: DataPublicPluginStart['search'];
 }
 

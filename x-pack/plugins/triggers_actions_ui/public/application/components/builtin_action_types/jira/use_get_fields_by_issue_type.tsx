@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpClient, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getFieldsByIssueType } from './api';
 import * as i18n from './translations';
@@ -18,7 +18,7 @@ interface Fields {
 }
 
 interface Props {
-  http: HttpSetup;
+  http: HttpClient;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'

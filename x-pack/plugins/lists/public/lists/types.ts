@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpClient } from '../../../../../src/core/public';
 import { Type } from '../../common/schemas';
 
 export interface ApiParams {
-  http: HttpStart;
+  http: HttpClient;
   signal: AbortSignal;
 }
 export type ApiPayload<T extends ApiParams> = Omit<T, 'http' | 'signal'>;

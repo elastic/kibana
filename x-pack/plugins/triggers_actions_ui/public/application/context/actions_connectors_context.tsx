@@ -5,12 +5,12 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpStart, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpClient, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ActionTypeModel } from '../../types';
 import { TypeRegistry } from '../type_registry';
 
 export interface ActionsConnectorsContextValue {
-  http: HttpStart;
+  http: HttpClient;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications: Pick<
     ToastsApi,

@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from '../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../src/core/public';
 
 export class HttpService {
-  private client: HttpSetup | undefined;
+  private client: HttpClient | undefined;
 
-  public setup(httpClient: HttpSetup): void {
+  public setup(httpClient: HttpClient): void {
     this.client = httpClient;
   }
 
-  public get httpClient(): HttpSetup {
+  public get httpClient(): HttpClient {
     if (!this.client) {
       throw new Error('Http service has not be initialized. Client is missing.');
     }

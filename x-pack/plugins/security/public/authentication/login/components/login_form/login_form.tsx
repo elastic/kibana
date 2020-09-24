@@ -28,12 +28,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+import { HttpClient, IHttpFetchError, NotificationsStart } from 'src/core/public';
 import { LoginSelector } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
 interface Props {
-  http: HttpStart;
+  http: HttpClient;
   notifications: NotificationsStart;
   selector: LoginSelector;
   infoMessage?: string;

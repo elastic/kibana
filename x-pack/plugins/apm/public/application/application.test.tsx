@@ -7,7 +7,7 @@
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
+import { AppMountParameters, CoreStart, HttpClient } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/ApmPluginContext/MockApmPluginContext';
 import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
@@ -48,7 +48,7 @@ describe('renderApp', () => {
       history: createMemoryHistory(),
     };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core.http as unknown) as HttpSetup);
+    createCallApmApi((core.http as unknown) as HttpClient);
 
     jest
       .spyOn(window.console, 'warn')

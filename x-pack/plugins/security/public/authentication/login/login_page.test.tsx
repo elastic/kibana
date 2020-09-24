@@ -27,7 +27,7 @@ const createLoginState = (options?: Partial<LoginState>) => {
 };
 
 describe('LoginPage', () => {
-  // mock a minimal subset of the HttpSetup
+  // mock a minimal subset of the HttpClient
   const httpMock = {
     get: jest.fn(),
     addLoadingCountSource: jest.fn(),

@@ -9,7 +9,7 @@ import {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
-  HttpStart,
+  HttpClient,
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
@@ -78,7 +78,7 @@ export interface LensAppProps {
 }
 
 export interface LensAppServices {
-  http: HttpStart;
+  http: HttpClient;
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;

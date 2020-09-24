@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { Role, RoleIndexPrivilege, copyRole } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   public async getRoles() {
     return await this.http.get<Role[]>('/api/security/role');

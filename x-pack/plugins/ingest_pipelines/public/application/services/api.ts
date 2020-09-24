@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -24,7 +24,7 @@ import {
 } from '../constants';
 
 export class ApiService {
-  private client: HttpSetup | undefined;
+  private client: HttpClient | undefined;
   private uiMetricService: UiMetricService | undefined;
 
   private useRequest<R = any, E = Error>(config: UseRequestConfig) {
@@ -50,7 +50,7 @@ export class ApiService {
     return this.uiMetricService.trackUiMetric(eventName);
   }
 
-  public setup(httpClient: HttpSetup, uiMetricService: UiMetricService): void {
+  public setup(httpClient: HttpClient, uiMetricService: UiMetricService): void {
     this.client = httpClient;
     this.uiMetricService = uiMetricService;
   }

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  HttpStart,
+  HttpClient,
   NotificationsStart,
   IUiSettingsClient,
   DocLinksStart,
@@ -21,7 +21,7 @@ import {
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface KibanaDeps {
-  http: HttpStart;
+  http: HttpClient;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;

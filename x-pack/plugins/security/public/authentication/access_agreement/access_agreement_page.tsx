@@ -20,13 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+import { CoreStart, FatalErrorsStart, HttpClient, NotificationsStart } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
-  http: HttpStart;
+  http: HttpClient;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
 }

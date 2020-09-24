@@ -14,12 +14,12 @@ import { parse } from 'url';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+import { CoreStart, FatalErrorsStart, HttpClient, NotificationsStart } from 'src/core/public';
 import { LoginState } from '../../../common/login_state';
 import { LoginForm, DisabledLoginForm } from './components';
 
 interface Props {
-  http: HttpStart;
+  http: HttpClient;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;

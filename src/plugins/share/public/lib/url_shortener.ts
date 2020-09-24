@@ -18,12 +18,12 @@
  */
 
 import url from 'url';
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { CREATE_PATH, getGotoPath } from '../../common/short_url_routes';
 
 export async function shortenUrl(
   absoluteUrl: string,
-  { basePath, post }: { basePath: string; post: HttpStart['post'] }
+  { basePath, post }: { basePath: string; post: HttpClient['post'] }
 ) {
   const parsedUrl = url.parse(absoluteUrl);
   if (!parsedUrl || !parsedUrl.path) {

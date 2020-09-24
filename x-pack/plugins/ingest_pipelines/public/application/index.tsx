@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
@@ -29,7 +29,7 @@ export interface AppServices {
 }
 
 export interface CoreServices {
-  http: HttpSetup;
+  http: HttpClient;
 }
 
 export const renderApp = (

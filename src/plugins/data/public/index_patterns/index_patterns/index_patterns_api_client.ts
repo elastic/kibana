@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
 import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
 export class IndexPatternsApiClient implements IIndexPatternsApiClient {
-  private http: HttpStart;
+  private http: HttpClient;
 
-  constructor(http: HttpStart) {
+  constructor(http: HttpClient) {
     this.http = http;
   }
 

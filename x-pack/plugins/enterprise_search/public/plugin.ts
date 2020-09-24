@@ -7,7 +7,7 @@
 import {
   AppMountParameters,
   CoreSetup,
-  HttpSetup,
+  HttpClient,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
@@ -168,7 +168,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     return { config: this.config, data: this.data };
   }
 
-  private async getInitialData(http: HttpSetup) {
+  private async getInitialData(http: HttpClient) {
     if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 

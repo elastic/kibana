@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, HttpClient } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -30,7 +30,7 @@ export interface EditorFrameProps {
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
   onError: (e: { message: string }) => void;
-  core: CoreStart;
+  core: CoreStart & { http: HttpClient };
   plugins: EditorFrameStartPlugins;
   dateRange: {
     fromDate: string;

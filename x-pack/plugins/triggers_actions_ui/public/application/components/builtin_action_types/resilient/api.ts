@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 
 export async function getIncidentTypes({
@@ -12,7 +12,7 @@ export async function getIncidentTypes({
   signal,
   connectorId,
 }: {
-  http: HttpSetup;
+  http: HttpClient;
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
@@ -29,7 +29,7 @@ export async function getSeverity({
   signal,
   connectorId,
 }: {
-  http: HttpSetup;
+  http: HttpClient;
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {

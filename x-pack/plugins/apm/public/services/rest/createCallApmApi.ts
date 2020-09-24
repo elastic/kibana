@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -26,7 +26,7 @@ export let callApmApi: APMClient = () => {
   );
 };
 
-export function createCallApmApi(http: HttpSetup) {
+export function createCallApmApi(http: HttpClient) {
   callApmApi = ((options: APMClientOptions) => {
     const { pathname, params = {}, ...opts } = options;
 

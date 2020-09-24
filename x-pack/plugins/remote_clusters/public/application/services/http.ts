@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup, HttpResponse } from 'kibana/public';
+import { HttpClient, HttpResponse } from 'kibana/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
-let _httpClient: HttpSetup;
+let _httpClient: HttpClient;
 
-export function init(httpClient: HttpSetup): void {
+export function init(httpClient: HttpClient): void {
   _httpClient = httpClient;
 }
 

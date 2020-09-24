@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpClient } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
 import { filtersOperation, FiltersIndexPatternColumn } from './filters';
@@ -80,7 +80,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
-  http: HttpSetup;
+  http: HttpClient;
   dateRange: DateRange;
   data: DataPublicPluginStart;
 }

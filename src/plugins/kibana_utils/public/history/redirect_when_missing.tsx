@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 
-import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
+import { ApplicationStart, HttpClient, ToastsSetup } from 'kibana/public';
 import { SavedObjectNotFound } from '..';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
@@ -59,7 +59,7 @@ export function redirectWhenMissing({
 }: {
   history: History;
   navigateToApp: ApplicationStart['navigateToApp'];
-  basePath: HttpStart['basePath'];
+  basePath: HttpClient['basePath'];
   /**
    * a mapping of url's to redirect to based on the saved object that
    * couldn't be found, or just a string that will be used for all types

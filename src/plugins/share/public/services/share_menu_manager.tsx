@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart, HttpClient } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -70,7 +70,7 @@ export class ShareMenuManager {
     embedUrlParamExtensions,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
-    post: HttpStart['post'];
+    post: HttpClient['post'];
     basePath: string;
   }) {
     if (this.isOpen) {

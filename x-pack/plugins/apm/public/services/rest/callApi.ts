@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
@@ -36,7 +36,7 @@ export function clearCache() {
 export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
-  http: HttpSetup,
+  http: HttpClient,
   fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);

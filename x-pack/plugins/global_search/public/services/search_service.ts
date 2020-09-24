@@ -8,7 +8,7 @@ import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
@@ -75,7 +75,7 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  http: HttpStart;
+  http: HttpClient;
   licenseChecker: ILicenseChecker;
 }
 
@@ -86,7 +86,7 @@ const mapToUndefined = () => undefined;
 export class SearchService {
   private readonly providers = new Map<string, GlobalSearchResultProvider>();
   private config?: GlobalSearchClientConfigType;
-  private http?: HttpStart;
+  private http?: HttpClient;
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
 

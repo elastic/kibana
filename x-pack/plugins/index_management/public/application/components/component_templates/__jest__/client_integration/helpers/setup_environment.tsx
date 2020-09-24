@@ -7,7 +7,7 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
@@ -25,7 +25,7 @@ const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export const appDependencies = {
-  httpClient: (mockHttpClient as unknown) as HttpSetup,
+  httpClient: (mockHttpClient as unknown) as HttpClient,
   apiBasePath: API_BASE_PATH,
   trackMetric: () => {},
   docLinks: docLinksServiceMock.createStartContract(),

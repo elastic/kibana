@@ -6,7 +6,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { HttpFetchQuery, HttpStart } from 'src/core/public';
+import { HttpFetchQuery, HttpClient } from 'src/core/public';
 import * as t from 'io-ts';
 
 function isObject(value: unknown) {
@@ -39,13 +39,13 @@ export const formatErrors = (errors: t.Errors): string[] => {
 
 class ApiService {
   private static instance: ApiService;
-  private _http!: HttpStart;
+  private _http!: HttpClient;
 
   public get http() {
     return this._http;
   }
 
-  public set http(httpSetup: HttpStart) {
+  public set http(httpSetup: HttpClient) {
     this._http = httpSetup;
   }
 

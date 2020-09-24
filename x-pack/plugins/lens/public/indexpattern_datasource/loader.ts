@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
+import { SavedObjectsClientContract, HttpClient, SavedObjectReference } from 'kibana/public';
 import { StateSetter } from '../types';
 import {
   IndexPattern,
@@ -350,7 +350,7 @@ export async function syncExistingFields({
     timeFieldName?: string | null;
     hasRestrictions: boolean;
   }>;
-  fetchJson: HttpSetup['post'];
+  fetchJson: HttpClient['post'];
   setState: SetState;
   isFirstExistenceFetch: boolean;
   currentIndexPatternTitle: string;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import {
   getLogSourceConfigurationPath,
   getLogSourceConfigurationSuccessResponsePayloadRT,
@@ -13,7 +13,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callFetchLogSourceConfigurationAPI = async (
   sourceId: string,
-  fetch: HttpSetup['fetch']
+  fetch: HttpClient['fetch']
 ) => {
   const response = await fetch(getLogSourceConfigurationPath(sourceId), {
     method: 'GET',

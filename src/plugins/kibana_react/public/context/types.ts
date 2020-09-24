@@ -18,11 +18,11 @@
  */
 
 import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+import { CoreStart, HttpClient } from '../../../../core/public';
 import { KibanaReactOverlays } from '../overlays';
 import { KibanaReactNotifications } from '../notifications';
 
-export type KibanaServices = Partial<CoreStart>;
+export type KibanaServices = Partial<Omit<CoreStart, 'http'> & { http: HttpClient }>;
 
 export interface KibanaReactContextValue<Services extends KibanaServices> {
   readonly services: Services;

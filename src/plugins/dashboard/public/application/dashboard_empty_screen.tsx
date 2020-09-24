@@ -28,7 +28,7 @@ import {
   EuiText,
   EuiButton,
 } from '@elastic/eui';
-import { IUiSettingsClient, HttpStart } from 'kibana/public';
+import { IUiSettingsClient, HttpClient } from 'kibana/public';
 import * as constants from './dashboard_empty_screen_constants';
 
 export interface DashboardEmptyScreenProps {
@@ -36,7 +36,7 @@ export interface DashboardEmptyScreenProps {
   onLinkClick: () => void;
   onVisualizeClick?: () => void;
   uiSettings: IUiSettingsClient;
-  http: HttpStart;
+  http: HttpClient;
   isReadonlyMode?: boolean;
 }
 

@@ -50,7 +50,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
-  HttpStart,
+  HttpClient,
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
@@ -90,7 +90,7 @@ export interface SavedObjectsTableProps {
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
-  http: HttpStart;
+  http: HttpClient;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;

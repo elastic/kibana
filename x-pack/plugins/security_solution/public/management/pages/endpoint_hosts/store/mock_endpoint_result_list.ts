@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import {
   GetHostPolicyResponse,
   HostInfo,
@@ -164,7 +164,7 @@ const endpointListApiPathHandlerMocks = ({
  * @param pathHandlersOptions
  */
 export const setEndpointListApiMockImplementation: (
-  mockedHttpService: jest.Mocked<HttpStart>,
+  mockedHttpService: jest.Mocked<HttpClient>,
   apiResponses?: Parameters<typeof endpointListApiPathHandlerMocks>[0]
 ) => void = (
   mockedHttpService,

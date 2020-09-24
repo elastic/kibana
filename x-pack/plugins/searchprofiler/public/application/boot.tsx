@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpStart as Http, ToastsSetup } from 'kibana/public';
+import { HttpClient as Http, ToastsSetup } from 'kibana/public';
 import React from 'react';
 
 import { LicenseStatus } from '../../common';

@@ -120,6 +120,12 @@ export interface HttpStart extends Omit<HttpSetup, 'anonymousPaths'> {
 }
 
 /**
+ * Convenience type compatible with both {@link HttpSetup} and {@link HttpStart}
+ * @public
+ */
+export type HttpClient = Omit<HttpStart, 'anonymousPaths'>;
+
+/**
  * APIs for manipulating the basePath on URL segments.
  * @public
  */

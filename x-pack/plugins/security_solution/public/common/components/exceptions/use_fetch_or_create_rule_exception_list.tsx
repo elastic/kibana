@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { HttpStart } from '../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../src/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
@@ -27,7 +27,7 @@ import {
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 
 export interface UseFetchOrCreateRuleExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   ruleId: Rule['id'];
   exceptionListType: ExceptionListSchema['type'];
   onError: (arg: Error, code: number | null, message: string | null) => void;

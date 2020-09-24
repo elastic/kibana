@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -96,8 +96,8 @@ export function basePath() {
  * Temp solution to allow {@link ml} service to use http from
  * the dependency_cache.
  */
-const proxyHttpStart = new Proxy<HttpStart>(({} as unknown) as HttpStart, {
-  get(obj, prop: keyof HttpStart) {
+const proxyHttpClient = new Proxy<HttpClient>(({} as unknown) as HttpClient, {
+  get(obj, prop: keyof HttpClient) {
     try {
       return getHttp()[prop];
     } catch (e) {
@@ -109,7 +109,7 @@ const proxyHttpStart = new Proxy<HttpStart>(({} as unknown) as HttpStart, {
 
 export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
-export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
+export const ml = mlApiServicesProvider(new HttpService(proxyHttpClient));
 
 export function mlApiServicesProvider(httpService: HttpService) {
   return {

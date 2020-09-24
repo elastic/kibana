@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
+import { HttpClient, SavedObjectsFindOptions } from 'src/core/public';
 import { keysToCamelCaseShallow } from './case_conversion';
 import { SavedObjectWithMetadata } from '../types';
 
@@ -29,7 +29,7 @@ interface SavedObjectsFindResponse {
 }
 
 export async function findObjects(
-  http: HttpStart,
+  http: HttpClient,
   findOptions: SavedObjectsFindOptions
 ): Promise<SavedObjectsFindResponse> {
   const response = await http.get<Record<string, any>>(
@@ -43,7 +43,7 @@ export async function findObjects(
 }
 
 export async function findObject(
-  http: HttpStart,
+  http: HttpClient,
   type: string,
   id: string
 ): Promise<SavedObjectWithMetadata> {

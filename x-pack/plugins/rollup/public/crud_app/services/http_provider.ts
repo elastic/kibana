@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 
-let _http: HttpStart | null = null;
+let _http: HttpClient | null = null;
 
-export function setHttp(http: HttpStart) {
+export function setHttp(http: HttpClient) {
   _http = http;
 }
 

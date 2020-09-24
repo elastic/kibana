@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
-export function putLicense(http: HttpSetup, license: string, acknowledge: boolean) {
+export function putLicense(http: HttpClient, license: string, acknowledge: boolean) {
   return http.put(API_BASE_PATH, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
@@ -20,7 +20,7 @@ export function putLicense(http: HttpSetup, license: string, acknowledge: boolea
   });
 }
 
-export function startBasic(http: HttpSetup, acknowledge: boolean) {
+export function startBasic(http: HttpClient, acknowledge: boolean) {
   return http.post(`${API_BASE_PATH}/start_basic`, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
@@ -33,7 +33,7 @@ export function startBasic(http: HttpSetup, acknowledge: boolean) {
   });
 }
 
-export function startTrial(http: HttpSetup) {
+export function startTrial(http: HttpClient) {
   return http.post(`${API_BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
@@ -42,7 +42,7 @@ export function startTrial(http: HttpSetup) {
   });
 }
 
-export function canStartTrial(http: HttpSetup) {
+export function canStartTrial(http: HttpClient) {
   return http.get(`${API_BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
@@ -51,7 +51,7 @@ export function canStartTrial(http: HttpSetup) {
   });
 }
 
-export function getPermissions(http: HttpSetup) {
+export function getPermissions(http: HttpClient) {
   return http.post(`${API_BASE_PATH}/permissions`, {
     headers: {
       contentType: 'application/json',

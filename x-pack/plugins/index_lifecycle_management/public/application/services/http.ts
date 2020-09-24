@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import {
   UseRequestConfig,
   useRequest as _useRequest,
@@ -14,9 +14,9 @@ interface GenericObject {
   [key: string]: any;
 }
 
-let _httpClient: HttpSetup;
+let _httpClient: HttpClient;
 
-export function init(httpClient: HttpSetup): void {
+export function init(httpClient: HttpClient): void {
   _httpClient = httpClient;
 }
 

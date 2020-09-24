@@ -7,10 +7,10 @@
 import { mockNow } from '../../utils/testHelpers';
 import { clearCache, callApi } from '../rest/callApi';
 import { SessionStorageMock } from './SessionStorageMock';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 
-type HttpMock = HttpSetup & {
-  get: jest.SpyInstance<HttpSetup['get']>;
+type HttpMock = HttpClient & {
+  get: jest.SpyInstance<HttpClient['get']>;
 };
 
 describe('callApi', () => {

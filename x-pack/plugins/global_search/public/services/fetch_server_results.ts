@@ -6,7 +6,7 @@
 
 import { Observable, from, EMPTY } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindOptions } from './types';
 
@@ -23,7 +23,7 @@ interface ServerFetchResponse {
  * all server-side providers are completed.
  */
 export const fetchServerResults = (
-  http: HttpStart,
+  http: HttpClient,
   term: string,
   { preference, aborted$ }: GlobalSearchFindOptions
 ): Observable<GlobalSearchResult[]> => {

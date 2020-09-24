@@ -8,7 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpClient } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
@@ -45,7 +45,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataPluginMockValue,
-  http: {} as HttpSetup,
+  http: {} as HttpClient,
 };
 
 describe('ranges', () => {

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 export async function fetchExportByTypeAndSearch(
-  http: HttpStart,
+  http: HttpClient,
   types: string[],
   search: string | undefined,
   includeReferencesDeep: boolean = false

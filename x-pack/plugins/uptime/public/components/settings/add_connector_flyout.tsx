@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { HttpStart, DocLinksStart, NotificationsStart, ApplicationStart } from 'src/core/public';
+import { HttpClient, DocLinksStart, NotificationsStart, ApplicationStart } from 'src/core/public';
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
@@ -24,7 +24,7 @@ interface KibanaDeps {
   triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
   application: ApplicationStart;
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: HttpClient;
   notifications: NotificationsStart;
 }
 

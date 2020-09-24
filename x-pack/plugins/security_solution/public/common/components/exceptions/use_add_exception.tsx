@@ -6,7 +6,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
-import { HttpStart } from '../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../src/core/public';
 
 import {
   addExceptionListItem,
@@ -47,7 +47,7 @@ export type ReturnUseAddOrUpdateException = [
 ];
 
 export interface UseAddOrUpdateExceptionProps {
-  http: HttpStart;
+  http: HttpClient;
   onError: (arg: Error, code: number | null, message: string | null) => void;
   onSuccess: (updated: number, conficts: number) => void;
 }

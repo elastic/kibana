@@ -6,7 +6,7 @@
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { useAppDependencies } from '../app_context';
 
 export const DeleteModalConfirmation = ({
@@ -25,7 +25,7 @@ export const DeleteModalConfirmation = ({
     http,
   }: {
     ids: string[];
-    http: HttpSetup;
+    http: HttpClient;
   }) => Promise<{ successes: string[]; errors: string[] }>;
   onDeleted: (deleted: string[]) => void;
   onCancel: () => void;

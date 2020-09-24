@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   loadIndexPatterns,
@@ -29,7 +29,7 @@ export const getIndexPatterns = async () => {
 };
 
 export const getIndexOptions = async (
-  http: HttpSetup,
+  http: HttpClient,
   pattern: string,
   indexPatternsParam: string[]
 ) => {
@@ -84,7 +84,7 @@ export const getIndexOptions = async (
   return options;
 };
 
-export const getFields = async (http: HttpSetup, indexes: string[]) => {
+export const getFields = async (http: HttpClient, indexes: string[]) => {
   return await getThresholdAlertTypeFields({ indexes, http });
 };
 

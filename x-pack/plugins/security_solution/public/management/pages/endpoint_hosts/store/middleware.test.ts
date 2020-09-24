@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { applyMiddleware, createStore, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
@@ -29,9 +29,9 @@ jest.mock('../../policy/store/policy_list/services/ingest', () => ({
 }));
 
 describe('endpoint list middleware', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
+  let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: jest.Mocked<HttpClient>;
   type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
   let store: EndpointListStore;
   let getState: EndpointListStore['getState'];
@@ -46,7 +46,7 @@ describe('endpoint list middleware', () => {
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
-    fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = fakeCoreStart.http;
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(
       endpointListReducer,

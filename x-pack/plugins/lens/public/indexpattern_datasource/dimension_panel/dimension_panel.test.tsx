@@ -19,7 +19,12 @@ import {
 import { DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpClient,
+  CoreStart,
+} from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
@@ -138,7 +143,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
-      http: {} as HttpSetup,
+      http: {} as HttpClient,
       data: ({
         fieldFormats: ({
           getType: jest.fn().mockReturnValue({
@@ -151,7 +156,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           }),
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
-      core: {} as CoreSetup,
+      core: {} as CoreStart,
     };
 
     jest.clearAllMocks();

@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, HttpClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { interval } from 'rxjs';
 import {
@@ -325,7 +325,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 };
 
 // convert the data from the visualization API into something easier to digest with charts
-async function getVisualizationData(model: any, visualizeOptions: any, http: HttpSetup) {
+async function getVisualizationData(model: any, visualizeOptions: any, http: HttpClient) {
   const vizData = await getThresholdAlertVisualizationData({
     model,
     visualizeOptions,

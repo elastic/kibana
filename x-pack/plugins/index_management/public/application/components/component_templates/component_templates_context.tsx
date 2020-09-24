@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
+import { HttpClient, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
 
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
@@ -13,7 +13,7 @@ import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 
 interface Props {
-  httpClient: HttpSetup;
+  httpClient: HttpClient;
   apiBasePath: string;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   docLinks: DocLinksStart;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 interface Context {
-  httpClient: HttpSetup;
+  httpClient: HttpClient;
   apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;

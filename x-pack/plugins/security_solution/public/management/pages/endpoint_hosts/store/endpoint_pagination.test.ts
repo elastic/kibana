@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { History, createBrowserHistory } from 'history';
 import { applyMiddleware, Store, createStore } from 'redux';
 
@@ -27,9 +27,9 @@ import {
 import { getEndpointListPath } from '../../../common/routing';
 
 describe('endpoint list pagination: ', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
+  let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: jest.Mocked<HttpClient>;
   let history: History<AppLocation['state']>;
   let store: Store;
   let queryParams: () => EndpointIndexUIQueryParams;
@@ -43,7 +43,7 @@ describe('endpoint list pagination: ', () => {
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart();
     depsStart = depsStartMock();
-    fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = fakeCoreStart.http;
     history = createBrowserHistory();
     const middleware = endpointMiddlewareFactory(fakeCoreStart, depsStart);
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());

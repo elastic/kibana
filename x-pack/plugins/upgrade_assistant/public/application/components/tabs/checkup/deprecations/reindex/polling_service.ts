@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject } from 'rxjs';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import {
   IndexGroup,
   ReindexOperation,
@@ -44,7 +44,7 @@ export class ReindexPollingService {
   public status$: BehaviorSubject<ReindexState>;
   private pollTimeout?: NodeJS.Timeout;
 
-  constructor(private indexName: string, private http: HttpSetup) {
+  constructor(private indexName: string, private http: HttpClient) {
     this.status$ = new BehaviorSubject<ReindexState>({
       loadingState: LoadingState.Loading,
       errorMessage: null,

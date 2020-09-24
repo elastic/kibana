@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, HttpClient } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -36,7 +36,7 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart) {
+export function getMlGlobalServices(httpStart: HttpClient) {
   const httpService = new HttpService(httpStart);
   return {
     httpService,

@@ -6,7 +6,7 @@
 
 import {
   NotificationsStart,
-  HttpStart,
+  HttpClient,
   OverlayStart,
   SavedObjectsClientContract,
 } from 'kibana/public';
@@ -75,7 +75,7 @@ export function createMockGraphStore({
         addSuccess: jest.fn(),
       },
     } as unknown) as NotificationsStart,
-    http: {} as HttpStart,
+    http: {} as HttpClient,
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -172,7 +172,7 @@ export const pureFetchRuleById = async ({
   id,
   http,
   signal,
-}: FetchRuleProps & { http: HttpStart }): Promise<Rule> =>
+}: FetchRuleProps & { http: HttpClient }): Promise<Rule> =>
   http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },

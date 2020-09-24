@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart, HttpClient } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ScopedHistory } from 'kibana/public';
 
@@ -15,7 +15,7 @@ export interface AppDependencies {
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
   docLinks: CoreStart['docLinks'];
-  http: CoreStart['http'];
+  http: HttpClient;
   i18n: CoreStart['i18n'];
   notifications: CoreStart['notifications'];
   uiSettings: CoreStart['uiSettings'];
@@ -26,7 +26,7 @@ export interface AppDependencies {
 }
 
 export const useAppDependencies = () => {
-  return useKibana().services as AppDependencies;
+  return useKibana<AppDependencies>().services as AppDependencies;
 };
 
 export const useToastNotifications = () => {

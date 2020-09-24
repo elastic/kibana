@@ -20,7 +20,7 @@
 import {
   ChromeStart,
   DocLinksStart,
-  HttpStart,
+  HttpClient,
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
@@ -44,7 +44,7 @@ export interface HomeKibanaServices {
   urlForwarding: UrlForwardingStart;
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
-  http: HttpStart;
+  http: HttpClient;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];

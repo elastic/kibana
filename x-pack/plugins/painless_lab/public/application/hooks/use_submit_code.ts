@@ -5,7 +5,7 @@
  */
 
 import { useRef, useCallback, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -14,7 +14,7 @@ import { formatRequestPayload } from '../lib/format';
 
 const DEBOUNCE_MS = 800;
 
-export const useSubmitCode = (http: HttpSetup) => {
+export const useSubmitCode = (http: HttpClient) => {
   const currentRequestIdRef = useRef(0);
   const [response, setResponse] = useState<Response | undefined>(undefined);
   const [inProgress, setInProgress] = useState(false);

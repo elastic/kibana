@@ -18,7 +18,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
@@ -37,7 +37,7 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
 });
 
 export async function getIndices(
-  http: HttpStart,
+  http: HttpClient,
   getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   rawPattern: string,
   showAllIndices: boolean

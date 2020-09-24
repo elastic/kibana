@@ -29,7 +29,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpStart, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpClient, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -54,7 +54,7 @@ interface ActionAccordionFormProps {
   setActionIdByIndex: (id: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
-  http: HttpStart;
+  http: HttpClient;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications: Pick<
     ToastsApi,

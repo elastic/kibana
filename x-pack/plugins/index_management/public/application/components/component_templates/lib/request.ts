@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 
 import {
   UseRequestConfig,
@@ -20,13 +20,13 @@ export type UseRequestHook = <T = any, E = Error>(
 ) => UseRequestResponse<T, E>;
 export type SendRequestHook = (config: SendRequestConfig) => Promise<SendRequestResponse>;
 
-export const getUseRequest = (httpClient: HttpSetup): UseRequestHook => <T = any, E = Error>(
+export const getUseRequest = (httpClient: HttpClient): UseRequestHook => <T = any, E = Error>(
   config: UseRequestConfig
 ) => {
   return _useRequest<T, E>(httpClient, config);
 };
 
-export const getSendRequest = (httpClient: HttpSetup): SendRequestHook => <T = any>(
+export const getSendRequest = (httpClient: HttpClient): SendRequestHook => <T = any>(
   config: SendRequestConfig
 ) => {
   return _sendRequest<T>(httpClient, config);

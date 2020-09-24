@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { User, EditUser } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
 
 export class UserAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpClient) {}
 
   public async getUsers() {
     return await this.http.get<User[]>(usersUrl);

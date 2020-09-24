@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { get } from 'lodash';
 import { SavedObjectRelation } from '../types';
 
 export async function getRelationships(
-  http: HttpStart,
+  http: HttpClient,
   type: string,
   id: string,
   savedObjectTypes: string[]

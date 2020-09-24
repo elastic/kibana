@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
 import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
 
-export async function loadActionTypes({ http }: { http: HttpStart }): Promise<ActionType[]> {
+export async function loadActionTypes({ http }: { http: HttpClient }): Promise<ActionType[]> {
   return await http.get(`${BASE_ACTION_API_PATH}/list_action_types`);
 }
 
-export async function loadAllActions({ http }: { http: HttpStart }): Promise<ActionConnector[]> {
+export async function loadAllActions({ http }: { http: HttpClient }): Promise<ActionConnector[]> {
   return await http.get(`${BASE_ACTION_API_PATH}`);
 }
 
@@ -21,7 +21,7 @@ export async function createActionConnector({
   http,
   connector,
 }: {
-  http: HttpStart;
+  http: HttpClient;
   connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
   return await http.post(`${BASE_ACTION_API_PATH}/action`, {
@@ -34,7 +34,7 @@ export async function updateActionConnector({
   connector,
   id,
 }: {
-  http: HttpStart;
+  http: HttpClient;
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
@@ -52,7 +52,7 @@ export async function deleteActions({
   http,
 }: {
   ids: string[];
-  http: HttpStart;
+  http: HttpClient;
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
@@ -73,7 +73,7 @@ export async function executeAction({
   http,
 }: {
   id: string;
-  http: HttpSetup;
+  http: HttpClient;
   params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<unknown>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {

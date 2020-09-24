@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpClient } from 'src/core/public';
 import { KibanaFeatureConfig, KibanaFeature } from '.';
 
 export class FeaturesAPIClient {
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: HttpClient) {}
 
   public async getFeatures() {
     const features = await this.http.get<KibanaFeatureConfig[]>('/api/features');

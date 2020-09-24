@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
@@ -18,7 +18,7 @@ const generator = new EndpointDocGenerator('policy-list');
  * @param totalPolicies
  */
 export const setPolicyListApiMockImplementation = (
-  mockedHttpService: jest.Mocked<HttpStart>,
+  mockedHttpService: jest.Mocked<HttpClient>,
   totalPolicies: number = 1
 ): void => {
   const policyApiHandlers = policyListApiPathHandlers(totalPolicies);

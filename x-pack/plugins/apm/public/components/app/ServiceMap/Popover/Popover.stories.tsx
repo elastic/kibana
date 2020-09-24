@@ -6,7 +6,7 @@
 
 import { storiesOf } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import React from 'react';
 import { EuiThemeProvider } from '../../../../../../observability/public';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
@@ -32,7 +32,7 @@ storiesOf('app/ServiceMap/Popover', module)
           avgTransactionDuration: 61634.38905590272,
         },
       }),
-    } as unknown) as HttpSetup;
+    } as unknown) as HttpClient;
 
     createCallApmApi(httpMock);
 

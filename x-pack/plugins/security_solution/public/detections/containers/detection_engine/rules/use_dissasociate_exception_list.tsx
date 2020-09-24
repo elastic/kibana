@@ -6,7 +6,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../../../src/core/public';
 import { List } from '../../../../../common/detection_engine/schemas/types/lists';
 import { patchRule } from './api';
 
@@ -14,7 +14,7 @@ type Func = (lists: List[]) => void;
 export type ReturnUseDissasociateExceptionList = [boolean, Func | null];
 
 export interface UseDissasociateExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   ruleRuleId: string;
   onError: (arg: Error) => void;
   onSuccess: () => void;

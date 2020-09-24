@@ -6,7 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, HttpClient } from 'kibana/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
@@ -181,7 +181,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
   showNoDataPopover: () => void;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'notifications' | 'uiSettings'> & { http: HttpClient };
   query: Query;
   dateRange: DateRange;
   filters: Filter[];

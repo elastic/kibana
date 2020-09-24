@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from 'kibana/public';
+import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpClient } from 'kibana/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {
@@ -111,7 +111,7 @@ function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
  * ML Http Service
  */
 export class HttpService {
-  constructor(private httpStart: HttpStart) {}
+  constructor(private httpStart: HttpClient) {}
 
   private getResultHeaders(headers: HeadersInit): HeadersInit {
     return {

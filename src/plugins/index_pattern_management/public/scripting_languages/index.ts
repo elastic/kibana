@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpStart, NotificationsStart } from 'src/core/public';
+import { HttpClient, NotificationsStart } from 'src/core/public';
 
 export function getSupportedScriptingLanguages(): string[] {
   return ['painless'];
@@ -29,7 +29,7 @@ export function getDeprecatedScriptingLanguages(): string[] {
 }
 
 export const getEnabledScriptingLanguages = (
-  http: HttpStart,
+  http: HttpClient,
   toasts: NotificationsStart['toasts']
 ) =>
   http.get('/api/kibana/scripts/languages').catch(() => {

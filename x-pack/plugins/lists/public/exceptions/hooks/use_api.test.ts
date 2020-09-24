@@ -11,7 +11,7 @@ import * as api from '../api';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { HttpStart } from '../../../../../../src/core/public';
+import { HttpClient } from '../../../../../../src/core/public';
 import { ApiCallByIdProps, ApiCallByListIdProps } from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
@@ -34,7 +34,7 @@ describe('useApi', () => {
       .mockResolvedValue(payload);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -65,7 +65,7 @@ describe('useApi', () => {
     jest.spyOn(api, 'deleteExceptionListItemById').mockRejectedValue(mockError);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -91,7 +91,7 @@ describe('useApi', () => {
       .mockResolvedValue(payload);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -122,7 +122,7 @@ describe('useApi', () => {
     jest.spyOn(api, 'deleteExceptionListById').mockRejectedValue(mockError);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -148,7 +148,7 @@ describe('useApi', () => {
       .mockResolvedValue(payload);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -179,7 +179,7 @@ describe('useApi', () => {
     jest.spyOn(api, 'fetchExceptionListItemById').mockRejectedValue(mockError);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -205,7 +205,7 @@ describe('useApi', () => {
       .mockResolvedValue(payload);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -236,7 +236,7 @@ describe('useApi', () => {
     jest.spyOn(api, 'fetchExceptionListById').mockRejectedValue(mockError);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -262,7 +262,7 @@ describe('useApi', () => {
       .mockResolvedValue(output);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -307,7 +307,7 @@ describe('useApi', () => {
       .mockResolvedValue(output);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();
@@ -343,7 +343,7 @@ describe('useApi', () => {
     jest.spyOn(api, 'fetchExceptionListsItemsByListIds').mockRejectedValue(mockError);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+      const { result, waitForNextUpdate } = renderHook<HttpClient, ExceptionsApi>(() =>
         useApi(mockKibanaHttpService)
       );
       await waitForNextUpdate();

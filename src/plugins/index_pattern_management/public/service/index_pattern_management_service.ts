@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpStart } from '../../../../core/public';
+import { HttpClient } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 import { FieldFormatEditors } from './field_format_editors';
@@ -38,7 +38,7 @@ import {
 } from '../components/field_editor/components/field_format_editor';
 
 interface StartDependencies {
-  httpClient: HttpStart;
+  httpClient: HttpClient;
 }
 
 /**

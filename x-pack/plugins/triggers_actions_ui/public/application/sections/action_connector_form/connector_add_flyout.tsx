@@ -21,7 +21,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { HttpClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
@@ -280,7 +280,7 @@ export const ConnectorAddFlyout = ({
   );
 };
 
-const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
+const UpgradeYourLicenseCallOut = ({ http }: { http: HttpClient }) => (
   <EuiCallOut
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',

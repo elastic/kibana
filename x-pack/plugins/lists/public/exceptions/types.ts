@@ -17,7 +17,7 @@ import {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpClient } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;
@@ -35,7 +35,7 @@ export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSc
 export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
 
 export interface PersistHookProps {
-  http: HttpStart;
+  http: HttpClient;
   onError: (arg: Error) => void;
 }
 
@@ -49,7 +49,7 @@ export interface UseExceptionListSuccess {
 }
 
 export interface UseExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   lists: ExceptionIdentifiers[];
   onError?: (arg: string[]) => void;
   filterOptions: FilterExceptionsOptions[];
@@ -68,7 +68,7 @@ export interface ExceptionIdentifiers {
 }
 
 export interface ApiCallByListIdProps {
-  http: HttpStart;
+  http: HttpClient;
   listIds: string[];
   namespaceTypes: NamespaceType[];
   filterOptions: FilterExceptionsOptions[];
@@ -77,7 +77,7 @@ export interface ApiCallByListIdProps {
 }
 
 export interface ApiCallByIdProps {
-  http: HttpStart;
+  http: HttpClient;
   id: string;
   namespaceType: NamespaceType;
   signal: AbortSignal;
@@ -101,30 +101,30 @@ export interface ApiCallFindListsItemsMemoProps {
 }
 
 export interface AddExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   list: CreateExceptionListSchema;
   signal: AbortSignal;
 }
 
 export interface AddExceptionListItemProps {
-  http: HttpStart;
+  http: HttpClient;
   listItem: CreateExceptionListItemSchema;
   signal: AbortSignal;
 }
 
 export interface UpdateExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   list: UpdateExceptionListSchema;
   signal: AbortSignal;
 }
 
 export interface UpdateExceptionListItemProps {
-  http: HttpStart;
+  http: HttpClient;
   listItem: UpdateExceptionListItemSchema;
   signal: AbortSignal;
 }
 
 export interface AddEndpointExceptionListProps {
-  http: HttpStart;
+  http: HttpClient;
   signal: AbortSignal;
 }

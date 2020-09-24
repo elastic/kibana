@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpClient, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getIssueTypes } from './api';
 import * as i18n from './translations';
@@ -13,7 +13,7 @@ import * as i18n from './translations';
 type IssueTypes = Array<{ id: string; name: string }>;
 
 interface Props {
-  http: HttpSetup;
+  http: HttpClient;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
