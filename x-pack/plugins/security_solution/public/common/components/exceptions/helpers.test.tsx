@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  getTagsInclude,
   getFormattedComments,
   filterExceptionItems,
   getNewExceptionItem,
@@ -192,20 +191,6 @@ describe('Exception helpers', () => {
     test('it returns formatted operating systems if multiple specified', () => {
       const result = formatOperatingSystems(['some tag', 'macos', 'some other tag', 'windows']);
       expect(result).toEqual('macOS, Windows');
-    });
-  });
-
-  describe('#getTagsInclude', () => {
-    test('it returns a tuple of "false" and "null" if no matches found', () => {
-      const result = getTagsInclude({ tags: ['some', 'tags', 'here'], regex: /(no match)/ });
-
-      expect(result).toEqual([false, null]);
-    });
-
-    test('it returns a tuple of "true" and matching string if matches found', () => {
-      const result = getTagsInclude({ tags: ['some', 'tags', 'here'], regex: /(some)/ });
-
-      expect(result).toEqual([true, 'some']);
     });
   });
 
@@ -459,33 +444,12 @@ describe('Exception helpers', () => {
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
-          ...getExceptionListItemSchemaMock,
+          ...getExceptionListItemSchemaMock(),
           os_types: ['windows', 'macos'],
         },
         {
-          ...getExceptionListItemSchemaMock,
+          ...getExceptionListItemSchemaMock(),
           os_types: ['windows', 'macos'],
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-
-    test('it should add os tag to all exception items without duplication', () => {
-      const payload = [
-        getExceptionListItemSchemaMock(),
-        { ...getExceptionListItemSchemaMock(), os_types: ['linux', 'windows'] as OsTypeArray },
-        { ...getExceptionListItemSchemaMock(), os_types: ['linux'] as OsTypeArray },
-      ];
-      const osTypes: OsTypeArray = ['windows'];
-      const result = enrichExceptionItemsWithOS(payload, osTypes);
-      const expected = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          os_types: ['linux', 'windows'],
-        },
-        {
-          ...getExceptionListItemSchemaMock(),
-          os_types: ['linux', 'windows'],
         },
       ];
       expect(result).toEqual(expected);

@@ -102,6 +102,7 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
  */
 export const formatOperatingSystems = (osTypes: string[]): string => {
   return osTypes
+    .filter((os) => ['linux', 'macos', 'windows'].includes(os))
     .map((os) => {
       if (os === 'macos') {
         return 'macOS';
@@ -109,21 +110,6 @@ export const formatOperatingSystems = (osTypes: string[]): string => {
       return capitalize(os);
     })
     .join(', ');
-};
-
-/**
- * Returns all tags that match a given regex
- */
-export const getTagsInclude = ({
-  tags,
-  regex,
-}: {
-  tags: string[];
-  regex: RegExp;
-}): [boolean, string | null] => {
-  const matches: string[] | null = tags.join(';').match(regex);
-  const match = matches != null ? matches[1] : null;
-  return [matches != null, match];
 };
 
 /**
@@ -227,7 +213,6 @@ export const formatExceptionItemForUpdate = (
     ...fieldsToUpdate
   } = exceptionItem;
   return {
-    os_types,
     ...fieldsToUpdate,
   };
 };
