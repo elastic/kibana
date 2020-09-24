@@ -16,7 +16,7 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
-import { getConnectorFromConfiguration } from './helpers';
+import { getConnectorFromConfiguration, transformCaseConnectorToEsConnector } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -97,7 +97,9 @@ export function initPushCaseUserActionApi({
         const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
         // old case may not have new attribute connector_id, so we default to the configured system
-        const updateConnector = myCase.attributes.connector ?? caseConfigureConnector;
+        const updateConnector =
+          myCase.attributes.connector ??
+          transformCaseConnectorToEsConnector(caseConfigureConnector);
 
         if (!connectors.some((connector) => connector.id === updateConnector.id)) {
           throw Boom.notFound('Connector not found or set to none');
@@ -119,7 +121,7 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
-              connector: { ...updateConnector },
+              connector: updateConnector,
             },
             version: myCase.version,
           }),

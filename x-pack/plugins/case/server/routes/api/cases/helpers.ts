@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, isPlainObject } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CaseAttributes,
   CasePatchRequest,
   CasesConfigureAttributes,
   CaseConnector,
+  ESCaseConnector,
+  ESCaseAttributes,
+  ESCasePatchRequest,
 } from '../../../../common/api';
 
 interface CompareArrays {
@@ -62,9 +65,9 @@ export const isTwoArraysDifference = (
 };
 
 export const getCaseToUpdate = (
-  currentCase: CaseAttributes,
-  queryCase: CasePatchRequest
-): CasePatchRequest =>
+  currentCase: ESCaseAttributes,
+  queryCase: ESCasePatchRequest
+): ESCasePatchRequest =>
   Object.entries(queryCase).reduce(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
@@ -75,6 +78,15 @@ export const getCaseToUpdate = (
             [key]: value,
           };
         }
+        return acc;
+      } else if (isPlainObject(currentValue) && isPlainObject(value)) {
+        if (!deepEqual(currentValue, value)) {
+          return {
+            ...acc,
+            [key]: value,
+          };
+        }
+
         return acc;
       } else if (currentValue != null && value !== currentValue) {
         return {
@@ -108,4 +120,27 @@ export const getConnectorFromConfiguration = (
       ? caseConfigure.saved_objects[0].attributes.connector.type
       : '.none',
   fields: {},
+});
+
+export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
+  id: connector.id,
+  name: connector.name,
+  type: connector.type,
+  fields: Object.keys(connector.fields).map((fieldKey) => ({
+    key: fieldKey,
+    value: connector.fields[fieldKey],
+  })),
+});
+
+export const transformESConnectorToCaseConnector = (connector: ESCaseConnector): CaseConnector => ({
+  id: connector.id,
+  name: connector.name,
+  type: connector.type,
+  fields: connector.fields.reduce(
+    (fields, field) => ({
+      ...fields,
+      [field.key]: field.value,
+    }),
+    {}
+  ),
 });

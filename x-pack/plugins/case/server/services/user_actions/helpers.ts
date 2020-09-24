@@ -11,10 +11,13 @@ import {
   CaseUserActionAttributes,
   UserAction,
   UserActionField,
-  CaseAttributes,
+  ESCaseAttributes,
   User,
 } from '../../../common/api';
-import { isTwoArraysDifference } from '../../routes/api/cases/helpers';
+import {
+  isTwoArraysDifference,
+  transformESConnectorToCaseConnector,
+} from '../../routes/api/cases/helpers';
 import { UserActionItem } from '.';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 
@@ -135,8 +138,8 @@ export const buildCaseUserActions = ({
 }: {
   actionDate: string;
   actionBy: User;
-  originalCases: Array<SavedObject<CaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+  originalCases: Array<SavedObject<ESCaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<ESCaseAttributes>>;
 }): UserActionItem[] =>
   updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
     const originalItem = originalCases.find((oItem) => oItem.id === updatedItem.id);
@@ -145,8 +148,15 @@ export const buildCaseUserActions = ({
       const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
       updatedFields.forEach((field) => {
         if (userActionFieldsAllowed.includes(field)) {
-          const origValue = get(originalItem, ['attributes', field]);
-          const updatedValue = get(updatedItem, ['attributes', field]);
+          const origValue =
+            field === 'connector' && originalItem.attributes.connector
+              ? transformESConnectorToCaseConnector(originalItem.attributes.connector)
+              : get(originalItem, ['attributes', field]);
+
+          const updatedValue =
+            field === 'connector' && updatedItem.attributes.connector
+              ? transformESConnectorToCaseConnector(updatedItem.attributes.connector)
+              : get(updatedItem, ['attributes', field]);
 
           if (isString(origValue) && isString(updatedValue)) {
             userActions = [
