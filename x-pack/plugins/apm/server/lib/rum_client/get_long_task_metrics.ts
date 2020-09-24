@@ -21,11 +21,14 @@ import {
 
 export async function getPageLoadTransactionIds({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   let result: string[] = [];
@@ -76,29 +79,20 @@ export async function getPageLoadTransactionIds({
 
 export async function getLongTaskMetrics({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery: string;
 }) {
   const transactionsIds = await getPageLoadTransactionIds({ setup });
-
-  let i = 0;
-
-  let maxIndex = 15000;
 
   let sumOfLongTasks = 0;
   let longestLongTask = 0;
   let noOfLongTasks = 0;
 
-  if (transactionsIds.length < maxIndex) {
-    maxIndex = transactionsIds.length;
-  }
-
-  let breakIt = true;
-
-  const transIds = transactionsIds.slice(i, maxIndex);
-
   const projection = getRumLongTasksProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
@@ -111,7 +105,7 @@ export async function getLongTaskMetrics({
             ...projection.body.query.bool.filter,
             {
               terms: {
-                [TRANSACTION_ID]: transIds,
+                [TRANSACTION_ID]: transactionsIds,
               },
             },
           ],
@@ -136,21 +130,12 @@ export async function getLongTaskMetrics({
 
   const response = await apmEventClient.search(params);
 
-  console.log(JSON.stringify(response));
-
   const { sumOfLongTasks: sum, longestLongTask: longest } =
     response.aggregations ?? {};
 
   sumOfLongTasks += sum?.value ?? 0;
   longestLongTask += longest?.value ?? 0;
   noOfLongTasks += response.hits.total.value;
-
-  maxIndex += 15000;
-
-  if (transactionsIds.length < maxIndex) {
-    maxIndex = transactionsIds.length;
-    breakIt = true;
-  }
 
   return {
     noOfLongTasks,

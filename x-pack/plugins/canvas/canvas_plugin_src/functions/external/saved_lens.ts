@@ -72,7 +72,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           id: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
-          title: args.title ? args.title : undefined,
+          title: args.title === null ? undefined : args.title,
           disableTriggers: true,
         },
         embeddableType: EmbeddableTypes.lens,

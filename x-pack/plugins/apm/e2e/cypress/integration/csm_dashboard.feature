@@ -27,3 +27,11 @@ Feature: CSM Dashboard
     Given a user clicks the page load breakdown filter
     When the user selected the breakdown
     Then breakdown series should appear in chart
+
+  Scenario: Search by url filter focus
+    When a user clicks inside url search field
+    Then it displays top pages in the suggestion popover
+
+  Scenario: Search by url filter
+    When a user enters a query in url search field
+    Then it should filter results based on query
