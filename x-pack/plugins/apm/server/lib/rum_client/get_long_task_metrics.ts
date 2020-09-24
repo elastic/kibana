@@ -14,12 +14,17 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { SPAN_DURATION } from '../../../common/elasticsearch_fieldnames';
+import {
+  SPAN_DURATION,
+  TRANSACTION_ID,
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getLongTaskMetrics({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const projection = getRumLongTasksProjection({
     setup,
@@ -28,9 +33,6 @@ export async function getLongTaskMetrics({
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         transIds: {
           terms: {
@@ -59,10 +61,13 @@ export async function getLongTaskMetrics({
   const response = await apmEventClient.search(params);
   const { transIds } = response.aggregations ?? {};
 
-  const validTransactions: string[] = await filterPageLoadTransactions(
+  const validTransactions: string[] = await filterPageLoadTransactions({
     setup,
-    (transIds?.buckets ?? []).map((bucket) => bucket.key as string)
-  );
+    urlQuery,
+    transactionIds: (transIds?.buckets ?? []).map(
+      (bucket) => bucket.key as string
+    ),
+  });
   let noOfLongTasks = 0;
   let sumOfLongTasks = 0;
   let longestLongTask = 0;
@@ -83,12 +88,18 @@ export async function getLongTaskMetrics({
   };
 }
 
-async function filterPageLoadTransactions(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  transactionIds: string[]
-) {
+async function filterPageLoadTransactions({
+  setup,
+  urlQuery,
+  transactionIds,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
+  transactionIds: string[];
+}) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
@@ -99,14 +110,14 @@ async function filterPageLoadTransactions(
           must: [
             {
               terms: {
-                'transaction.id': transactionIds,
+                [TRANSACTION_ID]: transactionIds,
               },
             },
           ],
           filter: [...projection.body.query.bool.filter],
         },
       },
-      _source: ['transaction.id'],
+      _source: [TRANSACTION_ID],
     },
   });
 

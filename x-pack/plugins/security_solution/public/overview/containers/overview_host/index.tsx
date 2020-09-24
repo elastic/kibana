@@ -12,7 +12,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
   HostsQueries,
   HostOverviewRequestOptions,
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
@@ -20,7 +20,11 @@ import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
 import { useManageSource } from '../../../common/containers/sourcerer';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -31,7 +35,7 @@ export interface HostOverviewArgs {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  overviewHost: HostOverviewStrategyResponse['overviewHost'];
+  overviewHost: HostsOverviewStrategyResponse['overviewHost'];
   refetch: inputsModel.Refetch;
 }
 
@@ -90,13 +94,13 @@ export const useHostOverview = ({
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostOverviewRequestOptions, HostOverviewStrategyResponse>(request, {
+          .search<HostOverviewRequestOptions, HostsOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostOverviewResponse((prevResponse) => ({
@@ -107,7 +111,7 @@ export const useHostOverview = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }

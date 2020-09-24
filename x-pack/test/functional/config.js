@@ -351,6 +351,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        meta_for_geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['meta_for_geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         geoconnections_data_reader: {
           elasticsearch: {
             indices: [

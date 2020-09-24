@@ -73,12 +73,6 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface UsersSortField {
-  field: UsersFields;
-
-  direction: Direction;
-}
-
 export interface NetworkTopTablesSortField {
   field: NetworkTopTablesFields;
 
@@ -92,12 +86,6 @@ export interface NetworkDnsSortField {
 }
 
 export interface NetworkHttpSortField {
-  direction: Direction;
-}
-
-export interface TlsSortField {
-  field: TlsFields;
-
   direction: Direction;
 }
 
@@ -313,18 +301,6 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
-export enum FlowTarget {
-  client = 'client',
-  destination = 'destination',
-  server = 'server',
-  source = 'source',
-}
-
 export enum HistogramType {
   authentications = 'authentications',
   anomalies = 'anomalies',
@@ -352,10 +328,6 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export enum TlsFields {
-  _id = '_id',
 }
 
 export enum DataProviderType {
@@ -416,6 +388,13 @@ export enum NetworkHttpFields {
   path = 'path',
   requestCount = 'requestCount',
   statuses = 'statuses',
+}
+
+export enum FlowTarget {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
 }
 
 export enum FlowDirection {
@@ -543,10 +522,6 @@ export interface Source {
 
   HostFirstLastSeen: FirstLastSeenHost;
 
-  IpOverview?: Maybe<IpOverviewData>;
-
-  Users: UsersData;
-
   KpiNetwork?: Maybe<KpiNetworkData>;
 
   KpiHosts: KpiHostsData;
@@ -564,14 +539,6 @@ export interface Source {
   NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
-
-  OverviewNetwork?: Maybe<OverviewNetworkData>;
-
-  OverviewHost?: Maybe<OverviewHostData>;
-
-  Tls: TlsData;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1504,76 +1471,6 @@ export interface FirstLastSeenHost {
   lastSeen?: Maybe<string>;
 }
 
-export interface IpOverviewData {
-  client?: Maybe<Overview>;
-
-  destination?: Maybe<Overview>;
-
-  host: HostEcsFields;
-
-  server?: Maybe<Overview>;
-
-  source?: Maybe<Overview>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface Overview {
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-
-  autonomousSystem: AutonomousSystem;
-
-  geo: GeoEcsFields;
-}
-
-export interface AutonomousSystem {
-  number?: Maybe<number>;
-
-  organization?: Maybe<AutonomousSystemOrganization>;
-}
-
-export interface AutonomousSystemOrganization {
-  name?: Maybe<string>;
-}
-
-export interface UsersData {
-  edges: UsersEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UsersEdges {
-  node: UsersNode;
-
-  cursor: CursorType;
-}
-
-export interface UsersNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  user?: Maybe<UsersItem>;
-}
-
-export interface UsersItem {
-  name?: Maybe<string>;
-
-  id?: Maybe<string[]>;
-
-  groupId?: Maybe<string[]>;
-
-  groupName?: Maybe<string[]>;
-
-  count?: Maybe<number>;
-}
-
 export interface KpiNetworkData {
   networkEvents?: Maybe<number>;
 
@@ -1868,122 +1765,6 @@ export interface NetworkHttpItem {
   requestCount?: Maybe<number>;
 
   statuses: string[];
-}
-
-export interface OverviewNetworkData {
-  auditbeatSocket?: Maybe<number>;
-
-  filebeatCisco?: Maybe<number>;
-
-  filebeatNetflow?: Maybe<number>;
-
-  filebeatPanw?: Maybe<number>;
-
-  filebeatSuricata?: Maybe<number>;
-
-  filebeatZeek?: Maybe<number>;
-
-  packetbeatDNS?: Maybe<number>;
-
-  packetbeatFlow?: Maybe<number>;
-
-  packetbeatTLS?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: Maybe<number>;
-
-  auditbeatFIM?: Maybe<number>;
-
-  auditbeatLogin?: Maybe<number>;
-
-  auditbeatPackage?: Maybe<number>;
-
-  auditbeatProcess?: Maybe<number>;
-
-  auditbeatUser?: Maybe<number>;
-
-  endgameDns?: Maybe<number>;
-
-  endgameFile?: Maybe<number>;
-
-  endgameImageLoad?: Maybe<number>;
-
-  endgameNetwork?: Maybe<number>;
-
-  endgameProcess?: Maybe<number>;
-
-  endgameRegistry?: Maybe<number>;
-
-  endgameSecurity?: Maybe<number>;
-
-  filebeatSystemModule?: Maybe<number>;
-
-  winlogbeatSecurity?: Maybe<number>;
-
-  winlogbeatMWSysmonOperational?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  notAfter?: Maybe<string[]>;
-
-  subjects?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuers?: Maybe<string[]>;
-}
-
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: Maybe<UserEcsFields>;
 }
 
 export interface SayMyName {
@@ -2412,34 +2193,6 @@ export interface HostFirstLastSeenSourceArgs {
 
   docValueFields: DocValueFieldsInput[];
 }
-export interface IpOverviewSourceArgs {
-  id?: Maybe<string>;
-
-  filterQuery?: Maybe<string>;
-
-  ip: string;
-
-  defaultIndex: string[];
-
-  docValueFields: DocValueFieldsInput[];
-}
-export interface UsersSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: UsersSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface KpiNetworkSourceArgs {
   id?: Maybe<string>;
 
@@ -2552,50 +2305,6 @@ export interface NetworkHttpSourceArgs {
   sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTargetSourceDest;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
 }
@@ -2930,6 +2639,116 @@ export namespace GetAuthenticationsQuery {
   };
 }
 
+export namespace GetHostOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostOverview: HostOverview;
+  };
+
+  export type HostOverview = {
+    __typename?: 'HostItem';
+
+    _id: Maybe<string>;
+
+    host: Maybe<Host>;
+
+    cloud: Maybe<Cloud>;
+
+    inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture: Maybe<string[]>;
+
+    id: Maybe<string[]>;
+
+    ip: Maybe<string[]>;
+
+    mac: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    os: Maybe<Os>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    platform: Maybe<string[]>;
+
+    version: Maybe<string[]>;
+  };
+
+  export type Cloud = {
+    __typename?: 'CloudFields';
+
+    instance: Maybe<Instance>;
+
+    machine: Maybe<Machine>;
+
+    provider: Maybe<(Maybe<string>)[]>;
+
+    region: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Instance = {
+    __typename?: 'CloudInstance';
+
+    id: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Machine = {
+    __typename?: 'CloudMachine';
+
+    type: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
+  };
+}
+
 export namespace GetHostFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
@@ -3060,116 +2879,6 @@ export namespace GetHostsTableQuery {
   };
 }
 
-export namespace GetHostOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostOverview: HostOverview;
-  };
-
-  export type HostOverview = {
-    __typename?: 'HostItem';
-
-    _id: Maybe<string>;
-
-    host: Maybe<Host>;
-
-    cloud: Maybe<Cloud>;
-
-    inspect: Maybe<Inspect>;
-
-    endpoint: Maybe<Endpoint>;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture: Maybe<string[]>;
-
-    id: Maybe<string[]>;
-
-    ip: Maybe<string[]>;
-
-    mac: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    os: Maybe<Os>;
-
-    type: Maybe<string[]>;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    platform: Maybe<string[]>;
-
-    version: Maybe<string[]>;
-  };
-
-  export type Cloud = {
-    __typename?: 'CloudFields';
-
-    instance: Maybe<Instance>;
-
-    machine: Maybe<Machine>;
-
-    provider: Maybe<(Maybe<string>)[]>;
-
-    region: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Instance = {
-    __typename?: 'CloudInstance';
-
-    id: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Machine = {
-    __typename?: 'CloudMachine';
-
-    type: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type Endpoint = {
-    __typename?: 'EndpointFields';
-
-    endpointPolicy: Maybe<string>;
-
-    policyStatus: Maybe<HostPolicyResponseActionStatus>;
-
-    sensorVersion: Maybe<string>;
-  };
-}
-
 export namespace GetKpiHostDetailsQuery {
   export type Variables = {
     sourceId: string;
@@ -3290,290 +2999,6 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUncommonProcessesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    UncommonProcesses: UncommonProcesses;
-  };
-
-  export type UncommonProcesses = {
-    __typename?: 'UncommonProcessesData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UncommonProcessesEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UncommonProcessItem';
-
-    _id: string;
-
-    instances: number;
-
-    process: Process;
-
-    user: Maybe<User>;
-
-    hosts: Hosts[];
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    args: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    id: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetIpOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    ip: string;
-    defaultIndex: string[];
-    inspect: boolean;
-    docValueFields: DocValueFieldsInput[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    IpOverview: Maybe<IpOverview>;
-  };
-
-  export type IpOverview = {
-    __typename?: 'IpOverviewData';
-
-    source: Maybe<_Source>;
-
-    destination: Maybe<Destination>;
-
-    host: Host;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type _Source = {
-    __typename?: 'Overview';
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-
-    autonomousSystem: AutonomousSystem;
-
-    geo: Geo;
-  };
-
-  export type AutonomousSystem = {
-    __typename?: 'AutonomousSystem';
-
-    number: Maybe<number>;
-
-    organization: Maybe<Organization>;
-  };
-
-  export type Organization = {
-    __typename?: 'AutonomousSystemOrganization';
-
-    name: Maybe<string>;
-  };
-
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name: Maybe<string[]>;
-
-    city_name: Maybe<string[]>;
-
-    country_iso_code: Maybe<string[]>;
-
-    country_name: Maybe<string[]>;
-
-    location: Maybe<Location>;
-
-    region_iso_code: Maybe<string[]>;
-
-    region_name: Maybe<string[]>;
-  };
-
-  export type Location = {
-    __typename?: 'Location';
-
-    lat: Maybe<number[]>;
-
-    lon: Maybe<number[]>;
-  };
-
-  export type Destination = {
-    __typename?: 'Overview';
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-
-    autonomousSystem: _AutonomousSystem;
-
-    geo: _Geo;
-  };
-
-  export type _AutonomousSystem = {
-    __typename?: 'AutonomousSystem';
-
-    number: Maybe<number>;
-
-    organization: Maybe<_Organization>;
-  };
-
-  export type _Organization = {
-    __typename?: 'AutonomousSystemOrganization';
-
-    name: Maybe<string>;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name: Maybe<string[]>;
-
-    city_name: Maybe<string[]>;
-
-    country_iso_code: Maybe<string[]>;
-
-    country_name: Maybe<string[]>;
-
-    location: Maybe<_Location>;
-
-    region_iso_code: Maybe<string[]>;
-
-    region_name: Maybe<string[]>;
-  };
-
-  export type _Location = {
-    __typename?: 'Location';
-
-    lat: Maybe<number[]>;
-
-    lon: Maybe<number[]>;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture: Maybe<string[]>;
-
-    id: Maybe<string[]>;
-
-    ip: Maybe<string[]>;
-
-    mac: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    os: Maybe<Os>;
-
-    type: Maybe<string[]>;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    platform: Maybe<string[]>;
-
-    version: Maybe<string[]>;
-  };
 
   export type Inspect = {
     __typename?: 'Inspect';
@@ -4108,310 +3533,6 @@ export namespace GetNetworkTopNFlowQuery {
     fakeTotalCount: number;
 
     showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetTlsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTargetSourceDest;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: TlsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Tls: Tls;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'TlsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'TlsNode';
-
-    _id: Maybe<string>;
-
-    subjects: Maybe<string[]>;
-
-    ja3: Maybe<string[]>;
-
-    issuers: Maybe<string[]>;
-
-    notAfter: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUsersQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: UsersSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Users: Users;
-  };
-
-  export type Users = {
-    __typename?: 'UsersData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UsersEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UsersNode';
-
-    user: Maybe<User>;
-  };
-
-  export type User = {
-    __typename?: 'UsersItem';
-
-    name: Maybe<string>;
-
-    id: Maybe<string[]>;
-
-    groupId: Maybe<string[]>;
-
-    groupName: Maybe<string[]>;
-
-    count: Maybe<number>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewHostQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewHost: Maybe<OverviewHost>;
-  };
-
-  export type OverviewHost = {
-    __typename?: 'OverviewHostData';
-
-    auditbeatAuditd: Maybe<number>;
-
-    auditbeatFIM: Maybe<number>;
-
-    auditbeatLogin: Maybe<number>;
-
-    auditbeatPackage: Maybe<number>;
-
-    auditbeatProcess: Maybe<number>;
-
-    auditbeatUser: Maybe<number>;
-
-    endgameDns: Maybe<number>;
-
-    endgameFile: Maybe<number>;
-
-    endgameImageLoad: Maybe<number>;
-
-    endgameNetwork: Maybe<number>;
-
-    endgameProcess: Maybe<number>;
-
-    endgameRegistry: Maybe<number>;
-
-    endgameSecurity: Maybe<number>;
-
-    filebeatSystemModule: Maybe<number>;
-
-    winlogbeatSecurity: Maybe<number>;
-
-    winlogbeatMWSysmonOperational: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewNetworkQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewNetwork: Maybe<OverviewNetwork>;
-  };
-
-  export type OverviewNetwork = {
-    __typename?: 'OverviewNetworkData';
-
-    auditbeatSocket: Maybe<number>;
-
-    filebeatCisco: Maybe<number>;
-
-    filebeatNetflow: Maybe<number>;
-
-    filebeatPanw: Maybe<number>;
-
-    filebeatSuricata: Maybe<number>;
-
-    filebeatZeek: Maybe<number>;
-
-    packetbeatDNS: Maybe<number>;
-
-    packetbeatFlow: Maybe<number>;
-
-    packetbeatTLS: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
   };
 
   export type Inspect = {
