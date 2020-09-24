@@ -25,7 +25,7 @@ describe('useFormattedDate', () => {
       return <div data-test-subj={testID}>{formattedDate}</div>;
     }
 
-    reactRenderResult = (date: string | number | undefined) =>
+    reactRenderResult = (date: string | number | undefined): RenderResult =>
       render(
         <KibanaContextProvider services={mockCoreStart}>
           <Test date={date} />

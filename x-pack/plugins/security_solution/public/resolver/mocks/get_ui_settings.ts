@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getUiSettings(key: string): string {
+export function getUiSettings(key: string): string | undefined {
   if (key === 'dateFormat') {
     return 'MMM D, YYYY @ HH:mm:ss.SSS';
   }
