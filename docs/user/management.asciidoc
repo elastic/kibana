@@ -58,12 +58,12 @@ years of historical data in combination with your raw data.
 | {ref}/transforms.html[Transforms]
 |Use transforms to pivot existing {es} indices into summarized or entity-centric indices.
 
-| <<managing-cross-cluster-replication, Cross-Cluster Replication>>
+| {ref}/ccr-getting-started.html[Cross-Cluster Replication]
 |Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
 This is important for
 disaster recovery. It also keeps data local for faster queries.
 
-| <<working-remote-clusters, Remote Clusters>>
+| {ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Remote Clusters]
 |Manage your remote clusters for use with cross-cluster search and cross-cluster replication.
 You can add and remove remote clusters, and check their connectivity.
 |===
@@ -180,8 +180,6 @@ include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-ccr.asciidoc[]
-
 include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
 
 include::{kib-repo-dir}/management/index-lifecycle-policies/create-policy.asciidoc[]
@@ -199,8 +197,6 @@ include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
-
-include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
 
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
