@@ -51,21 +51,25 @@ interface Props {
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
 const DEFAULT_BASE_EXPRESSION = {
-  count: {
-    value: 75,
-    comparator: Comparator.GT,
-  },
   timeSize: 5,
   timeUnit: 'm',
 };
 
 const DEFAULT_COUNT_EXPRESSION = {
   ...DEFAULT_BASE_EXPRESSION,
+  count: {
+    value: 75,
+    comparator: Comparator.GT,
+  },
   criteria: [DEFAULT_CRITERIA],
 };
 
 const DEFAULT_RATIO_EXPRESSION = {
   ...DEFAULT_BASE_EXPRESSION,
+  count: {
+    value: 2,
+    comparator: Comparator.GT,
+  },
   criteria: [
     [DEFAULT_CRITERIA],
     [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
@@ -207,10 +211,13 @@ export const Editor: React.FC<Props> = (props) => {
 
   const updateType = useCallback(
     (type: ThresholdType) => {
-      if (type === 'count') {
-        setAlertParams('criteria', DEFAULT_COUNT_EXPRESSION.criteria);
-      } else {
-        setAlertParams('criteria', DEFAULT_RATIO_EXPRESSION.criteria);
+      const defaults = type === 'count' ? DEFAULT_COUNT_EXPRESSION : DEFAULT_RATIO_EXPRESSION;
+      // Reset properties that don't make sense switching from one context to the other
+      for (const [key, value] of Object.entries({
+        criteria: defaults.criteria,
+        count: defaults.count,
+      })) {
+        setAlertParams(key, value);
       }
     },
     [setAlertParams]
