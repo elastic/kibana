@@ -28,19 +28,19 @@ async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
     // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
     accept_enterprise: true,
   });
-  return body.license;
+  return body;
 }
 /**
  * Get the cluster's license from the connected node.
  *
- * This is the equivalent of GET /_license?local=true&accept_enterprise=true .
+ * This is the equivalent of GET /_license?local=true&accept_enterprise=true.
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *
- * In OSS we'll get a 400 response using the nwe client and need to catch that error too
+ * In OSS we'll get a 400 response using the new elasticsearch client.
  */
 async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
-  // Fetching the license from the local node is cheaper than getting it from the master node and good enough
+  // Fetching the local license is cheaper than getting it from the master node and good enough
   const { license } = await fetchLicense(esClient, true).catch(async (err) => {
     if (cachedLicense) {
       try {
