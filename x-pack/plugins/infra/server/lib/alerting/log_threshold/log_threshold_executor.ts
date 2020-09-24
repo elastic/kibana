@@ -21,7 +21,7 @@ import {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   AlertParamsRT,
-  isRatioAlert,
+  isRatioAlertParams,
   hasGroupBy,
   getNumerator,
   getDenominator,
@@ -58,9 +58,9 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     try {
       const validatedParams = decodeOrThrow(AlertParamsRT)(params);
 
-      if (!isRatioAlert(validatedParams.criteria)) {
+      if (!isRatioAlertParams(validatedParams)) {
         await executeAlert(
-          validatedParams as CountAlertParams,
+          validatedParams,
           timestampField,
           indexPattern,
           callCluster,
@@ -68,7 +68,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         );
       } else {
         await executeRatioAlert(
-          validatedParams as RatioAlertParams,
+          validatedParams,
           timestampField,
           indexPattern,
           callCluster,

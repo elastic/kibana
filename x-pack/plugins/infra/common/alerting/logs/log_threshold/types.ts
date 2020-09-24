@@ -171,8 +171,12 @@ export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
 export const AlertParamsRT = rt.union([alertParamsRT, ratioAlertParamsRT]);
 export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
 
-export const isRatioAlert = (criteria: AlertParams['criteria']) => {
+export const isRatioAlert = (criteria: AlertParams['criteria']): criteria is RatioCriteria => {
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
+};
+
+export const isRatioAlertParams = (params: AlertParams): params is RatioAlertParams => {
+  return isRatioAlert(params.criteria);
 };
 
 export const getNumerator = (criteria: RatioCriteria): Criteria => {
