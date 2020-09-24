@@ -41,6 +41,7 @@ describe('TrustedAppsPage', () => {
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
     });
+    window.scrollTo = jest.fn();
   });
 
   test.skip('rendering', () => {
