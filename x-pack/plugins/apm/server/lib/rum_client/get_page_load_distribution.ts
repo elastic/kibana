@@ -40,13 +40,16 @@ export async function getPageLoadDistribution({
   setup,
   minPercentile,
   maxPercentile,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   minPercentile?: string;
   maxPercentile?: string;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {

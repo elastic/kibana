@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isPlainObject from 'lodash/isPlainObject';
 /**
  * Deeply merges two objects, omitting undefined values, and not deeply merging Arrays.
