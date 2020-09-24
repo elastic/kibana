@@ -56,7 +56,8 @@ test('Allows to manage drilldowns', async () => {
 
   fireEvent.click(screen.getByText(/Create new/i));
 
-  let [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  let [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  let createButton = screen.getByRole('button', { name: /Create Drilldown/i });
   expect(createHeading).toBeVisible();
   expect(screen.getByLabelText(/Back/i)).toBeVisible();
 
@@ -77,7 +78,8 @@ test('Allows to manage drilldowns', async () => {
     target: { value: URL },
   });
 
-  [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  createButton = screen.getByRole('button', { name: /Create Drilldown/i });
 
   expect(createButton).toBeEnabled();
   fireEvent.click(createButton);

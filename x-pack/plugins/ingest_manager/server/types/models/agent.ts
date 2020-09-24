@@ -62,7 +62,12 @@ export const AgentEventSchema = schema.object({
 });
 
 export const NewAgentActionSchema = schema.object({
-  type: schema.oneOf([schema.literal('CONFIG_CHANGE'), schema.literal('UNENROLL')]),
+  type: schema.oneOf([
+    schema.literal('CONFIG_CHANGE'),
+    schema.literal('UNENROLL'),
+    schema.literal('UPGRADE'),
+  ]),
   data: schema.maybe(schema.any()),
+  ack_data: schema.maybe(schema.any()),
   sent_at: schema.maybe(schema.string()),
 });
