@@ -6,7 +6,9 @@
 
 import expect from '@kbn/expect';
 
+// @ts-expect-error
 import { uncommonProcessesQuery } from '../../../../plugins/security_solution/public/hosts/containers/uncommon_processes/index.gql_query';
+// @ts-expect-error
 import { GetUncommonProcessesQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
