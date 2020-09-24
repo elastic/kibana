@@ -192,16 +192,13 @@ export const DataGrid: FC<Props> = memo(
 
     if (status === INDEX_STATUS.ERROR) {
       // if it's a searchBar syntax error leave the table visible so they can try again
-      if (!errorMessage.includes('failed to create query')) {
+      if (errorMessage && !errorMessage.includes('failed to create query')) {
         errorCallout = (
           <EuiCallOut
-            title={i18n.translate(
-              'xpack.ml.dataframe.analytics.regressionExploration.querySyntaxError',
-              {
-                defaultMessage:
-                  'An error occurred loading the index data. Please ensure your query syntax is valid.',
-              }
-            )}
+            title={i18n.translate('xpack.ml.dataframe.analytics.exploration.querySyntaxError', {
+              defaultMessage:
+                'An error occurred loading the index data. Please ensure your query syntax is valid.',
+            })}
             color="danger"
             iconType="cross"
           >
