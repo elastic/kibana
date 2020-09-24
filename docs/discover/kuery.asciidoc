@@ -60,7 +60,7 @@ To match documents where `response` is 200, `extension` is php, or both:
 response:200 or extension:php
 -------------------
 
-To match documents where `response` is 200 and `extension` is php:
+To match documents where response is `200` and extension is `php`:
 
 [source,yaml]
 -------------------
