@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, mount } from 'enzyme';
-import { MarkdownVisWrapper } from './markdown_vis_controller';
+import MarkdownVisComponent from './markdown_vis_controller';
 
 describe('markdown vis controller', () => {
   it('should set html from markdown params', () => {
@@ -32,9 +32,7 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
-    );
+    const wrapper = render(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
     expect(wrapper.find('a').text()).toBe('markdown');
   });
 
@@ -47,9 +45,7 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
-    );
+    const wrapper = render(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
   });
 
@@ -62,12 +58,10 @@ describe('markdown vis controller', () => {
       },
     };
 
-    const wrapper = mount(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
-    );
+    const wrapper = mount(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
     expect(wrapper.text().trim()).toBe('Initial');
     vis.params.markdown = 'Updated';
-    wrapper.setProps({ vis });
+    wrapper.setProps({ ...vis.params });
     expect(wrapper.text().trim()).toBe('Updated');
   });
 
@@ -87,54 +81,24 @@ describe('markdown vis controller', () => {
     });
 
     it('should be called on initial rendering', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      mount(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
 
     it('should be called on successive render when params change', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      mount(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
       expect(renderComplete.mock.calls.length).toBe(1);
       renderComplete.mockClear();
       vis.params.markdown = 'changed';
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      mount(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
 
     it('should be called on successive render even without data change', () => {
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      mount(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
       expect(renderComplete.mock.calls.length).toBe(1);
       renderComplete.mockClear();
-      mount(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      mount(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
   });
