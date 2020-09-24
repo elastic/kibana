@@ -17,6 +17,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTable,
+  EuiTableHeader,
+  EuiTableHeaderCell,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
@@ -26,7 +28,6 @@ import { Loading } from '../../../components/shared/loading';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourceIcon } from '../../../components/shared/source_icon';
 
-import { TableHeader } from '../../../../shared/table_header';
 import { GroupLogic } from '../group_logic';
 
 import { IContentSource } from '../../../types';
@@ -45,7 +46,6 @@ export const GroupSourcePrioritization: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const headerItems = ['Source', 'Relevance Priority'];
   const headerAction = (
     <EuiButton
       disabled={groupPrioritiesUnchanged}
@@ -69,19 +69,18 @@ export const GroupSourcePrioritization: React.FC = () => {
         titleSize="s"
         title={<h3>No sources are shared with this group</h3>}
         body={<>Share two or more sources with {groupName} to customize source prioritization.</>}
-        actions={
-          <EuiButton onClick={showSharedSourcesModal} color="secondary" fill>
-            Add shared content sources
-          </EuiButton>
-        }
+        actions={<EuiButton onClick={showSharedSourcesModal}>Add shared content sources</EuiButton>}
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>
   );
 
   const sourceTable = (
-    <EuiTable className="table table--emphasized" responsive={false}>
-      <TableHeader headerItems={headerItems} />
+    <EuiTable className="table table--emphasized" responsive={false} tableLayout="auto">
+      <EuiTableHeader>
+        <EuiTableHeaderCell>Source</EuiTableHeaderCell>
+        <EuiTableHeaderCell align="right">Relevance Priority</EuiTableHeaderCell>
+      </EuiTableHeader>
       <EuiTableBody>
         {contentSources.map(({ id, name, serviceType }: IContentSource) => (
           <EuiTableRow key={id} data-test-subj="GroupsRow">
@@ -95,7 +94,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell>
+            <EuiTableRowCell align="right">
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange

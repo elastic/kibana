@@ -30,6 +30,8 @@ import { ADD_SOURCE_PATH, SOURCE_DETAILS_PATH, getContentSourcePath } from '../.
 
 import { SourceIcon } from '../source_icon';
 
+import './source_row.scss';
+
 const CREDENTIALS_INVALID_ERROR_REASON = 1;
 
 export interface ISourceRow {
@@ -100,7 +102,12 @@ export const SourceRow: React.FC<ISourceRowProps> = ({
   return (
     <EuiTableRow data-test-subj="GroupsRow" className={rowClass}>
       <EuiTableRowCell>
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          alignItems="center"
+          gutterSize="xs"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <SourceIcon
               serviceType={isIndexing ? 'loadingSmall' : serviceType}
