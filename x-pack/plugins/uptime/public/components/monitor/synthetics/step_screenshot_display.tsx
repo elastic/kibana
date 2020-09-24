@@ -55,7 +55,7 @@ export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
 
   let content: JSX.Element;
   if (screenshot) {
-    const screenshotSrc = `data:image/png;base64,${screenshot}`;
+    const screenshotSrc = `data:image/jpeg;base64,${screenshot}`;
     content = (
       <>
         {isOverlayOpen && (

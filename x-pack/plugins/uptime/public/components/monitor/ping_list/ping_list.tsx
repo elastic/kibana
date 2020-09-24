@@ -100,7 +100,7 @@ export function rowShouldExpand(item: Ping) {
   return (
     !!item.error ||
     (item.http?.response?.body?.bytes ?? 0 > 0) ||
-    item.monitor.type === 'suitejourney'
+    item.monitor.type === 'suitejourney' || item.monitor.type === "browser"
   );
 }
 

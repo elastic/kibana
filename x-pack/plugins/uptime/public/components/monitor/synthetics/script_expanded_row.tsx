@@ -14,9 +14,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, FC } from 'react';
+import React, { useCallback, useContext, useEffect, FC, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UptimeThemeContext } from '../../../contexts';
+import { SyntheticsPing } from 'x-pack/plugins/uptime/common/runtime_types';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
@@ -60,9 +60,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
       dispatch(getJourneySteps({ checkGroup }));
     }
   }, [dispatch, checkGroup]);
-  const {
-    colors: { success: successColor, danger: failColor },
-  } = useContext(UptimeThemeContext);
+
   const f = useSelector(journeySelector);
   const journey = f.journeys.find((j) => j.checkGroup === checkGroup);
   const fetchScreenshot = useCallback(
@@ -89,6 +87,75 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
   );
 };
 
+const StepComponent: FC<{
+  step: SyntheticsPing;
+  index: number;
+  fetchScreenshot: (stepIndex: number) => void;
+}> = ({ step, index, fetchScreenshot }) => {
+  return (
+    <>
+      <div style={{ padding: '8px' }}>
+        <div>
+          <EuiText>
+            <strong>
+              {index + 1}. {step.synthetics?.step.name}
+            </strong>
+          </EuiText>
+        </div>
+        <EuiSpacer size="s" />
+        <div>
+          <StatusBadge status={step.synthetics!.payload!.status!} />
+        </div>
+        <EuiSpacer />
+        <div>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <StepScreenshotDisplay
+                isLoading={step.synthetics!.screenshotLoading!}
+                screenshot={step.synthetics!.blob!}
+                stepIndex={step.synthetics!.step.index}
+                fetchScreenshot={fetchScreenshot}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {step?.synthetics?.payload?.source && (
+                <EuiAccordion id={step.synthetics.step.name + index} buttonContent="Step script">
+                  <EuiText>
+                    <EuiCode language="javascript">{step.synthetics.payload.source!}</EuiCode>
+                  </EuiText>
+                </EuiAccordion>
+              )}
+              {step?.synthetics?.payload?.error && (
+                <EuiAccordion id={`${step.synthetics.step.name}_error`} buttonContent="Error">
+                  <EuiCodeBlock
+                    isCopyable={true}
+                    overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+                    language="html"
+                  >
+                    {step.synthetics.payload.error.message}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+              )}
+              {step?.synthetics?.payload?.error?.stack && (
+                <EuiAccordion id={`${step.synthetics.step.name}_stack`} buttonContent="Stack trace">
+                  <EuiCodeBlock
+                    isCopyable={true}
+                    overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+                    language="html"
+                  >
+                    {step.synthetics.payload.error.stack}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+      <EuiSpacer />
+    </>
+  );
+};
+
 type ComponentProps = ScriptExpandedRowProps & {
   fetchScreenshot: (stepIndex: number) => void;
   journey: JourneyState;
@@ -103,72 +170,7 @@ export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ journey, fetchS
     <EuiSpacer />
     <EuiFlexGroup direction="column">
       {journey.steps.map((step, index) => (
-        <>
-          <div style={{ padding: '8px' }}>
-            <div>
-              <EuiText>
-                <strong>
-                  {index + 1}. {step.synthetics.step.name}
-                </strong>
-              </EuiText>
-            </div>
-            <EuiSpacer size="s" />
-            <div>
-              <StatusBadge status={step.synthetics.payload.status} />
-            </div>
-            <EuiSpacer />
-            <div>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <StepScreenshotDisplay
-                    isLoading={step.synthetics.screenshotLoading}
-                    screenshot={step.synthetics.blob}
-                    stepIndex={step.synthetics.step.index}
-                    fetchScreenshot={fetchScreenshot}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {step?.synthetics?.payload?.source && (
-                    <EuiAccordion
-                      id={step.synthetics.step.name + index}
-                      buttonContent="Step script"
-                    >
-                      <EuiText>
-                        <EuiCode language="javascript">{step.synthetics.payload.source!}</EuiCode>
-                      </EuiText>
-                    </EuiAccordion>
-                  )}
-                  {step?.synthetics?.payload?.error && (
-                    <EuiAccordion id={`${step.synthetics.step.name}_error`} buttonContent="Error">
-                      <EuiCodeBlock
-                        isCopyable={true}
-                        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-                        language="html"
-                      >
-                        {step.synthetics.payload.error.message}
-                      </EuiCodeBlock>
-                    </EuiAccordion>
-                  )}
-                  {step?.synthetics?.payload?.error?.stack && (
-                    <EuiAccordion
-                      id={`${step.synthetics.step.name}_stack`}
-                      buttonContent="Stack trace"
-                    >
-                      <EuiCodeBlock
-                        isCopyable={true}
-                        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-                        language="html"
-                      >
-                        {step.synthetics.payload.error.stack}
-                      </EuiCodeBlock>
-                    </EuiAccordion>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </div>
-          <EuiSpacer />
-        </>
+        <StepComponent key={index} index={index} step={step} fetchScreenshot={fetchScreenshot} />
       ))}
     </EuiFlexGroup>
   </div>
