@@ -22,6 +22,7 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 import {
   MapExtent,
   MVTFieldDescriptor,
+  RegisterCancelCallback,
   TiledSingleLayerVectorSourceDescriptor,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -179,7 +180,7 @@ export class MVTSingleLayerVectorSource
 
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: RegisterCancelCallback
   ): MapExtent | null {
     return null;
   }

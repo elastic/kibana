@@ -74,6 +74,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     });
     return {
       data: featureCollection,
+      meta: {},
     };
   }
 

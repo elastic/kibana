@@ -42,11 +42,17 @@ export type VectorSourceRequestMeta = MapFilters & {
   sourceMeta: VectorSourceSyncMeta;
 };
 
+export type VectorJoinSourceRequestMeta = MapFilters & {
+  applyGlobalQuery: boolean;
+  fieldNames: string[];
+  sourceQuery: MapQuery;
+};
+
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
   sourceQuery: MapQuery;
-  timeFilters: unknown;
+  timeFilters: TimeRange;
 };
 
 export type ESSearchSourceResponseMeta = {
@@ -58,10 +64,12 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
+type DataMetaUnion = VectorSourceRequestMeta &
+  VectorJoinSourceRequestMeta &
+  VectorStyleRequestMeta &
+  ESSearchSourceResponseMeta;
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<VectorSourceRequestMeta> &
-  Partial<VectorStyleRequestMeta> &
-  Partial<ESSearchSourceResponseMeta>;
+export type DataMeta = Partial<DataMetaUnion>;
 
 type NumericalStyleFieldData = {
   avg: number;
@@ -86,3 +94,5 @@ export type DataRequestDescriptor = {
   data?: object;
   dataMeta?: DataMeta;
 };
+
+export type RegisterCancelCallback = (requestToken: symbol, callback: () => void) => void;

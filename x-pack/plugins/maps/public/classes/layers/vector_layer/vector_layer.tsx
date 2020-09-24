@@ -50,23 +50,22 @@ import {
 } from '../../../../common/descriptor_types';
 import { IVectorSource, VectorSource } from '../../sources/vector_source';
 import { ILayer } from '../layer';
-import { IJoin } from '../../joins/join';
+import { IJoin, PropertiesMap } from '../../joins/join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { BucketProperties } from '../../util/es_agg_utils';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 interface SourceResult {
-  refreshed: false;
+  refreshed: boolean;
   featureCollection?: FeatureCollection;
 }
 
 interface JoinState {
   dataHasChanged: boolean;
   join: IJoin;
-  propertiesMap: Map<string, BucketProperties> | null;
+  propertiesMap?: PropertiesMap;
 }
 
 export interface VectorLayerArguments {
@@ -258,11 +257,11 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getLeftJoinFields() {
-    return await this.getSource().getLeftJoinFields();
+    return await (this.getSource() as IVectorSource).getLeftJoinFields();
   }
 
   _getJoinFields() {
-    const joinFields = [];
+    const joinFields: IFeild[] = [];
     this.getValidJoins().forEach((join) => {
       const fields = join.getJoinFields();
       joinFields.push(...fields);
@@ -271,12 +270,12 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getFields() {
-    const sourceFields = await this.getSource().getFields();
+    const sourceFields = await (this.getSource() as IVectorSource).getFields();
     return [...sourceFields, ...this._getJoinFields()];
   }
 
   async getStyleEditorFields() {
-    const sourceFields = await this.getSourceForEditing().getFields();
+    const sourceFields = await (this.getSourceForEditing() as IVectorSource).getFields();
     return [...sourceFields, ...this._getJoinFields()];
   }
 
@@ -303,7 +302,7 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
-  }: { join: IJoin } & DataRequestContext): JoinState {
+  }: Promise<{ join: IJoin } & DataRequestContext>): JoinState {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
@@ -324,14 +323,14 @@ export class VectorLayer extends AbstractLayer {
       return {
         dataHasChanged: false,
         join,
-        propertiesMap: prevDataRequest.getData(),
+        propertiesMap: prevDataRequest?.getData(),
       };
     }
 
     try {
       startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this._source.getDisplayName();
-      const { propertiesMap } = await joinSource.getPropertiesMap(
+      const propertiesMap = await joinSource.getPropertiesMap(
         searchFilters,
         leftSourceName,
         join.getLeftField().getName(),
@@ -350,7 +349,6 @@ export class VectorLayer extends AbstractLayer {
       return {
         dataHasChanged: true,
         join,
-        propertiesMap: null,
       };
     }
   }
@@ -399,8 +397,11 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
-      const feature = sourceResult.featureCollection.features[i];
+    for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
+      const feature = sourceResult.featureCollection!.features[i];
+      if (!feature.properties) {
+        feature.properties = {};
+      }
       const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
       let isFeatureVisible = true;
       for (let j = 0; j < joinStates.length; j++) {
@@ -429,7 +430,7 @@ export class VectorLayer extends AbstractLayer {
     syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
-  ): SourceResult {
+  ): Promise<SourceResult> {
     const {
       startLoading,
       stopLoading,
@@ -450,7 +451,9 @@ export class VectorLayer extends AbstractLayer {
     if (canSkipFetch) {
       return {
         refreshed: false,
-        featureCollection: prevDataRequest.getData(),
+        featureCollection: prevDataRequest
+          ? (prevDataRequest.getData() as FeatureCollection)
+          : EMPTY_FEATURE_COLLECTION,
       };
     }
 
@@ -541,7 +544,7 @@ export class VectorLayer extends AbstractLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource;
-    sourceQuery: Query | null;
+    sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {

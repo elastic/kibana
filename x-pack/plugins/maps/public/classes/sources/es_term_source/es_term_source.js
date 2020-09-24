@@ -115,9 +115,7 @@ export class ESTermSource extends AbstractESAggSource {
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
-    return {
-      propertiesMap: extractPropertiesMap(rawEsData, countPropertyName),
-    };
+    return extractPropertiesMap(rawEsData, countPropertyName);
   }
 
   isFilterByMapBounds() {

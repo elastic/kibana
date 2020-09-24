@@ -9,6 +9,7 @@ import { IVectorSource } from '../vector_source';
 import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
 import {
   DynamicStylePropertyOptions,
+  RegisterCancelCallback,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -29,7 +30,7 @@ export interface IESSource extends IVectorSource {
     layerName: string,
     style: VectorStyle,
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
+    registerCancelCallback: RegisterCancelCallback,
     searchFilters: VectorSourceRequestMeta
   ): Promise<unknown>;
 }
@@ -49,7 +50,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     layerName: string,
     style: VectorStyle,
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
+    registerCancelCallback: RegisterCancelCallback,
     searchFilters: VectorSourceRequestMeta
   ): Promise<unknown>;
   _runEsQuery: ({

@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from 'src/plugins/data/public';
+import {
+  MapQuery,
+  RegisterCancelCallback,
+  VectorJoinSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { IESAggSource } from '../es_agg_source';
+import { PropertiesMap } from '../../joins/join';
 
 export interface IESTermSource extends IESAggSource {
   getTermField: () => IField;
   hasCompleteConfig: () => boolean;
-  getWhereQuery: () => Query | undefined;
+  getWhereQuery: () => MapQuery;
+  getPropertiesMap: (
+    searchFilters: VectorJoinSourceRequestMeta,
+    leftSourceName: string,
+    leftFieldName: string,
+    registerCancelCallback: RegisterCancelCallback
+  ) => PropertiesMap;
 }

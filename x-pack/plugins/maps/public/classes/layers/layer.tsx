@@ -56,7 +56,7 @@ export interface ILayer {
   getMaxZoom(): number;
   getMinSourceZoom(): number;
   getAlpha(): number;
-  getQuery(): Query | null;
+  getQuery(): Query | undefined;
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
@@ -412,8 +412,8 @@ export class AbstractLayer implements ILayer {
     return typeof this._descriptor.alpha === 'number' ? this._descriptor.alpha : 1;
   }
 
-  getQuery(): Query | null {
-    return this._descriptor.query ? this._descriptor.query : null;
+  getQuery(): Query | undefined {
+    return this._descriptor.query;
   }
 
   getCurrentStyle(): IStyle {

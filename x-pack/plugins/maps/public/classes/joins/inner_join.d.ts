@@ -6,7 +6,7 @@
 
 import { GeoJsonProperties } from 'geojson';
 import { IESTermSource } from '../sources/es_term_source';
-import { IJoin } from './join';
+import { IJoin, PropertiesMap } from './join';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ISource } from '../sources/source';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
@@ -21,7 +21,13 @@ export class InnerJoin implements IJoin {
 
   toDescriptor(): JoinDescriptor;
 
+  getJoinFields: () => IField[];
+
   getLeftField: () => IField;
+
+  getIndexPatternIds: () => string[];
+
+  getQueryableIndexPatternIds: () => string[];
 
   getSourceDataRequestId: () => string;
 
@@ -32,4 +38,6 @@ export class InnerJoin implements IJoin {
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 
   hasCompleteConfig: () => boolean;
+
+  joinPropertiesToFeature: (feature: Feature, propertiesMap?: PropertiesMap) => boolean;
 }
