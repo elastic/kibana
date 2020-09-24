@@ -127,7 +127,7 @@ export function DimensionContainer({
 
   return (
     <>
-      <div className="lnsDimensionContainer__trigger">{trigger}</div>
+      {trigger}
       {flyout}
     </>
   );

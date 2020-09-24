@@ -332,7 +332,6 @@ export function LayerPanel(
                 })}
                 {group.supportsMoreColumns ? (
                   <DragDrop
-                    className="lnsLayerPanel__dimension"
                     data-test-subj={group.dataTestSubj}
                     droppable={
                       Boolean(dragDropContext.dragging) &&
@@ -376,7 +375,7 @@ export function LayerPanel(
                       }
                     }}
                   >
-                    <div className="lnsLayerPanel__triggerLink">
+                    <div className="lnsLayerPanel__dimension">
                       <DimensionContainer
                         dimensionContainerState={dimensionContainerState}
                         setDimensionContainerState={setDimensionContainerState}
@@ -385,15 +384,14 @@ export function LayerPanel(
                         groupId={group.groupId}
                         trigger={
                           <EuiButtonEmpty
-                            iconType="plusInCircleFilled"
+                            className="lnsLayerPanel__triggerLink"
                             color="text"
+                            size="xs"
+                            iconType="plusInCircleFilled"
+                            contentProps={{
+                              className: 'lnsLayerPanel__triggerLinkContent',
+                            }}
                             data-test-subj="lns-empty-dimension"
-                            aria-label={i18n.translate('xpack.lens.configure.addConfig', {
-                              defaultMessage: 'Add a configuration',
-                            })}
-                            title={i18n.translate('xpack.lens.configure.addConfig', {
-                              defaultMessage: 'Add a configuration',
-                            })}
                             onClick={() => {
                               if (dimensionContainerState.isOpen) {
                                 setDimensionContainerState(initialDimensionContainerState);
@@ -405,7 +403,6 @@ export function LayerPanel(
                                 });
                               }
                             }}
-                            size="xs"
                           >
                             <FormattedMessage
                               id="xpack.lens.configure.emptyConfig"

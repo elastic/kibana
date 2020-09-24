@@ -11,8 +11,9 @@ export const DropIllustration = ({
   titleId,
   ...props
 }: {
-  title: string;
-  titleId: string;
+  title?: string;
+  titleId?: string;
+  className?: string;
 }) => (
   <svg
     width={176}

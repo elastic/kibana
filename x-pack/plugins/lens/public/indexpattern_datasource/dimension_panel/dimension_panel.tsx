@@ -242,10 +242,10 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
       onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
       aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
+        defaultMessage: 'Click to edit configuration or drag to move',
       })}
       title={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
+        defaultMessage: 'Click to edit configuration or drag to move',
       })}
     >
       {uniqueLabel}

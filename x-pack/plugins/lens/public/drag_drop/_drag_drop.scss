@@ -8,7 +8,7 @@
   @include lnsDragDropHover;
 
   // Include a possible nested button like when using FieldButton
-  > button {
+  > .kbnFieldButton__button {
     cursor: grab;
   }
 
@@ -20,7 +20,6 @@
 // Drop area
 .lnsDragDrop-isDroppable {
   @include lnsDroppable;
-  @include lnsDragDropHover;
 }
 
 // Drop area when there's an item being dragged
