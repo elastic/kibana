@@ -35,8 +35,7 @@ export function getLensTopNavConfig(options: {
       label: i18n.translate('xpack.lens.app.saveAndReturn', {
         defaultMessage: 'Save and return',
       }),
-      emphasize: true,
-      iconType: 'check',
+      iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
       disableButton: !savingPermitted,
@@ -48,7 +47,7 @@ export function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    emphasize: !showSaveAndReturn,
+    iconType: !showSaveAndReturn ? 'save' : undefined,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
