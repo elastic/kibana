@@ -35,7 +35,12 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage title={title} subtitle={subtitle} badgeOptions={badgeOptions}>
+        <HeaderPage
+          hideSourcerer={true}
+          title={title}
+          subtitle={subtitle}
+          badgeOptions={badgeOptions}
+        >
           {actions}
         </HeaderPage>
 

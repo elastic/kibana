@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -31,7 +32,12 @@ uiRoutes.when('/kibana/instances', {
   controller: class KibanaInstancesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       super({
-        title: 'Kibana Instances',
+        title: i18n.translate('xpack.monitoring.kibana.instances.routeTitle', {
+          defaultMessage: 'Kibana - Instances',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.kibana.instances.pageTitle', {
+          defaultMessage: 'Kibana instances',
+        }),
         storageKey: 'kibana.instances',
         getPageData,
         reactNodeId: 'monitoringKibanaInstancesApp',
