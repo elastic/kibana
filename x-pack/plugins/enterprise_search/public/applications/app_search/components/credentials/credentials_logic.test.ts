@@ -1127,9 +1127,8 @@ describe('CredentialsLogic', () => {
       try {
         await promise;
       } catch {
-        // Ignore this
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       }
-      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
 
@@ -1159,9 +1158,8 @@ describe('CredentialsLogic', () => {
       try {
         await promise;
       } catch {
-        // Ignore this
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       }
-      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
 
@@ -1191,9 +1189,8 @@ describe('CredentialsLogic', () => {
       try {
         await promise;
       } catch {
-        // Ignore this
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       }
-      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
   });
 });
