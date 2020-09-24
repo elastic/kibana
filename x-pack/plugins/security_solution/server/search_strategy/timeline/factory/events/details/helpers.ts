@@ -7,7 +7,8 @@
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
 import { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy/timeline';
-import { baseCategoryFields } from '../../../../../utils/beat_schema/8.0.0';
+
+export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 
 export const getFieldCategory = (field: string): string => {
   const fieldCategory = field.split('.')[0];

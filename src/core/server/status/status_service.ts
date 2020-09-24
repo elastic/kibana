@@ -70,10 +70,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
-    const overall$: Observable<ServiceStatus> = combineLatest(
+    const overall$: Observable<ServiceStatus> = combineLatest([
       core$,
-      this.pluginsStatus.getAll$()
-    ).pipe(
+      this.pluginsStatus.getAll$(),
+    ]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
