@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function GrokDebuggerPageProvider({ getPageObjects, getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const grokDebugger = getService('grokDebugger');
 

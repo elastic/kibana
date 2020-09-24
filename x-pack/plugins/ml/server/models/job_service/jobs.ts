@@ -420,28 +420,22 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
   async function jobsExist(jobIds: string[] = []) {
-    // Get the list of job IDs.
-    const jobsInfo = (await callAsInternalUser('ml.jobs', {
-      jobId: jobIds,
-    })) as MlJobsResponse;
-
     const results: { [id: string]: boolean } = {};
-    if (jobsInfo.count > 0) {
-      const allJobIds = jobsInfo.jobs.map((job) => job.job_id);
+    for (const jobId of jobIds) {
+      try {
+        const jobsInfo = (await callAsInternalUser('ml.jobs', {
+          jobId,
+        })) as MlJobsResponse;
 
-      // Check if each of the supplied IDs match existing jobs.
-      jobIds.forEach((jobId) => {
-        // Create a Regex for each supplied ID as wildcard * is allowed.
-        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
-        const exists = allJobIds.some((existsJobId) => regexp.test(existsJobId));
-        results[jobId] = exists;
-      });
-    } else {
-      jobIds.forEach((jobId) => {
+        results[jobId] = jobsInfo.count > 0;
+      } catch (e) {
+        // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
+        if (e.status !== 404) {
+          throw e;
+        }
         results[jobId] = false;
-      });
+      }
     }
-
     return results;
   }
 

@@ -22,7 +22,6 @@ import {
 
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { SwimLanePagination } from './swimlane_pagination';
-import { SWIMLANE_TYPE } from './explorer_constants';
 import { ViewBySwimLaneData } from './explorer_utils';
 
 /**
@@ -94,7 +93,6 @@ export const SwimlaneContainer: FC<
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
     onPaginationChange &&
-    props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
     fromPage &&
     perPage;
 

@@ -9,6 +9,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<development-tests>>
 * <<development-github>>
 * <<interpreting-ci-failures>>
+* <<ci-metrics>>
 * <<development-documentation>>
 * <<development-pull-request>>
 * <<kibana-issue-reporting>>
@@ -23,7 +24,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 
 Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
-[float]
+[discrete]
 [[kibana-localization]]
 === Localization
 
@@ -32,7 +33,7 @@ Read <<kibana-localization-best-practices>> for details on our localization prac
 Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
 We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
 
-[float]
+[discrete]
 [[kibana-release-notes-process]]
 === Release Notes Process
 
@@ -43,7 +44,7 @@ access to GitHub labels.
 The Release Notes summarize what the PRs accomplish in language that is meaningful to users.
  To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
-[float]
+[discrete]
 ==== Create the Release Notes text
 
 The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description.
@@ -59,7 +60,7 @@ When you create the Release Notes text, use the following best practices:
 * When you create a bug fix PR, start with `Fixes`.
 * When you create a deprecation PR, start with `Deprecates`.
 
-[float]
+[discrete]
 ==== Add your labels
 
 [arabic]
@@ -72,18 +73,20 @@ When you create the Release Notes text, use the following best practices:
   * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
 
 
-include::development-github.asciidoc[]
+include::development-github.asciidoc[leveloffset=+1]
 
-include::development-tests.asciidoc[]
+include::development-tests.asciidoc[leveloffset=+1]
 
-include::interpreting-ci-failures.asciidoc[]
+include::interpreting-ci-failures.asciidoc[leveloffset=+1]
 
-include::development-documentation.asciidoc[]
+include::development-ci-metrics.asciidoc[leveloffset=+1]
 
-include::development-pull-request.asciidoc[]
+include::development-documentation.asciidoc[leveloffset=+1]
 
-include::kibana-issue-reporting.asciidoc[]
+include::development-pull-request.asciidoc[leveloffset=+1]
 
-include::pr-review.asciidoc[]
+include::kibana-issue-reporting.asciidoc[leveloffset=+1]
 
-include::linting.asciidoc[]
+include::pr-review.asciidoc[leveloffset=+1]
+
+include::linting.asciidoc[leveloffset=+1]

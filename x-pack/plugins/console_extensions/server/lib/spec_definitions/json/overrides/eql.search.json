@@ -1,0 +1,25 @@
+{
+  "eql.search": {
+    "url_params": {
+      "allow_no_indices": { "__one_of": [true, false] },
+      "expand_wildcards": { "__one_of": ["all", "open", "closed", "hidden", "none"] },
+      "ignore_unavailable": { "__one_of": [true, false] } ,
+      "keep_alive": "5d",
+      "keep_on_completion": { "__one_of": [true, false] }  ,
+      "wait_for_completion_timeout": 0
+    },
+    "data_autocomplete_rules": {
+      "case_sensitive": { "__one_of": [true, false] },
+      "fetch_size": 1000,
+      "query": "",
+      "event_category_field": "",
+      "tiebreaker_field": "",
+      "timestamp_field": "",
+      "filter": ""
+    },
+    "patterns": [
+      "{target}/_eql/search"
+    ]
+
+  }
+}
