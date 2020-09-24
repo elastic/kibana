@@ -4,57 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _isEqual from 'lodash/isEqual';
+import { kea, MakeLogicType } from 'kea';
+import { isEqual } from 'lodash';
+import { History } from 'history';
 
-import { storeLogic } from 'shared/store';
+import { HttpLogic } from '../../../shared/http';
+import {
+  FlashMessagesLogic,
+  flashAPIErrors,
+  setSuccessMessage,
+  setQueuedSuccessMessage,
+} from '../../../shared/flash_messages';
+import { GROUPS_PATH } from '../../routes';
 
-import http from 'shared/http';
-import routes from 'workplace_search/routes';
-import { GROUPS_PATH } from 'workplace_search/utils/routePaths';
-
-import { IFlashMessagesProps } from 'shared/types';
-import { IGroup, IObject, IContentSource, IGroupDetails, IUser } from 'workplace_search/types';
-
-import GroupsLogic from './GroupsLogic';
+import { IContentSourceDetails, IGroupDetails, IUser, ISourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
 export interface IGroupActions {
-  setFlashMessages(flashMessages: IFlashMessagesProps);
-  onInitializeGroup(group: IGroup);
-  onGroupNameChanged(group: IGroup);
-  onGroupPrioritiesChanged(group: IGroup);
-  onGroupNameInputChange(groupName: string);
-  addGroupSource(sourceId: string);
-  removeGroupSource(sourceId: string);
-  addGroupUser(userId: string);
-  removeGroupUser(userId: string);
-  onGroupSourcesSaved(groupSources: string[]);
-  onGroupUsersSaved(group: IGroup);
-  setGroupModalErrors(errors: string[]);
-  hideSharedSourcesModal(group: IGroup);
-  hideManageUsersModal(group: IGroup);
-  selectAllSources(contentSources: IContentSource[]);
-  selectAllUsers(users: IUser[]);
-  updatePriority(id: string, boost: number);
-  resetGroup();
-  showConfirmDeleteModal();
-  hideConfirmDeleteModal();
-  showSharedSourcesModal();
-  showManageUsersModal();
-  resetFlashMessages();
-  initializeGroup(groupId: string, history: IObject);
-  deleteGroup(history: IObject);
-  updateGroupName();
-  saveGroupSources();
-  saveGroupUsers();
-  saveGroupSourcePrioritization();
+  onInitializeGroup(group: IGroupDetails): IGroupDetails;
+  onGroupNameChanged(group: IGroupDetails): IGroupDetails;
+  onGroupPrioritiesChanged(group: IGroupDetails): IGroupDetails;
+  onGroupNameInputChange(groupName: string): string;
+  addGroupSource(sourceId: string): string;
+  removeGroupSource(sourceId: string): string;
+  addGroupUser(userId: string): string;
+  removeGroupUser(userId: string): string;
+  onGroupSourcesSaved(group: IGroupDetails): IGroupDetails;
+  onGroupUsersSaved(group: IGroupDetails): IGroupDetails;
+  setGroupModalErrors(errors: string[]): string[];
+  hideSharedSourcesModal(group: IGroupDetails): IGroupDetails;
+  hideManageUsersModal(group: IGroupDetails): IGroupDetails;
+  selectAllSources(contentSources: IContentSourceDetails[]): IContentSourceDetails[];
+  selectAllUsers(users: IUser[]): IUser[];
+  updatePriority(id: string, boost: number): { id: string; boost: number };
+  resetGroup(): void;
+  showConfirmDeleteModal(): void;
+  hideConfirmDeleteModal(): void;
+  showSharedSourcesModal(): void;
+  showManageUsersModal(): void;
+  resetFlashMessages(): void;
+  initializeGroup(groupId: string, history: History): { groupId: string; history: History };
+  deleteGroup(history: History): { history: History };
+  updateGroupName(): void;
+  saveGroupSources(): void;
+  saveGroupUsers(): void;
+  saveGroupSourcePrioritization(): void;
 }
 
 export interface IGroupValues {
-  contentSources: IContentSource[];
+  contentSources: IContentSourceDetails[];
   users: IUser[];
-  flashMessages?: IFlashMessagesProps;
   group: IGroupDetails;
   dataLoading: boolean;
   manageUsersModalVisible: boolean;
@@ -65,31 +65,27 @@ export interface IGroupValues {
   selectedGroupSources: string[];
   selectedGroupUsers: string[];
   groupPrioritiesUnchanged: boolean;
-  activeSourcePriorities: IObject;
+  activeSourcePriorities: ISourcePriority;
+  cachedSourcePriorities: ISourcePriority;
 }
 
-interface IListenerParams {
-  actions: IGroupActions;
-  values: IGroupValues;
-}
-
-export const GroupLogic = storeLogic({
-  actions: (): IGroupActions => ({
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
-    onInitializeGroup: (group: IGroup) => group,
-    onGroupNameChanged: (group: IGroup) => group,
-    onGroupPrioritiesChanged: (group: IGroup) => group,
+export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
+  path: ['enterprise_search', 'workplace_search', 'group'],
+  actions: {
+    onInitializeGroup: (group: IGroupDetails) => group,
+    onGroupNameChanged: (group: IGroupDetails) => group,
+    onGroupPrioritiesChanged: (group: IGroupDetails) => group,
     onGroupNameInputChange: (groupName: string) => groupName,
     addGroupSource: (sourceId: string) => sourceId,
     removeGroupSource: (sourceId: string) => sourceId,
     addGroupUser: (userId: string) => userId,
     removeGroupUser: (userId: string) => userId,
-    onGroupSourcesSaved: (groupSources: string[]) => groupSources,
-    onGroupUsersSaved: (group: IGroup) => group,
+    onGroupSourcesSaved: (group: IGroupDetails) => group,
+    onGroupUsersSaved: (group: IGroupDetails) => group,
     setGroupModalErrors: (errors: string[]) => errors,
-    hideSharedSourcesModal: (group: IGroup) => group,
-    hideManageUsersModal: (group: IGroup) => group,
-    selectAllSources: (contentSources: IContentSource[]) => contentSources,
+    hideSharedSourcesModal: (group: IGroupDetails) => group,
+    hideManageUsersModal: (group: IGroupDetails) => group,
+    selectAllSources: (contentSources: IContentSourceDetails[]) => contentSources,
     selectAllUsers: (users: IUser[]) => users,
     updatePriority: (id: string, boost: number) => ({ id, boost }),
     resetGroup: () => true,
@@ -98,40 +94,22 @@ export const GroupLogic = storeLogic({
     showSharedSourcesModal: () => true,
     showManageUsersModal: () => true,
     resetFlashMessages: () => true,
-    initializeGroup: (groupId: string, history: IObject) => ({ groupId, history }),
-    deleteGroup: (history: IObject) => ({ history }),
+    initializeGroup: (groupId: string, history: History) => ({ groupId, history }),
+    deleteGroup: (history: History) => ({ history }),
     updateGroupName: () => true,
     saveGroupSources: () => true,
     saveGroupUsers: () => true,
     saveGroupSourcePrioritization: () => true,
-  }),
-  reducers: () => ({
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        onGroupNameChanged: (_, { name }) => ({
-          success: [`Successfully renamed this group to '${name}'`],
-        }),
-        onGroupUsersSaved: () => ({ success: ['Successfully updated the users of this group'] }),
-        onGroupSourcesSaved: () => ({ success: ['Successfully updated shared content sources'] }),
-        onGroupPrioritiesChanged: () => ({
-          success: ['Successfully updated shared source prioritization'],
-        }),
-        showConfirmDeleteModal: () => ({}),
-        showManageUsersModal: () => ({}),
-        showSharedSourcesModal: () => ({}),
-        resetFlashMessages: () => ({}),
-      },
-    ],
+  },
+  reducers: {
     group: [
-      {},
+      {} as IGroupDetails,
       {
         onInitializeGroup: (_, group) => group,
         onGroupNameChanged: (_, group) => group,
         onGroupSourcesSaved: (_, group) => group,
         onGroupUsersSaved: (_, group) => group,
-        resetGroup: () => ({}),
+        resetGroup: () => ({} as IGroupDetails),
       },
     ],
     dataLoading: [
@@ -218,104 +196,143 @@ export const GroupLogic = storeLogic({
         onGroupSourcesSaved: (_, { contentSources }) => mapPriorities(contentSources),
         updatePriority: (state, { id, boost }) => {
           const updated = { ...state };
-          updated[id] = parseInt(boost, 10);
+          updated[id] = boost;
           return updated;
         },
       },
     ],
-  }),
+  },
   selectors: ({ selectors }) => ({
     groupPrioritiesUnchanged: [
       () => [selectors.cachedSourcePriorities, selectors.activeSourcePriorities],
-      (cached, active) => _isEqual(cached, active),
+      (cached, active) => isEqual(cached, active),
     ],
   }),
-  listeners: ({ actions, values }: IListenerParams) => ({
-    initializeGroup: ({ groupId, history }) => {
-      const route = routes.fritoPieOrganizationGroupPath(groupId);
-      http(route)
-        .then(({ data }) => actions.onInitializeGroup(data))
-        .catch(({ response }) => {
-          history.push(GROUPS_PATH);
-          const error =
-            response.status === 404
-              ? [`Unable to find group with ID: ${groupId}`]
-              : response.data.errors;
-          GroupsLogic.actions.setFlashMessages({ error });
+  listeners: ({ actions, values }) => ({
+    initializeGroup: async ({ groupId, history }) => {
+      try {
+        const response = await HttpLogic.values.http.get(`/api/workplace_search/groups/${groupId}`);
+        actions.onInitializeGroup(response);
+      } catch (e) {
+        history.push(GROUPS_PATH);
+
+        const error = e.response.status === 404 ? `Unable to find group with ID: ${groupId}` : e;
+
+        FlashMessagesLogic.actions.setQueuedMessages({
+          type: 'error',
+          message: error,
         });
+      }
     },
-    deleteGroup: ({ history }) => {
+    deleteGroup: async ({ history }) => {
       const {
         group: { id, name },
       } = values;
-      const route = routes.fritoPieOrganizationGroupPath(id);
-      http
-        .delete(route)
-        .then(() => {
-          history.push(GROUPS_PATH);
-          GroupsLogic.actions.setFlashMessages({
-            success: [`Group ${name} was successfully deleted`],
-          });
-        })
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+      try {
+        await HttpLogic.values.http.delete(`/api/workplace_search/groups/${id}`);
+        history.push(GROUPS_PATH);
+        setQueuedSuccessMessage(`Group "${name}" was successfully deleted`);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    updateGroupName: () => {
+    updateGroupName: async () => {
       const {
         group: { id },
         groupNameInputValue,
       } = values;
-      const route = routes.fritoPieOrganizationGroupPath(id);
-      http
-        .put(route, { group: { name: groupNameInputValue } })
-        .then(({ data }) => actions.onGroupNameChanged(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+
+      try {
+        const response = await HttpLogic.values.http.put(`/api/workplace_search/groups/${id}`, {
+          body: JSON.stringify({ group: { name: groupNameInputValue } }),
+        });
+        actions.onGroupNameChanged(response);
+        setSuccessMessage(`Successfully renamed this group to "${response.name}".`);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveGroupSources: () => {
+    saveGroupSources: async () => {
       const {
         group: { id },
         selectedGroupSources,
       } = values;
-      const route = routes.shareFritoPieOrganizationGroupPath(id);
-      http
-        .post(route, { content_source_ids: selectedGroupSources })
-        .then(({ data }) => actions.onGroupSourcesSaved(data))
-        .catch(({ response }) => actions.setGroupModalErrors(response.data.errors));
+
+      try {
+        const response = await HttpLogic.values.http.post(
+          `/api/workplace_search/groups/${id}/share`,
+          {
+            body: JSON.stringify({ content_source_ids: selectedGroupSources }),
+          }
+        );
+        actions.onGroupSourcesSaved(response);
+        setSuccessMessage('Successfully updated shared content sources');
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveGroupUsers: () => {
+    saveGroupUsers: async () => {
       const {
         group: { id },
         selectedGroupUsers,
       } = values;
-      const route = routes.assignFritoPieOrganizationGroupPath(id);
-      http
-        .post(route, { user_ids: selectedGroupUsers })
-        .then(({ data }) => actions.onGroupUsersSaved(data))
-        .catch(({ response }) => actions.setGroupModalErrors(response.data.errors));
+
+      try {
+        const response = await HttpLogic.values.http.post(
+          `/api/workplace_search/groups/${id}/assign`,
+          {
+            body: JSON.stringify({ user_ids: selectedGroupUsers }),
+          }
+        );
+        actions.onGroupUsersSaved(response);
+        setSuccessMessage('Successfully updated the users of this group');
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveGroupSourcePrioritization: () => {
+    saveGroupSourcePrioritization: async () => {
       const {
         group: { id },
         activeSourcePriorities,
       } = values;
-      const route = routes.updateSourceBoostsFritoPieOrganizationGroupPath(id);
 
       // server expects an array of id, value for each boost.
       // example: [['123abc', 7], ['122abv', 1]]
       const boosts = [] as Array<Array<string | number>>;
-      Object.keys(activeSourcePriorities).forEach((k) =>
-        boosts.push([k, activeSourcePriorities[k]])
+      Object.keys(activeSourcePriorities).forEach((k: string) =>
+        boosts.push([k, Number(activeSourcePriorities[k])])
       );
 
-      http
-        .put(route, { content_source_boosts: boosts })
-        .then(({ data }) => actions.onGroupPrioritiesChanged(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+      try {
+        const response = await HttpLogic.values.http.put(
+          `/api/workplace_search/groups/${id}/boosts`,
+          {
+            body: JSON.stringify({ content_source_boosts: boosts }),
+          }
+        );
+        setSuccessMessage('Successfully updated shared source prioritization');
+        actions.onGroupPrioritiesChanged(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    showConfirmDeleteModal: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    showManageUsersModal: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    showSharedSourcesModal: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    resetFlashMessages: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
 
-const mapPriorities = (contentSources) => {
-  const prioritiesMap = {} as IObject;
+const mapPriorities = (contentSources: IContentSourceDetails[]): ISourcePriority => {
+  const prioritiesMap = {} as ISourcePriority;
   contentSources.forEach(({ id, boost }) => {
     prioritiesMap[id] = boost;
   });
