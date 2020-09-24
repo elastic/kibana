@@ -53,7 +53,7 @@ across all fields in your index.
 KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
 To override the default precedence, group operators in parenthesis.
 
-To match documents where `response` is 200, `extension` is php, or both:
+To match documents where response is `200`, extension is `php`, or both:
 
 [source,yaml]
 -------------------
