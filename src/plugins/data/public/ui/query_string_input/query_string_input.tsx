@@ -46,8 +46,7 @@ import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../q
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
-interface Props {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
@@ -65,6 +64,10 @@ interface Props {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+}
+
+interface Props extends QueryStringInputProps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
 }
 
 interface State {
@@ -442,7 +445,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.services.http.post('/api/kibana/kql_opt_in_telemetry', {
+    this.services.http.post('/api/kibana/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -687,4 +690,4 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryStringInput = withKibana(QueryStringInputUI);
+export const QueryStringInput: React.FC<QueryStringInputProps> = withKibana(QueryStringInputUI);

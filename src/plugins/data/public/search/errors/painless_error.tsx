@@ -24,11 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 import { EsError, isEsError } from './types';
-import { IEsSearchRequest } from '..';
+import { IKibanaSearchRequest } from '..';
 
 export class PainlessError extends KbnError {
   painlessStack?: string;
-  constructor(err: EsError, request: IEsSearchRequest) {
+  constructor(err: EsError, request: IKibanaSearchRequest) {
     const rootCause = getRootCause(err as EsError);
 
     super(

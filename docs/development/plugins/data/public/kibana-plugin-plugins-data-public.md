@@ -63,7 +63,6 @@
 |  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
-|  [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
@@ -81,6 +80,7 @@
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
 |  [QueryStateChange](./kibana-plugin-plugins-data-public.querystatechange.md) |  |
+|  [QueryStringInputProps](./kibana-plugin-plugins-data-public.querystringinputprops.md) |  |
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
@@ -153,6 +153,7 @@
 |  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
+|  [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md) |  |
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
