@@ -11,7 +11,7 @@ import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '..
 import { cacheGet, cacheSet, setArchiveFilelist } from '../registry/cache';
 import { unzipBuffer, untarBuffer, ArchiveEntry } from '../registry/extract';
 
-export async function loadArchive({
+export async function loadArchivePackage({
   archiveBuffer,
   contentType,
 }: {
