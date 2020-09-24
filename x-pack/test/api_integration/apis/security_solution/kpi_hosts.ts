@@ -189,44 +189,10 @@ export default function ({ getService }: FtrProviderContext) {
         authSuccessHistogram: null,
         authFailure: 0,
         authFailureHistogram: null,
-        uniqueSourceIps: 121,
-        uniqueSourceIpsHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 52,
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 31,
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 88,
-          },
-        ],
+        uniqueSourceIps: null,
+        uniqueSourceIpsHistogram: null,
         uniqueDestinationIps: null,
-        uniqueDestinationIpsHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 61,
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 45,
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 114,
-          },
-        ],
+        uniqueDestinationIpsHistogram: null,
       };
 
       it('Make sure that we get KpiHosts data', async () => {
