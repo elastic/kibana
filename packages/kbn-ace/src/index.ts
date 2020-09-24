@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { useXJsonMode } from './use_x_json';
+export {
+  ElasticsearchSqlHighlightRules,
+  ScriptHighlightRules,
+  XJsonHighlightRules,
+  addXJsonToRules,
+  XJsonMode,
+  installXJsonMode,
+} from './ace/modes';
