@@ -439,8 +439,6 @@ export interface Source {
   HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
-  /** Just a simple example to get the app name */
-  whoAmI?: Maybe<SayMyName>;
 }
 
 /** A set of configuration options for a security data source */
@@ -585,11 +583,6 @@ export interface FirstLastSeenHost {
   firstSeen?: Maybe<string>;
 
   lastSeen?: Maybe<string>;
-}
-
-export interface SayMyName {
-  /** The id of the source */
-  appName: string;
 }
 
 export interface TimelineResult {

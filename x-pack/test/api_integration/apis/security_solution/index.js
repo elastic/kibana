@@ -18,8 +18,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./saved_objects/timeline'));
     loadTestFile(require.resolve('./sources'));
     // loadTestFile(require.resolve('./overview_network'));
-    loadTestFile(require.resolve('./timeline'));
-    loadTestFile(require.resolve('./timeline_details'));
+    // loadTestFile(require.resolve('./timeline'));
+    // loadTestFile(require.resolve('./timeline_details'));
     // loadTestFile(require.resolve('./uncommon_processes'));
     // loadTestFile(require.resolve('./users'));
     // loadTestFile(require.resolve('./tls'));

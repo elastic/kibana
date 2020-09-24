@@ -906,14 +906,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "whoAmI",
-            "description": "Just a simple example to get the app name",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "SayMyName", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -1913,29 +1905,6 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SayMyName",
-        "description": "",
-        "fields": [
-          {
-            "name": "appName",
-            "description": "The id of the source",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
             "isDeprecated": false,
             "deprecationReason": null
           }

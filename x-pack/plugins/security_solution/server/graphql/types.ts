@@ -441,8 +441,6 @@ export interface Source {
   HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
-  /** Just a simple example to get the app name */
-  whoAmI?: Maybe<SayMyName>;
 }
 
 /** A set of configuration options for a security data source */
@@ -587,11 +585,6 @@ export interface FirstLastSeenHost {
   firstSeen?: Maybe<string>;
 
   lastSeen?: Maybe<string>;
-}
-
-export interface SayMyName {
-  /** The id of the source */
-  appName: string;
 }
 
 export interface TimelineResult {
@@ -2057,8 +2050,6 @@ export namespace SourceResolvers {
     HostOverview?: HostOverviewResolver<HostItem, TypeParent, TContext>;
 
     HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, TContext>;
-    /** Just a simple example to get the app name */
-    whoAmI?: WhoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
   }
 
   export type IdResolver<R = string, Parent = Source, TContext = SiemContext> = Resolver<
@@ -2127,12 +2118,6 @@ export namespace SourceResolvers {
 
     docValueFields: DocValueFieldsInput[];
   }
-
-  export type WhoAmIResolver<
-    R = Maybe<SayMyName>,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
 }
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
@@ -2598,19 +2583,6 @@ export namespace FirstLastSeenHostResolvers {
     Parent = FirstLastSeenHost,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-}
-
-export namespace SayMyNameResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = SayMyName> {
-    /** The id of the source */
-    appName?: AppNameResolver<string, TypeParent, TContext>;
-  }
-
-  export type AppNameResolver<R = string, Parent = SayMyName, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
 }
 
 export namespace TimelineResultResolvers {
@@ -6077,7 +6049,6 @@ export type IResolvers<TContext = SiemContext> = {
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
   FirstLastSeenHost?: FirstLastSeenHostResolvers.Resolvers<TContext>;
-  SayMyName?: SayMyNameResolvers.Resolvers<TContext>;
   TimelineResult?: TimelineResultResolvers.Resolvers<TContext>;
   ColumnHeaderResult?: ColumnHeaderResultResolvers.Resolvers<TContext>;
   DataProviderResult?: DataProviderResultResolvers.Resolvers<TContext>;

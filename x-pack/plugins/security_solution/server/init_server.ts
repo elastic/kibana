@@ -18,7 +18,6 @@ import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_num
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { createTimelineResolvers } from './graphql/timeline';
-import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 
 export const initServer = (libs: AppBackendLibs) => {
@@ -37,7 +36,6 @@ export const initServer = (libs: AppBackendLibs) => {
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createTimelineResolvers(libs) as IResolvers,
-      createWhoAmIResolvers() as IResolvers,
     ],
     typeDefs: schemas,
   });
