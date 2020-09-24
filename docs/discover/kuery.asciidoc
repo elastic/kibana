@@ -36,7 +36,7 @@ message:"quick brown fox"
 
 Without the quotes,
 the query matches documents regardless of the order in which
-they appear. Documents with "quick brown fox" will match,
+they appear. Documents with "quick brown fox" match,
 but so will "quick fox brown".
 
 NOTE: Terms without fields are matched against the default field in your index settings.
