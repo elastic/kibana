@@ -14,7 +14,7 @@
     "charts",
     "uiActions"
   ],
-  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
+  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions", "globalSearch"],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]

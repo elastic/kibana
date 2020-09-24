@@ -87,6 +87,15 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
             })
           );
 
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.advanced.pageTitle', {
+              defaultMessage: 'Logstash node: {nodeName}',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
           const metricsToShow = [
             data.metrics.logstash_node_cpu_utilization,
             data.metrics.logstash_queue_events_count,
