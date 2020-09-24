@@ -9,12 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
 
 import { useKibana } from '../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../use_is_mounted';
 import { AddDocumentForm } from '../add_document_form';
 
 import './add_documents_accordion.scss';
+
+const DISCOVER_URL_GENERATOR_ID = 'DISCOVER_APP_URL_GENERATOR';
 
 const i18nTexts = {
   addDocumentsButton: i18n.translate(
@@ -36,9 +39,20 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
 
   useEffect(() => {
     const getDiscoverUrl = async (): Promise<void> => {
-      const { isDeprecated, createUrl } = services.urlGenerators.getUrlGenerator(
-        'DISCOVER_APP_URL_GENERATOR'
-      );
+      let isDeprecated: UrlGeneratorsDefinition<typeof DISCOVER_URL_GENERATOR_ID>['isDeprecated'];
+      let createUrl: UrlGeneratorsDefinition<typeof DISCOVER_URL_GENERATOR_ID>['createUrl'];
+
+      // This try/catch may not be necessary once
+      // https://github.com/elastic/kibana/issues/78344 is addressed
+      try {
+        ({ isDeprecated, createUrl } = services.urlGenerators.getUrlGenerator(
+          DISCOVER_URL_GENERATOR_ID
+        ));
+      } catch (e) {
+        // Discover plugin is not enabled
+        setDiscoverLink(undefined);
+        return;
+      }
 
       if (isDeprecated) {
         setDiscoverLink(undefined);
