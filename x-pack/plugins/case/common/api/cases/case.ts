@@ -183,3 +183,12 @@ export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCasePa
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
+
+export type ESCaseConnector = Omit<CaseConnector, 'fields'> & {
+  fields: Array<{ key: string; value: unknown }>;
+};
+
+export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
+export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
+  connector?: ESCaseConnector;
+};

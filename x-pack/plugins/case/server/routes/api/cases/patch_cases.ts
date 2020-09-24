@@ -15,10 +15,15 @@ import {
   CasePatchRequest,
   excess,
   throwErrors,
+  ESCasePatchRequest,
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { getCaseToUpdate, getConnectorFromConfiguration } from './helpers';
+import {
+  getCaseToUpdate,
+  getConnectorFromConfiguration,
+  transformCaseConnectorToEsConnector,
+} from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 import { CASES_URL } from '../../../../common/constants';
 
@@ -50,6 +55,7 @@ export function initPatchCasesApi({
           }),
           caseConfigureService.find({ client }),
         ]);
+
         const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
         let nonExistingCases: CasePatchRequest[] = [];
@@ -76,16 +82,25 @@ export function initPatchCasesApi({
               .join(', ')} has been updated. Please refresh before saving additional updates.`
           );
         }
-        const updateCases: CasePatchRequest[] = query.cases.map((thisCase) => {
+        const updateCases: ESCasePatchRequest[] = query.cases.map((thisCase) => {
           const currentCase = myCases.saved_objects.find((c) => c.id === thisCase.id);
+
           return currentCase != null
-            ? getCaseToUpdate(currentCase.attributes, thisCase)
+            ? getCaseToUpdate(currentCase.attributes, {
+                ...(thisCase.connector
+                  ? {
+                      ...thisCase,
+                      connector: transformCaseConnectorToEsConnector(thisCase.connector),
+                    }
+                  : thisCase),
+              } as ESCasePatchRequest)
             : { id: thisCase.id, version: thisCase.version };
         });
         const updateFilterCases = updateCases.filter((updateCase) => {
           const { id, version, ...updateCaseAttributes } = updateCase;
           return Object.keys(updateCaseAttributes).length > 0;
         });
+
         if (updateFilterCases.length > 0) {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           const { username, full_name, email } = await caseService.getUser({ request, response });

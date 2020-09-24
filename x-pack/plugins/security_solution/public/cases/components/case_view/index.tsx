@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 
 import * as i18n from './translations';
 import { Case, CaseConnector } from '../../containers/types';
@@ -41,7 +40,6 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { getConnectorFieldsFromUserActions } from '../edit_connector/helpers';
 
 interface Props {
   caseId: string;
@@ -189,9 +187,9 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
 
-    const [caseConnectorName, isValidConnector] = useMemo(() => {
+    const [isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
-      return [connector?.name ?? 'none', !!connector];
+      return [!!connector];
     }, [connectors, caseData.connector]);
 
     const currentExternalIncident = useMemo(
@@ -202,18 +200,8 @@ export const CaseComponent = React.memo<CaseProps>(
       [caseServices, caseData.connector]
     );
 
-    const currentConnectorFields = getConnectorFieldsFromUserActions(
-      caseData.connector.id,
-      caseUserActions
-    );
-
     const { pushButton, pushCallouts } = usePushToService({
-      connector: {
-        ...caseData.connector,
-        fields: isEmpty(currentConnectorFields)
-          ? caseData.connector.fields
-          : currentConnectorFields,
-      },
+      connector: caseData.connector,
       caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,

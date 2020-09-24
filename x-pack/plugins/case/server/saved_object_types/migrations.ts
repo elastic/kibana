@@ -22,7 +22,7 @@ interface SanitizedCase {
     id: string;
     name: string;
     type: string;
-    fields: Record<string, unknown>;
+    fields: Array<Record<string, unknown>>;
   };
 }
 
@@ -44,7 +44,7 @@ export const caseMigrations = {
       ...doc,
       attributes: {
         ...attributesWithoutConnectorId,
-        connector: { id: connector_id, name: '', type: '', fields: {} },
+        connector: { id: connector_id, name: '', type: '', fields: [] },
       },
       references: doc.references || [],
     };
