@@ -14,10 +14,10 @@ import { EvaluatePanel } from './evaluate_panel';
 
 interface Props {
   jobId: string;
-  isTraining?: boolean;
+  defaultIsTraining?: boolean;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, isTraining }) => (
+export const RegressionExploration: FC<Props> = ({ jobId, defaultIsTraining }) => (
   <ExplorationPageWrapper
     jobId={jobId}
     title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
@@ -25,6 +25,6 @@ export const RegressionExploration: FC<Props> = ({ jobId, isTraining }) => (
       values: { jobId },
     })}
     EvaluatePanel={EvaluatePanel}
-    isTraining={isTraining}
+    defaultIsTraining={defaultIsTraining}
   />
 );

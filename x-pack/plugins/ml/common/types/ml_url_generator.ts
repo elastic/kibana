@@ -167,7 +167,7 @@ export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
-    isTraining?: string;
+    defaultIsTraining?: boolean;
   };
 }
 
@@ -177,7 +177,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
-    isTraining?: string;
+    defaultIsTraining?: boolean;
   }
 >;
 

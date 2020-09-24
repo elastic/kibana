@@ -13,10 +13,10 @@ import { EvaluatePanel } from './evaluate_panel';
 
 interface Props {
   jobId: string;
-  isTraining?: boolean;
+  defaultIsTraining?: boolean;
 }
 
-export const ClassificationExploration: FC<Props> = ({ jobId, isTraining }) => (
+export const ClassificationExploration: FC<Props> = ({ jobId, defaultIsTraining }) => (
   <ExplorationPageWrapper
     jobId={jobId}
     title={i18n.translate(
@@ -27,6 +27,6 @@ export const ClassificationExploration: FC<Props> = ({ jobId, isTraining }) => (
       }
     )}
     EvaluatePanel={EvaluatePanel}
-    isTraining={isTraining}
+    defaultIsTraining={defaultIsTraining}
   />
 );

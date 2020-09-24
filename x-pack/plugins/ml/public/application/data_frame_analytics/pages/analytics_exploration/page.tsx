@@ -32,58 +32,52 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 export const Page: FC<{
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;
-  isTraining?: string | boolean;
-}> = ({ jobId, analysisType, isTraining }) => {
-  if (isTraining !== undefined) {
-    isTraining = isTraining === 'true';
-  }
-
-  return (
-    <Fragment>
-      <NavigationMenu tabId="data_frame_analytics" />
-      <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
-        <EuiPageBody style={{ maxWidth: 'calc(100% - 0px)' }}>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analytics.exploration.title"
-                    defaultMessage="Analytics exploration"
-                  />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate(
-                      'xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel',
-                      {
-                        defaultMessage: 'Experimental',
-                      }
-                    )}
-                    tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent',
-                      {
-                        defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
-                      }
-                    )}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
-            <EuiSpacer size="l" />
-            {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-              <OutlierExploration jobId={jobId} />
-            )}
-            {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-              <RegressionExploration jobId={jobId} isTraining={isTraining} />
-            )}
-            {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-              <ClassificationExploration jobId={jobId} isTraining={isTraining} />
-            )}
-          </EuiPageContentBody>
-        </EuiPageBody>
-      </EuiPage>
-    </Fragment>
-  );
-};
+  defaultIsTraining?: boolean;
+}> = ({ jobId, analysisType, defaultIsTraining }) => (
+  <Fragment>
+    <NavigationMenu tabId="data_frame_analytics" />
+    <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
+      <EuiPageBody style={{ maxWidth: 'calc(100% - 0px)' }}>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.title"
+                  defaultMessage="Analytics exploration"
+                />
+                <span>&nbsp;</span>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel',
+                    {
+                      defaultMessage: 'Experimental',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent',
+                    {
+                      defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
+                    }
+                  )}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
+          <EuiSpacer size="l" />
+          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+            <OutlierExploration jobId={jobId} />
+          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+            <RegressionExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
+          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+            <ClassificationExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
+          )}
+        </EuiPageContentBody>
+      </EuiPageBody>
+    </EuiPage>
+  </Fragment>
+);
