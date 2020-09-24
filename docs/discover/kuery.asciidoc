@@ -67,7 +67,7 @@ To match documents where response is `200` and extension is `php`:
 response:200 and extension:php
 -------------------
 
-To match documents where `response` is 200 or 404.
+To match documents where response is `200` or `404`.
 
 [source,yaml]
 -------------------
@@ -89,14 +89,14 @@ To match documents where `response` is 200 and `extension` is
 response:200 and extension:php or extension:css
 -------------------
 
-To match documents where `response` is not 200:
+To match documents where response is not `200`:
 
 [source,yaml]
 -------------------
 not response:200
 -------------------
 
-To match documents where `response` is 200 but `extension` is not php or css.
+To match documents where response is `200` but extension is not `php` or `css`.
 
 [source,yaml]
 -------------------
@@ -123,8 +123,8 @@ account_number:>=100 and items_sold:<=200
 [discrete]
 === Exist queries
 
-An exist query matches documents that contain a value for a field, in this case
-`response`.
+An exist query matches documents that contain a value for a field, in this case,
+response:
 
 [source,yaml]
 -------------------
@@ -149,8 +149,8 @@ To match multiple fields:
 machine.os*:windows 10
 -------------------
 
-This sytax is handy when you have both `text` and `keyword`
-versions of a field. This query checks both `machine.os` and `machine.os.keyword`
+This sytax is handy when you have `text` and `keyword`
+versions of a field. The query checks `machine.os` and `machine.os.keyword`
 for the term
 "windows 10".
 
@@ -159,7 +159,7 @@ for the term
 === Nested field queries
 
 A main consideration for querying {ref}/nested.html[nested fields] is how to match parts of the nested query to the individual nested documents.
-There are two main approaches:
+There are two approaches:
 
 * *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
 * *Match parts of the query to different nested documents.* This is how a regular object field works.
@@ -207,7 +207,7 @@ To match stores that have more than 10 bananas in stock:
 items:{ name:banana and stock > 10 }
 -------------------
 
-`items` is the "nested path". Everything inside the curly braces (the nested group)
+`items` is the nested path. Everything inside the curly braces (the nested group)
 must match a single nested document.
 
 The following query does not return any matches because no single nested
@@ -221,8 +221,8 @@ items:{ name:banana and stock:9 }
 [discrete]
 ==== Match different documents
 
-The subqueries in this example are in separate nested groups
-and can match different nested documents.
+The following subqueries are in separate nested groups
+and can match different nested documents:
 
 [source,yaml]
 -------------------
@@ -243,7 +243,7 @@ bananas that *also* stocks vegetables:
 items:{ name:banana and stock > 10 } and items:{ category:vegetable }
 -------------------
 
-The first nested group (`name:banana and stock > 10`) must still match a single document, but the `category:vegetables`
+The first nested group (`name:banana and stock > 10`) must match a single document, but the `category:vegetables`
 subquery can match a different nested document because it is in a separate group.
 
 [discrete]
