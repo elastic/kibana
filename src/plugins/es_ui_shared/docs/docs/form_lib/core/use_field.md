@@ -345,6 +345,29 @@ The (optional) children of `<UseField />` is a function child which receives the
 
 The docs for the [FieldHook are right here](field_hook.md).
 
+## `getUseField()`
+
+**Arguments:** `props: UseFieldProps` 
+
+In some cases you might find yourself declaring the exact same prop on `<UseField />` for all your fields. (e.g. using the [the `Field` component](../helpers/components#field) everywhere).
+
+You can use the `getUseField` helper to get a `<UseField />` component with predefined props values.
+
+```js
+const UseField = getUseField({ component: Field });
+
+const MyFormComponent = () => {
+  ...
+  return (
+    <Form form={form}>
+      {/*You now can use it in your JSX without specifying the component anymore */}
+      <UseField path="name" />
+    </Form>
+  );
+};
+```
+
+
 ## Typescript value type
 
 You can provided the value type (`unknown` by default) on the component. 
