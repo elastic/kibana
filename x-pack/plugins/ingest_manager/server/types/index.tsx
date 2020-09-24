@@ -68,6 +68,7 @@ export {
   Settings,
   SettingsSOAttributes,
   InstallType,
+  InstallSource,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,

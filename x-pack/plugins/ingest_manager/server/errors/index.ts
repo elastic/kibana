@@ -20,3 +20,4 @@ export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
+export class PackageCacheError extends IngestManagerError {}

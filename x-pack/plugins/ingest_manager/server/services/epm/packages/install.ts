@@ -256,8 +256,8 @@ export async function installPackageFromRegistry({
   if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
-  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
-  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+
+  const { paths, registryPackageInfo } = await Registry.loadRegistryPackage(pkgName, pkgVersion);
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
