@@ -56,16 +56,24 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({ sourceId: 'INITIAL_SOURCE_ID' });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sourceId: 'INITIAL_SOURCE_ID',
+      }),
+      expect.anything()
+    );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ sourceId: 'CHANGED_SOURCE_ID' });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
-      sourceId: 'CHANGED_SOURCE_ID',
-    });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sourceId: 'CHANGED_SOURCE_ID',
+      }),
+      expect.anything()
+    );
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
@@ -93,18 +101,24 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({
-      query: 'INITIAL_FILTER_QUERY',
-    });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: 'INITIAL_FILTER_QUERY',
+      }),
+      expect.anything()
+    );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
-      query: 'CHANGED_FILTER_QUERY',
-    });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: 'CHANGED_FILTER_QUERY',
+      }),
+      expect.anything()
+    );
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
@@ -124,10 +138,13 @@ describe('useLogSummary hook', () => {
 
     await waitForNextUpdate();
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({
-      startTimestamp: firstRange.startTimestamp,
-      endTimestamp: firstRange.endTimestamp,
-    });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startTimestamp: firstRange.startTimestamp,
+        endTimestamp: firstRange.endTimestamp,
+      }),
+      expect.anything()
+    );
 
     const secondRange = createMockDateRange('now-20s', 'now');
 
@@ -135,10 +152,13 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
-      startTimestamp: secondRange.startTimestamp,
-      endTimestamp: secondRange.endTimestamp,
-    });
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startTimestamp: secondRange.startTimestamp,
+        endTimestamp: secondRange.endTimestamp,
+      }),
+      expect.anything()
+    );
   });
 });
 
