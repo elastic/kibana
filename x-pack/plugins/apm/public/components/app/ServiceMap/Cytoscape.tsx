@@ -6,7 +6,7 @@
 
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import React, {
   createContext,
   CSSProperties,
