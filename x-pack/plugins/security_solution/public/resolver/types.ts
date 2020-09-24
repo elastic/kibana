@@ -504,6 +504,24 @@ export interface DataAccessLayer {
   relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
 
   /**
+   * Return events that have `process.entity_id` that includes `entityID` and that have
+   * a `event.category` that includes `category`.
+   */
+  eventsWithEntityIDAndCategory: (
+    entityID: string,
+    category: string,
+    after: string
+  ) => Promise<{
+    events: SafeResolverEvent[];
+    nextEvent: string | null;
+  }>;
+
+  /**
+   * Return up to one event that has an `event.id` that includes `eventID`.
+   */
+  event(eventID: string): Promise<SafeResolverEvent | null>;
+
+  /**
    * Fetch a ResolverTree for a entityID
    */
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;

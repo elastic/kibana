@@ -6,6 +6,7 @@
 
 import {
   ResolverRelatedEvents,
+  SafeResolverEvent,
   ResolverTree,
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
@@ -56,6 +57,29 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
           events: [],
           nextEvent: null,
         });
+      },
+
+      /**
+       * Return events that have `process.entity_id` that includes `entityID` and that have
+       * a `event.category` that includes `category`.
+       */
+      async eventsWithEntityIDAndCategory(
+        _entityID: string,
+        _category: string,
+        _after: string
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        const events: SafeResolverEvent[] = [];
+        return {
+          events,
+          nextEvent: null,
+        };
+      },
+
+      async event(_eventID: string): Promise<SafeResolverEvent | null> {
+        return null;
       },
 
       /**

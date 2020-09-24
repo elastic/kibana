@@ -28,6 +28,24 @@ export function dataAccessLayerFactory(
         query: { events: 100 },
       });
     },
+
+    /**
+     * Return an empty response. The corresponding API is not yet implemented.
+     */
+    async eventsWithEntityIDAndCategory() {
+      return {
+        events: [],
+        nextEvent: null,
+      };
+    },
+
+    /**
+     * Return an empty response. The corresponding API is not yet implemented.
+     */
+    async event() {
+      return null;
+    },
+
     /**
      * Used to get descendant and ancestor process events for a node.
      */
