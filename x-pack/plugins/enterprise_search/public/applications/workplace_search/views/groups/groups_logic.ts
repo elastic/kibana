@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { storeLogic } from 'shared/store';
+import { kea, MakeLogicType } from 'kea';
+import { HttpLogic } from '../../../shared/http';
+import {
+  FlashMessagesLogic,
+  flashAPIErrors,
+  setSuccessMessage,
+} from '../../../shared/flash_messages';
 
-import http from 'shared/http';
-import routes from 'workplace_search/routes';
+import { IContentSource, IGroup, IUser } from '../../types';
 
-import { IContentSource, IGroup, IUser } from 'workplace_search/types';
-
-import { DEFAULT_META } from 'shared/constants/defaultMeta';
-import { IMeta, IFlashMessagesProps } from 'shared/types';
+import { JSON_HEADER as headers } from '../../../../../common/constants';
+import { DEFAULT_META } from '../../../shared/constants';
+import { IMeta } from '../../../../../common/types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -27,37 +31,35 @@ interface IGroupsSearchResponse {
 }
 
 export interface IGroupsActions {
-  setFlashMessages(flashMessages: IFlashMessagesProps);
-  onInitializeGroups(data: IGroupsServerData);
-  setSearchResults(data: IGroupsSearchResponse);
-  addFilteredSource(sourceId: string);
-  removeFilteredSource(sourceId: string);
-  addFilteredUser(userId: string);
-  removeFilteredUser(userId: string);
-  setGroupUsers(allGroupUsers: IUser[]);
-  setAllGroupLoading(allGroupUsersLoading: boolean);
-  setFilterValue(filterValue: string);
-  setActivePage(activePage: number);
-  setNewGroupName(newGroupName: string);
-  setNewGroup(newGroup: IGroup);
-  setNewGroupFormErrors(errors: string[]);
-  openNewGroupModal();
-  closeNewGroupModal();
-  closeFilterSourcesDropdown();
-  closeFilterUsersDropdown();
-  toggleFilterSourcesDropdown();
-  toggleFilterUsersDropdown();
-  setGroupsLoading();
-  resetGroupsFilters();
-  resetGroups();
-  initializeGroups();
-  getSearchResults(resetPagination?: boolean);
-  fetchGroupUsers(groupId: string);
-  saveNewGroup();
+  onInitializeGroups(data: IGroupsServerData): IGroupsServerData;
+  setSearchResults(data: IGroupsSearchResponse): IGroupsSearchResponse;
+  addFilteredSource(sourceId: string): string;
+  removeFilteredSource(sourceId: string): string;
+  addFilteredUser(userId: string): string;
+  removeFilteredUser(userId: string): string;
+  setGroupUsers(allGroupUsers: IUser[]): IUser[];
+  setAllGroupLoading(allGroupUsersLoading: boolean): boolean;
+  setFilterValue(filterValue: string): string;
+  setActivePage(activePage: number): number;
+  setNewGroupName(newGroupName: string): string;
+  setNewGroup(newGroup: IGroup): IGroup;
+  setNewGroupFormErrors(errors: string[]): string[];
+  openNewGroupModal(): void;
+  closeNewGroupModal(): void;
+  closeFilterSourcesDropdown(): void;
+  closeFilterUsersDropdown(): void;
+  toggleFilterSourcesDropdown(): void;
+  toggleFilterUsersDropdown(): void;
+  setGroupsLoading(): void;
+  resetGroupsFilters(): void;
+  resetGroups(): void;
+  initializeGroups(): void;
+  getSearchResults(resetPagination?: boolean): { resetPagination: boolean | undefined };
+  fetchGroupUsers(groupId: string): { groupId: string };
+  saveNewGroup(): void;
 }
 
 export interface IGroupsValues {
-  flashMessages?: IFlashMessagesProps;
   groups: IGroup[];
   contentSources: IContentSource[];
   users: IUser[];
@@ -65,7 +67,7 @@ export interface IGroupsValues {
   groupListLoading: boolean;
   newGroupModalOpen: boolean;
   newGroupName: string;
-  newGroup: IGroup;
+  newGroup: IGroup | null;
   newGroupNameErrors: string[];
   filterSourcesDropdownOpen: boolean;
   filteredSources: string[];
@@ -78,14 +80,9 @@ export interface IGroupsValues {
   hasFiltersSet: boolean;
 }
 
-interface IListenerParams {
-  actions: IGroupsActions;
-  values: IGroupsValues;
-}
-
-export const GroupsLogic = storeLogic({
-  actions: (): IGroupsActions => ({
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
+export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
+  path: ['enterprise_search', 'workplace_search', 'groups'],
+  actions: {
     onInitializeGroups: (data: IGroupsServerData) => data,
     setSearchResults: (data: IGroupsSearchResponse) => data,
     addFilteredSource: (sourceId: string) => sourceId,
@@ -112,18 +109,10 @@ export const GroupsLogic = storeLogic({
     getSearchResults: (resetPagination?: boolean) => ({ resetPagination }),
     fetchGroupUsers: (groupId: string) => ({ groupId }),
     saveNewGroup: () => true,
-  }),
-  reducers: () => ({
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        setNewGroup: (_, group) => ({ success: [`Successfully created "${group.name}".`] }),
-        setGroupsLoading: () => ({}),
-      },
-    ],
+  },
+  reducers: {
     groups: [
-      [],
+      [] as IGroup[],
       {
         setSearchResults: (_, { results }) => results,
       },
@@ -254,23 +243,29 @@ export const GroupsLogic = storeLogic({
         }),
       },
     ],
-  }),
+  },
   selectors: ({ selectors }) => ({
     hasFiltersSet: [
       () => [selectors.filteredUsers, selectors.filteredSources],
       (filteredUsers, filteredSources) => filteredUsers.length > 0 || filteredSources.length > 0,
     ],
   }),
-  listeners: ({ actions, values }: IListenerParams) => ({
-    initializeGroups: () => {
-      const route = routes.fritoPieOrganizationGroupsPath();
-      http(route)
-        .then(({ data }) => actions.onInitializeGroups(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+  listeners: ({ actions, values }) => ({
+    initializeGroups: async () => {
+      try {
+        const response = await HttpLogic.values.http.get('/api/workplace_search/groups');
+        actions.onInitializeGroups(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    getSearchResults: ({ resetPagination }) => {
+    getSearchResults: async ({ resetPagination }, breakpoint) => {
+      // Debounce search results when typing
+      await breakpoint(300);
+
+      FlashMessagesLogic.actions.clearFlashMessages();
       actions.setGroupsLoading();
-      const route = routes.searchFritoPieOrganizationGroupsPath();
+
       const {
         groupsMeta: {
           page: { current, size },
@@ -291,27 +286,44 @@ export const GroupsLogic = storeLogic({
         user_ids: filteredUsers,
       };
 
-      http
-        .post(route, { page, search })
-        .then(({ data }) => actions.setSearchResults(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+      try {
+        const response = await HttpLogic.values.http.post('/api/workplace_search/groups/search', {
+          body: JSON.stringify({
+            page,
+            search,
+          }),
+          headers,
+        });
+
+        actions.setSearchResults(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    fetchGroupUsers: ({ groupId }) => {
+    fetchGroupUsers: async ({ groupId }) => {
       actions.setAllGroupLoading(true);
-      const route = routes.groupUsersFritoPieOrganizationGroupPath(groupId);
-      http(route)
-        .then(({ data }) => actions.setGroupUsers(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+      try {
+        const response = await HttpLogic.values.http.get(
+          `/api/workplace_search/groups/${groupId}/group_users`
+        );
+        actions.setGroupUsers(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveNewGroup: () => {
-      const route = routes.fritoPieOrganizationGroupsPath();
-      http
-        .post(route, { group_name: values.newGroupName })
-        .then(({ data }) => {
-          actions.getSearchResults(true);
-          actions.setNewGroup(data);
-        })
-        .catch(({ response }) => actions.setNewGroupFormErrors(response.data.errors));
+    saveNewGroup: async () => {
+      try {
+        const response = await HttpLogic.values.http.post('/api/workplace_search/groups', {
+          body: JSON.stringify({ group_name: values.newGroupName }),
+          headers,
+        });
+        actions.getSearchResults(true);
+        actions.setNewGroup(response);
+
+        setSuccessMessage(`Successfully created "${response.name}"`);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });
