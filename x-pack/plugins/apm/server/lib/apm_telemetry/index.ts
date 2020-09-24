@@ -30,7 +30,7 @@ import {
 } from './collect_data_telemetry';
 import { APMDataTelemetry } from './types';
 
-const APM_TELEMETRY_TASK_NAME = 'apm-usage-task';
+const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,

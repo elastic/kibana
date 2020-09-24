@@ -14,7 +14,7 @@ import {
 
 import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 
-export const TELEMETRY_TASK_TYPE = 'alerting_usage';
+export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
 

@@ -20,7 +20,7 @@ import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
 
-const TELEMETRY_TASK_TYPE = 'lens_usage';
+const TELEMETRY_TASK_TYPE = 'lens_telemetry';
 
 export const TASK_ID = `Lens-${TELEMETRY_TASK_TYPE}`;
 

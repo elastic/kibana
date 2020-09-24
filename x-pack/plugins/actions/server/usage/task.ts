@@ -13,7 +13,7 @@ import {
 } from '../../../task_manager/server';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
-export const TELEMETRY_TASK_TYPE = 'actions_usage';
+export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
 

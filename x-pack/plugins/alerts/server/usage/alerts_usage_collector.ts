@@ -55,7 +55,7 @@ export function createAlertsUsageCollector(
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
-    const result = await taskManager.get('Alerting-alerting_usage');
+    const result = await taskManager.get('Alerting-alerting_telemetry');
     return result;
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();
