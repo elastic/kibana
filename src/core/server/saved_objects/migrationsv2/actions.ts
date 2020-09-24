@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from '../../../elasticsearch';
-
-export const init = () => async () => ({ init: true });
+import { ElasticsearchClient } from '../../elasticsearch';
 
 /**
  * IDEAS:
