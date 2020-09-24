@@ -27,4 +27,5 @@ export {
   isValidNamespace,
   LicenseService,
   isAgentUpgradeable,
+  buildAgentSourceUri,
 } from '../../../../common';

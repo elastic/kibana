@@ -38,12 +38,13 @@ import {
   useKibanaVersion,
 } from '../../../hooks';
 import { SearchBar, ContextMenuActions } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
+import { AgentStatusKueryHelper, isAgentUpgradeable, buildAgentSourceUri } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AgentReassignAgentPolicyFlyout,
   AgentHealth,
   AgentUnenrollAgentModal,
+  AgentUpgradeAgentModal,
 } from '../components';
 import { AgentBulkActions, SelectionMode } from './components/bulk_actions';
 
@@ -76,7 +77,8 @@ const RowActions = React.memo<{
   refresh: () => void;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
-}>(({ agent, refresh, onReassignClick, onUnenrollClick }) => {
+  onUpgradeClick: () => void;
+}>(({ agent, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
 
@@ -128,6 +130,17 @@ const RowActions = React.memo<{
               defaultMessage="Unenroll agent"
             />
           )}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.ingestManager.agentList.upgradeOneButton"
+            defaultMessage="Upgrade agent"
+          />
         </EuiContextMenuItem>,
       ]}
     />
@@ -191,6 +204,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
 
   let kuery = search.trim();
   if (selectedAgentPolicies.length) {
@@ -376,6 +390,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 refresh={() => agentsRequest.resendRequest()}
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
+                onUpgradeClick={() => setAgentToUpgrade(agent)}
               />
             );
           },
@@ -437,6 +452,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               agentsRequest.resendRequest();
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
+          />
+        </EuiPortal>
+      )}
+
+      {agentToUpgrade && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agentToUpgrade]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToUpgrade(undefined);
+              agentsRequest.resendRequest();
+            }}
+            version={kibanaVersion}
+            sourceUri={buildAgentSourceUri(agentToUpgrade, kibanaVersion)}
           />
         </EuiPortal>
       )}

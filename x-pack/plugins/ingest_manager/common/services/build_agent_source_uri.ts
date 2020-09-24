@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './loading';
-export * from './agent_reassign_policy_flyout';
-export * from './agent_enrollment_flyout';
-export * from './agent_health';
-export * from './agent_unenroll_modal';
-export * from './agent_upgrade_modal';
+// given the agent and a version, get the appropriate source URI to handle agent upgrades
+import { Agent } from '../types';
+
+export function buildAgentSourceUri(agent: Agent, version: string) {
+  return `http://path/to/download/${version}`;
+}

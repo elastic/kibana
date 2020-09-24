@@ -7,9 +7,13 @@ import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { useCapabilities } from '../../../../hooks';
+import { useCapabilities, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
-import { AgentUnenrollAgentModal, AgentReassignAgentPolicyFlyout } from '../../components';
+import {
+  AgentUnenrollAgentModal,
+  AgentReassignAgentPolicyFlyout,
+  AgentUpgradeAgentModal,
+} from '../../components';
 import { useAgentRefresh } from '../hooks';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
@@ -18,9 +22,11 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign }) => {
   const hasWriteCapabilites = useCapabilities().write;
+  const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
   const onClose = useMemo(() => {
@@ -48,6 +54,20 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               refreshAgent();
             }}
             useForceUnenroll={isUnenrolling}
+          />
+        </EuiPortal>
+      )}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agent]}
+            agentCount={1}
+            sourceUri={buildAgentSourceUri(agent, kibanaVersion)}
+            version={kibanaVersion}
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgent();
+            }}
           />
         </EuiPortal>
       )}
@@ -93,6 +113,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                 defaultMessage="Unenroll agent"
               />
             )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="refresh"
+            onClick={() => {
+              setIsUpgradeModalOpen(true);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentList.upgradeOneButton"
+              defaultMessage="Upgrade agent"
+            />
           </EuiContextMenuItem>,
         ]}
       />
