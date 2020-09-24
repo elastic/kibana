@@ -36,8 +36,10 @@ describe('agent name helpers', () => {
       });
 
       describe('with otlp', () => {
-        it('converts it to python', () => {
-          expect(getNormalizedAgentName('otlp')).toEqual('python');
+        it('converts it to opentelemetry/unknown', () => {
+          expect(getNormalizedAgentName('otlp')).toEqual(
+            'opentelemetry/unknown'
+          );
         });
       });
     });

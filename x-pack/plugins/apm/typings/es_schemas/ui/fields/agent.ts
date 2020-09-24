@@ -16,7 +16,18 @@ export type AgentName =
   | 'nodejs'
   | 'python'
   | 'dotnet'
-  | 'ruby';
+  | 'ruby'
+  | 'otlp'
+  | 'opentelemetry/cpp'
+  | 'opentelemetry/dotnet'
+  | 'opentelemetry/erlang'
+  | 'opentelemetry/go'
+  | 'opentelemetry/java'
+  | 'opentelemetry/nodejs'
+  | 'opentelemetry/php'
+  | 'opentelemetry/python'
+  | 'opentelemetry/ruby'
+  | 'opentelemetry/webjs';
 
 export interface Agent {
   ephemeral_id?: string;

@@ -23,13 +23,20 @@ export const AGENT_NAMES: AgentName[] = [
   'python',
   'ruby',
   'rum-js',
+  'otlp',
+  'opentelemetry/cpp',
+  'opentelemetry/dotnet',
+  'opentelemetry/erlang',
+  'opentelemetry/go',
+  'opentelemetry/java',
+  'opentelemetry/nodejs',
+  'opentelemetry/php',
+  'opentelemetry/python',
+  'opentelemetry/ruby',
+  'opentelemetry/webjs',
 ];
 
-export function isAgentName(agentName: string): agentName is AgentName {
-  return AGENT_NAMES.includes(agentName as AgentName);
-}
-
-export const RUM_AGENTS = ['js-base', 'rum-js', 'opentelemetry/webjs'];
+export const RUM_AGENTS = ['js-base', 'rum-js'];
 
 export function isRumAgentName(
   agentName?: string
@@ -55,7 +62,7 @@ export function isJavaAgentName(
 export function getNormalizedAgentName(agentName?: string) {
   let newName = agentName && agentName.toLowerCase();
 
-  if (isRumAgentName(newName)) {
+  if (isRumAgentName(newName) || newName === 'opentelemetry/webjs') {
     newName = 'js-base';
   }
 
@@ -63,9 +70,13 @@ export function getNormalizedAgentName(agentName?: string) {
     newName = newName?.replace('opentelemetry/', '');
   }
 
-  // What should be "opentelemetry-python" can be reported as "otlp"
-  if (newName === 'otlp') {
-    newName = 'python';
+  // OpenTelemetry implementations that do not report their agent name can be
+  // reported as "otlp"
+  //
+  // OpenTelemetry alse supports Erlang and C++ but we don't so just use the
+  // OpenTelemetry icon for those.
+  if (newName === 'cpp' || newName === 'erlang' || newName === 'otlp') {
+    newName = 'opentelemetry/unknown';
   }
 
   return newName;

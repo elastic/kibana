@@ -524,6 +524,710 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               }
                             }
                           }
+                        },
+                        "otlp": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/cpp": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/dotnet": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/erlang": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/go": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/java": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/nodejs": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/php": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/python": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/ruby": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "opentelemetry/webjs": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword",
+                                  "ignore_above": 1024
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "composite": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "name": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    },
+                                    "version": {
+                                      "type": "keyword",
+                                      "ignore_above": 1024
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -883,6 +1587,50 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           "null_value": 0
                         },
                         "rum-js": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "otlp": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/cpp": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/dotnet": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/erlang": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/go": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/java": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/nodejs": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/php": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/python": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/ruby": {
+                          "type": "long",
+                          "null_value": 0
+                        },
+                        "opentelemetry/webjs": {
                           "type": "long",
                           "null_value": 0
                         }

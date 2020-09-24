@@ -9,6 +9,7 @@ import dotNetIcon from './icons/dot-net.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
+import openTelemetryIcon from './icons/opentelemetry.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
@@ -20,6 +21,7 @@ const agentIcons: { [key: string]: string } = {
   java: javaIcon,
   'js-base': rumJsIcon,
   nodejs: nodeJsIcon,
+  'opentelemetry/unknown': openTelemetryIcon,
   php: phpIcon,
   python: pythonIcon,
   ruby: rubyIcon,
