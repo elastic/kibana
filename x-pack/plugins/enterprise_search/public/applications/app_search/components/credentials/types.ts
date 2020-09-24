@@ -9,3 +9,14 @@ import { IEngine } from '../../types';
 export interface ICredentialsDetails {
   engines: IEngine[];
 }
+
+export interface IApiToken {
+  access_all_engines?: boolean;
+  key?: string;
+  engines?: string[];
+  id?: number;
+  name: string;
+  read?: boolean;
+  type: string;
+  write?: boolean;
+}

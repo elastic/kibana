@@ -12,8 +12,8 @@ import { ADMIN, PRIVATE } from './constants';
 import { HttpLogic } from '../../../shared/http';
 import { IMeta } from '../../../../../common/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
-import { IApiToken, IEngine } from '../../types';
-import { ICredentialsDetails } from './types';
+import { IEngine } from '../../types';
+import { IApiToken, ICredentialsDetails } from './types';
 
 interface ITokenReadWrite {
   name: 'read' | 'write';
