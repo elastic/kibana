@@ -20,7 +20,12 @@ import {
 } from '@elastic/eui';
 
 export const NewBucketButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
-  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={onClick}>
+  <EuiButtonEmpty
+    data-test-subj="lns-newBucket-add"
+    size="xs"
+    iconType="plusInCircle"
+    onClick={onClick}
+  >
     {label}
   </EuiButtonEmpty>
 );
@@ -30,6 +35,7 @@ interface BucketContainerProps {
   invalidMessage: string;
   onRemoveClick: () => void;
   removeTitle: string;
+  isNotRemovable?: boolean;
   children: React.ReactNode;
   dataTestSubj?: string;
 }
@@ -41,6 +47,7 @@ const BucketContainer = ({
   removeTitle,
   children,
   dataTestSubj,
+  isNotRemovable,
 }: BucketContainerProps) => {
   return (
     <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
@@ -70,6 +77,7 @@ const BucketContainer = ({
             onClick={onRemoveClick}
             aria-label={removeTitle}
             title={removeTitle}
+            disabled={isNotRemovable}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

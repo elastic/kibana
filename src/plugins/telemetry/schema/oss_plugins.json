@@ -1297,6 +1297,55 @@
         }
       }
     },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword"
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "timelion_sheet": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "stack_management": {
       "properties": {
         "visualize:enableLabs": {
@@ -1578,6 +1627,121 @@
         },
         "last_reported": {
           "type": "long"
+        }
+      }
+    },
+    "static_telemetry": {
+      "properties": {
+        "ece": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "ess": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "eck": {
+          "properties": {
+            "operator_uuid": {
+              "type": "keyword"
+            },
+            "operator_roles": {
+              "type": "keyword"
+            },
+            "custom_operator_namespace": {
+              "type": "boolean"
+            },
+            "distribution": {
+              "type": "text"
+            },
+            "build": {
+              "properties": {
+                "hash": {
+                  "type": "text"
+                },
+                "date": {
+                  "type": "date"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
         }
       }
     },

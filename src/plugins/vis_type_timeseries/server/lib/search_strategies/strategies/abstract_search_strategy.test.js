@@ -49,6 +49,7 @@ describe('AbstractSearchStrategy', () => {
     expect(fields).toBe(mockedFields);
     expect(req.pre.indexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
+      fieldCapsOptions: { allowNoIndices: true },
     });
   });
 

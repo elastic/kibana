@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../licensing/common/types';
 import { AlertType } from '../common/alert_types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LicensingPluginSetup,
   LicensingRequestHandlerContext,
@@ -15,9 +16,10 @@ import {
 export const APM_FEATURE = {
   id: 'apm',
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-    defaultMessage: 'APM',
+    defaultMessage: 'APM and Client Side Monitoring',
   }),
   order: 900,
+  category: DEFAULT_APP_CATEGORIES.observability,
   icon: 'apmApp',
   navLinkId: 'apm',
   app: ['apm', 'csm', 'kibana'],
