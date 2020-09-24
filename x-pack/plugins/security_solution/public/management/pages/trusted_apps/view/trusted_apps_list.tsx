@@ -150,6 +150,7 @@ export const TrustedAppsList = memo(() => {
         },
         [history]
       )}
+      data-test-subj="trustedAppsList"
     />
   );
 });
