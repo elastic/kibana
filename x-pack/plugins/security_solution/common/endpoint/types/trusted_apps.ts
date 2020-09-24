@@ -6,9 +6,13 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
+  DeleteTrustedAppsRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../schema/trusted_apps';
+
+/** API request params for deleting Trusted App entry */
+export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
