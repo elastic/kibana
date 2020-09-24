@@ -44,11 +44,13 @@ export const getPageLoadDistBreakdown = async ({
   minDuration,
   maxDuration,
   breakdown,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   minDuration: number;
   maxDuration: number;
   breakdown: string;
+  urlQuery?: string;
 }) => {
   // convert secs to micros
   const stepValues = getPLDChartSteps({
@@ -58,6 +60,7 @@ export const getPageLoadDistBreakdown = async ({
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
