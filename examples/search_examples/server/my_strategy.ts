@@ -24,7 +24,6 @@ export const mySearchStrategyProvider = (data: PluginStart): ISearchStrategy => 
   const es = data.search.getSearchStrategy('es');
   return {
     search: async (context, request, options): Promise<IMyStrategyResponse> => {
-      request.debug = true;
       const esSearchRes = await es.search(context, request, options);
       return {
         ...esSearchRes,
