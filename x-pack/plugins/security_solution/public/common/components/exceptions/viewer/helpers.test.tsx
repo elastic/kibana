@@ -179,6 +179,10 @@ describe('Exception viewer helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
+          description: 'Linux',
+          title: 'OS',
+        },
+        {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
@@ -200,6 +204,10 @@ describe('Exception viewer helpers', () => {
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',

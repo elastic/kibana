@@ -250,7 +250,7 @@ describe('When the add exception modal is opened', () => {
           indexPatterns: {
             ...stubIndexPattern,
             fields: [
-              { name: 'file.path.text', type: 'string' },
+              { name: 'file.path.caseless', type: 'string' },
               { name: 'subject_name', type: 'string' },
               { name: 'trusted', type: 'string' },
               { name: 'file.hash.sha256', type: 'string' },
