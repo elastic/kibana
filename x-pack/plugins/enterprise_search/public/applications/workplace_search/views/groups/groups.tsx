@@ -10,36 +10,36 @@ import { useActions, useValues } from 'kea';
 import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import FlashMessages from 'shared/components/FlashMessages';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import {
-  Loading,
-  SidebarNavigation,
-  ViewContentHeader,
-  AppView,
-} from 'workplace_search/components';
-import { getGroupPath, USERS_PATH } from 'workplace_search/utils/routePaths';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import { useDebounce, useDidUpdateEffect } from 'shared/utils';
+import { AppLogic } from '../../app_logic';
 
-import { GroupsLogic, IGroupsActions, IGroupsValues } from './GroupsLogic';
+import { Loading } from '../../components/shared/loading';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-import AddGroupModal from './components/AddGroupModal';
-import ClearFiltersLink from './components/ClearFiltersLink';
-import GroupsTable from './components/GroupsTable';
-import TableFilters from './components/TableFilters';
+import { getGroupPath, USERS_PATH } from '../../routes';
+
+import { useDidUpdateEffect } from '../../../shared/use_did_update_effect';
+import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
+
+import { GroupsLogic } from './groups_logic';
+
+import { AddGroupModal } from './components/add_group_modal';
+import { ClearFiltersLink } from './components/clear_filters_link';
+import { GroupsTable } from './components/groups_table';
+import { TableFilters } from './components/table_filters';
 
 export const Groups: React.FC = () => {
-  const { getSearchResults, openNewGroupModal, resetGroups } = useActions(
-    GroupsLogic
-  ) as IGroupsActions;
+  const { messages } = useValues(FlashMessagesLogic);
+
+  const { getSearchResults, openNewGroupModal, resetGroups } = useActions(GroupsLogic);
   const {
     groupsDataLoading,
     newGroupModalOpen,
     newGroup,
     groupListLoading,
-    flashMessages,
     hasFiltersSet,
     groupsMeta: {
       page: { current: activePage, total_results: numGroups },
@@ -47,20 +47,20 @@ export const Groups: React.FC = () => {
     filteredSources,
     filteredUsers,
     filterValue,
-  } = useValues(GroupsLogic) as IGroupsValues;
+  } = useValues(GroupsLogic);
 
   const {
     isFederatedAuth,
-    canCreateInvitations,
-    fpAccount: { isCurated },
-  } = useValues(AppLogic) as IAppValues;
+    account: { canCreateInvitations },
+  } = useValues(AppLogic);
 
-  const debouncedFilterValue = useDebounce(filterValue, 300);
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     getSearchResults(true);
     return resetGroups;
-  }, [debouncedFilterValue, filteredSources, filteredUsers]);
+  }, [filteredSources, filteredUsers, filterValue]);
+
   // Because the initial search happens above, we want to skip the initial search and use the custom hook to do so.
   useDidUpdateEffect(() => {
     getSearchResults();
@@ -70,28 +70,26 @@ export const Groups: React.FC = () => {
     return <Loading />;
   }
 
-  const description = `Assign shared content sources ${
-    !isFederatedAuth ? 'and users to groups ' : ''
-  }to create relevant search experiences for various internal teams.`;
+  if (newGroup && hasMessages) {
+    messages[0].description = (
+      <Link to={getGroupPath(newGroup.id)}>
+        <EuiButton color="primary">Manage Group</EuiButton>
+      </Link>
+    );
+  }
+
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
   const inviteUsersButton =
-    !isFederatedAuth && (canCreateInvitations || isCurated) ? (
+    !isFederatedAuth && canCreateInvitations ? (
       <Link to={USERS_PATH}>
-        <EuiButton data-test-subj="InviteUsersButton" color="primary" fill>
-          Invite users
-        </EuiButton>
+        <EuiButton data-test-subj="InviteUsersButton">Invite users</EuiButton>
       </Link>
     ) : null;
 
   const headerAction = (
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="AddGroupButton"
-          color="secondary"
-          fill={true}
-          onClick={openNewGroupModal}
-        >
+        <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
           Create a group
         </EuiButton>
       </EuiFlexItem>
@@ -114,27 +112,21 @@ export const Groups: React.FC = () => {
     </EuiFlexGroup>
   );
 
-  const flashMessagesEl = (
-    <FlashMessages {...flashMessages}>
-      {newGroup && (
-        <Link to={getGroupPath(newGroup.id)}>
-          <EuiButton color="primary">Manage Group</EuiButton>
-        </Link>
-      )}
-    </FlashMessages>
-  );
-
-  const sidebar = <SidebarNavigation title="Manage groups" description={description} />;
-
   return (
-    <AppView sidebar={sidebar}>
-      <ViewContentHeader title="Organization groups" action={headerAction} />
+    <>
+      <SetPageChrome text="Groups" />
+      <SendTelemetry action="viewed" metric="groups" />
+      {hasMessages && <FlashMessages />}
+      <ViewContentHeader
+        title="Manage groups"
+        description="Assign shared content sources and users to groups to create relevant search experiences for various internal teams."
+        action={headerAction}
+      />
       <EuiSpacer size="m" />
-      {!!flashMessages && flashMessagesEl}
       <TableFilters />
       <EuiSpacer />
       {numGroups > 0 && !groupListLoading ? <GroupsTable /> : noResults}
       {newGroupModalOpen && <AddGroupModal />}
-    </AppView>
+    </>
   );
 };
