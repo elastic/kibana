@@ -9,6 +9,7 @@ import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import '../../../../../common/mock/match_media';
+import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';

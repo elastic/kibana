@@ -15,11 +15,11 @@ import { wait as waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineType } from '../../../../common/types/timeline';
 
-import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
-import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
+import { TestProviders, apolloClient, mockOpenTimelineQueryResults } from '../../../common/mock';
 import { getTimelineTabsUrl } from '../../../common/components/link_to';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';

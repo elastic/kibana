@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
+import '../../../common/mock/react_beautiful_dnd';
 
 import {
   apolloClientObservable,
