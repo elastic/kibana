@@ -16,6 +16,7 @@ import {
   DeletePackageConfigsRequestSchema,
   NewPackageConfig,
 } from '../../types';
+import { defaultIngestErrorHandler } from '../../errors';
 import { CreatePackageConfigResponse, DeletePackageConfigsResponse } from '../../../common';
 
 export const getPackageConfigsHandler: RequestHandler<
@@ -37,11 +38,8 @@ export const getPackageConfigsHandler: RequestHandler<
         success: true,
       },
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -64,11 +62,8 @@ export const getOnePackageConfigHandler: RequestHandler<TypeOf<
         body: { message: 'Package config not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -184,10 +179,7 @@ export const deletePackageConfigHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
