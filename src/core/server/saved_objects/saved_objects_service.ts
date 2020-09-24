@@ -54,6 +54,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationEsClient } from './migrations/core/';
+import { migrationStateMachine } from './migrationsv2';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -410,6 +411,11 @@ export class SavedObjectsService
       this.logger.info('Starting saved objects migrations');
       await migrator.runMigrations();
     }
+
+    // await migrationStateMachine(
+    //   elasticsearch.client.asInternalUser,
+    //   this.coreContext.env.packageInfo.version
+    // );
 
     const createRepository = (
       esClient: ElasticsearchClient,
