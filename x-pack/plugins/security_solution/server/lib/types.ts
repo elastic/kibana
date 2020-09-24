@@ -13,7 +13,6 @@ import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
-import { IpDetails } from './ip_details';
 import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
@@ -31,7 +30,6 @@ export interface AppDomainLibs {
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  ipDetails: IpDetails;
   matrixHistogram: MatrixHistogram;
   network: Network;
   kpiNetwork: KpiNetwork;

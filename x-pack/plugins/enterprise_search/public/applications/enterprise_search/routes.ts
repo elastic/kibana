@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createIpDetailsResolvers } from './resolvers';
-export { ipDetailsSchemas } from './schema.gql';
+export const ROOT_PATH = '/';
+export const SETUP_GUIDE_PATH = '/setup_guide';
