@@ -5,10 +5,11 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { getTimepickerRisonData } from '../rison_helpers';
+import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 
 interface MlRisonData {
   ml?: {
@@ -24,48 +25,31 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {}, external }: Props) {
-  const { core } = useApmPluginContext();
   const location = useLocation();
 
   const {
+    core,
     plugins: { ml },
   } = useApmPluginContext();
 
-  // default to link to ML Anomaly Detection jobs management page
-  const [mlADLink, setMlADLink] = useState(
-    core.http.basePath.prepend('/app/ml/jobs')
-  );
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      const { time, refreshInterval } = getTimepickerRisonData(location.search);
-      let jobIds: string[] = [];
-      if (query.ml?.jobIds) {
-        jobIds = query.ml.jobIds;
-      }
+  let jobIds: string[] = [];
+  if (query.ml?.jobIds) {
+    jobIds = query.ml.jobIds;
+  }
+  const { time, refreshInterval } = getTimepickerRisonData(location.search);
 
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'jobs',
-          pageState: {
-            jobId: jobIds,
-            groupIds: ['apm'],
-            globalState: {
-              time,
-              refreshInterval,
-            },
-          },
-        });
-        if (!isCancelled) {
-          setMlADLink(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator, location.search, query]);
+  // default to link to ML Anomaly Detection jobs management page
+  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: jobIds,
+      groupIds: ['apm'],
+      globalState: {
+        time,
+        refreshInterval,
+      },
+    },
+  });
 
   return (
     <EuiLink

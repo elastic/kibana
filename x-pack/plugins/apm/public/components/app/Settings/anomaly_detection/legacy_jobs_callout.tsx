@@ -5,40 +5,22 @@
  */
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useMlHref } from '../../../../../../ml/public';
 
 export function LegacyJobsCallout() {
   const {
     core,
     plugins: { ml },
   } = useApmPluginContext();
-
-  const [mlADLink, setMlADLink] = useState(
-    core.http.basePath.prepend('/app/ml/jobs')
-  );
-
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'jobs',
-          pageState: {
-            jobId: 'high_mean_response_time',
-          },
-        });
-        if (!isCancelled) {
-          setMlADLink(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator]);
+  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+    page: 'jobs',
+    pageState: {
+      jobId: 'high_mean_response_time',
+    },
+  });
 
   return (
     <EuiCallOut

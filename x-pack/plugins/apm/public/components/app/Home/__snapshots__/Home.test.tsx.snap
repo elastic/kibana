@@ -34,6 +34,7 @@ exports[`Home component should render services 1`] = `
         },
         "http": Object {
           "basePath": Object {
+            "get": [Function],
             "prepend": [Function],
           },
         },
@@ -106,6 +107,7 @@ exports[`Home component should render traces 1`] = `
         },
         "http": Object {
           "basePath": Object {
+            "get": [Function],
             "prepend": [Function],
           },
         },

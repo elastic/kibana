@@ -26,6 +26,7 @@ import { useBasePath, useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SecurityJob } from '../types';
+import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -43,31 +44,16 @@ interface JobNameProps {
 }
 
 const JobName = ({ id, description, basePath }: JobNameProps) => {
-  const [jobUrl, setJobUrl] = useState(`${basePath}/app/ml/jobs`);
   const {
     services: { ml },
   } = useKibana();
 
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'jobs',
-          pageState: {
-            jobId: id,
-          },
-        });
-        if (!isCancelled) {
-          setJobUrl(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator, id]);
+  const jobUrl = useMlHref(ml, basePath, {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: id,
+    },
+  });
 
   return (
     <JobNameWrapper>
@@ -179,26 +165,9 @@ export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) =>
     services: { ml },
   } = useKibana();
 
-  const [createNewAnomalyDetectionJoUrl, setCreateNewAnomalyDetectionJoUrl] = useState(
-    `${basePath}/app/ml/jobs/new_job/step/index_or_search`
-  );
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'jobs/new_job/step/index_or_search',
-        });
-        if (!isCancelled) {
-          setCreateNewAnomalyDetectionJoUrl(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator]);
+  const createNewAnomalyDetectionJoUrl = useMlHref(ml, basePath, {
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+  });
 
   return (
     <EuiEmptyPrompt

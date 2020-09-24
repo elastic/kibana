@@ -5,10 +5,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { getTimepickerRisonData } from '../rison_helpers';
 import { RefreshInterval } from '../../../../../../../../src/plugins/data/common/query';
+import { useMlHref } from '../../../../../../ml/public';
 
 export function useTimeSeriesExplorerHref({
   jobId,
@@ -24,43 +24,26 @@ export function useTimeSeriesExplorerHref({
     core,
     plugins: { ml },
   } = useApmPluginContext();
-  const [mlAnomalyDetectionHref, setMlAnomalyDetectionHref] = useState(
-    core.http.basePath.prepend('/app/ml/jobs')
-  );
   const location = useLocation();
+  const { time, refreshInterval } = getTimepickerRisonData(location.search);
 
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      const { time, refreshInterval } = getTimepickerRisonData(location.search);
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'timeseriesexplorer',
-          pageState: {
-            jobIds: [jobId],
-            timeRange: time,
-            refreshInterval: refreshInterval as RefreshInterval,
-            zoom: time,
-            ...(serviceName && transactionType
-              ? {
-                  entities: {
-                    'service.name': serviceName,
-                    'transaction.type': transactionType,
-                  },
-                }
-              : {}),
-          },
-        });
-        if (!isCancelled) {
-          setMlAnomalyDetectionHref(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator, location.search, jobId, serviceName, transactionType]);
+  const mlAnomalyDetectionHref = useMlHref(ml, core.http.basePath.get(), {
+    page: 'timeseriesexplorer',
+    pageState: {
+      jobIds: [jobId],
+      timeRange: time,
+      refreshInterval: refreshInterval as RefreshInterval,
+      zoom: time,
+      ...(serviceName && transactionType
+        ? {
+            entities: {
+              'service.name': serviceName,
+              'transaction.type': transactionType,
+            },
+          }
+        : {}),
+    },
+  });
 
   return mlAnomalyDetectionHref;
 }

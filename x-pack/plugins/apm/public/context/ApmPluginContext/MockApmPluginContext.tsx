@@ -55,6 +55,7 @@ const mockCore = {
   http: {
     basePath: {
       prepend: (path: string) => `/basepath${path}`,
+      get: () => `/basepath`,
     },
   },
   i18n: {
