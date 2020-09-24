@@ -15,7 +15,7 @@ import {
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../../common/elasticsearch_geo_utils';
+} from '../../../../../common/elasticsearch_util';
 import { DrawTooltip } from './draw_tooltip';
 
 const DRAW_RECTANGLE = 'draw_rectangle';

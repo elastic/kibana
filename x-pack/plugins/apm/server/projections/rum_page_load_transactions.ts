@@ -19,8 +19,10 @@ import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const { start, end, uiFiltersES } = setup;
 
@@ -35,6 +37,17 @@ export function getRumPageLoadTransactionsProjection({
           field: 'transaction.marks.navigationTiming.fetchStart',
         },
       },
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': {
+                  value: `*${urlQuery}*`,
+                },
+              },
+            },
+          ]
+        : []),
       ...uiFiltersES,
     ],
   };
