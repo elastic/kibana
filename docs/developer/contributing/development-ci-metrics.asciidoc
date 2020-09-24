@@ -31,7 +31,7 @@ The number of separate modules included in each bundle/plugin. This is the best 
 [[ci-metric-types-distributable-size]]
 ==== Distributable size
 
-The size of the Kibana distributable is an important metric to keep an eye on, not only so it's fast for people to download and use Kibana but also because the number of files in our distributable directly impacts the speed of extracting a Kibana distributable.
+The size of the Kibana distributable is an essential metric as it not only contributes to the time it takes to download, but it also impacts time it takes to extract the archive once downloaded.
 
 There are several metrics that we don't report on PRs because gzip-compression produces different file sizes even when provided the same input, so this metric would regularly show changes even though PR authors hadn't made any relevant changes.
 
