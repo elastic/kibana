@@ -26,6 +26,7 @@ import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions, TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
+import { toExpressionAst } from './to_ast';
 
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
@@ -63,6 +64,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,
+    toExpressionAst,
     responseHandler: 'none',
     inspectorAdapters: {},
     getSupportedTriggers: () => {

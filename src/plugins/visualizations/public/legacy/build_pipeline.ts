@@ -264,11 +264,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
     return `tsvb ${paramsArray.join(' ')}`;
   },
-  timelion: (params) => {
-    const expression = prepareString('expression', params.expression);
-    const interval = prepareString('interval', params.interval);
-    return `timelion_vis ${expression}${interval}`;
-  },
   table: (params, schemas) => {
     const visConfig = {
       ...params,

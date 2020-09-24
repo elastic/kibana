@@ -44,9 +44,16 @@ interface RenderValue {
 
 export type VisParams = Arguments;
 
+export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'timelion_vis',
+  Input,
+  Arguments,
+  Output
+>;
+
 export const getTimelionVisualizationConfig = (
   dependencies: TimelionVisDependencies
-): ExpressionFunctionDefinition<'timelion_vis', Input, Arguments, Output> => ({
+): TimelionExpressionFunctionDefinition => ({
   name: 'timelion_vis',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
