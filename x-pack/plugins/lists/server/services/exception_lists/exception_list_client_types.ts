@@ -58,7 +58,6 @@ export interface CreateExceptionListOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   name: Name;
-  osTypes: OsTypeArray;
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
