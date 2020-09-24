@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchClient } from '../../../../../../../../src/core/server';
-import { getValidationErrors, isValidationErrorResponse } from './helpers';
+import { getValidationErrors, isErrorResponse, isValidationErrorResponse } from './helpers';
 
 export interface Validation {
   isValid: boolean;
@@ -36,9 +36,11 @@ export const validateEql = async ({
     { ignore: [400] }
   );
 
-  const errors = isValidationErrorResponse(response.body) ? getValidationErrors(response.body) : [];
-  return {
-    errors,
-    isValid: errors.length === 0,
-  };
+  if (isValidationErrorResponse(response.body)) {
+    return { isValid: false, errors: getValidationErrors(response.body) };
+  } else if (isErrorResponse(response.body)) {
+    throw new Error(JSON.stringify(response.body));
+  } else {
+    return { isValid: true, errors: [] };
+  }
 };
