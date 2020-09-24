@@ -30,8 +30,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/77957
-describe.skip('Alerts', () => {
+describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
@@ -231,7 +230,6 @@ describe.skip('Alerts', () => {
           cy.reload();
           goToOpenedAlerts();
           waitForAlertsToBeLoaded();
-          waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
           cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());

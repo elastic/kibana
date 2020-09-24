@@ -42,7 +42,7 @@ export const expandFirstAlert = () => {
 };
 
 export const goToClosedAlerts = () => {
-  cy.get(CLOSED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
 };
 
 export const goToManageAlertsDetectionRules = () => {
@@ -64,7 +64,7 @@ export const openAlerts = () => {
 };
 
 export const goToInProgressAlerts = () => {
-  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click();
 };
 
 export const markInProgressFirstAlert = () => {
@@ -94,7 +94,7 @@ export const investigateFirstAlertInTimeline = () => {
 };
 
 export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };
 
 export const waitForAlertsIndexToBeCreated = () => {
