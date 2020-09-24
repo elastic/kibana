@@ -38,6 +38,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
           description,
           id,
           name,
+          os_types: osTypes,
           meta,
           type,
           _version,
@@ -56,6 +57,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
           itemId,
           meta,
           name,
+          osTypes,
           tags,
           type,
         });

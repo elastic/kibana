@@ -267,6 +267,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         return ({
           ...getExceptionListItemSchemaMock(),
           ...newExceptionItem,
+          os_types: newExceptionItem.osTypes,
         } as unknown) as ExceptionListItemSchema;
       });
     });
@@ -303,7 +304,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         meta: undefined,
         name: 'Some Anti-Virus App',
         namespaceType: 'agnostic',
-        os_types: ['windows'],
+        osTypes: ['windows'],
         tags: [],
         type: 'simple',
       });

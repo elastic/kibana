@@ -31,7 +31,7 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
-  os_types: [],
+  os_types: ['linux'],
   tags: TAGS,
   type: ITEM_TYPE,
 });

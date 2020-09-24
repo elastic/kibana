@@ -51,6 +51,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           entries,
           item_id: itemId,
           namespace_type: namespaceType,
+          os_types: osTypes,
           tags,
         } = request.body;
         if (id == null && itemId == null) {
@@ -70,6 +71,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
           });

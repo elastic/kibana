@@ -205,7 +205,6 @@ export const formatExceptionItemForUpdate = (
     created_at,
     created_by,
     list_id,
-    os_types,
     tie_breaker_id,
     updated_at,
     updated_by,

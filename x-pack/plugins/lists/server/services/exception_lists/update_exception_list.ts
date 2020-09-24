@@ -16,6 +16,7 @@ import {
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
+  OsTypeArray,
   TagsOrUndefined,
   VersionOrUndefined,
   _VersionOrUndefined,
@@ -31,6 +32,7 @@ interface UpdateExceptionListOptions {
   description: DescriptionOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+  osTypes: OsTypeArray;
   listId: ListIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;

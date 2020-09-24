@@ -17,6 +17,7 @@ import {
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
+  OsTypeArray,
   TagsOrUndefined,
   UpdateCommentsArrayOrUndefined,
   _VersionOrUndefined,
@@ -38,6 +39,7 @@ interface UpdateExceptionListItemOptions {
   entries: EntriesArray;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+  osTypes: OsTypeArray;
   itemId: ItemIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;
@@ -54,6 +56,7 @@ export const updateExceptionListItem = async ({
   savedObjectsClient,
   namespaceType,
   name,
+  osTypes,
   description,
   itemId,
   meta,
@@ -85,6 +88,7 @@ export const updateExceptionListItem = async ({
         entries,
         meta,
         name,
+        os_types: osTypes,
         tags,
         type,
         updated_by: user,

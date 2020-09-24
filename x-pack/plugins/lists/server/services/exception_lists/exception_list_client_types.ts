@@ -58,6 +58,7 @@ export interface CreateExceptionListOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   name: Name;
+  osTypes: OsTypeArray;
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
@@ -72,6 +73,7 @@ export interface UpdateExceptionListOptions {
   listId: ListIdOrUndefined;
   namespaceType: NamespaceType;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
@@ -146,6 +148,7 @@ export interface UpdateExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
@@ -159,6 +162,7 @@ export interface UpdateEndpointListItemOptions {
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   name: NameOrUndefined;
+  osTypes: OsTypeArray;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
