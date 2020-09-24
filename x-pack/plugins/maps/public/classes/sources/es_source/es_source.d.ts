@@ -11,7 +11,7 @@ import {
   DynamicStylePropertyOptions,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 export interface IESSource extends IVectorSource {
@@ -27,11 +27,11 @@ export interface IESSource extends IVectorSource {
   ): Promise<ISearchSource>;
   loadStylePropsMeta(
     layerName: string,
-    style: VectorStyle,
+    style: IVectorStyle,
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
+    registerCancelCallback: (callback: () => void) => void,
     searchFilters: VectorSourceRequestMeta
-  ): Promise<unknown>;
+  ): Promise<object>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -47,11 +47,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   ): Promise<ISearchSource>;
   loadStylePropsMeta(
     layerName: string,
-    style: VectorStyle,
+    style: IVectorStyle,
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
+    registerCancelCallback: (callback: () => void) => void,
     searchFilters: VectorSourceRequestMeta
-  ): Promise<unknown>;
+  ): Promise<object>;
   _runEsQuery: ({
     requestId,
     requestName,

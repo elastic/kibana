@@ -192,10 +192,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const {
-      tooltipContent,
-      areResultsTrimmed,
-    } = (this.getSource() as IVectorSource).getSourceTooltipContent(sourceDataRequest);
+    const { tooltipContent, areResultsTrimmed } = this.getSource().getSourceTooltipContent(
+      sourceDataRequest
+    );
     return {
       icon: (this.getCurrentStyle() as VectorStyle).getIcon(),
       tooltipContent,
@@ -221,7 +220,7 @@ export class VectorLayer extends AbstractLayer {
     registerCancelCallback,
     dataFilters,
   }: DataRequestContext) {
-    const isStaticLayer = !(this.getSource() as IVectorSource).isBoundsAware();
+    const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer || this.hasJoins()) {
       return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
     }
@@ -229,7 +228,7 @@ export class VectorLayer extends AbstractLayer {
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       dataFilters,
-      this.getSource() as IVectorSource,
+      this.getSource(),
       this.getCurrentStyle() as IVectorStyle
     );
     // Do not pass all searchFilters to source.getBoundsForFilters().
@@ -245,7 +244,7 @@ export class VectorLayer extends AbstractLayer {
     let bounds = null;
     try {
       startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
-      bounds = await (this.getSource() as IVectorSource).getBoundsForFilters(
+      bounds = await this.getSource().getBoundsForFilters(
         boundsFilters,
         registerCancelCallback.bind(null, requestToken)
       );
@@ -263,7 +262,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getLeftJoinFields() {
-    return await (this.getSource() as IVectorSource).getLeftJoinFields();
+    return await this.getSource().getLeftJoinFields();
   }
 
   _getJoinFields() {
@@ -276,7 +275,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getFields() {
-    const sourceFields = await (this.getSource() as IVectorSource).getFields();
+    const sourceFields = await this.getSource().getFields();
     return [...sourceFields, ...this._getJoinFields()];
   }
 
@@ -689,11 +688,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    await this._syncData(
-      syncContext,
-      this.getSource() as IVectorSource,
-      this.getCurrentStyle() as IVectorStyle
-    );
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle() as IVectorStyle);
   }
 
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
@@ -1057,7 +1052,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getPropertiesForTooltip(properties: GeoJsonProperties) {
-    const vectorSource = this.getSource() as IVectorSource;
+    const vectorSource = this.getSource();
     let allProperties = await vectorSource.getTooltipProperties(properties);
     this._addJoinsToSourceTooltips(allProperties);
 
@@ -1071,8 +1066,7 @@ export class VectorLayer extends AbstractLayer {
   canShowTooltip() {
     return (
       this.isVisible() &&
-      ((this.getSource() as IVectorSource).canFormatFeatureProperties() ||
-        this.getJoins().length > 0)
+      (this.getSource().canFormatFeatureProperties() || this.getJoins().length > 0)
     );
   }
 
