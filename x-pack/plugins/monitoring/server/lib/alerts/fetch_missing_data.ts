@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import moment from 'moment';
 import { AlertCluster, AlertMissingData } from '../../alerts/types';
 import {
   KIBANA_SYSTEM_ID,
@@ -270,7 +269,7 @@ export async function fetchMissingData(
       for (const uuidBucket of uuidBuckets) {
         const stackProductUuid = uuidBucket.key;
         const stackProduct = getStackProductFromIndex(indexBucket.key, clusterBucket);
-        const differenceInMs = moment().diff(moment(uuidBucket.most_recent.value));
+        const differenceInMs = +new Date() - uuidBucket.most_recent.value;
         let stackProductName = stackProductUuid;
         for (const nameField of nameFields) {
           stackProductName = get(uuidBucket, `top.hits.hits[0]._source.${nameField}`);
