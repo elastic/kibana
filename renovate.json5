@@ -35,15 +35,23 @@
     },
     packageRules: [
       {
-        groupSlug: '@elastic/charts',
-        packageNames: ['@elastic/charts'],
-        reviewers: ['markov00'],
-      },
-      {
         packagePatterns: [
           '.*',
         ],
         enabled: false,
+      },
+      {
+        groupSlug: '@elastic/charts',
+        packageNames: ['@elastic/charts'],
+        reviewers: ['markov00'],
+        enabled: true,
+      },
+      {
+        groupSlug: 'vega related modules',
+        packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
+        reviewers: ['@elastic/kibana-app'],
+        labels: ['Feature:Lens', 'Team:KibanaApp'],
+        enabled: true,
       },
     ],
   },
