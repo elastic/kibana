@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
@@ -50,16 +52,25 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   }
 
   render() {
-    const className = classNames('kbnLoadingIndicator', this.state.visible ? null : 'hidden');
+    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
 
+    const ariaHidden = this.state.visible ? false : true;
+
+    const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
+      defaultMessage: 'Loading content',
+    });
+
     return (
-      <div className={className} data-test-subj={testSubj}>
-        <div className="kbnLoadingIndicator__bar essentialAnimation" />
-      </div>
+      <EuiLoadingSpinner
+        className={className}
+        data-test-subj={testSubj}
+        aria-hidden={ariaHidden}
+        aria-label={ariaLabel}
+      />
     );
   }
 }

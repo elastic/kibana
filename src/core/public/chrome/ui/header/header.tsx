@@ -97,7 +97,6 @@ export function Header({
 
   return (
     <>
-      <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           <EuiHeader
@@ -112,6 +111,7 @@ export function Header({
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
                   />,
+                  <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],
                 borders: 'none',
               },
