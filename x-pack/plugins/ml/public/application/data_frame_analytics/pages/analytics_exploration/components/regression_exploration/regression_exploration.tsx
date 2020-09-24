@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
 
 import { EvaluatePanel } from './evaluate_panel';
-import { FeatureImportanceSummaryPanel } from '../total_feature_importane_summary/feature_importance_summary';
+import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summary/feature_importance_summary';
 
 interface Props {
   jobId: string;

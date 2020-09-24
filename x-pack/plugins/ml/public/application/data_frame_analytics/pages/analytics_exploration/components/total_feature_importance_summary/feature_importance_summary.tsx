@@ -83,23 +83,29 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     services: { docLinks },
   } = useMlKibana();
 
-  const [plotData, barSeriesSpec] = useMemo(() => {
+  const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo(() => {
     let sortedData: Array<{
       featureName: string;
       meanImportance: number;
       className?: string;
     }> = [];
-    let barSettings: Partial<BarSeriesSpec> = {
+    let _barSeriesSpec: Partial<BarSeriesSpec> = {
       xAccessor: 'featureName',
       yAccessors: ['meanImportance'],
     };
+    let classificationType:
+      | 'binary_classification'
+      | 'multiclass_classification'
+      | 'regression'
+      | '' = '';
     if (totalFeatureImportance.length < 1) {
-      return [sortedData, barSettings];
+      return [sortedData, _barSeriesSpec];
     }
 
     if (isClassificationTotalFeatureImportance(totalFeatureImportance[0])) {
       // if binary classification
       if (totalFeatureImportance[0].classes.length === 2) {
+        classificationType = 'binary_classification';
         sortedData = (totalFeatureImportance as ClassificationTotalFeatureImportance[]).map((d) => {
           return {
             featureName: d.feature_name,
@@ -113,6 +119,8 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       // stack them in order of increasing importance
       // so for each feature, biggest importance on the left to smallest importance on the right
       if (totalFeatureImportance[0].classes.length > 2) {
+        classificationType = 'multiclass_classification';
+
         (totalFeatureImportance as ClassificationTotalFeatureImportance[]).forEach((feature) => {
           feature.classes
             .sort((a, b) => a.importance.mean_magnitude - b.importance.mean_magnitude)
@@ -124,7 +132,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
               });
             });
         });
-        barSettings = {
+        _barSeriesSpec = {
           xAccessor: 'featureName',
           yAccessors: ['meanImportance'],
           splitSeriesAccessors: ['className'],
@@ -134,6 +142,8 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     }
     // if regression
     if (isRegressionTotalFeatureImportance(totalFeatureImportance[0])) {
+      classificationType = 'regression';
+
       sortedData = (totalFeatureImportance as RegressionTotalFeatureImportance[]).map(
         (d: RegressionTotalFeatureImportance) => ({
           featureName: d.feature_name,
@@ -145,7 +155,11 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     // sort from largest importance at top to smallest importance at bottom
     sortedData = sortedData.sort((a, b) => b.meanImportance - a.meanImportance);
 
-    return [sortedData, barSettings];
+    // only show legend if it's a multiclass
+    const _showLegend = classificationType === 'multiclass_classification';
+    const _chartHeight =
+      totalFeatureImportance.length * (totalFeatureImportance.length < 5 ? 40 : 20) + 50;
+    return [sortedData, _barSeriesSpec, _showLegend, _chartHeight];
   }, [totalFeatureImportance]);
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -185,12 +199,23 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Chart className="story-chart" size={{ width: '100%', height: 300 }}>
-        <Settings rotation={90} theme={theme} showLegend />
+      <Chart
+        className="story-chart"
+        size={{
+          width: '100%',
+          height: chartHeight,
+        }}
+      >
+        <Settings rotation={90} theme={theme} showLegend={showLegend} />
 
         <Axis
           id="x-axis"
-          title="Feature importance average magnitude"
+          title={i18n.translate(
+            'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
+            {
+              defaultMessage: 'Feature importance average magnitude',
+            }
+          )}
           position={Position.Bottom}
           tickFormat={tickFormatter}
         />

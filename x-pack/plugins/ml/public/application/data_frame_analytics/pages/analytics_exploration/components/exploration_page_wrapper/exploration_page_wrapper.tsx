@@ -16,7 +16,7 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
-import { FeatureImportanceSummaryPanelProps } from '../total_feature_importane_summary/feature_importance_summary';
+import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
