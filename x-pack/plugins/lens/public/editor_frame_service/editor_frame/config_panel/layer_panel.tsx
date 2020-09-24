@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFormRow,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,7 +26,6 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, DimensionContainerState } from './types';
 import { DimensionContainer } from './dimension_container';
-import { FieldButton } from '../../../../../../../src/plugins/kibana_react/public';
 
 const initialDimensionContainerState = {
   isOpen: false,
@@ -333,130 +331,126 @@ export function LayerPanel(
                   );
                 })}
                 {group.supportsMoreColumns ? (
-                  <DimensionContainer
-                    dimensionContainerState={dimensionContainerState}
-                    setDimensionContainerState={setDimensionContainerState}
-                    groups={groups}
-                    accessor={newId}
-                    groupId={group.groupId}
-                    trigger={
-                      <DragDrop
-                        data-test-subj={group.dataTestSubj}
-                        droppable={
-                          Boolean(dragDropContext.dragging) &&
-                          // Verify that the dragged item is not coming from the same group
-                          // since this would be a reorder
-                          (!isDraggedOperation(dragDropContext.dragging) ||
-                            dragDropContext.dragging.groupId !== group.groupId) &&
-                          layerDatasource.canHandleDrop({
-                            ...layerDatasourceDropProps,
+                  <DragDrop
+                    className="lnsLayerPanel__dimension"
+                    data-test-subj={group.dataTestSubj}
+                    droppable={
+                      Boolean(dragDropContext.dragging) &&
+                      // Verify that the dragged item is not coming from the same group
+                      // since this would be a reorder
+                      (!isDraggedOperation(dragDropContext.dragging) ||
+                        dragDropContext.dragging.groupId !== group.groupId) &&
+                      layerDatasource.canHandleDrop({
+                        ...layerDatasourceDropProps,
+                        columnId: newId,
+                        filterOperations: group.filterOperations,
+                      })
+                    }
+                    onDrop={(droppedItem) => {
+                      const dropResult = layerDatasource.onDrop({
+                        ...layerDatasourceDropProps,
+                        droppedItem,
+                        columnId: newId,
+                        filterOperations: group.filterOperations,
+                      });
+                      if (dropResult) {
+                        props.updateVisualization(
+                          activeVisualization.setDimension({
+                            layerId,
+                            groupId: group.groupId,
                             columnId: newId,
-                            filterOperations: group.filterOperations,
+                            prevState: props.visualizationState,
                           })
+                        );
+
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
                         }
-                        onDrop={(droppedItem) => {
-                          const dropResult = layerDatasource.onDrop({
-                            ...layerDatasourceDropProps,
-                            droppedItem,
+                      }
+                    }}
+                  >
+                    <DimensionContainer
+                      dimensionContainerState={dimensionContainerState}
+                      setDimensionContainerState={setDimensionContainerState}
+                      groups={groups}
+                      accessor={newId}
+                      groupId={group.groupId}
+                      trigger={
+                        <div className="lnsLayerPanel__triggerLink">
+                          <EuiButtonEmpty
+                            iconType="plusInCircleFilled"
+                            data-test-subj="lns-empty-dimension"
+                            aria-label={i18n.translate('xpack.lens.configure.addConfig', {
+                              defaultMessage: 'Add a configuration',
+                            })}
+                            title={i18n.translate('xpack.lens.configure.addConfig', {
+                              defaultMessage: 'Add a configuration',
+                            })}
+                            onClick={() => {
+                              if (dimensionContainerState.isOpen) {
+                                setDimensionContainerState(initialDimensionContainerState);
+                              } else {
+                                setDimensionContainerState({
+                                  isOpen: true,
+                                  openId: newId,
+                                  addingToGroupId: group.groupId,
+                                });
+                              }
+                            }}
+                            size="xs"
+                          >
+                            <FormattedMessage
+                              id="xpack.lens.configure.emptyConfig"
+                              defaultMessage="Drop a field here"
+                            />
+                          </EuiButtonEmpty>
+                        </div>
+                      }
+                      panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                        defaultMessage: '{groupLabel} configuration',
+                        values: {
+                          groupLabel: group.groupLabel,
+                        },
+                      })}
+                      panel={
+                        <NativeRenderer
+                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                          nativeProps={{
+                            ...layerDatasourceConfigProps,
+                            core: props.core,
                             columnId: newId,
                             filterOperations: group.filterOperations,
-                          });
-                          if (dropResult) {
-                            props.updateVisualization(
-                              activeVisualization.setDimension({
-                                layerId,
-                                groupId: group.groupId,
-                                columnId: newId,
-                                prevState: props.visualizationState,
-                              })
-                            );
+                            suggestedPriority: group.suggestedPriority,
 
-                            if (typeof dropResult === 'object') {
-                              // When a column is moved, we delete the reference to the old
-                              props.updateVisualization(
-                                activeVisualization.removeDimension({
+                            setState: (newState: unknown) => {
+                              props.updateAll(
+                                datasourceId,
+                                newState,
+                                activeVisualization.setDimension({
                                   layerId,
-                                  columnId: dropResult.deleted,
+                                  groupId: group.groupId,
+                                  columnId: newId,
                                   prevState: props.visualizationState,
                                 })
                               );
-                            }
-                          }
-                        }}
-                      >
-                        <FieldButton
-                          className="lnsLayerPanel__emptyDimension"
-                          fieldIcon={
-                            <EuiIcon
-                              className="lnsLayerPanel__emptyDimensionIcon"
-                              type="plusInCircleFilled"
-                              size="s"
-                            />
-                          }
-                          data-test-subj="lns-empty-dimension"
-                          aria-label={i18n.translate('xpack.lens.configure.addConfig', {
-                            defaultMessage: 'Add a configuration',
-                          })}
-                          title={i18n.translate('xpack.lens.configure.addConfig', {
-                            defaultMessage: 'Add a configuration',
-                          })}
-                          onClick={() => {
-                            if (dimensionContainerState.isOpen) {
-                              setDimensionContainerState(initialDimensionContainerState);
-                            } else {
                               setDimensionContainerState({
                                 isOpen: true,
                                 openId: newId,
-                                addingToGroupId: group.groupId,
+                                addingToGroupId: null, // clear now that dimension exists
                               });
-                            }
+                            },
                           }}
-                          fieldName={
-                            <FormattedMessage
-                              id="xpack.lens.configure.emptyConfig"
-                              defaultMessage="Drop a field or click to add"
-                            />
-                          }
                         />
-                      </DragDrop>
-                    }
-                    panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                      defaultMessage: '{groupLabel} configuration',
-                      values: {
-                        groupLabel: group.groupLabel,
-                      },
-                    })}
-                    panel={
-                      <NativeRenderer
-                        render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                        nativeProps={{
-                          ...layerDatasourceConfigProps,
-                          core: props.core,
-                          columnId: newId,
-                          filterOperations: group.filterOperations,
-                          suggestedPriority: group.suggestedPriority,
-
-                          setState: (newState: unknown) => {
-                            props.updateAll(
-                              datasourceId,
-                              newState,
-                              activeVisualization.setDimension({
-                                layerId,
-                                groupId: group.groupId,
-                                columnId: newId,
-                                prevState: props.visualizationState,
-                              })
-                            );
-                            setDimensionContainerState({
-                              isOpen: true,
-                              openId: newId,
-                              addingToGroupId: null, // clear now that dimension exists
-                            });
-                          },
-                        }}
-                      />
-                    }
-                  />
+                      }
+                    />
+                  </DragDrop>
                 ) : null}
               </>
             </EuiFormRow>

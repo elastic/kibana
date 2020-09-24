@@ -1,39 +1,18 @@
 .lnsDragDrop {
+  border: 1px dashed $euiColorLightShade;
   border-radius: $euiBorderRadius;
-
-  // Affix a pseudo element to handle the borders since
-  // we don't want the button itself to shift in size based
-  // on the border width which is anywhere between 0-2
-  position: relative;
-
-  &::after {
-    content: '';
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    border-radius: $euiBorderRadius;
-    border: 1px dashed $euiColorLightShade;
-  }
 }
 
 .lnsDragDrop-isDraggable {
   @include euiSlightShadow;
   background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-
-  &::after {
-    border-color: transparent;
-  }
+  border: 1px solid transparent;
 
   &:hover {
+    border: 1px dashed $euiColorMediumShade;
+
     & {
       cursor: grab;
-    }
-
-    &::after {
-      border-color: $euiColorMediumShade;
     }
   }
 
@@ -44,6 +23,11 @@
 
 
 
+
+
+
+
+
 .lnsDragDrop-isNotDroppable {
   opacity: .5;
 }
@@ -51,17 +35,15 @@
 // Fix specificity by chaining classes
 
 .lnsDragDrop.lnsDragDrop-isDropTarget {
-  background-color: transparentize($euiColorVis0, .9);
+  background-color: transparentize($euiColorSecondary, .9);
 }
 
 .lnsDragDrop.lnsDragDrop-isActiveDropTarget {
-  background-color: transparentize($euiColorVis0, .75);
-
-  &::after {
-    border: 2px dashed $euiColorVis0;
-  }
+  background-color: transparentize($euiColorSecondary, .75);
 }
 
 .lnsDragDrop-isDragging {
   opacity: .25;
 }
+
+:draggable {}
