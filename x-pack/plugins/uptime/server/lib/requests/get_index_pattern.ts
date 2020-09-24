@@ -6,12 +6,17 @@
 
 import { LegacyAPICaller, LegacyCallAPIOptions } from 'src/core/server';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { IndexPatternsFetcher, IIndexPattern } from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, FieldDescriptor } from '../../../../../../src/plugins/data/server';
 
-export const getUptimeIndexPattern: UMElasticsearchQueryFn<{}, IIndexPattern | undefined> = async ({
-  callES,
-  dynamicSettings,
-}) => {
+export interface IndexPatternTitleAndFields {
+  title: string;
+  fields: FieldDescriptor[];
+}
+
+export const getUptimeIndexPattern: UMElasticsearchQueryFn<
+  {},
+  IndexPatternTitleAndFields | undefined
+> = async ({ callES, dynamicSettings }) => {
   const callAsCurrentUser: LegacyAPICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},
@@ -28,7 +33,7 @@ export const getUptimeIndexPattern: UMElasticsearchQueryFn<{}, IIndexPattern | u
       pattern: dynamicSettings.heartbeatIndices,
     });
 
-    const indexPattern: IIndexPattern = {
+    const indexPattern: IndexPatternTitleAndFields = {
       fields,
       title: dynamicSettings.heartbeatIndices,
     };
