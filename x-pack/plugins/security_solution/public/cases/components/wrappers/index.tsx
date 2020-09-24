@@ -10,7 +10,6 @@ import { gutterTimeline } from '../../../common/lib/helpers';
 export const WhitePageWrapper = styled.div`
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  height: 100%;
   min-height: 100vh;
 `;
 
