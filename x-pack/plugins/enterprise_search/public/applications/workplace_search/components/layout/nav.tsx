@@ -12,6 +12,8 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
+import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
+
 import {
   ORG_SOURCES_PATH,
   SOURCES_PATH,
@@ -39,7 +41,7 @@ export const WorkplaceSearchNav: React.FC = () => {
           defaultMessage: 'Sources',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${GROUPS_PATH}`)}>
+      <SideNavLink to={GROUPS_PATH} subNav={<GroupSubNav />}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
           defaultMessage: 'Groups',
         })}
