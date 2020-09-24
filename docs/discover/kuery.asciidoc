@@ -31,7 +31,7 @@ Match documents with the phrase "quick brown fox" in the `message` field.
 
 [source,yaml]
 -------------------
-message:"Quick brown fox"
+message:"quick brown fox"
 -------------------
 
 Without the quotes,
