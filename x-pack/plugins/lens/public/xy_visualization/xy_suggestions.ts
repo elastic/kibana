@@ -117,8 +117,6 @@ function flipSeriesType(seriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar':
       return 'bar_horizontal';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
     case 'bar_horizontal_percentage_stacked':
       return 'bar_percentage_stacked';
     case 'bar_percentage_stacked':
@@ -152,10 +150,17 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXScaleType =
     currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.scale;
 
+  // We need to distinguish between data types to improve suggestions:
+  // for instance date or number histograms require different approaches
+  const currentXDataType =
+    currentXScaleType && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
   if (
     currentXScaleType &&
-    // make sure histograms get mapped to x dimension even when changing current bucket/dimension mapping
-    (currentXScaleType === 'interval' || prioritizedBuckets[0].operation.scale !== 'interval')
+    // make sure date histograms get mapped to x dimension even when changing current bucket/dimension mapping
+    // number histograms can be mapped also elsewhere
+    ((currentXScaleType === 'interval' && currentXDataType === 'date') ||
+      prioritizedBuckets[0].operation.scale !== 'interval')
   ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
