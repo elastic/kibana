@@ -4,6 +4,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -146,6 +147,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -293,6 +295,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -440,6 +443,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -2744,6 +2748,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
 <div>
   <div
     class="euiBasicTable euiBasicTable-loading"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -2886,6 +2891,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
 <div>
   <div
     class="euiBasicTable euiBasicTable-loading"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
@@ -5190,6 +5196,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
