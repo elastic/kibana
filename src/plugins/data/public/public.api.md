@@ -1465,7 +1465,7 @@ export interface ISearchStart {
     search: ISearchGeneric;
     searchSource: ISearchStartSearchSource;
     // (undocumented)
-    showError: (e: any) => void;
+    showError: (e: Error) => void;
 }
 
 // @public
@@ -1638,7 +1638,7 @@ export interface OptionedValueProp {
 // @public (undocumented)
 export class PainlessError extends KbnError {
     // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
-    constructor(err: EsError, request: IEsSearchRequest);
+    constructor(err: EsError, request: IKibanaSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2036,12 +2036,12 @@ export class SearchInterceptor {
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // (undocumented)
-    protected handleSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
+    protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
-    search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
+    search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {
         abortSignal?: AbortSignal;

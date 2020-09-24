@@ -44,6 +44,7 @@ describe('alert actions', () => {
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
     searchStrategyClient = {
       aggs: {} as ISearchStart['aggs'],
+      showError: jest.fn(),
       search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
       searchSource: {} as ISearchStart['searchSource'],
     };
