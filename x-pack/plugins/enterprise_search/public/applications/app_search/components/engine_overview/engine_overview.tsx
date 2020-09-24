@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useValues } from 'kea';
 import {
   EuiPageContent,
@@ -19,7 +19,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
+import { LicensingLogic } from '../../../shared/licensing';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
@@ -40,7 +40,7 @@ interface ISetEnginesCallbacks {
 
 export const EngineOverview: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  const { license } = useContext(LicenseContext) as ILicenseContext;
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const [isLoading, setIsLoading] = useState(true);
   const [engines, setEngines] = useState([]);
@@ -72,13 +72,13 @@ export const EngineOverview: React.FC = () => {
   }, [enginesPage]);
 
   useEffect(() => {
-    if (hasPlatinumLicense(license)) {
+    if (hasPlatinumLicense) {
       const params = { type: 'meta', pageIndex: metaEnginesPage };
       const callbacks = { setResults: setMetaEngines, setResultsTotal: setMetaEnginesTotal };
 
       setEnginesData(params, callbacks);
     }
-  }, [license, metaEnginesPage]);
+  }, [hasPlatinumLicense, metaEnginesPage]);
 
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;

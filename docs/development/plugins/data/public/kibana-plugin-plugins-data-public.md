@@ -79,6 +79,7 @@
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
 |  [QueryStateChange](./kibana-plugin-plugins-data-public.querystatechange.md) |  |
+|  [QueryStringInputProps](./kibana-plugin-plugins-data-public.querystringinputprops.md) |  |
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
@@ -115,8 +116,11 @@
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
+|  [isCompleteResponse](./kibana-plugin-plugins-data-public.iscompleteresponse.md) |  |
+|  [isErrorResponse](./kibana-plugin-plugins-data-public.iserrorresponse.md) |  |
 |  [isFilter](./kibana-plugin-plugins-data-public.isfilter.md) |  |
 |  [isFilters](./kibana-plugin-plugins-data-public.isfilters.md) |  |
+|  [isPartialResponse](./kibana-plugin-plugins-data-public.ispartialresponse.md) |  |
 |  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
 |  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
