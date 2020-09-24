@@ -7,9 +7,6 @@
 import expect from '@kbn/expect';
 
 import { HostsQueries } from '../../../../plugins/security_solution/common/search_strategy';
-import { uncommonProcessesQuery } from '../../../../plugins/security_solution/public/hosts/containers/uncommon_processes/index.gql_query';
-// @ts-expect-error
-import { GetUncommonProcessesQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -130,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const expected: GetUncommonProcessesQuery.Node = {
+      const expected = {
         _id: 'HCFxB2kBR346wHgnL4ik',
         instances: 1,
         process: {
