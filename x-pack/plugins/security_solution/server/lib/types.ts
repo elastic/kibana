@@ -80,7 +80,7 @@ export interface SearchResponse<T> {
 }
 
 export interface EqlSequence<T> {
-  join_keys: [];
+  join_keys: SearchTypes[];
   events: Array<BaseHit<T>>;
 }
 
