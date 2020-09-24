@@ -491,7 +491,9 @@ export class MissingDataAlert extends BaseAlert {
         state.gapDuration = missing.gapDuration;
 
         if (stackProduct.shouldFire) {
-          state.ui.triggeredMS = new Date().valueOf();
+          if (!state.ui.isFiring) {
+            state.ui.triggeredMS = new Date().valueOf();
+          }
           state.ui.isFiring = true;
           state.ui.message = this.getUiMessage(state, stackProduct);
           state.ui.severity = stackProduct.severity;

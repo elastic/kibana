@@ -443,7 +443,9 @@ export class CpuUsageAlert extends BaseAlert {
         nodeState.nodeName = stat.nodeName;
 
         if (node.shouldFire) {
-          nodeState.ui.triggeredMS = new Date().valueOf();
+          if (!nodeState.ui.isFiring) {
+            nodeState.ui.triggeredMS = new Date().valueOf();
+          }
           nodeState.ui.isFiring = true;
           nodeState.ui.message = this.getUiMessage(nodeState, node);
           nodeState.ui.severity = node.severity;

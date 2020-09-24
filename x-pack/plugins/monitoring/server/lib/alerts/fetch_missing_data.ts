@@ -40,7 +40,10 @@ interface UuidResponse {
 
 interface UuidBucketESResponse {
   key: string;
-  top: {
+  most_recent: {
+    value: number;
+  };
+  document: {
     hits: {
       hits: TopHitESResponse[];
     };
@@ -49,7 +52,24 @@ interface UuidBucketESResponse {
 
 interface TopHitESResponse {
   _source: {
-    timestamp: string;
+    source_node?: {
+      name?: string;
+    };
+    kibana_stats?: {
+      kibana?: {
+        name?: string;
+      };
+    };
+    logstash_stats?: {
+      logstash?: {
+        host?: string;
+      };
+    };
+    beats_stats?: {
+      beat?: {
+        name?: string;
+      };
+    };
   };
 }
 
@@ -107,10 +127,15 @@ export async function fetchMissingData(
     'logstash_stats.logstash.host',
     'beats_stats.beat.name',
   ];
-  const topHitsAgg = {
-    top: {
+  const subAggs = {
+    most_recent: {
+      max: {
+        field: 'timestamp',
+      },
+    },
+    document: {
       top_hits: {
-        size: 2,
+        size: 1,
         sort: [
           {
             timestamp: {
@@ -119,13 +144,8 @@ export async function fetchMissingData(
           },
         ],
         _source: {
-          includes: ['timestamp', ...nameFields],
+          includes: nameFields,
         },
-      },
-    },
-    top_hit: {
-      max: {
-        field: 'timestamp',
       },
     },
   };
@@ -172,17 +192,15 @@ export async function fetchMissingData(
                   terms: {
                     field: 'node_stats.node_id',
                     size,
-                    order: { top_hit: 'desc' },
                   },
-                  aggs: topHitsAgg,
+                  aggs: subAggs,
                 },
                 kibana_uuids: {
                   terms: {
                     field: 'kibana_stats.kibana.uuid',
                     size,
-                    order: { top_hit: 'desc' },
                   },
-                  aggs: topHitsAgg,
+                  aggs: subAggs,
                 },
                 beats: {
                   filter: {
@@ -199,9 +217,8 @@ export async function fetchMissingData(
                       terms: {
                         field: 'beats_stats.beat.uuid',
                         size,
-                        order: { top_hit: 'desc' },
                       },
-                      aggs: topHitsAgg,
+                      aggs: subAggs,
                     },
                   },
                 },
@@ -220,9 +237,8 @@ export async function fetchMissingData(
                       terms: {
                         field: 'beats_stats.beat.uuid',
                         size,
-                        order: { top_hit: 'desc' },
                       },
-                      aggs: topHitsAgg,
+                      aggs: subAggs,
                     },
                   },
                 },
@@ -230,9 +246,8 @@ export async function fetchMissingData(
                   terms: {
                     field: 'logstash_stats.logstash.uuid',
                     size,
-                    order: { top_hit: 'desc' },
                   },
-                  aggs: topHitsAgg,
+                  aggs: subAggs,
                 },
               },
             },
@@ -255,15 +270,7 @@ export async function fetchMissingData(
       for (const uuidBucket of uuidBuckets) {
         const stackProductUuid = uuidBucket.key;
         const stackProduct = getStackProductFromIndex(indexBucket.key, clusterBucket);
-        let differenceInMs = -1;
-        if (uuidBucket.top.hits.hits.length === 1) {
-          differenceInMs = moment().diff(moment(uuidBucket.top.hits.hits[0]._source.timestamp));
-        } else {
-          const first = moment(uuidBucket.top.hits.hits[0]._source.timestamp);
-          const second = moment(uuidBucket.top.hits.hits[1]._source.timestamp);
-          differenceInMs = first.diff(second);
-        }
-
+        const differenceInMs = moment().diff(moment(uuidBucket.most_recent.value));
         let stackProductName = stackProductUuid;
         for (const nameField of nameFields) {
           stackProductName = get(uuidBucket, `top.hits.hits[0]._source.${nameField}`);
