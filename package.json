@@ -135,6 +135,8 @@
     "@kbn/telemetry-tools": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
+    "@kbn/ace": "1.0.0",
+    "@kbn/monaco": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
     "@types/yauzl": "^2.9.1",
     "JSONStream": "1.3.5",
