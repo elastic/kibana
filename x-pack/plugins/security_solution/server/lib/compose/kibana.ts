@@ -16,13 +16,10 @@ import { KpiHosts } from '../kpi_hosts';
 import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
-import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
 
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
-import { Overview } from '../overview';
-import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
@@ -45,14 +42,12 @@ export function compose(
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
-    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
+    fields: new IndexFields(new ElasticsearchIndexFieldAdapter()),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
-    ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     matrixHistogram: new MatrixHistogram(new ElasticsearchMatrixHistogramAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
-    overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {
