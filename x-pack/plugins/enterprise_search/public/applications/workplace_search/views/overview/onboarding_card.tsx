@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { useValues } from 'kea';
 
 import {
@@ -21,7 +21,7 @@ import {
 
 import { sendTelemetry } from '../../../shared/telemetry';
 import { HttpLogic } from '../../../shared/http';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
 interface IOnboardingCardProps {
   title: React.ReactNode;
@@ -43,9 +43,6 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   complete,
 }) => {
   const { http } = useValues(HttpLogic);
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
