@@ -16,7 +16,6 @@ import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
-import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
 import { createScalarToAnyValueResolvers } from './graphql/scalar_to_any';
 import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
@@ -25,10 +24,8 @@ import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_num
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { createTimelineResolvers } from './graphql/timeline';
-import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
-import { createTlsResolvers } from './graphql/tls';
 import { createMatrixHistogramResolvers } from './graphql/matrix_histogram';
 
 export const initServer = (libs: AppBackendLibs) => {
@@ -45,7 +42,6 @@ export const initServer = (libs: AppBackendLibs) => {
       createPinnedEventResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarToStringArrayValueResolvers() as IResolvers,
-      createOverviewResolvers(libs) as IResolvers,
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
@@ -55,8 +51,6 @@ export const initServer = (libs: AppBackendLibs) => {
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createTimelineResolvers(libs) as IResolvers,
-      createTlsResolvers(libs) as IResolvers,
-      createUncommonProcessesResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,
       createKpiHostsResolvers(libs) as IResolvers,
     ],

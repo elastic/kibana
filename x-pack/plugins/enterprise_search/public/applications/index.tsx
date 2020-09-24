@@ -13,24 +13,17 @@ import { Store } from 'redux';
 import { getContext, resetContext } from 'kea';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  AppMountParameters,
-  CoreStart,
-  ApplicationStart,
-  HttpSetup,
-  ChromeBreadcrumb,
-} from 'src/core/public';
-import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
-import { LicenseProvider } from './shared/licensing';
-import { FlashMessagesProvider } from './shared/flash_messages';
-import { HttpProvider } from './shared/http';
+import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
+import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { mountLicensingLogic } from './shared/licensing';
+import { mountHttpLogic } from './shared/http';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
   externalUrl: IExternalUrl;
-  http: HttpSetup;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -46,14 +39,25 @@ export const KibanaContext = React.createContext({});
 
 export const renderApp = (
   App: React.FC<IInitialAppData>,
-  params: AppMountParameters,
-  core: CoreStart,
-  plugins: PluginsSetup,
-  config: ClientConfigType,
-  { externalUrl, errorConnecting, ...initialData }: ClientData
+  { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
+  { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
+  const { externalUrl, errorConnecting, ...initialData } = data;
+
   resetContext({ createStore: true });
   const store = getContext().store as Store;
+
+  const unmountLicensingLogic = mountLicensingLogic({
+    license$: plugins.licensing.license$,
+  });
+
+  const unmountHttpLogic = mountHttpLogic({
+    http: core.http,
+    errorConnecting,
+    readOnlyMode: initialData.readOnlyMode,
+  });
+
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ history: params.history });
 
   ReactDOM.render(
     <I18nProvider>
@@ -61,31 +65,25 @@ export const renderApp = (
         value={{
           config,
           externalUrl,
-          http: core.http,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
         }}
       >
-        <LicenseProvider license$={plugins.licensing.license$}>
-          <Provider store={store}>
-            <HttpProvider
-              http={core.http}
-              errorConnecting={errorConnecting}
-              readOnlyMode={initialData.readOnlyMode}
-            />
-            <FlashMessagesProvider history={params.history} />
-            <Router history={params.history}>
-              <App {...initialData} />
-            </Router>
-          </Provider>
-        </LicenseProvider>
+        <Provider store={store}>
+          <Router history={params.history}>
+            <App {...initialData} />
+          </Router>
+        </Provider>
       </KibanaContext.Provider>
     </I18nProvider>,
     params.element
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountLicensingLogic();
+    unmountHttpLogic();
+    unmountFlashMessagesLogic();
   };
 };
 

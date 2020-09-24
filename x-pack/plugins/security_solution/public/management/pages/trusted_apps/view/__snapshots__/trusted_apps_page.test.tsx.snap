@@ -296,6 +296,22 @@ Object {
                         </span>
                       </div>
                     </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -304,7 +320,7 @@ Object {
                   >
                     <td
                       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="4"
+                      colspan="5"
                     >
                       <div
                         class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -554,6 +570,22 @@ Object {
                       </span>
                     </div>
                   </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Actions"
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -562,7 +594,7 @@ Object {
                 >
                   <td
                     class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                    colspan="4"
+                    colspan="5"
                   >
                     <div
                       class="euiTableCellContent euiTableCellContent--alignCenter"

@@ -9,15 +9,15 @@ import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { useKibana } from '../../lib/kibana';
-
 import {
   IndexField,
   IndexFieldsStrategyResponse,
   IndexFieldsStrategyRequest,
+  BrowserField,
+  BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
@@ -25,26 +25,9 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 
 import { State } from '../../store';
+import { DocValueFields } from '../../../../common/search_strategy/common';
 
-export interface BrowserField {
-  aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format: string;
-  indexes: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-}
-
-export interface DocValueFields {
-  field: string;
-  format: string;
-}
-
-export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+export { BrowserField, BrowserFields, DocValueFields };
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
   Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
@@ -91,13 +74,11 @@ export const getDocValueFields = memoizeOne(
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
           if (field.readFromDocValues && accumulator.length < 100) {
-            const format: string =
-              field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
             return [
               ...accumulator,
               {
                 field: field.name,
-                format,
+                format: field.format,
               },
             ];
           }
@@ -159,14 +140,14 @@ export const useFetchIndex = (
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
-                  const stringifyIndices = response.indicesExists.sort().join();
-                  previousIndexesName.current = response.indicesExists;
+                  const stringifyIndices = response.indicesExist.sort().join();
+                  previousIndexesName.current = response.indicesExist;
                   setLoading(false);
                   setState({
                     browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                     docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                    indexes: response.indicesExists,
-                    indexExists: response.indicesExists.length > 0,
+                    indexes: response.indicesExist,
+                    indexExists: response.indicesExist.length > 0,
                     indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
                   });
                 }
@@ -250,8 +231,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
-                  const stringifyIndices = response.indicesExists.sort().join();
-                  previousIndexesName.current = response.indicesExists;
+                  const stringifyIndices = response.indicesExist.sort().join();
+                  previousIndexesName.current = response.indicesExist;
                   dispatch(
                     sourcererActions.setSource({
                       id: sourcererScopeName,
@@ -261,7 +242,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                         errorMessage: null,
                         id: sourcererScopeName,
                         indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                        indicesExist: response.indicesExists.length > 0,
+                        indicesExist: response.indicesExist.length > 0,
                         loading: false,
                       },
                     })

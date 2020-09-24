@@ -7,6 +7,7 @@
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
   EuiRadioGroup,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -21,7 +22,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import debounce from 'lodash/debounce';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -34,6 +34,16 @@ import * as i18n from './translations';
 
 const PopoverContent = styled.div`
   width: 600px;
+`;
+
+const ResetButton = styled(EuiButtonEmpty)`
+  width: fit-content;
+`;
+
+const MyEuiButton = styled(EuiButton)`
+  .euiHealth {
+    vertical-align: middle;
+  }
 `;
 
 const AllEuiHealth = styled(EuiHealth)`
@@ -112,7 +122,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   onChangeEventTypeAndIndexesName,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [showAdvanceSettings, setAdvanceSettings] = useState(false);
+  const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
@@ -228,27 +238,28 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setPopover(false);
   }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
-  const handleComboBoxChange = useMemo(
-    () =>
-      debounce(onChangeCombo, 500, {
-        leading: true,
-        trailing: false,
-      }),
-    [onChangeCombo]
-  );
+  const resetDataSources = useCallback(() => {
+    setSelectedOptions(
+      sourcererScope.selectedPatterns.map((indexSelected) => ({
+        label: indexSelected,
+        value: indexSelected,
+      }))
+    );
+    setFilterEventType(eventType);
+  }, [eventType, sourcererScope.selectedPatterns]);
 
   const comboBox = useMemo(
     () => (
       <EuiComboBox
-        placeholder="Pick index patterns"
+        placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={handleComboBoxChange}
+        onChange={onChangeCombo}
         renderOption={renderOption}
       />
     ),
-    [handleComboBoxChange, indexesPatternOptions, renderOption, selectedOptions]
+    [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
   );
 
   const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
@@ -261,7 +272,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         options={filterOptions}
         idSelected={filterEventType}
         onChange={onChangeFilter}
-        name="data sources"
+        name={i18n.SELECT_INDEX_PATTERNS}
       />
     ),
     [filterEventType, filterOptions, onChangeFilter]
@@ -270,24 +281,20 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const button = useMemo(() => {
     const options = getEventTypeOptions();
     return (
-      <EuiButton
+      <MyEuiButton
         iconType="arrowDown"
         iconSide="right"
         isLoading={sourcererScope.loading}
         onClick={togglePopover}
       >
-        {options.find((opt) => opt.id === filterEventType)?.label}
-      </EuiButton>
+        {options.find((opt) => opt.id === eventType)?.label}
+      </MyEuiButton>
     );
-  }, [filterEventType, sourcererScope.loading, togglePopover]);
+  }, [eventType, sourcererScope.loading, togglePopover]);
 
   const tooltipContent = useMemo(
-    () =>
-      selectedOptions
-        .map((so) => so.label)
-        .sort()
-        .join(', '),
-    [selectedOptions]
+    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
+    [isPopoverOpen, sourcererScope.selectedPatterns]
   );
 
   const ButtonContent = useMemo(
@@ -316,6 +323,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   useEffect(() => {
     setFilterEventType((prevFilter) => (prevFilter !== eventType ? eventType : prevFilter));
+    setAdvanceSettings(eventType === 'custom');
   }, [eventType]);
 
   return (
@@ -337,6 +345,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             <EuiSpacer size="m" />
             <EuiAccordion
               id="accordion1"
+              forceState={showAdvanceSettings ? 'open' : 'closed'}
               buttonContent={ButtonContent}
               onToggle={setAdvanceSettings}
             >
@@ -354,7 +363,19 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               </>
             )}
             <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <ResetButton
+                  aria-label={i18n.DATA_SOURCES_RESET}
+                  data-test-subj="sourcerer-reset"
+                  flush="left"
+                  onClick={resetDataSources}
+                  size="l"
+                  title={i18n.DATA_SOURCES_RESET}
+                >
+                  {i18n.DATA_SOURCES_RESET}
+                </ResetButton>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={handleSaveIndices}

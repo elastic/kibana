@@ -95,12 +95,6 @@ export interface NetworkHttpSortField {
   direction: Direction;
 }
 
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface PageInfoTimeline {
   pageIndex: number;
 
@@ -356,10 +350,6 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -566,14 +556,6 @@ export interface Source {
   NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
-
-  OverviewNetwork?: Maybe<OverviewNetworkData>;
-
-  OverviewHost?: Maybe<OverviewHostData>;
-
-  Tls: TlsData;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>;
 }
@@ -1451,17 +1433,17 @@ export interface CloudFields {
 
   machine?: Maybe<CloudMachine>;
 
-  provider?: Maybe<(Maybe<string>)[]>;
+  provider?: Maybe<Maybe<string>[]>;
 
-  region?: Maybe<(Maybe<string>)[]>;
+  region?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudInstance {
-  id?: Maybe<(Maybe<string>)[]>;
+  id?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudMachine {
-  type?: Maybe<(Maybe<string>)[]>;
+  type?: Maybe<Maybe<string>[]>;
 }
 
 export interface EndpointFields {
@@ -1846,122 +1828,6 @@ export interface NetworkHttpItem {
   statuses: string[];
 }
 
-export interface OverviewNetworkData {
-  auditbeatSocket?: Maybe<number>;
-
-  filebeatCisco?: Maybe<number>;
-
-  filebeatNetflow?: Maybe<number>;
-
-  filebeatPanw?: Maybe<number>;
-
-  filebeatSuricata?: Maybe<number>;
-
-  filebeatZeek?: Maybe<number>;
-
-  packetbeatDNS?: Maybe<number>;
-
-  packetbeatFlow?: Maybe<number>;
-
-  packetbeatTLS?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: Maybe<number>;
-
-  auditbeatFIM?: Maybe<number>;
-
-  auditbeatLogin?: Maybe<number>;
-
-  auditbeatPackage?: Maybe<number>;
-
-  auditbeatProcess?: Maybe<number>;
-
-  auditbeatUser?: Maybe<number>;
-
-  endgameDns?: Maybe<number>;
-
-  endgameFile?: Maybe<number>;
-
-  endgameImageLoad?: Maybe<number>;
-
-  endgameNetwork?: Maybe<number>;
-
-  endgameProcess?: Maybe<number>;
-
-  endgameRegistry?: Maybe<number>;
-
-  endgameSecurity?: Maybe<number>;
-
-  filebeatSystemModule?: Maybe<number>;
-
-  winlogbeatSecurity?: Maybe<number>;
-
-  winlogbeatMWSysmonOperational?: Maybe<number>;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  notAfter?: Maybe<string[]>;
-
-  subjects?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuers?: Maybe<string[]>;
-}
-
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: Maybe<UserEcsFields>;
-}
-
 export interface SayMyName {
   /** The id of the source */
   appName: string;
@@ -2158,7 +2024,7 @@ export interface SortTimelineResult {
 }
 
 export interface ResponseTimelines {
-  timeline: (Maybe<TimelineResult>)[];
+  timeline: Maybe<TimelineResult>[];
 
   totalCount?: Maybe<number>;
 
@@ -2257,9 +2123,9 @@ export interface HostFields {
 
   id?: Maybe<string>;
 
-  ip?: Maybe<(Maybe<string>)[]>;
+  ip?: Maybe<Maybe<string>[]>;
 
-  mac?: Maybe<(Maybe<string>)[]>;
+  mac?: Maybe<Maybe<string>[]>;
 
   name?: Maybe<string>;
 
@@ -2275,7 +2141,7 @@ export interface IndexField {
   /** Example of field's value */
   example?: Maybe<string>;
   /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
+  indexes: Maybe<string>[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -2556,50 +2422,6 @@ export interface NetworkHttpSourceArgs {
   sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: Maybe<string>;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTargetSourceDest;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
 }
@@ -2953,21 +2775,21 @@ export namespace GetHostOverviewQuery {
 
     machine: Maybe<Machine>;
 
-    provider: Maybe<(Maybe<string>)[]>;
+    provider: Maybe<Maybe<string>[]>;
 
-    region: Maybe<(Maybe<string>)[]>;
+    region: Maybe<Maybe<string>[]>;
   };
 
   export type Instance = {
     __typename?: 'CloudInstance';
 
-    id: Maybe<(Maybe<string>)[]>;
+    id: Maybe<Maybe<string>[]>;
   };
 
   export type Machine = {
     __typename?: 'CloudMachine';
 
-    type: Maybe<(Maybe<string>)[]>;
+    type: Maybe<Maybe<string>[]>;
   };
 
   export type Inspect = {
@@ -3239,111 +3061,6 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUncommonProcessesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    UncommonProcesses: UncommonProcesses;
-  };
-
-  export type UncommonProcesses = {
-    __typename?: 'UncommonProcessesData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UncommonProcessesEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UncommonProcessItem';
-
-    _id: string;
-
-    instances: number;
-
-    process: Process;
-
-    user: Maybe<User>;
-
-    hosts: Hosts[];
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    args: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    id: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
 
   export type Inspect = {
     __typename?: 'Inspect';
@@ -4068,92 +3785,6 @@ export namespace GetNetworkTopNFlowQuery {
   };
 }
 
-export namespace GetTlsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTargetSourceDest;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: TlsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Tls: Tls;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'TlsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'TlsNode';
-
-    _id: Maybe<string>;
-
-    subjects: Maybe<string[]>;
-
-    ja3: Maybe<string[]>;
-
-    issuers: Maybe<string[]>;
-
-    notAfter: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
 export namespace GetUsersQuery {
   export type Variables = {
     sourceId: string;
@@ -4246,132 +3877,6 @@ export namespace GetUsersQuery {
   };
 }
 
-export namespace GetOverviewHostQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewHost: Maybe<OverviewHost>;
-  };
-
-  export type OverviewHost = {
-    __typename?: 'OverviewHostData';
-
-    auditbeatAuditd: Maybe<number>;
-
-    auditbeatFIM: Maybe<number>;
-
-    auditbeatLogin: Maybe<number>;
-
-    auditbeatPackage: Maybe<number>;
-
-    auditbeatProcess: Maybe<number>;
-
-    auditbeatUser: Maybe<number>;
-
-    endgameDns: Maybe<number>;
-
-    endgameFile: Maybe<number>;
-
-    endgameImageLoad: Maybe<number>;
-
-    endgameNetwork: Maybe<number>;
-
-    endgameProcess: Maybe<number>;
-
-    endgameRegistry: Maybe<number>;
-
-    endgameSecurity: Maybe<number>;
-
-    filebeatSystemModule: Maybe<number>;
-
-    winlogbeatSecurity: Maybe<number>;
-
-    winlogbeatMWSysmonOperational: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewNetworkQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewNetwork: Maybe<OverviewNetwork>;
-  };
-
-  export type OverviewNetwork = {
-    __typename?: 'OverviewNetworkData';
-
-    auditbeatSocket: Maybe<number>;
-
-    filebeatCisco: Maybe<number>;
-
-    filebeatNetflow: Maybe<number>;
-
-    filebeatPanw: Maybe<number>;
-
-    filebeatSuricata: Maybe<number>;
-
-    filebeatZeek: Maybe<number>;
-
-    packetbeatDNS: Maybe<number>;
-
-    packetbeatFlow: Maybe<number>;
-
-    packetbeatTLS: Maybe<number>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
 export namespace GetAllTimeline {
   export type Variables = {
     pageInfo: PageInfoTimeline;
@@ -4403,7 +3908,7 @@ export namespace GetAllTimeline {
 
     favoriteCount: Maybe<number>;
 
-    timeline: (Maybe<Timeline>)[];
+    timeline: Maybe<Timeline>[];
   };
 
   export type Timeline = {

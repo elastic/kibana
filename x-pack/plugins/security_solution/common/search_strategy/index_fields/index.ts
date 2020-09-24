@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   IEsSearchRequest,
   IEsSearchResponse,
   IFieldSubType,
 } from '../../../../../../src/plugins/data/common';
-import { Maybe } from '../common';
+import { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -55,5 +55,27 @@ export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
 
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];
-  indicesExists: string[];
+  indicesExist: string[];
 }
+
+export interface BrowserField {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
+  indexes: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+}
+
+export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+
+export const EMPTY_BROWSER_FIELDS = {};
+export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
+export const EMPTY_INDEX_PATTERN: IIndexPattern = {
+  fields: [],
+  title: '',
+};

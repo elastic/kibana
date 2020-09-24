@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ESQuery } from '../../../common/typed_json';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
@@ -158,7 +159,7 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineResponse((prevResponse) => ({
@@ -172,7 +173,7 @@ export const useTimelineEvents = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
