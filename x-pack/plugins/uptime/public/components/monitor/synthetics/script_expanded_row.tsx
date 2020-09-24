@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, FC, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -93,6 +94,7 @@ const StepComponent: FC<{
   index: number;
   fetchScreenshot: (stepIndex: number) => void;
 }> = ({ step, index, fetchScreenshot }) => {
+  console.log('step', step);
   return (
     <>
       <div style={{ padding: '8px' }}>
@@ -152,22 +154,68 @@ const StepComponent: FC<{
   );
 };
 
+interface JourneyWithExecutedStepsProps {
+  journey: JourneyState;
+  fetchScreenshot: (stepIndex: number) => void;
+}
+
+const JourneyWithExecutedSteps: FC<JourneyWithExecutedStepsProps> = ({
+  journey,
+  fetchScreenshot,
+}) => {
+  return (
+    <div>
+      <EuiText>
+        <h3>Summary information</h3>
+        <p>{statusMessage(journey.steps.reduce(reduceStepStatus, { succeeded: 0, failed: 0 }))}</p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
+        {journey.steps
+          .filter((step) => step.synthetics?.type === 'step/end')
+          .map((step, index) => (
+            <StepComponent
+              key={index}
+              index={index}
+              step={step}
+              fetchScreenshot={fetchScreenshot}
+            />
+          ))}
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
+interface ConsoleOutputStepsProps {
+  journey: JourneyState;
+}
+
+const ConsoleOutputSteps: FC<ConsoleOutputStepsProps> = ({ journey }) => {
+  return (
+    <div>
+      <EuiTitle>
+        <h4>No steps ran</h4>
+      </EuiTitle>
+      <EuiSpacer />
+      <p>This journey failed to run, recorded console output is shown below</p>
+      <EuiSpacer />
+      {journey.steps.map((s) => (
+        <p>
+          <span>{s.synthetics?.type}</span>: <span>{s.synthetics?.payload?.message}</span>
+        </p>
+      ))}
+    </div>
+  );
+};
+
 type ComponentProps = ScriptExpandedRowProps & {
   fetchScreenshot: (stepIndex: number) => void;
   journey: JourneyState;
 };
 
-export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ journey, fetchScreenshot }) => (
-  <div>
-    <EuiText>
-      <h3>Summary information</h3>
-      <p>{statusMessage(journey.steps.reduce(reduceStepStatus, { succeeded: 0, failed: 0 }))}</p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup direction="column">
-      {journey.steps.map((step, index) => (
-        <StepComponent key={index} index={index} step={step} fetchScreenshot={fetchScreenshot} />
-      ))}
-    </EuiFlexGroup>
-  </div>
-);
+export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ journey, fetchScreenshot }) => {
+  const hasStepEnd = journey.steps.some((step) => step.synthetics?.type === 'step/end');
+  if (hasStepEnd)
+    return <JourneyWithExecutedSteps journey={journey} fetchScreenshot={fetchScreenshot} />;
+  return <ConsoleOutputSteps journey={journey} />;
+};

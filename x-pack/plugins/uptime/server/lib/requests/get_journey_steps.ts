@@ -22,8 +22,8 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any>
         bool: {
           filter: [
             {
-              term: {
-                'synthetics.type': 'step/end',
+              terms: {
+                'synthetics.type': ['step/end', 'stderr', 'cmd/status'],
               },
             },
             {
