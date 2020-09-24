@@ -21,8 +21,10 @@ interface Props {
   alertsContext: AlertsContextValue;
   errors: IErrorObject;
   boundaryIndexPattern: IIndexPattern;
+  boundaryNameField: string;
   setBoundaryIndexPattern: (boundaryIndexPattern?: IIndexPattern) => void;
   setBoundaryGeoField: (boundaryGeoField?: string) => void;
+  setBoundaryNameField: (boundaryNameField?: string) => void;
 }
 
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
@@ -30,9 +32,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   alertsContext,
   errors,
   boundaryIndexPattern,
+  boundaryNameField,
   setBoundaryIndexPattern,
   setBoundaryGeoField,
+  setBoundaryNameField,
 }) => {
+  const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { dataUi, dataIndexPatterns, http } = alertsContext;
   const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
@@ -73,6 +78,27 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
               )) ||
             []
           }
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        id="boundaryNameFieldSelect"
+        fullWidth
+        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.boundaryNameSelectLabel', {
+          defaultMessage: 'Human-readable boundary name (optional)',
+        })}
+      >
+        <SingleFieldSelect
+          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.boundaryNameSelect', {
+            defaultMessage: 'Select boundary name',
+          })}
+          value={boundaryNameField}
+          onChange={setBoundaryNameField}
+          fields={boundaryIndexPattern.fields.filter(
+            (field: IFieldType) =>
+              BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
+              !field.name.startsWith('_') &&
+              !field.name.endsWith('keyword')
+          )}
         />
       </EuiFormRow>
     </Fragment>

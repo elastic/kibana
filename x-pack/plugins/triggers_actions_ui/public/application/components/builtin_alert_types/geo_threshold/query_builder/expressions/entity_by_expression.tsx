@@ -29,7 +29,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
 }) => {
   const ENTITY_TYPES = ['string', 'number', 'ip'];
   const indexPopover = (
-    <EuiFormRow id="someSelect" fullWidth error={errors.index}>
+    <EuiFormRow id="entitySelect" fullWidth error={errors.index}>
       <SingleFieldSelect
         placeholder={i18n.translate(
           'xpack.triggersActionsUI.geoThreshold.topHitsSplitFieldSelectPlaceholder',

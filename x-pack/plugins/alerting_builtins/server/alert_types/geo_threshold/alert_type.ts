@@ -97,6 +97,7 @@ export function getAlertType(
       boundaryIndexTitle: string;
       boundaryIndexId: string;
       boundaryGeoField: string;
+      boundaryNameField: string;
     };
     alertId: string;
     state: AlertTypeState;
@@ -116,6 +117,7 @@ export function getAlertType(
         boundaryIndexTitle: string;
         boundaryIndexId: string;
         boundaryGeoField: string;
+        boundaryNameField: string;
       };
     };
   };
@@ -158,6 +160,7 @@ export function getAlertType(
         boundaryIndexTitle: schema.string({ minLength: 1 }),
         boundaryIndexId: schema.string({ minLength: 1 }),
         boundaryGeoField: schema.string({ minLength: 1 }),
+        boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
       }),
     },
     actionVariables: {

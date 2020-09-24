@@ -28,6 +28,7 @@ const DEFAULT_VALUES = {
   BOUNDARY_INDEX: '',
   BOUNDARY_INDEX_ID: '',
   BOUNDARY_GEO_FIELD: '',
+  BOUNDARY_NAME_FIELD: '',
 };
 
 const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
@@ -50,6 +51,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     boundaryIndexTitle,
     boundaryIndexId,
     boundaryGeoField,
+    boundaryNameField,
   } = alertParams;
 
   const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
@@ -107,6 +109,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         boundaryIndexTitle: boundaryIndexTitle ?? DEFAULT_VALUES.BOUNDARY_INDEX,
         boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
+        boundaryNameField: boundaryNameField ?? DEFAULT_VALUES.BOUNDARY_NAME_FIELD,
       });
       if (!alertsContext.dataIndexPatterns) {
         return;
@@ -223,6 +226,10 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         setBoundaryGeoField={(_geoField: string | undefined) =>
           _geoField && setAlertParams('boundaryGeoField', _geoField)
         }
+        setBoundaryNameField={(_boundaryNameField: string | undefined) =>
+          _boundaryNameField && setAlertParams('boundaryNameField', _boundaryNameField)
+        }
+        boundaryNameField={boundaryNameField}
       />
     </Fragment>
   );

@@ -149,21 +149,23 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryIndexTitle: string;
       boundaryIndexId: string;
       boundaryGeoField: string;
+      boundaryNameField: string;
     };
     alertId: string;
     state: AlertTypeState;
   }) {
-    const shapesFilters =
-      state.shapesFilters ||
-      (await getShapesFilters(
-        params.boundaryIndexTitle,
-        params.boundaryType,
-        params.boundaryGeoField,
-        params.geoField,
-        services.callCluster,
-        log,
-        alertId
-      ));
+    const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
+      ? state
+      : await getShapesFilters(
+          params.boundaryIndexTitle,
+          params.boundaryType,
+          params.boundaryGeoField,
+          params.geoField,
+          params.boundaryNameField,
+          services.callCluster,
+          log,
+          alertId
+        );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
 
@@ -204,17 +206,21 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     );
 
     // Create alert instances
-    movedEntities.forEach(({ entityName, currLocation, prevLocation }) =>
-      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId, {
-        crossingEventTimeStamp: currLocation.date,
-        currentLocation: currLocation.location,
-        currentBoundaryId: currLocation.shapeId,
-        previousLocation: prevLocation.location,
-        previousBoundaryId: prevLocation.shapeId,
-        crossingDocumentId: currLocation.docId,
-        timeOfDetection: currIntervalEndTime,
-      })
-    );
+    movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
+      services
+        .alertInstanceFactory(
+          `${entityName}-${shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId}`
+        )
+        .scheduleActions(ActionGroupId, {
+          crossingEventTimeStamp: currLocation.date,
+          currentLocation: currLocation.location,
+          currentBoundaryId: currLocation.shapeId,
+          previousLocation: prevLocation.location,
+          previousBoundaryId: prevLocation.shapeId,
+          crossingDocumentId: currLocation.docId,
+          timeOfDetection: currIntervalEndTime,
+        });
+    });
 
     // Combine previous results w/ current results for state of next run
     const prevLocationArr = _.chain(currLocationArr)
@@ -226,5 +232,6 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     return {
       prevLocationArr,
       shapesFilters,
+      shapesIdsNamesMap,
     };
   };

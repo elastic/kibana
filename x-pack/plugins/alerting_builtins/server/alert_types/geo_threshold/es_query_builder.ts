@@ -18,11 +18,13 @@ export async function getShapesFilters(
   boundaryType: string,
   boundaryGeoField: string,
   geoField: string,
+  boundaryNameField?: string,
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger,
   alertId: string
 ) {
   const filters: Record<string, unknown> = {};
+  const shapesIdsNamesMap = {};
   switch (boundaryType) {
     case 'entireIndex':
       // Get all shapes in index
@@ -45,11 +47,19 @@ export async function getShapesFilters(
           },
         };
       });
+      if (boundaryNameField) {
+        boundaryData.hits.hits.forEach(({ _source, _id }) => {
+          shapesIdsNamesMap[_id] = _source[boundaryNameField];
+        });
+      }
       break;
     default:
       log.info(`alert ${GEO_THRESHOLD_ID}:${alertId} Unsupported type: ${boundaryType}`);
   }
-  return filters;
+  return {
+    shapesFilters: filters,
+    shapesIdsNamesMap,
+  };
 }
 
 export async function executeEsQueryFactory(
@@ -69,6 +79,7 @@ export async function executeEsQueryFactory(
     geoField: string;
     boundaryIndexTitle: string;
     boundaryType: string;
+    boundaryNameField?: string;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
   log: Logger,
