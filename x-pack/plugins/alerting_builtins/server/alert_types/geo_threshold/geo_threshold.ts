@@ -149,7 +149,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryIndexTitle: string;
       boundaryIndexId: string;
       boundaryGeoField: string;
-      boundaryNameField: string;
+      boundaryNameField?: string;
     };
     alertId: string;
     state: AlertTypeState;
@@ -159,12 +159,12 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       : await getShapesFilters(
           params.boundaryIndexTitle,
           params.boundaryType,
-          params.boundaryGeoField,
           params.geoField,
           params.boundaryNameField,
           services.callCluster,
           log,
-          alertId
+          alertId,
+          params.boundaryGeoField
         );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);

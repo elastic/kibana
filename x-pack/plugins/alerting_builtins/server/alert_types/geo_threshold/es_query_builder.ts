@@ -18,13 +18,13 @@ export async function getShapesFilters(
   boundaryType: string,
   boundaryGeoField: string,
   geoField: string,
-  boundaryNameField?: string,
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger,
-  alertId: string
+  alertId: string,
+  boundaryNameField?: string
 ) {
   const filters: Record<string, unknown> = {};
-  const shapesIdsNamesMap = {};
+  const shapesIdsNamesMap: Record<string, string> = {};
   switch (boundaryType) {
     case 'entireIndex':
       // Get all shapes in index

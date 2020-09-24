@@ -97,7 +97,7 @@ export function getAlertType(
       boundaryIndexTitle: string;
       boundaryIndexId: string;
       boundaryGeoField: string;
-      boundaryNameField: string;
+      boundaryNameField?: string;
     };
     alertId: string;
     state: AlertTypeState;
@@ -117,7 +117,7 @@ export function getAlertType(
         boundaryIndexTitle: string;
         boundaryIndexId: string;
         boundaryGeoField: string;
-        boundaryNameField: string;
+        boundaryNameField?: string;
       };
     };
   };
