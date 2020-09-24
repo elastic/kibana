@@ -35,7 +35,7 @@ import {
   getCombinedSignal,
   AbortError,
   IEsSearchRequest,
-  IEsSearchResponse,
+  IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
 } from '../../common';
@@ -91,7 +91,7 @@ export class SearchInterceptor {
     request: IEsSearchRequest,
     signal: AbortSignal,
     strategy?: string
-  ): Observable<IEsSearchResponse> {
+  ): Observable<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(searchRequest);
@@ -113,7 +113,7 @@ export class SearchInterceptor {
   public search(
     request: IEsSearchRequest,
     options?: ISearchOptions
-  ): Observable<IEsSearchResponse> {
+  ): Observable<IKibanaSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
       if (options?.abortSignal?.aborted) {

@@ -176,7 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
         lastSeen: '2019-02-19T20:42:33.561Z',
       };
 
-      expect(firstLastSeenHost).to.eql(expected);
+      expect(firstLastSeenHost.firstSeen).to.eql(expected.firstSeen);
+      expect(firstLastSeenHost.lastSeen).to.eql(expected.lastSeen);
     });
   });
 }

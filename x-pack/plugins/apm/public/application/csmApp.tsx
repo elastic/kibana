@@ -20,7 +20,7 @@ import {
 import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome } from '../components/app/RumDashboard/RumHome';
+import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
@@ -39,8 +39,8 @@ export const rumRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: renderAsRedirectTo('/csm'),
-    breadcrumb: 'Client Side Monitoring',
+    render: renderAsRedirectTo('/ux'),
+    breadcrumb: UX_LABEL,
   },
 ];
 

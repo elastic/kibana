@@ -7,7 +7,9 @@
 import expect from '@kbn/expect';
 
 import { Direction } from '../../../../plugins/security_solution/common/search_strategy';
+// @ts-expect-error
 import { timelineQuery } from '../../../../plugins/security_solution/public/timelines/containers/index.gql_query';
+// @ts-expect-error
 import { GetTimelineQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

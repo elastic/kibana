@@ -34,7 +34,6 @@ const ConditionEntryCell = memo<{
 ConditionEntryCell.displayName = 'ConditionEntryCell';
 
 export interface ConditionEntryProps {
-  // FIXME:PT probably need to adjust below types to match what is done in `TrustedApp` type
   os: TrustedApp['os'];
   entry: TrustedApp['entries'][0];
   /** controls if remove button is enabled/disabled */
@@ -43,6 +42,12 @@ export interface ConditionEntryProps {
   showLabels: boolean;
   onRemove: (entry: TrustedApp['entries'][0]) => void;
   onChange: (newEntry: TrustedApp['entries'][0], oldEntry: TrustedApp['entries'][0]) => void;
+  /**
+   * invoked when at least one field in the entry was visited (triggered when `onBlur` DOM event is dispatched)
+   * For this component, that will be triggered only when the `value` field is visited, since that is the
+   * only one needs user input.
+   */
+  onVisited?: (entry: TrustedApp['entries'][0]) => void;
   'data-test-subj'?: string;
 }
 export const ConditionEntry = memo<ConditionEntryProps>(
@@ -52,6 +57,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
     onRemove,
     onChange,
     isRemoveDisabled = false,
+    onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useCallback(
@@ -62,6 +68,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
       },
       [dataTestSubj]
     );
+
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
         {
@@ -80,6 +87,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         },
       ];
     }, []);
+
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => {
         onChange(
@@ -92,6 +100,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
       },
       [entry, onChange]
     );
+
     const handleFieldUpdate = useCallback(
       (newField) => {
         onChange(
@@ -104,9 +113,16 @@ export const ConditionEntry = memo<ConditionEntryProps>(
       },
       [entry, onChange]
     );
+
     const handleRemoveClick = useCallback(() => {
       onRemove(entry);
     }, [entry, onRemove]);
+
+    const handleValueOnBlur = useCallback(() => {
+      if (onVisited) {
+        onVisited(entry);
+      }
+    }, [entry, onVisited]);
 
     return (
       <EuiFlexGroup
@@ -160,7 +176,9 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
+              required
               onChange={handleValueUpdate}
+              onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}
             />
           </ConditionEntryCell>
@@ -177,6 +195,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
                 'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
                 { defaultMessage: 'Remove Entry' }
               )}
+              data-test-subj={getTestId('remove')}
             />
           </ConditionEntryCell>
         </EuiFlexItem>
