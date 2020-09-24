@@ -16,19 +16,20 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { PageInfoPaginated, UncommonProcessesEdges } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { createFilter } from '../../../common/containers/helpers';
-
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  HostUncommonProcessesRequestOptions,
-  HostUncommonProcessesStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { HostsQueries } from '../../../../common/search_strategy/security_solution/hosts';
-import { DocValueFields, SortField } from '../../../../common/search_strategy';
+  DocValueFields,
+  SortField,
+  PageInfoPaginated,
+  HostsUncommonProcessesEdges,
+  HostsQueries,
+  HostsUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+} from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -45,7 +46,7 @@ export interface UncommonProcessesArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  uncommonProcesses: UncommonProcessesEdges[];
+  uncommonProcesses: HostsUncommonProcessesEdges[];
 }
 
 interface UseUncommonProcesses {
@@ -75,7 +76,7 @@ export const useUncommonProcesses = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [uncommonProcessesRequest, setUncommonProcessesRequest] = useState<
-    HostUncommonProcessesRequestOptions
+    HostsUncommonProcessesRequestOptions
   >({
     defaultIndex,
     docValueFields: docValueFields ?? [],
@@ -123,14 +124,14 @@ export const useUncommonProcesses = ({
   );
 
   const uncommonProcessesSearch = useCallback(
-    (request: HostUncommonProcessesRequestOptions) => {
+    (request: HostsUncommonProcessesRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostUncommonProcessesRequestOptions, HostUncommonProcessesStrategyResponse>(
+          .search<HostsUncommonProcessesRequestOptions, HostsUncommonProcessesStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
