@@ -806,9 +806,15 @@ In other use cases the message field can be used to concatenate different values
               }
               docValueFields={Array []}
               end="2018-03-24T03:33:52.253Z"
-              eventType="raw"
               filters={Array []}
-              id="foo"
+              id="test"
+              indexNames={
+                Array [
+                  "filebeat-*",
+                  "auditbeat-*",
+                  "packetbeat-*",
+                ]
+              }
               indexPattern={
                 Object {
                   "fields": Array [
@@ -900,9 +906,7 @@ In other use cases the message field can be used to concatenate different values
                   "title": "filebeat-*,auditbeat-*,packetbeat-*",
                 }
               }
-              indexToAdd={Array []}
               isLive={false}
-              isLoadingSource={false}
               isSaving={false}
               itemsPerPage={5}
               itemsPerPageOptions={
@@ -914,7 +918,7 @@ In other use cases the message field can be used to concatenate different values
               }
               kqlMode="search"
               kqlQueryExpression=""
-              loadingIndexName={false}
+              loadingSourcerer={false}
               onChangeItemsPerPage={[MockFunction]}
               onClose={[MockFunction]}
               onDataProviderEdited={[MockFunction]}

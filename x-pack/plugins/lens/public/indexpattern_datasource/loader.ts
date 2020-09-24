@@ -63,6 +63,7 @@ export async function loadIndexPatterns({
               type: field.type,
               aggregatable: field.aggregatable,
               searchable: field.searchable,
+              meta: indexPattern.metaFields.includes(field.name),
               esTypes: field.esTypes,
               scripted: field.scripted,
             };
