@@ -33,7 +33,7 @@ import { Range } from '../../../expressions/public';
 import './metric_vis.scss';
 
 export interface MetricVisComponentProps {
-  visParams: VisParams;
+  visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Input;
   fireEvent: (event: any) => void;
   renderComplete: () => void;

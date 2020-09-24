@@ -22,16 +22,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+import { MetricVisRenderValue } from './metric_vis_fn';
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('./components/metric_vis_component'));
 
-export const metricVisRenderer: () => ExpressionRenderDefinition = () => ({
+export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => ({
   name: 'metric_vis',
   displayName: 'metric visualization',
   reuseDomNode: true,
-  render: async (domNode: HTMLElement, config: any, handlers: any) => {
-    const { visData, visConfig } = config;
-
+  render: async (domNode, { visData, visConfig }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });

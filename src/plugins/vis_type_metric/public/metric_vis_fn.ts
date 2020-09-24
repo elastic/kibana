@@ -46,18 +46,17 @@ interface Arguments {
   bucket: any; // these aren't typed yet
 }
 
-interface RenderValue {
+export interface MetricVisRenderValue {
   visType: typeof visType;
   visData: Input;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
-  params: any;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'metricVis',
   Input,
   Arguments,
-  Render<RenderValue>
+  Render<MetricVisRenderValue>
 >;
 
 export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
@@ -201,9 +200,6 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
             },
           },
           dimensions,
-        },
-        params: {
-          listenOnChange: true,
         },
       },
     };
