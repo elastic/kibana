@@ -16,7 +16,7 @@ These metrics help contributors know how they are impacting the size of the bund
 [[ci-metric-page-load-bundle-size]] `page load bundle size` ::
 The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn't necessary on every page load behind an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`].
 +
-Code that is shared statically with other plugins, including anything that's exported from the `public/index.ts` file of a plugin and any code referenced by the `extraPublicDirs` manifest property, is always exported from the entry file meaning it will contribute to the `page load bundle size` for the plugin which is sharing the code.
+Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property. 
 
 [[ci-metric-async-chunks-size]] `async chunks size` ::
 An "async chunk" is created for the files imported by each https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`] statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
