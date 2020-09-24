@@ -7,115 +7,43 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch, useHistory, useParams } from 'react-router-dom';
+import { History } from 'history';
 
-import {
-  GROUP_SOURCE_PRIORITIZATION_PATH,
-  GROUP_PATH,
-  GROUPS_PATH,
-  getGroupPath,
-  getGroupSourcePrioritizationPath,
-} from 'workplace_search/utils/routePaths';
+import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
+import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
+import { GroupLogic } from './group_logic';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { SidebarNavigation, AppView } from 'workplace_search/components';
-import FlashMessages from 'shared/components/FlashMessages';
-import { IRouter } from 'shared/types';
-import { GroupLogic, IGroupActions, IGroupValues } from './GroupLogic';
+import { ManageUsersModal } from './components/manage_users_modal';
+import { SharedSourcesModal } from './components/shared_sources_modal';
 
-import ManageUsersModal from './components/ManageUsersModal';
-import SharedSourcesModal from './components/SharedSourcesModal';
+import { GroupOverview } from './components/group_overview';
+import { GroupSourcePrioritization } from './components/group_source_prioritization';
 
-import GroupOverview from './components/GroupOverview';
-import GroupSourcePrioritization from './components/GroupSourcePrioritization';
+export const GroupRouter: React.FC = () => {
+  const history = useHistory() as History;
+  const { groupId } = useParams() as { groupId: string };
 
-// TOOD: Get the router params from useRouter
-export const GroupRouter: React.FC<IRouter> = ({
-  match: {
-    params: { groupId },
-  },
-  history,
-  location: { pathname },
-}) => {
-  const {
-    initializeGroup,
-    resetGroup,
-    showSharedSourcesModal,
-    showManageUsersModal,
-    resetFlashMessages,
-  } = useActions(GroupLogic) as IGroupActions;
+  const { messages } = useValues(FlashMessagesLogic);
+  const { initializeGroup, resetGroup } = useActions(GroupLogic);
+  const { sharedSourcesModalModalVisible, manageUsersModalVisible } = useValues(GroupLogic);
 
-  const {
-    group: { name },
-    sharedSourcesModalModalVisible,
-    manageUsersModalVisible,
-    flashMessages,
-  } = useValues(GroupLogic) as IGroupValues;
-
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     initializeGroup(groupId, history);
-    resetGroup();
+    return resetGroup;
   }, []);
 
-  useEffect(() => {
-    resetFlashMessages();
-  }, [pathname]);
-
-  const breadcrumbs = {
-    topLevelPath: GROUPS_PATH,
-    topLevelName: 'All groups',
-    activeName: name,
-  };
-
-  const overviewLink = {
-    title: 'Overview',
-    path: getGroupPath(groupId),
-  };
-
-  const sourcePrioritizationLink = {
-    title: 'Manage source prioritization',
-    path: getGroupSourcePrioritizationPath(groupId),
-  };
-
-  const manageSourcesLink = {
-    title: 'Manage shared content sources',
-    onClick: showSharedSourcesModal,
-    dataTestSubj: 'ManageSharedSourcesButton',
-  };
-
-  const manageUsersLink = {
-    title: 'Manage users',
-    onClick: showManageUsersModal,
-    dataTestSubj: 'ManageUsersButton',
-  };
-
-  const links = isFederatedAuth
-    ? [overviewLink, manageSourcesLink, sourcePrioritizationLink]
-    : [overviewLink, manageSourcesLink, manageUsersLink, sourcePrioritizationLink];
-
-  const sidebar = (
-    <SidebarNavigation
-      title={
-        <>
-          Manage <span className="eui-textOverflowWrap">{name}</span>
-        </>
-      }
-      breadcrumbs={breadcrumbs}
-      links={links}
-    />
-  );
-
   return (
-    <AppView sidebar={sidebar}>
-      {flashMessages && <FlashMessages {...flashMessages} />}
+    <>
+      {hasMessages && <FlashMessages />}
       <Switch>
         <Route path={GROUP_SOURCE_PRIORITIZATION_PATH} component={GroupSourcePrioritization} />
         <Route path={GROUP_PATH} component={GroupOverview} />
       </Switch>
       {sharedSourcesModalModalVisible && <SharedSourcesModal />}
       {manageUsersModalVisible && <ManageUsersModal />}
-    </AppView>
+    </>
   );
 };

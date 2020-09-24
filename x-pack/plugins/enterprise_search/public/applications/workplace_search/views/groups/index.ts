@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { GroupsRouter } from './GroupsRouter';
-export { GroupsLogic } from './GroupsLogic';
+export { GroupsRouter } from './groups_router';
+export { GroupsLogic } from './groups_logic';

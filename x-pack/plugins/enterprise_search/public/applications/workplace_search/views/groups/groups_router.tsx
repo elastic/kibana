@@ -8,17 +8,19 @@ import React, { useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
-import { GROUP_PATH, GROUPS_PATH } from 'workplace_search/utils/routePaths';
+import { GROUP_PATH, GROUPS_PATH } from '../../routes';
 
-import { GroupsLogic, IGroupsActions } from './GroupsLogic';
+import { GroupsLogic } from './groups_logic';
 
-import GroupRouter from './GroupRouter';
-import Groups from './Groups';
+import { GroupRouter } from './group_router';
+import { Groups } from './groups';
+
+import './groups.scss';
 
 export const GroupsRouter: React.FC = () => {
-  const { initializeGroups } = useActions(GroupsLogic) as IGroupsActions;
+  const { initializeGroups } = useActions(GroupsLogic);
 
   useEffect(() => {
     initializeGroups();
