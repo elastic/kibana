@@ -116,6 +116,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
+      },
       searchSource: {
         /**
          * creates searchsource based on serialized search source fields

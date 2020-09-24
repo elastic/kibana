@@ -18,20 +18,10 @@
  */
 
 import { createHash } from 'crypto';
-import { finalize } from 'rxjs/operators';
-import { trimEnd } from 'lodash';
-import {
-  BehaviorSubject,
-  throwError,
-  timer,
-  Subscription,
-  defer,
-  from,
-  Observable,
-  NEVER,
-} from 'rxjs';
+import { get, trimEnd, debounce } from 'lodash';
+import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import {
   getCombinedSignal,
   AbortError,
@@ -41,6 +31,8 @@ import {
   ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
+import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -84,12 +76,6 @@ export class SearchInterceptor {
    * @internal
    */
   protected pendingCount$ = new BehaviorSubject(0);
-
-  /**
-   * The subscriptions from scheduling the automatic timeout for each request.
-   * @internal
-   */
-  protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
    * @internal
@@ -141,7 +127,6 @@ export class SearchInterceptor {
       timeoutSignal.addEventListener('abort', (e) => {
         if (sessionInfo?.status === SearchStatus.Running) {
           sessionInfo.status = SearchStatus.Timeout;
-          this.onSessionTimeout();
         }
       });
 
@@ -178,14 +163,39 @@ export class SearchInterceptor {
     }
   }
 
-  private onSessionTimeout() {
-    this.deps.toasts.addDanger({
-      title: 'Timed out',
-      text: i18n.translate('data.search.upgradeLicense', {
-        defaultMessage:
-          'One or more queries timed out. With our free Basic tier, your queries never time out.',
-      }),
-    });
+  /*
+   * @returns `TimeoutErrorMode` indicating what action should be taken in case of a request timeout based on license and permissions.
+   * @internal
+   */
+  protected getTimeoutMode() {
+    return TimeoutErrorMode.UPGRADE;
+  }
+
+  /*
+   * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
+   * @internal
+   */
+  protected handleSearchError(
+    e: any,
+    request: IEsSearchRequest,
+    timeoutSignal: AbortSignal,
+    appAbortSignal?: AbortSignal
+  ): Error {
+    if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+      // Handle a client or a server side timeout
+      const err = new SearchTimeoutError(e, this.getTimeoutMode());
+
+      // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
+      this.showTimeoutError(err);
+      return err;
+    } else if (appAbortSignal?.aborted) {
+      // In the case an application initiated abort, throw the existing AbortError.
+      return e;
+    } else if (isPainlessError(e)) {
+      return new PainlessError(e, request);
+    } else {
+      return e;
+    }
   }
 
   /**
@@ -210,9 +220,71 @@ export class SearchInterceptor {
   }
 
   /**
+   * @internal
+   */
+  protected setupAbortSignal({
+    abortSignal,
+    timeout,
+  }: {
+    abortSignal?: AbortSignal;
+    timeout?: number;
+  }) {
+    // Schedule this request to automatically timeout after some interval
+    const timeoutController = new AbortController();
+    const { signal: timeoutSignal } = timeoutController;
+    const timeout$ = timeout ? timer(timeout) : NEVER;
+    const subscription = timeout$.subscribe(() => {
+      timeoutController.abort();
+    });
+
+    // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
+    // 1. The user manually aborts (via `cancelPending`)
+    // 2. The request times out
+    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    const signals = [
+      this.abortController.signal,
+      timeoutSignal,
+      ...(abortSignal ? [abortSignal] : []),
+    ];
+
+    const combinedSignal = getCombinedSignal(signals);
+    const cleanup = () => {
+      subscription.unsubscribe();
+    };
+
+    combinedSignal.addEventListener('abort', cleanup);
+
+    return {
+      timeoutSignal,
+      combinedSignal,
+      cleanup,
+    };
+  }
+
+  /**
+   * Right now we are throttling but we will hook this up with background sessions to show only one
+   * error notification per session.
+   * @internal
+   */
+  private showTimeoutError = debounce(
+    (e: SearchTimeoutError) => {
+      this.deps.toasts.addDanger({
+        title: 'Timed out',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+    },
+    30000,
+    { leading: true, trailing: false }
+  );
+
+  /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
    * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   *
+   * @param request
+   * @options
+   * @returns `Observalbe` emitting the search response or an error.
    */
   public search(
     request: IEsSearchRequest,
@@ -230,17 +302,13 @@ export class SearchInterceptor {
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       this.onRequestStart(request, options?.sessionId, timeoutSignal);
-
-      const res$ = this.runSearch(request, combinedSignal, options?.strategy);
-      res$.subscribe({
-        error: () => {
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+        catchError((e: any) => {
           this.onRequestError(request, options?.sessionId);
-        },
-        complete: () => {
-          this.onRequestComplete(request, options?.sessionId);
-        },
-      });
-      return res$.pipe(
+          return throwError(
+            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
+          );
+        }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
           cleanup();
@@ -249,47 +317,28 @@ export class SearchInterceptor {
     });
   }
 
-  /**
-   * @internal
+  /*
+   *
    */
-  protected setupAbortSignal({
-    abortSignal,
-    timeout,
-  }: {
-    abortSignal?: AbortSignal;
-    timeout?: number;
-  }) {
-    // Schedule this request to automatically timeout after some interval
-    const timeoutController = new AbortController();
-    const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timeout ? timer(timeout) : NEVER;
-    const subscription = timeout$.subscribe(() => {
-      timeoutController.abort();
+  public showError(e: Error) {
+    if (e instanceof AbortError) return;
+
+    if (e instanceof SearchTimeoutError) {
+      // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
+      return;
+    }
+
+    if (e instanceof PainlessError) {
+      this.deps.toasts.addDanger({
+        title: 'Search Error',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+      return;
+    }
+
+    this.deps.toasts.addError(e, {
+      title: 'Search Error',
     });
-    this.timeoutSubscriptions.add(subscription);
-
-    // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
-    // 1. The user manually aborts (via `cancelPending`)
-    // 2. The request times out
-    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
-    const signals = [
-      this.abortController.signal,
-      timeoutSignal,
-      ...(abortSignal ? [abortSignal] : []),
-    ];
-
-    const combinedSignal = getCombinedSignal(signals);
-    const cleanup = () => {
-      this.timeoutSubscriptions.remove(subscription);
-    };
-
-    combinedSignal.addEventListener('abort', cleanup);
-
-    return {
-      timeoutSignal,
-      combinedSignal,
-      cleanup,
-    };
   }
 }
 

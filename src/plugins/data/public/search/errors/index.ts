@@ -17,4 +17,5 @@
  * under the License.
  */
 
-import './fetch_error';
+export * from './painless_error';
+export * from './timeout_error';

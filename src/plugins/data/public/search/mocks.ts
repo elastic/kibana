@@ -40,6 +40,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
       start: jest.fn(),
       get: jest.fn(),
     },
+    showError: jest.fn(),
     searchSource: searchSourceMock,
   };
 }
