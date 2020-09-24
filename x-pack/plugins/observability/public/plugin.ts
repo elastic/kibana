@@ -23,7 +23,7 @@ export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
 }
 
-interface SetupPlugins {
+export interface ObservabilityPluginSetupDeps {
   home?: HomePublicPluginSetup;
 }
 
@@ -34,7 +34,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
+  public setup(core: CoreSetup, plugins: ObservabilityPluginSetupDeps) {
     core.application.register({
       id: 'observability-overview',
       title: 'Overview',
@@ -50,7 +50,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         // Get start services
         const [coreStart] = await core.getStartServices();
 
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, plugins, params);
       },
     });
 

@@ -39,8 +39,8 @@ import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { AutocompleteField } from '../autocomplete_field';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -74,10 +74,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    defineRuleData?.index ?? [],
-    RuleStep.aboutRule
-  );
+  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
+
   const canUseExceptions =
     defineRuleData?.ruleType &&
     !isMlRule(defineRuleData.ruleType) &&
