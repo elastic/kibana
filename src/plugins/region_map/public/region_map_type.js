@@ -26,7 +26,7 @@ import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
+  const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
 
   return {
@@ -54,7 +54,9 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionsTemplate: (props) => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => (
+        <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
+      ),
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
@@ -97,6 +99,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
       ]),
     },
     setup: async (vis) => {
+      const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
