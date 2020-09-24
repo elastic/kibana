@@ -29,6 +29,8 @@ const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   },
 }))<{ paddingTop: number }>`
   overflow: auto;
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
 `;
 

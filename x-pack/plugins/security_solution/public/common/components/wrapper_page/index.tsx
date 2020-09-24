@@ -28,6 +28,9 @@ const Wrapper = styled.div`
 
   &.siemWrapperPage--fullHeight {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
   }
 
   &.siemWrapperPage--withTimeline {

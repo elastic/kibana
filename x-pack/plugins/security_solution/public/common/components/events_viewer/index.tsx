@@ -29,6 +29,7 @@ const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  flex: 1 1 auto;
   display: flex;
   width: 100%;
 `;
