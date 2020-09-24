@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { Field } from '../../../advanced_settings/public';
+import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
@@ -119,7 +119,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
-            <Field
+            <LazyField
               setting={
                 {
                   type: 'boolean',
