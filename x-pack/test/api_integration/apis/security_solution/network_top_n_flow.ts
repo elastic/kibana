@@ -5,11 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { networkTopNFlowQuery } from '../../../../plugins/security_solution/public/network/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
   FlowTargetSourceDest,
+  // @ts-expect-error
   GetNetworkTopNFlowQuery,
+  // @ts-expect-error
   NetworkTopTablesFields,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';

@@ -5,10 +5,13 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { networkDnsQuery } from '../../../../plugins/security_solution/public/network/containers/network_dns/index.gql_query';
 import {
   Direction,
+  // @ts-expect-error
   GetNetworkDnsQuery,
+  // @ts-expect-error
   NetworkDnsFields,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
