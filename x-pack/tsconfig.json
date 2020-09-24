@@ -24,5 +24,8 @@
     // overhead is too significant
     "incremental": false
   },
-  "references": [{ "path": "../src/core/tsconfig.json" }]
+  "references": [
+    { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/kibana_utils/tsconfig.json" }
+  ]
 }

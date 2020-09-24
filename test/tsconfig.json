@@ -18,6 +18,7 @@
     "interpreter_functional/plugins/**/*"
   ],
   "references": [
-    { "path": "../src/core/tsconfig.json" }
+    { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/kibana_utils/tsconfig.json" }
   ]
 }

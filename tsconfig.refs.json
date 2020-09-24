@@ -3,5 +3,6 @@
   "references": [
     { "path": "./src/test_utils" },
     { "path": "./src/core" },
+    { "path": "./src/plugins/kibana_utils" },
   ]
 }
