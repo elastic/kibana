@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { wait as waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -66,15 +67,14 @@ describe('When the edit exception modal is opened', () => {
   });
 
   describe('when the modal is loading', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
+    it('renders the loading spinner', async () => {
       (useFetchIndex as jest.Mock).mockImplementation(() => [
         true,
         {
           indexPatterns: stubIndexPattern,
         },
       ]);
-      wrapper = mount(
+      const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={[]}
@@ -87,16 +87,16 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-    });
-    it('renders the loading spinner', () => {
-      expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      });
     });
   });
 
   describe('when an endpoint exception with exception data is passed', () => {
     describe('when exception entry fields are included in the index pattern', () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         const exceptionItemMock = {
           ...getExceptionListItemSchemaMock(),
           entries: [
@@ -117,7 +117,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -145,7 +147,7 @@ describe('When the edit exception modal is opened', () => {
 
     describe("when exception entry fields aren't included in the index pattern", () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         wrapper = mount(
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
@@ -160,7 +162,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -189,7 +193,7 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when an detection exception with entries is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
@@ -204,7 +208,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      });
     });
     it('has the edit exception button enabled', () => {
       expect(
@@ -228,7 +234,7 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when an exception with no entries is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -244,7 +250,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      });
     });
     it('has the edit exception button disabled', () => {
       expect(

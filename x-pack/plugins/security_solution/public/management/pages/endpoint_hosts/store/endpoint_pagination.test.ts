@@ -26,6 +26,10 @@ import {
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 
+jest.mock('../../policy/store/policy_list/services/ingest', () => ({
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+}));
 describe('endpoint list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;

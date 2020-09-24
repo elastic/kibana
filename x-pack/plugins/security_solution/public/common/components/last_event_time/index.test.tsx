@@ -57,7 +57,7 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
+    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">20 hours ago</span>');
   });
   test('Bad date time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([

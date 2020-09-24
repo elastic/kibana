@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
-
+import { wait as waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
@@ -62,7 +62,7 @@ describe('DraggableWrapper', () => {
       expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
     });
 
-    test('it renders hover actions when the mouse is over the text of draggable wrapper', () => {
+    test('it renders hover actions when the mouse is over the text of draggable wrapper', async () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
@@ -71,11 +71,13 @@ describe('DraggableWrapper', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
-      wrapper.update();
-      jest.runAllTimers();
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+        wrapper.update();
+        jest.runAllTimers();
+        wrapper.update();
+        expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+      });
     });
   });
 

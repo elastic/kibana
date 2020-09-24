@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { wait as waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import {
@@ -77,7 +78,7 @@ describe('RuleDetailsPageComponent', () => {
     });
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -93,7 +94,8 @@ describe('RuleDetailsPageComponent', () => {
         wrappingComponent: TestProviders,
       }
     );
-
-    expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    });
   });
 });

@@ -11,7 +11,10 @@ import '../../mock/match_media';
 import { EntityDraggableComponent } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
+jest.mock('react-beautiful-dnd', () => {
+  const originalModule = jest.requireActual('react-beautiful-dnd');
+  return { ...originalModule };
+});
 describe('entity_draggable', () => {
   const mount = useMountAppended();
 

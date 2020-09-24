@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
-
+import { wait as waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import { useSourcererScope } from '../../common/containers/sourcerer';
@@ -71,7 +71,7 @@ const mockProps = {
   hasMlUserPermissions: true,
 };
 const mockUseSourcererScope = useSourcererScope as jest.Mock;
-describe('rendering - rendering', () => {
+describe('Network page - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', () => {
     mockUseSourcererScope.mockReturnValue({
       selectedPatterns: [],
@@ -88,7 +88,7 @@ describe('rendering - rendering', () => {
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
   });
 
-  test('it DOES NOT render the Setup Instructions text when an index is available', () => {
+  test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
     mockUseSourcererScope.mockReturnValue({
       selectedPatterns: [],
       indicesExist: true,
@@ -101,10 +101,12 @@ describe('rendering - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+    });
   });
 
-  test('it should add the new filters after init', () => {
+  test('it should add the new filters after init', async () => {
     const newFilters: Filter[] = [
       {
         query: {
@@ -157,12 +159,14 @@ describe('rendering - rendering', () => {
         </Router>
       </TestProviders>
     );
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
-    wrapper.update();
-    expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
-    );
+      myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+      wrapper.update();
+      expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
+        '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      );
+    });
   });
 });

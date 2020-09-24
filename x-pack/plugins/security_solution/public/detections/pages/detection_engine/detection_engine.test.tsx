@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { useParams } from 'react-router-dom';
-
+import { wait as waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
@@ -80,7 +80,7 @@ describe('DetectionEnginePageComponent', () => {
     });
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -93,7 +93,8 @@ describe('DetectionEnginePageComponent', () => {
         </Router>
       </TestProviders>
     );
-
-    expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    });
   });
 });
