@@ -54,7 +54,7 @@ overwritten by client-side headers, regardless of the
 |[[elasticsearch-hosts]] `elasticsearch.hosts:`
  | The URLs of the {es} instances to use for all your queries. All nodes
 listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`*
-+
+
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
 
@@ -141,7 +141,7 @@ These settings cannot be used in conjunction with
 certificates, which make up a trusted certificate chain for {es}. This chain is
 used by {kib} to establish trust when making outbound SSL/TLS connections to
 {es}.
-+
+
 In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>> and/or
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
@@ -157,7 +157,7 @@ corresponding private key. These are used by {kib} to authenticate itself when
 making outbound SSL/TLS connections to {es}. For this setting, you must also set
 the `xpack.security.http.ssl.client_authentication` setting in {es} to
 `"required"` or `"optional"` to request a client certificate from {kib}.
-+
+
 If the keystore contains any additional certificates, they are used as a
 trusted certificate chain for {es}. This chain is used by {kib} to establish
 trust when making outbound SSL/TLS connections to {es}. In addition to this
@@ -187,7 +187,7 @@ as blank. If the keystore has an empty password, set this to
 authority (CA) certificates, which make up a trusted certificate chain for
 {es}. This chain is used by {kib} to establish trust when making outbound
 SSL/TLS connections to {es}.
-+
+
 In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-certificateAuthorities, `elasticsearch.ssl.certificateAuthorities`>> and/or
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>.
@@ -300,15 +300,16 @@ the `polling` method could be used enabling that option. *Default: `false`*
 suppress all logging output. *Default: `false`*
 
 | `logging.timezone`
- | Set to the canonical timezone ID
-(for example, `America/Los_Angeles`) to log events using that timezone. For a
-list of timezones, refer to https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. *Default: `UTC`*
+ | Set to the canonical time zone ID
+(for example, `America/Los_Angeles`) to log events using that time zone.
+For possible values, refer to
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones]. *Default: `UTC`*
 
-| [[logging-verbose]] `logging.verbose:` {ece-icon}
+| [[logging-verbose]] `logging.verbose:` {ess-icon}
  | Set to `true` to log all events, including system usage information and all
 requests. *Default: `false`*
 
-| `map.includeElasticMapsService:` {ess-icon}
+| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by <<regionmap-settings, `map.regionmap`>>
 and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are available in <<maps, Maps>>. *Default: `true`*
@@ -317,7 +318,7 @@ and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are availabl
  | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
 
-| [[regionmap-settings]] `map.regionmap:` {ess-icon} {ece-icon}
+| [[regionmap-settings]] `map.regionmap:` {ess-icon}
  | Specifies additional vector layers for
 use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
@@ -347,16 +348,10 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ece-icon}
- | Turns on or off whether layers from the Elastic Maps Service should be included in the vector
-layer option list. By turning this off,
-only the layers that are configured here will be included. The default is `true`.
-This also affects whether tile-service from the Elastic Maps Service will be available.
-
-| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon} {ece-icon}
+| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
  | Optional. References the originating source of the geojson file.
 
-| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon} {ece-icon}
+| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
  | Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
 features you wish to expose. The following shows how to define multiple
@@ -382,11 +377,11 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon} {ece-icon}
+| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
  | Mandatory. The human readable text that is shown under the Options tab when
 building the Region Map visualization.
 
-| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon} {ece-icon}
+| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
  | Mandatory.
 This value is used to do an inner-join between the document stored in
 {es} and the geojson file. For example, if the field in the geojson is
@@ -394,30 +389,30 @@ called `Location` and has city names, there must be a field in {es}
 that holds the same values that {kib} can then use to lookup for the geoshape
 data.
 
-| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon} {ece-icon}
+| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
  | Mandatory. A description of
 the map being provided.
 
-| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon} {ece-icon}
+| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
  | Mandatory. The location of the
 geojson file as provided by a webserver.
 
-| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon} {ece-icon}
+| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
  | The map attribution string.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
-| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon} {ece-icon}
+| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
  | The maximum zoom level. *Default: `10`*
 
-| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon} {ece-icon}
+| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon}
  | The minimum zoom level. *Default: `1`*
 
-| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon} {ece-icon}
+| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon}
  | An array of subdomains
 used by the tile service. Specify the position of the subdomain the URL with
 the token `{s}`.
 
-| [[tilemap-url]] `map.tilemap.url:` {ess-icon} {ece-icon}
+| [[tilemap-url]] `map.tilemap.url:` {ess-icon}
  | The URL to the tileservice that {kib} uses
 to display map tiles in tilemap visualizations. By default,
 {kib} reads this URL from an external metadata service, but users can
@@ -507,7 +502,7 @@ These settings cannot be used in conjunction with <<server-ssl-keystore-path, `s
  | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a
 trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections from end
 users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
-+
+
 In addition to this setting, trusted certificates may be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> and/or <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
 
 | `server.ssl.cipherSuites:`
@@ -535,7 +530,7 @@ is optional, as the key may not be encrypted.
 keystore contains any additional certificates, those will be used as a trusted certificate chain for {kib}. All of these are used by {kib}
 to establish trust when receiving inbound SSL/TLS connections from end users. The certificate chain is also used by {kib} to verify client
 certificates from end users when PKI authentication is enabled.
-+
+
 In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
 <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
 
@@ -557,7 +552,7 @@ keystore has no password, leave this unset. If the keystore has an empty passwor
  | Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which
 make up a trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections
 from end users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
-+
+
 In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
 <<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
 
