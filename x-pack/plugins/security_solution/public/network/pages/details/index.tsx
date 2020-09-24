@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -24,7 +24,7 @@ import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { useNetworkDetails } from '../../containers/details';
-import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
