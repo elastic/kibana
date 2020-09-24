@@ -60,5 +60,10 @@ module.exports = {
         'form_lib/core/use_multi_fields',
       ],
     },
+    {
+      type: 'category',
+      label: 'Helpers',
+      items: ['form_lib/helpers/components', 'form_lib/helpers/validators'],
+    },
   ],
 };
