@@ -30,16 +30,7 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 The easiest way to get data into {kib} is to add a sample data set.
 
-{kib} has the following sample data sets that you can use before you load your own data:
-
-* *Sample eCommerce orders* includes visualizations for tracking product-related information,
-such as cost, revenue, and price.
-
-* *Sample flight data* includes visualizations for monitoring flight routes.
-
-* *Sample web logs* includes visualizations for monitoring website traffic.
-
-For this tutorial, you'll add the *Sample eCommerce orders* data:
+{kib} has several sample data sets that you can use before you load your own data. For this tutorial, you'll add the *Sample eCommerce orders* data.
 
 . Go to the home page.
 
@@ -61,9 +52,9 @@ With *Discover*, you use {ref}/query-dsl-query-string-query.html#query-string-sy
 queries] to explore your data, also referred to as documents, and narrow the results with filters. *Discover* displays an interactive  histogram that shows the distribution of 
 documents over time, and a table that lists the fields for each document that matches the index.
 
-. Open the menu, then go to *Discover*.
+. Open the menu, then click *Discover*.
 +
-The `kibana_sample_data_ecommerce` index pattern appears. By default, all fields are shown for each matching document.
+By default, all fields are shown for each matching document.
 +
 [role="screenshot"]
 image::images/tutorial-discover-1.png[]
@@ -95,12 +86,12 @@ image::images/tutorial-discover-3.png[]
 [[view-and-analyze-the-data]]
 === View and analyze the data
 
-Now that you know what your documents contain, it's time to gain insight with *Dashboard*. 
-A _dashboard_ is a collection of panels that you can 
+Gain insight into your data with *Dashboard*. A _dashboard_ is a collection of panels that you can 
 use to analyze your data. Panels contain everything you need, including visualizations, 
-interactive controls, Markdown, and more.
+interactive controls, Markdown, and more. For this tutorial, you'll use the *[eCommerce] Revenue Dashboard*.
 
-To begin, open the menu, go to *Dashboard*, then click *[eCommerce] Revenue Dashboard*.
+. Open the menu, then click *Dashboard*.
+. Click *[eCommerce] Revenue Dashboard*.
 
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-dashboard.png[]
@@ -111,12 +102,11 @@ image::getting-started/images/tutorial-sample-dashboard.png[]
 
 Change the appearance and behavior of the panels on your dashboard.
 
-. In the {kib} toolbar, click *Edit*.
+. From the {kib} toolbar, click *Edit*.
 
-. From the *[eCommerce] Average Sales Price* donut chart panel, open the panel menu, then select *Edit visualization*.
+. From the *[eCommerce] Average Sales Price* donut chart panel, open the panel menu, then click *Edit visualization*.
 
-. To change the data on the panel, use an {es} {ref}/search-aggregations.html[bucket aggregation],  
-which sorts the documents that match your search criteria into different categories or buckets.
+. To sort the documents that match your search criteria into different categories or buckets, use an {es} {ref}/search-aggregations.html[bucket aggregation].
 
 .. In the *Buckets* pane, click *Add > Split group*.
 
@@ -126,14 +116,14 @@ which sorts the documents that match your search criteria into different categor
 
 .. Set *Descending* to *3*, then click *Update*.
 +
-The average order price for the top four orders appear in the visualization builder.
+The average order price for the top three orders appear.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-edit1.png[]
 
 . In the {kib} toolbar, click *Save and return*. 
 
-. To save the dashboard, click *Save* .
+. *Save* the dashboard.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-edit2.png[]
@@ -161,12 +151,12 @@ For example, if you want to only view the orders for Wednesday, select *day_of_w
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-filter2.png[]
 
-. When you are finished experimenting, remove the filters.
+. When you are done, remove the filters.
 
 [[query-the-data]]
 To query the data:
 
-. To view all data from the Gnomehouse manufacturer, enter the following in the *KQL* query bar:
+. To view all data from the Gnomehouse manufacturer, enter the following in the *KQL* search bar:
 +
 [source,text]
 manufacturer: Gnomehouse
@@ -174,15 +164,24 @@ manufacturer: Gnomehouse
 . For a more complex query with AND and OR, enter:
 +
 [source,text]
-manufacturer: Gnomehouse AND (manufacturer: Low Tide Media OR manufacturer: Tigress Enterprises)
+manufacturer: Gnomehouse AND (category: Women's Clothing OR category: Women's Shoes)
 +
-The dashboard panels update to display the flights out of Rome on JetBeats and 
-{kib} Airlines.  
+The dashboard updates to display the women's clothing and women's shoes orders from the Gnomehouse manufacturer.  
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-query.png[]
 
-. When you are finished exploring, remove the query by 
-clearing the contents in the *KQL* query bar, then click *Update*.
+. When you are done, remove the query.
+
+[[tutorial-visualizing]]
+=== Create visualizations 
+
+Shape your data using {kib} supported visualizations, tables, and more. In this tutorial, you'll use *Lens* to create a treemap, and *Maps* to create a map.
+
+. From the {kib} toolbar, click *Edit*, then click *Create new*.
+
+. On the *New Visualization* window, click *Lens*.
+
+
 
 
