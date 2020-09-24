@@ -29,20 +29,22 @@ interface Props {
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
   validations?: FieldConfig<any, ArrayItem[]>['validations'];
-  children: (args: {
-    items: ArrayItem[];
-    error: string | null;
-    addItem: () => void;
-    removeItem: (id: number) => void;
-    moveItem: (sourceIdx: number, destinationIdx: number) => void;
-    form: FormHook;
-  }) => JSX.Element;
+  children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
 export interface ArrayItem {
   id: number;
   path: string;
   isNew: boolean;
+}
+
+export interface FormArrayField {
+  items: ArrayItem[];
+  error: string | null;
+  addItem: () => void;
+  removeItem: (id: number) => void;
+  moveItem: (sourceIdx: number, destinationIdx: number) => void;
+  form: FormHook;
 }
 
 /**
