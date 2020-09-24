@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-intervalName: string | undefined | null;
+intervalName: string | undefined;
 ```
