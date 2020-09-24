@@ -14,6 +14,7 @@ import {
   RegistryError,
   PackageNotFoundError,
   defaultIngestErrorHandler,
+  BulkInstallPackagesError,
 } from './index';
 
 const LegacyESErrors = errors as Record<string, any>;
@@ -112,6 +113,44 @@ describe('defaultIngestErrorHandler', () => {
       expect(response.customError).toHaveBeenCalledTimes(1);
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 404,
+        body: { message: error.message },
+      });
+
+      // logging
+      expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+      expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('500: BulkInstallPackagesError', async () => {
+      const error = new BulkInstallPackagesError(500, '123');
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultIngestErrorHandler({ error, response });
+
+      // response
+      expect(response.ok).toHaveBeenCalledTimes(0);
+      expect(response.customError).toHaveBeenCalledTimes(1);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: error.message },
+      });
+
+      // logging
+      expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+      expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('400: BulkInstallPackagesError', async () => {
+      const error = new BulkInstallPackagesError(400, '123');
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultIngestErrorHandler({ error, response });
+
+      // response
+      expect(response.ok).toHaveBeenCalledTimes(0);
+      expect(response.customError).toHaveBeenCalledTimes(1);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: error.message },
       });
 

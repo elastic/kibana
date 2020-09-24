@@ -41,6 +41,9 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
   },
 };
 describe('install', () => {
+  describe('ensureInstalledDefaultPackages', () => {
+    it('should return an array of Installation objects when successful', async () => {});
+  });
   describe('getInstallType', () => {
     it('should return correct type when installing and no other version is currently installed', () => {
       const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
