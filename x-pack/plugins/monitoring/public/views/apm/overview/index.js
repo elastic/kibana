@@ -12,7 +12,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
-import { CODE_PATH_APM } from '../../../../common/constants';
+import { CODE_PATH_APM, ALERT_MISSING_DATA, APM_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/apm', {
   template,
@@ -42,19 +42,32 @@ uiRoutes.when('/apm', {
         reactNodeId: 'apmOverviewReact',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       $scope.$watch(
         () => this.data,
         (data) => {
-          this.renderReact(data);
+          this.renderReact(
+            <ApmOverview
+              alerts={this.alerts}
+              {...data}
+              onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
+            />
+          );
         }
       );
-    }
-
-    renderReact(data) {
-      const component = <ApmOverview {...data} onBrush={this.onBrush} zoomInfo={this.zoomInfo} />;
-      super.renderReact(component);
     }
   },
 });

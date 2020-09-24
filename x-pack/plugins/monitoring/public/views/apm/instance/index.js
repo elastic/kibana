@@ -18,7 +18,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { CODE_PATH_APM } from '../../../../common/constants';
+import { CODE_PATH_APM, ALERT_MISSING_DATA, APM_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -49,6 +49,17 @@ uiRoutes.when('/apm/instances/:uuid', {
         reactNodeId: 'apmInstanceReact',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       $scope.$watch(
@@ -63,21 +74,17 @@ uiRoutes.when('/apm/instances/:uuid', {
             })
           );
           title($scope.cluster, `APM server - ${get(data, 'apmSummary.name')}`);
-          this.renderReact(data);
+          this.renderReact(
+            <ApmServerInstance
+              summary={data.apmSummary || {}}
+              metrics={data.metrics || {}}
+              onBrush={this.onBrush}
+              alerts={this.alerts}
+              zoomInfo={this.zoomInfo}
+            />
+          );
         }
       );
-    }
-
-    renderReact(data) {
-      const component = (
-        <ApmServerInstance
-          summary={data.apmSummary || {}}
-          metrics={data.metrics || {}}
-          onBrush={this.onBrush}
-          zoomInfo={this.zoomInfo}
-        />
-      );
-      super.renderReact(component);
     }
   },
 });
