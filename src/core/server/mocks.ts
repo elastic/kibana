@@ -54,6 +54,7 @@ export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from './context/context_service.mock';
+export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
