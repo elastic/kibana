@@ -173,15 +173,13 @@ export function FieldSelect({
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
       isInvalid={Boolean(incompatibleSelectedOperationType)}
       selectedOptions={
-        ((selectedColumnOperationType
-          ? selectedColumnSourceField
-            ? [
-                {
-                  label: fieldMap[selectedColumnSourceField].displayName,
-                  value: { type: 'field', field: selectedColumnSourceField },
-                },
-              ]
-            : [memoizedFieldOptions[0]]
+        ((selectedColumnOperationType && selectedColumnSourceField
+          ? [
+              {
+                label: fieldMap[selectedColumnSourceField].displayName,
+                value: { type: 'field', field: selectedColumnSourceField },
+              },
+            ]
           : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}
