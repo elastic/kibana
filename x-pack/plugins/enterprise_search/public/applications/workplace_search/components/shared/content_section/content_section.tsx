@@ -6,15 +6,20 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { TSpacerSize } from '../../../types';
+
+import { ViewContentHeader } from '../view_content_header';
+
+import './content_section.scss';
 
 interface IContentSectionProps {
   children: React.ReactNode;
   className?: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
+  action?: React.ReactNode;
   headerChildren?: React.ReactNode;
   headerSpacer?: TSpacerSize;
   testSubj?: string;
@@ -25,6 +30,7 @@ export const ContentSection: React.FC<IContentSectionProps> = ({
   className = '',
   title,
   description,
+  action,
   headerChildren,
   headerSpacer,
   testSubj,
@@ -32,14 +38,13 @@ export const ContentSection: React.FC<IContentSectionProps> = ({
   <div className={className} data-test-subj={testSubj}>
     {title && (
       <>
-        <EuiTitle size="s">
-          <h3>{title}</h3>
-        </EuiTitle>
-        {description && <p>{description}</p>}
+        <ViewContentHeader title={title} titleSize="s" description={description} action={action} />
         {headerChildren}
         {headerSpacer && <EuiSpacer size={headerSpacer} />}
       </>
     )}
     {children}
+    <EuiSpacer size="xxl" />
+    <EuiSpacer size="xs" />
   </div>
 );
