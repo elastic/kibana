@@ -12,6 +12,7 @@ import { BASE_API_URL } from '../../common';
 import {
   IndexPatternsFetcher,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/server';
 
 /**
@@ -36,12 +37,11 @@ export interface Field {
   name: string;
   isScript: boolean;
   isAlias: boolean;
+  isMeta: boolean;
   path: string[];
   lang?: string;
   script?: string;
 }
-
-const metaFields = ['_source', '_type'];
 
 export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
@@ -104,14 +104,15 @@ async function fetchFieldExistence({
   toDate?: string;
   timeFieldName?: string;
 }) {
+  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const {
     indexPattern,
     indexPatternTitle,
     mappings,
     fieldDescriptors,
-  } = await fetchIndexPatternDefinition(indexPatternId, context);
+  } = await fetchIndexPatternDefinition(indexPatternId, context, metaFields);
 
-  const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+  const fields = buildFieldList(indexPattern, mappings, fieldDescriptors, metaFields);
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
@@ -128,7 +129,11 @@ async function fetchFieldExistence({
   };
 }
 
-async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
+async function fetchIndexPatternDefinition(
+  indexPatternId: string,
+  context: RequestHandlerContext,
+  metaFields: string[]
+) {
   const savedObjectsClient = context.core.savedObjects.client;
   const requestClient = context.core.elasticsearch.legacy.client;
   const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
@@ -178,7 +183,8 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
 export function buildFieldList(
   indexPattern: SavedObject<IndexPatternAttributes>,
   mappings: MappingResult | {},
-  fieldDescriptors: FieldDescriptor[]
+  fieldDescriptors: FieldDescriptor[],
+  metaFields: string[]
 ): Field[] {
   const aliasMap = Object.entries(Object.values(mappings)[0]?.mappings.properties ?? {})
     .map(([name, v]) => ({ ...v, name }))
@@ -204,6 +210,9 @@ export function buildFieldList(
         path: path.split('.'),
         lang: field.lang,
         script: field.script,
+        // id is a special case - it doesn't show up in the meta field list,
+        // but as it's not part of source, it has to be handled separately.
+        isMeta: metaFields.includes(field.name) || field.name === '_id',
       };
     }
   );
@@ -312,7 +321,7 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
  * Exported only for unit tests.
  */
 export function existingFields(
-  docs: Array<{ _source: unknown; fields: unknown }>,
+  docs: Array<{ _source: unknown; fields: unknown; [key: string]: unknown }>,
   fields: Field[]
 ): string[] {
   const missingFields = new Set(fields);
@@ -323,7 +332,14 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
+      let fieldStore = doc._source;
+      if (field.isScript) {
+        fieldStore = doc.fields;
+      }
+      if (field.isMeta) {
+        fieldStore = doc;
+      }
+      if (exists(fieldStore, field.path)) {
         missingFields.delete(field);
       }
     });
