@@ -24,6 +24,8 @@ import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
+export type FieldFormatMap = Record<string, SerializedFieldFormat>;
+
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
@@ -32,22 +34,12 @@ export interface IIndexPattern {
   timeFieldName?: string;
   intervalName?: string | null;
   getTimeField?(): IFieldType | undefined;
+  fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ) => FieldFormat;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
 }
 
-/**
- * Use data plugin interface instead
- * @deprecated
- */
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
@@ -179,15 +171,18 @@ export interface FieldSpec {
   indexed?: boolean;
 }
 
+export type IndexPatternFieldMap = Record<string, FieldSpec>;
+
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
-
-  title: string;
+  title?: string;
+  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
-  fields?: FieldSpec[];
+  fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;
+  type?: string;
 }
 
 export interface SourceFilter {
