@@ -12,7 +12,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
   HostsQueries,
   HostOverviewRequestOptions,
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
@@ -35,7 +35,7 @@ export interface HostOverviewArgs {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  overviewHost: HostOverviewStrategyResponse['overviewHost'];
+  overviewHost: HostsOverviewStrategyResponse['overviewHost'];
   refetch: inputsModel.Refetch;
 }
 
@@ -94,7 +94,7 @@ export const useHostOverview = ({
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostOverviewRequestOptions, HostOverviewStrategyResponse>(request, {
+          .search<HostOverviewRequestOptions, HostsOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
