@@ -8,7 +8,7 @@ import dateMath from '@elastic/datemath';
 
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { getAnomalies } from '../../machine_learning';
+import { AnomalyResults, getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({
   ml,
@@ -24,7 +24,7 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
-}) => {
+}): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request);
   const params = {
     jobIds: [jobId],
@@ -32,7 +32,5 @@ export const findMlSignals = async ({
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
   };
-  const relevantAnomalies = await getAnomalies(params, mlAnomalySearch);
-
-  return relevantAnomalies;
+  return getAnomalies(params, mlAnomalySearch);
 };
