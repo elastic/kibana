@@ -5,23 +5,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function deletePolicies(
-  callAsCurrentUser: LegacyAPICaller,
-  policyNames: string
-): Promise<any> {
-  const params = {
-    method: 'DELETE',
-    path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,
+async function deletePolicies(client: ElasticsearchClient, policyName: string): Promise<any> {
+  const options = {
     // we allow 404 since they may have no policies
     ignore: [404],
   };
 
-  return await callAsCurrentUser('transport.request', params);
+  return client.ilm.deleteLifecycle({ policy: policyName }, options);
 }
 
 const paramsSchema = schema.object({
@@ -36,10 +31,7 @@ export function registerDeleteRoute({ router, license, lib }: RouteDependencies)
       const { policyNames } = params;
 
       try {
-        await deletePolicies(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
-          policyNames
-        );
+        await deletePolicies(context.core.elasticsearch.client.asCurrentUser, policyNames);
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

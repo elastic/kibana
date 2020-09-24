@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
-
 import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
@@ -47,14 +45,6 @@ function convertStatsIntoList(
   );
 }
 
-async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  const params = {
-    format: 'json',
-  };
-
-  return await callAsCurrentUser('nodes.stats', params);
-}
-
 export function registerListRoute({ router, config, license, lib }: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
@@ -74,10 +64,11 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const stats = await fetchNodeStats(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
+        const body: ListNodesRouteResponse = convertStatsIntoList(
+          statsResponse.body,
+          disallowedNodeAttributes
         );
-        const body: ListNodesRouteResponse = convertStatsIntoList(stats, disallowedNodeAttributes);
         return response.ok({ body });
       } catch (e) {
         if (lib.isEsError(e)) {

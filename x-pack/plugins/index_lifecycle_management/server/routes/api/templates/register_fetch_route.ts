@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   IndexSettings,
@@ -60,19 +60,20 @@ function filterTemplates(
 }
 
 async function fetchTemplates(
-  callAsCurrentUser: LegacyAPICaller,
+  client: ElasticsearchClient,
   isLegacy: boolean
 ): Promise<
   { index_templates: TemplateFromEs[] } | { [templateName: string]: LegacyTemplateSerialized }
 > {
-  const params = {
-    method: 'GET',
-    path: isLegacy ? '/_template' : '/_index_template',
+  const options = {
     // we allow 404 incase the user shutdown security in-between the check and now
     ignore: [404],
   };
 
-  return await callAsCurrentUser('transport.request', params);
+  const response = isLegacy
+    ? await client.indices.getTemplate({}, options)
+    : await client.indices.getIndexTemplate({}, options);
+  return response.body;
 }
 
 const querySchema = schema.object({
@@ -86,7 +87,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
         const templates = await fetchTemplates(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          context.core.elasticsearch.client.asCurrentUser,
           isLegacy
         );
         const okResponse = { body: filterTemplates(templates, isLegacy) };

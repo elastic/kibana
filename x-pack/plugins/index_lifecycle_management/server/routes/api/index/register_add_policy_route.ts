@@ -5,29 +5,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function addLifecyclePolicy(
-  callAsCurrentUser: LegacyAPICaller,
+  client: ElasticsearchClient,
   indexName: string,
   policyName: string,
   alias: string
 ) {
-  const params = {
-    method: 'PUT',
-    path: `/${encodeURIComponent(indexName)}/_settings`,
-    body: {
-      lifecycle: {
-        name: policyName,
-        rollover_alias: alias,
-      },
+  const body = {
+    lifecycle: {
+      name: policyName,
+      rollover_alias: alias,
     },
   };
 
-  return callAsCurrentUser('transport.request', params);
+  return client.indices.putSettings({ index: indexName, body });
 }
 
 const bodySchema = schema.object({
@@ -45,7 +41,7 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
 
       try {
         await addLifecyclePolicy(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          context.core.elasticsearch.client.asCurrentUser,
           indexName,
           policyName,
           alias

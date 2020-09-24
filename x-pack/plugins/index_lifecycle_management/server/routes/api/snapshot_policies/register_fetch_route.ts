@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function fetchSnapshotPolicies(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  const params = {
-    method: 'GET',
-    path: '/_slm/policy',
-  };
-
-  return await callAsCurrentUser('transport.request', params);
+async function fetchSnapshotPolicies(client: ElasticsearchClient): Promise<any> {
+  const response = await client.slm.getLifecycle();
+  return response.body;
 }
 
 export function registerFetchRoute({ router, license, lib }: RouteDependencies) {
@@ -24,7 +20,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
     license.guardApiRoute(async (context, request, response) => {
       try {
         const policiesByName = await fetchSnapshotPolicies(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
+          context.core.elasticsearch.client.asCurrentUser
         );
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (e) {
