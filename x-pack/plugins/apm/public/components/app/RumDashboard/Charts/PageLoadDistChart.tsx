@@ -126,7 +126,7 @@ export function PageLoadDistChart({
             curve={CurveType.CURVE_CATMULL_ROM}
             lineSeriesStyle={{
               point: { visible: false },
-              line: { strokeWidth: 2 },
+              line: { strokeWidth: 3 },
             }}
             color={euiChartTheme.theme.colors?.vizColors?.[1]}
             tickFormat={(d) => numeral(d).format('0.0') + ' %'}
