@@ -18,6 +18,7 @@ import {
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
   ViewMode,
+  CONTEXT_MENU_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 import {
@@ -30,6 +31,7 @@ import {
   AdvancedUiActionsStart,
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
+import { SendToSlackAction } from './actions/send_to_slack_action';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -64,6 +66,8 @@ export class EmbeddableEnhancedPlugin
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
+
+    plugins.uiActionsEnhanced.addTriggerAction(CONTEXT_MENU_TRIGGER, new SendToSlackAction());
 
     return {};
   }
