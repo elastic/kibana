@@ -18,6 +18,7 @@ import {
   AlertParams,
   Comparator,
   ThresholdType,
+  isRatioAlert,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 import { Threshold } from './threshold';
 import { Criteria } from './criteria';
@@ -218,19 +219,23 @@ export const Editor: React.FC<Props> = (props) => {
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
+  const criteriaComponent = alertParams.criteria ? (
+    <Criteria
+      fields={supportedFields}
+      criteria={alertParams.criteria}
+      errors={errors.criteria}
+      alertParams={alertParams}
+      context={alertsContext}
+      sourceId={sourceId}
+      updateCriteria={updateCriteria}
+    />
+  ) : null;
+
   return (
     <>
       <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
 
-      <Criteria
-        fields={supportedFields}
-        criteria={alertParams.criteria}
-        errors={errors.criteria}
-        alertParams={alertParams}
-        context={alertsContext}
-        sourceId={sourceId}
-        updateCriteria={updateCriteria}
-      />
+      {alertParams.criteria && !isRatioAlert(alertParams.criteria) && criteriaComponent}
 
       <Threshold
         comparator={alertParams.count?.comparator}
@@ -252,6 +257,10 @@ export const Editor: React.FC<Props> = (props) => {
         onChange={updateGroupBy}
         fields={groupByFields}
       />
+
+      {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
+
+      <EuiSpacer size="l" />
     </>
   );
 };

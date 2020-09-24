@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
@@ -27,12 +27,13 @@ import { Errors, CriterionErrors } from '../validation';
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
-const RATIO_SEPERATOR_TEXT = i18n.translate(
-  'xpack.infra.logs.alerting.threshold.ratioCriteriaSeperator',
-  {
-    defaultMessage: 'To the count of log entries',
-  }
-);
+const QueryAText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryAText', {
+  defaultMessage: 'Query A',
+});
+
+const QueryBText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryBText', {
+  defaultMessage: 'Query B',
+});
 
 interface SharedProps {
   fields: IFieldType[];
@@ -168,6 +169,10 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
 
   return (
     <>
+      <EuiSpacer size="xxl" />
+
+      <ExpressionLike text={QueryAText} />
+
       <CriteriaWrapper
         {...props}
         criteria={getNumerator(criteria)}
@@ -178,7 +183,9 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         isRatio={true}
       />
 
-      <ExpressionLike text={RATIO_SEPERATOR_TEXT.toUpperCase()} />
+      <EuiSpacer size="l" />
+
+      <ExpressionLike text={QueryBText} />
 
       <CriteriaWrapper
         {...props}

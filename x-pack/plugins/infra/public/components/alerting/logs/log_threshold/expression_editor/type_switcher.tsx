@@ -23,7 +23,7 @@ const countSuffix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeCo
 });
 
 const ratioSuffix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeRatioSuffix', {
-  defaultMessage: 'of the count of log entries',
+  defaultMessage: 'of Query A to Query B',
 });
 
 const countI18n = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeCount', {
