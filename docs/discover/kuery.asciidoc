@@ -1,7 +1,7 @@
 [[kuery-query]]
 === Kibana Query Language
 
-The Kibana Query Language (KQL) makes it easy to find
+Kibana Query Language (KQL) makes it easy to find
 the fields and syntax for your {es} query. If you have the
 https://www.elastic.co/subscriptions[Basic tier] or above,
 simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
