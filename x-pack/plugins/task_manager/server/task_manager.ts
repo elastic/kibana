@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BehaviorSubject, Subject, Observable, Subscription } from 'rxjs';
+import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
@@ -17,7 +17,7 @@ import {
   ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { Result, asOk, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
-import { ThroughputManager } from './lib/throughput_manager';
+import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
 import { Logger } from './types';
@@ -101,7 +101,6 @@ export class TaskManager {
 
   private store: TaskStore;
   private bufferedStore: BufferedTaskStore;
-  private throughputManager: ThroughputManager;
 
   private logger: Logger;
   private pool: TaskPool;
@@ -151,8 +150,11 @@ export class TaskManager {
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
-    const maxWorkers$ = new BehaviorSubject(opts.config.max_workers);
-    const pollInterval$ = new BehaviorSubject(opts.config.poll_interval);
+    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      errors$: this.store.errors$,
+      startingMaxWorkers: opts.config.max_workers,
+      startingPollInterval: opts.config.poll_interval,
+    });
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
@@ -161,16 +163,7 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers$,
-    });
-
-    this.throughputManager = new ThroughputManager({
-      maxWorkers$,
-      pollInterval$,
-      startingMaxWorkers: opts.config.max_workers,
-      startingPollInterval: opts.config.poll_interval,
-      logger: this.logger,
-      errors$: this.store.errors$,
+      maxWorkers$: maxWorkersConfiguration$,
     });
 
     const {
@@ -180,7 +173,7 @@ export class TaskManager {
     this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
-          pollInterval$,
+          pollInterval$: pollIntervalConfiguration$,
           bufferCapacity: opts.config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
@@ -253,8 +246,6 @@ export class TaskManager {
    */
   public start() {
     if (!this.isStarted) {
-      this.throughputManager.start();
-
       // Some calls are waiting until task manager is started
       this.startQueue.forEach((fn) => fn());
       this.startQueue = [];
@@ -288,7 +279,6 @@ export class TaskManager {
     if (this.isStarted) {
       this.pollingSubscription.unsubscribe();
       this.pool.cancelRunningTasks();
-      this.throughputManager.stop();
     }
   }
 
