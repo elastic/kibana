@@ -37,7 +37,7 @@ export const createNodeAgentInstructions = (apmServerUrl = '', secretToken = '')
       defaultMessage:
         'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `serviceName`. \
-This agent supports a vararity of frameworks but can also be used with your custom stack.',
+This agent supports a variety of frameworks but can also be used with your custom stack.',
     }),
     commands: `// ${i18n.translate(
       'apmOss.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
