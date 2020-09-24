@@ -41,11 +41,16 @@ export function createManagedConfiguration(opts: ManagedConfigurationOpts): Mana
     maxWorkersConfiguration$: errorCheck$.pipe(
       scan((previousMaxWorkers, errorCount) => {
         if (errorCount > 0) {
+          // Decrease max workers by MAX_WORKERS_DECREASE_PERCENTAGE while making sure it doesn't go lower than 1.
+          // Using Math.floor to make sure the number is different than previous while not being a decimal value.
           return Math.max(Math.floor(previousMaxWorkers * MAX_WORKERS_DECREASE_PERCENTAGE), 1);
         }
+        // Increase max workers by MAX_WORKERS_INCREASE_PERCENTAGE while making sure it doesn't go
+        // higher than the starting value. Using Math.ceil to make sure the number is different than
+        // previous while not being a decimal value
         return Math.min(
           opts.startingMaxWorkers,
-          Math.ceil(previousMaxWorkers * MAX_WORKERS_INCREASE_PERCENTAGE + 1)
+          Math.ceil(previousMaxWorkers * MAX_WORKERS_INCREASE_PERCENTAGE)
         );
       }, opts.startingMaxWorkers),
       startWith(opts.startingMaxWorkers),
@@ -54,11 +59,15 @@ export function createManagedConfiguration(opts: ManagedConfigurationOpts): Mana
     pollIntervalConfiguration$: errorCheck$.pipe(
       scan((previousPollInterval, errorCount) => {
         if (errorCount > 0) {
+          // Increase poll interval by POLL_INTERVAL_INCREASE_PERCENTAGE and use Math.ceil to
+          // make sure the number is different than previous while not being a decimal value.
           return Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE);
         }
+        // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
+        // make sure the number is different than previous while not being a decimal value.
         return Math.max(
           opts.startingPollInterval,
-          Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE - 1)
+          Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
         );
       }, opts.startingPollInterval),
       startWith(opts.startingPollInterval),
