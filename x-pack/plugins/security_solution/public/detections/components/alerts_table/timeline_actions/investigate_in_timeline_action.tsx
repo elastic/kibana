@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
@@ -30,6 +31,9 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ecsRowData,
   nonEcsRowData,
 }) => {
+  const {
+    data: { search: searchStrategyClient },
+  } = useKibana().services;
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
 
@@ -66,9 +70,17 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         createTimeline,
         ecsData: ecsRowData,
         nonEcsData: nonEcsRowData,
+        searchStrategyClient,
         updateTimelineIsLoading,
       }),
-    [apolloClient, createTimeline, ecsRowData, nonEcsRowData, updateTimelineIsLoading]
+    [
+      apolloClient,
+      createTimeline,
+      ecsRowData,
+      nonEcsRowData,
+      searchStrategyClient,
+      updateTimelineIsLoading,
+    ]
   );
 
   return (
