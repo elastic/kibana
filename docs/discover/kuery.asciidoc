@@ -5,7 +5,7 @@ The Kibana Query Language (KQL) makes it easy to find
 the fields and syntax for your {es} query. If you have the
 https://www.elastic.co/subscriptions[Basic tier] or above,
 simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
-values, and query operators as you type.
+values, and query operators.
 
 This guide provides examples of common KQL searches, from a basic term
 query to more complex queries with boolean operators and groupings. It
