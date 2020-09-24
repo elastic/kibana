@@ -64,7 +64,9 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
+        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats<
+          Stats
+        >();
         const body: ListNodesRouteResponse = convertStatsIntoList(
           statsResponse.body,
           disallowedNodeAttributes

@@ -41,10 +41,10 @@ async function addLinkedIndices(client: ElasticsearchClient, policiesMap: Polici
     ignore: [404],
   };
 
-  const response = await client.ilm.explainLifecycle({ index: '*' }, options);
-  const policyExplanation: {
+  const response = await client.ilm.explainLifecycle<{
     indices: { [indexName: string]: IndexLifecyclePolicy };
-  } = response.body;
+  }>({ index: '*' }, options);
+  const policyExplanation = response.body;
   Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
     if (policy && policiesMap[policy]) {
       policiesMap[policy].linkedIndices = policiesMap[policy].linkedIndices || [];
