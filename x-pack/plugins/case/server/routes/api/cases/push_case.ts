@@ -16,7 +16,11 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
-import { getConnectorFromConfiguration, transformCaseConnectorToEsConnector } from './helpers';
+import {
+  getConnectorFromConfiguration,
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -190,7 +194,7 @@ export function initPushCaseUserActionApi({
                   references: origComment?.references ?? [],
                 };
               }),
-              caseConfigureConnector: updateConnector,
+              caseConfigureConnector: transformESConnectorToCaseConnector(updateConnector),
             })
           ),
         });
