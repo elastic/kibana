@@ -23,14 +23,6 @@ export function analyzeWithAxe(context, options, callback) {
   Promise.resolve()
     .then(() => {
       if (window.axe) {
-        window.axe.configure({
-          rules: [
-            {
-              id: 'duplicate-id-aria',
-              selector: '.mgtAdvancedSettings__field--unsaved', // TODO remove when resolved https://github.com/elastic/kibana/issues/78225
-            },
-          ],
-        });
         return window.axe.run(context, options);
       }
 

@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // clicking on the toggle button - https://github.com/elastic/kibana/issues/78225
+    // clicking on the toggle button
     it('adv settings - toggle ', async () => {
       await testSubjects.click('advancedSetting-editField-csv:quoteValues');
       await a11y.testAppSnapshot();

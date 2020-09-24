@@ -61,6 +61,7 @@ export class GlobalToastList extends React.Component<Props, State> {
   public render() {
     return (
       <EuiGlobalToastList
+        aria-label="Notification message list"
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
         dismissToast={({ id }) => this.props.dismissToast(id)}
