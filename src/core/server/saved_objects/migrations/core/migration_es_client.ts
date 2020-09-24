@@ -80,7 +80,7 @@ export function createMigrationEsClient(
         throw new Error(`unknown ElasticsearchClient client method [${key}]`);
       }
       return await migrationRetryCallCluster(
-        () => fn(params, { maxRetries: 0, ...options }),
+        () => fn.call(client, params, { maxRetries: 0, ...options }),
         log,
         delay
       );
