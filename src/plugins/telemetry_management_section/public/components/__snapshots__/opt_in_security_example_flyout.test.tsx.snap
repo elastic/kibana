@@ -17,7 +17,7 @@ exports[`OptInDetailsComponent security flyout renders as expected 1`] = `
         color="subdued"
       >
         <EuiText>
-          This is a representative sample of the the endpoint security alert event that we collect. Endpoint security data is collected only when the Elastic Endpoint is enabled. It includes information about the endpoint configuration and detection events.
+          This is a representative sample of the endpoint security alert event that we collect. Endpoint security data is collected only when the Elastic Endpoint is enabled. It includes information about the endpoint configuration and detection events.
         </EuiText>
       </EuiTextColor>
     </EuiFlyoutHeader>
