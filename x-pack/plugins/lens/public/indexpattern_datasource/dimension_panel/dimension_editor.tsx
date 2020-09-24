@@ -281,10 +281,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
             fullWidth
             isInvalid={Boolean(incompatibleSelectedOperationType)}
             error={
-              selectedColumn
-                ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                    defaultMessage: 'To use this function, select a different field.',
-                  })
+              selectedColumn && incompatibleSelectedOperationType
+                ? selectedOperationDefinition?.input === 'field'
+                  ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                      defaultMessage: 'To use this function, select a different field.',
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
+                      defaultMessage: 'To use this function, select a field.',
+                    })
                 : undefined
             }
           >
