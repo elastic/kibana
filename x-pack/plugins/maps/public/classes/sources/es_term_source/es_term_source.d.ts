@@ -17,6 +17,6 @@ export interface IESTermSource extends IESAggSource {
     searchFilters: VectorJoinSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ) => PropertiesMap;
 }

@@ -9,7 +9,7 @@ import { IESTermSource } from '../sources/es_term_source';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
 import { IField } from '../fields/field';
-import { BucketProperties } from '../util/es_agg_utils';
+import { BucketProperties } from '../../../common/elasticsearch_util';
 
 export type PropertiesMap = Map<string, BucketProperties>;
 

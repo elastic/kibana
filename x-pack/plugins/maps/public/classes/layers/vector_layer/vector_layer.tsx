@@ -51,12 +51,13 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { ILayer } from '../layer';
+import { CustomIconAndTooltipContent, ILayer } from '../layer';
 import { IJoin, PropertiesMap } from '../../joins/join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IESSource } from '../../sources/es_source';
 
 interface SourceResult {
   refreshed: boolean;
@@ -163,7 +164,7 @@ export class VectorLayer extends AbstractLayer {
     return true;
   }
 
-  getCustomIconAndTooltipContent() {
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     const featureCollection = this._getSourceFeatureCollection();
 
     const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
@@ -582,8 +583,7 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      // todo: cast source to ESSource when migrating to TS
-      const styleMeta = await source.loadStylePropsMeta(
+      const styleMeta = await (source as IESSource).loadStylePropsMeta(
         layerName,
         style,
         dynamicStyleProps,

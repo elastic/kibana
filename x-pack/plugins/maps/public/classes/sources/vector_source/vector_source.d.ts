@@ -45,7 +45,7 @@ export interface IVectorSource extends ISource {
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: string,
@@ -71,7 +71,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: string,

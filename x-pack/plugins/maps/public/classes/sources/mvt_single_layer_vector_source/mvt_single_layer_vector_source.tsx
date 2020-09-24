@@ -179,7 +179,7 @@ export class MVTSingleLayerVectorSource
 
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null {
     return null;
   }
