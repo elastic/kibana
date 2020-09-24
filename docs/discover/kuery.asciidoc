@@ -2,7 +2,7 @@
 === Kibana Query Language
 
 The Kibana Query Language (KQL) makes it easy to find
-the right field and syntax for your {es} query. If you have the
+the fields and syntax for your {es} query. If you have the
 https://www.elastic.co/subscriptions[Basic tier] or above,
 simply place your cursor in the *Search* field. You’ll get suggestions for fields,
 values, and query operators as you type.
