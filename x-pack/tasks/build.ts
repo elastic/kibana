@@ -61,9 +61,6 @@ async function copySourceAndBabelify() {
         'plugins/**/*',
         'plugins/reporting/.phantom/*',
         'plugins/reporting/.chromium/*',
-        'legacy/common/**/*',
-        'legacy/plugins/**/*',
-        'legacy/server/**/*',
         'typings/**/*',
       ],
       {

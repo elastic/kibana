@@ -129,6 +129,39 @@ Object {
               </button>
             </div>
           </div>
+          <span
+            class="euiToolTipAnchor"
+          >
+            <div
+              class="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  aria-label="Index patterns"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--large euiButtonEmpty--flushLeft"
+                  data-test-subj="sourcerer-trigger"
+                  title="Index patterns"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <div
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="indexSettings"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Index patterns
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </span>
         </header>
         <div
           class="euiTabs"
@@ -263,6 +296,22 @@ Object {
                         </span>
                       </div>
                     </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -271,7 +320,7 @@ Object {
                   >
                     <td
                       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="4"
+                      colspan="5"
                     >
                       <div
                         class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -354,6 +403,39 @@ Object {
             </button>
           </div>
         </div>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <div
+            class="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock"
+          >
+            <div
+              class="euiPopover__anchor"
+            >
+              <button
+                aria-label="Index patterns"
+                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--large euiButtonEmpty--flushLeft"
+                data-test-subj="sourcerer-trigger"
+                title="Index patterns"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <div
+                    class="euiButtonContent__icon"
+                    data-euiicon-type="indexSettings"
+                  />
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Index patterns
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </span>
       </header>
       <div
         class="euiTabs"
@@ -488,6 +570,22 @@ Object {
                       </span>
                     </div>
                   </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Actions"
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -496,7 +594,7 @@ Object {
                 >
                   <td
                     class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                    colspan="4"
+                    colspan="5"
                   >
                     <div
                       class="euiTableCellContent euiTableCellContent--alignCenter"
