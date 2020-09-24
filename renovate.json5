@@ -29,6 +29,10 @@
   separateMajorMinor: false,
   masterIssue: true,
   rangeStrategy: 'bump',
+  semanticCommits: false,
+  vulnerabilityAlerts: {
+    enabled: false,
+  },
   npm: {
     lockFileMaintenance: {
       enabled: false,
@@ -55,11 +59,4 @@
       },
     ],
   },
-  prConcurrentLimit: 0,
-  vulnerabilityAlerts: {
-    enabled: false,
-  },
-  rebaseStalePrs: false,
-  rebaseConflictedPrs: false,
-  semanticCommits: false,
 }
