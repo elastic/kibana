@@ -136,7 +136,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         label: (el: cytoscape.NodeSingular) =>
           isService(el)
             ? el.data(SERVICE_NAME)
-            : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
+            : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
         'overlay-opacity': 0,
         shape: (el: cytoscape.NodeSingular) =>
