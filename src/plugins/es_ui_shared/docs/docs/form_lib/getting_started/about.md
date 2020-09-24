@@ -7,11 +7,12 @@ sidebar_label: About
 ## Presentation
 
 The form library helps us building forms efficiently by providing a system whose main task is (1) to abstract away the state management of fields values and validity and (2) running validations on the fields when their values change.  
+
 The system is composed of **three parts**:
 
-* the core
-* fields components
-* validators.
+* [the core](../core/about)
+* [fields components](../helpers/components)
+* [validators](../helpers/validators)
 
 ## Motivation
 

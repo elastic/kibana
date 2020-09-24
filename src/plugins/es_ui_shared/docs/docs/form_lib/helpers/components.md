@@ -35,6 +35,7 @@ This is the list of component we currently have. This list might grow in the fut
 * CheckBoxField
 * ToggleField
 * ComboBoxField<sup>*</sup>
+* JsonEditorField
 * SelectField
 * SuperSelectField
 * MultiSelectField
