@@ -39,6 +39,9 @@ const Wrapper = styled.div`
 
   &.siemWrapperPage--noPadding {
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
   }
 `;
 
