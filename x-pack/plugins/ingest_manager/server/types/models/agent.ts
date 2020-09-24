@@ -66,6 +66,7 @@ export const NewAgentActionSchema = schema.object({
     schema.literal('CONFIG_CHANGE'),
     schema.literal('UNENROLL'),
     schema.literal('UPGRADE'),
+    schema.literal('INTERNAL_POLICY_REASSIGN'),
   ]),
   data: schema.maybe(schema.any()),
   ack_data: schema.maybe(schema.any()),

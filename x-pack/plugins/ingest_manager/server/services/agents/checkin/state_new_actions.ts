@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timer, from, Observable, TimeoutError } from 'rxjs';
+import { timer, from, Observable, TimeoutError, of } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
+  share,
   distinctUntilKeyChanged,
   switchMap,
   merge,
@@ -31,6 +32,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
+import { getAgent } from '../crud';
 
 const RATE_LIMIT_MAX_DELAY_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -64,7 +66,8 @@ function createNewActionsSharedObservable(): Observable<AgentAction[]> {
       lastTimestamp = new Date().toISOString();
       return from(getNewActionsSince(internalSOClient, timestamp));
     }),
-    shareReplay({ refCount: true, bufferSize: 1 })
+    filter((data) => data.length > 0),
+    share()
   );
 }
 
@@ -151,6 +154,18 @@ export function agentCheckinStateNewActionsFactory() {
     rateLimiterMaxDelay
   );
 
+  function getOrCreateAgentPolicyObservable(agentPolicyId: string) {
+    if (!agentPolicies$.has(agentPolicyId)) {
+      agentPolicies$.set(agentPolicyId, createAgentPolicyActionSharedObservable(agentPolicyId));
+    }
+    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
+    if (!agentPolicy$) {
+      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
+    }
+
+    return agentPolicy$;
+  }
+
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
     agent: Agent,
@@ -159,14 +174,7 @@ export function agentCheckinStateNewActionsFactory() {
     if (!agent.policy_id) {
       throw new Error('Agent does not have a policy');
     }
-    const agentPolicyId = agent.policy_id;
-    if (!agentPolicies$.has(agentPolicyId)) {
-      agentPolicies$.set(agentPolicyId, createAgentPolicyActionSharedObservable(agentPolicyId));
-    }
-    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
-    if (!agentPolicy$) {
-      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
-    }
+    const agentPolicy$ = getOrCreateAgentPolicyObservable(agent.policy_id);
 
     const stream$ = agentPolicy$.pipe(
       timeout(
@@ -182,25 +190,43 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      switchMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      concatMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
       merge(newActions$),
-      switchMap(async (data) => {
-        if (!data) {
-          return;
+      concatMap((data: AgentAction[] | undefined) => {
+        if (data === undefined) {
+          return of(undefined);
         }
         const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
-          return;
+          return of(undefined);
         }
 
-        return newActions;
+        const hasConfigReassign = newActions.some(
+          (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
+        );
+        if (hasConfigReassign) {
+          return from(getAgent(soClient, agent.id)).pipe(
+            concatMap((refreshedAgent) => {
+              if (!refreshedAgent.policy_id) {
+                throw new Error('Agent does not have a policy assigned');
+              }
+              const newAgentPolicy$ = getOrCreateAgentPolicyObservable(refreshedAgent.policy_id);
+              return newAgentPolicy$;
+            }),
+            rateLimiter(),
+            concatMap((policyAction) =>
+              createAgentActionFromPolicyAction(soClient, agent, policyAction)
+            )
+          );
+        }
+
+        return of(newActions);
       }),
       filter((data) => data !== undefined),
       take(1)
     );
     try {
       const data = await toPromiseAbortable(stream$, options?.signal);
-
       return data || [];
     } catch (err) {
       if (err instanceof TimeoutError || err instanceof AbortError) {

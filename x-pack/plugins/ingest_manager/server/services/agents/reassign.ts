@@ -10,6 +10,7 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { getAgents, listAllAgents } from './crud';
+import { createAgentAction } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -24,6 +25,12 @@ export async function reassignAgent(
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
+  });
+
+  await createAgentAction(soClient, {
+    agent_id: agentId,
+    created_at: new Date().toISOString(),
+    type: 'INTERNAL_POLICY_REASSIGN',
   });
 }
 

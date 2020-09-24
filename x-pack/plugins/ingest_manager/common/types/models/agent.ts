@@ -22,7 +22,8 @@ export type AgentStatus =
   | 'upgrading'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL' | 'UPGRADE';
+export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL' | 'UPGRADE' | 'INTERNAL_POLICY_REASSIGN';
+
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
