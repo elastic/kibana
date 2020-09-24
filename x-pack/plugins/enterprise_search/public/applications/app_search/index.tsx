@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaContext, IKibanaContext } from '../index';
+import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
@@ -86,10 +87,6 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
 };
 
 export const AppSearchNav: React.FC = () => {
-  const {
-    externalUrl: { getAppSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
-
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);
