@@ -8,13 +8,8 @@ import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_q
 import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import {
-  GetAllTimeline,
-  SortFieldTimeline,
-  TimelineResult,
-  Direction,
-  DetailItem,
-} from '../../graphql/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
@@ -2264,7 +2259,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   ruleNote: '# this is some markdown documentation',
 };
 
-export const mockTimelineDetails: DetailItem[] = [
+export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
   {
     field: 'host.name',
     values: ['apache'],
