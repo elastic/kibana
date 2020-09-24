@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { MetricVisComponent } from './components/metric_vis_component';
-import { getI18n } from './services';
+
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+// @ts-ignore
+const MetricVisComponent = lazy(() => import('./components/metric_vis_component'));
 
 export const metricVisRenderer: () => ExpressionRenderDefinition = () => ({
   name: 'metric_vis',
@@ -31,23 +32,19 @@ export const metricVisRenderer: () => ExpressionRenderDefinition = () => ({
   render: async (domNode: HTMLElement, config: any, handlers: any) => {
     const { visData, visConfig } = config;
 
-    const I18nContext = getI18n().Context;
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
-      <I18nContext>
-        <VisualizationContainer className="mtrVis">
-          <MetricVisComponent
-            visData={visData}
-            visParams={visConfig}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-          />
-        </VisualizationContainer>
-      </I18nContext>,
+      <VisualizationContainer className="mtrVis">
+        <MetricVisComponent
+          visData={visData}
+          visParams={visConfig}
+          renderComplete={handlers.done}
+          fireEvent={handlers.event}
+        />
+      </VisualizationContainer>,
       domNode
     );
   },

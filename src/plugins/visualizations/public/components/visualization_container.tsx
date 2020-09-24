@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 interface VisualizationContainerProps {
   className?: string;
@@ -26,5 +27,9 @@ interface VisualizationContainerProps {
 
 export const VisualizationContainer = (props: VisualizationContainerProps) => {
   const classes = `visualization ${props.className}`;
-  return <div className={classes}>{props.children}</div>;
+  return (
+    <div className={classes}>
+      <Suspense fallback={<EuiLoadingSpinner />}>{props.children}</Suspense>
+    </div>
+  );
 };

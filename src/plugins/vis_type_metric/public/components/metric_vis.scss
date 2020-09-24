@@ -1,3 +1,10 @@
+// Prefix all styles with "mtr" to avoid conflicts.
+// Examples
+//   mtrChart
+//   mtrChart__legend
+//   mtrChart__legend--small
+//   mtrChart__legend-isLoading
+
 .mtrVis {
   width: 100%;
   display: flex;
