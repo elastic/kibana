@@ -15,6 +15,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
+import { buildAgentSourceUri } from '../../../../../../../common/services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
