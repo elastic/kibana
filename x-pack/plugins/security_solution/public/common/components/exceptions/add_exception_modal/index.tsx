@@ -279,7 +279,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const osTypes = getMappedNonEcsValue({
         data: alertData.nonEcsData,
         fieldName: 'host.os.family',
-      });
+      }).map((osType) => osType.toLowerCase());
       if (osTypes.length === 0 || !osTypeArray.is(osTypes)) {
         return osDefaults;
       }
