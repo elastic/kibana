@@ -51,14 +51,10 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
   const { criteria, errors } = props;
   if (!criteria || criteria.length === 0) return null;
 
-  return (
-    <div>
-      {!isRatioAlert(criteria) ? (
-        <CountCriteria {...props} criteria={criteria as CountCriteriaType} errors={errors} />
-      ) : (
-        <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} errors={errors} />
-      )}
-    </div>
+  return !isRatioAlert(criteria) ? (
+    <CountCriteria {...props} criteria={criteria as CountCriteriaType} errors={errors} />
+  ) : (
+    <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} errors={errors} />
   );
 };
 
