@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpHandler } from 'src/core/public';
 import { getJobId } from '../../../common/infra_ml';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
 export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpHandler
 ) => {
   try {
-    await callStopDatafeeds(spaceId, sourceId, jobTypes);
+    await callStopDatafeeds({ spaceId, sourceId, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
     if (err?.res?.status !== 404) {
@@ -21,27 +23,29 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
     }
   }
 
-  return await deleteJobs(spaceId, sourceId, jobTypes);
+  return await deleteJobs(spaceId, sourceId, jobTypes, fetch);
 };
 
 const deleteJobs = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpHandler
 ) => {
-  const deleteJobsResponse = await callDeleteJobs(spaceId, sourceId, jobTypes);
-  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes);
+  const deleteJobsResponse = await callDeleteJobs({ spaceId, sourceId, jobTypes }, fetch);
+  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes, fetch);
   return deleteJobsResponse;
 };
 
 const waitUntilJobsAreDeleted = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpHandler
 ) => {
   const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType));
   while (true) {
-    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks();
+    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks(fetch);
     const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));
 
     if (needToWait) {

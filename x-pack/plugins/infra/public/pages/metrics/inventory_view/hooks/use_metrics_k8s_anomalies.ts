@@ -5,6 +5,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { HttpHandler } from 'src/core/public';
 import {
   Sort,
   Pagination,
@@ -15,8 +16,8 @@ import {
   MetricsK8sAnomaly,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { npStart } from '../../../../legacy_singletons';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -148,6 +149,7 @@ export const useMetricsK8sAnomaliesResults = ({
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
   filteredDatasets?: string[];
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
@@ -177,15 +179,18 @@ export const useMetricsK8sAnomaliesResults = ({
           filteredDatasets: queryFilteredDatasets,
         } = reducerState;
         return await callGetMetricsK8sAnomaliesAPI(
-          sourceId,
-          queryStartTime,
-          queryEndTime,
-          sortOptions,
           {
-            ...paginationOptions,
-            cursor: paginationCursor,
+            sourceId,
+            startTime: queryStartTime,
+            endTime: queryEndTime,
+            sort: sortOptions,
+            pagination: {
+              ...paginationOptions,
+              cursor: paginationCursor,
+            },
+            datasets: queryFilteredDatasets,
           },
-          queryFilteredDatasets
+          services.http.fetch
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -292,15 +297,21 @@ export const useMetricsK8sAnomaliesResults = ({
   };
 };
 
+interface RequestArgs {
+  sourceId: string;
+  startTime: number;
+  endTime: number;
+  sort: Sort;
+  pagination: Pagination;
+  datasets?: string[];
+}
+
 export const callGetMetricsK8sAnomaliesAPI = async (
-  sourceId: string,
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination,
-  datasets?: string[]
+  requestArgs: RequestArgs,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
+  const { sourceId, startTime, endTime, sort, pagination, datasets } = requestArgs;
+  const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsK8sAnomaliesRequestPayloadRT.encode({

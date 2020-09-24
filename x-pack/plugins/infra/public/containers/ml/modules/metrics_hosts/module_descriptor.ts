@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../infra_ml_module_types';
+import { HttpHandler } from 'src/core/public';
+import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
@@ -16,7 +17,6 @@ import {
   metricsHostsJobTypes,
   getJobId,
   MetricsHostsJobType,
-  DatasetFilter,
   bucketSpan,
   partitionField,
 } from '../../../../../common/infra_ml';
@@ -38,24 +38,27 @@ const getJobIds = (spaceId: string, sourceId: string) =>
     {} as Record<MetricsHostsJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, metricsHostsJobTypes);
+const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  const response = await callJobsSummaryAPI(
+    { spaceId, sourceId, jobTypes: metricsHostsJobTypes },
+    fetch
+  );
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
-const getModuleDefinition = async () => {
-  return await callGetMlModuleAPI(moduleId);
+const getModuleDefinition = async (fetch: HttpHandler) => {
+  return await callGetMlModuleAPI(moduleId, fetch);
 };
 
-const setUpModule = async (
-  start: number | undefined,
-  end: number | undefined,
-  datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
-  pField?: string
-) => {
+const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler) => {
+  const {
+    start,
+    end,
+    moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+  } = setUpModuleArgs;
+
   const indexNamePattern = indices.join(',');
   const jobIds = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
   const jobOverrides = jobIds.map((id) => ({
@@ -73,41 +76,54 @@ const setUpModule = async (
   }));
 
   return callSetupMlModuleAPI(
-    moduleId,
-    start,
-    end,
-    spaceId,
-    sourceId,
-    indexNamePattern,
-    jobOverrides,
-    []
+    {
+      moduleId,
+      start,
+      end,
+      spaceId,
+      sourceId,
+      indexPattern: indexNamePattern,
+      jobOverrides,
+    },
+    fetch
   );
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes);
+const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes, fetch);
 };
 
-const validateSetupIndices = async (indices: string[], timestampField: string) => {
-  return await callValidateIndicesAPI(indices, [
+const validateSetupIndices = async (
+  indices: string[],
+  timestampField: string,
+  fetch: HttpHandler
+) => {
+  return await callValidateIndicesAPI(
     {
-      name: timestampField,
-      validTypes: ['date'],
+      indices,
+      fields: [
+        {
+          name: timestampField,
+          validTypes: ['date'],
+        },
+        {
+          name: partitionField,
+          validTypes: ['keyword'],
+        },
+      ],
     },
-    {
-      name: partitionField,
-      validTypes: ['keyword'],
-    },
-  ]);
+    fetch
+  );
 };
 
 const validateSetupDatasets = async (
   indices: string[],
   timestampField: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI(indices, timestampField, startTime, endTime);
+  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };
 
 export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {

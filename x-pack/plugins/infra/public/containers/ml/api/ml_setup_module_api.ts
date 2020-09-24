@@ -4,27 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { npStart } from '../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../common/infra_ml';
-import { createPlainError, throwErrors } from '../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
-export const callSetupMlModuleAPI = async (
-  moduleId: string,
-  start: number | undefined,
-  end: number | undefined,
-  spaceId: string,
-  sourceId: string,
-  indexPattern: string,
-  jobOverrides: SetupMlModuleJobOverrides[] = [],
-  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = [],
-  query?: object
-) => {
-  const response = await npStart.http.fetch(`/api/ml/modules/setup/${moduleId}`, {
+interface RequestArgs {
+  moduleId: string;
+  start?: number;
+  end?: number;
+  spaceId: string;
+  sourceId: string;
+  indexPattern: string;
+  jobOverrides?: SetupMlModuleJobOverrides[];
+  datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
+  query?: object;
+}
+
+export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
+  const {
+    moduleId,
+    start,
+    end,
+    spaceId,
+    sourceId,
+    indexPattern,
+    jobOverrides = [],
+    datafeedOverrides = [],
+    query,
+  } = requestArgs;
+
+  const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
     method: 'POST',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
@@ -40,10 +51,7 @@ export const callSetupMlModuleAPI = async (
     ),
   });
 
-  return pipe(
-    setupMlModuleResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(setupMlModuleResponsePayloadRT)(response);
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({
