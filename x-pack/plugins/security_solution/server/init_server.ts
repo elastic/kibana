@@ -16,7 +16,6 @@ import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
-import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
 import { createScalarToAnyValueResolvers } from './graphql/scalar_to_any';
 import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
@@ -43,7 +42,6 @@ export const initServer = (libs: AppBackendLibs) => {
       createPinnedEventResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarToStringArrayValueResolvers() as IResolvers,
-      createOverviewResolvers(libs) as IResolvers,
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
