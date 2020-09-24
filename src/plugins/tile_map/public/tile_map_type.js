@@ -29,7 +29,7 @@ import { getDeprecationMessage } from './get_deprecation_message';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings, serviceSettings } = dependencies;
+  const { uiSettings, getServiceSettings } = dependencies;
 
   return {
     name: 'tile_map',
@@ -145,6 +145,7 @@ export function createTileMapTypeDefinition(dependencies) {
       let tmsLayers;
 
       try {
+        const serviceSettings = await getServiceSettings();
         tmsLayers = await serviceSettings.getTMSServices();
       } catch (e) {
         return vis;

@@ -32,16 +32,9 @@ import { SearchAPI } from './data_model/search_api';
 
 import { createVegaTypeDefinition } from './vega_type';
 
-import {
-  setInjectedVars,
-  setData,
-  setSavedObjects,
-  setNotifications,
-  setKibanaMapFactory,
-} from './services';
+import { setInjectedVars, setData, setSavedObjects, setNotifications } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
-import { KibanaMap } from '../../maps_legacy/public/map/kibana_map';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
@@ -77,8 +70,11 @@ describe('VegaVisualizations', () => {
     mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
   };
 
+  const mockGetServiceSettings = async () => {
+    return {};
+  };
+
   beforeEach(() => {
-    setKibanaMapFactory((...args) => new KibanaMap(...args));
     setInjectedVars({
       emsTileLayerId: {},
       enableExternalUrls: true,
@@ -92,6 +88,7 @@ describe('VegaVisualizations', () => {
       plugins: {
         data: dataPluginMock.createSetupContract(),
       },
+      getServiceSettings: mockGetServiceSettings,
     };
 
     vegaVisType = createVegaTypeDefinition(vegaVisualizationDependencies);
@@ -128,7 +125,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);
@@ -155,7 +155,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
 
@@ -176,7 +179,10 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
-          })
+          }),
+          0,
+          0,
+          mockGetServiceSettings
         );
         await vegaParser.parseAsync();
 

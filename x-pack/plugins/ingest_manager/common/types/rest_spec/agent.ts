@@ -113,6 +113,11 @@ export interface PostAgentUnenrollRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUnenrollResponse {}
 
+export interface PostAgentUpgradeRequest {
+  params: {
+    agentId: string;
+  };
+}
 export interface PostBulkAgentUnenrollRequest {
   body: {
     agents: string[] | string;
@@ -120,6 +125,8 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUpgradeResponse {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostBulkAgentUnenrollResponse {}
 

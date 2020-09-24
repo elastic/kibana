@@ -54,7 +54,7 @@ interface TileMapVisualizationDependencies {
   getZoomPrecision: any;
   getPrecision: any;
   BaseMapsVisualization: any;
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
@@ -89,13 +89,13 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
+    const { getZoomPrecision, getPrecision, getServiceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
       uiSettings: core.uiSettings,
-      serviceSettings,
+      getServiceSettings,
     };
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
