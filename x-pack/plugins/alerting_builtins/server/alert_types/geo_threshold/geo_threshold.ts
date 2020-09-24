@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { executeEsQueryFactory, OTHER_CATEGORY } from './es_query_builder';
+import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId } from './alert_type';
 import { Logger } from '../../types';
@@ -153,9 +153,22 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     alertId: string;
     state: AlertTypeState;
   }) {
-    const executeEsQuery = await executeEsQueryFactory(params, services, log, alertId);
+    const shapesFilters =
+      state.shapesFilters ||
+      (await getShapesFilters(
+        params.boundaryIndexTitle,
+        params.boundaryType,
+        params.boundaryGeoField,
+        params.geoField,
+        services.callCluster,
+        log,
+        alertId
+      ));
 
-    // Run largest query on first run capturing anything up to current interval
+    const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
+
+    // Run largest query & grab shape filters on first run capturing anything
+    // up to current interval
     if (!currIntervalStartTime) {
       const prevToCurrentIntervalResults:
         | SearchResponse<unknown>
@@ -212,5 +225,6 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
 
     return {
       prevLocationArr,
+      shapesFilters,
     };
   };

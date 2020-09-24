@@ -13,7 +13,7 @@ export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
 const MAX_QUERY_SIZE = 10000;
 
-async function getShapesFilters(
+export async function getShapesFilters(
   boundaryIndexTitle: string,
   boundaryType: string,
   boundaryGeoField: string,
@@ -72,21 +72,11 @@ export async function executeEsQueryFactory(
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
   log: Logger,
-  alertId: string
+  shapesFilters: Record<string, unknown>
 ) {
-  const shapesFilters = await getShapesFilters(
-    boundaryIndexTitle,
-    boundaryType,
-    boundaryGeoField,
-    geoField,
-    callCluster,
-    log,
-    alertId
-  );
   return async (
     gteDateTime: Date | null,
-    ltDateTime: Date | null,
-    topHitsQty: number = 1
+    ltDateTime: Date | null
   ): Promise<SearchResponse<unknown> | undefined> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esQuery: Record<string, any> = {
@@ -107,7 +97,7 @@ export async function executeEsQueryFactory(
                 aggs: {
                   entityHits: {
                     top_hits: {
-                      size: topHitsQty,
+                      size: 1,
                       sort: [
                         {
                           [dateField]: {
