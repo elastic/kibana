@@ -101,7 +101,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
 
     return (
       <EuiCodeBlock language="js">
-        {JSON.stringify(this.example_security_payload, null, 2)}
+        {JSON.stringify(this.exampleSecurityPayload, null, 2)}
       </EuiCodeBlock>
     );
   }
@@ -116,7 +116,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
             </EuiTitle>
             <EuiTextColor color="subdued">
               <EuiText>
-                This is a representative sample of the the endpoint security alert event that we
+                This is a representative sample of the endpoint security alert event that we
                 collect. Endpoint security data is collected only when the Elastic Endpoint is
                 enabled. It includes information about the endpoint configuration and detection
                 events.
@@ -129,7 +129,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
     );
   }
 
-  example_security_payload = {
+  exampleSecurityPayload = {
     '@timestamp': '2020-09-22T14:34:56.82202300Z',
     agent: {
       build: {
