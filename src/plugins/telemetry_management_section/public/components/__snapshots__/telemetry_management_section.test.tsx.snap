@@ -80,23 +80,20 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 />
               </p>
               <p>
-                See examples of the
-                 
+                See examples of the 
                 <EuiLink
                   onClick={[Function]}
                 >
                   cluster data
                 </EuiLink>
-                 
-                and
+                 and
                  
                 <EuiLink
                   onClick={[Function]}
                 >
                   endpoint security data
                 </EuiLink>
-                 
-                that we collect.
+                 that we collect.
               </p>
             </React.Fragment>,
             "displayName": "Provide usage statistics",

@@ -199,7 +199,7 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleExampleComponent = component.find('p > EuiLink[onClick]');
+      const toggleExampleComponent = component.find('p > EuiLink[onClick]').at(1);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInExampleFlyout');
       updatedView.simulate('close');
