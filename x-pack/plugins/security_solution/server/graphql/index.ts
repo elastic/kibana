@@ -15,7 +15,6 @@ import { ipDetailsSchemas } from './ip_details';
 import { kpiHostsSchema } from './kpi_hosts';
 import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
-import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
@@ -26,8 +25,6 @@ import { toNumberSchema } from './scalar_to_number_array';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { timelineSchema } from './timeline';
-import { tlsSchema } from './tls';
-import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
 import { matrixHistogramSchema } from './matrix_histogram';
 export const schemas = [
@@ -46,14 +43,11 @@ export const schemas = [
   matrixHistogramSchema,
   networkSchema,
   noteSchema,
-  overviewSchema,
   pinnedEventSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,
   sharedSchema,
   timelineSchema,
-  tlsSchema,
-  uncommonProcessesSchema,
   whoAmISchema,
 ];

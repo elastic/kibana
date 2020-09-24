@@ -19,6 +19,9 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (!agent.last_checkin) {
     return 'enrolling';
   }
+  if (agent.upgrade_started_at && !agent.upgraded_at) {
+    return 'upgrading';
+  }
 
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;

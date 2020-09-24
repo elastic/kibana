@@ -5,7 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { overviewNetworkQuery } from '../../../../plugins/security_solution/public/overview/containers/overview_network/index.gql_query';
+// @ts-expect-error
 import { GetOverviewNetworkQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

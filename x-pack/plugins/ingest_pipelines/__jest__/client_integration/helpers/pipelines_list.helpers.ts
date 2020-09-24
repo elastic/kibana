@@ -6,7 +6,6 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { BASE_PATH } from '../../../common/constants';
 import {
   registerTestBed,
   TestBed,
@@ -16,11 +15,12 @@ import {
 } from '../../../../../test_utils';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
+import { getListPath, ROUTES } from '../../../public/application/services/navigation';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [BASE_PATH],
-    componentRoutePath: BASE_PATH,
+    initialEntries: [getListPath()],
+    componentRoutePath: ROUTES.list,
   },
   doMountAsync: true,
 };
