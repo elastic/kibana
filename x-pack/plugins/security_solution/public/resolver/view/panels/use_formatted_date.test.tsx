@@ -14,7 +14,7 @@ import { getUiSettings } from '../../mocks/get_ui_settings';
 describe('useFormattedDate', () => {
   let element: HTMLElement;
   const testID = 'formattedDate';
-  let reactRenderResult: RenderResult;
+  let reactRenderResult: (date: string | number | undefined) => RenderResult;
 
   beforeEach(async () => {
     const mockCoreStart = coreMock.createStart();
