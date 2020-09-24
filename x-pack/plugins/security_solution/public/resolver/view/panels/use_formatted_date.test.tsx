@@ -14,18 +14,22 @@ import { getUiSettings } from '../../mocks/get_ui_settings';
 describe('useFormattedDate', () => {
   let element: HTMLElement;
   const testID = 'formattedDate';
-  let reactRenderResult: (date: string | number | undefined) => RenderResult;
+  let reactRenderResult: (
+    date: ConstructorParameters<typeof Date>[0] | Date | undefined
+  ) => RenderResult;
 
   beforeEach(async () => {
     const mockCoreStart = coreMock.createStart();
     mockCoreStart.uiSettings.get.mockImplementation(getUiSettings);
 
-    function Test({ date }: { date: string | number | undefined }) {
+    function Test({ date }: { date: ConstructorParameters<typeof Date>[0] | Date | undefined }) {
       const formattedDate = useFormattedDate(date);
       return <div data-test-subj={testID}>{formattedDate}</div>;
     }
 
-    reactRenderResult = (date: string | number | undefined): RenderResult =>
+    reactRenderResult = (
+      date: ConstructorParameters<typeof Date>[0] | Date | undefined
+    ): RenderResult =>
       render(
         <KibanaContextProvider services={mockCoreStart}>
           <Test date={date} />
