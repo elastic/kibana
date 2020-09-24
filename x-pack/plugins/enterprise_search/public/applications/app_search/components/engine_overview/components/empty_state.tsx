@@ -5,10 +5,12 @@
  */
 
 import React, { useContext } from 'react';
+import { useValues } from 'kea';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
+import { HttpLogic } from '../../../../shared/http';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { KibanaContext, IKibanaContext } from '../../../../index';
 import { CREATE_ENGINES_PATH } from '../../../routes';
@@ -18,9 +20,9 @@ import { EngineOverviewHeader } from './header';
 import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const {
     externalUrl: { getAppSearchUrl },
-    http,
   } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
