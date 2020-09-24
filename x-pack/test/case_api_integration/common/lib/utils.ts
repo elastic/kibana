@@ -32,7 +32,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -51,6 +51,7 @@ export const getServiceNowConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 
