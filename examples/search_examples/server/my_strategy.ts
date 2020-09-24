@@ -25,7 +25,7 @@ export const mySearchStrategyProvider = (
 ): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
   const es = data.search.getSearchStrategy('es');
   return {
-    search: async (context, request, options) => {
+    search: async (context, request, options): Promise<IMyStrategyResponse> => {
       const esSearchRes = await es.search(context, request, options);
       return {
         ...esSearchRes,
