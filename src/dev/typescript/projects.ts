@@ -22,13 +22,18 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { Project } from './project';
 
+const migratedToTsProjects = [
+  { path: 'src/test_utils/tsconfig.json' },
+  { path: 'src/core/tsconfig.json' },
+  { path: 'src/plugins/kibana_utils/tsconfig.json' },
+].map(({ path }) => new Project(resolve(REPO_ROOT, path)));
+
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
+  ...migratedToTsProjects,
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
