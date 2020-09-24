@@ -196,7 +196,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   return (
     <EuiPopover
       ownFocus
-      id="lnsFieldListPanel__field"
       className="lnsFieldItem__popoverAnchor"
       display="block"
       container={document.querySelector<HTMLElement>('.application') || undefined}
