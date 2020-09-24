@@ -11,24 +11,14 @@ import {
   SPAN_SUBTYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import {
-  ConnectionNode,
+  ConnectionElement,
   isSpanGroupingSupported,
 } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 
 export function groupResourceNodes(responseData: {
-  elements: Array<{
-    data:
-      | ConnectionNode
-      | ({
-          source: ConnectionNode['id'];
-          target: ConnectionNode['id'];
-          id: string;
-          sourceData: ConnectionNode;
-          targetData: ConnectionNode;
-        } & { bidirectional?: boolean; isInverseEdge?: boolean });
-  }>;
+  elements: ConnectionElement[];
 }) {
   type ElementDefinition = ValuesType<typeof responseData['elements']>;
   const isEdge = (el: ElementDefinition) =>
@@ -36,7 +26,6 @@ export function groupResourceNodes(responseData: {
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {
     if (isNode(el) && 'span.type' in el.data) {
-      // @ts-ignore
       return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
     }
     return false;
@@ -95,7 +84,7 @@ export function groupResourceNodes(responseData: {
     });
   });
 
-  // add in a composite node C for each new group
+  // add in a composite node for each new group
   const groupedNodes = nodeGroups.map(({ id, targets }) => ({
     data: {
       id,
@@ -104,11 +93,18 @@ export function groupResourceNodes(responseData: {
         defaultMessage: '{count} resources',
         values: { count: targets.length },
       }),
-      groupedConnections: targets.map((targetId) => {
-        // @ts-ignore
-        const { data } = nodes.find((element) => element.data.id === targetId);
-        return { label: data.label || data.id, ...data };
-      }),
+      groupedConnections: targets
+        .map((targetId) => {
+          const targetElement = nodes.find(
+            (element) => element.data.id === targetId
+          );
+          if (!targetElement) {
+            return;
+          }
+          const { data } = targetElement;
+          return { label: data.label || data.id, ...data };
+        })
+        .filter((node) => !!node),
     },
   }));
 

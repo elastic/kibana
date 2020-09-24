@@ -16,6 +16,7 @@ import {
   ConnectionNode,
   ServiceConnectionNode,
   ExternalConnectionNode,
+  ConnectionElement,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
@@ -214,7 +215,10 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
   }, []);
 
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+  const elements: ConnectionElement[] = [
+    ...dedupedConnections,
+    ...dedupedNodes,
+  ].map((element) => ({
     data: element,
   }));
 

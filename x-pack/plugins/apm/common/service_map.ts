@@ -22,6 +22,7 @@ export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   [SERVICE_ENVIRONMENT]: string | null;
   [AGENT_NAME]: string;
   serviceAnomalyStats?: ServiceAnomalyStats;
+  label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
@@ -31,6 +32,19 @@ export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
 }
 
 export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;
+
+export interface ConnectionEdge {
+  id: string;
+  source: ConnectionNode['id'];
+  target: ConnectionNode['id'];
+  label?: string;
+  bidirectional?: boolean;
+  isInverseEdge?: boolean;
+}
+
+export interface ConnectionElement {
+  data: ConnectionNode | ConnectionEdge;
+}
 
 export interface Connection {
   source: ConnectionNode;
