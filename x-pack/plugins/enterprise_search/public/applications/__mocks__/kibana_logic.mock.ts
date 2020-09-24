@@ -9,4 +9,5 @@ export const mockKibanaValues = {
   navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
   setDocTitle: jest.fn(),
+  renderHeaderActions: jest.fn(),
 };

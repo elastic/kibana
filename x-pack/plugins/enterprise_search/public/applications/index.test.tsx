@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { getContext } from 'kea';
 
 import { coreMock } from 'src/core/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
@@ -13,6 +14,7 @@ import { renderApp, renderHeaderActions } from './';
 import { EnterpriseSearch } from './enterprise_search';
 import { AppSearch } from './app_search';
 import { WorkplaceSearch } from './workplace_search';
+import { KibanaLogic } from './shared/kibana';
 
 describe('renderApp', () => {
   const kibanaDeps = {
@@ -66,17 +68,33 @@ describe('renderApp', () => {
       expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
   });
-});
 
-describe('renderHeaderActions', () => {
-  it('mounts and unmounts any HeaderActions component', () => {
+  describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');
     const MockHeaderActions = () => <button className="hello-world">Hello World</button>;
 
-    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl);
-    expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
+    it('mounts and unmounts any HeaderActions component', () => {
+      const store = getContext().store;
 
-    unmount();
-    expect(mockHeaderEl.innerHTML).toEqual('');
+      const unmountHeader = renderHeaderActions(MockHeaderActions, store, mockHeaderEl);
+      expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
+
+      unmountHeader();
+      expect(mockHeaderEl.innerHTML).toEqual('');
+    });
+
+    it('passes a renderHeaderActions helper to KibanaLogic, which can be used by our apps to render HeaderActions', () => {
+      // Setup
+      kibanaDeps.params.setHeaderActionMenu.mockImplementationOnce((cb: any) => cb(mockHeaderEl));
+      mount(MockApp);
+
+      // Call KibanaLogic's renderHeaderActions, which should call params.setHeaderActionMenu
+      KibanaLogic.values.renderHeaderActions(MockHeaderActions);
+      expect(kibanaDeps.params.setHeaderActionMenu).toHaveBeenCalled();
+
+      // renderHeaderActions should have been called and generated the correct DOM
+      expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
+      unmount();
+    });
   });
 });

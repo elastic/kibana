@@ -6,6 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { FC } from 'react';
 import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 
 export interface IKibanaValues {
@@ -13,6 +14,7 @@ export interface IKibanaValues {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
+  renderHeaderActions(HeaderActions: FC): void;
 }
 
 export const KibanaLogic = kea<MakeLogicType<IKibanaValues>>({
@@ -22,6 +24,7 @@ export const KibanaLogic = kea<MakeLogicType<IKibanaValues>>({
     navigateToUrl: [props.navigateToUrl, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setDocTitle: [props.setDocTitle, {}],
+    renderHeaderActions: [props.renderHeaderActions, {}],
   }),
 });
 
