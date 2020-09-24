@@ -182,13 +182,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Graph');
       });
 
-      it(`navigating to app displays a 404`, async () => {
+      it(`navigating to app displays a 403`, async () => {
         await PageObjects.common.navigateToUrl('graph', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

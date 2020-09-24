@@ -24,7 +24,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
     createExpectWithConflictsWithoutOverwritingResult,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
-    expectNotFoundResponse,
+    expectForbiddenResponse,
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -61,16 +61,16 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         spaceId,
         user,
         tests: {
-          noConflictsWithoutReferences: { statusCode: 404, response: expectNotFoundResponse },
-          noConflictsWithReferences: { statusCode: 404, response: expectNotFoundResponse },
-          withConflictsOverwriting: { statusCode: 404, response: expectNotFoundResponse },
-          withConflictsWithoutOverwriting: { statusCode: 404, response: expectNotFoundResponse },
+          noConflictsWithoutReferences: { statusCode: 403, response: expectForbiddenResponse },
+          noConflictsWithReferences: { statusCode: 403, response: expectForbiddenResponse },
+          withConflictsOverwriting: { statusCode: 403, response: expectForbiddenResponse },
+          withConflictsWithoutOverwriting: { statusCode: 403, response: expectForbiddenResponse },
           multipleSpaces: {
-            statusCode: 404,
-            withConflictsResponse: expectNotFoundResponse,
-            noConflictsResponse: expectNotFoundResponse,
+            statusCode: 403,
+            withConflictsResponse: expectForbiddenResponse,
+            noConflictsResponse: expectForbiddenResponse,
           },
-          nonExistentSpace: { statusCode: 404, response: expectNotFoundResponse },
+          nonExistentSpace: { statusCode: 403, response: expectForbiddenResponse },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });

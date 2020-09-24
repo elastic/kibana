@@ -185,7 +185,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           // ensure that `createConfiguration` throws
           expect(true).to.be(false);
         } catch (e) {
-          expect(e.res.statusCode).to.be(404);
+          expect(e.res.statusCode).to.be(403);
         }
       });
 
@@ -200,7 +200,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `updateConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
 
@@ -211,7 +211,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `deleteConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
       });

@@ -200,6 +200,14 @@ export function resolveCopyToSpaceConflictsSuite(
     expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
   };
 
+  const expectForbiddenResponse = async (resp: TestResponse) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Forbidden',
+    });
+  };
+
   const expectNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
@@ -308,7 +316,7 @@ export function resolveCopyToSpaceConflictsSuite(
   ) => (): ResolveCopyToSpaceMultiNamespaceTest[] => {
     // the status code of the HTTP response differs depending on the error type
     // a 403 error actually comes back as an HTTP 200 response
-    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const statusCode = outcome === 'noAccess' ? 403 : 200;
     const type = 'sharedtype';
     const exactMatchId = 'all_spaces';
     const inexactMatchId = `conflict_1_${spaceId}`;
@@ -316,7 +324,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
     const createRetries = (overwriteRetry: Record<string, any>) => ({ space_2: [overwriteRetry] });
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenResponse = (response: TestResponse) => {
+    const expectForbiddenESResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -327,7 +335,11 @@ export function resolveCopyToSpaceConflictsSuite(
         },
       });
     };
-    const expectSuccessResponse = (response: TestResponse, id: string, destinationId?: string) => {
+    const expectSuccessESResponse = (
+      response: TestResponse,
+      id: string,
+      destinationId?: string
+    ) => {
       const { success, successCount, successResults, errors } = getResult(response);
       expect(success).to.eql(true);
       expect(successCount).to.eql(1);
@@ -350,12 +362,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, exactMatchId);
+            expectSuccessESResponse(response, exactMatchId);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectForbiddenESResponse(response);
           }
         },
       },
@@ -371,12 +383,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
+            expectSuccessESResponse(response, inexactMatchId, 'conflict_1_space_2');
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectForbiddenESResponse(response);
           }
         },
       },
@@ -392,12 +404,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
+            expectSuccessESResponse(response, ambiguousConflictId, 'conflict_2_space_2');
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectForbiddenESResponse(response);
           }
         },
       },
@@ -523,6 +535,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
   return {
     resolveCopyToSpaceConflictsTest,
+    expectForbiddenResponse,
     expectNotFoundResponse,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,

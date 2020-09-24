@@ -164,19 +164,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_timelion_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(messageText).to.contain('You do not have permission to access the requested page');
       });
     });
   });
