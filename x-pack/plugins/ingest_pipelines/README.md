@@ -25,7 +25,7 @@ The app has the following test coverage:
 
 ### Quick steps for manual testing
 
-You can run the following request in Console to create an ingest node pipeline.
+You can run the following request in Console to create an ingest node pipeline:
 
 ```
 PUT _ingest/pipeline/test_pipeline
@@ -75,7 +75,7 @@ PUT _ingest/pipeline/test_pipeline
 
 Then, go to the Ingest Node Pipelines UI to edit, delete, clone, or view details of the pipeline.
 
-To simulate a pipeline, go to the "Edit" page of your pipeline. Click the "Add documents" link under the "Processors" section. You may add the following sample documents, add an existing document, or create some sample data of your own.
+To simulate a pipeline, go to the "Edit" page of your pipeline. Click the "Add documents" link under the "Processors" section. You may add the following sample documents to test the pipeline: 
 
 ```
 // The first document in this example should trigger the on_failure processor in the pipeline, while the second one should succeed.
@@ -97,3 +97,5 @@ To simulate a pipeline, go to the "Edit" page of your pipeline. Click the "Add d
   }
 ]
 ```
+
+Alternatively, you can add a document from an existing index, or create some sample data of your own. Afterward, click the "Run the pipeline" button to view the output.
