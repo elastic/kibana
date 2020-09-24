@@ -123,6 +123,8 @@ export const CasesResponseRt = rt.array(CaseResponseRt);
  * so we redefine then so we can use/validate types
  */
 
+// TODO: Refactor to support multiple connectors with various fields
+
 const ServiceConnectorUserParams = rt.type({
   fullName: rt.union([rt.string, rt.null]),
   username: rt.string,

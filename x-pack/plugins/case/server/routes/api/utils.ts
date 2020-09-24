@@ -17,7 +17,6 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
-  CaseAttributes,
   CommentResponse,
   CommentsResponse,
   CommentAttributes,

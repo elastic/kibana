@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionConnector } from '../../../../../case/common/api';
 import { FormSchema, FIELD_TYPES } from '../../../shared_imports';
 
 export interface FormProps {

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
 } from '@elastic/eui';

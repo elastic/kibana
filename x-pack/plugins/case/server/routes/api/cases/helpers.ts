@@ -9,7 +9,6 @@ import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CasePatchRequest,
   CasesConfigureAttributes,
   CaseConnector,
   ESCaseConnector,

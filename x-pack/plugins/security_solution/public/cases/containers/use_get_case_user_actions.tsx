@@ -65,7 +65,7 @@ export const getPushedInfo = (
     const userActionsForPushLessServiceUpdates = caseUserActions.filter(
       (mua) =>
         (mua.action !== 'push-to-service' &&
-          !(mua.action === 'update' && mua.actionField[0] === 'connector_id')) ||
+          !(mua.action === 'update' && mua.actionField[0] === 'connector')) ||
         (mua.action === 'push-to-service' &&
           connectorId === getExternalService(`${mua.newValue}`)?.connectorId)
     );

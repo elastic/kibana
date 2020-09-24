@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
 
 import { CaseFullExternalService, ActionConnector } from '../../../../../case/common/api';
@@ -128,7 +128,7 @@ export const getUpdateAction = ({
   action: CaseUserActions;
   label: string | JSX.Element;
   handleOutlineComment: (id: string) => void;
-}) => ({
+}): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
       username={action.actionBy.username ?? ''}
