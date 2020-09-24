@@ -22,6 +22,8 @@ import {
   initGetLogEntryAnomaliesRoute,
   initGetLogEntryAnomaliesDatasetsRoute,
 } from './routes/log_analysis';
+import { initGetK8sAnomaliesRoute } from './routes/infra_ml';
+import { initGetHostsAnomaliesRoute } from './routes/infra_ml';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
@@ -58,6 +60,8 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetLogEntryRateRoute(libs);
   initGetLogEntryAnomaliesRoute(libs);
   initGetLogEntryAnomaliesDatasetsRoute(libs);
+  initGetK8sAnomaliesRoute(libs);
+  initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initSourceRoute(libs);
