@@ -13,8 +13,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { fromQuery, toQuery } from '../../Links/url_helpers';
+import { useUrlParams } from '../../../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 interface Props {
   serviceNames: string[];
