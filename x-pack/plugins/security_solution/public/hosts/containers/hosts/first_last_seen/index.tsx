@@ -7,17 +7,15 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
-
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   HostsQueries,
   HostFirstLastSeenRequestOptions,
   HostFirstLastSeenStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution';
-import { useWithSource } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
+import { DocValueFields } from '../../../../../common/search_strategy';
 import {
   AbortError,
   isCompleteResponse,
@@ -33,21 +31,23 @@ export interface FirstLastSeenHostArgs {
   lastSeen?: string | null;
 }
 interface UseHostFirstLastSeen {
+  docValueFields: DocValueFields[];
   hostName: string;
+  indexNames: string[];
 }
 
 export const useFirstLastSeenHost = ({
+  docValueFields,
   hostName,
+  indexNames,
 }: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
-  const { docValueFields } = useWithSource('default');
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [firstLastSeenHostRequest, setFirstLastSeenHostRequest] = useState<
     HostFirstLastSeenRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.firstLastSeen,
     hostName,
@@ -124,7 +124,7 @@ export const useFirstLastSeenHost = ({
     setFirstLastSeenHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         hostName,
       };
@@ -133,7 +133,7 @@ export const useFirstLastSeenHost = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, hostName]);
+  }, [indexNames, docValueFields, hostName]);
 
   useEffect(() => {
     firstLastSeenHostSearch(firstLastSeenHostRequest);
