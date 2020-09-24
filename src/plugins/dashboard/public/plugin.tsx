@@ -117,7 +117,7 @@ declare module '../../share/public' {
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
-interface DashboardFeatureFlagConfig {
+export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }
 
