@@ -18,7 +18,7 @@
  */
 
 import { RequestHandlerContext } from '../../../../core/server';
-import { ISearchOptions } from '../../common/search';
+import { ISearchOptions, IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
@@ -34,8 +34,8 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: <
-    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -53,8 +53,8 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   aggs: AggsStart;
   /**
@@ -66,9 +66,9 @@ export interface ISearchStart<
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
-    request: IEsSearchRequest,
+    request: SearchStrategyRequest,
     options: ISearchOptions
-  ) => Promise<IEsSearchResponse>;
+  ) => Promise<SearchStrategyResponse>;
 }
 
 /**
@@ -76,8 +76,8 @@ export interface ISearchStart<
  * that resolves to a response.
  */
 export interface ISearchStrategy<
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   search: (
     context: RequestHandlerContext,

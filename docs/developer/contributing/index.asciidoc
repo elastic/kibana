@@ -9,6 +9,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<development-tests>>
 * <<development-github>>
 * <<interpreting-ci-failures>>
+* <<ci-metrics>>
 * <<development-documentation>>
 * <<development-pull-request>>
 * <<kibana-issue-reporting>>
@@ -77,6 +78,8 @@ include::development-github.asciidoc[leveloffset=+1]
 include::development-tests.asciidoc[leveloffset=+1]
 
 include::interpreting-ci-failures.asciidoc[leveloffset=+1]
+
+include::development-ci-metrics.asciidoc[leveloffset=+1]
 
 include::development-documentation.asciidoc[leveloffset=+1]
 

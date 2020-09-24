@@ -40,6 +40,7 @@ import {
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
+  DEFAULT_INDEX_KEY,
 } from '../common/constants';
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
@@ -55,6 +56,10 @@ import {
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
+import {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '../common/search_strategy/index_fields';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -385,15 +390,32 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins, storage: Storage) {
-    const { composeLibs } = await this.downloadAssets();
+    const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+    const [
+      { composeLibs },
+      kibanaIndexPatterns,
+      {
+        detectionsSubPlugin,
+        hostsSubPlugin,
+        networkSubPlugin,
+        timelinesSubPlugin,
+        managementSubPlugin,
+      },
+      configIndexPatterns,
+    ] = await Promise.all([
+      this.downloadAssets(),
+      startPlugins.data.indexPatterns.getIdsWithTitle(),
+      this.downloadSubPlugins(),
+      startPlugins.data.search
+        .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
+          {
+            strategy: 'securitySolutionIndexFields',
+          }
+        )
+        .toPromise(),
+    ]);
 
-    const {
-      detectionsSubPlugin,
-      hostsSubPlugin,
-      networkSubPlugin,
-      timelinesSubPlugin,
-      managementSubPlugin,
-    } = await this.downloadSubPlugins();
     const { apolloClient } = composeLibs(coreStart);
     const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
     const libs$ = new BehaviorSubject(appLibs);
@@ -417,12 +439,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     this.store = createStore(
-      createInitialState({
-        ...hostsStart.store.initialState,
-        ...networkStart.store.initialState,
-        ...timelineInitialState,
-        ...managementSubPluginStart.store.initialState,
-      }),
+      createInitialState(
+        {
+          ...hostsStart.store.initialState,
+          ...networkStart.store.initialState,
+          ...timelineInitialState,
+          ...managementSubPluginStart.store.initialState,
+        },
+        {
+          kibanaIndexPatterns,
+          configIndexPatterns: configIndexPatterns.indicesExist,
+        }
+      ),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,
