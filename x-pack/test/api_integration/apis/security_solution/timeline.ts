@@ -6,10 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import {
-  timelineQuery,
-  Direction,
-} from '../../../../plugins/security_solution/public/timelines/containers/index.gql_query';
+import { Direction } from '../../../../plugins/security_solution/common/search_strategy';
+import { timelineQuery } from '../../../../plugins/security_solution/public/timelines/containers/index.gql_query';
 import { GetTimelineQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
