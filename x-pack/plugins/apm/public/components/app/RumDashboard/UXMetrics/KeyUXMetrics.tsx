@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { UXMetrics } from './index';
 import {
   FCP_LABEL,
@@ -82,7 +83,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={longTaskData?.noOfLongTasks ?? 0}
+          title={numeral(longTaskData?.noOfLongTasks ?? 0).format('0,0')}
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />

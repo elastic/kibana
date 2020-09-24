@@ -68,11 +68,10 @@ export async function getClientMetrics({
   // Divide by 1000 to convert ms into seconds
   return {
     pageViews,
-    backEnd: { value: (backEnd.values['50.0'] || 0) / 1000 },
+    backEnd: { value: backEnd.values['50.0'] || 0 },
     frontEnd: {
       value:
-        ((domInteractive.values['50.0'] || 0) - (backEnd.values['50.0'] || 0)) /
-        1000,
+        (domInteractive.values['50.0'] || 0) - (backEnd.values['50.0'] || 0),
     },
   };
 }
