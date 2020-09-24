@@ -42,6 +42,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   filterQuery,
   from,
+  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -50,6 +51,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,
+    indexNames,
     startDate: from,
     skip,
   });
