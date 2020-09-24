@@ -45,7 +45,7 @@ export class XyVisualization {
         xyChart,
         getXyChartRenderer,
         xyVisualization,
-      } = await import('./xy_visualization');
+      } = await import('../async_services');
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);

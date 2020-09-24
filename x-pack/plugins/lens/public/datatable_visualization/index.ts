@@ -33,7 +33,7 @@ export class DatatableVisualization {
         datatableColumns,
         getDatatableRenderer,
         datatableVisualization,
-      } = await import('./datatable_visualization');
+      } = await import('../async_services');
       expressions.registerFunction(() => datatableColumns);
       expressions.registerFunction(() => datatable);
       expressions.registerRenderer(() =>

@@ -29,7 +29,7 @@ export class PieVisualization {
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { pieVisualization, pie, getPieRenderer } = await import('./pie_visualization');
+      const { pieVisualization, pie, getPieRenderer } = await import('../async_services');
 
       expressions.registerFunction(() => pie);
 

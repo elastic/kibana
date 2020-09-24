@@ -23,7 +23,7 @@ export class MetricVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { metricVisualization, metricChart, getMetricChartRenderer } = await import(
-        './metric_visualization'
+        '../async_services'
       );
 
       expressions.registerFunction(() => metricChart);

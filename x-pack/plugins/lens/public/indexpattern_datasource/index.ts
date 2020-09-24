@@ -33,7 +33,7 @@ export class IndexPatternDatasource {
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const { getIndexPatternDatasource, renameColumns } = await import('./indexpattern');
+      const { getIndexPatternDatasource, renameColumns } = await import('../async_services');
       expressions.registerFunction(renameColumns);
       return core.getStartServices().then(([coreStart, { data }]) =>
         getIndexPatternDatasource({

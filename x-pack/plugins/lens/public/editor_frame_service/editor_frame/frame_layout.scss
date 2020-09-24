@@ -1,3 +1,5 @@
+@import '../../variables';
+
 .lnsFrameLayout {
   padding: 0;
   position: absolute;
@@ -14,8 +16,6 @@
   overflow: hidden;
   flex-grow: 1;
 }
-
-$lnsPanelMinWidth: $euiSize * 18;
 
 .lnsFrameLayout__pageBody {
   @include euiScrollBar;

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './workspace_panel_wrapper.scss';
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';

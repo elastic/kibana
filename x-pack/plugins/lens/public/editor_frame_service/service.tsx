@@ -133,7 +133,7 @@ export class EditorFrameService {
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
 
-          const { EditorFrame } = await import('./editor_frame');
+          const { EditorFrame } = await import('../async_services');
 
           render(
             <I18nProvider>

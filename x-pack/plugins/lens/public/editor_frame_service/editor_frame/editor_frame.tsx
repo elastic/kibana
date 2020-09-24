@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './editor_frame.scss';
-
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
