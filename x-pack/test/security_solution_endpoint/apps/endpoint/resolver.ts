@@ -13,7 +13,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
 
-  describe('Endpoint Event Resolver', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/78375
+  describe.skip('Endpoint Event Resolver', function () {
     before(async () => {
       await esArchiver.load('endpoint/resolver_tree', { useCreate: true });
       await pageObjects.hosts.navigateToSecurityHostsPage();
