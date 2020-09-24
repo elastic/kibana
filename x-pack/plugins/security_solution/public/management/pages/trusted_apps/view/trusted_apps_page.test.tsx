@@ -21,6 +21,15 @@ describe('TrustedAppsPage', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  const originalScrollTo = window.scrollTo;
+
+  beforeAll(() => {
+    window.scrollTo = () => {};
+  });
+
+  afterAll(() => {
+    window.scrollTo = originalScrollTo;
+  });
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -32,6 +41,7 @@ describe('TrustedAppsPage', () => {
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
     });
+    window.scrollTo = jest.fn();
   });
 
   test.skip('rendering', () => {

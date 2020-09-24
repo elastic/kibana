@@ -78,6 +78,7 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
   rumJSErrors,
+  rumUrlSearch,
   rumLongTaskMetrics,
 } from './rum_client';
 import {
@@ -175,6 +176,7 @@ const createApmApi = () => {
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
     .add(rumJSErrors)
+    .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
 
     // Observability dashboard
