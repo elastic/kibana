@@ -13,7 +13,12 @@ import {
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { appContextService } from '../services';
-import { IngestManagerError, RegistryError, PackageNotFoundError } from './index';
+import {
+  IngestManagerError,
+  RegistryError,
+  PackageNotFoundError,
+  BulkInstallPackagesError,
+} from './index';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
@@ -51,6 +56,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof PackageNotFoundError) {
     return 404; // Not Found
+  }
+  if (error instanceof BulkInstallPackagesError) {
+    return error.statusCode;
   }
 
   return 400; // Bad Request

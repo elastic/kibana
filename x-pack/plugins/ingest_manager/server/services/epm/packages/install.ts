@@ -40,6 +40,7 @@ import {
   IngestManagerError,
   PackageOutdatedError,
   ingestErrorToResponseOptions,
+  BulkInstallPackagesError,
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
@@ -67,21 +68,10 @@ function isBulkInstallError(resp: BulkInstallResponse): resp is IBulkInstallPack
   return 'error' in resp && resp.error !== undefined;
 }
 
-async function getInstallationAndName(
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string
-) {
-  return {
-    pkgName,
-    installation: await getInstallation({ savedObjectsClient, pkgName }),
-  };
-}
-
-type GetInstallationReturnType = UnwrapPromise<ReturnType<typeof getInstallationAndName>>;
 export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-): Promise<GetInstallationReturnType[]> {
+): Promise<Installation[]> {
   const installations = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
@@ -91,16 +81,19 @@ export async function ensureInstalledDefaultPackages(
 
   for (const resp of bulkResponse) {
     if (isBulkInstallError(resp)) {
-      throw new Error(resp.error);
+      throw new BulkInstallPackagesError(resp.statusCode, resp.error);
     } else {
-      // getInstallation can return undefined so we'll tack on the name so when we throw an error in setup we can
-      // reference the name of the package that we failed to retrieve the installation information for
-      const installation = getInstallationAndName(savedObjectsClient, resp.name);
-      installations.push(installation);
+      installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
     }
   }
 
-  return Promise.all(installations);
+  const retrievedInstallations = await Promise.all(installations);
+  return retrievedInstallations.map((installation, index) => {
+    if (!installation) {
+      throw new Error(`could not get installation ${bulkResponse[index].name} during setup`);
+    }
+    return installation;
+  });
 }
 
 export async function ensureInstalledPackage(options: {
