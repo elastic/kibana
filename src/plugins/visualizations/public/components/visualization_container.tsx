@@ -18,18 +18,34 @@
  */
 
 import React, { ReactNode, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
+import classNames from 'classnames';
+import { VisualizationNoResults } from './visualization_noresults';
 
 interface VisualizationContainerProps {
   className?: string;
   children: ReactNode;
+  showNoResult?: boolean;
 }
 
-export const VisualizationContainer = (props: VisualizationContainerProps) => {
-  const classes = `visualization ${props.className}`;
+export const VisualizationContainer = ({
+  className,
+  children,
+  showNoResult = false,
+}: VisualizationContainerProps) => {
+  const classes = classNames('visualization', className);
+
+  const fallBack = (
+    <div className="visChart__spinner">
+      <EuiLoadingChart mono size="l" />
+    </div>
+  );
+
   return (
     <div className={classes}>
-      <Suspense fallback={<EuiLoadingSpinner />}>{props.children}</Suspense>
+      <Suspense fallback={fallBack}>
+        {showNoResult ? <VisualizationNoResults /> : children}
+      </Suspense>
     </div>
   );
 };
