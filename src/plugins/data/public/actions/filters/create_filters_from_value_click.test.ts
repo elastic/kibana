@@ -95,12 +95,7 @@ describe('createFiltersFromValueClick', () => {
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    if (dataPoints[0].table.columns[0].meta) {
-      if (!dataPoints[0].table.columns[0].meta.params) {
-        dataPoints[0].table.columns[0].meta.params = {};
-      }
-      dataPoints[0].table.columns[0].meta.params!.type = 'terms';
-    }
+    (dataPoints[0].table.columns[0].meta.sourceParams as any).type = 'terms';
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);

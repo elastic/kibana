@@ -5,11 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  DatatableColumn,
-} from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition, Datatable, DatatableColumn } from 'src/plugins/expressions';
 import { IndexPatternColumn } from './operations';
 
 interface RemapArgs {
