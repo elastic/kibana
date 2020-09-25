@@ -49,38 +49,6 @@ import { DiscoverFetchError } from './fetch_error/fetch_error';
 import './discover.scss';
 import { esFilters } from '../../../../data/public';
 
-// Hook
-function useWindowSize() {
-  // Initialize state with undefined width/height so server and client renders match
-  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
-  const [windowSize, setWindowSize] = useState({
-    width: undefined,
-    height: undefined,
-  });
-
-  useEffect(() => {
-    // Handler to call on window resize
-    function handleResize() {
-      // Set window width/height to state
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Call handler right away so state gets updated with initial window size
-    handleResize();
-
-    // Remove event listener on cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // Empty array ensures that effect is only run on mount
-
-  return windowSize;
-}
-
 export function Discover({
   addColumn,
   bucketInterval,
@@ -129,7 +97,6 @@ export function Discover({
   }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, filterManager } = opts;
-  const size = useWindowSize();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   let flyout;
@@ -208,10 +175,10 @@ export function Discover({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
+        {flyout}
         <main className="dscApp__frame">
           <>
-            {flyout}
-            {size && size.width > 575 ? (
+            <div className="dscSidebar dscSidebar__desktop hidden-xs hidden-sm">
               <DiscoverSidebar
                 columns={state.columns}
                 fieldCounts={fieldCounts}
@@ -223,33 +190,32 @@ export function Discover({
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
                 setIndexPattern={setIndexPattern}
               />
-            ) : (
-              <div className="dscSidebar__mobile">
-                <DiscoverSidebarMobile
-                  columns={state.columns}
-                  fieldCounts={fieldCounts}
-                  hits={rows}
-                  indexPatternList={indexPatternList}
-                  onAddField={addColumn}
-                  onAddFilter={onAddFilter}
-                  onRemoveField={onRemoveColumn}
-                  selectedIndexPattern={searchSource && searchSource.getField('index')}
-                  setIndexPattern={setIndexPattern}
-                />
-                <EuiButton
-                  contentProps={{ className: 'dscSidebar__mobileButton' }}
-                  iconSide="right"
-                  iconType="arrowRight"
-                  fullWidth
-                  onClick={() => setIsFlyoutVisible(true)}
-                >
-                  Fields
-                  <EuiBadge className="dscSidebar__mobileBadge" color="accent">
-                    5
-                  </EuiBadge>
-                </EuiButton>
-              </div>
-            )}
+            </div>
+            <div className="dscSidebar dscSidebar__mobile visible-xs visible-sm">
+              <DiscoverSidebarMobile
+                columns={state.columns}
+                fieldCounts={fieldCounts}
+                hits={rows}
+                indexPatternList={indexPatternList}
+                onAddField={addColumn}
+                onAddFilter={onAddFilter}
+                onRemoveField={onRemoveColumn}
+                selectedIndexPattern={searchSource && searchSource.getField('index')}
+                setIndexPattern={setIndexPattern}
+              />
+              <EuiButton
+                contentProps={{ className: 'dscSidebar__mobileButton' }}
+                iconSide="right"
+                iconType="arrowRight"
+                fullWidth
+                onClick={() => setIsFlyoutVisible(true)}
+              >
+                Fields
+                <EuiBadge className="dscSidebar__mobileBadge" color="accent">
+                  5
+                </EuiBadge>
+              </EuiButton>
+            </div>
 
             <>
               {resultState === 'none' && (
@@ -273,7 +239,6 @@ export function Discover({
 
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
-                  {size.width}px / {size.height}px
                   <div className="dscResultCount">
                     <EuiFlexGroup justifyContent="spaceBetween">
                       <EuiFlexItem

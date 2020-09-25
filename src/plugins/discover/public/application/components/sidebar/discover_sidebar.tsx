@@ -19,7 +19,14 @@
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiButtonIcon, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -148,18 +155,26 @@ export function DiscoverSidebar({
   return (
     <I18nProvider>
       <section
-        className="sidebar-list dscSidebar__section "
+        className="sidebar-list dscSidebar__contentWrapper"
         aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
           defaultMessage: 'Index and fields',
         })}
       >
-        <div className="dscSidebar__sectionStatic">
-          <DiscoverIndexPattern
-            selectedIndexPattern={selectedIndexPattern}
-            setIndexPattern={setIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-          />
-          <div className="dscSidebar__item">
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
+          className="dscSidebar__content"
+          direction="column"
+        >
+          <EuiFlexItem grow={false}>
+            {' '}
+            <DiscoverIndexPattern
+              selectedIndexPattern={selectedIndexPattern}
+              setIndexPattern={setIndexPattern}
+              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <form>
               <DiscoverFieldSearch
                 onChange={onChangeFieldSearch}
@@ -167,139 +182,143 @@ export function DiscoverSidebar({
                 types={fieldTypes}
               />
             </form>
-          </div>
-        </div>
-        <div className="sidebar-list dscSidebar__sectionScroll">
-          {fields.length > 0 && (
-            <>
-              <EuiTitle size="xxxs" id="selected_fields">
-                <h3>
-                  <FormattedMessage
-                    id="discover.fieldChooser.filter.selectedFieldsTitle"
-                    defaultMessage="Selected fields"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="xs" />
-              <ul
-                className="dscSidebarList dscFieldList--selected"
-                aria-labelledby="selected_fields"
-                data-test-subj={`fieldList-selected`}
-              >
-                {selectedFields.map((field: IndexPatternField) => {
-                  return (
-                    <li
-                      key={`field${field.name}`}
-                      data-attr-field={field.name}
-                      className="dscSidebar__item"
-                    >
-                      <DiscoverField
-                        field={field}
-                        indexPattern={selectedIndexPattern}
-                        onAddField={onAddField}
-                        onRemoveField={onRemoveField}
-                        onAddFilter={onAddFilter}
-                        getDetails={getDetailsByField}
-                        selected={true}
-                        useShortDots={useShortDots}
-                        mobile={mobile}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-              <EuiAccordion
-                id="dscAvailableFields"
-                initialIsOpen={true}
-                buttonContent={
-                  <EuiText size="xs">
-                    <strong>
-                      <FormattedMessage
-                        id="discover.fieldChooser.filter.availableFieldsTitle"
-                        defaultMessage="Available fields"
-                      />
-                    </strong>
-                  </EuiText>
-                }
-              >
-                {popularFields.length > 0 && (
-                  <div className="dscFieldList__popularSection">
-                    <EuiTitle
-                      size="xxxs"
-                      // className={`dscFieldListHeader ${!showFields ? 'hidden-sm hidden-xs' : ''}`}
-                      className="dscFieldListHeader"
-                    >
-                      <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
-                        <FormattedMessage
-                          id="discover.fieldChooser.filter.popularTitle"
-                          defaultMessage="Popular"
-                        />
-                      </h4>
-                    </EuiTitle>
-                    <ul
-                      // className={`dscFieldList dscFieldList--popular ${
-                      //   !showFields ? 'hidden-sm hidden-xs' : ''
-                      // }`}
-                      className="dscFieldList dscFieldList--popular"
-                      aria-labelledby="available_fields available_fields_popular"
-                      data-test-subj={`fieldList-popular`}
-                    >
-                      {popularFields.map((field: IndexPatternField) => {
-                        return (
-                          <li
-                            key={`field${field.name}`}
-                            data-attr-field={field.name}
-                            className="dscSidebar__item"
-                          >
-                            <DiscoverField
-                              field={field}
-                              indexPattern={selectedIndexPattern}
-                              onAddField={onAddField}
-                              onRemoveField={onRemoveField}
-                              onAddFilter={onAddFilter}
-                              getDetails={getDetailsByField}
-                              useShortDots={useShortDots}
-                              mobile={mobile}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <div className="sidebar-list dscSidebar__scrollSection">
+              <div className="dscSidebar__scrollSectionList">
+                {fields.length > 0 && (
+                  <>
+                    <EuiAccordion
+                      id="dscSelectedFields"
+                      initialIsOpen={true}
+                      buttonContent={
+                        <EuiText size="xs">
+                          <strong>
+                            <FormattedMessage
+                              id="discover.fieldChooser.filter.selectedFieldsTitle"
+                              defaultMessage="Selected fields"
                             />
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
-                <ul
-                  // className={`dscFieldList dscFieldList--unpopular ${
-                  //   !showFields ? 'hidden-sm hidden-xs' : ''
-                  // }`}
-                  className="dscFieldList dscFieldList--unpopular"
-                  aria-labelledby="available_fields"
-                  data-test-subj={`fieldList-unpopular`}
-                >
-                  {unpopularFields.map((field: IndexPatternField) => {
-                    return (
-                      <li
-                        key={`field${field.name}`}
-                        data-attr-field={field.name}
-                        className="dscSidebar__item"
+                          </strong>
+                        </EuiText>
+                      }
+                    >
+                      <EuiSpacer size="s" />
+                      <ul
+                        className="dscFieldList dscFieldList--selected"
+                        aria-labelledby="selected_fields"
+                        data-test-subj={`fieldList-selected`}
                       >
-                        <DiscoverField
-                          field={field}
-                          indexPattern={selectedIndexPattern}
-                          onAddField={onAddField}
-                          onRemoveField={onRemoveField}
-                          onAddFilter={onAddFilter}
-                          getDetails={getDetailsByField}
-                          useShortDots={useShortDots}
-                          mobile={mobile}
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
-              </EuiAccordion>
-            </>
-          )}
-        </div>
+                        {selectedFields.map((field: IndexPatternField) => {
+                          return (
+                            <li
+                              key={`field${field.name}`}
+                              data-attr-field={field.name}
+                              className="dscSidebar__item"
+                            >
+                              <DiscoverField
+                                field={field}
+                                indexPattern={selectedIndexPattern}
+                                onAddField={onAddField}
+                                onRemoveField={onRemoveField}
+                                onAddFilter={onAddFilter}
+                                getDetails={getDetailsByField}
+                                selected={true}
+                                useShortDots={useShortDots}
+                                mobile={mobile}
+                              />
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </EuiAccordion>
+                    {selectedFields && selectedFields.length > 0 ? <EuiSpacer size="m" /> : null}
+                    <EuiAccordion
+                      id="dscAvailableFields"
+                      initialIsOpen={true}
+                      buttonContent={
+                        <EuiText size="xs">
+                          <strong>
+                            <FormattedMessage
+                              id="discover.fieldChooser.filter.availableFieldsTitle"
+                              defaultMessage="Available fields"
+                            />
+                          </strong>
+                        </EuiText>
+                      }
+                    >
+                      <EuiSpacer size="s" />
+                      {popularFields.length > 0 && (
+                        <>
+                          <EuiTitle size="xxxs" className="dscFieldListHeader">
+                            <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
+                              <FormattedMessage
+                                id="discover.fieldChooser.filter.popularTitle"
+                                defaultMessage="Popular"
+                              />
+                            </h4>
+                          </EuiTitle>
+                          <ul
+                            className="dscFieldList dscFieldList--popular"
+                            aria-labelledby="available_fields available_fields_popular"
+                            data-test-subj={`fieldList-popular`}
+                          >
+                            {popularFields.map((field: IndexPatternField) => {
+                              return (
+                                <li
+                                  key={`field${field.name}`}
+                                  data-attr-field={field.name}
+                                  className="dscSidebar__item"
+                                >
+                                  <DiscoverField
+                                    field={field}
+                                    indexPattern={selectedIndexPattern}
+                                    onAddField={onAddField}
+                                    onRemoveField={onRemoveField}
+                                    onAddFilter={onAddFilter}
+                                    getDetails={getDetailsByField}
+                                    useShortDots={useShortDots}
+                                    mobile={mobile}
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </>
+                      )}
+                      <ul
+                        className="dscFieldList dscFieldList--unpopular"
+                        aria-labelledby="available_fields"
+                        data-test-subj={`fieldList-unpopular`}
+                      >
+                        {unpopularFields.map((field: IndexPatternField) => {
+                          return (
+                            <li
+                              key={`field${field.name}`}
+                              data-attr-field={field.name}
+                              className="dscSidebar__item"
+                            >
+                              <DiscoverField
+                                field={field}
+                                indexPattern={selectedIndexPattern}
+                                onAddField={onAddField}
+                                onRemoveField={onRemoveField}
+                                onAddFilter={onAddFilter}
+                                getDetails={getDetailsByField}
+                                useShortDots={useShortDots}
+                                mobile={mobile}
+                              />
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </EuiAccordion>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+              </div>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </section>
     </I18nProvider>
   );

@@ -1,48 +1,53 @@
-.dscApp .dscSidebar__section {
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+.dscSidebar {
+  margin: 0;
+  min-width: 304px;
   display: flex;
-  // overflow: hidden;
+  flex-direction: column;
+  position: relative;
 }
 
-.dscApp .dscSidebar__sectionStatic {
-  padding: 0 16px;
+.dscSidebar__contentWrapper {
+  flex: 1 0 100%;
+  overflow: hidden;
+  @include euiBreakpoint('xs', 's') {
+    padding-bottom: $euiSize * 4;
+  }
+
+  .dscSidebar__content {
+    @include euiBreakpoint('xs', 's') {
+      padding-top: 0;
+    }
+    width: 100%;
+    height: 100%;
+    padding: $euiSize $euiSize 0;
+  }
 }
 
-.dscApp .dscSidebar__sectionScroll {
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
+.dscSidebar__scrollSection {
+  @include euiBreakpoint('xs', 's') {
+    padding-left: $euiSize;
+    padding-top: $euiSize;
+  }
+  @include euiOverflowShadow;
+  @include euiScrollBar;
+  margin-left: -$euiSize; /* 1 */
+  position: relative;
   flex-grow: 1;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    rgba(255, 0, 0, 0.1) 0%,
-    red 7.5px,
-    red calc(100% - 7.5px),
-    rgba(255, 0, 0, 0.1) 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(255, 0, 0, 0.1) 0%,
-    red 7.5px,
-    red calc(100% - 7.5px),
-    rgba(255, 0, 0, 0.1) 100%
-  );
-  height: 100%;
-  overflow-y: auto;
-  padding: 0 16px;
+  overflow: auto;
+}
+
+.dscSidebar__scrollSectionList {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    padding-top: $euiSizeS;
+    position: absolute;
+    top: 0;
+    left: $euiSize; /* 1 */
+    right: $euiSizeXS; /* 1 */
+  }
 }
 
 .dscSidebar__container {
@@ -65,13 +70,10 @@
   line-height: $euiSizeXXL;
 }
 
-.dscFieldList__popularSection {
-  margin-top: $euiSizeXS;
-}
-
 .dscFieldList {
   list-style: none;
   margin-bottom: 0;
+  padding: 0 $euiSizeXS $euiSizeXS;
 }
 
 .dscFieldListHeader {

@@ -35,6 +35,7 @@ discover-app {
     flex-wrap: wrap;
     margin-left: 0;
     margin-right: 0;
+    overflow-y: auto;
   }
 }
 
@@ -82,6 +83,11 @@ discover-app {
   flex-direction: column;
   display: flex;
   overflow: hidden;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-right: $euiSize;
+    margin-bottom: $euiSize;
+  }
 
   @include euiBreakpoint('xs', 's') {
     margin: $euiSizeS;
