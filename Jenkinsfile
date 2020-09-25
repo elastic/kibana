@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@implement/ci-stats/v2-report'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
@@ -9,7 +9,16 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
       ciStats.trackBuild {
         catchError {
           retryable.enable()
-          kibanaPipeline.allCiTasks()
+
+          kibanaPipeline.withTasks {
+            task {
+              kibanaPipeline.buildXpack(10)
+            }
+
+            task {
+              kibanaPipeline.buildOss(10)
+            }
+          }
         }
       }
     }
