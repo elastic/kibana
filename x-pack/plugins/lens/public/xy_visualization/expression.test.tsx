@@ -914,6 +914,28 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
+    test('it does not apply histogram mode to more than one the series', () => {
+      const { data, args } = sampleArgs();
+      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      delete firstLayer.splitAccessor;
+      const secondLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      delete secondLayer.splitAccessor;
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [firstLayer, secondLayer] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+    });
+
     test('it applies histogram mode to the series for stacked series', () => {
       const { data, args } = sampleArgs();
       const component = shallow(

@@ -586,7 +586,7 @@ export function XYChart({
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
-            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            enableHistogramMode: !chartHasMoreThanOneSeries && isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {
