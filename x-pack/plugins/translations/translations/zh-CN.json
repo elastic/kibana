@@ -15893,7 +15893,6 @@
     "xpack.securitySolution.endpoint.resolver.panel.table.row.count": "计数",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.eventType": "事件类型",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.processNameTitle": "进程名称",
-    "xpack.securitySolution.endpoint.resolver.panel.table.row.timestampInvalidLabel": "无效",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.timestampTitle": "时间戳",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription": "值缺失",
     "xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded": "{numberOfEventsMissing} 个{category}事件无法显示，因为已达到数据限制。",
