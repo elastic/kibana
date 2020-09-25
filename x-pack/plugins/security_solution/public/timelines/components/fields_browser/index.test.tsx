@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import '../../../common/mock/react_beautiful_dnd';

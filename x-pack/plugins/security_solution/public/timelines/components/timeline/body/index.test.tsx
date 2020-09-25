@@ -16,8 +16,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';

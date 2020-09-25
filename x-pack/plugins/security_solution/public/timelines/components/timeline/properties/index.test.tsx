@@ -22,7 +22,7 @@ import { useThrottledResizeObserver } from '../../../../common/components/utils'
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../common/components/link_to');
 

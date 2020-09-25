@@ -7,7 +7,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
-import { wait as waitFor } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { StepAboutRule } from '.';
@@ -82,7 +82,7 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(async () => {
+    await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
@@ -110,7 +110,7 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(async () => {
+    await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
@@ -119,7 +119,6 @@ describe('StepAboutRuleComponent', () => {
         .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
         .first()
         .simulate('change', { target: { value: 'Test description text' } });
-
       const result = await formHook();
       expect(result?.isValid).toEqual(false);
     });
@@ -139,44 +138,43 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(async () => {
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    const expected: AboutStepRule = {
+      author: [],
+      isAssociatedToEndpointList: false,
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: { value: 21, mapping: [], isMappingChecked: false },
+      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+
+    await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
-
-      const expected: AboutStepRule = {
-        author: [],
-        isAssociatedToEndpointList: false,
-        isBuildingBlock: false,
-        license: '',
-        ruleNameOverride: '',
-        timestampOverride: '',
-        description: 'Test description text',
-        falsePositives: [''],
-        name: 'Test name text',
-        note: '',
-        references: [''],
-        riskScore: { value: 21, mapping: [], isMappingChecked: false },
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: 'none', name: 'none', reference: 'none' },
-            technique: [],
-          },
-        ],
-      };
-
       const result = await formHook();
       expect(result?.isValid).toEqual(true);
       expect(result?.data).toEqual(expected);
@@ -197,50 +195,49 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(async () => {
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
+      .first()
+      .simulate('change', { target: { value: '80' } });
+
+    const expected: AboutStepRule = {
+      author: [],
+      isAssociatedToEndpointList: false,
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: { value: 80, mapping: [], isMappingChecked: false },
+      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+
+    await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
-        .first()
-        .simulate('change', { target: { value: '80' } });
-
-      const expected: AboutStepRule = {
-        author: [],
-        isAssociatedToEndpointList: false,
-        isBuildingBlock: false,
-        license: '',
-        ruleNameOverride: '',
-        timestampOverride: '',
-        description: 'Test description text',
-        falsePositives: [''],
-        name: 'Test name text',
-        note: '',
-        references: [''],
-        riskScore: { value: 80, mapping: [], isMappingChecked: false },
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: 'none', name: 'none', reference: 'none' },
-            technique: [],
-          },
-        ],
-      };
-
       const result = await formHook();
       expect(result?.isValid).toEqual(true);
       expect(result?.data).toEqual(expected);
@@ -261,21 +258,20 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(async () => {
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+
+    await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
-
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
-
       const result = await formHook();
       expect(result?.isValid).toEqual(true);
       expect(result?.data?.riskScore.value).toEqual(21);

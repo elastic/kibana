@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { render, wait as waitFor, RenderResult, fireEvent } from '@testing-library/react';
+import { render, waitFor, RenderResult, fireEvent } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';

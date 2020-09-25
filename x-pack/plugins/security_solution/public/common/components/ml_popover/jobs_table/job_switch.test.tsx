@@ -7,7 +7,7 @@
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../api.mock';

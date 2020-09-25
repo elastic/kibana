@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import {
   apolloClientObservable,
   mockGlobalState,

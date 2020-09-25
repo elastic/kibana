@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { render, wait as waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { TestProviders } from '../../../common/mock';

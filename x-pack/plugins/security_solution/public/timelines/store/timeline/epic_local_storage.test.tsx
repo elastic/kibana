@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" for when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   mockGlobalState,

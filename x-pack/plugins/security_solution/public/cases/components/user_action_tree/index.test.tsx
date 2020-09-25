@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';

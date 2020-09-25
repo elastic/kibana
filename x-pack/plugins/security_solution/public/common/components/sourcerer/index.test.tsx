@@ -20,7 +20,7 @@ import {
 } from '../../mock';
 import { createStore, State } from '../../store';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

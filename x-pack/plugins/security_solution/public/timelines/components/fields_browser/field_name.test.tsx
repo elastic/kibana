@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';

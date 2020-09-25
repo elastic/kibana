@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';

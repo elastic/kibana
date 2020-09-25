@@ -10,8 +10,7 @@ import { mount } from 'enzyme';
 import { TagList } from '.';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../common/mock';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
 

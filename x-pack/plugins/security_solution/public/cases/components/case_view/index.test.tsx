@@ -15,8 +15,7 @@ import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';

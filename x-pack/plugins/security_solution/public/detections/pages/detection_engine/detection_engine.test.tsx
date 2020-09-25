@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { useParams } from 'react-router-dom';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   apolloClientObservable,

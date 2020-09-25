@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import { useSourcererScope } from '../../common/containers/sourcerer';

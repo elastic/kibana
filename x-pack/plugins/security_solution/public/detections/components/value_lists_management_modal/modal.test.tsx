@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { exportList, useDeleteList, useFindLists, ListSchema } from '../../../shared_imports';

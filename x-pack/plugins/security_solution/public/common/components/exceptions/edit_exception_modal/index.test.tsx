@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';

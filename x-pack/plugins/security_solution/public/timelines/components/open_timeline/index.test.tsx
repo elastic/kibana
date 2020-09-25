@@ -10,7 +10,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';

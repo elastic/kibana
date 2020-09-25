@@ -5,7 +5,7 @@
  */
 import React, { FormEvent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';

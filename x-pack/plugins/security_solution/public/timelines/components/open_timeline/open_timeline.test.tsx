@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';

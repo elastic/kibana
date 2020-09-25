@@ -6,7 +6,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';

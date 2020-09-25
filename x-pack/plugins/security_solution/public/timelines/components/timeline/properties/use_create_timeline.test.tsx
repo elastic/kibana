@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount, shallow } from 'enzyme';
