@@ -36,10 +36,10 @@ export function timeseriesFetcher({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
@@ -48,7 +48,7 @@ export function timeseriesFetcher({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...uiFiltersES,
+    ...('uiFiltersES' in setup ? setup.uiFiltersES : []),
   ];
 
   if (transactionName) {

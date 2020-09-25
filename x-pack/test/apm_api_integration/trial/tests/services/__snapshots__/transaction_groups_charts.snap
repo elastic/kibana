@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters when no environment is selected should return the correct anomaly boundaries 1`] = `Array []`;
+exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters when not defined environments selected should return the correct anomaly boundaries 1`] = `Array []`;
 
 exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters with environment selected and empty kuery filter should return a non-empty anomaly series 1`] = `
 Array [
@@ -22,7 +22,27 @@ Array [
 ]
 `;
 
-exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters with environment selected should return a non-empty anomaly series 1`] = `
+exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters with environment selected with uiFilters should return a non-empty anomaly series 1`] = `
+Array [
+  Object {
+    "x": 1600160400000,
+    "y": 1207819.9254745746,
+    "y0": 9931.23680748096,
+  },
+  Object {
+    "x": 1600161300000,
+    "y": 1203970.8677330983,
+    "y0": 10048.325077970672,
+  },
+  Object {
+    "x": 1600161780000,
+    "y": 1203970.8677330983,
+    "y0": 10048.325077970672,
+  },
+]
+`;
+
+exports[`APM Transaction Overview when data is loaded and fetching transaction groups charts with uiFilters with environment selected without uiFilters should return a non-empty anomaly series 1`] = `
 Array [
   Object {
     "x": 1600160400000,

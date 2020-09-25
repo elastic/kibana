@@ -6,6 +6,7 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
@@ -30,6 +31,7 @@ export function useTransactionCharts() {
               transactionType,
               transactionName,
               uiFilters: JSON.stringify(uiFilters),
+              environment: uiFilters.environment || ENVIRONMENT_ALL.value,
             },
           },
         });

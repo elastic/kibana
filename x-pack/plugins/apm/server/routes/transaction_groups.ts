@@ -11,7 +11,7 @@ import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { uiFiltersRt, rangeRt } from './default_api_types';
+import { uiFiltersRt, rangeRt, environmentRt } from './default_api_types';
 import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
@@ -63,8 +63,9 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
         transactionType: t.string,
         transactionName: t.string,
       }),
-      uiFiltersRt,
+      t.partial(uiFiltersRt.props),
       rangeRt,
+      environmentRt,
     ]),
   },
   handler: async ({ context, request }) => {
@@ -75,23 +76,35 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       transactionType,
       transactionName,
       uiFilters: uiFiltersJson,
+      environment,
     } = context.params.query;
-
-    const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getTransactionCharts({
+    const options = {
       serviceName,
       transactionType,
       transactionName,
       setup,
       searchAggregatedTransactions,
       logger,
-      uiFilters,
-    });
+      environment,
+    };
+
+    if (uiFiltersJson) {
+      const uiFilters = getParsedUiFilters({
+        uiFilters: uiFiltersJson,
+        logger,
+      });
+      return getTransactionCharts({
+        ...options,
+        uiFilters,
+      });
+    }
+
+    return getTransactionCharts(options);
   },
 }));
 

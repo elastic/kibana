@@ -17,7 +17,7 @@ export async function getApmTimeseriesData(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
   searchAggregatedTransactions: boolean;
 }) {
   const { start, end } = options.setup;

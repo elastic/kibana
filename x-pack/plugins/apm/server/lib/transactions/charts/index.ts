@@ -27,10 +27,11 @@ export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
   searchAggregatedTransactions: boolean;
   logger: Logger;
-  uiFilters: UIFilters;
+  uiFilters?: UIFilters;
+  environment: string;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

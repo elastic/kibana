@@ -13,3 +13,5 @@ export const rangeRt = t.type({
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });
+
+export const environmentRt = t.type({ environment: t.string });

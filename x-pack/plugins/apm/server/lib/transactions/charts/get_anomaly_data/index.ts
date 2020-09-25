@@ -26,14 +26,16 @@ export async function getAnomalySeries({
   setup,
   logger,
   uiFilters,
+  environment,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
   timeSeriesDates: number[];
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
   logger: Logger;
-  uiFilters: UIFilters;
+  uiFilters?: UIFilters;
+  environment: string;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
@@ -46,16 +48,18 @@ export async function getAnomalySeries({
   }
 
   // don't fetch anomalies when no specific environment is selected
-  if (uiFilters.environment === ENVIRONMENT_ALL.value) {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
     return;
   }
 
   // don't fetch anomalies if unknown uiFilters are applied
   const knownFilters = ['environment', 'serviceName'];
-  const hasUnknownFiltersApplied = Object.entries(uiFilters)
-    .filter(([key, value]) => !!value)
-    .map(([key]) => key)
-    .some((uiFilterName) => !knownFilters.includes(uiFilterName));
+  const hasUnknownFiltersApplied =
+    uiFilters &&
+    Object.entries(uiFilters)
+      .filter(([key, value]) => !!value)
+      .map(([key]) => key)
+      .some((uiFilterName) => !knownFilters.includes(uiFilterName));
 
   if (hasUnknownFiltersApplied) {
     return;
@@ -72,10 +76,7 @@ export async function getAnomalySeries({
     return;
   }
 
-  const mlJobIds = await getMLJobIds(
-    setup.ml.anomalyDetectors,
-    uiFilters.environment
-  );
+  const mlJobIds = await getMLJobIds(setup.ml.anomalyDetectors, environment);
 
   const jobId = mlJobIds[0];
 
