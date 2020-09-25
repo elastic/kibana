@@ -5,6 +5,7 @@
  */
 
 import { ElasticsearchAssetType, Installation, KibanaAssetType } from '../../../types';
+import { BulkInstallPackagesError } from '../../../errors';
 import { SavedObject } from 'src/core/server';
 
 jest.mock('./install');
@@ -53,7 +54,7 @@ describe('install', () => {
       appContextService.stop();
     });
     it('should return an array of Installation objects when successful', async () => {
-      mockedBulkInstallPackages.mockImplementation(async function () {
+      mockedBulkInstallPackages.mockImplementationOnce(async function () {
         return [
           {
             name: 'blah',
@@ -67,6 +68,47 @@ describe('install', () => {
       const soClient = savedObjectsClientMock.create();
       const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
       expect(resp).toEqual([mockInstallation.attributes]);
+    });
+    it('should throw an error when on the first IBulkInstallPackageError it finds', async () => {
+      mockedBulkInstallPackages.mockImplementationOnce(async function () {
+        return [
+          {
+            name: 'success one',
+            assets: [],
+            newVersion: '',
+            oldVersion: '',
+            statusCode: 200,
+          },
+          {
+            name: 'success two',
+            assets: [],
+            newVersion: '',
+            oldVersion: '',
+            statusCode: 200,
+          },
+          {
+            name: 'failure one',
+            statusCode: 499,
+            error: 'strings work',
+          },
+          {
+            name: 'success three',
+            assets: [],
+            newVersion: '',
+            oldVersion: '',
+            statusCode: 200,
+          },
+          {
+            name: 'failure two',
+            statusCode: 499,
+            error: 'will not report this or any below',
+          },
+        ];
+      });
+      const soClient = savedObjectsClientMock.create();
+      const installPromise = ensureInstalledDefaultPackages(soClient, jest.fn());
+      expect(installPromise).rejects.toThrow(BulkInstallPackagesError);
+      expect(installPromise).rejects.toThrow('strings work');
     });
   });
 });
