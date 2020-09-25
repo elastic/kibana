@@ -134,7 +134,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
-    saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+    saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
   };
 }
 
