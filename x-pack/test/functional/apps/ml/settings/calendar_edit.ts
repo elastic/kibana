@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
   const newJobGroups = ['farequote'];
 
-  describe('calendar edit', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/78288
+  describe.skip('calendar edit', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
