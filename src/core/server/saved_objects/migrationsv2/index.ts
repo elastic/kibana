@@ -44,6 +44,9 @@ export type State = {
   target: string;
   error?: Error;
   aliases: Record<string, string>;
+  retryCount: number;
+  retryDelay: number;
+  log: Array<{ level: 'error' | 'info'; message: string }>;
 };
 type Model = (currentState: State, result: ActionResponse) => State;
 type ActionThunk = () => Promise<ActionResponse>;
@@ -59,13 +62,35 @@ function indexVersion(indexName: string) {
 }
 
 export const model: Model = (currentState: State, res: ActionResponse): State => {
-  let stateP = currentState;
-  const control = currentState.controlState;
+  const stateP: State = { ...currentState, ...{ log: [] } };
+  const control = stateP.controlState;
 
   if ('error' in res) {
-    stateP = { ...stateP, ...{ controlState: 'FATAL' }, ...{ error: res.error } };
-    return stateP;
-  } else if (control === 'INIT') {
+    if (stateP.retryCount === 5) {
+      stateP.error = res.error;
+      stateP.controlState = 'FATAL';
+      stateP.log = [
+        { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
+      ];
+    } else {
+      stateP.error = res.error;
+      stateP.retryCount = stateP.retryCount + 1;
+      stateP.retryDelay = 1000 * Math.pow(2, stateP.retryCount + 1); // 2s, 4s, 8s, 16s, 32s, 64s
+      stateP.log = [
+        {
+          level: 'error',
+          message:
+            chalk.red('ERROR: ') +
+            `Action failed with '${res.error.message}'. Retrying attempt ${
+              stateP.retryCount
+            } out of 5 in ${stateP.retryDelay / 1000} seconds.`,
+        },
+        ...stateP.log,
+      ];
+    }
+  }
+
+  if (control === 'INIT') {
     if ('fetchAliases' in res) {
       if (
         res.fetchAliases['.kibana_current'] != null &&
@@ -75,7 +100,7 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
         // `.kibana_current` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
         // been completed.
-        stateP = { ...stateP, ...{ controlState: 'DONE' } };
+        stateP.controlState = 'DONE';
         // TODO, go to step (6)
       } else if (
         res.fetchAliases['.kibana_current'] != null &&
@@ -83,48 +108,37 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
       ) {
         // `.kibana_current` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
-        stateP = {
-          ...stateP,
-          ...{
-            controlState: 'FATAL',
-            error: new Error(
-              'The .kibana_current alias is pointing to a newer version of Kibana: v' +
-                indexVersion(res.fetchAliases['.kibana_current'])
-            ),
-          },
-        };
+        stateP.controlState = 'FATAL';
+        stateP.error = new Error(
+          'The .kibana_current alias is pointing to a newer version of Kibana: v' +
+            indexVersion(res.fetchAliases['.kibana_current'])
+        );
       } else if (res.fetchAliases['.kibana_current'] ?? res.fetchAliases['.kibana'] ?? false) {
         //  The source index is:
         //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
         //  2. the index the `.kibana` alias points to, or if it doesn't exist,
         const source = res.fetchAliases['.kibana_current'] || res.fetchAliases['.kibana'];
-        stateP = {
-          ...stateP,
-          ...{ controlState: 'SET_SOURCE_WRITE_BLOCK' },
-          ...{ source, target: `.kibana_${stateP.kibanaVersion}_001` },
-        };
+
+        stateP.controlState = 'SET_SOURCE_WRITE_BLOCK';
+        stateP.source = source;
+        stateP.target = `.kibana_${stateP.kibanaVersion}_001`;
       } else {
         // TODO: Check if we need to migrate from a v6.x `.kibana` index, source = '.kibana'
         // This cluster doesn't have any existing Kibana indices, create a new
         // version specific index.
-        stateP = {
-          ...stateP,
-          ...{
-            controlState: 'INIT_NEW_INDICES',
-            target: `.kibana_${stateP.kibanaVersion}_001`,
-          },
-        };
+        stateP.controlState = 'INIT_NEW_INDICES';
+        stateP.target = `.kibana_${stateP.kibanaVersion}_001`;
       }
     }
     return stateP;
   } else if (control === 'SET_SOURCE_WRITE_BLOCK') {
     if ('setIndexWriteBlock' in res) {
-      stateP = { ...stateP, ...{ controlState: 'CLONE_SOURCE' } };
+      stateP.controlState = 'CLONE_SOURCE';
     }
     return stateP;
   } else if (control === 'CLONE_SOURCE') {
     if ('cloneIndex' in res) {
-      stateP = { ...stateP, ...{ controlState: 'DONE' } };
+      stateP.controlState = 'DONE';
     }
     return stateP;
   } else if (control === 'DONE' || control === 'FATAL' || control === 'INIT_NEW_INDICES') {
@@ -137,13 +151,20 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
 export const next: NextAction = (client: ElasticsearchClient, state: State) => {
   // If for every state there is only one action (deterministic) we can define
   // next as a state -> action set.
+  const delay = <F extends () => any>(fn: F): (() => ReturnType<F>) => {
+    return () => {
+      return state.retryDelay > 0
+        ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
+        : fn();
+    };
+  };
   const control = state.controlState;
   if (control === 'INIT') {
-    return Actions.fetchAliases(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']);
+    return delay(Actions.fetchAliases(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
   } else if (control === 'SET_SOURCE_WRITE_BLOCK') {
-    return Actions.setIndexWriteBlock(client, state.source);
+    return delay(Actions.setIndexWriteBlock(client, state.source));
   } else if (control === 'CLONE_SOURCE') {
-    return Actions.cloneIndex(client, state.source, state.target);
+    return delay(Actions.cloneIndex(client, state.source, state.target));
   } else if (control === 'FATAL' || control === 'INIT_NEW_INDICES') {
     return null;
   } else if (control === 'DONE') {
@@ -183,6 +204,9 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
     source: '',
     target: '',
     error: undefined,
+    retryCount: 0,
+    retryDelay: 0,
+    log: [],
   };
 
   let controlStateStepCounter = 0;
@@ -198,6 +222,9 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
     console.log(chalk.cyanBright('ACTION RESPONSE\n'), actionResult);
 
     const newState = model(state, actionResult);
+    if (newState.log.length > 0) {
+      newState.log.forEach((log) => console[log.level](log.message));
+    }
     controlStateStepCounter =
       newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
     if (controlStateStepCounter > 10) {

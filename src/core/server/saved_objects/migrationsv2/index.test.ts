@@ -27,6 +27,9 @@ const initState: State = {
   source: '',
   target: '',
   error: undefined,
+  log: [],
+  retryCount: 0,
+  retryDelay: 0,
 };
 
 describe('migrations state machine', () => {
@@ -121,6 +124,7 @@ describe('migrations state machine', () => {
   });
 
   describe('next', () => {
+    it.todo('when state.retryDelay > 0 delays execution of the next action');
     it.todo('INIT returns fetchAliases thunk');
     it.todo('SET_SOURCE_WRITE_BLOCK returns setIndexWriteBlock thunk');
     it.todo('CLONE_SOURCE returns cloneIndex thunk');
