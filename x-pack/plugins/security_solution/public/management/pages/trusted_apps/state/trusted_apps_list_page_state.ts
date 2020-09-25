@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerApiError } from '../../../../common/types';
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
 import { TrustedAppsUrlParams } from '../types';
-import { ServerApiError } from '../../../../common/types';
 
 export interface PaginationInfo {
   index: number;
@@ -18,6 +18,7 @@ export interface TrustedAppsListData {
   items: TrustedApp[];
   totalItemsCount: number;
   paginationInfo: PaginationInfo;
+  timestamp: number;
 }
 
 /** Store State when an API request has been sent to create a new trusted app entry */
@@ -42,7 +43,13 @@ export interface TrustedAppsListPageState {
   listView: {
     currentListResourceState: AsyncResourceState<TrustedAppsListData>;
     currentPaginationInfo: PaginationInfo;
+    freshDataTimestamp: number;
     show: TrustedAppsUrlParams['show'] | undefined;
+  };
+  deletionDialog: {
+    entry?: TrustedApp;
+    confirmed: boolean;
+    submissionResourceState: AsyncResourceState;
   };
   createView:
     | undefined

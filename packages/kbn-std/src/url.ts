@@ -18,11 +18,7 @@
  */
 
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
-
-// duplicate type from 'query-string' to avoid adding the d.ts file to all packages depending on kbn-std
-export interface ParsedQuery<T = string> {
-  [key: string]: T | T[] | null | undefined;
-}
+import type { ParsedQuery } from 'query-string';
 
 /**
  * We define our own typings because the current version of @types/node

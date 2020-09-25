@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, CommonProps, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, CommonProps, EuiText, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
 
@@ -25,6 +25,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     onAndClicked,
     onEntryRemove,
     onEntryChange,
+    onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useCallback(
@@ -46,6 +47,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
               entries={entries}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              onVisited={onVisited}
               data-test-subj={getTestId('group1')}
             />
           )}
@@ -72,17 +74,16 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
 
 LogicalConditionBuilder.displayName = 'LogicalConditionBuilder';
 
-// FIXME:PT need to style this better.
 const NoEntries = memo(() => {
   return (
-    <div>
-      <EuiText>
+    <EuiPanel paddingSize="l">
+      <EuiText textAlign="center" size="s" color="subdued">
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.logicalConditionBuilder.noEntries"
-          defaultMessage="No entries"
+          defaultMessage="No conditions defined"
         />
       </EuiText>
-    </div>
+    </EuiPanel>
   );
 });
 

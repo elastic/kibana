@@ -5,7 +5,7 @@
  */
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
-import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -14,7 +14,7 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe(`Resolver: when analyzing a tree with no ancestors and two children, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -32,7 +32,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
 
   beforeEach(() => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
@@ -85,6 +88,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
+          ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
           ['process.executable', 'executable'],
           ['process.pid', '0'],
           ['user.name', 'user.name'],
@@ -125,6 +129,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
         ['user.name', 'user.name'],
@@ -165,6 +170,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
         ['process.executable', 'executable'],
         ['process.pid', '0'],
         ['user.name', 'user.name'],
@@ -183,6 +189,38 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           },
         })
       );
+    });
+    describe("and when the user clicks the link to the node's events", () => {
+      beforeEach(async () => {
+        const nodeEventsListLink = await simulator().resolve(
+          'resolver:node-detail:node-events-link'
+        );
+
+        if (nodeEventsListLink) {
+          nodeEventsListLink.simulate('click', { button: 0 });
+        }
+      });
+      it('should show a link to view 2 registry events', async () => {
+        await expect(
+          simulator().map(() => {
+            // The link text is split across two columns. The first column is the count and the second column has the type.
+            const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
+            const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
+            return {
+              typeLength: type.length,
+              linkLength: link.length,
+              typeText: type.text(),
+              linkText: link.text(),
+            };
+          })
+        ).toYieldEqualTo({
+          typeLength: 1,
+          linkLength: 1,
+          linkText: 'registry',
+          // EUI's Table adds the column name to the value.
+          typeText: 'Count2',
+        });
+      });
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {

@@ -16,11 +16,20 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
-describe('TrustedAppsPage', () => {
+describe('When on the Trusted Apps Page', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  const originalScrollTo = window.scrollTo;
+
+  beforeAll(() => {
+    window.scrollTo = () => {};
+  });
+
+  afterAll(() => {
+    window.scrollTo = originalScrollTo;
+  });
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -32,10 +41,15 @@ describe('TrustedAppsPage', () => {
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
     });
+    window.scrollTo = jest.fn();
   });
 
-  test('rendering', () => {
-    expect(render()).toMatchSnapshot();
+  it('should render expected set of list columns', () => {
+    const { getByTestId } = render();
+    const tableColumns = Array.from(
+      getByTestId('trustedAppsList').querySelectorAll('table th')
+    ).map((th) => (th.textContent || '').trim());
+    expect(tableColumns).toEqual(['Name', 'OS', 'Date Created', 'Created By', 'Actions']);
   });
 
   it('should display a Add Trusted App button', async () => {
@@ -79,8 +93,8 @@ describe('TrustedAppsPage', () => {
     });
 
     it('should display create form', async () => {
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('addTrustedAppFlyout-createForm')).toMatchSnapshot();
+      const { queryByTestId } = await renderAndClickAddButton();
+      expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
     });
 
     it('should initially have the flyout Add button disabled', async () => {

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ANOMALY_SEVERITY } from '../../ml/common';
 
-import { EuiTheme } from '../../../legacy/common/eui_styled_components';
+import { EuiTheme } from '../../xpack_legacy/common';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',

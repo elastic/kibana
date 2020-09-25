@@ -53,16 +53,18 @@ export function RumDashboard() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={3}>
+            <EuiPanel>
               <VisitorBreakdown />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiPanel>
               <VisitorBreakdownMap />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -14,7 +14,6 @@ import {
   EVENT_OUTCOME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../projections/util/merge_projection';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ServicesItemsSetup,
   ServicesItemsProjection,
@@ -258,6 +257,7 @@ export const getTransactionRates = async ({
 export const getTransactionErrorRates = async ({
   setup,
   projection,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
@@ -265,12 +265,25 @@ export const getTransactionErrorRates = async ({
     terms: {
       field: EVENT_OUTCOME,
     },
+    aggs: {
+      count: {
+        value_count: {
+          field: getTransactionDurationFieldForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        },
+      },
+    },
   };
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        events: [ProcessorEvent.transaction],
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
       body: {
         size: 0,
@@ -319,11 +332,11 @@ export const getTransactionErrorRates = async ({
     const successfulTransactions =
       outcomeResponse.buckets.find(
         (bucket) => bucket.key === EventOutcome.success
-      )?.doc_count ?? 0;
+      )?.count.value ?? 0;
     const failedTransactions =
       outcomeResponse.buckets.find(
         (bucket) => bucket.key === EventOutcome.failure
-      )?.doc_count ?? 0;
+      )?.count.value ?? 0;
 
     return failedTransactions / (successfulTransactions + failedTransactions);
   }

@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('Usage', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/78494
+  describe.skip('Usage', () => {
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
@@ -115,8 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/76581
-    describe.skip('from new jobs posted', () => {
+    describe('from new jobs posted', () => {
       it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
