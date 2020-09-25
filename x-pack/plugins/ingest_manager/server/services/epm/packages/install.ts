@@ -45,6 +45,7 @@ import {
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
+import { bulkInstallPackages } from './bulk_install_packages';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -169,8 +170,8 @@ export async function handleInstallPackageFailure({
   }
 }
 
-type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
-function bulkInstallErrorToOptions({
+export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
+export function bulkInstallErrorToOptions({
   pkgToUpgrade,
   error,
 }: {
@@ -192,7 +193,7 @@ interface UpgradePackageParams {
   latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
 }
-async function upgradePackage({
+export async function upgradePackage({
   savedObjectsClient,
   callCluster,
   installedPkg,
@@ -238,51 +239,11 @@ async function upgradePackage({
   }
 }
 
-interface BulkInstallPackagesParams {
+export interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
   packagesToUpgrade: string[];
   callCluster: CallESAsCurrentUser;
 }
-export async function bulkInstallPackages({
-  savedObjectsClient,
-  packagesToUpgrade,
-  callCluster,
-}: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
-  const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
-    Promise.all([
-      getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
-      Registry.fetchFindLatestPackage(pkgToUpgrade),
-    ])
-  );
-  const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
-  const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      const [installedPkg, latestPkg] = result.value;
-      return upgradePackage({
-        savedObjectsClient,
-        callCluster,
-        installedPkg,
-        latestPkg,
-        pkgToUpgrade,
-      });
-    } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
-    }
-  });
-  const installResults = await Promise.allSettled(installResponsePromises);
-  const installResponses = installResults.map((result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      return result.value;
-    } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
-    }
-  });
-
-  return installResponses;
-}
-
 interface InstallPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;

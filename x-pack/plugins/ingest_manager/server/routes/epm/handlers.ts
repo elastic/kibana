@@ -26,10 +26,12 @@ import {
   BulkUpgradePackagesFromRegistryRequestSchema,
 } from '../../types';
 import {
+  bulkInstallPackages,
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
+  handleInstallPackageFailure,
   installPackage,
   removeInstallation,
   getLimitedPackages,
@@ -37,10 +39,6 @@ import {
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
-import {
-  handleInstallPackageFailure,
-  bulkInstallPackages,
-} from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,

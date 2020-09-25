@@ -12,6 +12,8 @@ import {
   InstallationStatus,
   KibanaAssetType,
 } from '../../../types';
+
+export { bulkInstallPackages } from './bulk_install_packages';
 export {
   getCategories,
   getFile,
@@ -23,7 +25,7 @@ export {
   SearchParams,
 } from './get';
 
-export { installPackage, ensureInstalledPackage } from './install';
+export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
 type RequiredPackage = 'system' | 'endpoint';
