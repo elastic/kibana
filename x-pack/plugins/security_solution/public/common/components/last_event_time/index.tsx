@@ -8,8 +8,7 @@ import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo } from 'react';
 
-import { DocValueFields } from '../../../../common/search_strategy';
-import { LastEventIndexKey } from '../../../graphql/types';
+import { DocValueFields, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
