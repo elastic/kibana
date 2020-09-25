@@ -219,7 +219,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: (val) => val,
+          tickFormatter: series.length === 1 ? undefined : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
