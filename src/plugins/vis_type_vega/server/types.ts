@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Observable } from 'rxjs';
 
 export type ConfigObservable = Observable<{ kibana: { index: string } }>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeVegaPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeVegaPluginStart {}

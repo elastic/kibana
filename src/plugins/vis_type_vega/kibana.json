@@ -3,6 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector"],
+  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
 }

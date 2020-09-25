@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { countBy, get, groupBy, mapValues, max, min, values } from 'lodash';
+import hjson from 'hjson';
+import { get } from 'lodash';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 
 import { LegacyAPICaller } from 'src/core/server';
-import { ConfigObservable } from './types';
+import { ConfigObservable } from '../types';
 
-const VIS_USAGE_TYPE = 'vega';
+export type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+const VEGA_USAGE_TYPE = 'vis_type_vega';
 
-interface VisSummary {
-  vega_spec_total: string;
-  space: string;
-  past_days: number;
-}
+const checkVegaSchemaType = (schemaURL: string, type: 'vega' | 'vega-lite') =>
+  schemaURL.includes(`//vega.github.io/schema/${type}/`);
 
-/*
- * Parse the response data into telemetry payload
- */
-async function getStats(callCluster: LegacyAPICaller, index: string) {
+const getStats = async (callCluster: LegacyAPICaller, index: string) => {
   const searchParams = {
-    size: 10000, // elasticsearch index.max_result_window default value
+    size: 10000,
     index,
     ignoreUnavailable: true,
     filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
@@ -56,45 +50,48 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
     return;
   }
 
-  // `map` to get the raw types
-  const visSummaries: VisSummary[] = esResponse.hits.hits.map((hit) => {
-    const spacePhrases = hit._id.split(':');
-    const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
-    const visualization = get(hit, '_source.visualization', { visState: '{}' });
-    const visState: { type?: string } = JSON.parse(visualization.visState);
-    return {
-      type: visState.type || '_na_',
-      space,
-    };
-  });
+  return esResponse.hits.hits.reduce(
+    (telemetry, hit) => {
+      const visualization = get(hit, '_source.visualization', { visState: '{}' });
+      const visState: { type?: string; params?: { spec?: string } } = JSON.parse(
+        visualization.visState
+      );
 
-  // organize stats per type
-  const visTypes = groupBy(visSummaries, 'type');
+      if (visState.type === 'vega' && visState.params?.spec)
+        try {
+          const spec = hjson.parse(visState.params.spec, { legacyRoot: false });
 
-  // get the final result
-  return mapValues(visTypes, (curr) => {
-    const total = curr.length;
-    const spacesBreakdown = countBy(curr, 'space');
-    const spaceCounts: number[] = values(spacesBreakdown);
+          if (spec) {
+            if (checkVegaSchemaType(spec.$schema, 'vega')) {
+              telemetry.vega_lib_specs_total++;
+            }
+            if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
+              telemetry.vega_lite_lib_specs_total++;
+            }
+            if (spec.config?.kibana?.type === 'map') {
+              telemetry.vega_map_layout_total++;
+            }
+          }
+        } catch (e) {
+          // Let it go, the data is invalid and we'll don't need to handle it
+        }
 
-    return {
-      total,
-      spaces_min: min(spaceCounts),
-      spaces_max: max(spaceCounts),
-      spaces_avg: total / spaceCounts.length,
-      saved_7_days_total: curr.filter((c) => c.past_days <= 7).length,
-      saved_30_days_total: curr.filter((c) => c.past_days <= 30).length,
-      saved_90_days_total: curr.filter((c) => c.past_days <= 90).length,
-    };
-  });
-}
+      return telemetry;
+    },
+    {
+      vega_lib_specs_total: 0,
+      vega_lite_lib_specs_total: 0,
+      vega_map_layout_total: 0,
+    }
+  );
+};
 
 export function getUsageCollector(config: ConfigObservable) {
   return {
-    type: VIS_USAGE_TYPE,
+    type: VEGA_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
-      const index = (await config.pipe(first()).toPromise()).kibana.index;
+      const { index } = (await config.pipe(first()).toPromise()).kibana;
 
       return await getStats(callCluster, index);
     },

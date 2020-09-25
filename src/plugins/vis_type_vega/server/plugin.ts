@@ -18,14 +18,27 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { getUsageCollector } from './get_usage_collector';
-import { ConfigObservable } from '../types';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { VisTypeVegaPluginSetup, VisTypeVegaPluginStart } from './types';
+import { registerVegaUsageCollector } from './usage_collector';
+import { ConfigObservable } from './types';
 
-export function registerVegaUsageCollector(
-  collectorSet: UsageCollectionSetup,
-  config: ConfigObservable
-): void {
-  const collector = collectorSet.makeUsageCollector(getUsageCollector(config));
+export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
+  private readonly config: ConfigObservable;
 
-  collectorSet.registerCollector(collector);
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.legacy.globalConfig$;
+  }
+
+  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+    if (plugins.usageCollection) {
+      registerVegaUsageCollector(plugins.usageCollection, this.config);
+    }
+    return {};
+  }
+
+  public start(core: CoreStart) {
+    return {};
+  }
+  public stop() {}
 }
