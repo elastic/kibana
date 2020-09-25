@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { getEmptyValue } from '../empty_value';
-import { LastEventIndexKey } from '../../../graphql/types';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -48,8 +48,8 @@ describe('Last Event Time Stat', () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
       false,
       {
-        lastSeen: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.lastSeen,
-        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+        lastSeen: mockLastEventTimeQuery.lastSeen,
+        errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
     const wrapper = mount(
@@ -64,7 +64,7 @@ describe('Last Event Time Stat', () => {
       false,
       {
         lastSeen: 'something-invalid',
-        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+        errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
     const wrapper = mount(
@@ -80,7 +80,7 @@ describe('Last Event Time Stat', () => {
       false,
       {
         lastSeen: null,
-        errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+        errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
     const wrapper = mount(
