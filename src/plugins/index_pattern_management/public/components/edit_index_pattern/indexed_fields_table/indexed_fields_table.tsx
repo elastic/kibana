@@ -21,7 +21,6 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
-import { getFieldFormat } from './lib';
 import { IndexedFieldItem } from './types';
 
 interface IndexedFieldsTableProps {
@@ -73,7 +72,8 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             displayName: field.displayName,
-            format: getFieldFormat(indexPattern, field.name),
+            // format: // getFieldFormat(indexPattern, field.name),
+            format: indexPattern.getFormatterForField(field)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
           };
