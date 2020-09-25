@@ -23,38 +23,6 @@ import { searchMigrations } from './search_migrations';
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration search', () => {
-  describe('6.7.2', () => {
-    const migrationFn = searchMigrations['6.7.2'];
-
-    it('should migrate obsolete match_all query', () => {
-      const migratedDoc = migrationFn(
-        {
-          type: 'search',
-          attributes: {
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                query: {
-                  match_all: {},
-                },
-              }),
-            },
-          },
-        },
-        savedObjectMigrationContext
-      );
-      const migratedSearchSource = JSON.parse(
-        migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
-      );
-
-      expect(migratedSearchSource).toEqual({
-        query: {
-          query: '',
-          language: 'kuery',
-        },
-      });
-    });
-  });
-
   describe('7.0.0', () => {
     const migrationFn = searchMigrations['7.0.0'];
 
@@ -326,6 +294,57 @@ Object {
       const migratedDoc = migrationFn(doc, savedObjectMigrationContext);
 
       expect(migratedDoc).toEqual(doc);
+    });
+  });
+
+  describe('7.8.2', () => {
+    const migrationFn = searchMigrations['7.8.2'];
+
+    it('should migrate obsolete match_all query', () => {
+      const migratedDoc = migrationFn(
+        {
+          type: 'search',
+          attributes: {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                query: {
+                  match_all: {},
+                },
+              }),
+            },
+          },
+        },
+        savedObjectMigrationContext
+      );
+      const migratedSearchSource = JSON.parse(
+        migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+
+      expect(migratedSearchSource).toEqual({
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      });
+    });
+
+    it('should return original doc if searchSourceJSON cannot be parsed', () => {
+      const migratedDoc = migrationFn(
+        {
+          type: 'search',
+          attributes: {
+            kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+          },
+        },
+        savedObjectMigrationContext
+      );
+
+      expect(migratedDoc).toEqual({
+        type: 'search',
+        attributes: {
+          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        },
+      });
     });
   });
 });

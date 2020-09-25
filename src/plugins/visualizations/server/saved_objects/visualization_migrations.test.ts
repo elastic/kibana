@@ -150,32 +150,6 @@ describe('migration visualization', () => {
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
       });
-
-      it('should migrate obsolete match_all query', () => {
-        const migratedDoc = migrate({
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                query: {
-                  match_all: {},
-                },
-              }),
-            },
-          },
-        });
-        const migratedSearchSource = JSON.parse(
-          migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
-        );
-
-        expect(migratedSearchSource).toEqual({
-          query: {
-            query: '',
-            language: 'kuery',
-          },
-        });
-      });
     });
   });
 
@@ -1484,6 +1458,57 @@ describe('migration visualization', () => {
 
       expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
       expect(actual.params.row).toBeTruthy();
+    });
+  });
+
+  describe('7.8.2', () => {
+    const migrationFn = visualizationSavedObjectTypeMigrations['7.8.2'];
+
+    it('should migrate obsolete match_all query', () => {
+      const migratedDoc = migrationFn(
+        {
+          type: 'area',
+          attributes: {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                query: {
+                  match_all: {},
+                },
+              }),
+            },
+          },
+        },
+        savedObjectMigrationContext
+      );
+      const migratedSearchSource = JSON.parse(
+        migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+
+      expect(migratedSearchSource).toEqual({
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      });
+    });
+
+    it('should return original doc if searchSourceJSON cannot be parsed', () => {
+      const migratedDoc = migrationFn(
+        {
+          type: 'area',
+          attributes: {
+            kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+          },
+        },
+        savedObjectMigrationContext
+      );
+
+      expect(migratedDoc).toEqual({
+        type: 'area',
+        attributes: {
+          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        },
+      });
     });
   });
 
