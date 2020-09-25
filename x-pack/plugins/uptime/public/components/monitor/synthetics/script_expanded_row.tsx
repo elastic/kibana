@@ -199,11 +199,13 @@ const ConsoleOutputSteps: FC<ConsoleOutputStepsProps> = ({ journey }) => {
       <EuiSpacer />
       <p>This journey failed to run, recorded console output is shown below</p>
       <EuiSpacer />
-      {journey.steps.map((s) => (
-        <p>
-          <span>{s.synthetics?.type}</span>: <span>{s.synthetics?.payload?.message}</span>
-        </p>
-      ))}
+      <EuiCodeBlock>
+        {journey.steps.map((s) => (
+          <p>
+            <span>{s.synthetics?.type}</span>: <span>{s.synthetics?.payload?.message}</span>
+          </p>
+        ))}
+      </EuiCodeBlock>
     </div>
   );
 };
