@@ -24,20 +24,23 @@ import {
   KibanaContext,
   Render,
 } from 'src/plugins/expressions/public';
-import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
+import {
+  getTimelionRequestHandler,
+  TimelionSuccessResponse,
+} from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
 import { Filter, Query, TimeRange } from '../../data/common';
 
 type Input = KibanaContext | null;
-type Output = Promise<Render<RenderValue>>;
+type Output = Promise<Render<TimelionRenderValue>>;
 interface Arguments {
   expression: string;
   interval: string;
 }
 
-interface RenderValue {
-  visData: Input;
+export interface TimelionRenderValue {
+  visData: TimelionSuccessResponse;
   visType: 'timelion';
   visParams: VisParams;
 }
@@ -89,7 +92,7 @@ export const getTimelionVisualizationConfig = (
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'timelion_vis',
       value: {
         visParams,
         visType: TIMELION_VIS_NAME,

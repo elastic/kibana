@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '../../kibana_react/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
-import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions, TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -49,11 +48,6 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
         expression: '.es(*)',
         interval: 'auto',
       },
-      component: (props: TimelionVisComponentProp) => (
-        <KibanaContextProvider services={{ ...dependencies }}>
-          <TimelionVisComponent {...props} />
-        </KibanaContextProvider>
-      ),
     },
     editorConfig: {
       optionsTemplate: (props: TimelionOptionsProps) => (
