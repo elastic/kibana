@@ -379,4 +379,15 @@ export class IndexPattern implements IIndexPattern {
       );
     }
   }
+
+  /**
+   * Provide a field, get its formatter
+   * @param field
+   */
+  getFormatterForFieldNoDefault(field: IndexPatternField | IndexPatternField['spec'] | IFieldType) {
+    const formatSpec = this.fieldFormatMap[field.name];
+    if (formatSpec) {
+      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
+    }
+  }
 }

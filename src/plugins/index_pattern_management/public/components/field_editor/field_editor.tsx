@@ -208,7 +208,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
+      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec)?.type?.id,
       fieldFormatParams: format.params(),
     });
   }
@@ -247,7 +247,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onFormatChange = (formatId: string, params?: any) => {
-    const { spec, fieldTypeFormats } = this.state;
+    const { fieldTypeFormats } = this.state;
     const { uiSettings, data } = this.context.services;
 
     const FieldFormat = data.fieldFormats.getType(
@@ -255,14 +255,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     ) as FieldFormatInstanceType;
 
     const newFormat = new FieldFormat(params, (key) => uiSettings.get(key));
-    // spec.format = newFormat;
-    // new FieldFormat(params, (key) => uiSettings.get(key)).toJSON()
-    spec.format = { id: formatId, params };
 
     this.setState({
-      // fieldFormatId: FieldFormat.id,
-      // fieldFormatParams: newFormat.params(),
-      // format: newFormat,
       fieldFormatId: formatId,
       fieldFormatParams: params,
       format: newFormat,
@@ -520,7 +514,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldType={spec.type}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
-            fieldFormatParams={fieldFormatParams}
+            fieldFormatParams={fieldFormatParams || {}}
             fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
@@ -780,7 +774,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, fieldFormatParams } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -815,9 +809,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fields.add(field);
     }
 
-    if (fieldFormatId && field.format) {
-      // indexPattern.fieldFormatMap[field.name] = undefined;
-      indexPattern.setFieldFormat(field.name, field.format);
+    if (fieldFormatId) {
+      indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
       indexPattern.deleteFieldFormat(field.name);
     }
