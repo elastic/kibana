@@ -255,11 +255,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     ) as FieldFormatInstanceType;
 
     const newFormat = new FieldFormat(params, (key) => uiSettings.get(key));
-    spec.format = newFormat;
+    // spec.format = newFormat;
+    // new FieldFormat(params, (key) => uiSettings.get(key)).toJSON()
+    spec.format = { id: formatId, params };
 
     this.setState({
-      fieldFormatId: FieldFormat.id,
-      fieldFormatParams: newFormat.params(),
+      // fieldFormatId: FieldFormat.id,
+      // fieldFormatParams: newFormat.params(),
+      // format: newFormat,
+      fieldFormatId: formatId,
+      fieldFormatParams: params,
       format: newFormat,
     });
   };

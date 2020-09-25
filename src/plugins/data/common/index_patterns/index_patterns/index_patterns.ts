@@ -347,6 +347,7 @@ export class IndexPatternsService {
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
+    console.log('index pattern loaded', parsedFieldFormatMap);
     return {
       id,
       version,
@@ -383,9 +384,11 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
+    /*
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
+      */
 
     const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
@@ -416,12 +419,14 @@ export class IndexPatternsService {
       }
     }
 
+    /*
     Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
       const field = spec.fields?.[fieldName];
       if (field) {
         field.format = value;
       }
     });
+    */
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);

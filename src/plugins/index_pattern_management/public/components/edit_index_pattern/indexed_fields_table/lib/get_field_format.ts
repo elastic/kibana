@@ -20,8 +20,11 @@
 import { get } from 'lodash';
 import { IIndexPattern } from '../../../../../../data/public';
 
+// todo index pattern
 export function getFieldFormat(indexPattern?: IIndexPattern, fieldName?: string): string {
+  const field = indexPattern?.fields?.getByName()
   return indexPattern && fieldName
-    ? get(indexPattern, ['fieldFormatMap', fieldName, 'type', 'title'])
+    // ? get(indexPattern, ['fieldFormatMap', fieldName, 'type', 'title'])
+    indexPattern?.getFormatterForField(fieldname)
     : '';
 }
