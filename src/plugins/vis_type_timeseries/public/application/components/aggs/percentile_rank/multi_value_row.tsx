@@ -18,6 +18,7 @@
  */
 import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
+
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
@@ -51,7 +52,7 @@ export const MultiValueRow = ({
   return (
     <div className="tvbAggRow__multiValueRow">
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFieldNumber
             value={model.value === '' ? '' : Number(model.value)}
             placeholder="0"
@@ -68,7 +69,7 @@ export const MultiValueRow = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size="s" />
     </div>
   );
 };

@@ -136,17 +136,13 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               />
             }
           >
-            <>
-              {model.values && (
-                <PercentileRankValues
-                  disableAdd={isTablePanel}
-                  disableDelete={isTablePanel}
-                  showOnlyLastRow={isTablePanel}
-                  model={model.values}
-                  onChange={handlePercentileRankValuesChange}
-                />
-              )}
-            </>
+            <PercentileRankValues
+              disableAdd={isTablePanel}
+              disableDelete={isTablePanel}
+              showOnlyLastRow={isTablePanel}
+              model={model.values!}
+              onChange={handlePercentileRankValuesChange}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
