@@ -15,6 +15,7 @@ import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   runtime: {
     value: 'runtime',
+    isBeta: true,
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
       defaultMessage: 'Runtime',
     }),

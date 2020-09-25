@@ -11,6 +11,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
@@ -49,6 +50,8 @@ export const RuntimeTypeParameter = ({ stack }: Props) => {
                 fullWidth
               />
             </EuiFormRow>
+
+            <EuiSpacer size="m" />
 
             {/* Field description */}
             {typeDefinition && (

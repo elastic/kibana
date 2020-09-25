@@ -19,6 +19,7 @@ export interface DataTypeDefinition {
   };
   subTypes?: { label: string; types: SubType[] };
   description?: () => ReactNode;
+  isBeta?: boolean;
 }
 
 export interface ParameterDefinition {
