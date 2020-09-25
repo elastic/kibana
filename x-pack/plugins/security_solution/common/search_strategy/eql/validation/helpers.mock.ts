@@ -5,7 +5,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { ValidationErrorResponse } from './helpers';
+import { ErrorResponse } from './helpers';
 
 export const getValidEqlResponse = (): ApiResponse['body'] => ({
   is_partial: false,
@@ -21,7 +21,7 @@ export const getValidEqlResponse = (): ApiResponse['body'] => ({
   },
 });
 
-export const getEqlResponseWithValidationError = (): ValidationErrorResponse => ({
+export const getEqlResponseWithValidationError = (): ErrorResponse => ({
   error: {
     root_cause: [
       {
@@ -36,7 +36,7 @@ export const getEqlResponseWithValidationError = (): ValidationErrorResponse => 
   },
 });
 
-export const getEqlResponseWithValidationErrors = (): ValidationErrorResponse => ({
+export const getEqlResponseWithValidationErrors = (): ErrorResponse => ({
   error: {
     root_cause: [
       {

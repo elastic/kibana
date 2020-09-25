@@ -22,8 +22,10 @@ import {
 
 export async function getWebCoreVitals({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,

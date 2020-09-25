@@ -66,7 +66,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
           entityID,
           events,
           nextEvent: null,
-        } as ResolverRelatedEvents);
+        });
       },
 
       /**

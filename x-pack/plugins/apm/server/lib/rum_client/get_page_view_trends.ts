@@ -18,6 +18,7 @@ export async function getPageViewTrends({
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   breakdowns?: string;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,

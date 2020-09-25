@@ -113,15 +113,15 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         handleSubmit={handleSubmit}
       />
     );
-  } else {
-    return (
-      <AddProcessorForm
-        {...rest}
-        form={form}
-        esDocsBasePath={services.documentation.getEsDocsBasePath()}
-        closeFlyout={onClose}
-        handleSubmit={handleSubmit}
-      />
-    );
   }
+
+  return (
+    <AddProcessorForm
+      {...rest}
+      form={form}
+      esDocsBasePath={services.documentation.getEsDocsBasePath()}
+      closeFlyout={onClose}
+      handleSubmit={handleSubmit}
+    />
+  );
 };

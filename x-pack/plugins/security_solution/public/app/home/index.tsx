@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
@@ -14,11 +14,12 @@ import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
-import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useUserInfo } from '../../detections/components/user_info';
+import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
+import { useKibana } from '../../common/lib/kibana';
+import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
 const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -42,20 +43,21 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const { signalIndexExists, signalIndexName } = useSignalIndex();
+  const { application } = useKibana().services;
+  const subPluginId = useRef<string>('');
 
-  const indexToAdd = useMemo<string[] | null>(() => {
-    if (signalIndexExists && signalIndexName != null) {
-      return [signalIndexName];
-    }
-    return null;
-  }, [signalIndexExists, signalIndexName]);
+  application.currentAppId$.subscribe((appId) => {
+    subPluginId.current = appId ?? '';
+  });
 
+  useInitSourcerer(
+    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default
+  );
   const [showTimeline] = useShowTimeline();
-  const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
-  // side effect: this will attempt to create the signals index if it doesn't exist
-  useUserInfo();
+  const { browserFields, indexPattern, indicesExist } = useSourcererScope();
 
   return (
     <SecuritySolutionAppWrapper>

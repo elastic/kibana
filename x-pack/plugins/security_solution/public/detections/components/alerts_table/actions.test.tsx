@@ -197,6 +197,7 @@ describe('alert actions', () => {
             highlightedDropAndProviderId: '',
             historyIds: [],
             id: '',
+            indexNames: [],
             isFavorite: false,
             isLive: false,
             isLoading: false,

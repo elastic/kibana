@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getValidationErrors, isValidationErrorResponse } from './helpers';
+import { getValidationErrors, isErrorResponse, isValidationErrorResponse } from './helpers';
 import {
   getEqlResponseWithNonValidationError,
   getEqlResponseWithValidationError,
@@ -13,6 +13,20 @@ import {
 } from './helpers.mock';
 
 describe('eql validation helpers', () => {
+  describe('isErrorResponse', () => {
+    it('is false for a regular response', () => {
+      expect(isErrorResponse(getValidEqlResponse())).toEqual(false);
+    });
+
+    it('is true for a response with non-validation errors', () => {
+      expect(isErrorResponse(getEqlResponseWithNonValidationError())).toEqual(true);
+    });
+
+    it('is true for a response with validation errors', () => {
+      expect(isErrorResponse(getEqlResponseWithValidationError())).toEqual(true);
+    });
+  });
+
   describe('isValidationErrorResponse', () => {
     it('is false for a regular response', () => {
       expect(isValidationErrorResponse(getValidEqlResponse())).toEqual(false);

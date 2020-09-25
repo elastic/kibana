@@ -16,17 +16,20 @@ interface ErrorCause {
   reason: string;
 }
 
-export interface ValidationErrorResponse {
+export interface ErrorResponse {
   error: ErrorCause & { root_cause: ErrorCause[] };
 }
 
 const isValidationErrorType = (type: unknown): boolean =>
   type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE || type === MAPPING_ERROR_TYPE;
 
-export const isValidationErrorResponse = (response: unknown): response is ValidationErrorResponse =>
-  has(response, 'error.type') && isValidationErrorType(get(response, 'error.type'));
+export const isErrorResponse = (response: unknown): response is ErrorResponse =>
+  has(response, 'error.type');
 
-export const getValidationErrors = (response: ValidationErrorResponse): string[] =>
+export const isValidationErrorResponse = (response: unknown): response is ErrorResponse =>
+  isErrorResponse(response) && isValidationErrorType(get(response, 'error.type'));
+
+export const getValidationErrors = (response: ErrorResponse): string[] =>
   response.error.root_cause
     .filter((cause) => isValidationErrorType(cause.type))
     .map((cause) => cause.reason);

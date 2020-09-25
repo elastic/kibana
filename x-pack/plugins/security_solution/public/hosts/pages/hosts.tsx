@@ -22,7 +22,6 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
 import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -46,6 +45,7 @@ import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
   ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
@@ -74,7 +74,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { docValueFields, indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -101,12 +101,19 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.hosts}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 
                 <HostsKpiComponent
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
                   from={from}
                   setQuery={setQuery}
                   to={to}
@@ -127,11 +134,11 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 to={to}
                 filterQuery={tabsFilterQuery}
                 isInitializing={isInitializing}
+                indexNames={selectedPatterns}
                 setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                 setQuery={setQuery}
                 from={from}
                 type={hostsModel.HostsType.page}
-                indexPattern={indexPattern}
                 hostsPagePath={hostsPagePath}
               />
             </WrapperPage>

@@ -11,6 +11,7 @@ import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   getValidationErrors,
+  isErrorResponse,
   isValidationErrorResponse,
 } from '../../../../common/search_strategy/eql';
 
@@ -39,9 +40,11 @@ export const validateEql = async ({
     )
     .toPromise();
 
-  const errors = isValidationErrorResponse(response.body) ? getValidationErrors(response.body) : [];
-  return {
-    errors,
-    valid: errors.length === 0,
-  };
+  if (isValidationErrorResponse(response.body)) {
+    return { valid: false, errors: getValidationErrors(response.body) };
+  } else if (isErrorResponse(response.body)) {
+    throw new Error(JSON.stringify(response.body));
+  } else {
+    return { valid: true, errors: [] };
+  }
 };
