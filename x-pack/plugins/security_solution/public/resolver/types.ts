@@ -16,6 +16,7 @@ import {
   ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverPaginatedEvents,
 } from '../../common/endpoint/types';
 
 /**
@@ -502,6 +503,21 @@ export interface DataAccessLayer {
    * Fetch related events for an entity ID
    */
   relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+
+  /**
+   * Return events that have `process.entity_id` that includes `entityID` and that have
+   * a `event.category` that includes `category`.
+   */
+  eventsWithEntityIDAndCategory: (
+    entityID: string,
+    category: string,
+    after?: string
+  ) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * Return up to one event that has an `event.id` that includes `eventID`.
+   */
+  event: (eventID: string) => Promise<SafeResolverEvent | null>;
 
   /**
    * Fetch a ResolverTree for a entityID
