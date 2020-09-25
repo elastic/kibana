@@ -6,10 +6,15 @@
 
 import { EuiButton, EuiWindowEvent } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
 
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 
 import * as i18n from './translations';
+
+const StyledEuiButton = styled(EuiButton)`
+  margin: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 
 export const ExitFullScreen: React.FC = () => {
   const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
@@ -36,14 +41,14 @@ export const ExitFullScreen: React.FC = () => {
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <EuiButton
+      <StyledEuiButton
         data-test-subj="exit-full-screen"
         iconType="fullScreen"
         isDisabled={!globalFullScreen}
         onClick={exitFullScreen}
       >
         {i18n.EXIT_FULL_SCREEN}
-      </EuiButton>
+      </StyledEuiButton>
     </>
   );
 };
