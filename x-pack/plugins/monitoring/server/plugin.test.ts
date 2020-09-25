@@ -14,7 +14,9 @@ jest.mock('rxjs', () => ({
 }));
 
 jest.mock('./es_client/instantiate_client', () => ({
-  instantiateClient: jest.fn(),
+  instantiateClient: jest.fn().mockImplementation(() => ({
+    cluster: {},
+  })),
 }));
 
 jest.mock('./license_service', () => ({
@@ -23,6 +25,10 @@ jest.mock('./license_service', () => ({
       refresh: jest.fn(),
     })),
   })),
+}));
+
+jest.mock('./kibana_monitoring/collectors', () => ({
+  registerCollectors: jest.fn(),
 }));
 
 describe('Monitoring plugin', () => {
@@ -69,6 +75,9 @@ describe('Monitoring plugin', () => {
       overall$: {
         subscribe: jest.fn(),
       },
+    },
+    savedObjects: {
+      registerType: jest.fn(),
     },
   };
 

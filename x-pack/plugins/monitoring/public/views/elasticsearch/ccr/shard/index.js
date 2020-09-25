@@ -48,6 +48,10 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
       $scope.$watch(
         () => this.data,
         (data) => {
+          if (!data) {
+            return;
+          }
+
           this.setPageTitle(
             i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.pageTitle', {
               defaultMessage: 'Elasticsearch Ccr Shard - Index: {followerIndex} Shard: {shardId}',
@@ -57,13 +61,10 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
               },
             })
           );
-          this.renderReact(data);
+
+          this.renderReact(<CcrShard {...data} />);
         }
       );
-
-      this.renderReact = (props) => {
-        super.renderReact(<CcrShard {...props} />);
-      };
     }
   },
 });

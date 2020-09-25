@@ -26,6 +26,7 @@ export class AngularApp {
       pluginInitializerContext,
       externalConfig,
       triggersActionsUi,
+      usageCollection,
       kibanaLegacy,
     } = deps;
     const app: IModule = localAppModule(deps);
@@ -42,6 +43,7 @@ export class AngularApp {
           externalConfig,
           kibanaLegacy,
           triggersActionsUi,
+          usageCollection,
         },
         this.injector
       );

@@ -36,6 +36,13 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       const nodeName = $route.current.params.node;
 
       super({
+        title: i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+          defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+          values: {
+            nodeName,
+          },
+        }),
+        telemetryPageViewTitle: 'elasticsearch_node',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',

@@ -40,6 +40,7 @@ uiRoutes.when('/beats/beats', {
         pageTitle: i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
           defaultMessage: 'Beats listing',
         }),
+        telemetryPageViewTitle: 'beats_listing',
         storageKey: 'beats.beats',
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',
@@ -50,9 +51,6 @@ uiRoutes.when('/beats/beats', {
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
-
-      //Bypassing super.updateData, since this controller loads its own data
-      this._isDataInitialized = true;
 
       $scope.$watch(
         () => this.data,
