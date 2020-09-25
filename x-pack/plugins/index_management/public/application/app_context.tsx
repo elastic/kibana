@@ -8,7 +8,7 @@ import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
 import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
@@ -34,6 +34,7 @@ export interface AppDependencies {
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  uiSettings: CoreSetup['uiSettings'];
 }
 
 export const AppContextProvider = ({
