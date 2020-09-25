@@ -146,7 +146,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.LINE });
+      expect(setValue).toHaveBeenLastCalledWith('type', ChartTypes.LINE);
     });
 
     it('should set histogram visType when multiple seriesParam', () => {
@@ -160,7 +160,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.HISTOGRAM });
+      expect(setValue).toHaveBeenLastCalledWith('type', ChartTypes.HISTOGRAM);
     });
   });
 
@@ -193,7 +193,7 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
 
-      expect(setValue).toHaveBeenCalledTimes(5);
+      expect(setValue).toHaveBeenCalledTimes(6);
       expect(setValue).toHaveBeenNthCalledWith(3, SERIES_PARAMS, updatedSeriesParams);
       expect(setValue).toHaveBeenNthCalledWith(5, SERIES_PARAMS, updatedSeriesParams);
       expect(setValue).toHaveBeenNthCalledWith(4, VALUE_AXES, updatedValues);
