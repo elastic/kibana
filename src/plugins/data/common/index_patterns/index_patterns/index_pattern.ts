@@ -234,12 +234,7 @@ export class IndexPattern implements IIndexPattern {
    * @param fieldType
    * @param lang
    */
-  async addScriptedField(
-    name: string,
-    script: string,
-    fieldType: string = 'string',
-    lang: string = 'painless'
-  ) {
+  async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
 
@@ -252,7 +247,7 @@ export class IndexPattern implements IIndexPattern {
       script,
       type: fieldType,
       scripted: true,
-      lang,
+      lang: 'painless',
       aggregatable: true,
       searchable: true,
       count: 0,
@@ -322,13 +317,9 @@ export class IndexPattern implements IIndexPattern {
     return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
   }
 
-  isTimeBasedWildcard(): boolean {
-    return this.isTimeBased() && this.isWildcard();
-  }
-
   getTimeField() {
     if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
-    return this.fields.getByName(this.timeFieldName) || undefined;
+    return this.fields.getByName(this.timeFieldName);
   }
 
   getFieldByName(name: string): IndexPatternField | undefined {
@@ -338,13 +329,6 @@ export class IndexPattern implements IIndexPattern {
 
   getAggregationRestrictions() {
     return this.typeMeta?.aggs;
-  }
-
-  /**
-   * Does this index pattern title include a '*'
-   */
-  private isWildcard() {
-    return _.includes(this.title, '*');
   }
 
   /**

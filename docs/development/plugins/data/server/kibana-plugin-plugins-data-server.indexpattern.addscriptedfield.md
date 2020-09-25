@@ -9,7 +9,7 @@ Add scripted field to field list
 <b>Signature:</b>
 
 ```typescript
-addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
+addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
 ```
 
 ## Parameters
@@ -19,7 +19,6 @@ addScriptedField(name: string, script: string, fieldType?: string, lang?: string
 |  name | <code>string</code> |  |
 |  script | <code>string</code> |  |
 |  fieldType | <code>string</code> |  |
-|  lang | <code>string</code> |  |
 
 <b>Returns:</b>
 
