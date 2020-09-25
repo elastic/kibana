@@ -44,6 +44,7 @@ import { DeleteDocumentParams } from 'elasticsearch';
 import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { Duration } from 'moment';
+import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
