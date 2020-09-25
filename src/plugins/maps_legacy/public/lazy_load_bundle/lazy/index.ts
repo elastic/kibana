@@ -17,23 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
-import { getClusterInfo } from '../get_cluster_info';
-
-export function mockGetClusterInfo(callCluster, clusterInfo, req) {
-  callCluster.withArgs(req, 'info').returns(clusterInfo);
-  callCluster.withArgs('info').returns(clusterInfo);
-}
-
-describe('get_cluster_info', () => {
-  it('uses callCluster to get info API', () => {
-    const callCluster = sinon.stub();
-    const response = Promise.resolve({});
-
-    mockGetClusterInfo(callCluster, response);
-
-    expect(getClusterInfo(callCluster)).to.be(response);
-  });
-});
+// @ts-expect-error
+export { KibanaMap } from '../../map/kibana_map';
+// @ts-expect-error
+export { ServiceSettings } from '../../map/service_settings';
+// @ts-expect-error
+export { L } from '../../leaflet';

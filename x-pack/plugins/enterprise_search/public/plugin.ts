@@ -23,13 +23,13 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { IInitialAppData } from '../common/types';
-import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
+import { externalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
   host?: string;
 }
 export interface ClientData extends IInitialAppData {
-  externalUrl: IExternalUrl;
+  publicUrl?: string;
   errorConnecting?: boolean;
 }
 
@@ -47,7 +47,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
-    this.data.externalUrl = new ExternalUrl(this.config.host || '');
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -59,11 +58,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
         const { EnterpriseSearch } = await import('./applications/enterprise_search');
@@ -80,11 +79,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
         const { AppSearch } = await import('./applications/app_search');
@@ -101,11 +100,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
-        const pluginData = this.getPluginData();
-
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+
         await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
         const { renderApp, renderHeaderActions } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
@@ -114,7 +113,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           './applications/workplace_search/components/layout'
         );
         params.setHeaderActionMenu((element) =>
-          renderHeaderActions(WorkplaceSearchHeaderActions, element, this.data.externalUrl)
+          renderHeaderActions(WorkplaceSearchHeaderActions, element)
         );
 
         return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
@@ -174,14 +173,14 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      const { publicUrl, ...initialData } = await http.get('/api/enterprise_search/config_data');
-      this.data = { ...this.data, ...initialData };
-      if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
-
+      this.data = await http.get('/api/enterprise_search/config_data');
       this.hasInitialized = true;
+
+      // TODO: This is a temporary workaround to keep the WorkplaceSearchHeaderActions working.
+      // We'll solve this shortly by ensuring the main app store loads before the header actions.
+      externalUrl.enterpriseSearchUrl = this.data.publicUrl || this.config.host;
     } catch {
       this.data.errorConnecting = true;
-      // The plugin will attempt to re-fetch config data on page change
     }
   }
 }
