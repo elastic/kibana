@@ -409,16 +409,16 @@ export const AlertsList: React.FunctionComponent = () => {
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
         onDeleted={async (deleted: string[]) => {
-          loadAlertsData();
-          setSelectedIds([]);
           setAlertsToDelete([]);
+          setSelectedIds([]);
+          await loadAlertsData();
         }}
         onErrors={async () => {
           // Refresh the alerts from the server, some alerts may have beend deleted
           await loadAlertsData();
           setAlertsToDelete([]);
         }}
-        onCancel={async () => {
+        onCancel={() => {
           setAlertsToDelete([]);
         }}
         apiDeleteCall={deleteAlerts}
@@ -429,6 +429,9 @@ export const AlertsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
           defaultMessage: 'alerts',
         })}
+        setIsLoadingState={(isLoading: boolean) => {
+          setAlertsState({ ...alertsState, isLoading });
+        }}
       />
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (

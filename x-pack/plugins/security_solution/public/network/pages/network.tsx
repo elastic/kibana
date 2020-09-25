@@ -19,13 +19,12 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { SiemNavigation } from '../../common/components/navigation';
 
-import { KpiNetworkComponent } from '../components/kpi_network';
+import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
-import { LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { State, inputsSelectors } from '../../common/store';
@@ -44,8 +43,7 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
-
-const sourceId = 'default';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
   ({
@@ -84,7 +82,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       [setAbsoluteRangeDatePicker]
     );
 
-    const { indicesExist, indexPattern } = useWithSource(sourceId);
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -111,7 +109,13 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.network}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 
@@ -125,13 +129,14 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
 
                 <EuiSpacer />
 
-                <KpiNetworkComponent
+                <NetworkKpiComponent
                   filterQuery={filterQuery}
+                  from={from}
+                  indexNames={selectedPatterns}
+                  narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
                   skip={isInitializing}
-                  from={from}
                   to={to}
-                  narrowDateRange={narrowDateRange}
                 />
               </Display>
 
@@ -150,6 +155,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
+                    indexNames={selectedPatterns}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}

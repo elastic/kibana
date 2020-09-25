@@ -5,11 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { usersQuery } from '../../../../plugins/security_solution/public/network/containers/users/index.gql_query';
 import {
   Direction,
+  // @ts-expect-error
   UsersFields,
   FlowTarget,
+  // @ts-expect-error
   GetUsersQuery,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';

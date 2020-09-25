@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
 import { serializePolicy } from './policy_serialization';
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
-  defaultNewFrozenPhase,
   defaultNewHotPhase,
   defaultNewWarmPhase,
 } from '../../constants';
@@ -35,12 +36,6 @@ describe('Policy serialization', () => {
               selectedNodeAttrs: 'another:thing',
               phaseEnabled: true,
             },
-            frozen: {
-              ...defaultNewFrozenPhase,
-              dataTierAllocationType: 'default',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -52,9 +47,6 @@ describe('Policy serialization', () => {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
             cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
-            frozen: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
           },
@@ -82,14 +74,6 @@ describe('Policy serialization', () => {
           },
         },
         cold: {
-          actions: {
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-        frozen: {
           actions: {
             set_priority: {
               priority: 0,
@@ -120,12 +104,6 @@ describe('Policy serialization', () => {
               selectedNodeAttrs: 'another:thing',
               phaseEnabled: true,
             },
-            frozen: {
-              ...defaultNewFrozenPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -143,15 +121,6 @@ describe('Policy serialization', () => {
               },
             },
             cold: {
-              actions: {
-                allocate: {
-                  include: { keep: 'this' },
-                  exclude: { keep: 'this' },
-                  require: { something: 'here' },
-                },
-              },
-            },
-            frozen: {
               actions: {
                 allocate: {
                   include: { keep: 'this' },
@@ -192,21 +161,6 @@ describe('Policy serialization', () => {
           },
         },
         cold: {
-          actions: {
-            allocate: {
-              include: { keep: 'this' },
-              exclude: { keep: 'this' },
-              require: {
-                another: 'thing',
-              },
-            },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-        frozen: {
           actions: {
             allocate: {
               include: { keep: 'this' },
@@ -244,12 +198,6 @@ describe('Policy serialization', () => {
               selectedNodeAttrs: '',
               phaseEnabled: true,
             },
-            frozen: {
-              ...defaultNewFrozenPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: '',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -261,9 +209,6 @@ describe('Policy serialization', () => {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
             cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
-            frozen: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
           },
@@ -293,15 +238,6 @@ describe('Policy serialization', () => {
           },
         },
         cold: {
-          actions: {
-            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-        frozen: {
           actions: {
             allocate: { include: {}, exclude: {}, require: { something: 'here' } },
             set_priority: {
@@ -333,12 +269,6 @@ describe('Policy serialization', () => {
               selectedNodeAttrs: 'ignore:this',
               phaseEnabled: true,
             },
-            frozen: {
-              ...defaultNewFrozenPhase,
-              dataTierAllocationType: 'none',
-              selectedNodeAttrs: 'ignore:this',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -350,9 +280,6 @@ describe('Policy serialization', () => {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
             cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
-            frozen: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
           },
@@ -394,17 +321,6 @@ describe('Policy serialization', () => {
           },
           min_age: '0d',
         },
-        frozen: {
-          actions: {
-            migrate: {
-              enabled: false,
-            },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
       },
     });
   });
@@ -418,9 +334,6 @@ describe('Policy serialization', () => {
           actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
         },
         cold: {
-          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-        },
-        frozen: {
           actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
         },
       },
@@ -444,12 +357,7 @@ describe('Policy serialization', () => {
           selectedNodeAttrs: 'ignore:this',
           phaseEnabled: true,
         },
-        frozen: {
-          ...defaultNewFrozenPhase,
-          dataTierAllocationType: 'none' as DataTierAllocationType,
-          selectedNodeAttrs: 'ignore:this',
-          phaseEnabled: true,
-        },
+
         delete: { ...defaultNewDeletePhase },
       },
     };
