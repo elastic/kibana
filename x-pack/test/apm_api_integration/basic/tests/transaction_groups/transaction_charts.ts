@@ -20,12 +20,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
   const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const environment = 'testing';
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&environment=${environment}`
         );
 
         expect(response.status).to.be(200);
@@ -46,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&environment=${environment}`
         );
       });
 
