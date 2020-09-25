@@ -18,12 +18,11 @@ import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { IExternalUrl } from './shared/enterprise_search_url';
+import { externalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
-  externalUrl: IExternalUrl;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -42,7 +41,8 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { externalUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnecting, ...initialData } = data;
+  externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
   const store = getContext().store as Store;
@@ -64,7 +64,6 @@ export const renderApp = (
       <KibanaContext.Provider
         value={{
           config,
-          externalUrl,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
@@ -93,15 +92,8 @@ export const renderApp = (
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
  * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
-interface IHeaderActionsProps {
-  externalUrl: IExternalUrl;
-}
 
-export const renderHeaderActions = (
-  HeaderActions: React.FC<IHeaderActionsProps>,
-  kibanaHeaderEl: HTMLElement,
-  externalUrl: IExternalUrl
-) => {
-  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
+export const renderHeaderActions = (HeaderActions: React.FC, kibanaHeaderEl: HTMLElement) => {
+  ReactDOM.render(<HeaderActions />, kibanaHeaderEl);
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };

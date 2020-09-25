@@ -21,7 +21,8 @@ import {
 
 import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 
-describe('Inspect', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/78496
+describe.skip('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
