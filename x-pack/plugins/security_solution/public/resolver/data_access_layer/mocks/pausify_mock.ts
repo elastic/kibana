@@ -89,6 +89,7 @@ export function pausifyMock<T>({
       }
     },
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */
