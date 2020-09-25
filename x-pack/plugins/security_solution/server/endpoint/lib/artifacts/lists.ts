@@ -141,18 +141,16 @@ export function translateToEndpointExceptions(
 
 function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.caseless') || field.endsWith('.text')
+    ? field.endsWith('.caseless')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.caseless') || field.endsWith('.text')
+    : field.endsWith('.caseless')
     ? 'exact_caseless'
     : 'exact_cased';
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.caseless') || field.endsWith('.text')
-    ? field.substring(0, field.lastIndexOf('.'))
-    : field;
+  return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
 }
 
 function translateItem(
