@@ -36,7 +36,7 @@ This is required to encrypt parameters that must be secured, for example PagerDu
 If you have security enabled:
 
 * You must have
-application privileges to access Metrics, APM, Uptime, or SIEM.
+application privileges to access Metrics, APM, Uptime, or Security.
 * If you are using a self-managed deployment with security, you must have
 Transport Security Layer (TLS) enabled for communication <<configuring-tls-kib-es, between Elasticsearch and Kibana>>.
 Alerts uses API keys to secure background alert checks and actions,
