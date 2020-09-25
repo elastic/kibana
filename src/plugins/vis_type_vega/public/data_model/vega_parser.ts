@@ -65,7 +65,7 @@ export class VegaParser {
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
-  _urlParsers: UrlParserConfig;
+  _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
@@ -80,13 +80,16 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
+  getServiceSettings: () => Promise<IServiceSettings>;
+  filters: Bool;
+  timeCache: TimeCache;
 
   constructor(
     spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    serviceSettings: IServiceSettings
+    getServiceSettings: () => Promise<IServiceSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -94,13 +97,9 @@ export class VegaParser {
     this.error = undefined;
     this.warnings = [];
     this.searchAPI = searchAPI;
-
-    const onWarn = this._onWarning.bind(this);
-    this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, this.searchAPI, filters, onWarn),
-      emsfile: new EmsFileParser(serviceSettings),
-      url: new UrlParser(onWarn),
-    };
+    this.getServiceSettings = getServiceSettings;
+    this.filters = filters;
+    this.timeCache = timeCache;
   }
 
   async parseAsync() {
@@ -123,7 +122,7 @@ export class VegaParser {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
             defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
-Vega (see {vegaSchemaUrl}) or 
+Vega (see {vegaSchemaUrl}) or
 Vega-Lite (see {vegaLiteSchemaUrl}).
 The URL is an identifier only. Kibana and your browser will never access this URL.`,
             values: {
@@ -547,6 +546,15 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * @private
    */
   async _resolveDataUrls() {
+    if (!this._urlParsers) {
+      const serviceSettings = await this.getServiceSettings();
+      const onWarn = this._onWarning.bind(this);
+      this._urlParsers = {
+        elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        emsfile: new EmsFileParser(serviceSettings),
+        url: new UrlParser(onWarn),
+      };
+    }
     const pending: PendingType = {};
 
     this.searchAPI.resetSearchStats();
@@ -560,7 +568,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         type = DEFAULT_PARSER;
       }
 
-      const parser = this._urlParsers[type];
+      const parser = this._urlParsers![type];
       if (parser === undefined) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
@@ -584,7 +592,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
     }
   }

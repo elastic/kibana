@@ -1229,5 +1229,20 @@ module.exports = {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
       },
     },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
+      },
+    },
   ],
 };
