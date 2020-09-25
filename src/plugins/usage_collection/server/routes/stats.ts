@@ -24,6 +24,7 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
+  ElasticsearchClient,
   IRouter,
   LegacyAPICaller,
   MetricsServiceSetup,
@@ -61,8 +62,11 @@ export function registerStatsRoute({
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  const getUsage = async (callCluster: LegacyAPICaller): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
+  const getUsage = async (
+    callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient
+  ): Promise<any> => {
+    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient);
     return collectorSet.toObject(usage);
   };
 
@@ -96,13 +100,14 @@ export function registerStatsRoute({
       let extended;
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const collectorsReady = await collectorSet.areAllCollectorsReady();
 
         if (shouldGetUsage && !collectorsReady) {
           return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
+        const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
 
         let modifiedUsage = usage;
