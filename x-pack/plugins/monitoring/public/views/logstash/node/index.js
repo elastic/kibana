@@ -76,6 +76,7 @@ uiRoutes.when('/logstash/node/:uuid', {
             alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
           },
         },
+        telemetryPageViewTitle: 'logstash_node',
       });
 
       $scope.$watch(

@@ -47,6 +47,7 @@ uiRoutes.when('/beats/beat/:beatUuid', {
             beatName: pageData.summary.name,
           },
         }),
+        telemetryPageViewTitle: 'beats_instance',
         getPageData,
         $scope,
         $injector,

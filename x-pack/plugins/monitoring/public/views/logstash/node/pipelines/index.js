@@ -81,6 +81,7 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
         $scope,
         $injector,
         fetchDataImmediately: false, // We want to apply pagination before sending the first request
+        telemetryPageViewTitle: 'logstash_node_pipelines',
       });
 
       $scope.$watch(

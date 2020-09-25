@@ -276,3 +276,10 @@ export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365',
 
 export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alertingEmailAddress';
 export const XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING = 'xPack:defaultAdminEmail';
+
+/**
+ * The saved object type for various monitoring data
+ */
+export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
+
+export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
