@@ -13,11 +13,12 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { NetworkHttpEdges, PageInfoPaginated } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
   NetworkQueries,
+  NetworkHttpEdges,
+  PageInfoPaginated,
   NetworkHttpRequestOptions,
   NetworkHttpStrategyResponse,
   SortField,

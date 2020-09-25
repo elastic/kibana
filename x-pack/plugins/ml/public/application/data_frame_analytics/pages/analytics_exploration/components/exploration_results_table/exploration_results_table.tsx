@@ -6,15 +6,7 @@
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -25,7 +17,6 @@ import { getToastNotifications } from '../../../../../util/dependency_cache';
 import {
   DataFrameAnalyticsConfig,
   MAX_COLUMNS,
-  INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
   getAnalysisType,
@@ -95,42 +86,10 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     );
 
     const docFieldsCount = classificationData.columnsWithCharts.length;
-    const {
-      columnsWithCharts,
-      errorMessage,
-      status,
-      tableItems,
-      visibleColumns,
-    } = classificationData;
+    const { columnsWithCharts, tableItems, visibleColumns } = classificationData;
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
-    }
-    // if it's a searchBar syntax error leave the table visible so they can try again
-    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
-      return (
-        <EuiPanel grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <ExplorationTitle title={title} />
-            </EuiFlexItem>
-            {jobStatus !== undefined && (
-              <EuiFlexItem grow={false}>
-                <span>{getTaskStateBadge(jobStatus)}</span>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiCallOut
-            title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
-              defaultMessage: 'An error occurred loading the index data.',
-            })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>{errorMessage}</p>
-          </EuiCallOut>
-        </EuiPanel>
-      );
     }
 
     return (
