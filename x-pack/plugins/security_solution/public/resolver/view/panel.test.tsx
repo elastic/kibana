@@ -88,6 +88,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
+          ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
           ['process.executable', 'executable'],
           ['process.pid', '0'],
           ['user.name', 'user.name'],
@@ -128,6 +129,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
         ['user.name', 'user.name'],
@@ -168,6 +170,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
         ['process.executable', 'executable'],
         ['process.pid', '0'],
         ['user.name', 'user.name'],
