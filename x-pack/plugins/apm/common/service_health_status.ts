@@ -44,6 +44,22 @@ export function getServiceHealthStatusColor(
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
+      return theme.eui.euiColorVis0;
+    case ServiceHealthStatus.warning:
+      return theme.eui.euiColorVis5;
+    case ServiceHealthStatus.critical:
+      return theme.eui.euiColorVis9;
+    case ServiceHealthStatus.unknown:
+      return theme.eui.euiColorMediumShade;
+  }
+}
+
+export function getServiceHealthStatusBadgeColor(
+  theme: EuiTheme,
+  status: ServiceHealthStatus
+) {
+  switch (status) {
+    case ServiceHealthStatus.healthy:
       return theme.eui.euiColorVis0_behindText;
     case ServiceHealthStatus.warning:
       return theme.eui.euiColorVis5_behindText;
