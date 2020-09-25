@@ -53,7 +53,7 @@
       {
         groupName: 'vega related modules',
         packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
-        reviewers: ['team:elastic/kibana-app'],
+        reviewers: ['team:kibana-app'],
         labels: ['Feature:Lens', 'Team:KibanaApp'],
         enabled: true,
       },

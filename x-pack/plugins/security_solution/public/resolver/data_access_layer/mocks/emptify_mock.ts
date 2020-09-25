@@ -44,6 +44,7 @@ export function emptifyMock<T>(
   return {
     metadata,
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */

@@ -6,6 +6,7 @@
 
 import '../__mocks__/shallow_usecontext.mock';
 import '../__mocks__/kea.mock';
+import '../__mocks__/enterprise_search_url.mock';
 
 import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';

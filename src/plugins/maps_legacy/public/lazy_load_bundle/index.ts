@@ -17,33 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
+let loadModulesPromise: Promise<LazyLoadedMapsLegacyModules>;
 
-import { TIMEOUT } from '../constants';
-import { getClusterStats } from '../get_cluster_stats';
-
-export function mockGetClusterStats(callCluster, clusterStats, req) {
-  callCluster
-    .withArgs(req, 'cluster.stats', {
-      timeout: TIMEOUT,
-    })
-    .returns(clusterStats);
-
-  callCluster
-    .withArgs('cluster.stats', {
-      timeout: TIMEOUT,
-    })
-    .returns(clusterStats);
+interface LazyLoadedMapsLegacyModules {
+  KibanaMap: unknown;
+  L: unknown;
+  ServiceSettings: unknown;
 }
 
-describe.skip('get_cluster_stats', () => {
-  it('uses callCluster to get cluster.stats API', async () => {
-    const callCluster = sinon.stub();
-    const response = Promise.resolve({});
+export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyModules> {
+  if (typeof loadModulesPromise !== 'undefined') {
+    return loadModulesPromise;
+  }
 
-    mockGetClusterStats(callCluster, response);
+  loadModulesPromise = new Promise(async (resolve) => {
+    const { KibanaMap, L, ServiceSettings } = await import('./lazy');
 
-    expect(getClusterStats(callCluster)).to.be(response);
+    resolve({
+      KibanaMap,
+      L,
+      ServiceSettings,
+    });
   });
-});
+  return loadModulesPromise;
+}
