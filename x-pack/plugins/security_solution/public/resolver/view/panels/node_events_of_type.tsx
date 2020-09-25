@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
-import React, { memo, Fragment } from 'react';
+import React, { memo, useCallback, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiButton,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
@@ -64,6 +69,8 @@ export const NodeEventsInCategory = memo(function ({
     </StyledPanel>
   );
 });
+
+NodeEventsInCategory.displayName = 'NodeEventsInCategory';
 
 /**
  * Rendered for each event in the list.
@@ -142,6 +149,11 @@ const NodeEventList = memo(function NodeEventList({
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
+      <EuiFlexItem grow={false}>
+        <EuiButton color="danger" size="s" fill onClick={() => window.alert('Button clicked')}>
+          {'Load More Data'}
+        </EuiButton>
+      </EuiFlexItem>
     </>
   );
 });

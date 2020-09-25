@@ -34,6 +34,17 @@ interface AppRequestedResolverData {
   readonly payload: TreeFetcherParameters;
 }
 
+interface AppRequestedRelatedEventData {
+  readonly type: 'appRequestedRelatedEventData';
+
+  readonly payload: {};
+}
+
+interface UserRequestedAdditionalRelatedEvents {
+  readonly type: 'userRequestedAdditionalRelatedEvents';
+  readonly payload: {};
+}
+
 interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
   /**
@@ -101,4 +112,6 @@ export type DataAction =
   | ServerReturnedRelatedEventData
   | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
+  | AppRequestedRelatedEventData
+  | UserRequestedAdditionalRelatedEvents
   | AppAbortedResolverDataRequest;
