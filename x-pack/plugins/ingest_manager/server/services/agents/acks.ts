@@ -28,6 +28,7 @@ import {
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
+import { ackAgentUpgraded } from './upgrade';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -78,6 +79,11 @@ export async function acknowledgeAgentActions(
   const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
   if (isAgentUnenrolled) {
     await forceUnenrollAgent(soClient, agent.id);
+  }
+
+  const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
+  if (upgradeAction) {
+    await ackAgentUpgraded(soClient, upgradeAction);
   }
 
   const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
