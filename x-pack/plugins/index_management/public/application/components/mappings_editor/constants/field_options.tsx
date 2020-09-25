@@ -18,6 +18,7 @@ export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = [
   'object',
   'nested',
   'alias',
+  'runtime',
 ];
 
 export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(
@@ -26,6 +27,35 @@ export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map
     label,
   })
 ) as ComboBoxOption[];
+
+export const RUNTIME_FIELD_OPTIONS = [
+  {
+    label: 'Keyword',
+    value: 'keyword',
+  },
+  {
+    label: 'Long',
+    value: 'long',
+  },
+  {
+    label: 'Double',
+    value: 'double',
+  },
+  {
+    label: 'Date',
+    value: 'date',
+  },
+  {
+    label: 'IP',
+    value: 'ip',
+  },
+  {
+    label: 'Boolean',
+    value: 'boolean',
+  },
+] as ComboBoxOption[];
+
+export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
 
 interface SuperSelectOptionConfig {
   inputDisplay: string;
