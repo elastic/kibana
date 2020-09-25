@@ -58,6 +58,17 @@ interface BaseProps {
    * The optional test subject associated with this DOM element.
    */
   'data-test-subj'?: string;
+
+  /**
+   * Indicates whether or not the currently dragged item
+   * can will be moved instead of copied
+   */
+  dragType?: 'copy' | 'move';
+
+  /**
+   *
+   */
+  dropType?: 'copy' | 'replace';
 }
 
 /**
@@ -136,6 +147,8 @@ const DragDropInner = React.memo(function DragDropInner(
     setDragging,
     isDragging,
     isNotDroppable,
+    dragType = 'copy',
+    dropType = 'copy',
   } = props;
 
   const classes = classNames(
@@ -143,10 +156,12 @@ const DragDropInner = React.memo(function DragDropInner(
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
+      'lnsDragDrop-isHidden': isDragging && dragType === 'move',
       'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
       'lnsDragDrop-isNotDroppable': isNotDroppable,
+      'lnsDragDrop-isReplacing': droppable && state.isActive && dropType === 'replace',
     },
     className,
     state.dragEnterClassNames

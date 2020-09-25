@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, isDraggedOperation } from '../../../types';
 import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
@@ -203,22 +202,18 @@ export function LayerPanel(
                   return (
                     <DragDrop
                       key={accessor}
-                      className={classNames('lnsLayerPanel__dimension', {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        'lnsLayerPanel__dimension-isHidden':
-                          isDraggedOperation(dragDropContext.dragging) &&
-                          accessor === dragDropContext.dragging.columnId,
-                      })}
-                      getAdditionalClassesOnEnter={() => {
-                        // If we are dragging another column, add an indication that the behavior will be a replacement'
-                        if (
-                          isDraggedOperation(dragDropContext.dragging) &&
-                          group.groupId !== dragDropContext.dragging.groupId
-                        ) {
-                          return 'lnsLayerPanel__dimension-isReplacing';
-                        }
-                        return '';
-                      }}
+                      dragType={
+                        isDraggedOperation(dragDropContext.dragging) &&
+                        accessor === dragDropContext.dragging.columnId
+                          ? 'move'
+                          : 'copy'
+                      }
+                      dropType={
+                        isDraggedOperation(dragDropContext.dragging) &&
+                        group.groupId !== dragDropContext.dragging.groupId
+                          ? 'replace'
+                          : 'copy'
+                      }
                       data-test-subj={group.dataTestSubj}
                       draggable={!dimensionContainerState.isOpen}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
@@ -254,7 +249,7 @@ export function LayerPanel(
                         }
                       }}
                     >
-                      <div>
+                      <div className="lnsLayerPanel__dimension">
                         <DimensionContainer
                           dimensionContainerState={dimensionContainerState}
                           setDimensionContainerState={setDimensionContainerState}

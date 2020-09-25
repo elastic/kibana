@@ -1,6 +1,7 @@
 .lnsFieldItem {
   .lnsFieldItem__infoIcon {
     visibility: hidden;
+    opacity: 0;
   }
 
   &:hover:not([class*='isActive']) {
@@ -8,6 +9,8 @@
 
     .lnsFieldItem__infoIcon {
       visibility: visible;
+      opacity: 1;
+      transition: opacity $euiAnimSpeedFast ease-in-out 1s;
     }
   }
 }

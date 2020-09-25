@@ -194,7 +194,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
               exists ? 'exists' : 'missing'
             }`}
-            isDraggable
             isActive={infoIsOpen}
             data-test-subj={`lnsFieldListPanelField-${field.name}`}
             onClick={togglePopover}
