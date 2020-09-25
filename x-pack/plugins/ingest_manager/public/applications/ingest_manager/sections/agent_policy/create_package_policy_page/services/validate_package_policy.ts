@@ -50,6 +50,7 @@ export const validatePackagePolicy = (
     namespace: null,
     inputs: {},
   };
+  const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
@@ -59,18 +60,8 @@ export const validatePackagePolicy = (
     ];
   }
 
-  if (!packagePolicy.namespace.trim()) {
-    validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceRequiredErrorMessage', {
-        defaultMessage: 'Namespace is required',
-      }),
-    ];
-  } else if (!isValidNamespace(packagePolicy.namespace)) {
-    validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceInvalidErrorMessage', {
-        defaultMessage: 'Namespace contains invalid characters',
-      }),
-    ];
+  if (!namespaceValidation.valid && namespaceValidation.error) {
+    validationResults.namespace = [namespaceValidation.error];
   }
 
   if (
