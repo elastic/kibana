@@ -12,11 +12,18 @@ import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
+import {
+  BulkResponse,
+  BulkResponseErrorAggregation,
+  isValidUnit,
+  SearchAfterAndBulkCreateReturnType,
+  SignalSearchResponse,
+} from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
+import { ShardError } from '../../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -438,4 +445,98 @@ export const getSignalTimeTuples = ({
     buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
   );
   return totalToFromTuples;
+};
+
+/**
+ * Given errors from a search query this will return an array of strings derived from the errors.
+ * @param errors The errors to derive the strings from
+ */
+export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
+  return errors.map((error) => {
+    return `reason: ${error.reason.reason}, type: ${error.reason.caused_by.type}, caused by: ${error.reason.caused_by.reason}`;
+  });
+};
+
+export const createSearchAfterReturnTypeFromResponse = ({
+  searchResult,
+}: {
+  searchResult: SignalSearchResponse;
+}): SearchAfterAndBulkCreateReturnType => {
+  return createSearchAfterReturnType({
+    success: searchResult._shards.failed === 0,
+    lastLookBackDate:
+      searchResult.hits.hits.length > 0
+        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'])
+        : undefined,
+  });
+};
+
+export const createSearchAfterReturnType = ({
+  success,
+  searchAfterTimes,
+  bulkCreateTimes,
+  lastLookBackDate,
+  createdSignalsCount,
+  errors,
+}: {
+  success?: boolean | undefined;
+  searchAfterTimes?: string[] | undefined;
+  bulkCreateTimes?: string[] | undefined;
+  lastLookBackDate?: Date | undefined;
+  createdSignalsCount?: number | undefined;
+  errors?: string[] | undefined;
+} = {}): SearchAfterAndBulkCreateReturnType => {
+  return {
+    success: success ?? true,
+    searchAfterTimes: searchAfterTimes ?? [],
+    bulkCreateTimes: bulkCreateTimes ?? [],
+    lastLookBackDate: lastLookBackDate ?? null,
+    createdSignalsCount: createdSignalsCount ?? 0,
+    errors: errors ?? [],
+  };
+};
+
+export const mergeReturns = (
+  searchAfters: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  return searchAfters.reduce((prev, next) => {
+    const {
+      success: existingSuccess,
+      searchAfterTimes: existingSearchAfterTimes,
+      bulkCreateTimes: existingBulkCreateTimes,
+      lastLookBackDate: existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount,
+      errors: existingErrors,
+    } = prev;
+
+    const {
+      success: newSuccess,
+      searchAfterTimes: newSearchAfterTimes,
+      bulkCreateTimes: newBulkCreateTimes,
+      lastLookBackDate: newLastLookBackDate,
+      createdSignalsCount: newCreatedSignalsCount,
+      errors: newErrors,
+    } = next;
+
+    return {
+      success: existingSuccess && newSuccess,
+      searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      errors: [...new Set([...existingErrors, ...newErrors])],
+    };
+  });
+};
+
+export const createTotalHitsFromSearchResult = ({
+  searchResult,
+}: {
+  searchResult: SignalSearchResponse;
+}): number => {
+  const totalHits =
+    typeof searchResult.hits.total === 'number'
+      ? searchResult.hits.total
+      : searchResult.hits.total.value;
+  return totalHits;
 };

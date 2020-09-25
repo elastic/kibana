@@ -35,8 +35,11 @@ uiRoutes.when('/apm/instances', {
         title: i18n.translate('xpack.monitoring.apm.instances.routeTitle', {
           defaultMessage: '{apm} - Instances',
           values: {
-            apm: 'APM',
+            apm: 'APM server',
           },
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.apm.instances.pageTitle', {
+          defaultMessage: 'APM server instances',
         }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,

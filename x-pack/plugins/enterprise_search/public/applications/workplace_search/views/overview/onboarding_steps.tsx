@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
 import { sendTelemetry } from '../../../shared/telemetry';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
@@ -135,8 +136,8 @@ export const OnboardingSteps: React.FC = () => {
 };
 
 export const OrgNameOnboarding: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const {
-    http,
     externalUrl: { getWorkplaceSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 

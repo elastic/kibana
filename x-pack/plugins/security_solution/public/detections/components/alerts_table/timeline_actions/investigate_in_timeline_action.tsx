@@ -15,7 +15,6 @@ import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
-
 import { CreateTimelineProps } from '../types';
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -49,6 +48,8 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         notes: [],
         timeline: {
           ...timeline,
+          // by setting as an empty array, it will default to all in the reducer because of the event type
+          indexNames: [],
           show: true,
         },
         to: toTimeline,

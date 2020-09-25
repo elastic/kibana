@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../../__mocks__/kea.mock';
+import '../../../__mocks__/shallow_usecontext.mock';
+import { mockHttpValues } from '../../../__mocks__/';
+
 import React from 'react';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 
-import { mountWithContext } from '../../../__mocks__';
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
 import { sendTelemetry } from '../../../shared/telemetry';
 
@@ -16,22 +21,24 @@ import { EngineTable } from './engine_table';
 describe('EngineTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
-  const wrapper = mountWithContext(
-    <EngineTable
-      data={[
-        {
-          name: 'test-engine',
-          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-          document_count: 99999,
-          field_count: 10,
-        },
-      ]}
-      pagination={{
-        totalEngines: 50,
-        pageIndex: 0,
-        onPaginate,
-      }}
-    />
+  const wrapper = mount(
+    <I18nProvider>
+      <EngineTable
+        data={[
+          {
+            name: 'test-engine',
+            created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+            document_count: 99999,
+            field_count: 10,
+          },
+        ]}
+        pagination={{
+          totalEngines: 50,
+          pageIndex: 0,
+          onPaginate,
+        }}
+      />
+    </I18nProvider>
   );
   const table = wrapper.find(EuiBasicTable);
 
@@ -56,7 +63,7 @@ describe('EngineTable', () => {
       link.simulate('click');
 
       expect(sendTelemetry).toHaveBeenCalledWith({
-        http: expect.any(Object),
+        http: mockHttpValues.http,
         product: 'app_search',
         action: 'clicked',
         metric: 'engine_table_link',
@@ -71,10 +78,16 @@ describe('EngineTable', () => {
   });
 
   it('handles empty data', () => {
-    const emptyWrapper = mountWithContext(
-      <EngineTable data={[]} pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }} />
+    const emptyWrapper = mount(
+      <I18nProvider>
+        <EngineTable
+          data={[]}
+          pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }}
+        />
+      </I18nProvider>
     );
     const emptyTable = emptyWrapper.find(EuiBasicTable);
+
     expect(emptyTable.prop('pagination').pageIndex).toEqual(0);
   });
 });

@@ -294,6 +294,7 @@ export const CaseComponent = React.memo<CaseProps>(
           <HeaderPage
             backOptions={backOptions}
             data-test-subj="case-view-title"
+            hideSourcerer={true}
             titleNode={
               <EditableTitle
                 disabled={!userCanCrud}

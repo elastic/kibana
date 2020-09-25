@@ -211,9 +211,8 @@ export interface TreeFetcherParameters {
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-  readonly relatedEventsReady: Map<string, boolean>;
 
-  readonly tree: {
+  readonly tree?: {
     /**
      * The parameters passed from the resolver properties
      */
@@ -614,8 +613,9 @@ export interface ResolverPluginSetup {
     dataAccessLayer: {
       /**
        * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       * The origin has 2 related registry events
        */
-      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin: () => { dataAccessLayer: DataAccessLayer };
     };
   };
 }

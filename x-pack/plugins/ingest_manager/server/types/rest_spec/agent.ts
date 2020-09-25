@@ -172,12 +172,36 @@ export const PostAgentUnenrollRequestSchema = {
   ),
 };
 
+export const PostAgentUpgradeRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    source_uri: schema.string(),
+    version: schema.string(),
+  }),
+};
+
+export const PostBulkAgentUnenrollRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const PutAgentReassignRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
   body: schema.object({
     policy_id: schema.string(),
+  }),
+};
+
+export const PostBulkAgentReassignRequestSchema = {
+  body: schema.object({
+    policy_id: schema.string(),
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   }),
 };
 

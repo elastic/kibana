@@ -26,7 +26,6 @@ import {
   TimelineDetailsData,
   TimelineEdges,
 } from '../../graphql/types';
-import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
@@ -43,6 +42,8 @@ import {
   RequestDetailsOptions,
   TimelineRequestOptions,
 } from './types';
+
+const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}

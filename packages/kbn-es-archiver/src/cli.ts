@@ -144,7 +144,7 @@ export function runCli() {
 
         const query = flags.query;
         let parsedQuery;
-        if (typeof query === 'string') {
+        if (typeof query === 'string' && query.length > 0) {
           try {
             parsedQuery = JSON.parse(query);
           } catch (err) {
