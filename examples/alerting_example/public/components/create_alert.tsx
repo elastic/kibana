@@ -30,7 +30,6 @@ import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   triggersActionsUi,
   charts,
   uiSettings,
