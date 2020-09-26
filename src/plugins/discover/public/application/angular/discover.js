@@ -608,21 +608,21 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-    return {
+    const defaultState = {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0
           ? savedSearch.columns
           : config.get(DEFAULT_COLUMNS_SETTING).slice(),
-      columnsWidth:
-        savedSearch.grid && savedSearch.grid.columnsWidth
-          ? savedSearch.grid.columnsWidth
-          : undefined,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
     };
+    if (savedSearch.grid && savedSearch.grid.columnsWidth) {
+      defaultState.columnsWidth = savedSearch.grid.columnsWidth;
+    }
+    return defaultState;
   }
 
   $scope.state.index = $scope.indexPattern.id;
@@ -637,7 +637,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     config: config,
     fixedScroll: createFixedScroll($scope, $timeout),
     setHeaderActionMenu: getHeaderActionMenuMounter(),
-    config: config,
     filterManager,
   };
 
