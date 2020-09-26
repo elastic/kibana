@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
+import { BulkInstallPackageInfo } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -36,12 +36,7 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import {
-  IngestManagerError,
-  PackageOutdatedError,
-  ingestErrorToResponseOptions,
-  BulkInstallPackagesError,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
@@ -65,8 +60,8 @@ export async function installLatestPackage(options: {
   }
 }
 
-function isBulkInstallError(resp: BulkInstallResponse): resp is IBulkInstallPackageError {
-  return 'error' in resp && resp.error !== undefined;
+function isBulkInstallError(resp: BulkInstallResponse): resp is BulkInstallPackagesServiceError {
+  return 'error' in resp && resp.error instanceof Error;
 }
 
 export async function ensureInstalledDefaultPackages(
@@ -82,7 +77,7 @@ export async function ensureInstalledDefaultPackages(
 
   for (const resp of bulkResponse) {
     if (isBulkInstallError(resp)) {
-      throw new BulkInstallPackagesError(resp.statusCode, resp.error);
+      throw resp.error;
     } else {
       installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
     }
@@ -170,19 +165,21 @@ export async function handleInstallPackageFailure({
   }
 }
 
-export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
+interface BulkInstallPackagesServiceError {
+  name: string;
+  error: Error;
+}
+export type BulkInstallResponse = BulkInstallPackageInfo | BulkInstallPackagesServiceError;
 export function bulkInstallErrorToOptions({
   pkgToUpgrade,
   error,
 }: {
   pkgToUpgrade: string;
   error: Error;
-}): IBulkInstallPackageError {
-  const { statusCode, body } = ingestErrorToResponseOptions(error);
+}): BulkInstallPackagesServiceError {
   return {
     name: pkgToUpgrade,
-    statusCode,
-    error: body.message,
+    error,
   };
 }
 

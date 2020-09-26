@@ -37,7 +37,7 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 
 export const getCategoriesHandler: RequestHandler<
@@ -176,13 +176,25 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const res = await bulkInstallPackages({
+  const bulkInstalledResults = await bulkInstallPackages({
     savedObjectsClient,
     callCluster,
     packagesToUpgrade: request.body.packages,
   });
+  const payload = bulkInstalledResults.map((result) => {
+    if ('error' in result) {
+      const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+      return {
+        name: result.name,
+        statusCode,
+        error: body.message,
+      };
+    } else {
+      return result;
+    }
+  });
   const body: BulkInstallPackagesResponse = {
-    response: res,
+    response: payload,
   };
   return response.ok({ body });
 };

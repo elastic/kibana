@@ -69,7 +69,7 @@ describe('install', () => {
       const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
       expect(resp).toEqual([mockInstallation.attributes]);
     });
-    it('should throw an error when on the first IBulkInstallPackageError it finds', async () => {
+    it('should throw an error of the first IBulkInstallPackageError it finds', async () => {
       mockedBulkInstallPackages.mockImplementationOnce(async function () {
         return [
           {
@@ -88,8 +88,7 @@ describe('install', () => {
           },
           {
             name: 'failure one',
-            statusCode: 499,
-            error: 'strings work',
+            error: new BulkInstallPackagesError('abc 123'),
           },
           {
             name: 'success three',
@@ -100,15 +99,14 @@ describe('install', () => {
           },
           {
             name: 'failure two',
-            statusCode: 499,
-            error: 'will not report this or any below',
+            error: new BulkInstallPackagesError('zzz'),
           },
         ];
       });
       const soClient = savedObjectsClientMock.create();
       const installPromise = ensureInstalledDefaultPackages(soClient, jest.fn());
       expect(installPromise).rejects.toThrow(BulkInstallPackagesError);
-      expect(installPromise).rejects.toThrow('strings work');
+      expect(installPromise).rejects.toThrow('abc 123');
     });
   });
 });

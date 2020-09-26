@@ -18,9 +18,4 @@ export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {}
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
-
-export class BulkInstallPackagesError extends IngestManagerError {
-  constructor(public readonly statusCode: number, message?: string) {
-    super(message);
-  }
-}
+export class BulkInstallPackagesError extends IngestManagerError {}
