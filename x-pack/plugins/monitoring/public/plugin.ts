@@ -28,7 +28,7 @@ import { createLegacyAlertTypes } from './alerts/legacy_alert';
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -70,10 +70,10 @@ export class MonitoringPlugin
       });
     }
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    plugins.triggersActionsUi.alertTypeRegistry.register(createCpuUsageAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
-      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
+      plugins.triggersActionsUi.alertTypeRegistry.register(legacyAlertType);
     }
 
     const app: App = {
@@ -94,7 +94,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 
