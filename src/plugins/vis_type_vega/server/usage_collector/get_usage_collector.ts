@@ -16,19 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import hjson from 'hjson';
 import { get } from 'lodash';
+import { parse } from 'hjson';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 
 import { LegacyAPICaller } from 'src/core/server';
 import { ConfigObservable } from '../types';
 
-export type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type VegaType = 'vega' | 'vega-lite';
 
 const VEGA_USAGE_TYPE = 'vis_type_vega';
 
-const checkVegaSchemaType = (schemaURL: string, type: 'vega' | 'vega-lite') =>
+const checkVegaSchemaType = (schemaURL: string, type: VegaType) =>
   schemaURL.includes(`//vega.github.io/schema/${type}/`);
 
 const getStats = async (callCluster: LegacyAPICaller, index: string) => {
@@ -46,11 +47,13 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
   const esResponse: ESResponse = await callCluster('search', searchParams);
   const size = get(esResponse, 'hits.hits.length', 0);
 
+  let shouldPublishTelemetry = false;
+
   if (!size) {
     return;
   }
 
-  return esResponse.hits.hits.reduce(
+  const finalTelemetry = esResponse.hits.hits.reduce(
     (telemetry, hit) => {
       const visualization = get(hit, '_source.visualization', { visState: '{}' });
       const visState: { type?: string; params?: { spec?: string } } = JSON.parse(
@@ -59,9 +62,10 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
 
       if (visState.type === 'vega' && visState.params?.spec)
         try {
-          const spec = hjson.parse(visState.params.spec, { legacyRoot: false });
+          const spec = parse(visState.params.spec, { legacyRoot: false });
 
           if (spec) {
+            shouldPublishTelemetry = true;
             if (checkVegaSchemaType(spec.$schema, 'vega')) {
               telemetry.vega_lib_specs_total++;
             }
@@ -69,7 +73,7 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
               telemetry.vega_lite_lib_specs_total++;
             }
             if (spec.config?.kibana?.type === 'map') {
-              telemetry.vega_map_layout_total++;
+              telemetry.vega_use_map_total++;
             }
           }
         } catch (e) {
@@ -81,9 +85,11 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
     {
       vega_lib_specs_total: 0,
       vega_lite_lib_specs_total: 0,
-      vega_map_layout_total: 0,
+      vega_use_map_total: 0,
     }
   );
+
+  return shouldPublishTelemetry ? finalTelemetry : undefined;
 };
 
 export function getUsageCollector(config: ConfigObservable) {
