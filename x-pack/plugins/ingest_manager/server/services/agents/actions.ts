@@ -225,7 +225,11 @@ export async function getAgentPolicyActionByIds(
   );
 }
 
-export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
+export async function getNewActionsSince(
+  soClient: SavedObjectsClientContract,
+  timestamp: string,
+  decryptData: boolean = true
+) {
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
       'not',
@@ -243,14 +247,33 @@ export async function getNewActionsSince(soClient: SavedObjectsClientContract, t
       }
     ),
   ]);
-  const res = await soClient.find<AgentActionSOAttributes>({
-    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter,
-  });
 
-  return res.saved_objects
+  const actions = (
+    await soClient.find<AgentActionSOAttributes>({
+      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      filter,
+    })
+  ).saved_objects
     .filter(isAgentActionSavedObject)
     .map((so) => savedObjectToAgentAction(so));
+
+  if (!decryptData) {
+    return actions;
+  }
+
+  return await Promise.all(
+    actions.map(async (action) => {
+      // Get decrypted actions
+      return savedObjectToAgentAction(
+        await appContextService
+          .getEncryptedSavedObjects()
+          .getDecryptedAsInternalUser<AgentActionSOAttributes>(
+            AGENT_ACTION_SAVED_OBJECT_TYPE,
+            action.id
+          )
+      );
+    })
+  );
 }
 
 export async function getLatestConfigChangeAction(
