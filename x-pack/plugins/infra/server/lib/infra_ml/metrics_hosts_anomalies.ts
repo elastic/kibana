@@ -7,7 +7,7 @@
 import { RequestHandlerContext } from 'src/core/server';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, getLogEntryDatasets } from './common';
+import { fetchMlJob } from './common';
 import { getJobId, metricsHostsJobTypes } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
@@ -21,7 +21,6 @@ import {
 interface MappedAnomalyHit {
   id: string;
   anomalyScore: number;
-  dataset: string;
   typical: number;
   actual: number;
   jobId: string;
@@ -34,24 +33,31 @@ interface MappedAnomalyHit {
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
   sourceId: string,
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const metricsHostsJobIds = metricsHostsJobTypes.map((jt) => getJobId(spaceId, sourceId, jt));
+  let metricsHostsJobIds = metricsHostsJobTypes;
+
+  if (metric) {
+    metricsHostsJobIds = metricsHostsJobIds.filter((jt) => jt === `k8s_${metric}`);
+  }
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
 
   try {
     await Promise.all(
-      metricsHostsJobIds.map((id) => {
-        return (async () => {
-          const {
-            timing: { spans },
-          } = await fetchMlJob(mlAnomalyDetectors, id);
-          jobIds.push(id);
-          jobSpans = [...jobSpans, ...spans];
-        })();
-      })
+      metricsHostsJobIds
+        .map((jt) => getJobId(spaceId, sourceId, jt))
+        .map((id) => {
+          return (async () => {
+            const {
+              timing: { spans },
+            } = await fetchMlJob(mlAnomalyDetectors, id);
+            jobIds.push(id);
+            jobSpans = [...jobSpans, ...spans];
+          })();
+        })
     );
   } catch (e) {
     if (isMlPrivilegesError(e)) {
@@ -71,6 +77,7 @@ export async function getMetricsHostsAnomalies(
   sourceId: string,
   startTime: number,
   endTime: number,
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
   pagination: Pagination
 ) {
@@ -82,6 +89,7 @@ export async function getMetricsHostsAnomalies(
   } = await getCompatibleAnomaliesJobIds(
     context.infra.spaceId,
     sourceId,
+    metric,
     context.infra.mlAnomalyDetectors
   );
 
@@ -131,7 +139,6 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
   const {
     id,
     anomalyScore,
-    dataset,
     typical,
     actual,
     duration,
@@ -142,7 +149,6 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
   return {
     id,
     anomalyScore,
-    dataset,
     typical,
     actual,
     duration,
@@ -243,47 +249,6 @@ async function fetchMetricsHostsAnomalies(
     hasMoreEntries,
     timing: {
       spans: [fetchLogEntryAnomaliesSpan],
-    },
-  };
-}
-
-// TODO: FIgure out why we need datasets
-export async function getMetricsHostsAnomaliesDatasets(
-  context: {
-    infra: {
-      mlSystem: MlSystem;
-      mlAnomalyDetectors: MlAnomalyDetectors;
-      spaceId: string;
-    };
-  },
-  sourceId: string,
-  startTime: number,
-  endTime: number
-) {
-  const {
-    jobIds,
-    timing: { spans: jobSpans },
-  } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
-    sourceId,
-    context.infra.mlAnomalyDetectors
-  );
-
-  if (jobIds.length === 0) {
-    throw new InsufficientAnomalyMlJobsConfigured(
-      'Log rate or categorisation ML jobs need to be configured to search for anomaly datasets'
-    );
-  }
-
-  const {
-    data: datasets,
-    timing: { spans: datasetsSpans },
-  } = await getLogEntryDatasets(context.infra.mlSystem, startTime, endTime, jobIds);
-
-  return {
-    datasets,
-    timing: {
-      spans: [...jobSpans, ...datasetsSpans],
     },
   };
 }

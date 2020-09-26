@@ -55,6 +55,12 @@ export type GetMetricsHostsAnomaliesSuccessResponsePayload = rt.TypeOf<
   typeof getMetricsHostsAnomaliesSuccessReponsePayloadRT
 >;
 
+const metricRT = rt.keyof({
+  memory_usage: null,
+  network_in: null,
+  network_out: null,
+});
+
 export const getMetricsHostsAnomaliesRequestPayloadRT = rt.type({
   data: rt.intersection([
     rt.type({
@@ -64,12 +70,11 @@ export const getMetricsHostsAnomaliesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
       // Sort properties
       sort: sortRT,
-      // // Dataset filters
-      // datasets: rt.array(rt.string),
     }),
   ]),
 });
