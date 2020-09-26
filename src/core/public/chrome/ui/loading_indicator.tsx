@@ -80,6 +80,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         data-test-subj={testSubj}
         aria-hidden={ariaHidden}
         aria-label={ariaLabel}
+        position="fixed"
         color="accent"
         size="xs"
       />
