@@ -74,7 +74,7 @@ export interface InstallPackageResponse {
 export interface IBulkInstallPackageError {
   name: string;
   statusCode: number;
-  error: string;
+  error: string | Error;
 }
 
 export interface BulkInstallPackageInfo {

@@ -18,4 +18,3 @@ export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {}
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
-export class BulkInstallPackagesError extends IngestManagerError {}
