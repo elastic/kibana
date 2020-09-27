@@ -23,7 +23,13 @@ import {
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
-import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
+import {
+  getInstallation,
+  getInstallationObject,
+  isRequiredPackage,
+  bulkInstallPackages,
+  isBulkInstallError,
+} from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
@@ -40,7 +46,6 @@ import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
-import { bulkInstallPackages } from './bulk_install_packages';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -58,10 +63,6 @@ export async function installLatestPackage(options: {
   } catch (err) {
     throw err;
   }
-}
-
-function isBulkInstallError(test: any): test is IBulkInstallPackageError {
-  return 'error' in test && test.error instanceof Error;
 }
 
 export async function ensureInstalledDefaultPackages(
@@ -165,7 +166,7 @@ export async function handleInstallPackageFailure({
   }
 }
 
-interface IBulkInstallPackageError {
+export interface IBulkInstallPackageError {
   name: string;
   error: Error;
 }

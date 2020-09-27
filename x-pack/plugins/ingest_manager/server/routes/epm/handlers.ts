@@ -13,7 +13,9 @@ import {
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
+  BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
+  IBulkInstallPackageError,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -26,6 +28,7 @@ import {
   BulkUpgradePackagesFromRegistryRequestSchema,
 } from '../../types';
 import {
+  BulkInstallResponse,
   bulkInstallPackages,
   getCategories,
   getPackages,
@@ -33,6 +36,7 @@ import {
   getPackageInfo,
   handleInstallPackageFailure,
   installPackage,
+  isBulkInstallError,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
@@ -169,6 +173,21 @@ export const installPackageFromRegistryHandler: RequestHandler<
   }
 };
 
+const bulkInstallServiceResponseToHttpEntry = (
+  result: BulkInstallResponse
+): BulkInstallPackageInfo | IBulkInstallPackageError => {
+  if (isBulkInstallError(result)) {
+    const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+    return {
+      name: result.name,
+      statusCode,
+      error: body.message,
+    };
+  } else {
+    return result;
+  }
+};
+
 export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   undefined,
   undefined,
@@ -176,23 +195,12 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const bulkInstalledResults = await bulkInstallPackages({
+  const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     callCluster,
     packagesToUpgrade: request.body.packages,
   });
-  const payload = bulkInstalledResults.map((result) => {
-    if ('error' in result) {
-      const { statusCode, body } = ingestErrorToResponseOptions(result.error);
-      return {
-        name: result.name,
-        statusCode,
-        error: body.message,
-      };
-    } else {
-      return result;
-    }
-  });
+  const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
     response: payload,
   };

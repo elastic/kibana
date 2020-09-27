@@ -8,13 +8,14 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../../../types';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
-import { BulkInstallResponse, upgradePackage } from './install';
+import { BulkInstallResponse, IBulkInstallPackageError, upgradePackage } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
   packagesToUpgrade: string[];
   callCluster: CallESAsCurrentUser;
 }
+
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToUpgrade,
@@ -53,4 +54,8 @@ export async function bulkInstallPackages({
   });
 
   return installResponses;
+}
+
+export function isBulkInstallError(test: any): test is IBulkInstallPackageError {
+  return 'error' in test && test.error instanceof Error;
 }

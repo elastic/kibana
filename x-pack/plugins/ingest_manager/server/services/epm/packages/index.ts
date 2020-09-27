@@ -13,7 +13,7 @@ import {
   KibanaAssetType,
 } from '../../../types';
 
-export { bulkInstallPackages } from './bulk_install_packages';
+export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
   getCategories,
   getFile,
@@ -25,7 +25,13 @@ export {
   SearchParams,
 } from './get';
 
-export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
+export {
+  BulkInstallResponse,
+  handleInstallPackageFailure,
+  installPackage,
+  IBulkInstallPackageError,
+  ensureInstalledPackage,
+} from './install';
 export { removeInstallation } from './remove';
 
 type RequiredPackage = 'system' | 'endpoint';
