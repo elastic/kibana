@@ -33,6 +33,7 @@ import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
+import { PreviewQuery } from '../preview';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { ThresholdInput } from '../threshold_input';
@@ -75,6 +76,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
   },
+  preview: 'h',
 };
 
 const MyLabelButton = styled(EuiButtonEmpty)`
@@ -316,6 +318,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               idAria: 'detectionEngineStepDefineRuleTimeline',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
+            }}
+          />
+          <UseField
+            path="preview"
+            component={PreviewQuery}
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRulePreview',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepDefineRulePreview',
             }}
           />
         </Form>
