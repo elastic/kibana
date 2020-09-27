@@ -27,8 +27,9 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
-import { JobId, JobStatusBuckets, ReportingConfigType } from '../common/types';
+import { JobId, ReportingConfigType } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
+import { JobSummarySet } from './';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
 import { ReportingAPIClient } from './lib/reporting_api_client';
@@ -46,10 +47,7 @@ function getStored(): JobId[] {
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
-function handleError(
-  notifications: NotificationsSetup,
-  err: Error
-): Rx.Observable<JobStatusBuckets> {
+function handleError(notifications: NotificationsSetup, err: Error): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {

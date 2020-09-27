@@ -9,11 +9,10 @@
  * Jest to accept its use within a jest.mock()
  */
 import { mockKibanaContext } from './kibana_context.mock';
-import { mockLicenseContext } from './license_context.mock';
 
 jest.mock('react', () => ({
   ...(jest.requireActual('react') as object),
-  useContext: jest.fn(() => ({ ...mockKibanaContext, ...mockLicenseContext })),
+  useContext: jest.fn(() => ({ ...mockKibanaContext })),
   useEffect: jest.fn((fn) => fn()), // Calls on mount/every update - use mount for more complex behavior
 }));
 

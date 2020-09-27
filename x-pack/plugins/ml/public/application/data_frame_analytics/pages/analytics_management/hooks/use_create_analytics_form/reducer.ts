@@ -10,7 +10,7 @@ import { memoize } from 'lodash';
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { collapseLiteralStrings } from '../../../../../../../shared_imports';
 
 import { Action, ACTION } from './actions';
 import {

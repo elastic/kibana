@@ -8,7 +8,7 @@ import LRU from 'lru-cache';
 import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
-  IIndexPattern,
+  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import {
@@ -17,7 +17,12 @@ import {
 } from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';
 
-const cache = new LRU<string, IIndexPattern | undefined>({
+interface IndexPatternTitleAndFields {
+  title: string;
+  fields: FieldDescriptor[];
+}
+
+const cache = new LRU<string, IndexPatternTitleAndFields | undefined>({
   max: 100,
   maxAge: 1000 * 60,
 });
@@ -53,7 +58,7 @@ export const getDynamicIndexPattern = async ({
       pattern: patternIndices,
     });
 
-    const indexPattern: IIndexPattern = {
+    const indexPattern: IndexPatternTitleAndFields = {
       fields,
       title: indexPatternTitle,
     };
