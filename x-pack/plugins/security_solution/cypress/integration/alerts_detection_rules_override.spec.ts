@@ -131,7 +131,6 @@ describe('Detection rules, override', () => {
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
-    waitForTheRuleToBeExecuted();
 
     cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name} Beta`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newOverrideRule.description);
@@ -181,6 +180,7 @@ describe('Detection rules, override', () => {
     });
 
     refreshPage();
+    waitForTheRuleToBeExecuted();
 
     cy.get(NUMBER_OF_ALERTS)
       .invoke('text')

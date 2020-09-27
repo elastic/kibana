@@ -79,7 +79,7 @@ export const MITRE_TECHNIQUES_INPUT =
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
 
-export const REFRESH_BUTTON = '[data-test-subj=refreshButton]';
+export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
 export const RISK_INPUT = '.euiRangeInput';
 
@@ -96,7 +96,7 @@ export const RULE_NAME_INPUT =
 
 export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]';
 
-export const RULE_STATUS = '[data-test-subj=ruleStatus]';
+export const RULE_STATUS = '[data-test-subj="ruleStatus"]';
 
 export const RULE_TIMESTAMP_OVERRIDE =
   '[data-test-subj="detectionEngineStepAboutRuleTimestampOverride"]';

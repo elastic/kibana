@@ -265,10 +265,14 @@ export const selectThresholdRuleType = () => {
 };
 
 export const waitForTheRuleToBeExecuted = () => {
-  cy.get(RULE_STATUS).should((ruleStatus) => {
-    cy.get(REFRESH_BUTTON).click();
-    expect(ruleStatus).to.be('succeeded');
-  });
+  cy.get(RULE_STATUS)
+    .invoke('text')
+    .then((status) => {
+      if (status !== 'succeeded') {
+        cy.get(REFRESH_BUTTON).click();
+      }
+    });
+  cy.get(RULE_STATUS).should('have.text', 'succeeded');
 };
 
 export const selectEqlRuleType = () => {

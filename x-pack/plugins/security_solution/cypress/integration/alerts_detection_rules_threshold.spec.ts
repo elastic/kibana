@@ -128,7 +128,6 @@ describe('Detection rules, threshold', () => {
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
-    waitForTheRuleToBeExecuted();
 
     cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name} Beta`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThresholdRule.description);
@@ -164,6 +163,7 @@ describe('Detection rules, threshold', () => {
     });
 
     refreshPage();
+    waitForTheRuleToBeExecuted();
 
     cy.get(NUMBER_OF_ALERTS)
       .invoke('text')
