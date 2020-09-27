@@ -20,7 +20,7 @@ import {
   USER_AGENT_OS,
 } from './elasticsearch_fieldnames';
 
-const filtersByName = {
+export const filtersByName = {
   host: {
     title: i18n.translate('xpack.apm.localFilters.titles.host', {
       defaultMessage: 'Host',
