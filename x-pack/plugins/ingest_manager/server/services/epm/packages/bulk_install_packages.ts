@@ -6,12 +6,7 @@
 
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
-import {
-  BulkInstallPackagesParams,
-  BulkInstallResponse,
-  upgradePackage,
-  bulkInstallErrorToOptions,
-} from './install';
+import { BulkInstallPackagesParams, BulkInstallResponse, upgradePackage } from './install';
 
 export async function bulkInstallPackages({
   savedObjectsClient,
@@ -37,7 +32,7 @@ export async function bulkInstallPackages({
         pkgToUpgrade,
       });
     } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
+      return { name: pkgToUpgrade, error: result.reason };
     }
   });
   const installResults = await Promise.allSettled(installResponsePromises);
@@ -46,7 +41,7 @@ export async function bulkInstallPackages({
     if (result.status === 'fulfilled') {
       return result.value;
     } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
+      return { name: pkgToUpgrade, error: result.reason };
     }
   });
 

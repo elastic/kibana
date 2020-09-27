@@ -5,7 +5,6 @@
  */
 
 import { ElasticsearchAssetType, Installation, KibanaAssetType } from '../../../types';
-import { BulkInstallPackagesError } from '../../../errors';
 import { SavedObject } from 'src/core/server';
 
 jest.mock('./install');
@@ -69,7 +68,8 @@ describe('install', () => {
       const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
       expect(resp).toEqual([mockInstallation.attributes]);
     });
-    it('should throw an error of the first IBulkInstallPackageError it finds', async () => {
+    it('should throw the first Error it finds', async () => {
+      class SomeCustomError extends Error {}
       mockedBulkInstallPackages.mockImplementationOnce(async function () {
         return [
           {
@@ -88,7 +88,7 @@ describe('install', () => {
           },
           {
             name: 'failure one',
-            error: new BulkInstallPackagesError('abc 123'),
+            error: new SomeCustomError('abc 123'),
           },
           {
             name: 'success three',
@@ -99,13 +99,13 @@ describe('install', () => {
           },
           {
             name: 'failure two',
-            error: new BulkInstallPackagesError('zzz'),
+            error: new Error('zzz'),
           },
         ];
       });
       const soClient = savedObjectsClientMock.create();
       const installPromise = ensureInstalledDefaultPackages(soClient, jest.fn());
-      expect(installPromise).rejects.toThrow(BulkInstallPackagesError);
+      expect(installPromise).rejects.toThrow(SomeCustomError);
       expect(installPromise).rejects.toThrow('abc 123');
     });
   });

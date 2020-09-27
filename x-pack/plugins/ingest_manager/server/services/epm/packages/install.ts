@@ -60,8 +60,8 @@ export async function installLatestPackage(options: {
   }
 }
 
-function isBulkInstallError(resp: BulkInstallResponse): resp is BulkInstallPackagesServiceError {
-  return 'error' in resp && resp.error instanceof Error;
+function isBulkInstallError(test: any): test is IBulkInstallPackageError {
+  return 'error' in test && test.error instanceof Error;
 }
 
 export async function ensureInstalledDefaultPackages(
@@ -86,7 +86,7 @@ export async function ensureInstalledDefaultPackages(
   const retrievedInstallations = await Promise.all(installations);
   return retrievedInstallations.map((installation, index) => {
     if (!installation) {
-      throw new Error(`could not get installation ${bulkResponse[index].name} during setup`);
+      throw new Error(`could not get installation ${bulkResponse[index].name}`);
     }
     return installation;
   });
@@ -165,23 +165,11 @@ export async function handleInstallPackageFailure({
   }
 }
 
-interface BulkInstallPackagesServiceError {
+interface IBulkInstallPackageError {
   name: string;
   error: Error;
 }
-export type BulkInstallResponse = BulkInstallPackageInfo | BulkInstallPackagesServiceError;
-export function bulkInstallErrorToOptions({
-  pkgToUpgrade,
-  error,
-}: {
-  pkgToUpgrade: string;
-  error: Error;
-}): BulkInstallPackagesServiceError {
-  return {
-    name: pkgToUpgrade,
-    error,
-  };
-}
+export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
 interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -220,7 +208,7 @@ export async function upgradePackage({
         installedPkg,
         callCluster,
       });
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: installFailed });
+      return { name: pkgToUpgrade, error: installFailed };
     }
   } else {
     // package was already at the latest version
