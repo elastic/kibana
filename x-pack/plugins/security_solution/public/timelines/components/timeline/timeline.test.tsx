@@ -10,7 +10,12 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { Direction } from '../../../graphql/types';
-import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../../common/mock';
+import {
+  defaultHeaders,
+  mockTimelineData,
+  mockIndexPattern,
+  mockIndexNames,
+} from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 
@@ -23,7 +28,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { useTimelineEvents } from '../../containers/index';
 import { useTimelineEventsDetails } from '../../containers/details/index';
 
@@ -94,22 +99,20 @@ describe('Timeline', () => {
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
-      id: 'foo',
       dataProviders: mockDataProviders,
       docValueFields: [],
       end: endDate,
-      eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
+      id: TimelineId.test,
+      indexNames: mockIndexNames,
       indexPattern,
-      indexToAdd: [],
       isLive: false,
-      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingIndexName: false,
+      loadingSourcerer: false,
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       onDataProviderEdited: jest.fn(),
@@ -119,12 +122,12 @@ describe('Timeline', () => {
       onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
-      start: startDate,
       sort,
+      start: startDate,
       status: TimelineStatus.active,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
-      timelineType: TimelineType.default,
     };
   });
 
@@ -174,7 +177,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when the source is loading', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} isLoadingSource={true} />
+          <TimelineComponent {...props} loadingSourcerer={true} />
         </TestProviders>
       );
 
@@ -209,16 +212,6 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
-    });
-
-    test('it defaults to showing `All`', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <TimelineComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
     });
 
     it('it shows the timeline footer', () => {

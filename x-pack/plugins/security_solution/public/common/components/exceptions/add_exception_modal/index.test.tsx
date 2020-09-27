@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
@@ -28,6 +28,7 @@ import { ExceptionListItemSchema } from '../../../../../../lists/common';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
@@ -59,9 +60,9 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
-    (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
       {
-        isLoading: false,
         indexPatterns: stubIndexPattern,
       },
     ]);
@@ -77,9 +78,9 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        true,
         {
-          isLoading: true,
           indexPatterns: stubIndexPattern,
         },
       ]);
@@ -244,9 +245,9 @@ describe('When the add exception modal is opened', () => {
     };
     beforeEach(() => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        false,
         {
-          isLoading: false,
           indexPatterns: {
             ...stubIndexPattern,
             fields: [

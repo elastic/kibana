@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { CoreStart, AppMountParameters } from 'src/core/public';
-import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
+import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import {
   IngestManagerSetupDeps,
   IngestManagerConfigType,
