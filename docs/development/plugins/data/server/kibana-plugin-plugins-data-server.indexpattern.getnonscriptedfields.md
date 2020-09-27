@@ -4,6 +4,20 @@
 
 ## IndexPattern.getNonScriptedFields() method
 
+This function is just used by Discover and it's high likely to be removed in the near future It doesn't use the save function to skip the error message that's displayed when a user adds several columns in a higher frequency that the changes can be persisted to ES resulting in 409 errors
+
+if (!this.id) return; const field = this.fields.getByName(fieldName); if (!field) { return;
+
+const count = Math.max((field.count \|\| 0) + unit, 0); if (field.count === count) { return;
+
+field.count = count;
+
+try { const res = await this.savedObjectsClient.update( 'index-pattern', this.id, this.getAsSavedObjectBody(),
+
+version: this.version,
+
+); this.version = res.version; } catch (e) { // no need for an error message here
+
 <b>Signature:</b>
 
 ```typescript

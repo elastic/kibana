@@ -65,6 +65,7 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
+import { popularizeField } from '../helpers/popularize_field';
 import {
   esFilters,
   indexPatterns as indexPatternsUtils,
@@ -961,15 +962,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     const { indexPattern } = $scope;
-    // sometimes its a field instance, sometimes just a string
-    indexPattern.fields.getByName(field.name || field).count += 1;
-    core.savedObjects.client
-      .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
-        version: indexPattern.version,
-      })
-      .then((res) => {
-        indexPattern.version = res.version;
-      });
+
+    popularizeField(indexPattern, field.name, indexPatterns);
     const newFilters = esFilters.generateFilters(
       filterManager,
       field,
@@ -983,14 +977,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.addColumn = function addColumn(columnName) {
     if (uiCapabilities.discover.save) {
       const { indexPattern } = $scope;
-      indexPattern.fields.getByName(columnName).count += 1;
-      core.savedObjects.client
-        .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
-          version: indexPattern.version,
-        })
-        .then((res) => {
-          indexPattern.version = res.version;
-        });
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
@@ -999,14 +986,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.removeColumn = function removeColumn(columnName) {
     if (uiCapabilities.discover.save) {
       const { indexPattern } = $scope;
-      indexPattern.fields.getByName(columnName).count += 1;
-      core.savedObjects.client
-        .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
-          version: indexPattern.version,
-        })
-        .then((res) => {
-          indexPattern.version = res.version;
-        });
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
