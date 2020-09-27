@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
+import { CallESAsCurrentUser } from '../../../types';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
 import { BulkInstallResponse, upgradePackage } from './install';
