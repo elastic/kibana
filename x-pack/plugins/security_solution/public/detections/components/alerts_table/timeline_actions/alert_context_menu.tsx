@@ -407,7 +407,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       onClick={handleAddExceptionClick}
       disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
     >
-      <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>
+      <EuiText data-test-subj="addExceptionButton" size="m">
+        {i18n.ACTION_ADD_EXCEPTION}
+      </EuiText>
     </EuiContextMenuItem>
   );
 
