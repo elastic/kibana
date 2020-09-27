@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual } from 'lodash';
+import _, { isEqual } from 'lodash';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { IUiSettingsClient, NotificationsStart } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -27,14 +27,21 @@ import {
   IKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, Filter, Query } from '../../../../data/public';
+import { esFilters, Filter, IndexPattern, Query } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { getSortArray } from './doc_table';
+import { DEFAULT_COLUMNS_SETTING } from '../../../common';
+import { SavedSearch } from '../../saved_searches';
 
 export interface AppState {
   /**
    * Columns displayed in the table
    */
   columns?: string[];
+  /**
+   * Width of data grid columns
+   */
+  columnsWidth?: { [key: string]: number };
   /**
    * Array of applied filters
    */
@@ -54,7 +61,7 @@ export interface AppState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][];
+  sort?: Array<[string, string]>;
   /**
    * id of the used saved query
    */
@@ -189,6 +196,33 @@ export function getState({
     flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
+}
+
+export function getStateDefaults(
+  savedSearch: SavedSearch,
+  indexPattern: IndexPattern,
+  config: IUiSettingsClient,
+  defaultQuery: {
+    query: string;
+    language: string;
+  }
+): AppState {
+  const { searchSource } = savedSearch;
+  const defaultState: AppState = {
+    query: searchSource.getField('query') || defaultQuery,
+    sort: getSortArray(savedSearch.sort, indexPattern),
+    columns:
+      savedSearch.columns.length > 0
+        ? savedSearch.columns
+        : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+    index: indexPattern.id,
+    interval: 'auto',
+    filters: _.cloneDeep(searchSource.getOwnField('filter')) as Filter[],
+  };
+  if (savedSearch.grid && savedSearch.grid.columnsWidth) {
+    defaultState.columnsWidth = savedSearch.grid.columnsWidth;
+  }
+  return defaultState;
 }
 
 /**

@@ -24,7 +24,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
+import { getState, splitState, getStateDefaults } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
@@ -76,7 +76,6 @@ import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import rison from 'rison-node';
 import {
-  DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -220,7 +219,12 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     getPreviousAppState,
     resetInitialAppState,
   } = getState({
-    defaultAppState: getStateDefaults(),
+    defaultAppState: getStateDefaults(
+      savedSearch,
+      $scope.indexPattern,
+      config,
+      data.query.queryString.getDefaultQuery()
+    ),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
@@ -605,26 +609,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       indexPatternId: searchSource.getField('index').id,
     };
   };
-
-  function getStateDefaults() {
-    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-    const defaultState = {
-      query,
-      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
-      index: $scope.indexPattern.id,
-      interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
-    };
-    if (savedSearch.grid && savedSearch.grid.columnsWidth) {
-      defaultState.columnsWidth = savedSearch.grid.columnsWidth;
-    }
-    return defaultState;
-  }
-
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
@@ -768,7 +752,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
             history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
-            setAppState(getStateDefaults());
+            setAppState(
+              getStateDefaults(
+                savedSearch,
+                $scope.indexPattern,
+                config,
+                data.query.queryString.getDefaultQuery()
+              )
+            );
             chrome.docTitle.change(savedSearch.lastSavedTitle);
             chrome.setBreadcrumbs([
               {
