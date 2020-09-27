@@ -11,13 +11,8 @@ import {
   getDefaultSearchParams,
   ISearchStrategy,
   toSnakeCase,
-} from '../../../../../../src/plugins/data/server';
-import {
-  EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
-} from '../../../common/search_strategy/eql';
-
-export const EQL_SEARCH_STRATEGY = 'eql';
+} from '../../../../../src/plugins/data/server';
+import { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '../../common/search/types';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger

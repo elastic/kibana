@@ -5,11 +5,26 @@
  */
 
 import { Logger, RequestHandlerContext } from 'src/core/server';
-import { EqlSearchStrategyRequest } from '../../../common/search_strategy/eql';
-import { getValidEqlResponse } from '../../../common/search_strategy/eql/validation/helpers.mock';
-import { eqlSearchStrategyProvider } from './provider';
+
+import { EqlSearchStrategyRequest } from '../../common/search/types';
+import { eqlSearchStrategyProvider } from './eql_search_strategy';
 
 describe('EQL search strategy', () => {
+  const mockEqlResponse = {
+    body: {
+      is_partial: false,
+      is_running: false,
+      took: 162,
+      timed_out: false,
+      hits: {
+        total: {
+          value: 1,
+          relation: 'eq',
+        },
+        sequences: [],
+      },
+    },
+  };
   const mockEqlSearch = jest.fn();
   const mockEqlGet = jest.fn();
   const mockLogger = ({
@@ -42,7 +57,7 @@ describe('EQL search strategy', () => {
 
   beforeEach(() => {
     mockEqlSearch.mockClear();
-    mockEqlSearch.mockResolvedValueOnce({ body: getValidEqlResponse() });
+    mockEqlSearch.mockResolvedValueOnce(mockEqlResponse);
   });
 
   it('returns a strategy with `search`', async () => {
@@ -67,7 +82,7 @@ describe('EQL search strategy', () => {
     });
 
     it('retrieves the current request if an id is provided', async () => {
-      mockEqlGet.mockResolvedValueOnce({ body: getValidEqlResponse() });
+      mockEqlGet.mockResolvedValueOnce(mockEqlResponse);
       const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
       await eqlSearch.search(mockContext, { id: 'my-search-id' });
       const [[requestParams]] = mockEqlGet.mock.calls;

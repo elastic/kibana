@@ -5,11 +5,13 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
-import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
+} from '../../../../../data_enhanced/common';
+import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
+import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
+import {
   getValidationErrors,
   isErrorResponse,
   isValidationErrorResponse,
