@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 
 import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
-import { paginationCursorRT, anomalyTypeRT, sortRT, paginationRT } from './common';
+import { paginationCursorRT, anomalyTypeRT, sortRT, paginationRT, metricRT } from './common';
 
 export const INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_k8s_anomalies';
@@ -54,12 +54,6 @@ export const getMetricsK8sAnomaliesSuccessReponsePayloadRT = rt.intersection([
 export type GetMetricsK8sAnomaliesSuccessResponsePayload = rt.TypeOf<
   typeof getMetricsK8sAnomaliesSuccessReponsePayloadRT
 >;
-
-const metricRT = rt.keyof({
-  memory_usage: null,
-  network_in: null,
-  network_out: null,
-});
 
 export const getMetricsK8sAnomaliesRequestPayloadRT = rt.type({
   data: rt.intersection([

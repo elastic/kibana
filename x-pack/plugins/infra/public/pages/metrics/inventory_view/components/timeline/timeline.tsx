@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -35,6 +35,8 @@ import { calculateDomain } from '../../../metrics_explorer/components/helpers/ca
 
 import { euiStyled } from '../../../../../../../observability/public';
 import { InfraFormatter } from '../../../../../lib/lib';
+import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
+import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
 interface Props {
   interval: string;
@@ -47,6 +49,17 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
+  const [start] = useState(moment().toDate().getTime());
+
+  const SORT_DEFAULTS = {
+    direction: 'desc' as const,
+    field: 'anomalyScore' as const,
+  };
+
+  const PAGINATION_DEFAULTS = {
+    pageSize: 100,
+  };
+
   const { loading, error, timeseries, reload } = useTimeline(
     filterQueryAsJson,
     [metric],
@@ -58,6 +71,38 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     interval,
     isVisible
   );
+
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults({
+    sourceId: 'default',
+    startTime: moment(new Date(start)).subtract(10, 'd').toDate().getTime(),
+    endTime: start,
+    defaultSortOptions: SORT_DEFAULTS,
+    defaultPaginationOptions: PAGINATION_DEFAULTS,
+  });
+
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults({
+    sourceId: 'default',
+    startTime: moment(new Date(start)).subtract(10, 'd').toDate().getTime(),
+    endTime: start,
+    defaultSortOptions: SORT_DEFAULTS,
+    defaultPaginationOptions: PAGINATION_DEFAULTS,
+  });
+
+  const getAnomalies = useMemo(() => {
+    if (nodeType === 'host') {
+      return getMetricsHostsAnomalies;
+    } else if (nodeType === 'pod') {
+      return getMetricsK8sAnomalies;
+    }
+  }, [nodeType, getMetricsK8sAnomalies, getMetricsHostsAnomalies]);
+
+  // const anomalies = useMemo(() => {
+  //   if (nodeType === 'host') {
+  //     return metricsHostsAnomalies;
+  //   } else if (nodeType === 'pod') {
+  //     return metricsK8sAnomalies;
+  //   }
+  // }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type)?.textLC;
 
@@ -103,6 +148,25 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     },
     [jumpToTime, stopAutoReload]
   );
+
+  const anomalyMetricName = useMemo(() => {
+    const metricType = metric.type;
+    if (metricType === 'memory') {
+      return 'memory_usage';
+    }
+    if (metricType === 'rx') {
+      return 'network_in';
+    }
+    if (metricType === 'tx') {
+      return 'network_out';
+    }
+  }, [metric]);
+
+  useEffect(() => {
+    if (getAnomalies && anomalyMetricName) {
+      getAnomalies(anomalyMetricName);
+    }
+  }, [getAnomalies, anomalyMetricName]);
 
   if (loading) {
     return (
@@ -196,7 +260,7 @@ const TimelineHeader = euiStyled.div`
 `;
 
 const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs}; 
+  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
   width: 100%;
   height: 100%;
 `;

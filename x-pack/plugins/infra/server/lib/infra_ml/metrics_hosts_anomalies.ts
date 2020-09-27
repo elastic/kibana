@@ -39,7 +39,7 @@ async function getCompatibleAnomaliesJobIds(
   let metricsHostsJobIds = metricsHostsJobTypes;
 
   if (metric) {
-    metricsHostsJobIds = metricsHostsJobIds.filter((jt) => jt === `k8s_${metric}`);
+    metricsHostsJobIds = metricsHostsJobIds.filter((jt) => jt === `hosts_${metric}`);
   }
 
   const jobIds: string[] = [];
