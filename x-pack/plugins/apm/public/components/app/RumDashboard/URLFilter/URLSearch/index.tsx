@@ -76,6 +76,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
       }
       return Promise.resolve(null);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [uxQuery, searchValue, popoverIsOpen]
   );
 

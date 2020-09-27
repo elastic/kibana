@@ -8,13 +8,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { EuiSpacer, EuiBadge } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { omit } from 'lodash';
 import { URLSearch } from './URLSearch';
 import { UrlList } from './UrlList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { LocalUIFilterName } from '../../../../../server/lib/ui_filters/local_ui_filters/config';
-import { omit } from 'lodash';
 import { removeUndefinedProps } from '../../../../context/UrlParamsContext/helpers';
+import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 const removeSearchTermLabel = i18n.translate(
   'xpack.apm.uiFilter.url.removeSearchTerm',

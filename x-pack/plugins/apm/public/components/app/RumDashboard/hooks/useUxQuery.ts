@@ -26,7 +26,7 @@ export function useUxQuery() {
     }
 
     return null;
-  }, [urlParams]);
+  }, [start, end, searchTerm, percentile, uiFilters]);
 
   return queryParams;
 }

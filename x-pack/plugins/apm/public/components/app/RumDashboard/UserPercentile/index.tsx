@@ -67,6 +67,7 @@ export function UserPercentile() {
     if (!percentile) {
       updatePercentile(DEFAULT_P);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -95,7 +96,6 @@ export function UserPercentile() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => {
-    // setOptions(options.slice().sort(Comparators.property('checked')));
     setIsPopoverOpen(!isPopoverOpen);
   };
 
@@ -116,7 +116,7 @@ export function UserPercentile() {
             color={'text'}
             contentProps={{ style: { justifyContent: 'space-around' } }}
           >
-            {ticks.find((tick) => tick.value == percentile)?.label}
+            {ticks.find((tick) => tick.value === percentile)?.label}
           </EuiButton>
         }
       >
