@@ -6,8 +6,13 @@
 
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
-import { BulkInstallPackagesParams, BulkInstallResponse, upgradePackage } from './install';
+import { BulkInstallResponse, upgradePackage } from './install';
 
+interface BulkInstallPackagesParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  packagesToUpgrade: string[];
+  callCluster: CallESAsCurrentUser;
+}
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToUpgrade,

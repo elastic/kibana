@@ -224,11 +224,6 @@ export async function upgradePackage({
   }
 }
 
-export interface BulkInstallPackagesParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  packagesToUpgrade: string[];
-  callCluster: CallESAsCurrentUser;
-}
 interface InstallPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
