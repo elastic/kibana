@@ -10,30 +10,26 @@ import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUxQuery } from '../hooks/useUxQuery';
 
 export function VisitorBreakdown() {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum-client/visitor-breakdown',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [end, start, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   return (

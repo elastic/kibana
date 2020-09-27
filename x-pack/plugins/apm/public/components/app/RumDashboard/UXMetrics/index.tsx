@@ -16,8 +16,8 @@ import {
 import { I18LABELS } from '../translations';
 import { CoreVitals } from '../CoreVitals';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUxQuery } from '../hooks/useUxQuery';
 
 export interface UXMetrics {
   cls: string;
@@ -31,29 +31,21 @@ export interface UXMetrics {
 }
 
 export function UXMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum-client/web-core-vitals',
           params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
-            },
+            query: uxQuery,
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   return (

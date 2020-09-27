@@ -6,31 +6,26 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { useUxQuery } from '../hooks/useUxQuery';
 
 export function PageViewsTrend() {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-view-trends',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
               ...(breakdown
                 ? {
                     breakdowns: JSON.stringify(breakdown),
@@ -42,7 +37,7 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdown, searchTerm]
+    [uxQuery, breakdown]
   );
 
   return (

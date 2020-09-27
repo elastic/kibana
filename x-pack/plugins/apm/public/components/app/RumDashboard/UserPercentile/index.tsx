@@ -4,90 +4,137 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { EuiSuperSelect, EuiHealth, EuiImage, EuiText } from '@elastic/eui';
+import { EuiRange, htmlIdGenerator, EuiPopover, EuiButton } from '@elastic/eui';
+import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+
+const PercentileRange = styled(EuiRange)`
+  &&& {
+    button::before {
+      content: '';
+      display: block;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      bottom: 0;
+      border: 1px dotted;
+      border-width: 0 0 0 1px;
+      height: 12px;
+      width: 2px;
+    }
+  }
+`;
+
+const ticks = [
+  { label: '40', value: 40 },
+  { label: 'Median (P50)', value: 50 },
+  { label: 'P75', value: 75 },
+  { label: 'P90', value: 90 },
+  { label: 'P95', value: 95 },
+  { label: 'P99', value: 99 },
+];
+
+const DEFAULT_P = 50;
 
 export function UserPercentile() {
-  const options = [
-    {
-      value: 'minor',
-      inputDisplay: (
-        <>
-          <EuiImage
-            size="l"
-            hasShadow
-            url="https://user-images.githubusercontent.com/3505601/94191254-86a55180-fead-11ea-98da-23e459a1fb50.png"
-          />
-          <EuiText>
-            <h3>Median</h3>
-          </EuiText>
-        </>
-      ),
-      'data-test-subj': 'option-minor',
-    },
-    {
-      value: 'warning',
-      inputDisplay: (
-        <>
-          <EuiImage
-            size="l"
-            hasShadow
-            url="https://user-images.githubusercontent.com/3505601/94191264-8907ab80-fead-11ea-95a7-e97be222714e.png"
-          />
-          <EuiText>
-            <h3>P75</h3>
-          </EuiText>
-        </>
-      ),
-      'data-test-subj': 'option-warning',
-      disabled: true,
-    },
-    {
-      value: 'critical',
-      inputDisplay: (
-        <>
-          <EuiImage
-            size="l"
-            hasShadow
-            url="https://user-images.githubusercontent.com/3505601/94191248-84db8e00-fead-11ea-83a6-f59718015d06.png"
-          />
-          <EuiText>
-            <h3>P90</h3>
-          </EuiText>
-        </>
-      ),
-      'data-test-subj': 'option-critical',
-    },
-    {
-      value: 'critical',
-      inputDisplay: (
-        <>
-          <EuiImage
-            size="l"
-            hasShadow
-            url="https://user-images.githubusercontent.com/3505601/94191241-82793400-fead-11ea-821a-bfa7bab4e616.png"
-          />
-          <EuiText>
-            <h3>P100</h3>
-          </EuiText>
-        </>
-      ),
-      'data-test-subj': 'option-critical',
-    },
-  ];
-  const [value, setValue] = useState(options[1].value);
+  const history = useHistory();
 
-  const onChange = (value) => {
-    setValue(value);
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
+
+  const [value, setValue] = useState(percentile ?? DEFAULT_P);
+
+  const updatePercentile = useCallback(
+    (percentileN?: number) => {
+      const newLocation = {
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          percentile: percentileN,
+        }),
+      };
+      history.push(newLocation);
+    },
+    [history]
+  );
+
+  useEffect(() => {
+    if (!percentile) {
+      updatePercentile(DEFAULT_P);
+    }
+  }, []);
+
+  useEffect(() => {
+    setValue(Number(percentile));
+  }, [percentile]);
+
+  const onChange = (e) => {
+    const val = +e.currentTarget.value;
+    if (val < 62.5) {
+      setValue(50);
+    }
+    if (val > 62.5 && val < 82.5) {
+      setValue(75);
+    }
+    if (val < 92.5 && val > 82.5) {
+      setValue(90);
+    }
+    if (val > 92.5 && val < 97) {
+      setValue(95);
+    }
+    if (val > 97) {
+      setValue(99);
+    }
   };
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => {
+    // setOptions(options.slice().sort(Comparators.property('checked')));
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+    updatePercentile(value);
+  };
   return (
-    <EuiSuperSelect
-      style={{ width: 300 }}
-      options={options}
-      valueOfSelected={value}
-      onChange={(value) => onChange(value)}
-    />
+    <>
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        button={
+          <EuiButton
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={onButtonClick}
+            color={'text'}
+            contentProps={{ style: { justifyContent: 'space-around' } }}
+          >
+            {ticks.find((tick) => tick.value == percentile)?.label}
+          </EuiButton>
+        }
+      >
+        <PercentileRange
+          style={{ width: 500 }}
+          id={htmlIdGenerator()()}
+          value={value}
+          onChange={(e) => onChange(e)}
+          showTicks
+          showRange
+          fullWidth
+          aria-label="An example of EuiRange with levels prop"
+          aria-describedby="levelsHelp2"
+          min={40}
+          max={100}
+          ticks={ticks}
+        />
+      </EuiPopover>
+    </>
   );
 }
