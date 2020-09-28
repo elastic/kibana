@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'brace/mode/json';
 import React from 'react';
 import { EuiCodeEditor, EuiSpacer } from '@elastic/eui';
 import { FilterAggConfigEditor } from '../types';

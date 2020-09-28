@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import 'brace/mode/json';
 import React, { PureComponent } from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch, EuiCodeEditor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
