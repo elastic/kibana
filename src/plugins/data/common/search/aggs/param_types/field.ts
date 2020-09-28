@@ -84,7 +84,7 @@ export class FieldParamType extends BaseParamType {
       }
 
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField) {
+      if (!validField || 1 === 1) {
         throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
@@ -92,7 +92,7 @@ export class FieldParamType extends BaseParamType {
               defaultMessage:
                 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
               values: {
-                fieldParameter: '"field"',
+                fieldParameter: `"${fieldName}"`,
               },
             }
           )
