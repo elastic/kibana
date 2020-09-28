@@ -18,7 +18,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   let agentAccessAPIKey: string;
 
-  describe('artifact download', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('artifact download', () => {
     before(async () => {
       await esArchiver.load('endpoint/artifacts/api_feature', { useCreate: true });
 

@@ -22,12 +22,13 @@ import { NetworkKpiComponent } from '.';
 describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;
   const props = {
-    from: '2019-06-15T06:00:00.000Z',
-    to: '2019-06-18T06:00:00.000Z',
-    narrowDateRange: jest.fn(),
     filterQuery: '',
+    from: '2019-06-15T06:00:00.000Z',
+    indexNames: [],
+    narrowDateRange: jest.fn(),
     setQuery: jest.fn(),
     skip: true,
+    to: '2019-06-18T06:00:00.000Z',
   };
 
   const { storage } = createSecuritySolutionStorageMock();

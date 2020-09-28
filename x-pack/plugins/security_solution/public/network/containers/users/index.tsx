@@ -6,9 +6,9 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
@@ -23,7 +23,11 @@ import {
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -62,7 +66,7 @@ export const useNetworkUsers = ({
   startDate,
 }: UseNetworkUsers): [boolean, NetworkUsersArgs] => {
   const getNetworkUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useSelector(getNetworkUsersSelector, shallowEqual);
+  const { activePage, sort, limit } = useShallowEqualSelector(getNetworkUsersSelector);
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -126,7 +130,7 @@ export const useNetworkUsers = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkUsersResponse((prevResponse) => ({
@@ -139,7 +143,7 @@ export const useNetworkUsers = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
