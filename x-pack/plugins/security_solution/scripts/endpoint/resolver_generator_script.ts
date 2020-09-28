@@ -23,15 +23,17 @@ class KbnClientWithApiKeySupport extends KbnClient {
   private kibanaUrlNoAuth: string;
   constructor(log: ToolingLog, kibanaConfig: KibanaConfig) {
     super(log, kibanaConfig);
-    // is resolveUrl necessary?
     const kibanaUrl = this.resolveUrl(kibanaConfig.url);
     const matches = kibanaUrl.match(/(https?:\/\/)(.*\:.*\@)(.*)/);
     // strip auth from url
-    this.kibanaUrlNoAuth = matches && matches.length === 3 ? matches[1] + matches[3] : kibanaUrl;
+    this.kibanaUrlNoAuth =
+      matches && matches.length >= 3
+        ? matches[1] + matches[3].replace('/', '')
+        : kibanaUrl.replace('/', '');
   }
   requestWithApiKey(path: string, init?: RequestInit | undefined): Promise<Response> {
     return (fetch(
-      `${this.kibanaUrlNoAuth}/${path}`,
+      `${this.kibanaUrlNoAuth}${path}`,
       init as FetchRequestInit
     ) as unknown) as Promise<Response>;
   }
@@ -219,7 +221,7 @@ async function main() {
       alias: 'f',
       describe: 'enroll fleet agents for hosts',
       type: 'boolean',
-      default: true,
+      default: false,
     },
   }).argv;
   const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
