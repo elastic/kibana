@@ -10,6 +10,7 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -27,6 +28,27 @@ import { StatusBadge } from './status_badge';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 import { Accordion } from './accordion';
 import { UptimeThemeContext } from '../../../contexts';
+
+interface EmptyStepStateProps {
+  journey: JourneyState;
+}
+
+const EmptyStepState: FC<EmptyStepStateProps> = ({ journey: { checkGroup } }) => (
+  <EuiEmptyPrompt
+    iconType="cross"
+    title={<h2>There are no steps for this journey</h2>}
+    body={
+      <>
+        <p>There are no steps associated with the run of this journey.</p>
+        <p>
+          The journey's check group is
+          <code>{checkGroup}</code>.
+        </p>
+        <p>There is no further information to display.</p>
+      </>
+    }
+  />
+);
 
 interface ScriptExpandedRowProps {
   checkGroup?: string;
@@ -85,8 +107,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
     );
   }
   if (journey.steps.length === 0) {
-    console.log('weird journey:', journey);
-    return <div>Didn't find any steps sadly</div>;
+    return <EmptyStepState journey={journey} />;
   }
   return (
     <ScriptExpandedRowComponent {...props} fetchScreenshot={fetchScreenshot} journey={journey} />
