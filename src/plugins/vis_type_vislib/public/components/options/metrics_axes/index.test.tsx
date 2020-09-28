@@ -194,9 +194,9 @@ describe('MetricsAxisOptions component', () => {
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
 
       expect(setValue).toHaveBeenCalledTimes(6);
-      expect(setValue).toHaveBeenNthCalledWith(3, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(5, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(4, VALUE_AXES, updatedValues);
+      expect(setValue).toHaveBeenNthCalledWith(4, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(6, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(5, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
