@@ -28,8 +28,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/78373
-  describe.skip('doc link in discover', function contextSize() {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('doc link in discover', function contextSize() {
     beforeEach(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.loadIfNeeded('discover');
