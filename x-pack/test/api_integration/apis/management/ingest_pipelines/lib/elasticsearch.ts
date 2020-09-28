@@ -50,9 +50,19 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
+  const createIndex = (index: { index: string; id: string; body: object }) => {
+    return es.index(index);
+  };
+
+  const deleteIndex = (indexName: string) => {
+    return es.indices.delete({ index: indexName });
+  };
+
   return {
     createPipeline,
     deletePipeline,
     cleanupPipelines,
+    createIndex,
+    deleteIndex,
   };
 };

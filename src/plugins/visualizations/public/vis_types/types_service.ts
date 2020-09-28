@@ -19,10 +19,8 @@
 
 import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-// @ts-ignore
-import { BaseVisType } from './base_vis_type';
-// @ts-ignore
-import { ReactVisType } from './react_vis_type';
+import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
+import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface VisType {
@@ -71,17 +69,17 @@ export class TypesService {
     return {
       /**
        * registers a visualization type
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createBaseVisualization: (config: any) => {
+      createBaseVisualization: (config: BaseVisTypeOptions): void => {
         const vis = new BaseVisType(config);
         registerVisualization(() => vis);
       },
       /**
        * registers a visualization which uses react for rendering
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createReactVisualization: (config: any) => {
+      createReactVisualization: (config: ReactVisTypeOptions): void => {
         const vis = new ReactVisType(config);
         registerVisualization(() => vis);
       },

@@ -7,14 +7,14 @@
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiPopover,
   EuiContextMenuPanelDescriptor,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AlertType } from '../../../../../common/alert_types';
-import { AlertingFlyout } from './AlertingFlyout';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { AlertingFlyout } from '../../../alerting/AlertingFlyout';
 
 const alertLabel = i18n.translate(
   'xpack.apm.serviceDetails.alertsMenu.alerts',
@@ -53,7 +53,7 @@ interface Props {
   canReadAnomalies: boolean;
 }
 
-export function AlertIntegrations(props: Props) {
+export function AlertingPopoverAndFlyout(props: Props) {
   const { canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
 
   const plugin = useApmPluginContext();
