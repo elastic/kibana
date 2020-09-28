@@ -4,27 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAccordion,
-  EuiBasicTable,
-  EuiCode,
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, FC, Fragment } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
-import { UptimeThemeContext } from '../../../contexts';
 import { EmptyStepState } from './empty_journey';
 import { ExecutedJourney } from './executed_journey';
 import { ConsoleOutputStepList } from './console_output_steps';
@@ -33,8 +19,7 @@ interface ScriptExpandedRowProps {
   checkGroup?: string;
 }
 
-export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
-  const { checkGroup } = props;
+export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup }) => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (checkGroup) {
@@ -42,29 +27,22 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
     }
   }, [dispatch, checkGroup]);
 
-  const f = useSelector(journeySelector);
-  const journey = f.journeys.find((j) => j.checkGroup === checkGroup);
+  const journeyState = useSelector(journeySelector);
+  const journey = journeyState.journeys.find((j) => j.checkGroup === checkGroup);
+
   const fetchScreenshot = useCallback(
     (stepIndex: number) => {
       dispatch(getStepScreenshot({ checkGroup: checkGroup!, stepIndex }));
     },
     [checkGroup, dispatch]
   );
-  if (!journey) {
-    return <div>this probably shouldn't happen, but there's no info for this check group</div>;
-  }
-  if (journey.loading) {
-    return (
-      <div>
-        <EuiLoadingSpinner />
-      </div>
-    );
-  }
-  if (journey.steps.length === 0) {
-    return <EmptyStepState journey={journey} />;
-  }
+
   return (
-    <ScriptExpandedRowComponent {...props} fetchScreenshot={fetchScreenshot} journey={journey} />
+    <ScriptExpandedRowComponent
+      checkGroup={checkGroup}
+      fetchScreenshot={fetchScreenshot}
+      journey={journey}
+    />
   );
 };
 
@@ -73,8 +51,33 @@ type ComponentProps = ScriptExpandedRowProps & {
   journey: JourneyState;
 };
 
-export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ journey, fetchScreenshot }) => {
-  const hasStepEnd = journey.steps.some((step) => step.synthetics?.type === 'step/end');
-  if (hasStepEnd) return <ExecutedJourney journey={journey} fetchScreenshot={fetchScreenshot} />;
-  return <ConsoleOutputStepList journey={journey} />;
+const someStepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
+const someStepConsole = (step: Ping) =>
+  ['stderr', 'cmd/status'].indexOf(step.synthetics?.type) !== -1;
+
+export const ScriptExpandedRowComponent: FC<ComponentProps> = ({
+  checkGroup,
+  journey,
+  fetchScreenshot,
+}) => {
+  if (journey.loading) {
+    return (
+      <div>
+        <EuiLoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!journey || journey.steps.length === 0) {
+    return <EmptyStepState checkGroup={checkGroup} />;
+  }
+
+  if (journey.steps.some(someStepEnd))
+    return <ExecutedJourney journey={journey} fetchScreenshot={fetchScreenshot} />;
+
+  if (journey.steps.some(someStepConsole)) return <ConsoleOutputStepList journey={journey} />;
+
+  // TODO: should not happen, this means that the journey has no step/end and no console logs, but some other steps; filmstrip, screenshot, etc.
+  // we should probably create an error prompt letting the user know this step is not supported yet
+  return null;
 };
