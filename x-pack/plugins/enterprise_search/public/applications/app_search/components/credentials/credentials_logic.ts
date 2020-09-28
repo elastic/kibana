@@ -44,7 +44,7 @@ export interface ICredentialsLogicActions {
   setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
   setTokenName(name: string): string;
   setTokenType(tokenType: string): string;
-  toggleCredentialsForm(apiToken?: IApiToken): IApiToken;
+  showCredentialsForm(apiToken?: IApiToken): IApiToken;
   hideCredentialsForm(): { value: boolean };
   resetCredentials(): { value: boolean };
   initializeCredentialsData(): { value: boolean };
@@ -66,7 +66,7 @@ export interface ICredentialsLogicValues {
   fullEngineAccessChecked: boolean;
   meta: Partial<IMeta>;
   nameInputBlurred: boolean;
-  showCredentialsForm: boolean;
+  shouldShowCredentialsForm: boolean;
 }
 
 export const CredentialsLogic = kea<
@@ -90,7 +90,7 @@ export const CredentialsLogic = kea<
     }),
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
-    toggleCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
+    showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
     hideCredentialsForm: false,
     resetCredentials: false,
     initializeCredentialsData: true,
@@ -175,14 +175,14 @@ export const CredentialsLogic = kea<
           read: tokenType === PRIVATE,
           type: tokenType,
         }),
-        toggleCredentialsForm: (_, activeApiToken) => activeApiToken,
+        showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
     ],
     activeApiTokenRawName: [
       '',
       {
         setTokenName: (_, activeApiTokenRawName) => activeApiTokenRawName,
-        toggleCredentialsForm: (activeApiTokenRawName, activeApiToken) =>
+        showCredentialsForm: (activeApiTokenRawName, activeApiToken) =>
           activeApiToken.name || activeApiTokenRawName,
         hideCredentialsForm: () => '',
         onApiTokenCreateSuccess: () => '',
@@ -192,13 +192,13 @@ export const CredentialsLogic = kea<
     activeApiTokenIsExisting: [
       false,
       {
-        toggleCredentialsForm: (_, activeApiToken) => !!activeApiToken.id,
+        showCredentialsForm: (_, activeApiToken) => !!activeApiToken.id,
       },
     ],
-    showCredentialsForm: [
+    shouldShowCredentialsForm: [
       false,
       {
-        toggleCredentialsForm: (showCredentialsForm) => !showCredentialsForm,
+        showCredentialsForm: (shouldShowCredentialsForm) => !shouldShowCredentialsForm,
         hideCredentialsForm: () => false,
         onApiTokenCreateSuccess: () => false,
         onApiTokenUpdateSuccess: () => false,
@@ -209,7 +209,7 @@ export const CredentialsLogic = kea<
       {
         onApiTokenError: (_, formErrors) => formErrors,
         onApiTokenCreateSuccess: () => [],
-        toggleCredentialsForm: () => [],
+        showCredentialsForm: () => [],
         resetCredentials: () => [],
       },
     ],

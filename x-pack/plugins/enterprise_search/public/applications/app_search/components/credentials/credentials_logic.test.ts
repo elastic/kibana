@@ -37,7 +37,7 @@ describe('CredentialsLogic', () => {
     isCredentialsDetailsComplete: false,
     meta: {},
     nameInputBlurred: false,
-    showCredentialsForm: false,
+    shouldShowCredentialsForm: false,
   };
 
   const mount = (defaults?: object) => {
@@ -258,7 +258,7 @@ describe('CredentialsLogic', () => {
       apiTokens: expect.any(Array),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
-      showCredentialsForm: expect.any(Boolean),
+      shouldShowCredentialsForm: expect.any(Boolean),
       formErrors: expect.any(Array),
     };
 
@@ -310,16 +310,16 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('showCredentialsForm', () => {
+    describe('shouldShowCredentialsForm', () => {
       it('should reset to the default value, which closes the credentials form', () => {
         mount({
-          showCredentialsForm: true,
+          shouldShowCredentialsForm: true,
         });
 
         CredentialsLogic.actions.onApiTokenCreateSuccess(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
-          showCredentialsForm: false,
+          shouldShowCredentialsForm: false,
         });
       });
     });
@@ -366,7 +366,7 @@ describe('CredentialsLogic', () => {
       apiTokens: expect.any(Array),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
-      showCredentialsForm: expect.any(Boolean),
+      shouldShowCredentialsForm: expect.any(Boolean),
     };
 
     describe('apiTokens', () => {
@@ -437,16 +437,16 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('showCredentialsForm', () => {
+    describe('shouldShowCredentialsForm', () => {
       it('should reset to the default value, which closes the credentials form', () => {
         mount({
-          showCredentialsForm: true,
+          shouldShowCredentialsForm: true,
         });
 
         CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
         expect(CredentialsLogic.values).toEqual({
           ...values,
-          showCredentialsForm: false,
+          shouldShowCredentialsForm: false,
         });
       });
     });
@@ -849,32 +849,32 @@ describe('CredentialsLogic', () => {
     });
   });
 
-  describe('toggleCredentialsForm', () => {
+  describe('showCredentialsForm', () => {
     const values = {
       ...DEFAULT_VALUES,
       activeApiTokenIsExisting: expect.any(Boolean),
       activeApiToken: expect.any(Object),
       activeApiTokenRawName: expect.any(String),
       formErrors: expect.any(Array),
-      showCredentialsForm: expect.any(Boolean),
+      shouldShowCredentialsForm: expect.any(Boolean),
     };
 
-    describe('showCredentialsForm', () => {
-      it('should toggle `showCredentialsForm`', () => {
+    describe('shouldShowCredentialsForm', () => {
+      it('should toggle `shouldShowCredentialsForm`', () => {
         mount({
-          showCredentialsForm: false,
+          shouldShowCredentialsForm: false,
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
-          showCredentialsForm: true,
+          shouldShowCredentialsForm: true,
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
-          showCredentialsForm: false,
+          shouldShowCredentialsForm: false,
         });
       });
     });
@@ -885,7 +885,7 @@ describe('CredentialsLogic', () => {
           formErrors: ['I am an error'],
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
           formErrors: [],
@@ -897,7 +897,7 @@ describe('CredentialsLogic', () => {
       it('should set `activeApiTokenRawName` to the name of the provided token', () => {
         mount();
 
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
+        CredentialsLogic.actions.showCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiTokenRawName: 'myToken',
@@ -907,7 +907,7 @@ describe('CredentialsLogic', () => {
       it('should set `activeApiTokenRawName` to the default value if no token is provided', () => {
         mount();
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
@@ -918,8 +918,8 @@ describe('CredentialsLogic', () => {
       // used value... to be honest, this should probably just be a selector
       // it('should set `activeApiTokenRawName` back to the default value if no token is provided', () => {
       //   mount();
-      //   CredentialsLogic.actions.toggleCredentialsForm(newToken);
-      //   CredentialsLogic.actions.toggleCredentialsForm();
+      //   CredentialsLogic.actions.showCredentialsForm(newToken);
+      //   CredentialsLogic.actions.showCredentialsForm();
       //   expect(CredentialsLogic.values).toEqual({
       //     ...values,
       //     activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
@@ -931,7 +931,7 @@ describe('CredentialsLogic', () => {
       it('should set `activeApiToken` to the provided token', () => {
         mount();
 
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
+        CredentialsLogic.actions.showCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiToken: newToken,
@@ -943,7 +943,7 @@ describe('CredentialsLogic', () => {
           activeApiToken: newToken,
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiToken: DEFAULT_VALUES.activeApiToken,
@@ -958,7 +958,7 @@ describe('CredentialsLogic', () => {
           activeApiTokenIsExisting: false,
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm(newToken);
+        CredentialsLogic.actions.showCredentialsForm(newToken);
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiTokenIsExisting: true,
@@ -971,7 +971,7 @@ describe('CredentialsLogic', () => {
         });
         const { id, ...newTokenWithoutId } = newToken;
 
-        CredentialsLogic.actions.toggleCredentialsForm(newTokenWithoutId);
+        CredentialsLogic.actions.showCredentialsForm(newTokenWithoutId);
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiTokenIsExisting: false,
@@ -983,7 +983,7 @@ describe('CredentialsLogic', () => {
           activeApiTokenIsExisting: true,
         });
 
-        CredentialsLogic.actions.toggleCredentialsForm();
+        CredentialsLogic.actions.showCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
           activeApiTokenIsExisting: false,
@@ -995,7 +995,7 @@ describe('CredentialsLogic', () => {
   describe('hideCredentialsForm', () => {
     const values = {
       ...DEFAULT_VALUES,
-      showCredentialsForm: expect.any(Boolean),
+      shouldShowCredentialsForm: expect.any(Boolean),
       activeApiTokenRawName: expect.any(String),
     };
 
@@ -1013,16 +1013,16 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('showCredentialsForm', () => {
+    describe('shouldShowCredentialsForm', () => {
       it('resets this value', () => {
         mount({
-          showCredentialsForm: true,
+          shouldShowCredentialsForm: true,
         });
 
         CredentialsLogic.actions.hideCredentialsForm();
         expect(CredentialsLogic.values).toEqual({
           ...values,
-          showCredentialsForm: false,
+          shouldShowCredentialsForm: false,
         });
       });
     });
