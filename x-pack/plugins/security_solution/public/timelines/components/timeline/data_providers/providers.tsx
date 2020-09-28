@@ -320,6 +320,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
       () =>
         group.map((dataProvider, index) => (
           <DataProvidersGroupItem
+            key={dataProvider.id}
             browserFields={browserFields}
             dataProvider={dataProvider}
             index={index}
