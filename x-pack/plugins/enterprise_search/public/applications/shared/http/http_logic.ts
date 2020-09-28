@@ -4,38 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
 
-import { IKeaLogic, IKeaParams, TKeaReducers } from '../../shared/types';
+import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
-export interface IHttpLogicValues {
+export interface IHttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
+  readOnlyMode: boolean;
 }
-export interface IHttpLogicActions {
-  initializeHttp({ http, errorConnecting }: { http: HttpSetup; errorConnecting?: boolean }): void;
+export interface IHttpActions {
   initializeHttpInterceptors(): void;
-  setHttpInterceptors(httpInterceptors: Function[]): void;
-  setErrorConnecting(errorConnecting: boolean): void;
+  setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
+  setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
+  setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
-export const HttpLogic = kea({
-  actions: (): IHttpLogicActions => ({
-    initializeHttp: ({ http, errorConnecting }) => ({ http, errorConnecting }),
+export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
+  path: ['enterprise_search', 'http_logic'],
+  actions: {
     initializeHttpInterceptors: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
-  }),
-  reducers: (): TKeaReducers<IHttpLogicValues, IHttpLogicActions> => ({
-    http: [
-      (null as unknown) as HttpSetup,
-      {
-        initializeHttp: (_, { http }) => http,
-      },
-    ],
+    setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
+  },
+  reducers: ({ props }) => ({
+    http: [props.http, {}],
     httpInterceptors: [
       [],
       {
@@ -43,10 +40,15 @@ export const HttpLogic = kea({
       },
     ],
     errorConnecting: [
-      false,
+      props.errorConnecting || false,
       {
-        initializeHttp: (_, { errorConnecting }) => !!errorConnecting,
         setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
+      },
+    ],
+    readOnlyMode: [
+      props.readOnlyMode || false,
+      {
+        setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
       },
     ],
   }),
@@ -56,31 +58,71 @@ export const HttpLogic = kea({
 
       const errorConnectingInterceptor = values.http.intercept({
         responseError: async (httpResponse) => {
-          const { url, status } = httpResponse.response!;
-          const hasErrorConnecting = status === 502;
-          const isApiResponse =
-            url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+          if (isEnterpriseSearchApi(httpResponse)) {
+            const { status } = httpResponse.response!;
+            const hasErrorConnecting = status === 502;
 
-          if (isApiResponse && hasErrorConnecting) {
-            actions.setErrorConnecting(true);
+            if (hasErrorConnecting) {
+              actions.setErrorConnecting(true);
+            }
           }
-          return httpResponse;
+
+          // Re-throw error so that downstream catches work as expected
+          return Promise.reject(httpResponse) as Promise<HttpInterceptorResponseError>;
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);
 
-      // TODO: Read only mode interceptor
+      const readOnlyModeInterceptor = values.http.intercept({
+        response: async (httpResponse) => {
+          if (isEnterpriseSearchApi(httpResponse)) {
+            const readOnlyMode = httpResponse.response!.headers.get(READ_ONLY_MODE_HEADER);
+
+            if (readOnlyMode === 'true') {
+              actions.setReadOnlyMode(true);
+            } else {
+              actions.setReadOnlyMode(false);
+            }
+          }
+
+          return Promise.resolve(httpResponse);
+        },
+      });
+      httpInterceptors.push(readOnlyModeInterceptor);
+
       actions.setHttpInterceptors(httpInterceptors);
     },
   }),
-  events: ({ values }) => ({
+  events: ({ values, actions }) => ({
+    afterMount: () => {
+      actions.initializeHttpInterceptors();
+    },
     beforeUnmount: () => {
       values.httpInterceptors.forEach((removeInterceptorFn?: Function) => {
         if (removeInterceptorFn) removeInterceptorFn();
       });
     },
   }),
-} as IKeaParams<IHttpLogicValues, IHttpLogicActions>) as IKeaLogic<
-  IHttpLogicValues,
-  IHttpLogicActions
->;
+});
+
+/**
+ * Mount/props helper
+ */
+interface IHttpLogicProps {
+  http: HttpSetup;
+  errorConnecting?: boolean;
+  readOnlyMode?: boolean;
+}
+export const mountHttpLogic = (props: IHttpLogicProps) => {
+  HttpLogic(props);
+  const unmount = HttpLogic.mount();
+  return unmount;
+};
+
+/**
+ * Small helper that checks whether or not an http call is for an Enterprise Search API
+ */
+const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
+  const { url } = httpResponse.response!;
+  return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+};

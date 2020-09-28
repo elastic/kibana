@@ -6,26 +6,26 @@
 
 import _ from 'lodash';
 import {
-  ResolverEvent,
+  SafeResolverEvent,
   ResolverNodeStats,
-  ResolverRelatedEvents,
-  ResolverAncestry,
-  ResolverTree,
-  ResolverChildren,
+  SafeResolverRelatedEvents,
+  SafeResolverAncestry,
+  SafeResolverTree,
+  SafeResolverChildren,
   ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 import { createTree } from './node';
 
 interface Node {
   entityID: string;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   stats?: ResolverNodeStats;
 }
 
 export interface Options {
-  relatedEvents?: ResolverRelatedEvents;
-  ancestry?: ResolverAncestry;
-  children?: ResolverChildren;
+  relatedEvents?: SafeResolverRelatedEvents;
+  ancestry?: SafeResolverAncestry;
+  children?: SafeResolverChildren;
   relatedAlerts?: ResolverRelatedAlerts;
 }
 
@@ -37,7 +37,7 @@ export interface Options {
  */
 export class Tree {
   protected cache: Map<string, Node> = new Map();
-  protected tree: ResolverTree;
+  protected tree: SafeResolverTree;
 
   constructor(protected readonly id: string, options: Options = {}) {
     const tree = createTree(this.id);
@@ -55,7 +55,7 @@ export class Tree {
    *
    * @returns the origin ResolverNode
    */
-  public render(): ResolverTree {
+  public render(): SafeResolverTree {
     return this.tree;
   }
 
@@ -73,7 +73,7 @@ export class Tree {
    *
    * @param relatedEventsInfo is the related events and pagination information to add to the tree.
    */
-  private addRelatedEvents(relatedEventsInfo: ResolverRelatedEvents | undefined) {
+  private addRelatedEvents(relatedEventsInfo: SafeResolverRelatedEvents | undefined) {
     if (!relatedEventsInfo) {
       return;
     }
@@ -101,7 +101,7 @@ export class Tree {
    *
    * @param ancestorInfo is the ancestors and pagination information to add to the tree.
    */
-  private addAncestors(ancestorInfo: ResolverAncestry | undefined) {
+  private addAncestors(ancestorInfo: SafeResolverAncestry | undefined) {
     if (!ancestorInfo) {
       return;
     }
@@ -132,7 +132,7 @@ export class Tree {
     }
   }
 
-  private addChildren(children: ResolverChildren | undefined) {
+  private addChildren(children: SafeResolverChildren | undefined) {
     if (!children) {
       return;
     }

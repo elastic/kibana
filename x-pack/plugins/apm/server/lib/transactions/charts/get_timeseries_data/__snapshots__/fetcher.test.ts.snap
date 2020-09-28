@@ -49,6 +49,13 @@ Array [
           "transaction_results": Object {
             "aggs": Object {
               "timeseries": Object {
+                "aggs": Object {
+                  "count": Object {
+                    "value_count": Object {
+                      "field": "transaction.duration.us",
+                    },
+                  },
+                },
                 "date_histogram": Object {
                   "extended_bounds": Object {
                     "max": 1528977600000,

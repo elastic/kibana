@@ -12,7 +12,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
-import { ColdPhase, DeletePhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
+import { PhaseWithMinAge, Phases } from '../../../../../common/types';
 
 function getTimingLabelForPhase(phase: keyof Phases) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
@@ -63,7 +63,7 @@ function getUnitsAriaLabelForPhase(phase: keyof Phases) {
   }
 }
 
-interface Props<T extends Phase> {
+interface Props<T extends PhaseWithMinAge> {
   rolloverEnabled: boolean;
   errors?: PhaseValidationErrors<T>;
   phase: keyof Phases & string;
@@ -72,7 +72,7 @@ interface Props<T extends Phase> {
   isShowingErrors: boolean;
 }
 
-export const MinAgeInput = <Phase extends WarmPhase | ColdPhase | DeletePhase>({
+export const MinAgeInput = <Phase extends PhaseWithMinAge>({
   rolloverEnabled,
   errors,
   phaseData,

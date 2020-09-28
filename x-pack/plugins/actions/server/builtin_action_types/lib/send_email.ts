@@ -19,6 +19,7 @@ export interface SendEmailOptions {
   routing: Routing;
   content: Content;
   proxySettings?: ProxySettings;
+  rejectUnauthorized?: boolean;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -45,7 +46,7 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, proxySettings } = options;
+  const { transport, routing, content, proxySettings, rejectUnauthorized } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
@@ -68,15 +69,18 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
-    if (proxySettings && !transportConfig.secure) {
+
+    if (proxySettings) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
-        rejectUnauthorized: proxySettings?.rejectUnauthorizedCertificates,
+        rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
       };
-    }
-    if (proxySettings) {
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
+    } else if (!transportConfig.secure) {
+      transportConfig.tls = {
+        rejectUnauthorized,
+      };
     }
   }
 

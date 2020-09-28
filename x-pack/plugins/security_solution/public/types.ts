@@ -22,6 +22,7 @@ import {
 import { SecurityPluginSetup } from '../../security/public';
 import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
+import { Inspect } from '../common/search_strategy';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -56,3 +57,5 @@ export interface PluginStart {}
 export interface AppObservableLibs extends AppFrontendLibs {
   kibana: CoreStart;
 }
+
+export type InspectResponse = Inspect & { response: string[] };

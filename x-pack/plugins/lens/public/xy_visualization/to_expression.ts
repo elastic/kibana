@@ -84,7 +84,7 @@ export const buildExpression = (
   datasourceLayers?: Record<string, DatasourcePublicAPI>
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.xAccessor && layer.accessors.length)
+    Boolean(layer.accessors.length)
   );
   if (!validLayers.length) {
     return null;
@@ -99,6 +99,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
+          yRightTitle: [state.yRightTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -118,8 +119,22 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
-          showXAxisTitle: [state.showXAxisTitle ?? true],
-          showYAxisTitle: [state.showYAxisTitle ?? true],
+          axisTitlesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  arguments: {
+                    x: [state?.axisTitlesVisibilitySettings?.x ?? true],
+                    yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
           tickLabelsVisibilitySettings: [
             {
               type: 'expression',
@@ -129,7 +144,8 @@ export const buildExpression = (
                   function: 'lens_xy_tickLabelsConfig',
                   arguments: {
                     x: [state?.tickLabelsVisibilitySettings?.x ?? true],
-                    y: [state?.tickLabelsVisibilitySettings?.y ?? true],
+                    yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.tickLabelsVisibilitySettings?.yRight ?? true],
                   },
                 },
               ],
@@ -144,7 +160,8 @@ export const buildExpression = (
                   function: 'lens_xy_gridlinesConfig',
                   arguments: {
                     x: [state?.gridlinesVisibilitySettings?.x ?? true],
-                    y: [state?.gridlinesVisibilitySettings?.y ?? true],
+                    yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.gridlinesVisibilitySettings?.yRight ?? true],
                   },
                 },
               ],
@@ -187,7 +204,7 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor],
+                    xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],

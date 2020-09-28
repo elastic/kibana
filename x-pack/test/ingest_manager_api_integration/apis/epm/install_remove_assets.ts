@@ -29,7 +29,8 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('installs and uninstalls all assets', async () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('installs and uninstalls all assets', async () => {
     describe('installs all assets when installing a package for the first time', async () => {
       skipIfNoDockerRegistry(providerContext);
       before(async () => {
@@ -83,6 +84,13 @@ export default function (providerContext: FtrProviderContext) {
           path: `/_component_template/${logsTemplateName}-settings`,
         });
         expect(resSettings.statusCode).equal(200);
+      });
+      it('should have installed the transform components', async function () {
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+        });
+        expect(res.statusCode).equal(200);
       });
       it('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -161,6 +169,10 @@ export default function (providerContext: FtrProviderContext) {
               id: 'metrics-all_assets.test_metrics',
               type: 'index_template',
             },
+            {
+              id: 'logs-all_assets.test_logs-default-0.1.0',
+              type: 'transform',
+            },
           ],
           es_index_patterns: {
             test_logs: 'logs-all_assets.test_logs-*',
@@ -236,6 +248,18 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
         expect(resPipeline2.statusCode).equal(404);
+      });
+      it('should have uninstalled the transforms', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
       });
       it('should have uninstalled the kibana assets', async function () {
         let resDashboard;

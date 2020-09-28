@@ -6,6 +6,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DeepRequired } from 'utility-types';
 import {
   CoreSetup,
   Logger,
@@ -27,6 +28,7 @@ import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
+import { APMDataTelemetry } from './types';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -36,12 +38,14 @@ export async function createApmTelemetry({
   usageCollector,
   taskManager,
   logger,
+  kibanaVersion,
 }: {
   core: CoreSetup;
   config$: Observable<APMConfig>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  kibanaVersion: string;
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
@@ -95,7 +99,10 @@ export async function createApmTelemetry({
 
     await savedObjectsClient.create(
       APM_TELEMETRY_SAVED_OBJECT_TYPE,
-      dataTelemetry,
+      {
+        ...dataTelemetry,
+        kibanaVersion,
+      },
       { id: APM_TELEMETRY_SAVED_OBJECT_TYPE, overwrite: true }
     );
   };
@@ -105,12 +112,14 @@ export async function createApmTelemetry({
     schema: getApmTelemetryMapping(),
     fetch: async () => {
       try {
-        const data = (
+        const { kibanaVersion: storedKibanaVersion, ...data } = (
           await savedObjectsClient.get(
             APM_TELEMETRY_SAVED_OBJECT_TYPE,
             APM_TELEMETRY_SAVED_OBJECT_ID
           )
-        ).attributes;
+        ).attributes as { kibanaVersion: string } & DeepRequired<
+          APMDataTelemetry
+        >;
 
         return data;
       } catch (err) {
@@ -126,7 +135,7 @@ export async function createApmTelemetry({
 
   usageCollector.registerCollector(collector);
 
-  core.getStartServices().then(([_coreStart, pluginsStart]) => {
+  core.getStartServices().then(async ([_coreStart, pluginsStart]) => {
     const { taskManager: taskManagerStart } = pluginsStart as {
       taskManager: TaskManagerStartContract;
     };
@@ -141,5 +150,25 @@ export async function createApmTelemetry({
       params: {},
       state: {},
     });
+
+    try {
+      const currentData = (
+        await savedObjectsClient.get(
+          APM_TELEMETRY_SAVED_OBJECT_TYPE,
+          APM_TELEMETRY_SAVED_OBJECT_ID
+        )
+      ).attributes as { kibanaVersion?: string };
+
+      if (currentData.kibanaVersion !== kibanaVersion) {
+        logger.debug(
+          `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
+        );
+        taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+      }
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        logger.warn('Failed to fetch saved telemetry data.');
+      }
+    }
   });
 }

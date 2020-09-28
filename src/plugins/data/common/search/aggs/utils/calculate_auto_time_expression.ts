@@ -21,6 +21,7 @@ import { UI_SETTINGS } from '../../../../common/constants';
 import { TimeRange } from '../../../../common/query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
+import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
   return function calculateAutoTimeExpression(range: TimeRange) {
@@ -36,7 +37,7 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });
 
-    buckets.setInterval('auto');
+    buckets.setInterval(autoInterval);
     buckets.setBounds({
       min: moment(dates.from),
       max: moment(dates.to),

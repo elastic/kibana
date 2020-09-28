@@ -6,7 +6,6 @@
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-jest.mock('ui/new_platform');
 jest.mock('../../layers/vector_layer/vector_layer', () => {});
 
 const indexPatternTitle = 'myIndex';

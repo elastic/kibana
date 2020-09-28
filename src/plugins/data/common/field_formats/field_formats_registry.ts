@@ -181,11 +181,11 @@ export class FieldFormatsRegistry {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(
+  getDefaultInstancePlain = (
     fieldType: KBN_FIELD_TYPES,
     esTypes?: ES_FIELD_TYPES[],
     params: Record<string, any> = {}
-  ): FieldFormat {
+  ): FieldFormat => {
     const conf = this.getDefaultConfig(fieldType, esTypes);
     const instanceParams = {
       ...conf.params,
@@ -193,7 +193,7 @@ export class FieldFormatsRegistry {
     };
 
     return this.getInstance(conf.id, instanceParams);
-  }
+  };
   /**
    * Returns a cache key built by the given variables for caching in memoized
    * Where esType contains fieldType, fieldType is returned

@@ -46,7 +46,7 @@ async function getSpacesUsage(
     return null;
   }
 
-  const knownFeatureIds = features.getFeatures().map((feature) => feature.id);
+  const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
 
   let resp: SpacesAggregationResponse | undefined;
   try {

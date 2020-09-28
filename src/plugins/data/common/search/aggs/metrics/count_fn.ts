@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 const fnName = 'aggCount';
 
@@ -55,12 +54,6 @@ export const aggCount = (): FunctionDefinition => ({
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
-    json: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.count.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
-      }),
-    },
     customLabel: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.count.customLabel.help', {
@@ -78,10 +71,7 @@ export const aggCount = (): FunctionDefinition => ({
         enabled,
         schema,
         type: METRIC_TYPES.COUNT,
-        params: {
-          ...rest,
-          json: getParsedValue(args, 'json'),
-        },
+        params: rest,
       },
     };
   },

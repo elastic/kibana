@@ -66,6 +66,7 @@ interface ISideNavLinkProps {
   isExternal?: boolean;
   className?: string;
   isRoot?: boolean;
+  subNav?: React.ReactNode;
 }
 
 export const SideNavLink: React.FC<ISideNavLinkProps> = ({
@@ -74,6 +75,7 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   children,
   className,
   isRoot,
+  subNav,
   ...rest
 }) => {
   const { closeNavigation } = useContext(NavContext) as INavContext;
@@ -103,6 +105,7 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
           {children}
         </EuiLink>
       )}
+      {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
     </li>
   );
 };

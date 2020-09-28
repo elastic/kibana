@@ -8,8 +8,8 @@ import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingConfig, ReportingCore } from '../';
-import { createMockReportingCore } from '../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { ReportingSetupDeps } from '../types';
 import { FeaturesAvailability } from './';
 import {
@@ -54,17 +54,13 @@ function getPluginsMock(
   } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
-const getMockReportingConfig = () => ({
-  get: () => {},
-  kbnConfig: { get: () => '' },
-});
 const getResponseMock = (base = {}) => base;
 
 describe('license checks', () => {
   let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   beforeAll(async () => {
-    mockConfig = getMockReportingConfig();
+    mockConfig = createMockConfig(createMockConfigSchema());
     mockCore = await createMockReportingCore(mockConfig);
   });
 
@@ -189,7 +185,7 @@ describe('data modeling', () => {
   let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   beforeAll(async () => {
-    mockConfig = getMockReportingConfig();
+    mockConfig = createMockConfig(createMockConfigSchema());
     mockCore = await createMockReportingCore(mockConfig);
   });
   test('with normal looking usage data', async () => {
@@ -455,7 +451,7 @@ describe('data modeling', () => {
 
 describe('Ready for collection observable', () => {
   test('converts observable to promise', async () => {
-    const mockConfig = getMockReportingConfig();
+    const mockConfig = createMockConfig(createMockConfigSchema());
     const mockReporting = await createMockReportingCore(mockConfig);
 
     const usageCollection = getMockUsageCollection();

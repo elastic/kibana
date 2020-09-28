@@ -20,6 +20,7 @@ UI_SETTINGS: {
     readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: "courier:maxConcurrentShardRequests";
     readonly COURIER_BATCH_SEARCHES: "courier:batchSearches";
     readonly SEARCH_INCLUDE_FROZEN: "search:includeFrozen";
+    readonly SEARCH_TIMEOUT: "search:timeout";
     readonly HISTOGRAM_BAR_TARGET: "histogram:barTarget";
     readonly HISTOGRAM_MAX_BARS: "histogram:maxBars";
     readonly HISTORY_LIMIT: "history:limit";

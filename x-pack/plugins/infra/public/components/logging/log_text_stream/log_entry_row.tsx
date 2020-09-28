@@ -85,7 +85,7 @@ export const LogEntryRow = memo(
     ]);
 
     const handleOpenViewLogInContext = useCallback(() => {
-      openViewLogInContext?.(logEntry); // eslint-disable-line no-unused-expressions
+      openViewLogInContext?.(logEntry);
       trackMetric({ metric: 'view_in_context__stream' });
     }, [openViewLogInContext, logEntry, trackMetric]);
 

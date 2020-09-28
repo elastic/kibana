@@ -14,7 +14,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 describe('getProxyAgent', () => {
   test('return HttpsProxyAgent for https proxy url', () => {
     const agent = getProxyAgent(
-      { proxyUrl: 'https://someproxyhost', rejectUnauthorizedCertificates: false },
+      { proxyUrl: 'https://someproxyhost', proxyRejectUnauthorizedCertificates: false },
       logger
     );
     expect(agent instanceof HttpsProxyAgent).toBeTruthy();
@@ -22,7 +22,7 @@ describe('getProxyAgent', () => {
 
   test('return HttpProxyAgent for http proxy url', () => {
     const agent = getProxyAgent(
-      { proxyUrl: 'http://someproxyhost', rejectUnauthorizedCertificates: false },
+      { proxyUrl: 'http://someproxyhost', proxyRejectUnauthorizedCertificates: false },
       logger
     );
     expect(agent instanceof HttpProxyAgent).toBeTruthy();

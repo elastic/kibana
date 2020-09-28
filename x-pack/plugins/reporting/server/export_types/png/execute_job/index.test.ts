@@ -9,8 +9,8 @@ import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
-import { ScheduledTaskParamsPNG } from '../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
+import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
@@ -36,7 +36,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsPNG;
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPNG;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -85,7 +85,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
-    getScheduledTaskParams({
+    getBasePayload({
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
@@ -133,7 +133,7 @@ test(`returns content_type of application/png`, async () => {
 
   const { content_type: contentType } = await runTask(
     'pngJobId',
-    getScheduledTaskParams({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
+    getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('image/png');
@@ -148,7 +148,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await runTask(
     'pngJobId',
-    getScheduledTaskParams({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
+    getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
 

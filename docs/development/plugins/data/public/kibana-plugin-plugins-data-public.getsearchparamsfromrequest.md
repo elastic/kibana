@@ -9,7 +9,6 @@
 
 ```typescript
 export declare function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
-    esShardTimeout: number;
     getConfig: GetConfigFn;
 }): ISearchRequestParams;
 ```
@@ -19,7 +18,7 @@ export declare function getSearchParamsFromRequest(searchRequest: SearchRequest,
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  searchRequest | <code>SearchRequest</code> |  |
-|  dependencies | <code>{</code><br/><code>    esShardTimeout: number;</code><br/><code>    getConfig: GetConfigFn;</code><br/><code>}</code> |  |
+|  dependencies | <code>{</code><br/><code>    getConfig: GetConfigFn;</code><br/><code>}</code> |  |
 
 <b>Returns:</b>
 

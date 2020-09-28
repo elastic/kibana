@@ -5,10 +5,18 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { GetTrustedAppsRequestSchema } from '../schema/trusted_apps';
+import {
+  DeleteTrustedAppsRequestSchema,
+  GetTrustedAppsRequestSchema,
+  PostTrustedAppCreateRequestSchema,
+} from '../schema/trusted_apps';
+
+/** API request params for deleting Trusted App entry */
+export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+
 export interface GetTrustedListAppsResponse {
   per_page: number;
   page: number;
@@ -16,17 +24,24 @@ export interface GetTrustedListAppsResponse {
   data: TrustedApp[];
 }
 
-interface MacosLinuxConditionEntry {
-  field: 'hash' | 'path';
+/** API Request body for creating a new Trusted App entry */
+export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body>;
+
+export interface PostTrustedAppCreateResponse {
+  data: TrustedApp;
+}
+
+export interface MacosLinuxConditionEntry {
+  field: 'process.hash.*' | 'process.path.text';
   type: 'match';
   operator: 'included';
   value: string;
 }
 
-type WindowsConditionEntry =
+export type WindowsConditionEntry =
   | MacosLinuxConditionEntry
   | (Omit<MacosLinuxConditionEntry, 'field'> & {
-      field: 'signer';
+      field: 'process.code_signature';
     });
 
 /** Type for a new Trusted App Entry */

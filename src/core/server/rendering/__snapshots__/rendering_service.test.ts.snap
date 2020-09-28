@@ -27,15 +27,6 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -44,9 +35,7 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
-  "legacyMode": false,
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -81,15 +70,6 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -98,9 +78,7 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
-  "legacyMode": false,
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -135,15 +113,6 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -156,9 +125,7 @@ Object {
         },
       },
     },
-    "version": Any<String>,
   },
-  "legacyMode": false,
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -193,15 +160,6 @@ Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -210,9 +168,7 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
-  "legacyMode": false,
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -247,15 +203,6 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -264,9 +211,7 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
-  "legacyMode": false,
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},

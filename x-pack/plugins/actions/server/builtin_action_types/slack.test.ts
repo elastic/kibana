@@ -167,7 +167,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       proxySettings: {
         proxyUrl: 'https://someproxyhost',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       },
     });
     expect(response).toMatchInlineSnapshot(`
@@ -206,7 +206,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       proxySettings: {
         proxyUrl: 'https://someproxyhost',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       },
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(

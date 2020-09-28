@@ -11,12 +11,7 @@ import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mock
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import {
-  ProcessorsEditorContextProvider,
-  Props,
-  ProcessorsEditor,
-  GlobalOnFailureProcessorsEditor,
-} from '../';
+import { ProcessorsEditorContextProvider, Props, PipelineProcessorsEditor } from '../';
 
 import {
   breadcrumbService,
@@ -90,7 +85,7 @@ const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>
-        <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+        <PipelineProcessorsEditor onLoadJson={jest.fn()} />
       </ProcessorsEditorContextProvider>
     </KibanaContextProvider>
   ),
@@ -126,7 +121,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -166,7 +161,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -202,10 +197,13 @@ type TestSubject =
   | 'pipelineEditorDoneButton'
   | 'pipelineEditorOnFailureToggle'
   | 'addProcessorsButtonLevel1'
-  | 'processorSettingsForm'
-  | 'processorSettingsForm.submitButton'
+  | 'editProcessorForm'
+  | 'editProcessorForm.submitButton'
+  | 'addProcessorForm.submitButton'
+  | 'addProcessorForm'
   | 'processorOptionsEditor'
   | 'processorSettingsFormFlyout'
   | 'processorTypeSelector'
   | 'pipelineEditorOnFailureTree'
+  | 'processorsEmptyPrompt'
   | string;

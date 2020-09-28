@@ -16,13 +16,20 @@ import { ArtifactConstants } from './common';
 import { Manifest } from './manifest';
 
 export const getMockArtifacts = async (opts?: { compress: boolean }) => {
-  return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
+  return Promise.all([
+    // Exceptions items
+    ...ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         return getInternalArtifactMock(os, 'v1', opts);
       }
-    )
-  );
+    ),
+    // Trusted Apps items
+    ...ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      return getInternalArtifactMock(os, 'v1', opts, ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
+    }),
+  ]);
 };
 
 export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => {

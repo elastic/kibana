@@ -105,6 +105,8 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
-    />
+    >
+      Elastic
+    </EuiHeaderLogo>
   );
 }

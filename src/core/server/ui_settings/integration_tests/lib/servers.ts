@@ -24,7 +24,7 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../test_utils/kbn_server';
+} from '../../../../test_helpers/kbn_server';
 import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
@@ -68,14 +68,13 @@ export function getServices() {
 
   const callCluster = esServer.es.getCallCluster();
 
-  const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+  const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
-    savedObjectsClient,
-  });
+  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    savedObjectsClient
+  );
 
   services = {
     kbnServer,

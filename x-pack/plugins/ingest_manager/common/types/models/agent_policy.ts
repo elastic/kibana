@@ -42,6 +42,7 @@ export interface FullAgentPolicyInputStream {
 export interface FullAgentPolicyInput {
   id: string;
   name: string;
+  revision: number;
   type: string;
   data_stream: { namespace: string };
   use_output: string;
@@ -58,6 +59,11 @@ export interface FullAgentPolicy {
   outputs: {
     [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
       [key: string]: any;
+    };
+  };
+  fleet?: {
+    kibana: {
+      hosts: string[];
     };
   };
   inputs: FullAgentPolicyInput[];

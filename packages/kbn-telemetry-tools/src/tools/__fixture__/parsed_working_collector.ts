@@ -75,11 +75,9 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           type: 'StringKeyword',
         },
         my_index_signature_prop: {
-          '': {
-            '@@INDEX@@': {
-              kind: SyntaxKind.NumberKeyword,
-              type: 'NumberKeyword',
-            },
+          '@@INDEX@@': {
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
           },
         },
         my_objects: {

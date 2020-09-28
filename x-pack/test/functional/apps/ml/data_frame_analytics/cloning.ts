@@ -148,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string);
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string, 1);
           await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
         });
 
@@ -217,13 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
-          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter((row) => row.id === cloneJobId);
-          expect(filteredRows).to.have.length(
-            1,
-            `Filtered analytics table should have 1 row for job id '${cloneJobId}' (got matching items '${filteredRows}')`
-          );
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId, 1);
         });
       });
     }

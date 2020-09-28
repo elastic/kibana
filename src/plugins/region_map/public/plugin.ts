@@ -34,14 +34,14 @@ import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/publi
 import { setFormatService, setNotifications, setKibanaLegacy } from './kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
-import { ConfigSchema } from '../../maps_legacy/config';
+import { MapsLegacyConfig } from '../../maps_legacy/config';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
   BaseMapsVisualization: any;
 }
 
@@ -73,7 +73,7 @@ export interface RegionMapPluginStart {}
 
 /** @internal */
 export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this._initializerContext = initializerContext;
@@ -93,7 +93,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
-      serviceSettings: mapsLegacy.serviceSettings,
+      getServiceSettings: mapsLegacy.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
     };
 

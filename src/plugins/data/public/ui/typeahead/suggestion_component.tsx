@@ -46,6 +46,7 @@ interface Props {
   suggestion: QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
+  shouldDisplayDescription: boolean;
 }
 
 export function SuggestionComponent(props: Props) {
@@ -72,7 +73,9 @@ export function SuggestionComponent(props: Props) {
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
-        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        {props.shouldDisplayDescription && (
+          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        )}
       </div>
     </div>
   );

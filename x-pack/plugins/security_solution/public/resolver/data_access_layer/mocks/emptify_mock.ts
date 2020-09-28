@@ -12,7 +12,7 @@ import {
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
-type EmptiableRequests = 'relatedEvents' | 'resolverTree' | 'entities' | 'indexPatterns';
+type EmptiableRequests = 'relatedEvents' | 'resolverTree' | 'entities';
 
 interface Metadata<T> {
   /**
@@ -44,6 +44,7 @@ export function emptifyMock<T>(
   return {
     metadata,
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */
@@ -64,15 +65,6 @@ export function emptifyMock<T>(
         return dataShouldBeEmpty.includes('resolverTree')
           ? Promise.resolve(mockTreeWithNoProcessEvents())
           : dataAccessLayer.resolverTree(...args);
-      },
-
-      /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(...args): string[] {
-        return dataShouldBeEmpty.includes('indexPatterns')
-          ? []
-          : dataAccessLayer.indexPatterns(...args);
       },
 
       /**

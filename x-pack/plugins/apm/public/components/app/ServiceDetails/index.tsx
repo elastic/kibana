@@ -5,27 +5,26 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { AlertIntegrations } from './AlertIntegrations';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { ApmHeader } from '../../shared/ApmHeader';
+import { AlertIntegrations } from './AlertIntegrations';
+import { ServiceDetailTabs } from './ServiceDetailTabs';
 
-interface Props {
+interface Props extends RouteComponentProps<{ serviceName: string }> {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
 }
 
-export function ServiceDetails({ tab }: Props) {
+export function ServiceDetails({ match, tab }: Props) {
   const plugin = useApmPluginContext();
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
+  const { serviceName } = match.params;
   const capabilities = plugin.core.application.capabilities;
   const canReadAlerts = !!capabilities.apm['alerting:show'];
   const canSaveAlerts = !!capabilities.apm['alerting:save'];
@@ -76,7 +75,7 @@ export function ServiceDetails({ tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs tab={tab} />
+      <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
   );
 }

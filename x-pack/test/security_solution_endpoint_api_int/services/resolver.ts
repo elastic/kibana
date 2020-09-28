@@ -9,6 +9,7 @@ import {
   EndpointDocGenerator,
   Event,
 } from '../../../plugins/security_solution/common/endpoint/generate_data';
+import { firstNonNullValue } from '../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
@@ -87,7 +88,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         const tree = generator.generateTree(options);
         const body = tree.allEvents.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
           let index = eventsIndex;
-          if (doc.event.kind === 'alert') {
+          if (firstNonNullValue(doc.event?.kind) === 'alert') {
             index = alertsIndex;
           }
           /**

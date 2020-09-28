@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
    * The Reporting API Functional Test config implements a network policy that
    * is designed to disallow the following Canvas worksheet
    */
-  describe('reporting network policy', () => {
+  describe('Network Policy', () => {
     before(async () => {
       await esArchiver.load(archive); // includes a canvas worksheet with an offending image URL
     });
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         filter(({ statusCode }) => statusCode === 500),
         map(({ message }) => message),
         first(),
-        timeout(15000)
+        timeout(120000)
       );
 
       const reportFailed = await fails$.toPromise();

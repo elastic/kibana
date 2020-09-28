@@ -18,13 +18,13 @@ import { ml } from '../../../../../services/ml_api_service';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 interface Props {
   jobId: string;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalysisConfigType;
   showProgress: boolean;
 }
 

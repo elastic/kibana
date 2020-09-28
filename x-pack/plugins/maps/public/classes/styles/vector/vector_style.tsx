@@ -29,7 +29,7 @@ import {
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
+import { isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -81,11 +81,6 @@ import { ILayer } from '../../layers/layer';
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
 const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
-
-function getNumericalMbFeatureStateValue(value: string) {
-  const valueAsFloat = parseFloat(value);
-  return isNaN(valueAsFloat) ? null : valueAsFloat;
-}
 
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;
@@ -618,21 +613,17 @@ export class VectorStyle implements IVectorStyle {
 
       for (let j = 0; j < dynamicStyleProps.length; j++) {
         const dynamicStyleProp = dynamicStyleProps[j];
-        const name = dynamicStyleProp.getFieldName();
-        const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
-        const rawValue = feature.properties ? feature.properties[name] : undefined;
+        const targetMbName = dynamicStyleProp.getMbPropertyName();
+        const rawValue = feature.properties
+          ? feature.properties[dynamicStyleProp.getFieldName()]
+          : undefined;
+        const targetMbValue = dynamicStyleProp.getMbPropertyValue(rawValue);
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[name] = getNumericalMbFeatureStateValue(rawValue); // the same value will be potentially overridden multiple times, if the name remains identical
+          tmpFeatureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
         } else {
-          // in practice, a new system property will only be created for:
-          // - label text: this requires the value to be formatted first.
-          // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
-
-          const formattedValue = dynamicStyleProp.isOrdinal()
-            ? getNumericalMbFeatureStateValue(rawValue)
-            : dynamicStyleProp.formatField(rawValue);
-
-          if (feature.properties) feature.properties[computedName] = formattedValue;
+          if (feature.properties) {
+            feature.properties[targetMbName] = targetMbValue;
+          }
         }
       }
       tmpFeatureIdentifier.source = mbSourceId;

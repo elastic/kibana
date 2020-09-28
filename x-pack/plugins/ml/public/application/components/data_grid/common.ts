@@ -119,11 +119,12 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       schema = 'numeric';
     }
 
-    if (
-      field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`) ||
-      field.includes(`${resultsField}.${TOP_CLASSES}`)
-    ) {
+    if (field.includes(`${resultsField}.${TOP_CLASSES}`)) {
       schema = 'json';
+    }
+
+    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+      schema = 'featureImportance';
     }
 
     return { id: field, schema, isSortable };
@@ -248,10 +249,6 @@ export const useRenderCellValue = (
 
       if (typeof cellValue === 'boolean') {
         return cellValue ? 'true' : 'false';
-      }
-
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
       }
 
       return cellValue;

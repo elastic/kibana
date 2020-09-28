@@ -89,6 +89,7 @@ export function pausifyMock<T>({
       }
     },
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */
@@ -103,13 +104,6 @@ export function pausifyMock<T>({
       async resolverTree(...args): Promise<ResolverTree> {
         await resolverTreePromise;
         return dataAccessLayer.resolverTree(...args);
-      },
-
-      /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(...args): string[] {
-        return dataAccessLayer.indexPatterns(...args);
       },
 
       /**

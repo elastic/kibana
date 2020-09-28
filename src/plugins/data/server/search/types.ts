@@ -18,21 +18,13 @@
  */
 
 import { RequestHandlerContext } from '../../../../core/server';
-import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { ISearchOptions, IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors/usage';
+import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
-}
-
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  signal?: AbortSignal;
-  strategy?: string;
 }
 
 export interface ISearchSetup {
@@ -42,8 +34,8 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: <
-    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -61,8 +53,8 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   aggs: AggsStart;
   /**
@@ -74,9 +66,9 @@ export interface ISearchStart<
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
-    request: IKibanaSearchRequest,
+    request: SearchStrategyRequest,
     options: ISearchOptions
-  ) => Promise<IKibanaSearchResponse>;
+  ) => Promise<SearchStrategyResponse>;
 }
 
 /**
@@ -84,8 +76,8 @@ export interface ISearchStart<
  * that resolves to a response.
  */
 export interface ISearchStrategy<
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   search: (
     context: RequestHandlerContext,

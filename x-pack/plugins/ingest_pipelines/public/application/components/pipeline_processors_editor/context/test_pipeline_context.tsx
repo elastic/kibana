@@ -5,6 +5,8 @@
  */
 
 import React, { useCallback, useContext, useReducer, Reducer } from 'react';
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../../../shared_imports';
 import {
   DeserializedProcessorResult,
@@ -161,6 +163,12 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
           },
         });
 
+        services.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.ingestPipelines.testPipeline.errorNotificationText', {
+            defaultMessage: 'Error executing pipeline',
+          }),
+        });
+
         return;
       }
 
@@ -172,7 +180,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         },
       });
     },
-    [services.api]
+    [services.api, services.notifications.toasts]
   );
 
   return (

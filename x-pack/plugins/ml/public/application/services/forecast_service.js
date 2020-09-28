@@ -6,8 +6,14 @@
 
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import find from 'lodash/find';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import each from 'lodash/each';
 import { map } from 'rxjs/operators';
 
@@ -153,7 +159,7 @@ function getForecastData(
   entityFields,
   earliestMs,
   latestMs,
-  interval,
+  intervalMs,
   aggType
 ) {
   // Extract the partition, by, over fields on which to filter.
@@ -257,7 +263,7 @@ function getForecastData(
           times: {
             date_histogram: {
               field: 'timestamp',
-              interval: interval,
+              fixed_interval: `${intervalMs}ms`,
               min_doc_count: 1,
             },
             aggs: {

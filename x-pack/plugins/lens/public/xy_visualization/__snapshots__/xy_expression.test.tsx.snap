@@ -20,27 +20,60 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="bottom"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="left"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -67,6 +100,14 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -85,6 +126,14 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -111,6 +160,14 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -151,27 +208,60 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="bottom"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="left"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -193,6 +283,14 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -211,6 +309,14 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -232,6 +338,14 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -272,27 +386,60 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="left"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="bottom"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -314,6 +461,14 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -332,6 +487,14 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -353,6 +516,14 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -393,27 +564,60 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="bottom"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="left"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -440,6 +644,14 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -458,6 +670,14 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -484,6 +704,14 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -524,27 +752,60 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="bottom"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="left"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -563,9 +824,22 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -588,6 +862,14 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -606,9 +888,22 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -653,27 +948,60 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="bottom"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="left"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -695,6 +1023,14 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -717,6 +1053,14 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -738,6 +1082,14 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -782,27 +1134,60 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
   />
   <Connect(SpecInstance)
-    gridLineStyle={
+    gridLine={
       Object {
         "strokeWidth": 2,
+        "visible": true,
       }
     }
+    hide={false}
     id="x"
     position="left"
-    showGridLines={true}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="c"
   />
   <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
     groupId="left"
     id="left"
     key="left"
     position="bottom"
-    showGridLines={false}
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
     tickFormat={[Function]}
     title="a"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -824,6 +1209,14 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     groupId="left"
     id="d-a"
     key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -846,6 +1239,14 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     color={[Function]}
     data={
       Array [
@@ -867,6 +1268,14 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     groupId="left"
     id="d-b"
     key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
     name={[Function]}
     splitSeriesAccessors={
       Array [

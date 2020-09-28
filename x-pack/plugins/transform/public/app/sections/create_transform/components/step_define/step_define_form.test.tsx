@@ -15,10 +15,11 @@ import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
 const startMock = coreMock.createStart();
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
+
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -65,7 +66,7 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const { getByLabelText } = render(
+    const { getByText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
@@ -75,7 +76,8 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByLabelText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
     await wait();
     done();
   });

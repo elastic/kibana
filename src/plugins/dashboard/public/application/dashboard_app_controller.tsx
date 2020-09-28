@@ -24,9 +24,18 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
+import deepEqual from 'fast-deep-equal';
 
 import { Observable, pipe, Subscription, merge } from 'rxjs';
-import { filter, map, debounceTime, mapTo, startWith, switchMap } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  debounceTime,
+  mapTo,
+  startWith,
+  switchMap,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -57,7 +66,6 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -79,8 +87,8 @@ import {
   AngularHttpError,
   KibanaLegacyStart,
   subscribeWithScope,
-  migrateLegacyQuery,
 } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -144,6 +152,7 @@ export class DashboardAppController {
       i18n: i18nStart,
     },
     history,
+    setHeaderActionMenu,
     kbnUrlStateStorage,
     usageCollection,
     navigation,
@@ -168,7 +177,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const incomingEmbeddable = embeddable
+    let incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
@@ -279,6 +288,12 @@ export class DashboardAppController {
     const updateIndexPatternsOperator = pipe(
       filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
       map(getDashboardIndexPatterns),
+      distinctUntilChanged((a, b) =>
+        deepEqual(
+          a.map((ip) => ip.id),
+          b.map((ip) => ip.id)
+        )
+      ),
       // using switchMap for previous task cancellation
       switchMap((panelIndexPatterns: IndexPattern[]) => {
         return new Observable((observer) => {
@@ -328,6 +343,22 @@ export class DashboardAppController {
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+        const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+        embeddablesMap[incomingEmbeddable.embeddableId] = {
+          gridData: originalPanelState.gridData,
+          type: incomingEmbeddable.type,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...incomingEmbeddable.input,
+            id: incomingEmbeddable.embeddableId,
+          },
+        };
+        incomingEmbeddable = undefined;
+      }
+
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
@@ -405,17 +436,29 @@ export class DashboardAppController {
               ) : null;
             };
 
-            outputSubscription = new Subscription();
-            outputSubscription.add(
-              dashboardContainer
-                .getOutput$()
-                .pipe(
-                  mapTo(dashboardContainer),
-                  startWith(dashboardContainer), // to trigger initial index pattern update
-                  updateIndexPatternsOperator
+            outputSubscription = merge(
+              // output of dashboard container itself
+              dashboardContainer.getOutput$(),
+              // plus output of dashboard container children,
+              // children may change, so make sure we subscribe/unsubscribe with switchMap
+              dashboardContainer.getOutput$().pipe(
+                map(() => dashboardContainer!.getChildIds()),
+                distinctUntilChanged(deepEqual),
+                switchMap((newChildIds: string[]) =>
+                  merge(
+                    ...newChildIds.map((childId) =>
+                      dashboardContainer!.getChild(childId).getOutput$()
+                    )
+                  )
                 )
-                .subscribe()
-            );
+              )
+            )
+              .pipe(
+                mapTo(dashboardContainer),
+                startWith(dashboardContainer), // to trigger initial index pattern update
+                updateIndexPatternsOperator
+              )
+              .subscribe();
 
             inputSubscription = dashboardContainer.getInput$().subscribe(() => {
               let dirty = false;
@@ -454,32 +497,16 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            if (incomingEmbeddable) {
-              if ('id' in incomingEmbeddable) {
-                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(
-                  incomingEmbeddable.type,
-                  {
-                    savedObjectId: incomingEmbeddable.id,
-                  }
-                );
-              } else if ('input' in incomingEmbeddable) {
-                const input = incomingEmbeddable.input;
-                // @ts-expect-error
-                delete input.id;
-                const explicitInput = {
-                  savedVis: input,
-                };
-                const embeddableId =
-                  'embeddableId' in incomingEmbeddable
-                    ? incomingEmbeddable.embeddableId
-                    : undefined;
-                container.addOrUpdateEmbeddable<EmbeddableInput>(
-                  incomingEmbeddable.type,
-                  // This ugly solution is temporary - https://github.com/elastic/kibana/pull/70272 fixes this whole section
-                  (explicitInput as unknown) as EmbeddableInput,
-                  embeddableId
-                );
-              }
+            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
+            if (
+              incomingEmbeddable &&
+              (!incomingEmbeddable.embeddableId ||
+                !container.getInput().panels[incomingEmbeddable.embeddableId])
+            ) {
+              container.addNewEmbeddable<EmbeddableInput>(
+                incomingEmbeddable.type,
+                incomingEmbeddable.input
+              );
             }
           }
 
@@ -682,7 +709,13 @@ export class DashboardAppController {
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateNavBar = () => {
-      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+      ReactDOM.render(
+        <navigation.ui.TopNavMenu
+          {...getNavBarProps()}
+          {...(isEmbeddedExternally ? {} : { setMenuMountPoint: setHeaderActionMenu })}
+        />,
+        dashboardNavBar
+      );
     };
 
     const unmountNavBar = () => {

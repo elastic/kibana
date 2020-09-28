@@ -5,11 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ColdPhase,
+  DeletePhase,
+  HotPhase,
+  Policy,
+  PolicyFromES,
+  WarmPhase,
+} from '../../../../common/types';
 import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { ColdPhase, DeletePhase, HotPhase, Phase, Policy, PolicyFromES, WarmPhase } from './types';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
 
@@ -100,7 +107,7 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
-export type PhaseValidationErrors<T extends Phase> = {
+export type PhaseValidationErrors<T> = {
   [P in keyof Partial<T>]: string[];
 };
 

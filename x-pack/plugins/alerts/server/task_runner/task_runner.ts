@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -73,7 +73,7 @@ export class TaskRunner {
     return apiKey;
   }
 
-  private getFakeKibanaRequest(spaceId: string, apiKey: string | null) {
+  private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -98,7 +98,7 @@ export class TaskRunner {
 
   private getServicesWithSpaceLevelPermissions(
     spaceId: string,
-    apiKey: string | null
+    apiKey: RawAlert['apiKey']
   ): [Services, PublicMethodsOf<AlertsClient>] {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
     return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
@@ -109,7 +109,7 @@ export class TaskRunner {
     alertName: string,
     tags: string[] | undefined,
     spaceId: string,
-    apiKey: string | null,
+    apiKey: RawAlert['apiKey'],
     actions: Alert['actions'],
     alertParams: RawAlert['params']
   ) {
@@ -228,12 +228,13 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
+      const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
-        Object.entries(enabledAlertInstances)
+        Object.entries(instancesWithScheduledActions)
           .filter(
-            ([, alertInstance]: [string, AlertInstance]) => !alertInstance.isThrottled(throttle)
+            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
+              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
           )
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
@@ -250,7 +251,11 @@ export class TaskRunner {
     };
   }
 
-  async validateAndExecuteAlert(services: Services, apiKey: string | null, alert: SanitizedAlert) {
+  async validateAndExecuteAlert(
+    services: Services,
+    apiKey: RawAlert['apiKey'],
+    alert: SanitizedAlert
+  ) {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;

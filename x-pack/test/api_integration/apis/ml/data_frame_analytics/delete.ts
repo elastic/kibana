@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.message).to.eql('resource_not_found_exception');
       });
 
       describe('with deleteDestIndex setting', function () {

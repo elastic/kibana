@@ -5,15 +5,14 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
 import { isEmpty, isEqual, pickBy } from 'lodash';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
+import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
 function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
@@ -21,6 +20,7 @@ function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
 }
 
 export function DatePicker() {
+  const history = useHistory();
   const location = useLocation();
   const { core } = useApmPluginContext();
 

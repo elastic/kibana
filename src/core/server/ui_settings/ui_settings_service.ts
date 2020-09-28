@@ -19,10 +19,11 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { mapToObject } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
@@ -33,7 +34,6 @@ import {
   InternalUiSettingsServiceStart,
   UiSettingsParams,
 } from './types';
-import { mapToObject } from '../../utils/';
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';

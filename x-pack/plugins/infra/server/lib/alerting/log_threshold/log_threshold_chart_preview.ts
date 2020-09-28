@@ -50,8 +50,8 @@ export async function getChartPreviewData(
   const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern)
-    : getUngroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern);
+    ? getGroupedESQuery(expandedAlertParams, timestampField, indexPattern)
+    : getUngroupedESQuery(expandedAlertParams, timestampField, indexPattern);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

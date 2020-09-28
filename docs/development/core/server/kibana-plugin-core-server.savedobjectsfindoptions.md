@@ -17,7 +17,7 @@ export interface SavedObjectsFindOptions
 |  --- | --- | --- |
 |  [defaultSearchOperator](./kibana-plugin-core-server.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
 |  [fields](./kibana-plugin-core-server.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
-|  [filter](./kibana-plugin-core-server.savedobjectsfindoptions.filter.md) | <code>string</code> |  |
+|  [filter](./kibana-plugin-core-server.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |
 |  [hasReference](./kibana-plugin-core-server.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
 |  [namespaces](./kibana-plugin-core-server.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-server.savedobjectsfindoptions.page.md) | <code>number</code> |  |
@@ -29,4 +29,5 @@ export interface SavedObjectsFindOptions
 |  [sortField](./kibana-plugin-core-server.savedobjectsfindoptions.sortfield.md) | <code>string</code> |  |
 |  [sortOrder](./kibana-plugin-core-server.savedobjectsfindoptions.sortorder.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsfindoptions.type.md) | <code>string &#124; string[]</code> |  |
+|  [typeToNamespacesMap](./kibana-plugin-core-server.savedobjectsfindoptions.typetonamespacesmap.md) | <code>Map&lt;string, string[] &#124; undefined&gt;</code> | This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved object client wrapper. If this is defined, it supersedes the <code>type</code> and <code>namespaces</code> fields when building the Elasticsearch query. Any types that are not included in this map will be excluded entirely. If a type is included but its value is undefined, the operation will search for that type in the Default namespace. |
 

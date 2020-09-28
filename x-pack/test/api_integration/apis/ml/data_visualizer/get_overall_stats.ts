@@ -116,8 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseBody: {
           statusCode: 404,
           error: 'Not Found',
-          message:
-            '[index_not_found_exception] no such index [ft_farequote_not_exist], with { resource.type="index_or_alias" & resource.id="ft_farequote_not_exist" & index_uuid="_na_" & index="ft_farequote_not_exist" }',
+          message: 'index_not_found_exception',
         },
       },
     },

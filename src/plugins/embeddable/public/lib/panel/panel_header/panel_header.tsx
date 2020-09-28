@@ -31,12 +31,13 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
+import { uiToReactComponent } from '../../../../../kibana_react/public';
 
 export interface PanelHeaderProps {
   title?: string;
   isViewMode: boolean;
   hidePanelTitles: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -65,7 +66,9 @@ function renderNotifications(
   return notifications.map((notification) => {
     const context = { embeddable };
 
-    let badge = (
+    let badge = notification.MenuItem ? (
+      React.createElement(uiToReactComponent(notification.MenuItem))
+    ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
         key={notification.id}

@@ -15,6 +15,8 @@ import {
   PostAgentEnrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
+  PostAgentEnrollRequest,
+  PostBulkAgentReassignResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -22,11 +24,13 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
-  PostAgentCheckinRequestSchema,
-  PostAgentEnrollRequestSchema,
+  PostAgentCheckinRequest,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
 } from '../../types';
+import { defaultIngestErrorHandler } from '../../errors';
+import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
@@ -43,21 +47,17 @@ export const getAgentHandler: RequestHandler<TypeOf<
         ...agent,
         status: AgentService.getAgentStatus(agent),
       },
-      success: true,
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (soClient.errors.isNotFoundError(e)) {
+  } catch (error) {
+    if (soClient.errors.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -77,7 +77,6 @@ export const getAgentEventsHandler: RequestHandler<
     const body: GetOneAgentEventsResponse = {
       list: items,
       total,
-      success: true,
       page,
       perPage,
     };
@@ -85,17 +84,13 @@ export const getAgentEventsHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
-
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -107,23 +102,19 @@ export const deleteAgentHandler: RequestHandler<TypeOf<
     await AgentService.deleteAgent(soClient, request.params.agentId);
 
     const body = {
-      success: true,
       action: 'deleted',
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
+  } catch (error) {
+    if (error.isBoom) {
       return response.customError({
-        statusCode: e.output.statusCode,
+        statusCode: error.output.statusCode,
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -144,28 +135,24 @@ export const updateAgentHandler: RequestHandler<
         ...agent,
         status: AgentService.getAgentStatus(agent),
       },
-      success: true,
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
 export const postAgentCheckinHandler: RequestHandler<
-  TypeOf<typeof PostAgentCheckinRequestSchema.params>,
+  PostAgentCheckinRequest['params'],
   undefined,
-  TypeOf<typeof PostAgentCheckinRequestSchema.body>
+  PostAgentCheckinRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
@@ -187,7 +174,6 @@ export const postAgentCheckinHandler: RequestHandler<
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
-      success: true,
       actions: actions.map((a) => ({
         agent_id: agent.id,
         type: a.type,
@@ -198,32 +184,15 @@ export const postAgentCheckinHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (err) {
-    const logger = appContextService.getLogger();
-    if (err.isBoom) {
-      if (err.output.statusCode >= 500) {
-        logger.error(err);
-      }
-
-      return response.customError({
-        statusCode: err.output.statusCode,
-        body: { message: err.output.payload.message },
-      });
-    }
-
-    logger.error(err);
-
-    return response.customError({
-      statusCode: 500,
-      body: { message: err.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
 export const postAgentEnrollHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostAgentEnrollRequestSchema.body>
+  PostAgentEnrollRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
@@ -248,7 +217,6 @@ export const postAgentEnrollHandler: RequestHandler<
     );
     const body: PostAgentEnrollResponse = {
       action: 'created',
-      success: true,
       item: {
         ...agent,
         status: AgentService.getAgentStatus(agent),
@@ -256,18 +224,8 @@ export const postAgentEnrollHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.message },
-      });
-    }
-
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -283,23 +241,25 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       kuery: request.query.kuery,
     });
+    const totalInactive = request.query.showInactive
+      ? await AgentService.countInactiveAgents(soClient, {
+          kuery: request.query.kuery,
+        })
+      : 0;
 
     const body: GetAgentsResponse = {
       list: agents.map((agent) => ({
         ...agent,
         status: AgentService.getAgentStatus(agent),
       })),
-      success: true,
       total,
+      totalInactive,
       page,
       perPage,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -312,15 +272,51 @@ export const putAgentsReassignHandler: RequestHandler<
   try {
     await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
 
-    const body: PutAgentReassignResponse = {
-      success: true,
-    };
+    const body: PutAgentReassignResponse = {};
     return response.ok({ body });
-  } catch (e) {
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const postBulkAgentsReassignHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
+> = async (context, request, response) => {
+  if (!licenseService.isGoldPlus()) {
     return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
+      statusCode: 403,
+      body: { message: 'Requires Gold license' },
     });
+  }
+
+  const soClient = context.core.savedObjects.client;
+  try {
+    // Reassign by array of IDs
+    const result = Array.isArray(request.body.agents)
+      ? await AgentService.reassignAgents(
+          soClient,
+          { agentIds: request.body.agents },
+          request.body.policy_id
+        )
+      : await AgentService.reassignAgents(
+          soClient,
+          { kuery: request.body.agents },
+          request.body.policy_id
+        );
+    const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
+      return {
+        ...acc,
+        [so.id]: {
+          success: !so.error,
+          error: so.error || undefined,
+        },
+      };
+    }, {});
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -336,13 +332,10 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
       request.query.policyId
     );
 
-    const body: GetAgentStatusResponse = { results, success: true };
+    const body: GetAgentStatusResponse = { results };
 
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

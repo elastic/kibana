@@ -78,7 +78,7 @@ export async function getBeatSummary(
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createBeatsQuery({
         start,
         end,

@@ -60,7 +60,7 @@ export class SourceFormat extends FieldFormat {
   textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
 
   htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
-    const { field, hit } = options;
+    const { field, hit, indexPattern } = options;
 
     if (!field) {
       const converter = this.getConverterFor('text') as Function;
@@ -69,7 +69,7 @@ export class SourceFormat extends FieldFormat {
     }
 
     const highlights = (hit && hit.highlight) || {};
-    const formatted = field.indexPattern.formatHit(hit);
+    const formatted = indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
     const isShortDots = this.getConfig!(UI_SETTINGS.SHORT_DOTS_ENABLE);

@@ -11,11 +11,22 @@ import { Logger, SavedObjectsClientContract } from '../../../../../../../src/cor
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
+import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
+import {
+  BulkResponse,
+  BulkResponseErrorAggregation,
+  isValidUnit,
+  SignalHit,
+  BaseSignalHit,
+  SearchAfterAndBulkCreateReturnType,
+  SignalSearchResponse,
+  Signal,
+} from './types';
 import { BuildRuleMessage } from './rule_messages';
-import { hasLargeValueList, parseScheduleDates } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
+import { ShardError } from '../../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -117,7 +128,7 @@ export const getGapMaxCatchupRatio = ({
   };
 };
 
-export const getListsClient = async ({
+export const getListsClient = ({
   lists,
   spaceId,
   updatedByUser,
@@ -129,20 +140,16 @@ export const getListsClient = async ({
   updatedByUser: string | null;
   services: AlertServices;
   savedObjectClient: SavedObjectsClientContract;
-}): Promise<{
-  listClient: ListClient | undefined;
-  exceptionsClient: ExceptionListClient | undefined;
-}> => {
+}): {
+  listClient: ListClient;
+  exceptionsClient: ExceptionListClient;
+} => {
   if (lists == null) {
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = await lists.getListClient(
-    services.callCluster,
-    spaceId,
-    updatedByUser ?? 'elastic'
-  );
-  const exceptionsClient = await lists.getExceptionListClient(
+  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
   );
@@ -154,14 +161,10 @@ export const getExceptions = async ({
   client,
   lists,
 }: {
-  client: ExceptionListClient | undefined;
-  lists: ListArrayOrUndefined;
+  client: ExceptionListClient;
+  lists: ListArray;
 }): Promise<ExceptionListItemSchema[] | undefined> => {
-  if (client == null) {
-    throw new Error('lists plugin unavailable during rule execution');
-  }
-
-  if (lists != null && lists.length > 0) {
+  if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
@@ -211,6 +214,60 @@ export const generateId = (
   version: string,
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+
+// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
+export const generateSignalId = (signal: Signal) =>
+  createHash('sha256')
+    .update(
+      signal.parents
+        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        .concat(signal.rule.id)
+    )
+    .digest('hex');
+
+/**
+ * Generates unique doc ids for each building block signal within a sequence. The id of each building block
+ * depends on the parents of every building block, so that a signal which appears in multiple different sequences
+ * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
+ * @param buildingBlocks The full list of building blocks in the sequence.
+ */
+export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
+  const baseHashString = buildingBlocks.reduce(
+    (baseString, block) =>
+      baseString
+        .concat(
+          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        )
+        .concat(block.signal.rule.id),
+    ''
+  );
+  return buildingBlocks.map((block, idx) =>
+    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
+  );
+};
+
+export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+  const blockIds = generateBuildingBlockIds(buildingBlocks);
+  return buildingBlocks.map((block, idx) => {
+    return {
+      _id: blockIds[idx],
+      _index: index,
+      _source: {
+        ...block,
+      },
+    };
+  });
+};
+
+export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+  return {
+    _id: generateSignalId(signal.signal),
+    _index: index,
+    _source: {
+      ...signal,
+    },
+  };
+};
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
@@ -299,7 +356,7 @@ export const errorAggregator = (
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
       if (accum[item.create.error.reason] == null) {
         accum[item.create.error.reason] = {
           count: 1,
@@ -445,4 +502,98 @@ export const getSignalTimeTuples = ({
     buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
   );
   return totalToFromTuples;
+};
+
+/**
+ * Given errors from a search query this will return an array of strings derived from the errors.
+ * @param errors The errors to derive the strings from
+ */
+export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
+  return errors.map((error) => {
+    return `reason: ${error.reason.reason}, type: ${error.reason.caused_by.type}, caused by: ${error.reason.caused_by.reason}`;
+  });
+};
+
+export const createSearchAfterReturnTypeFromResponse = ({
+  searchResult,
+}: {
+  searchResult: SignalSearchResponse;
+}): SearchAfterAndBulkCreateReturnType => {
+  return createSearchAfterReturnType({
+    success: searchResult._shards.failed === 0,
+    lastLookBackDate:
+      searchResult.hits.hits.length > 0
+        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'])
+        : undefined,
+  });
+};
+
+export const createSearchAfterReturnType = ({
+  success,
+  searchAfterTimes,
+  bulkCreateTimes,
+  lastLookBackDate,
+  createdSignalsCount,
+  errors,
+}: {
+  success?: boolean | undefined;
+  searchAfterTimes?: string[] | undefined;
+  bulkCreateTimes?: string[] | undefined;
+  lastLookBackDate?: Date | undefined;
+  createdSignalsCount?: number | undefined;
+  errors?: string[] | undefined;
+} = {}): SearchAfterAndBulkCreateReturnType => {
+  return {
+    success: success ?? true,
+    searchAfterTimes: searchAfterTimes ?? [],
+    bulkCreateTimes: bulkCreateTimes ?? [],
+    lastLookBackDate: lastLookBackDate ?? null,
+    createdSignalsCount: createdSignalsCount ?? 0,
+    errors: errors ?? [],
+  };
+};
+
+export const mergeReturns = (
+  searchAfters: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  return searchAfters.reduce((prev, next) => {
+    const {
+      success: existingSuccess,
+      searchAfterTimes: existingSearchAfterTimes,
+      bulkCreateTimes: existingBulkCreateTimes,
+      lastLookBackDate: existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount,
+      errors: existingErrors,
+    } = prev;
+
+    const {
+      success: newSuccess,
+      searchAfterTimes: newSearchAfterTimes,
+      bulkCreateTimes: newBulkCreateTimes,
+      lastLookBackDate: newLastLookBackDate,
+      createdSignalsCount: newCreatedSignalsCount,
+      errors: newErrors,
+    } = next;
+
+    return {
+      success: existingSuccess && newSuccess,
+      searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      errors: [...new Set([...existingErrors, ...newErrors])],
+    };
+  });
+};
+
+export const createTotalHitsFromSearchResult = ({
+  searchResult,
+}: {
+  searchResult: SignalSearchResponse;
+}): number => {
+  const totalHits =
+    typeof searchResult.hits.total === 'number'
+      ? searchResult.hits.total
+      : searchResult.hits.total.value;
+  return totalHits;
 };
