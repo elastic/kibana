@@ -11,6 +11,7 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import {
   CustomConfigurePackagePolicyContent,
   CustomConfigurePackagePolicyProps,
+  pagePathGetters,
 } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
@@ -42,7 +43,12 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
     >(() => {
       return [
         'ingestManager',
-        { path: `#/policies/${agentPolicyId}/edit-integration/${packagePolicyId}` },
+        {
+          path: `#${pagePathGetters.edit_integration({
+            policyId: agentPolicyId,
+            packagePolicyId: packagePolicyId!,
+          })}`,
+        },
       ];
     }, [agentPolicyId, packagePolicyId]);
 
