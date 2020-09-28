@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useContext, FC } from 'react';
 import { UptimeAppColors } from '../../../apps/uptime_app';
 import { UptimeThemeContext } from '../../../contexts';
@@ -27,11 +28,17 @@ export function colorFromStatus(status: string, color: UptimeAppColors) {
 export function textFromStatus(status: string) {
   switch (status) {
     case 'succeeded':
-      return 'Succeeded';
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.succeededMessage', {
+        defaultMessage: 'Succeeded',
+      });
     case 'failed':
-      return 'Failed';
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.failedMessage', {
+        defaultMessage: 'Failed',
+      });
     case 'skipped':
-      return 'Skipped';
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.skippedMessage', {
+        defaultMessage: 'Skipped',
+      });
     default:
       return null;
   }
