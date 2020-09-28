@@ -12,6 +12,7 @@ import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { DeserializeResult } from '../../deserialize';
 import { Document } from '../../types';
+import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
 import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
@@ -34,6 +35,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   processors,
 }) => {
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const {
     testPipelineData,
@@ -73,6 +75,10 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         verbose,
         pipeline: { ...serializedProcessors },
       });
+
+      if (!isMounted.current) {
+        return { isSuccessful: false };
+      }
 
       setIsRunningTest(false);
 
@@ -123,6 +129,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       return { isSuccessful: true };
     },
     [
+      isMounted,
       processors,
       services.api,
       services.notifications.toasts,

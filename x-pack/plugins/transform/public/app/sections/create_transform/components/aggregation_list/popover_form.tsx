@@ -18,6 +18,8 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
 import { useUpdateEffect } from 'react-use';
 import { AggName } from '../../../../../../common/types/aggregations';

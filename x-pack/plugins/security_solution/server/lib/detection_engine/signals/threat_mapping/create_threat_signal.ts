@@ -9,12 +9,10 @@ import { getThreatList } from './get_threat_list';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
-import {
-  searchAfterAndBulkCreate,
-  SearchAfterAndBulkCreateReturnType,
-} from '../search_after_bulk_create';
+import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { CreateThreatSignalOptions, ThreatListItem } from './types';
 import { combineResults } from './utils';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
   threatMapping,

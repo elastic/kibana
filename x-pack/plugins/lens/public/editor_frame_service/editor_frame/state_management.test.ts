@@ -376,7 +376,7 @@ describe('editor_frame state management', () => {
         {
           type: 'VISUALIZATION_LOADED',
           doc: {
-            id: 'b',
+            savedObjectId: 'b',
             state: {
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },

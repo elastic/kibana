@@ -13,6 +13,7 @@ import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 export interface OwnProps {
   end: string;
@@ -89,6 +90,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       defaultModel={alertsDefaultModel}
       end={endDate}
       id={timelineId}
+      scopeId={SourcererScopeName.default}
       start={startDate}
     />
   );

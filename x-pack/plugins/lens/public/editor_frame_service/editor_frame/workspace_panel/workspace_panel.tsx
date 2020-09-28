@@ -215,7 +215,7 @@ export function InnerWorkspacePanel({
               />
             ) : (
               <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspace"
+                id="xpack.lens.editorFrame.emptyWorkspaceSimple"
                 defaultMessage="Drop field here"
               />
             )}
