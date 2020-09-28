@@ -1,3 +1,6 @@
 .dscNoResults {
+  @include euiBreakpoint('xs', 's') {
+    padding: 0 $euiSizeS;
+  }
   max-width: 1000px;
 }

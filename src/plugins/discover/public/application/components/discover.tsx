@@ -172,7 +172,7 @@ export function Discover({
         {flyout}
         <main className="dscApp__frame">
           <>
-            <div className="dscSidebar dscSidebar__desktop hidden-xs hidden-sm">
+            <div className="dscSidebar dscSidebar__desktop eui-hideFor--xs eui-hidenFor--s">
               <DiscoverSidebar
                 columns={state.columns}
                 fieldCounts={fieldCounts}
@@ -185,7 +185,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
               />
             </div>
-            <div className="dscSidebar dscSidebar__mobile visible-xs visible-sm">
+            <div className="dscSidebar dscSidebar__mobile eui-showFor--xs eui-showFor--s">
               <DiscoverSidebarMobile
                 columns={state.columns}
                 fieldCounts={fieldCounts}
