@@ -29,7 +29,10 @@
     "sample-data": {
       "properties": {
         "installed": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "last_install_date": {
           "type": "date"
@@ -44,7 +47,10 @@
           "type": "keyword"
         },
         "uninstalled": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },
