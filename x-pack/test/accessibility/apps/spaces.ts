@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for for customize space card', async () => {
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_a');
-      await PageObjects.spaceSelector.clickSpaceAcustomAvatar();
+      await PageObjects.spaceSelector.clickCustomizeSpaceAvatar('space_a');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
@@ -75,30 +75,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for click on "show" button to open customize feature display', async () => {
-      await retry.waitFor(
-        'show button is visible',
-        async () => await testSubjects.exists('show-hide-section-link')
-      );
-      await PageObjects.spaceSelector.clickShowFeatures();
+    it('a11y test for toggling an entire feature category', async () => {
+      await PageObjects.spaceSelector.toggleFeatureCategoryVisibility('kibana');
       await a11y.testAppSnapshot();
-    });
 
-    it('a11y test for change all option for feature visibility popover', async () => {
-      await PageObjects.spaceSelector.clickFeaturesVisibilityButton();
+      await PageObjects.spaceSelector.openFeatureCategory('kibana');
       await a11y.testAppSnapshot();
-    });
 
-    it('a11y test for hide all feature visibility popover option', async () => {
-      await PageObjects.spaceSelector.clickHideAllFeatures();
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test for toggle individual feature - using enterprise feature visibility', async () => {
-      await PageObjects.spaceSelector.clickFeaturesVisibilityButton();
-      await PageObjects.spaceSelector.clickShowAllFeatures();
-      await PageObjects.spaceSelector.toggleFeatureVisibility('enterpriseSearch');
-      await a11y.testAppSnapshot();
+      await PageObjects.spaceSelector.toggleFeatureCategoryVisibility('kibana');
     });
 
     it('a11y test for space listing page', async () => {

@@ -14,6 +14,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       };
 
@@ -35,6 +36,7 @@ describe('FeatureRegistry', () => {
         icon: 'addDataApp',
         navLinkId: 'someNavLink',
         app: ['app1'],
+        category: { id: 'foo', label: 'foo' },
         validLicenses: ['standard', 'basic', 'gold', 'platinum'],
         catalogue: ['foo'],
         management: {
@@ -143,11 +145,64 @@ describe('FeatureRegistry', () => {
       expect(result[0].toRaw()).toEqual(feature);
     });
 
+    describe('category', () => {
+      it('is required', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          privileges: null,
+        } as any;
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"child \\"category\\" fails because [\\"category\\" is required]"`
+        );
+      });
+
+      it('must have an id', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          privileges: null,
+          category: { label: 'foo' },
+        } as any;
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"child \\"category\\" fails because [child \\"id\\" fails because [\\"id\\" is required]]"`
+        );
+      });
+
+      it('must have a label', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          privileges: null,
+          category: { id: 'foo' },
+        } as any;
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"child \\"category\\" fails because [child \\"label\\" fails because [\\"label\\" is required]]"`
+        );
+      });
+    });
+
     it(`requires a value for privileges`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
       } as any;
 
       const featureRegistry = new FeatureRegistry();
@@ -163,6 +218,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         subFeatures: [
           {
@@ -201,6 +257,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             ui: [],
@@ -235,6 +292,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             ui: [],
@@ -271,6 +329,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           description: 'foo',
@@ -303,6 +362,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             ui: [],
@@ -340,6 +400,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       };
 
@@ -347,6 +408,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Duplicate Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       };
 
@@ -367,6 +429,7 @@ describe('FeatureRegistry', () => {
             name: 'some feature',
             navLinkId: prohibitedChars,
             app: [],
+            category: { id: 'foo', label: 'foo' },
             privileges: null,
           })
         ).toThrowErrorMatchingSnapshot();
@@ -382,6 +445,7 @@ describe('FeatureRegistry', () => {
               kibana: [prohibitedChars],
             },
             app: [],
+            category: { id: 'foo', label: 'foo' },
             privileges: null,
           })
         ).toThrowErrorMatchingSnapshot();
@@ -395,6 +459,7 @@ describe('FeatureRegistry', () => {
             name: 'some feature',
             catalogue: [prohibitedChars],
             app: [],
+            category: { id: 'foo', label: 'foo' },
             privileges: null,
           })
         ).toThrowErrorMatchingSnapshot();
@@ -409,6 +474,7 @@ describe('FeatureRegistry', () => {
             id: prohibitedId,
             name: 'some feature',
             app: [],
+            category: { id: 'foo', label: 'foo' },
             privileges: null,
           })
         ).toThrowErrorMatchingSnapshot();
@@ -420,6 +486,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: ['app1', 'app2'],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           foo: {
             name: 'Foo',
@@ -447,6 +514,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: ['bar'],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -481,6 +549,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: ['foo', 'bar', 'baz'],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -538,6 +607,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: ['bar'],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           description: 'something',
@@ -571,6 +641,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: ['foo', 'bar', 'baz'],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           description: 'something',
@@ -604,6 +675,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         privileges: {
           all: {
@@ -641,6 +713,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['foo', 'bar', 'baz'],
         privileges: {
           all: {
@@ -701,6 +774,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         privileges: null,
         reserved: {
@@ -736,6 +810,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['foo', 'bar', 'baz'],
         privileges: null,
         reserved: {
@@ -771,6 +846,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         alerting: ['bar'],
         privileges: {
           all: {
@@ -811,6 +887,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         alerting: ['foo', 'bar', 'baz'],
         privileges: {
           all: {
@@ -871,6 +948,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         alerting: ['bar'],
         privileges: null,
         reserved: {
@@ -906,6 +984,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         alerting: ['foo', 'bar', 'baz'],
         privileges: null,
         reserved: {
@@ -941,6 +1020,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         management: {
           kibana: ['hey'],
@@ -987,6 +1067,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         management: {
           kibana: ['hey'],
@@ -1060,6 +1141,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         management: {
           kibana: ['hey'],
@@ -1101,6 +1183,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['bar'],
         management: {
           kibana: ['hey', 'hey-there'],
@@ -1142,6 +1225,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           description: 'my reserved privileges',
@@ -1184,6 +1268,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           description: 'my reserved privileges',
@@ -1216,12 +1301,14 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       };
       const feature2: KibanaFeatureConfig = {
         id: 'test-feature-2',
         name: 'Test Feature 2',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       };
 
@@ -1346,6 +1433,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     };
 
@@ -1371,6 +1459,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     };
 

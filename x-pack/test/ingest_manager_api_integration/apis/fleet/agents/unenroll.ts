@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('allow to unenroll using a list of ids', async () => {
+    it('should allow to unenroll single agent', async () => {
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
@@ -94,6 +94,40 @@ export default function (providerContext: FtrProviderContext) {
       } = await esClient.security.getApiKey({ id: outputAPIKeyId });
       expect(outputAPIKeys).length(1);
       expect(outputAPIKeys[0].invalidated).eql(true);
+    });
+
+    it('should allow to unenroll multiple agents by id', async () => {
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: ['agent2', 'agent3'],
+        })
+        .expect(200);
+      const [agent2data, agent3data] = await Promise.all([
+        supertest.get(`/api/ingest_manager/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/ingest_manager/fleet/agents/agent3`).set('kbn-xsrf', 'xxx'),
+      ]);
+      expect(typeof agent2data.body.item.unenrollment_started_at).to.eql('string');
+      expect(agent2data.body.item.active).to.eql(true);
+      expect(typeof agent3data.body.item.unenrollment_started_at).to.be('string');
+      expect(agent2data.body.item.active).to.eql(true);
+    });
+
+    it('should allow to unenroll multiple agents by kuery', async () => {
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: 'fleet-agents.active: true',
+          force: true,
+        })
+        .expect(200);
+
+      const { body } = await supertest
+        .get(`/api/ingest_manager/fleet/agents`)
+        .set('kbn-xsrf', 'xxx');
+      expect(body.total).to.eql(0);
     });
   });
 }
