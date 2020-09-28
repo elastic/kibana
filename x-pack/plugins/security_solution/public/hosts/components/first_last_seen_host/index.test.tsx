@@ -40,7 +40,12 @@ describe('FirstLastSeen Component', () => {
     useFirstLastSeenHostMock.mockReturnValue([true, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.FIRST_SEEN}
+        />
       </TestProviders>
     );
     expect(container.innerHTML).toBe(
@@ -52,7 +57,12 @@ describe('FirstLastSeen Component', () => {
     useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.FIRST_SEEN}
+        />
       </TestProviders>
     );
 
@@ -69,7 +79,12 @@ describe('FirstLastSeen Component', () => {
     useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.LAST_SEEN}
+        />
       </TestProviders>
     );
     await act(() =>
@@ -91,7 +106,12 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.LAST_SEEN}
+        />
       </TestProviders>
     );
 
@@ -114,7 +134,12 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.FIRST_SEEN}
+        />
       </TestProviders>
     );
 
@@ -137,7 +162,12 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.FIRST_SEEN}
+        />
       </TestProviders>
     );
     await act(() =>
@@ -157,7 +187,12 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
+        <FirstLastSeenHost
+          docValueFields={[]}
+          indexNames={[]}
+          hostName="kibana-siem"
+          type={FirstLastSeenHostType.LAST_SEEN}
+        />
       </TestProviders>
     );
     await act(() =>

@@ -24,7 +24,7 @@ export function formatToSec(
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 
   if (valueInMs < 1000) {
-    return valueInMs + ' ms';
+    return valueInMs.toFixed(0) + ' ms';
   }
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
@@ -38,7 +38,7 @@ interface Props {
 export function KeyUXMetrics({ data, loading }: Props) {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end, serviceName, searchTerm } = urlParams;
 
   const { data: longTaskData, status } = useFetcher(
     (callApmApi) => {
@@ -46,13 +46,18 @@ export function KeyUXMetrics({ data, loading }: Props) {
         return callApmApi({
           pathname: '/api/apm/rum-client/long-task-metrics',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [start, end, serviceName, uiFilters, searchTerm]
   );
 
   // Note: FCP value is in ms unit
@@ -69,7 +74,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(data?.tbt)}
+          title={formatToSec(data?.tbt, 'ms')}
           description={TBT_LABEL}
           isLoading={loading}
         />
