@@ -96,7 +96,7 @@ To show what your data can do, add charts, graphs, progress monitors, and more t
 .. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
 
 [role="screenshot"]
-image::images/canvas-chart-element.png[Image showing canvas workpad with sample data graph]
+image::images/canvas-chart-element.png[Image showing Canvas workpad with sample data graph]
 
 [float]
 === Show how your data changes over time
