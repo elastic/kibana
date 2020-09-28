@@ -164,7 +164,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A>
+    options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 

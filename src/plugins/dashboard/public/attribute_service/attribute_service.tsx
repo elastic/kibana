@@ -76,9 +76,17 @@ export class AttributeService<
     }
   }
 
+  private async defaultUnwrapMethod(input: RefType): Promise<SavedObjectAttributes> {
+    return new Promise<SavedObjectAttributes>(() => {
+      return { ...input };
+    });
+  }
+
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
-    if (this.inputIsRefType(input) && this.options.unwrapMethod) {
-      return this.options.unwrapMethod(input.savedObjectId);
+    if (this.inputIsRefType(input)) {
+      return this.options.unwrapMethod
+        ? await this.options.unwrapMethod(input.savedObjectId)
+        : await this.defaultUnwrapMethod(input);
     }
     return input[ATTRIBUTE_SERVICE_KEY];
   }
