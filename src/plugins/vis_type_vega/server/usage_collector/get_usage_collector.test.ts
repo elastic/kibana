@@ -21,6 +21,7 @@ import { of } from 'rxjs';
 
 import { LegacyAPICaller } from 'src/core/server';
 import { getUsageCollector } from './get_usage_collector';
+import { HomeServerPluginSetup } from '../../../home/server';
 
 const mockedSavedObjects = [
   // vega-lite lib spec
@@ -72,11 +73,34 @@ const mockedSavedObjects = [
 ];
 
 const getMockCallCluster = (hits?: unknown[]) =>
-  (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
+  jest.fn().mockReturnValue(Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
 
 describe('Vega visualization usage collector', () => {
   const configMock = of({ kibana: { index: '' } });
-  const usageCollector = getUsageCollector(configMock);
+  const usageCollector = getUsageCollector(configMock, {
+    home: ({
+      sampleData: {
+        getSampleDatasets: jest.fn().mockReturnValue([
+          {
+            savedObjects: [
+              {
+                type: 'visualization',
+                attributes: {
+                  title: 'sample vega visualization',
+                  visState: JSON.stringify({
+                    type: 'vega',
+                    params: {
+                      spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
+                    },
+                  }),
+                },
+              },
+            ],
+          },
+        ]),
+      },
+    } as unknown) as HomeServerPluginSetup,
+  });
 
   test('Should fit the shape', () => {
     expect(usageCollector.type).toBe('vis_type_vega');
@@ -113,27 +137,45 @@ describe('Vega visualization usage collector', () => {
   });
 
   test('Should ingnore sample data visualizations', async () => {
-    const result = await usageCollector.fetch(
-      getMockCallCluster([
-        {
-          _id: 'visualization:sampledata-123',
-          _source: {
-            type: 'visualization',
-            visualization: {
-              visState: JSON.stringify({
-                type: 'vega',
-                title: '[Logs] Visitors Map',
-                params: {
-                  spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
-                },
-              }),
+    const callCluster = getMockCallCluster([
+      {
+        _id: 'visualization:sampledata-123',
+        _source: {
+          type: 'visualization',
+          title: '[Logs] Visitors Map',
+          visualization: {
+            visState: JSON.stringify({
+              type: 'vega',
+              params: {
+                spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
+              },
+            }),
+          },
+        },
+      },
+    ]);
+
+    await usageCollector.fetch(callCluster);
+
+    expect(callCluster).toHaveBeenCalledWith('search', {
+      body: {
+        query: {
+          bool: {
+            filter: { term: { type: 'visualization' } },
+            must_not: {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ match_phrase: { 'visualization.title': 'sample vega visualization' } }],
+              },
             },
           },
         },
-      ])
-    );
-
-    expect(result).toBeUndefined();
+      },
+      filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
+      ignoreUnavailable: true,
+      index: '',
+      size: 10000,
+    });
   });
 
   test('Summarizes visualizations response data', async () => {

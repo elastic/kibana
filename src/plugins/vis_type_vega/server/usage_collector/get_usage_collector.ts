@@ -16,34 +16,63 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
 import { parse } from 'hjson';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
+import { LegacyAPICaller, SavedObject } from 'src/core/server';
 
-import { LegacyAPICaller } from 'src/core/server';
-import { ConfigObservable } from '../types';
+import {
+  ConfigObservable,
+  VegaSavedObjectAttributes,
+  VisTypeVegaPluginSetupDependencies,
+} from '../types';
+
+type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
 
 type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 type VegaType = 'vega' | 'vega-lite';
 
 const VEGA_USAGE_TYPE = 'vis_type_vega';
 
+function isVegaType(attributes: any): attributes is VegaSavedObjectAttributes {
+  return attributes && attributes.type === 'vega' && attributes.params?.spec;
+}
+
 const checkVegaSchemaType = (schemaURL: string, type: VegaType) =>
   schemaURL.includes(`//vega.github.io/schema/${type}/`);
 
-// we want to exclude the Vega Sample Data visualizations from the stats
-// in order to have more accurate results
-const excludedFromStatsVisualizations = [
-  '[Flights] Airport Connections (Hover Over Airport)',
-  '[Flights] Departure Count Map',
-  '[Logs] File Type Scatter Plot',
-  '[Logs] Source and Destination Sankey Chart',
-  '[Logs] Visitors Map',
-  '[eCommerce] Sales Count Map',
-];
+const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) => {
+  const titles: string[] = [];
+  const sampleDataSets = home?.sampleData.getSampleDatasets() ?? [];
 
-const getStats = async (callCluster: LegacyAPICaller, index: string) => {
+  sampleDataSets.forEach((sampleDataSet) =>
+    sampleDataSet.savedObjects.forEach((savedObject: SavedObject<any>) => {
+      try {
+        if (savedObject.type === 'visualization') {
+          const visState = JSON.parse(savedObject.attributes?.visState);
+
+          if (isVegaType(visState)) {
+            titles.push(savedObject.attributes.title);
+          }
+        }
+      } catch (e) {
+        // Let it go, visState is invalid and we'll don't need to handle it
+      }
+    })
+  );
+
+  return titles;
+};
+
+const getStats = async (
+  callCluster: LegacyAPICaller,
+  index: string,
+  { home }: UsageCollectorDependencies
+) => {
+  // we want to exclude the Vega Sample Data visualizations from the stats
+  // in order to have more accurate results
+  const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
+
   const searchParams = {
     size: 10000,
     index,
@@ -51,13 +80,26 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
     filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
     body: {
       query: {
-        bool: { filter: { term: { type: 'visualization' } } },
+        bool: {
+          filter: { term: { type: 'visualization' } },
+          must_not: excludedFromStatsVisualizations.length
+            ? {
+                bool: {
+                  should: excludedFromStatsVisualizations.map((title) => ({
+                    match_phrase: {
+                      'visualization.title': title,
+                    },
+                  })),
+                  minimum_should_match: 1,
+                },
+              }
+            : undefined,
+        },
       },
     },
   };
   const esResponse: ESResponse = await callCluster('search', searchParams);
-  const size = get(esResponse, 'hits.hits.length', 0);
-
+  const size = esResponse?.hits?.hits?.length ?? 0;
   let shouldPublishTelemetry = false;
 
   if (!size) {
@@ -66,16 +108,10 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
 
   const finalTelemetry = esResponse.hits.hits.reduce(
     (telemetry, hit) => {
-      const visualization = get(hit, '_source.visualization', { visState: '{}' });
-      const visState: { title: string; type?: string; params?: { spec?: string } } = JSON.parse(
-        visualization.visState
-      );
+      const visualization = hit._source?.visualization;
+      const visState = JSON.parse(visualization?.visState ?? '{}');
 
-      if (
-        visState.type === 'vega' &&
-        visState.params?.spec &&
-        !excludedFromStatsVisualizations.includes(visState.title)
-      )
+      if (isVegaType(visState))
         try {
           const spec = parse(visState.params.spec, { legacyRoot: false });
 
@@ -107,14 +143,17 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
   return shouldPublishTelemetry ? finalTelemetry : undefined;
 };
 
-export function getUsageCollector(config: ConfigObservable) {
+export function getUsageCollector(
+  config: ConfigObservable,
+  dependencies: UsageCollectorDependencies
+) {
   return {
     type: VEGA_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
-      return await getStats(callCluster, index);
+      return await getStats(callCluster, index, dependencies);
     },
   };
 }

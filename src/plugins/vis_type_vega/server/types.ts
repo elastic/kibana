@@ -17,8 +17,23 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
+import { HomeServerPluginSetup } from '../../home/server';
+import { UsageCollectionSetup } from '../../usage_collection/server';
 
 export type ConfigObservable = Observable<{ kibana: { index: string } }>;
+
+export interface VegaSavedObjectAttributes {
+  title: string;
+  type: string;
+  params: {
+    spec: string;
+  };
+}
+
+export interface VisTypeVegaPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+  home?: HomeServerPluginSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeVegaPluginSetup {}

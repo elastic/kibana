@@ -19,13 +19,14 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getUsageCollector } from './get_usage_collector';
-import { ConfigObservable } from '../types';
+import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 
 export function registerVegaUsageCollector(
   collectorSet: UsageCollectionSetup,
-  config: ConfigObservable
+  config: ConfigObservable,
+  dependencies: Pick<VisTypeVegaPluginSetupDependencies, 'home'>
 ) {
-  const collector = collectorSet.makeUsageCollector(getUsageCollector(config));
+  const collector = collectorSet.makeUsageCollector(getUsageCollector(config, dependencies));
 
   collectorSet.registerCollector(collector);
 }

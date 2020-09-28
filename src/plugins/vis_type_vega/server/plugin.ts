@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { VisTypeVegaPluginSetup, VisTypeVegaPluginStart } from './types';
 import { registerVegaUsageCollector } from './usage_collector';
-import { ConfigObservable } from './types';
+import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from './types';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly config: ConfigObservable;
@@ -30,9 +29,9 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    if (plugins.usageCollection) {
-      registerVegaUsageCollector(plugins.usageCollection, this.config);
+  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+    if (usageCollection) {
+      registerVegaUsageCollector(usageCollection, this.config, { home });
     }
     return {};
   }
