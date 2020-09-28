@@ -3,22 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Logger } from 'src/core/server';
+import { Observable } from 'rxjs';
 import { TaskManager } from '../task_manager';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { createWorkloadAggregator } from './workload_statistics';
 import { TaskManagerConfig } from '../config';
+import {
+  MonitoringStats,
+  createAggregators,
+  createMonitoringStatsStream,
+} from './monitoring_stats_stream';
 
-export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+export {
+  MonitoringStats,
+  RawMonitoringStats,
+  summarizeMonitoringStats,
+  createAggregators,
+  createMonitoringStatsStream,
+} from './monitoring_stats_stream';
 
-export function createAggregatedStatsStream(
+export function createMonitoringStats(
   taskManager: TaskManager,
   config: TaskManagerConfig,
   logger: Logger
-): AggregatedStatProvider {
-  return createWorkloadAggregator(
-    taskManager,
-    config.monitored_aggregated_stats_refresh_rate,
-    logger
-  );
+): Observable<MonitoringStats> {
+  return createMonitoringStatsStream(createAggregators(taskManager, config, logger), config);
 }

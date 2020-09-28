@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
+export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
 
 // Refresh "pull based" monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
@@ -56,6 +57,12 @@ export const configSchema = schema.object({
     defaultValue: DEFAULT_MONITORING_REFRESH_RATE,
     /* don't run monitored stat aggregations any faster than once every 5 seconds */
     min: 5000,
+  }),
+  /* The size of the running average window for monitored stats. */
+  monitored_stats_running_average_window: schema.number({
+    defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW,
+    max: 100,
+    min: 10,
   }),
 });
 

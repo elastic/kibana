@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, take, bufferCount } from 'rxjs/operators';
 import { createWorkloadAggregator } from './workload_statistics';
 import { taskManagerMock } from '../task_manager.mock';
-import { first, take, bufferCount } from 'rxjs/operators';
 import { AggregationResult } from '../queries/aggregation_clauses';
 import { mockLogger } from '../test_utils';
 

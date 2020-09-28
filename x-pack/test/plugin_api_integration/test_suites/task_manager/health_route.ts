@@ -22,6 +22,16 @@ interface MonitoringStats {
       timestamp: string;
       value: Record<string, object>;
     };
+    runtime: {
+      timestamp: string;
+      value: {
+        drift: Record<string, object>;
+        polling: {
+          lastSuccessfulPoll: string;
+          resultFrequency: Record<string, number>;
+        };
+      };
+    };
   };
 }
 
@@ -59,18 +69,19 @@ export default function ({ getService }: FtrProviderContext) {
         poll_interval: 3000,
         max_poll_inactivity_cycles: 10,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
+        monitored_stats_running_average_window: 50,
         request_capacity: 1000,
         max_workers: 10,
       });
     });
 
     it('should return the task manager workload', async () => {
-      const workload = (await getHealth()).stats.workload;
+      const { workload } = (await getHealth()).stats;
       const sumSampleTaskInWorkload =
         (workload.value.taskTypes as {
           sampleTask?: { sum: number };
         }).sampleTask?.sum ?? 0;
-      const schedulesWorkload = (mapValues(
+      const scheduledWorkload = (mapValues(
         keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
         ([, count]) => count
       ) as unknown) as { '37m': number | undefined; '37s': number | undefined };
@@ -105,9 +116,25 @@ export default function ({ getService }: FtrProviderContext) {
           '37m': number;
           '37s': number;
         };
-        expect(schedulesWorkloadAfterScheduling['37s']).to.eql(schedulesWorkload['37s'] ?? 0 + 1);
-        expect(schedulesWorkloadAfterScheduling['37m']).to.eql(schedulesWorkload['37m'] ?? 0 + 1);
+        expect(schedulesWorkloadAfterScheduling['37s']).to.eql(1 + (scheduledWorkload['37s'] ?? 0));
+        expect(schedulesWorkloadAfterScheduling['37m']).to.eql(1 + (scheduledWorkload['37m'] ?? 0));
       });
+    });
+
+    it('should return the task manager runtime stats', async () => {
+      const {
+        runtime: {
+          value: { drift, polling },
+        },
+      } = (await getHealth()).stats;
+
+      expect(isNaN(Date.parse(polling.lastSuccessfulPoll as string))).to.eql(false);
+      expect(typeof polling.resultFrequency.NoTasksClaimed).to.eql('number');
+      expect(typeof polling.resultFrequency.RanOutOfCapacity).to.eql('number');
+      expect(typeof polling.resultFrequency.PoolFilled).to.eql('number');
+
+      expect(typeof drift.mean).to.eql('number');
+      expect(typeof drift.median).to.eql('number');
     });
   });
 }

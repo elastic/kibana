@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManager } from './task_manager';
+import { TaskManager, TaskLifecycleEvent } from './task_manager';
+import { of, Observable } from 'rxjs';
 
-const createTaskManagerMock = (isStarted: boolean = true) => {
+const createTaskManagerMock = ({
+  isStarted = true,
+  events = of(),
+}: {
+  isStarted?: boolean;
+  events?: Observable<TaskLifecycleEvent>;
+} = {}) => {
   return ({
     registerTaskDefinitions: jest.fn(),
     addMiddleware: jest.fn(),
@@ -20,6 +27,9 @@ const createTaskManagerMock = (isStarted: boolean = true) => {
     start: jest.fn(),
     get isStarted() {
       return isStarted;
+    },
+    get events() {
+      return events;
     },
     stop: jest.fn(),
   } as unknown) as jest.Mocked<TaskManager>;

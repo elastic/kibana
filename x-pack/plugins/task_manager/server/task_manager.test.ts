@@ -42,6 +42,7 @@ describe('TaskManager', () => {
     poll_interval: 6000000,
     max_poll_inactivity_cycles: 10,
     monitored_aggregated_stats_refresh_rate: 5000,
+    monitored_stats_running_average_window: 50,
     request_capacity: 1000,
   };
   const taskManagerOpts = {

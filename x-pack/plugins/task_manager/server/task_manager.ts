@@ -5,7 +5,7 @@
  */
 import { Logger } from 'src/core/server';
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
 
@@ -25,10 +25,12 @@ import {
   TaskRun,
   TaskClaim,
   TaskRunRequest,
+  TaskPollingCycle,
   isTaskRunEvent,
   isTaskClaimEvent,
   isTaskRunRequestEvent,
   asTaskRunRequestEvent,
+  asTaskPollingCycleEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
@@ -52,7 +54,7 @@ import {
   PollingErrorType,
   createObservableMonitor,
 } from './polling';
-import { TaskPool } from './task_pool';
+import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
   FetchResult,
@@ -82,7 +84,12 @@ interface RunNowResult {
   id: string;
 }
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
+export type TaskLifecycleEvent =
+  | TaskMarkRunning
+  | TaskRun
+  | TaskClaim
+  | TaskRunRequest
+  | TaskPollingCycle;
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -195,6 +202,10 @@ export class TaskManager {
     );
   }
 
+  public get events(): Observable<TaskLifecycleEvent> {
+    return this.events$;
+  }
+
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
   };
@@ -245,17 +256,23 @@ export class TaskManager {
       this.startQueue.forEach((fn) => fn());
       this.startQueue = [];
 
-      this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: PollingError<string>) => {
-          if (error.type === PollingErrorType.RequestCapacityReached) {
-            pipe(
-              error.data,
-              mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-            );
-          }
-          this.logger.error(error.message);
-        })
-      );
+      this.pollingSubscription = this.poller$
+        .pipe(
+          tap(
+            mapErr((error: PollingError<string>) => {
+              if (error.type === PollingErrorType.RequestCapacityReached) {
+                pipe(
+                  error.data,
+                  mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+                );
+              }
+              this.logger.error(error.message);
+            })
+          )
+        )
+        .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+          this.emitEvent(asTaskPollingCycleEvent<string>(event));
+        });
     }
   }
 
@@ -522,13 +539,13 @@ export async function awaitTaskRunResult(
             );
           }, taskEvent.event);
         } else {
-          either<ConcreteTaskInstance, Error | Option<ConcreteTaskInstance>>(
+          either<ConcreteTaskInstance | FillPoolResult, Error | Option<ConcreteTaskInstance>>(
             taskEvent.event,
-            (taskInstance: ConcreteTaskInstance) => {
+            (taskInstance: ConcreteTaskInstance | FillPoolResult) => {
               // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
-                resolve({ id: taskInstance.id });
+                resolve({ id: (taskInstance as ConcreteTaskInstance).id });
               }
             },
             async (error: Error | Option<ConcreteTaskInstance>) => {

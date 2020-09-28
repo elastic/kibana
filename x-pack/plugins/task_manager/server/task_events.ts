@@ -9,16 +9,19 @@ import { Option } from 'fp-ts/lib/Option';
 import { ConcreteTaskInstance } from './task';
 
 import { Result, Err } from './lib/result_type';
+import { FillPoolResult } from './lib/fill_pool';
+import { PollingError } from './polling';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
+  TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
 }
 
 export interface TaskEvent<T, E> {
-  id: string;
+  id?: string;
   type: TaskEventType;
   event: Result<T, E>;
 }
@@ -26,6 +29,7 @@ export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskPollingCycle<T = string> = TaskEvent<FillPoolResult, PollingError<T>>;
 
 export function asTaskMarkRunningEvent(
   id: string,
@@ -69,6 +73,15 @@ export function asTaskRunRequestEvent(
   };
 }
 
+export function asTaskPollingCycleEvent<T = string>(
+  event: Result<FillPoolResult, PollingError<T>>
+): TaskPollingCycle<T> {
+  return {
+    type: TaskEventType.TASK_POLLING_CYCLE,
+    event,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -84,4 +97,9 @@ export function isTaskRunRequestEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskRunRequest {
   return taskEvent.type === TaskEventType.TASK_RUN_REQUEST;
+}
+export function isTaskPollingCycleEvent<T = string>(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskPollingCycle<T> {
+  return taskEvent.type === TaskEventType.TASK_POLLING_CYCLE;
 }

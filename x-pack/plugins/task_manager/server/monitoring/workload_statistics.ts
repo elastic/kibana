@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interval } from 'rxjs';
+import { timer } from 'rxjs';
 import { concatMap, map, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
@@ -18,12 +18,28 @@ import {
 } from '../queries/aggregation_clauses';
 import { parseIntervalAsSecond } from '../lib/intervals';
 
+interface StatusStat extends JsonObject {
+  [status: string]: number;
+}
+interface TaskTypeStat extends JsonObject {
+  [taskType: string]: {
+    sum: number;
+    status: StatusStat;
+  };
+}
+
+export interface WorkloadStat extends JsonObject {
+  sum: number;
+  taskTypes: TaskTypeStat;
+  schedule: Array<[string, number]>;
+}
+
 export function createWorkloadAggregator(
   taskManager: TaskManager,
   refreshInterval: number,
   logger: Logger
-): AggregatedStatProvider {
-  return interval(refreshInterval).pipe(
+): AggregatedStatProvider<WorkloadStat> {
+  return timer(0, refreshInterval).pipe(
     concatMap(() =>
       taskManager.aggregate({
         aggs: {
@@ -47,7 +63,7 @@ export function createWorkloadAggregator(
         taskType: { buckets: taskTypes = [] } = {},
         schedule: { buckets: schedules = [] } = {},
       } = task;
-      const summary: JsonObject = {
+      const summary: WorkloadStat = {
         sum,
         taskTypes: mapValues(
           keyBy<AggregationBucketWithSubAgg<'status'>>(

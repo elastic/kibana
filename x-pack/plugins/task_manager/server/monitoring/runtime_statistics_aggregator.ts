@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { JsonObject, JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from 'src/plugins/kibana_utils/common';
 
-export interface AggregatedStat {
+export interface AggregatedStat<Stat = JsonValue> {
   key: string;
-  value: JsonObject | JsonValue;
+  value: Stat;
 }
 
-export type AggregatedStatProvider = Observable<AggregatedStat>;
+export type AggregatedStatProvider<Stat extends JsonValue = JsonValue> = Observable<
+  AggregatedStat<Stat>
+>;
