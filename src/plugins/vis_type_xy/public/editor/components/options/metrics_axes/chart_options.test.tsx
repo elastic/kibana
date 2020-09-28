@@ -24,7 +24,7 @@ import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam, ChartMode } from '../../../../types';
 import { LineOptions } from './line_options';
 import { valueAxis, seriesParam, vis } from './mocks';
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;

@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
-import { ChartType } from '../common/types';
+import { ChartType } from '../common';
 
 const name = 'xy';
 

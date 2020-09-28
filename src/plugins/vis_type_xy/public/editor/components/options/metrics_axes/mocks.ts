@@ -37,7 +37,7 @@ import {
   getPositions,
   getInterpolationModes,
 } from '../../../collections';
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

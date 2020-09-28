@@ -30,7 +30,7 @@ import {
 } from '@elastic/charts';
 
 import { KibanaDatatableRow } from '../../../expressions/public';
-import { ChartType } from '../../common/types';
+import { ChartType } from '../../common';
 import { SeriesParam, VisConfig, FakeParams } from '../types';
 
 /**

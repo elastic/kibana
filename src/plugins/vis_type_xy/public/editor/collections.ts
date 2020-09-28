@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Fit, Position } from '@elastic/charts';
 
 import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle, ScaleType } from '../types';
-import { ChartType } from '../../common/types';
+import { ChartType } from '../../common';
 import { LabelRotation } from '../../../charts/public';
 
 export const getPositions = () => [

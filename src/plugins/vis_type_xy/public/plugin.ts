@@ -33,6 +33,7 @@ import {
   setUISettings,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
+import { NEW_CHART_UI } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -68,17 +69,14 @@ export class VisTypeXyPlugin
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
   ) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      'The visTypeXy plugin is enabled\n\n',
-      'This may negatively alter existing vislib visualization configurations if saved.'
-    );
-    setUISettings(core.uiSettings);
-    setThemeService(charts.theme);
-    setColorsService(charts.colors);
+    if (core.uiSettings.get(NEW_CHART_UI, false)) {
+      setUISettings(core.uiSettings);
+      setThemeService(charts.theme);
+      setColorsService(charts.colors);
 
-    [createVisTypeXyVisFn].forEach(expressions.registerFunction);
-    visTypesDefinitions.forEach(visualizations.createReactVisualization);
+      [createVisTypeXyVisFn].forEach(expressions.registerFunction);
+      visTypesDefinitions.forEach(visualizations.createReactVisualization);
+    }
 
     return {};
   }

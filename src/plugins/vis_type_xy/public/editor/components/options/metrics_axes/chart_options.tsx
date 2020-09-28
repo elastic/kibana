@@ -28,7 +28,7 @@ import { SelectOption } from '../../../../../../charts/public';
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 

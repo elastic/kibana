@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { $Values } from '@kbn/utility-types';
 
 export const ChartType = Object.freeze({
@@ -24,3 +25,5 @@ export const ChartType = Object.freeze({
   Histogram: 'histogram' as const,
 });
 export type ChartType = $Values<typeof ChartType>;
+
+export const NEW_CHART_UI = 'visualization.visualize:newChartUi';

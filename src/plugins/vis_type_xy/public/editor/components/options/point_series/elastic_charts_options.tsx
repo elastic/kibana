@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SelectOption, SwitchOption } from '../../../../../../charts/public';
 
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 

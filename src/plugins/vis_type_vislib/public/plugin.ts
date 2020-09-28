@@ -27,7 +27,6 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
-import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -46,6 +45,7 @@ import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService, setDataActions, setKibanaLegacy } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { NEW_CHART_UI } from '../../vis_type_xy/public';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -57,7 +57,6 @@ export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
-  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 /** @internal */
@@ -74,15 +73,15 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
 
   public async setup(
     core: VisTypeVislibCoreSetup,
-    { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
+    { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
       uiSettings: core.uiSettings,
       charts,
     };
 
-    // if visTypeXy plugin is disabled it's config will be undefined
-    if (visTypeXy) {
+    if (core.uiSettings.get(NEW_CHART_UI)) {
+      // Register only non-replaced vis types
       [
         createPieVisTypeDefinition,
         createHeatmapVisTypeDefinition,

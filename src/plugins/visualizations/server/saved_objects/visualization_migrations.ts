@@ -20,7 +20,7 @@
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { ChartType } from '../../../vis_type_xy/common/types';
+import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {

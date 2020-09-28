@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { VisTypeXyServerPlugin } from './plugin';
 
-export const config = {
-  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-};
-
-export const plugin = () => ({
-  setup() {},
-  start() {},
-});
+export const plugin = () => new VisTypeXyServerPlugin();

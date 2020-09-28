@@ -21,7 +21,7 @@ import { upperFirst } from 'lodash';
 import { Position } from '@elastic/charts';
 
 import { VisParams, ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../../../../types';
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 
 export const makeSerie = (
   id: string,

@@ -59,7 +59,7 @@ import {
 import { getConfig } from './config';
 import { getThemeService, getColorsService, getDataActions } from './services';
 import { ValueClickContext } from '../../embeddable/public';
-import { ChartType } from '../common/types';
+import { ChartType } from '../common';
 
 import './_chart.scss';
 

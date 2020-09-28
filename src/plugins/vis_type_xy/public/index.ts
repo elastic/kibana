@@ -35,6 +35,9 @@ export {
 export { getPositions, getScaleTypes, TruncateLabelsOption } from './editor';
 export { xyVisTypes } from './vis_types';
 
+// Export common types
+export * from '../common';
+
 export function plugin() {
   return new Plugin();
 }

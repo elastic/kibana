@@ -21,7 +21,7 @@ import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
 
 import { Labels } from '../../charts/public';
-import { ChartType } from '../../vis_type_xy/common/types';
+import { ChartType } from '../../vis_type_xy/public';
 import {
   CategoryAxis,
   Dimensions,

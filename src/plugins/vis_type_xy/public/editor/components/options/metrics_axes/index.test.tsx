@@ -24,7 +24,7 @@ import { Position } from '@elastic/charts';
 
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
 
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
 import { MetricsAxisOptions } from './index';
 import { ValidationVisOptionsProps } from '../../common';

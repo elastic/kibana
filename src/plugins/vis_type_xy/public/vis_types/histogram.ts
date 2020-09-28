@@ -37,7 +37,7 @@ import {
 } from '../types';
 import { VisComponent } from '../vis_component';
 import { toExpression } from '../to_expression';
-import { ChartType } from '../../common/types';
+import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';

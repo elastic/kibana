@@ -27,7 +27,7 @@ import { BasicOptions, SwitchOption } from '../../../../../../charts/public';
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
-import { ChartType } from '../../../../../common/types';
+import { ChartType } from '../../../../../common';
 import { ValidationVisOptionsProps } from '../../common';
 import { ElasticChartsOptions } from './elastic_charts_options';
 

@@ -21,7 +21,7 @@ import { Fit, Position } from '@elastic/charts';
 import { ColorSchemas, Style, Labels } from '../../../charts/public';
 import { SchemaConfig } from '../../../visualizations/public';
 
-import { ChartType } from '../../common/types';
+import { ChartType } from '../../common';
 import {
   ChartMode,
   AxisMode,
