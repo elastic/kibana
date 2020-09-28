@@ -144,11 +144,11 @@ export class BookEmbeddableFactoryDefinition
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await (await this.getStartServices()).getAttributeService<
+      this.attributeService = (await this.getStartServices()).getAttributeService<
         BookSavedObjectAttributes
       >(this.type, {
         saveMethod: this.saveMethod.bind(this),
-        unwrapMethod: this.unwrapMethod.bind(this),
+        unwrapMethod: await this.unwrapMethod.bind(this),
       });
     }
     return this.attributeService!;

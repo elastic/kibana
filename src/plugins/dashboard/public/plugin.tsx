@@ -491,8 +491,6 @@ export class DashboardPlugin
         new AttributeService(
           type,
           showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
           embeddable.getEmbeddableFactory,

@@ -30,18 +30,8 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
-import {
-  SavedObjectsClientContract,
-  I18nStart,
-  NotificationsStart,
-  OverlayStart,
-} from '../../../../core/public';
-import {
-  SavedObjectSaveModal,
-  OnSaveProps,
-  SaveResult,
-  checkForDuplicateTitle,
-} from '../../../saved_objects/public';
+import { I18nStart, NotificationsStart } from '../../../../core/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -57,7 +47,8 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     attributes: A,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  unwrapMethod: (savedObjectId: string) => A;
+  unwrapMethod?: (savedObjectId: string) => A;
+  checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
 }
 
 export class AttributeService<
@@ -75,8 +66,6 @@ export class AttributeService<
       saveModal: React.ReactElement,
       I18nContext: I18nStart['Context']
     ) => void,
-    private savedObjectsClient: SavedObjectsClientContract,
-    private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
@@ -92,7 +81,7 @@ export class AttributeService<
   }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
-    if (this.inputIsRefType(input)) {
+    if (this.inputIsRefType(input) && this.options && this.options.unwrapMethod) {
       return this.options.unwrapMethod(input.savedObjectId);
     }
     return input[ATTRIBUTE_SERVICE_KEY];
@@ -165,21 +154,7 @@ export class AttributeService<
     }
     return new Promise<RefType>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
-        await checkForDuplicateTitle(
-          {
-            title: props.newTitle,
-            copyOnSave: false,
-            lastSavedTitle: '',
-            getEsType: () => this.type,
-            getDisplayName: this.embeddableFactory?.getDisplayName || (() => this.type),
-          },
-          props.isTitleDuplicateConfirmed,
-          props.onTitleDuplicate,
-          {
-            savedObjectsClient: this.savedObjectsClient,
-            overlays: this.overlays,
-          }
-        );
+        await this.options.checkForDuplicateTitle(props);
         try {
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
