@@ -182,18 +182,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                   <EuiSpacer size="m" />
 
                   {solutions.length ? (
-                    <EuiFlexGroup>
+                    <EuiFlexGroup className="kbnOverviewMore__content">
                       {solutions.map(({ id, title, description, icon, path }) => (
                         <EuiFlexItem key={id}>
                           <EuiCard
+                            className="kbnOverviewSolution"
                             description={description ? description : ''}
                             icon={
                               <EuiToken
+                                className="kbnOverviewSolution__icon"
+                                fill="light"
                                 iconType={icon}
                                 shape="circle"
-                                fill="light"
                                 size="l"
-                                className="homSolutionPanel__icon"
                               />
                             }
                             image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}

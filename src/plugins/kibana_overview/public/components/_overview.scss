@@ -87,6 +87,14 @@ $pageWidth: 1200px;
   }
 }
 
+.kbnOverviewSolution__icon {
+  background-color: $euiColorEmptyShade !important;
+  box-shadow: none !important;
+  height: $euiSizeL * 2;
+  padding: $euiSizeM;
+  width: $euiSizeL * 2;
+}
+
 .kbnOverviewFooter {
   // Prevent children from rendering as flex items
   .euiFlexItem {
