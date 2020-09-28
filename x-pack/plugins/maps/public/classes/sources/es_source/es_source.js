@@ -11,14 +11,14 @@ import {
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../../common/elasticsearch_geo_utils';
+import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 
 import { copyPersistentState } from '../../../reducers/util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
+import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
 
 export class AbstractESSource extends AbstractVectorSource {

@@ -6,12 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -46,6 +45,7 @@ export interface NetworkTlsArgs {
 
 interface UseNetworkTls {
   flowTarget: FlowTargetSourceDest;
+  indexNames: string[];
   ip: string;
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
@@ -60,24 +60,23 @@ export const useNetworkTls = ({
   filterQuery,
   flowTarget,
   id = ID,
+  indexNames,
   ip,
   skip,
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTlsSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type, flowTarget)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.tls,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -178,7 +177,7 @@ export const useNetworkTls = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -193,7 +192,7 @@ export const useNetworkTls = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);
