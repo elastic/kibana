@@ -24,13 +24,19 @@ import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
-import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
+import {
+  SignalRuleAlertTypeDefinition,
+  RuleAlertAttributes,
+  EqlSignalSearchResponse,
+  BaseSignalHit,
+} from './types';
 import {
   getGapBetweenRuns,
   getListsClient,
   getExceptions,
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
+  wrapSignal,
   createErrorsFromShard,
   createSearchAfterReturnType,
   mergeReturns,
@@ -50,6 +56,9 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
+import { bulkInsertSignals } from './single_bulk_create';
+import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
@@ -265,8 +274,6 @@ export const signalRulesAlertType = ({
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
           ]);
-        } else if (isEqlRule(type)) {
-          throw new Error('EQL Rules are under development, execution is not yet implemented');
         } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
@@ -378,7 +385,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
             threatIndex,
           });
-        } else {
+        } else if (type === 'query' || type === 'saved_query') {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -417,6 +424,51 @@ export const signalRulesAlertType = ({
             throttle,
             buildRuleMessage,
           });
+        } else if (isEqlRule(type)) {
+          if (query === undefined) {
+            throw new Error('eql query rule must have a query defined');
+          }
+          const inputIndex = await getInputIndex(services, version, index);
+          const request = buildEqlSearchRequest(
+            query,
+            inputIndex,
+            params.from,
+            params.to,
+            searchAfterSize,
+            params.timestampOverride,
+            exceptionItems ?? [],
+            params.eventCategoryOverride
+          );
+          const response: EqlSignalSearchResponse = await services.callCluster(
+            'transport.request',
+            request
+          );
+          let newSignals: BaseSignalHit[] | undefined;
+          if (response.hits.sequences !== undefined) {
+            newSignals = response.hits.sequences.reduce(
+              (acc: BaseSignalHit[], sequence) =>
+                acc.concat(buildSignalGroupFromSequence(sequence, savedObject, outputIndex)),
+              []
+            );
+          } else if (response.hits.events !== undefined) {
+            newSignals = response.hits.events.map((event) =>
+              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
+            );
+          } else {
+            throw new Error(
+              'eql query response should have either `sequences` or `events` but had neither'
+            );
+          }
+          // TODO: replace with code that filters out recursive rule signals while allowing sequences and their building blocks
+          // const filteredSignals = filterDuplicateSignals(alertId, newSignals);
+          if (newSignals.length > 0) {
+            const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
+            result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
+            result.createdSignalsCount += insertResult.createdItemsCount;
+          }
+          result.success = true;
+        } else {
+          throw new Error(`unknown rule type ${type}`);
         }
 
         if (result.success) {
