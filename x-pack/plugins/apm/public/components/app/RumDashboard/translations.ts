@@ -37,6 +37,18 @@ export const I18LABELS = {
       defaultMessage: 'Page load distribution',
     }
   ),
+  jsErrors: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
+    {
+      defaultMessage: 'JavaScript errors',
+    }
+  ),
+  highTrafficPages: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages',
+    {
+      defaultMessage: 'High traffic pages',
+    }
+  ),
   resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -105,6 +117,21 @@ export const I18LABELS = {
   noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
     defaultMessage: 'No results available',
   }),
+  totalErrors: i18n.translate('xpack.apm.rum.jsErrors.totalErrors', {
+    defaultMessage: 'Total errors',
+  }),
+  errorRate: i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+    defaultMessage: 'Error rate',
+  }),
+  errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
+    defaultMessage: 'Error message',
+  }),
+  impactedPageLoads: i18n.translate(
+    'xpack.apm.rum.jsErrors.impactedPageLoads',
+    {
+      defaultMessage: 'Impacted page loads',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
