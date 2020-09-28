@@ -64,10 +64,9 @@ export const caseSavedObjectType: SavedObjectsType = {
           fields: {
             properties: {
               key: {
-                type: 'keyword',
+                type: 'text',
               },
               value: {
-                // Are we sure that the value will be only a string or string[]. What if they are objects?
                 type: 'text',
               },
             },
