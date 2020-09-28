@@ -55,37 +55,33 @@ uiRoutes.when('/apm/instances', {
       $scope.$watch(
         () => this.data,
         (data) => {
-          this.renderReact(data);
+          const { pagination, sorting, onTableChange } = this;
+
+          const component = (
+            <SetupModeRenderer
+              scope={this.scope}
+              injector={this.injector}
+              productName={APM_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <ApmServerInstances
+                    setupMode={setupMode}
+                    apms={{
+                      pagination,
+                      sorting,
+                      onTableChange,
+                      data,
+                    }}
+                  />
+                  {bottomBarComponent}
+                </Fragment>
+              )}
+            />
+          );
+          this.renderReact(component);
         }
       );
-    }
-
-    renderReact(data) {
-      const { pagination, sorting, onTableChange } = this;
-
-      const component = (
-        <SetupModeRenderer
-          scope={this.scope}
-          injector={this.injector}
-          productName={APM_SYSTEM_ID}
-          render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-            <Fragment>
-              {flyoutComponent}
-              <ApmServerInstances
-                setupMode={setupMode}
-                apms={{
-                  pagination,
-                  sorting,
-                  onTableChange,
-                  data,
-                }}
-              />
-              {bottomBarComponent}
-            </Fragment>
-          )}
-        />
-      );
-      super.renderReact(component);
     }
   },
 });

@@ -47,14 +47,11 @@ uiRoutes.when('/apm', {
       $scope.$watch(
         () => this.data,
         (data) => {
-          this.renderReact(data);
+          this.renderReact(
+            <ApmOverview {...data} onBrush={this.onBrush} zoomInfo={this.zoomInfo} />
+          );
         }
       );
-    }
-
-    renderReact(data) {
-      const component = <ApmOverview {...data} onBrush={this.onBrush} zoomInfo={this.zoomInfo} />;
-      super.renderReact(component);
     }
   },
 });

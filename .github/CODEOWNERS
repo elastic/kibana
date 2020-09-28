@@ -246,6 +246,8 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
 /x-pack/plugins/ingest_pipelines/  @elastic/es-ui
+/packages/kbn-ace/ @elastic/es-ui
+/packages/kbn-monaco/ @elastic/es-ui
 
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem
