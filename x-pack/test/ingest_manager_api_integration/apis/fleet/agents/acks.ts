@@ -13,6 +13,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
@@ -204,6 +205,51 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.message).to.eql(
         'ACTION not allowed for acknowledgment only ACTION_RESULT'
       );
+    });
+
+    it('ack upgrade should update fleet-agent SO', async () => {
+      const { body: actionRes } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          action: {
+            type: 'UPGRADE',
+            ack_data: { version: '8.0.0', source_uri: 'http://localhost:8000' },
+          },
+        })
+        .expect(200);
+      const actionId = actionRes.item.id;
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'ACKNOWLEDGED',
+              timestamp: '2020-09-21T13:25:29.02838-04:00',
+              action_id: actionId,
+              agent_id: 'agent1',
+              message:
+                "Action '70d97288-ffd9-4549-8c49-2423a844f67f' of type 'UPGRADE' acknowledged.",
+            },
+          ],
+        })
+        .expect(200);
+
+      const res = await kibanaServer.savedObjects.get({
+        type: 'fleet-agents',
+        id: 'agent1',
+      });
+      expect(res.attributes.upgraded_at).to.be.ok();
     });
   });
 }
