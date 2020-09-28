@@ -5,6 +5,7 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
 interface EmptyStepStateProps {
@@ -14,15 +15,35 @@ interface EmptyStepStateProps {
 export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
   <EuiEmptyPrompt
     iconType="cross"
-    title={<h2>There are no steps for this journey</h2>}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.uptime.synthetics.emptyJourney.title"
+          defaultMessage="There are no steps for this journey"
+        />
+      </h2>
+    }
     body={
       <>
-        <p>There are no steps associated with the run of this journey.</p>
         <p>
-          The journey's check group is
-          <code>{checkGroup}</code>.
+          <FormattedMessage
+            id="xpack.uptime.synthetics.emptyJourney.message.heading"
+            defaultMessage="There are no steps associated with the run of this journey."
+          />
         </p>
-        <p>There is no further information to display.</p>
+        <p>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
+            defaultMessage="The journey's check group is {codeBlock}."
+            values={{ codeBlock: <code>{checkGroup}</code> }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.emptyJourney.message.footer"
+            defaultMessage="There is no further information to display."
+          />
+        </p>
       </>
     }
   />
