@@ -90,12 +90,15 @@ export const myCollector = makeUsageCollector<Usage>({
       type: { type: 'boolean' },
     },
     my_array: {
-      total: {
-        type: 'number',
+      type: 'array',
+      items: {
+        total: {
+          type: 'number',
+        },
+        type: { type: 'boolean' },
       },
-      type: { type: 'boolean' },
     },
-    my_str_array: { type: 'keyword' },
+    my_str_array: { type: 'array', items: { type: 'keyword' } },
     my_index_signature_prop: {
       count: { type: 'number' },
       avg: { type: 'number' },
