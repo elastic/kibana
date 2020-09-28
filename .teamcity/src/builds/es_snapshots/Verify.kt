@@ -16,12 +16,12 @@ val cloneForVerify = { build: BuildType ->
   build.copyTo(newBuild)
   newBuild.id = AbsoluteId(build.id?.toString() + "_ES_Snapshots")
   newBuild.params {
-    val buildId = ESSnapshotBuild.id?.value ?: ""
-    param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
+    param("env.ES_SNAPSHOT_MANIFEST", "${ESSnapshotBuild.depParamRefs["env.ES_SNAPSHOT_MANIFEST"]}")
   }
   newBuild.dependencies {
     dependency(ESSnapshotBuild) {
       snapshot {}
+      // This is just here to allow us to select a build when manually triggering a build using the UI
       artifacts {
         artifactRules = "manifest.json"
       }
