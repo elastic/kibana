@@ -26,6 +26,7 @@ import {
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import { SerializedVis, Vis, VisParams } from './vis';
+import { Schemas } from './legacy/build_pipeline';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -81,5 +82,6 @@ export interface VisToExpressionAstParams {
 
 export type VisToExpressionAst = (
   vis: Vis,
-  params: VisToExpressionAstParams
+  params: VisToExpressionAstParams,
+  schemas: Schemas
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

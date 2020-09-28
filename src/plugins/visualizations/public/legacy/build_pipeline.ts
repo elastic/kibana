@@ -356,8 +356,13 @@ export const buildPipeline = async (vis: Vis, params: PipelineParams) => {
   }
   pipeline += '| ';
 
+  const schemas = getSchemas(vis, {
+    timeRange: params.timeRange,
+    timefilter: params.timefilter,
+  });
+
   if (vis.type.toExpressionAst) {
-    const visAst = await vis.type.toExpressionAst(vis, params);
+    const visAst = await vis.type.toExpressionAst(vis, params, schemas);
     pipeline += formatExpression(visAst);
   } else {
     // request handler
@@ -369,18 +374,12 @@ export const buildPipeline = async (vis: Vis, params: PipelineParams) => {
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
-    const schemas = getSchemas(vis, {
-      timeRange: params.timeRange,
-      timefilter: params.timefilter,
-    });
     if (buildPipelineVisFunction[vis.type.name]) {
       pipeline += buildPipelineVisFunction[vis.type.name](
         { title, ...vis.params },
         schemas,
         uiState
       );
-    } else if (vis.type.toExpression) {
-      pipeline += await vis.type.toExpression(vis, params, schemas);
     } else {
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;

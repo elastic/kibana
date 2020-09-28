@@ -28,12 +28,13 @@ import { getPositions } from '../../vis_type_xy/public';
 import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { toExpression } from './to_expression';
 import { PieOptions } from './editor';
+import { Dimensions } from './vislib/helpers/hierarchical/build_hierarchical_data';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
   addLegend: boolean;
+  dimensions: Dimensions;
   isDonut: boolean;
   labels: {
     show: boolean;
@@ -50,7 +51,6 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
-  toExpression,
   visualization: createVislibVisController(deps),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];

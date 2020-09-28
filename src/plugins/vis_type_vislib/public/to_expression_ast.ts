@@ -20,28 +20,15 @@
 import moment from 'moment';
 import { get } from 'lodash';
 
-import { SchemaConfig, ExpressionFn } from '../../visualizations/public';
+import { Vis, VisToExpressionAst } from '../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
 
-export type XSchemaConfig = Omit<SchemaConfig, 'params'> & {
-  params: {
-    date?: boolean;
-    interval?: number;
-    format?: any;
-    bounds?: any;
-  };
-};
+import { VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
+import { VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
 
-export interface Dimensions {
-  x: XSchemaConfig | null;
-  y: SchemaConfig[];
-  z?: SchemaConfig[];
-  width?: SchemaConfig[];
-  series?: SchemaConfig[];
-  splitRow?: SchemaConfig[];
-  splitColumn?: SchemaConfig[];
-}
-
-export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<string> => {
+export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) => {
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -57,11 +44,13 @@ export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === 'date_histogram') {
-      dimensions.x.params.date = true;
+      (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
-      dimensions.x.params.interval = moment.duration(esValue, esUnit).asMilliseconds();
-      dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
-      dimensions.x.params.bounds = xAgg.buckets.getBounds();
+      (dimensions.x.params as DateHistogramParams).interval = moment
+        .duration(esValue, esUnit)
+        .asMilliseconds();
+      (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
+      (dimensions.x.params as DateHistogramParams).bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
@@ -69,7 +58,7 @@ export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<
         abortSignal: params.abortSignal,
       });
       intervalParam.write(xAgg, output);
-      dimensions.x.params.interval = output.params.interval;
+      (dimensions.x.params as HistogramParams).interval = output.params.interval;
     }
   }
 
@@ -94,9 +83,32 @@ export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<
   });
 
   visConfig.dimensions = dimensions;
+  const type = vis.type.name === 'pie' ? { type: vis.type.name } : {};
 
-  const configStr = `visConfig='${JSON.stringify(visConfig)
-    .replace(/\\/g, `\\\\`)
-    .replace(/'/g, `\\'`)}' `;
-  return `vislib type='${vis.type.name}' ${configStr}`;
+  const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+  const visTypeXy = buildExpressionFunction<
+    VisTypeVislibExpressionFunctionDefinition | VisTypeVislibPieExpressionFunctionDefinition
+  >('vislib', {
+    ...type,
+    visConfig: configStr,
+  });
+
+  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+
+  return ast.toAst();
 };
+
+/**
+ * Get esaggs expressions function
+ * @param vis
+ */
+function getEsaggsFn(vis: Vis) {
+  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
+  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+    index: vis.data.indexPattern!.id!,
+    metricsAtAllLevels: vis.isHierarchical(),
+    partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    includeFormatHints: false,
+  });
+}

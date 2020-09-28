@@ -18,9 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
+import { BasicVislibParams } from './types';
 
 const name = 'vislib';
 
@@ -29,19 +32,19 @@ interface Arguments {
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
 interface RenderValue {
   visType: string;
-  visConfig: VisParams;
+  visConfig: BasicVislibParams;
 }
 
-export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
+export type VisTypeVislibExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefinition => ({
   name,
   type: 'render',
   inputTypes: ['kibana_datatable'],
@@ -57,12 +60,12 @@ export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
+      help: 'vislib vis config',
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
+    const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
+    const convertedData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
@@ -70,7 +73,7 @@ export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
       value: {
         visData: convertedData,
         visType: args.type,
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         },

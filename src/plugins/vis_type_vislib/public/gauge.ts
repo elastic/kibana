@@ -25,7 +25,7 @@ import { AggGroupNames } from '../../data/public';
 
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
-import { toExpression } from './to_expression';
+import { toExpressionAst } from './to_expression_ast';
 import { Alignment, GaugeType } from './types';
 import { getGaugeCollections, GaugeOptions } from './editor';
 
@@ -65,7 +65,7 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
     defaultMessage:
       "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
   }),
-  toExpression,
+  toExpressionAst,
   visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {

@@ -20,7 +20,6 @@
 import _ from 'lodash';
 
 import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
-import { ExpressionFn } from './types_service';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 
@@ -45,7 +44,6 @@ export interface BaseVisTypeOptions {
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
-  toExpression?: ExpressionFn;
 }
 
 export class BaseVisType {
@@ -71,7 +69,6 @@ export class BaseVisType {
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
-  toExpression?: ExpressionFn;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -109,7 +106,6 @@ export class BaseVisType {
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
-    this.toExpression = opts.toExpression;
   }
 
   public get schemas() {

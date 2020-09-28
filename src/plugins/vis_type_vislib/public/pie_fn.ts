@@ -18,26 +18,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
+import { PieVisParams } from './pie';
 
 interface Arguments {
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
 interface RenderValue {
-  visConfig: VisParams;
+  visType: 'pie';
+  visConfig: PieVisParams;
 }
 
-export const createPieVisFn = (): ExpressionFunctionDefinition<
+export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'kibana_pie',
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({
   name: 'kibana_pie',
   type: 'render',
   inputTypes: ['kibana_datatable'],
@@ -48,11 +52,11 @@ export const createPieVisFn = (): ExpressionFunctionDefinition<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
+      help: 'vislib pie vis config',
     },
   },
   fn(input, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig) as PieVisParams;
     const convertedData = vislibSlicesResponseHandler(input, visConfig.dimensions);
 
     return {

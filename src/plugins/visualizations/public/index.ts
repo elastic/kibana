@@ -37,7 +37,7 @@ export { getSchemas as getVisSchemas } from './legacy/build_pipeline';
 
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
-export { VisTypeAlias, VisType, ExpressionFn } from './vis_types';
+export { VisTypeAlias, VisType } from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;

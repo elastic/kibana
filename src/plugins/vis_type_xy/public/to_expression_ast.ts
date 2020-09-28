@@ -20,10 +20,14 @@
 import moment from 'moment';
 import { get } from 'lodash';
 
-import { ExpressionFn } from '../../visualizations/public';
-import { DateHistogramParams, Dimensions, HistogramParams } from './types';
+import { Vis, VisToExpressionAst } from '../../visualizations/public';
+import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
+import { VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { ChartType } from '../common';
+import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 
-export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<string> => {
+export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) => {
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -58,7 +62,7 @@ export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<
     }
   }
 
-  const visConfig = vis.params;
+  const visConfig = vis.params as VisParams;
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
@@ -77,8 +81,28 @@ export const toExpression: ExpressionFn = async (vis, params, schemas): Promise<
 
   visConfig.dimensions = dimensions;
 
-  const configStr = `visConfig='${JSON.stringify(visConfig)
-    .replace(/\\/g, `\\\\`)
-    .replace(/'/g, `\\'`)}' `;
-  return `xy type='${vis.type.name}' ${configStr}`;
+  const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+  const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>('xy', {
+    type: vis.type.name as ChartType,
+    visConfig: configStr,
+  });
+
+  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+
+  return ast.toAst();
 };
+
+/**
+ * Get esaggs expressions function
+ * @param vis
+ */
+function getEsaggsFn(vis: Vis) {
+  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
+  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+    index: vis.data.indexPattern!.id!,
+    metricsAtAllLevels: vis.isHierarchical(),
+    partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    includeFormatHints: false,
+  });
+}

@@ -20,32 +20,29 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+
 import { ChartType } from '../common';
+import { VisParams } from './types';
 
 const name = 'xy';
-
-export type Context = KibanaDatatable;
 
 interface Arguments {
   type: ChartType;
   visConfig: string;
 }
-
-type VisParams = Required<Arguments>;
-
 interface RenderValue {
   visType: string;
   visConfig: VisParams;
 }
 
-type Return = Render<RenderValue>;
-
-export const createVisTypeXyVisFn = (): ExpressionFunctionDefinition<
+export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
-  Context,
+  KibanaDatatable,
   Arguments,
-  Return
-> => ({
+  Render<RenderValue>
+>;
+
+export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
   name,
   type: 'render',
   context: {
@@ -67,11 +64,7 @@ export const createVisTypeXyVisFn = (): ExpressionFunctionDefinition<
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-    // const convertedData = responseHandler(context, visConfigParams.dimensions);
-    // console.log('visConfigParams', visConfigParams);
-    // console.log('context', context);
-    // console.log('data', convertedData);
+    const visConfig = JSON.parse(args.visConfig) as VisParams;
 
     return {
       type: 'render',
@@ -80,7 +73,7 @@ export const createVisTypeXyVisFn = (): ExpressionFunctionDefinition<
         context,
         visData: context,
         visType: args.type,
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         },

@@ -36,7 +36,7 @@ import {
   InterpolationMode,
 } from '../types';
 import { VisComponent } from '../vis_component';
-import { toExpression } from '../to_expression';
+import { toExpressionAst } from '../to_expression_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
@@ -51,7 +51,7 @@ export const horizontalBarVisTypeDefinition: XyVisTypeDefinition = {
   description: i18n.translate('visTypeXy.horizontalBar.horizontalBarDescription', {
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
-  toExpression,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
   },

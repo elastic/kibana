@@ -31,6 +31,8 @@ export {
   Dimensions,
   ScaleType,
   AxisType,
+  HistogramParams,
+  DateHistogramParams,
 } from './types';
 export { getPositions, getScaleTypes, TruncateLabelsOption } from './editor';
 export { xyVisTypes } from './vis_types';

@@ -37,7 +37,7 @@ import {
   XyVisTypeDefinition,
 } from '../types';
 import { VisComponent } from '../vis_component';
-import { toExpression } from '../to_expression';
+import { toExpressionAst } from '../to_expression_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
@@ -49,7 +49,7 @@ export const lineVisTypeDefinition: XyVisTypeDefinition = {
   description: i18n.translate('visTypeXy.line.lineDescription', {
     defaultMessage: 'Emphasize trends',
   }),
-  toExpression,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
   },
