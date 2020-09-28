@@ -870,12 +870,6 @@ describe('CredentialsLogic', () => {
           ...values,
           shouldShowCredentialsForm: true,
         });
-
-        CredentialsLogic.actions.showCredentialsForm();
-        expect(CredentialsLogic.values).toEqual({
-          ...values,
-          shouldShowCredentialsForm: false,
-        });
       });
     });
 

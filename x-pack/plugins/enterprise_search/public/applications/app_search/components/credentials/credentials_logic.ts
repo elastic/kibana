@@ -198,7 +198,7 @@ export const CredentialsLogic = kea<
     shouldShowCredentialsForm: [
       false,
       {
-        showCredentialsForm: (shouldShowCredentialsForm) => !shouldShowCredentialsForm,
+        showCredentialsForm: (_) => true,
         hideCredentialsForm: () => false,
         onApiTokenCreateSuccess: () => false,
         onApiTokenUpdateSuccess: () => false,
