@@ -141,10 +141,9 @@ describe('Test pipeline', () => {
       const { actions, find, exists } = testBed;
 
       const error = {
-        status: 400,
-        error: 'Bad Request',
-        message:
-          '"[parse_exception] [_source] required property is missing, with { property_name="_source" }"',
+        status: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
       };
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, { body: error });
@@ -153,12 +152,89 @@ describe('Test pipeline', () => {
       actions.clickAddDocumentsButton();
 
       // Add invalid sample documents array and run the pipeline
-      actions.addDocumentsJson(JSON.stringify([{}]));
+      actions.addDocumentsJson(
+        JSON.stringify([
+          {
+            _index: 'test',
+            _id: '1',
+            _version: 1,
+            _seq_no: 0,
+            _primary_term: 1,
+            _source: {
+              name: 'John Doe',
+            },
+          },
+        ])
+      );
       await actions.clickRunPipelineButton();
 
       // Verify error rendered
       expect(exists('pipelineExecutionError')).toBe(true);
       expect(find('pipelineExecutionError').text()).toContain(error.message);
+    });
+
+    describe('Add indexed documents', () => {
+      test('should successfully add an indexed document', async () => {
+        const { actions, form, exists } = testBed;
+
+        const { _index: index, _id: documentId } = DOCUMENTS[0];
+
+        httpRequestsMockHelpers.setFetchDocumentsResponse(DOCUMENTS[0]);
+
+        // Open flyout
+        actions.clickAddDocumentsButton();
+
+        // Open documents accordion, click run without required fields, and verify error messages
+        await actions.toggleDocumentsAccordion();
+        await actions.clickAddDocumentButton();
+        expect(form.getErrorsMessages()).toEqual([
+          'An index name is required.',
+          'A document ID is required.',
+        ]);
+
+        // Add required fields, and click run
+        form.setInputValue('indexField.input', index);
+        form.setInputValue('idField.input', documentId);
+        await actions.clickAddDocumentButton();
+
+        // Verify request
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(latestRequest.status).toEqual(200);
+        expect(latestRequest.url).toEqual(`/api/ingest_pipelines/documents/${index}/${documentId}`);
+        // Verify success callout
+        expect(exists('addDocumentSuccess')).toBe(true);
+      });
+
+      test('should surface API errors from the request', async () => {
+        const { actions, form, exists, find } = testBed;
+
+        const nonExistentDoc = {
+          index: 'foo',
+          id: '1',
+        };
+
+        const error = {
+          status: 404,
+          error: 'Not found',
+          message: '[index_not_found_exception] no such index',
+        };
+
+        httpRequestsMockHelpers.setFetchDocumentsResponse(undefined, { body: error });
+
+        // Open flyout
+        actions.clickAddDocumentsButton();
+
+        // Open documents accordion, add required fields, and click run
+        await actions.toggleDocumentsAccordion();
+        form.setInputValue('indexField.input', nonExistentDoc.index);
+        form.setInputValue('idField.input', nonExistentDoc.id);
+        await actions.clickAddDocumentButton();
+
+        // Verify error rendered
+        expect(exists('addDocumentError')).toBe(true);
+        expect(exists('addDocumentSuccess')).toBe(false);
+        expect(find('addDocumentError').text()).toContain(error.message);
+      });
     });
   });
 

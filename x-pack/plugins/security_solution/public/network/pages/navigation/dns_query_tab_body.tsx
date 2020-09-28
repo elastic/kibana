@@ -45,6 +45,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
@@ -64,6 +65,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   ] = useNetworkDns({
     endDate,
     filterQuery,
+    indexNames,
     skip,
     startDate,
     type,
@@ -88,6 +90,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         endDate={endDate}
         filterQuery={filterQuery}
         id={HISTOGRAM_ID}
+        indexNames={indexNames}
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}

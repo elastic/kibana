@@ -12,6 +12,7 @@ import {
 } from './trusted_apps_list_page_state';
 import {
   Immutable,
+  MacosLinuxConditionEntry,
   NewTrustedApp,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
@@ -49,6 +50,12 @@ export const isWindowsTrustedAppCondition = (condition: {
   field: string;
 }): condition is WindowsConditionEntry => {
   return condition.field === 'process.code_signature' || true;
+};
+
+export const isMacosLinuxTrustedAppCondition = (condition: {
+  field: string;
+}): condition is MacosLinuxConditionEntry => {
+  return condition.field !== 'process.code_signature' || true;
 };
 
 export const isTrustedAppSupportedOs = (os: string): os is NewTrustedApp['os'] =>

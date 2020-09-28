@@ -315,6 +315,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return ['anomaly_threshold', 'machine_learning_job_id'];
     case 'threshold':
       return ['threshold', ...queryRuleParams];
+    case 'threat_match':
     case 'query':
     case 'saved_query':
     case 'eql':

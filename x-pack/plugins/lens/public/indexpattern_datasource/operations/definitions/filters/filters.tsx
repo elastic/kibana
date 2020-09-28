@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../../state_helpers';
 import { OperationDefinition } from '../index';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
 import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
@@ -31,8 +31,8 @@ export interface FilterValue {
   label: string;
 }
 
-const customQueryLabel = i18n.translate('xpack.lens.indexPattern.customQuery', {
-  defaultMessage: 'Custom query',
+const filtersLabel = i18n.translate('xpack.lens.indexPattern.filters', {
+  defaultMessage: 'Filters',
 });
 
 export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
@@ -61,31 +61,22 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
   }
 };
 
-export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: 'filters';
   params: {
     filters: Filter[];
   };
 }
 
-export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
+export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
   type: 'filters',
-  displayName: customQueryLabel,
+  displayName: filtersLabel,
   priority: 3, // Higher than any metric
-  getPossibleOperationForField: ({ type }) => {
-    if (type === 'document') {
-      return {
-        dataType: 'string',
-        isBucketed: true,
-        scale: 'ordinal',
-      };
-    }
-  },
-  isTransferable: () => false,
 
-  onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
+  input: 'none',
+  isTransferable: () => true,
 
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ suggestedPriority, previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -102,14 +93,21 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     }
 
     return {
-      label: customQueryLabel,
+      label: filtersLabel,
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
       suggestedPriority,
       isBucketed: true,
-      sourceField: field.name,
       params,
+    };
+  },
+
+  getPossibleOperation() {
+    return {
+      dataType: 'string',
+      isBucketed: true,
+      scale: 'ordinal',
     };
   },
 
@@ -223,9 +221,10 @@ export const FilterList = ({
                 defaultMessage: 'This query is invalid',
               })}
               onRemoveClick={() => onRemoveFilter(filter.id)}
-              removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeCustomQuery', {
-                defaultMessage: 'Remove custom query',
+              removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
+                defaultMessage: 'Remove a filter',
               })}
+              isNotRemovable={localFilters.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
@@ -259,8 +258,8 @@ export const FilterList = ({
           onAddFilter();
           setIsOpenByCreation(true);
         }}
-        label={i18n.translate('xpack.lens.indexPattern.filters.addCustomQuery', {
-          defaultMessage: 'Add a custom query',
+        label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
+          defaultMessage: 'Add a filter',
         })}
       />
     </>

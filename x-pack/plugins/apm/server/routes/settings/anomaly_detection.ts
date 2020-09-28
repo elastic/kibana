@@ -15,6 +15,7 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { notifyFeatureUsage } from '../../feature';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute(() => ({
@@ -62,6 +63,10 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
     }
 
     await createAnomalyDetectionJobs(setup, environments, context.logger);
+    notifyFeatureUsage({
+      licensingPlugin: context.licensing,
+      featureName: 'ml',
+    });
   },
 }));
 
