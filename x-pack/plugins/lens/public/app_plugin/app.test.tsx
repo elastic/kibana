@@ -132,9 +132,12 @@ describe('Lens App', () => {
   let defaultSavedObjectId: string;
 
   const navMenuItems = {
-    expectedSaveButton: { emphasize: true, testId: 'lnsApp_saveButton' },
-    expectedSaveAsButton: { emphasize: false, testId: 'lnsApp_saveButton' },
-    expectedSaveAndReturnButton: { emphasize: true, testId: 'lnsApp_saveAndReturnButton' },
+    expectedSaveButton: { testId: 'lnsApp_saveButton' },
+    expectedSaveAsButton: { testId: 'lnsApp_saveButton' },
+    expectedSaveAndReturnButton: {
+      iconType: 'checkInCircleFilled',
+      testId: 'lnsApp_saveAndReturnButton',
+    },
   };
 
   function makeAttributeService(): LensAttributeService {
@@ -614,9 +617,6 @@ describe('Lens App', () => {
           expect(topNavMenuConfig).not.toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
-          expect(topNavMenuConfig).not.toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveAsButton)
-          );
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveButton)
           );
@@ -649,9 +649,6 @@ describe('Lens App', () => {
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAsButton)
           );
-          expect(topNavMenuConfig).not.toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveButton)
-          );
         });
       });
 
@@ -671,9 +668,6 @@ describe('Lens App', () => {
           );
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAsButton)
-          );
-          expect(topNavMenuConfig).not.toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveButton)
           );
         });
       });
