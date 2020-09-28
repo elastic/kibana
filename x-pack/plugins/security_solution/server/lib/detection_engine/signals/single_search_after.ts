@@ -8,6 +8,7 @@ import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { makeFloatString } from './utils';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -23,6 +24,7 @@ interface SingleSearchAfterParams {
   pageSize: number;
   filter: unknown;
   timestampOverride: TimestampOverrideOrUndefined;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 // utilize search_after for paging results into bulk.
@@ -37,6 +39,7 @@ export const singleSearchAfter = async ({
   logger,
   pageSize,
   timestampOverride,
+  buildRuleMessage,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -61,7 +64,7 @@ export const singleSearchAfter = async ({
     const end = performance.now();
     return { searchResult: nextSearchAfterResult, searchDuration: makeFloatString(end - start) };
   } catch (exc) {
-    logger.error(`[-] nextSearchAfter threw an error ${exc}`);
+    logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
     throw exc;
   }
 };

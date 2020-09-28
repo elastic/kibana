@@ -11,7 +11,14 @@ import {
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { buildRuleMessageFactory } from './rule_messages';
 
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -32,6 +39,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId);
   });
@@ -48,6 +56,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
       timestampOverride: undefined,
+      buildRuleMessage,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId);
   });
@@ -67,6 +76,7 @@ describe('singleSearchAfter', () => {
         pageSize: 1,
         filter: undefined,
         timestampOverride: undefined,
+        buildRuleMessage,
       })
     ).rejects.toThrow('Fake Error');
   });
