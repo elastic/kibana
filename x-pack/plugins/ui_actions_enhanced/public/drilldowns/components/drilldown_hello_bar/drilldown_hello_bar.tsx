@@ -31,7 +31,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
 }) => {
   return (
     <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
-      <div style={{ marginBottom: -12 }}>
+      <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiIcon type="help" />
