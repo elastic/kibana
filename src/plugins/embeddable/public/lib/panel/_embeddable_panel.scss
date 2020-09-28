@@ -63,7 +63,7 @@
 
   .embPanel__placeholderTitleText {
     @include euiTextTruncate;
-    font-weight: lighter;
+    font-weight: $euiFontWeightRegular;
     color: $euiColorMediumShade;
   }
 }
