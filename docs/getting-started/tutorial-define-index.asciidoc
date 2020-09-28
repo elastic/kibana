@@ -45,6 +45,6 @@ contains the time series data.
 . From the *Time field* dropdown, select *@timestamp, then click *Create index pattern*.
 +
 [role="screenshot"]
-image::images/tutorial_index_patterns.png[All tutorial index patterns]
+image::images/tutorial_index_patterns.png[Image showing how to create an index pattern]
 
 
