@@ -79,7 +79,7 @@ export interface ISearchStart {
    */
   search: ISearchGeneric;
 
-  showError: (e: any) => void;
+  showError: (e: Error) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

@@ -1086,7 +1086,7 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
-    addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
+    addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // (undocumented)
@@ -1158,8 +1158,6 @@ export class IndexPattern implements IIndexPattern {
     intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
-    // (undocumented)
-    isTimeBasedWildcard(): boolean;
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
@@ -1469,7 +1467,7 @@ export interface ISearchStart {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // (undocumented)
-    showError: (e: any) => void;
+    showError: (e: Error) => void;
 }
 
 // @public
@@ -1642,7 +1640,7 @@ export interface OptionedValueProp {
 // @public (undocumented)
 export class PainlessError extends KbnError {
     // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
-    constructor(err: EsError, request: IEsSearchRequest);
+    constructor(err: EsError, request: IKibanaSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2040,18 +2038,12 @@ export class SearchInterceptor {
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // (undocumented)
-    protected handleSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
-    // (undocumented)
-    protected onRequestComplete(request: IEsSearchRequest, sessionId?: string): void;
-    // (undocumented)
-    protected onRequestError(request: IEsSearchRequest, sessionId?: string): void;
-    // (undocumented)
-    protected onRequestStart(request: IEsSearchRequest, sessionId: string | undefined, timeoutSignal: AbortSignal, searchId?: string): void;
+    protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
-    search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
+    search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {
         abortSignal?: AbortSignal;
@@ -2071,6 +2063,8 @@ export class SearchInterceptor {
 export interface SearchInterceptorDeps {
     // (undocumented)
     http: CoreSetup_2['http'];
+    // (undocumented)
+    session: ISessionService;
     // (undocumented)
     startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
