@@ -69,6 +69,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         reactNodeId: 'monitoringLogstashNodeAdvancedApp',
         $scope,
         $injector,
+        telemetryPageViewTitle: 'logstash_node_advanced',
       });
 
       $scope.$watch(
