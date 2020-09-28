@@ -79,9 +79,13 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
   if (ts.isTypeLiteralNode(node) || ts.isInterfaceDeclaration(node)) {
     return node.members.reduce((acc, m) => {
-      acc[m.name?.getText() || ''] = getDescriptor(m, program);
-      return acc;
-    }, {} as any);
+      const key = m.name?.getText();
+      if (key) {
+        return { ...acc, [key]: getDescriptor(m, program) };
+      } else {
+        return { ...acc, ...getDescriptor(m, program) };
+      }
+    }, {});
   }
 
   // If it's defined as signature { [key: string]: OtherInterface }
@@ -113,6 +117,10 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     }
     if (symbolName === 'Date') {
       return { kind: TelemetryKinds.Date, type: 'Date' };
+    }
+    // Support `Record<string, SOMETHING>`
+    if (symbolName === 'Record' && node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
+      return { '@@INDEX@@': getDescriptor(node.typeArguments![1], program) };
     }
     const declaration = (symbol?.getDeclarations() || [])[0];
     if (declaration) {
@@ -155,6 +163,19 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     }
 
     return uniqueKinds[0];
+  }
+
+  // Support `type MyUsageType = SomethingElse`
+  if (ts.isTypeAliasDeclaration(node)) {
+    return getDescriptor(node.type, program);
+  }
+
+  // Support `&` unions
+  if (ts.isIntersectionTypeNode(node)) {
+    return node.types.reduce(
+      (acc, unionNode) => ({ ...acc, ...getDescriptor(unionNode, program) }),
+      {}
+    );
   }
 
   switch (node.kind) {
