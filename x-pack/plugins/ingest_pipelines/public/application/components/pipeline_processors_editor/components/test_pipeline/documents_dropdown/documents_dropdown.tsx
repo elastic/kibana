@@ -36,12 +36,6 @@ const i18nTexts = {
       defaultMessage: 'Edit documents',
     }
   ),
-  resetButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.resetButtonLabel',
-    {
-      defaultMessage: 'Reset',
-    }
-  ),
   popoverTitle: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.popoverTitle',
     {

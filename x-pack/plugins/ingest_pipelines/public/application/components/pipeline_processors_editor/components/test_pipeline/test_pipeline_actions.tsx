@@ -24,7 +24,7 @@ const i18nTexts = {
 };
 
 export const TestPipelineActions: FunctionComponent = () => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
 
   const {
     state: { processors },
@@ -39,7 +39,7 @@ export const TestPipelineActions: FunctionComponent = () => {
   const [activeFlyoutTab, setActiveFlyoutTab] = useState<TestPipelineFlyoutTab>('documents');
 
   const updateSelectedDocument = (index: number) => {
-    setCurrentTestPipelineData({
+    testPipelineDataDispatch({
       type: 'updateActiveDocument',
       payload: {
         config: {

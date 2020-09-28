@@ -58,7 +58,7 @@ type Action =
 
 export interface TestPipelineContext {
   testPipelineData: TestPipelineData;
-  setCurrentTestPipelineData: (data: Action) => void;
+  testPipelineDataDispatch: (data: Action) => void;
   updateTestOutputPerProcessor: (
     documents: Document[] | undefined,
     processors: DeserializeResult
@@ -72,7 +72,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     },
     isExecutingPipeline: false,
   },
-  setCurrentTestPipelineData: () => {},
+  testPipelineDataDispatch: () => {},
   updateTestOutputPerProcessor: () => {},
 };
 
@@ -200,7 +200,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
     <TestPipelineContext.Provider
       value={{
         testPipelineData: state,
-        setCurrentTestPipelineData: dispatch,
+        testPipelineDataDispatch: dispatch,
         updateTestOutputPerProcessor,
       }}
     >

@@ -38,7 +38,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
   const {
     testPipelineData,
-    setCurrentTestPipelineData,
+    testPipelineDataDispatch,
     updateTestOutputPerProcessor,
   } = useTestPipelineContext();
 
@@ -86,7 +86,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         // reset the per-processor output
         // this is needed in the scenario where the pipeline has already executed,
         // but you modified the sample documents and there was an error on re-execution
-        setCurrentTestPipelineData({
+        testPipelineDataDispatch({
           type: 'updateOutputPerProcessor',
           payload: {
             isExecutingPipeline: false,
@@ -97,7 +97,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         return { isSuccessful: false };
       }
 
-      setCurrentTestPipelineData({
+      testPipelineDataDispatch({
         type: 'updateConfig',
         payload: {
           config: {
@@ -131,7 +131,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       processors,
       services.api,
       services.notifications.toasts,
-      setCurrentTestPipelineData,
+      testPipelineDataDispatch,
       updateTestOutputPerProcessor,
     ]
   );
@@ -156,7 +156,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   };
 
   const resetTestOutput = () => {
-    setCurrentTestPipelineData({
+    testPipelineDataDispatch({
       type: 'reset',
     });
   };
