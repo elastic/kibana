@@ -213,18 +213,4 @@ export const schema: FormSchema<DefineStepRule> = {
       ],
     },
   },
-  preview: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewLabel',
-      {
-        defaultMessage: 'Preview',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewHelpText',
-      {
-        defaultMessage: 'This will be the help text here.',
-      }
-    ),
-  },
 };

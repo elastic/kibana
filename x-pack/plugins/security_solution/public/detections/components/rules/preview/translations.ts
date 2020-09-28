@@ -19,3 +19,40 @@ export const PREVIEW_SELECT_ARIA = i18n.translate(
     defaultMessage: 'Query preview timeframe select',
   }
 );
+
+export const QUERY_PREVIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewLabel',
+  {
+    defaultMessage: 'Preview query results',
+  }
+);
+
+export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewHelpText',
+  {
+    defaultMessage: 'Select a timeframe of data to preview query results',
+  }
+);
+
+export const QUERY_GRAPH_COUNT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphCountLabel',
+  {
+    defaultMessage: 'Count',
+  }
+);
+
+export const QUERY_PREVIEW_GRAPH_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewName',
+  {
+    defaultMessage: 'Hits',
+  }
+);
+
+export const QUERY_PREVIEW_TITLE = (hits: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewGraphTitle',
+    {
+      values: { hits },
+      defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
+    }
+  );

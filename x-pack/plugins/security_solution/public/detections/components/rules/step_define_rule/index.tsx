@@ -123,9 +123,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, reset, submit } = form;
-  const [{ index: formIndex, ruleType: formRuleType }] = (useFormData({
+  const [{ index: formIndex, ruleType: formRuleType, queryBar: queryInfo }] = (useFormData({
     form,
-    watch: ['index', 'ruleType'],
+    watch: ['index', 'ruleType', 'queryBar'],
   }) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
   const ruleType = formRuleType || initialState.ruleType;
@@ -240,12 +240,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
-                    index,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                  }}
-                  config={{
-                    ...schema.queryBar,
-                    label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
               ) : (
@@ -254,7 +249,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
-                    label: i18n.QUERY_BAR_LABEL,
                     labelAppend: (
                       <MyLabelButton
                         data-test-subj="importQueryFromSavedTimeline"
@@ -326,15 +320,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <UseField
-            path="preview"
-            component={PreviewQuery}
-            componentProps={{
-              idAria: 'detectionEngineStepDefineRulePreview',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepDefineRulePreview',
-            }}
-          />
+          <PreviewQuery index={index} query={queryInfo} />
         </Form>
       </StepContentWrapper>
 
