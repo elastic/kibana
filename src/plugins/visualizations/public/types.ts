@@ -73,7 +73,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst = (
-  vis: Vis,
+export type VisToExpressionAst<TVisParams = VisParams> = (
+  vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ) => ExpressionAstExpression;
