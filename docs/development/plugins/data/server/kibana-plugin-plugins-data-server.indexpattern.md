@@ -47,7 +47,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-server.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-server.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
-|  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  | This function is just used by Discover and it's high likely to be removed in the near future It doesn't use the save function to skip the error message that's displayed when a user adds several columns in a higher frequency that the changes can be persisted to ES resulting in 409 errors<!-- -->if (!this.id) return; const field = this.fields.getByName(fieldName); if (!field) { return;<!-- -->const count = Math.max((field.count \|\| 0) + unit, 0); if (field.count === count) { return;<!-- -->field.count = count;<!-- -->try { const res = await this.savedObjectsClient.update( 'index-pattern', this.id, this.getAsSavedObjectBody(),<!-- -->version: this.version,<!-- -->); this.version = res.version; } catch (e) { // no need for an error message here |
+|  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-server.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
 |  [getTimeField()](./kibana-plugin-plugins-data-server.indexpattern.gettimefield.md) |  |  |
