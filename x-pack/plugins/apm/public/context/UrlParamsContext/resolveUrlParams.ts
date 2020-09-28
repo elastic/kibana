@@ -76,7 +76,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
-    percentile: toNumber(percentile) as const,
+    percentile: toNumber(percentile),
 
     // ui filters
     environment,

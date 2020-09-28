@@ -34,7 +34,7 @@ interface Props {
   searchValue: string;
   onClose: () => void;
   popoverIsOpen: boolean;
-  setPopoverIsOpen: SetStateAction<boolean>;
+  setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
 }
 
 export function SelectableUrlList({

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
 import { EuiRange, htmlIdGenerator, EuiPopover, EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
@@ -74,7 +80,7 @@ export function UserPercentile() {
     setValue(Number(percentile));
   }, [percentile]);
 
-  const onChange = (e) => {
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = +e.currentTarget.value;
     if (val < 62.5) {
       setValue(50);
