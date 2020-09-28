@@ -175,7 +175,7 @@ image::images/tutorial-visualize-md-2.png[Image showing example markdown editing
 . Click *Save*, then enter `Markdown Example` in the *Title* field.
 
 [role="screenshot"]
-image::images/tutorial-dashboard.png[Updated, finalized visualization with bar chart, pie chart, map, and markdown text field.]
+image::images/tutorial-dashboard.png[Final visualization with bar chart, pie chart, map, and markdown text field]
 
 [float]
 === Next steps
