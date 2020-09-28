@@ -107,7 +107,7 @@ test('a yml-format pipeline with no pipeline references stays unchanged', () => 
 
 test('getPipelineNameForInstallation gets correct name', () => {
   const dataStream: RegistryDataStream = {
-    name: 'coredns.log',
+    dataset: 'coredns.log',
     title: 'CoreDNS logs',
     release: 'ga',
     type: 'logs',
@@ -128,9 +128,9 @@ test('getPipelineNameForInstallation gets correct name', () => {
     packageVersion,
   });
   expect(pipelineEntryNameForInstallation).toBe(
-    `${dataStream.type}-${dataStream.name}-${packageVersion}`
+    `${dataStream.type}-${dataStream.dataset}-${packageVersion}`
   );
   expect(pipelineRefNameForInstallation).toBe(
-    `${dataStream.type}-${dataStream.name}-${packageVersion}-${pipelineRefName}`
+    `${dataStream.type}-${dataStream.dataset}-${packageVersion}-${pipelineRefName}`
   );
 });

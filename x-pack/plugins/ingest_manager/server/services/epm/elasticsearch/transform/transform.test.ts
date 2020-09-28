@@ -98,7 +98,7 @@ describe('test transform install', () => {
         data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -112,7 +112,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',
@@ -270,7 +270,7 @@ describe('test transform install', () => {
         data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -353,7 +353,7 @@ describe('test transform install', () => {
         data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -367,7 +367,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',

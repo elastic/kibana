@@ -8,8 +8,8 @@ import { RegistryDataStream } from '../../../types';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of
- * {type}-{id}
+ * {type}-{dataset}
  */
 export function getRegistryDataStreamAssetBaseName(dataStream: RegistryDataStream): string {
-  return `${dataStream.type}-${dataStream.name}`;
+  return `${dataStream.type}-${dataStream.dataset}`;
 }

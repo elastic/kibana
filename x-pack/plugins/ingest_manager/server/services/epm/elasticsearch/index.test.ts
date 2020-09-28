@@ -9,7 +9,7 @@ import { getRegistryDataStreamAssetBaseName } from './index';
 
 test('getBaseName', () => {
   const dataStream: RegistryDataStream = {
-    name: 'nginx.access',
+    dataset: 'nginx.access',
     title: 'Nginx Acess Logs',
     release: 'beta',
     type: 'logs',

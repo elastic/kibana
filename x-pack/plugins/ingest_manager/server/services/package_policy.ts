@@ -381,7 +381,7 @@ async function _assignPackageStreamToStream(
   }
 
   const packageDataStream = packageDataStreams.find(
-    (pkgDataStream) => pkgDataStream.name === stream.data_stream.dataset
+    (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
   if (!packageDataStream) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);

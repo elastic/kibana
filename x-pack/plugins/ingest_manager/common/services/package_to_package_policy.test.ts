@@ -69,9 +69,9 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
         packageToPackagePolicyInputs(({
           ...mockPackage,
           data_streams: [
-            { type: 'logs', name: 'foo', streams: [{ input: 'foo' }] },
-            { type: 'logs', name: 'bar', streams: [{ input: 'bar' }] },
-            { type: 'logs', name: 'bar2', streams: [{ input: 'bar' }] },
+            { type: 'logs', dataset: 'foo', streams: [{ input: 'foo' }] },
+            { type: 'logs', dataset: 'bar', streams: [{ input: 'bar' }] },
+            { type: 'logs', dataset: 'bar2', streams: [{ input: 'bar' }] },
           ],
           config_templates: [
             {
@@ -105,12 +105,12 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           data_streams: [
             {
               type: 'logs',
-              name: 'foo',
+              dataset: 'foo',
               streams: [{ input: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] }],
             },
             {
               type: 'logs',
-              name: 'bar',
+              dataset: 'bar',
               streams: [
                 {
                   input: 'bar',
@@ -120,7 +120,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
             },
             {
               type: 'logs',
-              name: 'bar2',
+              dataset: 'bar2',
               streams: [
                 {
                   input: 'bar',
@@ -176,12 +176,12 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           data_streams: [
             {
               type: 'logs',
-              name: 'foo',
+              dataset: 'foo',
               streams: [{ input: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] }],
             },
             {
               type: 'logs',
-              name: 'bar',
+              dataset: 'bar',
               streams: [
                 {
                   input: 'bar',
@@ -191,7 +191,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
             },
             {
               type: 'logs',
-              name: 'bar2',
+              dataset: 'bar2',
               streams: [
                 {
                   input: 'bar',
@@ -201,7 +201,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
             },
             {
               type: 'logs',
-              name: 'disabled',
+              dataset: 'disabled',
               streams: [
                 {
                   input: 'with-disabled-streams',
@@ -212,7 +212,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
             },
             {
               type: 'logs',
-              name: 'disabled2',
+              dataset: 'disabled2',
               streams: [
                 {
                   input: 'with-disabled-streams',

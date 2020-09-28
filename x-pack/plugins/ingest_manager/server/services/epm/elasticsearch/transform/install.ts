@@ -167,5 +167,5 @@ const getTransformNameForInstallation = (
   suffix: string
 ) => {
   const filename = transformDataStream?.path.split('/')?.pop()?.split('.')[0];
-  return `${transformDataStream.data_stream.type}-${transformDataStream.data_stream.name}-${filename}-${suffix}`;
+  return `${transformDataStream.data_stream.type}-${transformDataStream.data_stream.dataset}-${filename}-${suffix}`;
 };

@@ -176,7 +176,7 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface RegistryDataStream {
   type: string;
-  name: string;
+  dataset: string;
   title: string;
   release: string;
   streams?: RegistryStream[];

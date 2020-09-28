@@ -34,7 +34,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
     status: InstallationStatus.notInstalled,
     data_streams: [
       {
-        name: 'foo',
+        dataset: 'foo',
         streams: [
           {
             input: 'foo',
@@ -44,7 +44,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'bar',
+        dataset: 'bar',
         streams: [
           {
             input: 'bar',
@@ -59,7 +59,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'bar2',
+        dataset: 'bar2',
         streams: [
           {
             input: 'bar',
@@ -69,7 +69,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'disabled',
+        dataset: 'disabled',
         streams: [
           {
             input: 'with-disabled-streams',
@@ -80,7 +80,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'disabled2',
+        dataset: 'disabled2',
         streams: [
           {
             input: 'with-disabled-streams',

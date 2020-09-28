@@ -218,5 +218,5 @@ export const getPipelineNameForInstallation = ({
   const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
   const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
   // if this is the pipeline entry, don't add a suffix
-  return `${dataStream.type}-${dataStream.name}-${packageVersion}${suffix}`;
+  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}${suffix}`;
 };

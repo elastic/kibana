@@ -23,7 +23,7 @@ const findStreamsForInputType = (
         streams.push({
           ...stream,
           data_stream: {
-            dataset: dataStream.name,
+            dataset: dataStream.dataset,
           },
         });
       }

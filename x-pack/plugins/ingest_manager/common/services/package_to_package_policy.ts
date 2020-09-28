@@ -29,7 +29,7 @@ const getStreamsForInputType = (
           ...stream,
           data_stream: {
             type: dataStream.type,
-            dataset: dataStream.name,
+            dataset: dataStream.dataset,
           },
         });
       }
