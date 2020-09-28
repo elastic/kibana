@@ -15,8 +15,7 @@ import { Document } from '../../types';
 import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
-import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
-import { documentsSchema } from './test_pipeline_flyout_tabs/documents_schema';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
@@ -48,7 +47,6 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   } = testPipelineData;
 
   const { form } = useForm({
-    schema: documentsSchema,
     defaultValue: {
       documents: cachedDocuments || '',
     },
@@ -157,6 +155,12 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     }
   };
 
+  const resetTestOutput = () => {
+    setCurrentTestPipelineData({
+      type: 'reset',
+    });
+  };
+
   useEffect(() => {
     if (cachedDocuments && activeTab === 'output') {
       handleTestPipeline({ documents: cachedDocuments, verbose: cachedVerbose }, true);
@@ -169,6 +173,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   return (
     <ViewComponent
       handleTestPipeline={handleTestPipeline}
+      resetTestOutput={resetTestOutput}
       isRunningTest={isRunningTest}
       cachedVerbose={cachedVerbose}
       cachedDocuments={cachedDocuments}

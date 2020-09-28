@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 interface Props {
-  stopPipelineSimulation: () => void;
+  confirmResetTestOutput: () => void;
   closeModal: () => void;
 }
 
@@ -16,13 +16,13 @@ const i18nTexts = {
   modalTitle: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.resetDocumentsModal.title',
     {
-      defaultMessage: 'Reset',
+      defaultMessage: 'Clear documents',
     }
   ),
   modalDescription: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.resetDocumentsModal.description',
     {
-      defaultMessage: 'Reset documents and stop pipeline simulation.',
+      defaultMessage: 'This will stop pipeline simulation.',
     }
   ),
   cancelButtonLabel: i18n.translate(
@@ -34,13 +34,13 @@ const i18nTexts = {
   resetButtonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.resetDocumentsModal.resetButtonLabel',
     {
-      defaultMessage: 'Reset',
+      defaultMessage: 'Clear documents',
     }
   ),
 };
 
 export const ResetDocumentsModal: FunctionComponent<Props> = ({
-  stopPipelineSimulation,
+  confirmResetTestOutput,
   closeModal,
 }) => {
   return (
@@ -50,7 +50,7 @@ export const ResetDocumentsModal: FunctionComponent<Props> = ({
         data-test-subj="resetDocumentsConfirmationModal"
         title={i18nTexts.modalTitle}
         onCancel={closeModal}
-        onConfirm={stopPipelineSimulation}
+        onConfirm={confirmResetTestOutput}
         cancelButtonText={i18nTexts.cancelButtonLabel}
         confirmButtonText={i18nTexts.resetButtonLabel}
       >

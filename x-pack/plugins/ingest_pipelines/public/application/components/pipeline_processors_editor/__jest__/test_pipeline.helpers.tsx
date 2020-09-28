@@ -193,9 +193,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    clickResetButton() {
+    clickClearAllButton() {
       act(() => {
-        find('resetButton').simulate('click');
+        find('clearAllDocumentsButton').simulate('click');
       });
       component.update();
     },
@@ -285,7 +285,7 @@ type TestSubject =
   | 'outputTab'
   | 'processorOutputTabContent'
   | 'editDocumentsButton'
-  | 'resetButton'
+  | 'clearAllDocumentsButton'
   | 'addDocumentsAccordion'
   | 'addDocumentButton'
   | 'addDocumentError'

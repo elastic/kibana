@@ -19,9 +19,7 @@ import {
 
 import { Document } from '../../../types';
 
-import { TestPipelineFlyoutTab } from '../test_pipeline_flyout_tabs';
-
-import { ResetDocumentsModal } from './reset_documents_modal';
+import { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
 
 import './documents_dropdown.scss';
 
@@ -57,18 +55,15 @@ interface Props {
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
-  stopPipelineSimulation: () => void;
 }
 
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
-  stopPipelineSimulation,
   openFlyout,
 }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const [showResetModal, setShowResetModal] = useState<boolean>(false);
 
   const managePipelineButton = (
     <EuiButtonEmpty
@@ -87,97 +82,67 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   );
 
   return (
-    <>
-      <EuiPopover
-        isOpen={showPopover}
-        closePopover={() => setShowPopover(false)}
-        button={managePipelineButton}
-        panelPaddingSize="none"
-        withTitle
-        repositionOnScroll
-        data-test-subj="documentsDropdown"
-        panelClassName="documentsDropdownPanel"
+    <EuiPopover
+      isOpen={showPopover}
+      closePopover={() => setShowPopover(false)}
+      button={managePipelineButton}
+      panelPaddingSize="none"
+      withTitle
+      repositionOnScroll
+      data-test-subj="documentsDropdown"
+      panelClassName="documentsDropdownPanel"
+    >
+      <EuiSelectable
+        singleSelection
+        data-test-subj="documentList"
+        options={documents.map((doc, index) => ({
+          key: index.toString(),
+          'data-test-subj': 'documentListItem',
+          checked: selectedDocumentIndex === index ? 'on' : undefined,
+          label: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel', {
+            defaultMessage: 'Document {documentNumber}',
+            values: {
+              documentNumber: index + 1,
+            },
+          }),
+        }))}
+        onChange={(newOptions) => {
+          const selectedOption = newOptions.find((option) => option.checked === 'on');
+          if (selectedOption) {
+            updateSelectedDocument(Number(selectedOption.key!));
+          }
+
+          setShowPopover(false);
+        }}
       >
-        <EuiSelectable
-          singleSelection
-          data-test-subj="documentList"
-          options={documents.map((doc, index) => ({
-            key: index.toString(),
-            'data-test-subj': 'documentListItem',
-            checked: selectedDocumentIndex === index ? 'on' : undefined,
-            label: i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel',
-              {
-                defaultMessage: 'Document {documentNumber}',
-                values: {
-                  documentNumber: index + 1,
-                },
-              }
-            ),
-          }))}
-          onChange={(newOptions) => {
-            const selectedOption = newOptions.find((option) => option.checked === 'on');
-            if (selectedOption) {
-              updateSelectedDocument(Number(selectedOption.key!));
-            }
+        {(list) => (
+          <>
+            <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            {list}
+          </>
+        )}
+      </EuiSelectable>
 
-            setShowPopover(false);
-          }}
-        >
-          {(list) => (
-            <>
-              <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
-              {list}
-            </>
-          )}
-        </EuiSelectable>
+      <EuiHorizontalRule margin="xs" />
 
-        <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="s" />
 
-        <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            onClick={() => {
+              openFlyout('documents');
+              setShowPopover(false);
+            }}
+            data-test-subj="editDocumentsButton"
+          >
+            {i18nTexts.addDocumentsButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiFlexGroup justifyContent="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={() => {
-                openFlyout('documents');
-                setShowPopover(false);
-              }}
-              data-test-subj="editDocumentsButton"
-            >
-              {i18nTexts.addDocumentsButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup justifyContent="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              color="danger"
-              onClick={() => {
-                setShowResetModal(true);
-                setShowPopover(false);
-              }}
-              data-test-subj="resetButton"
-            >
-              {i18nTexts.resetButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-      </EuiPopover>
-
-      {showResetModal && (
-        <ResetDocumentsModal
-          stopPipelineSimulation={stopPipelineSimulation}
-          closeModal={() => setShowResetModal(false)}
-        />
-      )}
-    </>
+      <EuiSpacer size="s" />
+    </EuiPopover>
   );
 };

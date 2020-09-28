@@ -290,7 +290,7 @@ describe('Test pipeline', () => {
         expect(exists('documentsTabContent')).toBe(true);
       });
 
-      it('should reset documents and stop pipeline simulation', async () => {
+      it('should clear all documents and stop pipeline simulation', async () => {
         const { exists, actions, find } = testBed;
 
         // Dropdown should be visible and processor status should equal "success"
@@ -300,9 +300,10 @@ describe('Test pipeline', () => {
         ];
         expect(initialProcessorStatusLabel).toEqual('Success');
 
-        // Open dropdown and click "reset" button
+        // Open flyout and click clear all button
         actions.clickDocumentsDropdown();
-        actions.clickResetButton();
+        actions.clickEditDocumentsButton();
+        actions.clickClearAllButton();
 
         // Verify modal
         const modal = document.body.querySelector(
@@ -310,7 +311,7 @@ describe('Test pipeline', () => {
         );
 
         expect(modal).not.toBe(null);
-        expect(modal!.textContent).toContain('Reset');
+        expect(modal!.textContent).toContain('Clear documents');
 
         // Confirm reset and close modal
         await actions.clickConfirmResetButton();
