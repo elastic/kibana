@@ -30,14 +30,16 @@ import { getFormatService } from '../services';
 import { SchemaConfig } from '../../../visualizations/public';
 import { Range } from '../../../expressions/public';
 
+import './metric_vis.scss';
+
 export interface MetricVisComponentProps {
-  visParams: VisParams;
+  visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Input;
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
 
-export class MetricVisComponent extends Component<MetricVisComponentProps> {
+class MetricVisComponent extends Component<MetricVisComponentProps> {
   private getLabels() {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
@@ -209,3 +211,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     return metricsHtml;
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { MetricVisComponent as default };

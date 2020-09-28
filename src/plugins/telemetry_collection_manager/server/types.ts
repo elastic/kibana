@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import { LegacyAPICaller, Logger, KibanaRequest, ILegacyClusterClient } from 'kibana/server';
+import {
+  LegacyAPICaller,
+  Logger,
+  KibanaRequest,
+  ILegacyClusterClient,
+  IClusterClient,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ElasticsearchClient } from '../../../../src/core/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
 export interface TelemetryCollectionManagerPluginSetup {
@@ -67,6 +74,7 @@ export interface StatsCollectionConfig {
   callCluster: LegacyAPICaller;
   start: string | number;
   end: string | number;
+  esClient: ElasticsearchClient;
 }
 
 export interface BasicStatsPayload {
@@ -100,7 +108,7 @@ export interface ESLicense {
 }
 
 export interface StatsCollectionContext {
-  logger: Logger;
+  logger: Logger | Console;
   version: string;
 }
 
@@ -130,6 +138,7 @@ export interface CollectionConfig<
   title: string;
   priority: number;
   esCluster: ILegacyClusterClient;
+  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -145,5 +154,6 @@ export interface Collection<
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   esCluster: ILegacyClusterClient;
+  esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
   title: string;
 }
