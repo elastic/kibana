@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
@@ -42,14 +41,12 @@ export const getTagCloudVisRenderer: (
 
     render(
       <VisualizationContainer>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <TagCloudChart
-            {...config}
-            colors={colors}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-          />
-        </Suspense>
+        <TagCloudChart
+          {...config}
+          colors={colors}
+          renderComplete={handlers.done}
+          fireEvent={handlers.event}
+        />
       </VisualizationContainer>,
       domNode
     );
