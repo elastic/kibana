@@ -18,13 +18,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
 import { CoreContext } from '../core_context';
 
-import { configServiceMock } from '../config/config_service.mock';
+import { configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
 

@@ -5,14 +5,16 @@
  */
 
 import React, { useContext } from 'react';
-import upperFirst from 'lodash/upperFirst';
-import snakeCase from 'lodash/snakeCase';
+import { useValues } from 'kea';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
+import { KibanaContext, IKibanaContext } from '../../../index';
+
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { HttpLogic } from '../../../shared/http';
 
 import './product_card.scss';
 
@@ -28,7 +30,26 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
+  const {
+    config: { host },
+  } = useContext(KibanaContext) as IKibanaContext;
+
+  const LAUNCH_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.launchButton',
+    {
+      defaultMessage: 'Launch {productName}',
+      values: { productName: product.NAME },
+    }
+  );
+
+  const SETUP_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.setupButton',
+    {
+      defaultMessage: 'Setup {productName}',
+      values: { productName: product.NAME },
+    }
+  );
 
   return (
     <EuiCard
@@ -58,12 +79,8 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
               metric: snakeCase(product.ID),
             })
           }
-          data-test-subj={`Launch${upperFirst(product.ID)}Button`}
         >
-          {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
-            defaultMessage: `Launch {productName}`,
-            values: { productName: product.NAME },
-          })}
+          {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
       }
     />

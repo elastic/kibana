@@ -280,12 +280,14 @@ The following table describes the properties of the `options` object.
 | params   | The `params` value to give the action type executor.                                                   | object |
 | spaceId  | The space id the action is within.                                                                     | string |
 | apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
 ```typescript
+const request: KibanaRequest = { ... };
 const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
 await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
@@ -296,6 +298,7 @@ await actionsClient.enqueueExecution({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asHttpRequestExecutionSource(request),
 });
 ```
 
@@ -305,10 +308,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                          | Type   |
-| -------- | ---------------------------------------------------- | ------ |
-| id       | The id of the action you want to execute.            | string |
-| params   | The `params` value to give the action type executor. | object |
+| Property | Description                                                                          | Type   |
+| -------- | ------------------------------------------------------------------------------------ | ------ |
+| id       | The id of the action you want to execute.                                            | string |
+| params   | The `params` value to give the action type executor.                                 | object |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.| object, optional |
 
 ## Example
 
@@ -324,6 +328,10 @@ const result = await actionsClient.execute({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asSavedObjectExecutionSource({
+    id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+    type: 'alert'
+  }),
 });
 ```
 

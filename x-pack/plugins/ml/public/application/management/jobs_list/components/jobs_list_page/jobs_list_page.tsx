@@ -31,6 +31,7 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
+import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
 
 interface Tab {
   'data-test-subj': string;
@@ -75,8 +76,9 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
 
 export const JobsListPage: FC<{
   coreStart: CoreStart;
+  share: SharePluginStart;
   history: ManagementAppMountParams['history'];
-}> = ({ coreStart, history }) => {
+}> = ({ coreStart, share, history }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
@@ -136,7 +138,7 @@ export const JobsListPage: FC<{
 
   return (
     <I18nContext>
-      <KibanaContextProvider services={{ ...coreStart }}>
+      <KibanaContextProvider services={{ ...coreStart, share }}>
         <Router history={history}>
           <EuiPageContent
             id="kibanaManagementMLSection"

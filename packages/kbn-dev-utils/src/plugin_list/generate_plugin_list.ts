@@ -20,8 +20,8 @@
 import Path from 'path';
 
 import normalizePath from 'normalize-path';
+import { REPO_ROOT } from '@kbn/utils';
 
-import { REPO_ROOT } from '../repo_root';
 import { Plugins } from './discover_plugins';
 
 function* printPlugins(plugins: Plugins, includes: string[]) {

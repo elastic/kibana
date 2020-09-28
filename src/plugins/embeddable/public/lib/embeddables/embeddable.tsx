@@ -21,10 +21,11 @@ import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
-import { Adapters, ViewMode } from '../types';
+import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { TriggerContextMapping } from '../ui_actions';
+import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;

@@ -94,6 +94,11 @@ const appServices = {
   notifications: notificationServiceMock.createSetupContract(),
   history,
   uiSettings: {},
+  urlGenerators: {
+    getUrlGenerator: jest.fn().mockReturnValue({
+      createUrl: jest.fn(),
+    }),
+  },
 };
 
 const testBedSetup = registerTestBed<TestSubject>(
@@ -140,8 +145,8 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    clickProcessorOutputTab() {
-      act(() => {
+    async clickProcessorOutputTab() {
+      await act(async () => {
         find('outputTab').simulate('click');
       });
       component.update();
@@ -177,6 +182,20 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickProcessor(processorSelector: string) {
       await act(async () => {
         find(`${processorSelector}.manageItemButton`).simulate('click');
+      });
+      component.update();
+    },
+
+    async toggleDocumentsAccordion() {
+      await act(async () => {
+        find('addDocumentsAccordion').simulate('click');
+      });
+      component.update();
+    },
+
+    async clickAddDocumentButton() {
+      await act(async () => {
+        find('addDocumentButton').simulate('click');
       });
       component.update();
     },
@@ -224,8 +243,13 @@ type TestSubject =
   | 'processorStatusIcon'
   | 'documentsTab'
   | 'manageItemButton'
-  | 'processorSettingsForm'
+  | 'addProcessorForm'
+  | 'editProcessorForm'
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'
+  | 'addDocumentsAccordion'
+  | 'addDocumentButton'
+  | 'addDocumentError'
+  | 'addDocumentSuccess'
   | string;

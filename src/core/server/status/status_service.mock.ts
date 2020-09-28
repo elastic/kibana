@@ -43,6 +43,7 @@ const createSetupContractMock = () => {
     set: jest.fn(),
     dependencies$: new BehaviorSubject({}),
     derivedStatus$: new BehaviorSubject(available),
+    isStatusPageAnonymous: jest.fn().mockReturnValue(false),
   };
 
   return setupContract;

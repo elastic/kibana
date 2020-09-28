@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,99 +14,80 @@ import {
   getUseField,
   Field,
   JsonEditorField,
-  Form,
-  useForm,
   useKibana,
+  useFormData,
+  FormHook,
+  Form,
 } from '../../../../../../shared_imports';
 
-import { TestPipelineContext } from '../../../context';
-import { Document } from '../../../types';
-import { DeserializeResult } from '../../../deserialize';
-import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
-import { documentsSchema } from './documents_schema';
+import { AddDocumentsAccordion } from './add_documents_accordion';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
-  setPerProcessorOutput: (documents: Document[] | undefined, processors: DeserializeResult) => void;
+  validateAndTestPipeline: () => Promise<void>;
   isRunningTest: boolean;
-  processors: DeserializeResult;
-  testPipelineData: TestPipelineContext['testPipelineData'];
+  form: FormHook;
 }
 
-export const DocumentsTab: React.FunctionComponent<Props> = ({
-  handleTestPipeline,
+export const DocumentsTab: FunctionComponent<Props> = ({
+  validateAndTestPipeline,
   isRunningTest,
-  setPerProcessorOutput,
-  processors,
-  testPipelineData,
+  form,
 }) => {
   const { services } = useKibana();
 
-  const {
-    config: { documents: cachedDocuments, verbose: cachedVerbose },
-  } = testPipelineData;
+  const [, formatData] = useFormData({ form });
 
-  const testPipeline = async () => {
-    const { isValid, data } = await form.submit();
+  const onAddDocumentHandler = useCallback(
+    (document) => {
+      const { documents: existingDocuments = [] } = formatData();
 
-    if (!isValid) {
-      return;
-    }
-
-    const { documents } = data as { documents: Document[] };
-
-    await handleTestPipeline({ documents: documents!, verbose: cachedVerbose });
-
-    // This is necessary to update the status and output of each processor
-    // as verbose may not be enabled
-    setPerProcessorOutput(documents, processors);
-  };
-
-  const { form } = useForm({
-    schema: documentsSchema,
-    defaultValue: {
-      documents: cachedDocuments || '',
+      form.reset({ defaultValue: { documents: [...existingDocuments, document] } });
     },
-  });
+    [form, formatData]
+  );
 
   return (
-    <div data-test-subj="documentsTabContent">
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
-            defaultMessage="Provide an array of documents for the pipeline to ingest. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink
-                  href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate(
-                    'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
-                    {
-                      defaultMessage: 'Learn more.',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
+    <Form
+      form={form}
+      data-test-subj="testPipelineForm"
+      isInvalid={form.isSubmitted && !form.isValid}
+      onSubmit={validateAndTestPipeline}
+      error={form.getErrors()}
+    >
+      <div data-test-subj="documentsTabContent">
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
+              defaultMessage="Provide documents for the pipeline to ingest. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
+                      {
+                        defaultMessage: 'Learn more.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-      <Form
-        form={form}
-        data-test-subj="testPipelineForm"
-        isInvalid={form.isSubmitted && !form.isValid}
-        onSubmit={testPipeline}
-        error={form.getErrors()}
-      >
+        <AddDocumentsAccordion onAddDocuments={onAddDocumentHandler} />
+
+        <EuiSpacer size="l" />
+
         {/* Documents editor */}
         <UseField
           path="documents"
@@ -128,11 +109,12 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <EuiButton
+          onClick={validateAndTestPipeline}
           data-test-subj="runPipelineButton"
-          onClick={testPipeline}
           size="s"
           isLoading={isRunningTest}
           disabled={form.isSubmitted && !form.isValid}
+          iconType="play"
         >
           {isRunningTest ? (
             <FormattedMessage
@@ -146,7 +128,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
             />
           )}
         </EuiButton>
-      </Form>
-    </div>
+      </div>
+    </Form>
   );
 };

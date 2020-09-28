@@ -127,7 +127,59 @@ export const formattedSearchStrategyResponse = {
   ],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "dns_count": {\n        "cardinality": {\n          "field": "dns.question.registered_domain"\n        }\n      },\n      "dns_name_query_count": {\n        "terms": {\n          "field": "dns.question.registered_domain",\n          "size": 10,\n          "order": {\n            "unique_domains": "desc"\n          }\n        },\n        "aggs": {\n          "unique_domains": {\n            "cardinality": {\n              "field": "dns.question.name"\n            }\n          },\n          "dns_bytes_in": {\n            "sum": {\n              "field": "source.bytes"\n            }\n          },\n          "dns_bytes_out": {\n            "sum": {\n              "field": "destination.bytes"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T09:00:43.249Z",\n                "lte": "2020-09-14T09:00:43.249Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ],\n        "must_not": [\n          {\n            "term": {\n              "dns.question.type": {\n                "value": "PTR"\n              }\n            }\n          }\n        ]\n      }\n    }\n  },\n  "size": 0,\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
+              dns_name_query_count: {
+                terms: {
+                  field: 'dns.question.registered_domain',
+                  size: 10,
+                  order: { unique_domains: 'desc' },
+                },
+                aggs: {
+                  unique_domains: { cardinality: { field: 'dns.question.name' } },
+                  dns_bytes_in: { sum: { field: 'source.bytes' } },
+                  dns_bytes_out: { sum: { field: 'destination.bytes' } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T09:00:43.249Z',
+                        lte: '2020-09-14T09:00:43.249Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+                must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
+              },
+            },
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 2, showMorePagesIndicator: false },
@@ -165,7 +217,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {

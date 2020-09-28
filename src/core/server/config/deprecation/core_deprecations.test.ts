@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 import { coreDeprecationProvider } from './core_deprecations';
-import { configDeprecationFactory } from './deprecation_factory';
-import { applyDeprecations } from './apply_deprecations';
 
 const initialEnv = { ...process.env };
 

@@ -9,7 +9,7 @@ import { ApplyGlobalFilterActionContext } from '../../../../../src/plugins/data/
 
 export type ActionContext = ApplyGlobalFilterActionContext;
 
-export interface Config {
+export type Config = {
   /**
    * Whether to use a user selected index pattern, stored in `indexPatternId` field.
    */
@@ -30,6 +30,6 @@ export interface Config {
    * Whether to carry over source dashboard time range.
    */
   carryTimeRange: boolean;
-}
+};
 
 export type CollectConfigProps = CollectConfigPropsBase<Config>;

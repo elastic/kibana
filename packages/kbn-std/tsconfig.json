@@ -8,9 +8,6 @@
     "declarationMap": true,
     "types": ["jest", "node"]
   },
-  "include": [
-    "./src/**/*.ts",
-    "../../typings/query_string.d.ts"
-  ],
+  "include": ["./src/**/*.ts"],
   "exclude": ["target"]
 }

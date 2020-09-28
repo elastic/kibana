@@ -9,5 +9,5 @@ Extension point exposed for other plugins to register their own search strategie
 <b>Signature:</b>
 
 ```typescript
-registerSearchStrategy: <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
+registerSearchStrategy: <SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
 ```

@@ -36,31 +36,37 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
   <>
     {features.length > 1 && <EuiHorizontalRule margin="xl" aria-hidden="true" />}
 
-    <section className="homDataManage" aria-labelledby="homDataManage__title">
-      <EuiTitle size="s">
-        <h2 id="homDataManage__title">
-          <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
-        </h2>
-      </EuiTitle>
+    {features.length > 0 && (
+      <section
+        className="homDataManage"
+        aria-labelledby="homDataManage__title"
+        data-test-subj="homDataManage"
+      >
+        <EuiTitle size="s">
+          <h2 id="homDataManage__title">
+            <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
+          </h2>
+        </EuiTitle>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-      <EuiFlexGroup className="homDataManage__content">
-        {features.map((feature) => (
-          <EuiFlexItem key={feature.id}>
-            <Synopsis
-              id={feature.id}
-              onClick={createAppNavigationHandler(feature.path)}
-              description={feature.description}
-              iconType={feature.icon}
-              title={feature.title}
-              url={addBasePath(feature.path)}
-              wrapInPanel
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </section>
+        <EuiFlexGroup className="homDataManage__content">
+          {features.map((feature) => (
+            <EuiFlexItem key={feature.id}>
+              <Synopsis
+                id={feature.id}
+                onClick={createAppNavigationHandler(feature.path)}
+                description={feature.description}
+                iconType={feature.icon}
+                title={feature.title}
+                url={addBasePath(feature.path)}
+                wrapInPanel
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </section>
+    )}
   </>
 );
 

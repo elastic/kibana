@@ -17,12 +17,10 @@ import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsDiscoverCsv, TaskPayloadCSV } from './types';
+import { JobParamsCSV, TaskPayloadCSV } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsDiscoverCsv,
-  CreateJobFn<JobParamsDiscoverCsv>,
-  TaskPayloadCSV,
+  CreateJobFn<JobParamsCSV>,
   RunTaskFn<TaskPayloadCSV>
 > => ({
   ...metadata,
