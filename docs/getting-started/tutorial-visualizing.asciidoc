@@ -170,7 +170,7 @@ The Markdown widget uses **markdown** syntax.
 The Markdown renders in the preview pane.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-md-2.png[Image showing example markdown editing field.]
+image::images/tutorial-visualize-md-2.png[Image showing example markdown editing field]
 
 . Click *Save*, then enter `Markdown Example` in the *Title* field.
 
