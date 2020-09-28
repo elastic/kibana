@@ -155,8 +155,8 @@ export interface AggregationOptionsByType {
   } & AggregationSourceOptions;
   bucket_sort: {
     sort?: SortOptions;
-    from: number;
-    size: number;
+    from?: number;
+    size?: number;
   };
 }
 
