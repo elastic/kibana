@@ -5,6 +5,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

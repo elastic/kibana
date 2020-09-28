@@ -20,13 +20,12 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
-// @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
+import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -53,12 +52,12 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 function getComponent(selected = false, showDetails = false, useShortDots = false) {
-  const indexPattern = new StubIndexPattern(
+  const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
     stubbedLogstashFields(),
-    coreMock.createStart()
+    coreMock.createSetup()
   );
 
   const field = new IndexPatternField(
