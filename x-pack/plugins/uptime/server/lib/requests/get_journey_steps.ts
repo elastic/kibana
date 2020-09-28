@@ -35,6 +35,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any>
         },
       },
     },
+    size: 500,
   };
   const result = await callES('search', params);
   return result.hits.hits.map(({ _id, _source }: any) => ({
