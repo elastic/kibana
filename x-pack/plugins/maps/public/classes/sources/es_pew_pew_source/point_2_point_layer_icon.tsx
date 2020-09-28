@@ -7,7 +7,14 @@
 import React, { FunctionComponent } from 'react';
 
 export const Point2PointLayerIcon: FunctionComponent = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="49"
+    height="25"
+    fill="none"
+    viewBox="0 0 49 25"
+    className="mapLayersWizardIcon"
+  >
     <circle cx="38.311" cy="12.889" r="1.636" className="mapLayersWizardIcon__highlight" />
     <circle
       cx="10.85"

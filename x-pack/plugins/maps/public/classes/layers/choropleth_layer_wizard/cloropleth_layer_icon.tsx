@@ -7,7 +7,14 @@
 import React, { FunctionComponent } from 'react';
 
 export const ChoroplethLayerIcon: FunctionComponent = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="49"
+    height="25"
+    fill="none"
+    viewBox="0 0 49 25"
+    className="mapLayersWizardIcon"
+  >
     <path
       fill="#98A2B3"
       d="M32.206 15.364V1.588l-1.492.204c-.743.254-1.768.38-2.702.45a41.39 41.39 0 01-1.258.07l-.093.005c-.312.014-.57.025-.72.042a1.895 1.895 0 00-.558.167c-.156.07-.316.156-.47.238l-.057.031c-.356.19-.687.357-1.025.4l-2.262.474v5.864c0 .698-.677 2.578-.818 3.852l.34 1.807 11.114.17z"

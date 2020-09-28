@@ -7,7 +7,14 @@
 import React, { FunctionComponent } from 'react';
 
 export const HeatmapLayerIcon: FunctionComponent = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="49"
+    height="25"
+    fill="none"
+    viewBox="0 0 49 25"
+    className="mapLayersWizardIcon"
+  >
     <path
       className="mapLayersWizardIcon__background"
       fillRule="evenodd"

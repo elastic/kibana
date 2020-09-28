@@ -7,7 +7,14 @@
 import React, { FunctionComponent } from 'react';
 
 export const ClustersLayerIcon: FunctionComponent = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="49"
+    height="25"
+    fill="none"
+    viewBox="0 0 49 25"
+    className="mapLayersWizardIcon"
+  >
     <circle cx="17.867" cy="5.032" r="2.045" className="mapLayersWizardIcon__highlight" />
     <circle cx="13.367" cy="11.717" r="2.045" className="mapLayersWizardIcon__highlight" />
     <circle cx="14.594" cy="19.901" r="3.273" className="mapLayersWizardIcon__highlight" />
