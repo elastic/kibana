@@ -16,7 +16,7 @@ The anchor document is highlighted in blue.
 
 
 [role="screenshot"]
-image::images/Discover-ContextView.png[Context View]
+image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
 
 [float]
 [[filter-context]]
