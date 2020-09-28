@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import difference from 'lodash/difference';
+import { difference } from 'lodash';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';

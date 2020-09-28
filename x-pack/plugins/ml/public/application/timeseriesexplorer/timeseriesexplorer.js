@@ -8,12 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import debounce from 'lodash/debounce';
-import each from 'lodash/each';
-import find from 'lodash/find';
-import get from 'lodash/get';
-import has from 'lodash/has';
-import isEqual from 'lodash/isEqual';
+import { debounce, each, find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';

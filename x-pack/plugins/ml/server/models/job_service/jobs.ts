@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uniq from 'lodash/uniq';
+import { uniq } from 'lodash';
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { parseTimeIntervalForJob } from '../../../common/util/job_utils';

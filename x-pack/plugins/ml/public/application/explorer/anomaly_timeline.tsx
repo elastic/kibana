@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useMemo, useState } from 'react';
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import {
   EuiPanel,
   EuiPopover,

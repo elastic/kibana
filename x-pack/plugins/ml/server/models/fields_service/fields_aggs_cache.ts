@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pick from 'lodash/pick';
+import { pick } from 'lodash';
 
 /**
  * Cached aggregation types

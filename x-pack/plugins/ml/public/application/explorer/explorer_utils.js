@@ -8,10 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import get from 'lodash/get';
-import union from 'lodash/union';
-import sortBy from 'lodash/sortBy';
-import uniq from 'lodash/uniq';
+import { get, union, sortBy, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import {

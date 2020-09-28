@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
 import {
   Field,

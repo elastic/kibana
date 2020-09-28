@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import { ActionPayload } from '../../explorer_dashboard_service';
 import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
 

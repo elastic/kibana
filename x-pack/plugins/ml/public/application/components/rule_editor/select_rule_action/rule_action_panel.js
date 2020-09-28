@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 
 import { EuiDescriptionList, EuiLink, EuiPanel } from '@elastic/eui';
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';
 import { DeleteRuleModal } from './delete_rule_modal';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';

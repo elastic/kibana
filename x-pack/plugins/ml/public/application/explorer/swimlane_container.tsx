@@ -14,7 +14,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash';
 import { ExplorerSwimlane, ExplorerSwimlaneProps } from './explorer_swimlane';
 
 import { MlTooltipComponent } from '../components/chart_tooltip';

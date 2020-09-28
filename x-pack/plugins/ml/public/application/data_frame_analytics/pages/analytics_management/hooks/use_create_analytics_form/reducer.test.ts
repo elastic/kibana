@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import merge from 'lodash/merge';
+import { merge } from 'lodash';
 
 import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
 

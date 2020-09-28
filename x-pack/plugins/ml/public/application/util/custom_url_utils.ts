@@ -6,8 +6,7 @@
 
 // utility functions for handling custom URLs
 
-import get from 'lodash/get';
-import flow from 'lodash/flow';
+import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 

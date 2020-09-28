@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
 import {
