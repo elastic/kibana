@@ -33,7 +33,7 @@ const i18nTexts = {
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.description', {
       defaultMessage:
-        'Move data to data nodes optimized for less frequent, read-only access. Store cold data on less-expensive hardware.',
+        'Move data to nodes optimized for less frequent, read-only access. Store data in the cold phase on less-expensive hardware.',
     }),
   },
 };

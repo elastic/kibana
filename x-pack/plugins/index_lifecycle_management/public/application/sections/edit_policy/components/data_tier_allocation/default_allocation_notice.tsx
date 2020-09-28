@@ -14,13 +14,13 @@ import { AllocationNodeRole } from '../../../../lib';
 
 const i18nTextsNodeRoleToDataTier: Record<NodeDataRole, string> = {
   data_hot: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.hot', {
-    defaultMessage: 'hot tier',
+    defaultMessage: 'hot',
   }),
   data_warm: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.warm', {
-    defaultMessage: 'warm tier',
+    defaultMessage: 'warm',
   }),
   data_cold: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.cold', {
-    defaultMessage: 'cold tier',
+    defaultMessage: 'cold',
   }),
 };
 
@@ -33,8 +33,7 @@ const i18nTexts = {
       ),
       body: (nodeRole: NodeDataRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.warm', {
-          defaultMessage:
-            'There are no nodes in the warm tier. Data in this phase will be allocated to the {tier}.',
+          defaultMessage: 'Data in the warm phase will be allocated to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
     },
@@ -45,8 +44,7 @@ const i18nTexts = {
       ),
       body: (nodeRole: NodeDataRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.cold', {
-          defaultMessage:
-            'There are no nodes in the cold tier. Data in this phase will be allocated to the {tier}.',
+          defaultMessage: 'Data in the cold phase will be allocated to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
     },
@@ -61,7 +59,7 @@ const i18nTexts = {
         'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
         {
           defaultMessage:
-            'Assign at least one node to the warm or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no warm nodes.',
+            'Assign at least one node to the warm or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no available nodes.',
         }
       ),
     },
@@ -74,7 +72,7 @@ const i18nTexts = {
         'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableBody',
         {
           defaultMessage:
-            'Assign at least one node to the cold, warm or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no cold nodes.',
+            'Assign at least one node to the cold, warm, or hot tier to use role-based allocation. The policy will fail to complete allocation if there are no available nodes.',
         }
       ),
     },
