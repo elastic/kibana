@@ -92,6 +92,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     let _barSeriesSpec: Partial<BarSeriesSpec> = {
       xAccessor: 'featureName',
       yAccessors: ['meanImportance'],
+      id: 'magnitude',
     };
     let classificationType:
       | 'binary_classification'
@@ -173,7 +174,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
             <span>
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-                defaultMessage="Feature importance summary"
+                defaultMessage="Overall feature importance"
               />
             </span>
           </EuiTitle>
