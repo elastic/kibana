@@ -52,7 +52,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   severity: 'high',
   severity_mapping: [],
   updated_by: 'elastic_kibana',
-  tags: [],
+  tags: ['some fake tag 1', 'some fake tag 2'],
   to: 'now',
   type: 'query',
   threat: [],
@@ -61,7 +61,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   status_date: '2020-02-22T16:47:50.047Z',
   last_success_at: '2020-02-22T16:47:50.047Z',
   last_success_message: 'succeeded',
-  output_index: '.siem-signals-hassanabad-frank-default',
+  output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 55,
   risk_score_mapping: [],
@@ -108,5 +108,14 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
         },
       },
     ],
+  };
+};
+
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  return {
+    ...getRulesSchemaMock(anchorDate),
+    language: 'eql',
+    type: 'eql',
+    query: 'process where true',
   };
 };
