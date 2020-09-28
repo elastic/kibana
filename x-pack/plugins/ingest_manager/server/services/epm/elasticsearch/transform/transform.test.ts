@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JsonObject } from '../../../../../../infra/common/typed_json';
-
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
@@ -16,7 +14,7 @@ jest.mock('./common', () => {
   };
 });
 
-import { installTransformForDataset } from './install';
+import { installTransform } from './install';
 import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
@@ -105,10 +103,14 @@ describe('test transform install', () => {
         ],
       } as {
         count: number;
-        transforms: JsonObject[];
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
       })
     );
-    await installTransformForDataset(
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
@@ -296,7 +298,7 @@ describe('test transform install', () => {
       >)
     );
     legacyScopedClusterClient.callAsCurrentUser = jest.fn();
-    await installTransformForDataset(
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
@@ -391,10 +393,14 @@ describe('test transform install', () => {
         ],
       } as {
         count: number;
-        transforms: JsonObject[];
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
       })
     );
-    await installTransformForDataset(
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',

@@ -7,7 +7,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
-import { JsonObject } from '../../../../../../infra/common/typed_json';
 
 export const stopTransforms = async (transformIds: string[], callCluster: CallESAsCurrentUser) => {
   for (const transformId of transformIds) {
@@ -29,7 +28,11 @@ export const deleteTransforms = async (
       // get the index the transform
       const transformResponse: {
         count: number;
-        transforms: JsonObject[];
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
       } = await callCluster('transport.request', {
         method: 'GET',
         path: `/_transform/${transformId}`,
@@ -46,7 +49,7 @@ export const deleteTransforms = async (
       for (const transform of transformResponse.transforms) {
         await callCluster('transport.request', {
           method: 'DELETE',
-          path: `/${transform.dest.index}`,
+          path: `/${transform?.dest?.index}`,
           ignore: [404],
         });
       }

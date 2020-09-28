@@ -23,7 +23,7 @@ interface TransformInstallation {
   content: string;
 }
 
-export const installTransformForDataset = async (
+export const installTransform = async (
   registryPackage: RegistryPackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
@@ -70,7 +70,7 @@ export const installTransformForDataset = async (
     });
 
     const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform });
+      return handleTransformInstall({ callCluster, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -99,7 +99,7 @@ const isTransform = (path: string) => {
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
-async function installTransform({
+async function handleTransformInstall({
   callCluster,
   transform,
 }: {
