@@ -71,7 +71,7 @@ export class TypesService {
        * registers a visualization type
        * @param config - visualization type definition
        */
-      createBaseVisualization: (config: BaseVisTypeOptions): void => {
+      createBaseVisualization: <TVisParams>(config: BaseVisTypeOptions<TVisParams>): void => {
         const vis = new BaseVisType(config);
         registerVisualization(() => vis);
       },
