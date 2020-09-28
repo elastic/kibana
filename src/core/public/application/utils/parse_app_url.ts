@@ -43,6 +43,9 @@ export const parseAppUrl = (
   currentUrl: string = window.location.href
 ): ParsedAppUrl | undefined => {
   const currentOrigin = getUrlOrigin(currentUrl);
+  if (!currentOrigin) {
+    throw new Error('when manually provided, currentUrl must be valid url with an origin');
+  }
   const currentPath = currentUrl.substring(currentOrigin.length);
 
   // remove the origin from the given url
