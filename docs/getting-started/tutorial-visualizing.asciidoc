@@ -39,7 +39,7 @@ image::images/tutorial-visualize-wizard-step-1.png[Image showing different optio
 .. In the *Label* field, enter `Speaking Parts`. 
 +
 [role="screenshot"]
-image::images/tutorial-visualize-bar-1.5.png[Bar chart showing "speaking parts" data]
+image::images/tutorial-visualize-bar-1.5.png[Bar chart showing the speaking parts  data]
 
 . *Save* the chart with the name `Bar Example`.
 +
