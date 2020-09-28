@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
-import { of, empty } from 'rxjs';
-import { filter, flatMap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, startWith, map } from 'rxjs/operators';
 import { isUndefined, countBy, mapValues } from 'lodash';
 import stats from 'stats-lite';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskManager, TaskLifecycleEvent } from '../task_manager';
 import { isTaskRunEvent, isTaskPollingCycleEvent } from '../task_events';
-import { isOk } from '../lib/result_type';
+import { isOk, Ok } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
 import { FillPoolResult } from '../lib/fill_pool';
 
@@ -49,61 +48,60 @@ export interface SummarizedTaskRunStat extends JsonObject {
 
 export function createTaskRunAggregator(
   taskManager: TaskManager,
-  runningAverageWindowSize: number,
-  logger: Logger
+  runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
-  const runningStats: {
-    runtime: {
-      polling: {
-        lastSuccessfulPoll: (value?: string) => string | undefined;
-        resultFrequency: (value?: FillPoolResult) => FillPoolResult[];
-      };
-      drift: (value?: number) => number[];
-    };
-  } = {
-    runtime: {
-      polling: {
-        lastSuccessfulPoll: createLastValueStat<string>(),
-        resultFrequency: createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize),
-      },
-      drift: createRunningAveragedStat<number>(runningAverageWindowSize),
-    },
-  };
-  return taskManager.events.pipe(
+  const driftQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const taskRunEvents$: Observable<TaskRunStat['drift']> = taskManager.events.pipe(
     filter(
       (taskEvent: TaskLifecycleEvent) =>
-        (isTaskRunEvent(taskEvent) || isTaskPollingCycleEvent(taskEvent)) &&
-        isOk<ConcreteTaskInstance | FillPoolResult, unknown>(taskEvent.event)
+        isTaskRunEvent(taskEvent) && isOk<ConcreteTaskInstance, unknown>(taskEvent.event)
     ),
-    flatMap((taskEvent: TaskLifecycleEvent) => {
-      if (isTaskRunEvent(taskEvent) && isOk(taskEvent.event)) {
-        const task = taskEvent.event.value;
-        const now = Date.now();
-        return of({
-          key: 'runtime',
-          value: {
-            polling: {
-              lastSuccessfulPoll: runningStats.runtime.polling.lastSuccessfulPoll(),
-              resultFrequency: runningStats.runtime.polling.resultFrequency(),
-            },
-            drift: runningStats.runtime.drift(now - task.runAt.getTime()),
-          },
-        } as AggregatedStat<TaskRunStat>);
-      } else if (isTaskPollingCycleEvent(taskEvent) && isOk(taskEvent.event)) {
-        return of({
-          key: 'runtime',
-          value: {
-            polling: {
-              lastSuccessfulPoll: runningStats.runtime.polling.lastSuccessfulPoll(
-                new Date().toISOString()
-              ),
-              resultFrequency: runningStats.runtime.polling.resultFrequency(taskEvent.event.value),
-            },
-            drift: runningStats.runtime.drift(),
-          },
-        } as AggregatedStat<TaskRunStat>);
-      }
-      return empty();
+    map((taskEvent: TaskLifecycleEvent) => {
+      const task = (taskEvent.event as Ok<ConcreteTaskInstance>).value;
+      const now = Date.now();
+      return driftQueue(now - task.runAt.getTime());
+    })
+  );
+
+  const pollingQueue = {
+    lastSuccessfulPoll: createLastValueStat<string>(),
+    resultFrequency: createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize),
+  };
+  const taskPollingEvents$: Observable<TaskRunStat['polling']> = taskManager.events.pipe(
+    filter(
+      (taskEvent: TaskLifecycleEvent) =>
+        isTaskPollingCycleEvent(taskEvent) && isOk<FillPoolResult, unknown>(taskEvent.event)
+    ),
+    map((taskEvent: TaskLifecycleEvent) => {
+      return {
+        lastSuccessfulPoll: pollingQueue.lastSuccessfulPoll(new Date().toISOString()),
+        resultFrequency: pollingQueue.resultFrequency(
+          (taskEvent.event as Ok<FillPoolResult>).value
+        ),
+      };
+    })
+  );
+
+  return combineLatest(
+    taskRunEvents$.pipe(startWith([])),
+    taskPollingEvents$.pipe(
+      startWith({
+        resultFrequency: {
+          [FillPoolResult.NoTasksClaimed]: 0,
+          [FillPoolResult.RanOutOfCapacity]: 0,
+          [FillPoolResult.PoolFilled]: 0,
+        },
+      })
+    )
+  ).pipe(
+    map(([drift, polling]) => {
+      return {
+        key: 'runtime',
+        value: {
+          drift,
+          polling,
+        },
+      } as AggregatedStat<TaskRunStat>;
     })
   );
 }
@@ -134,10 +132,17 @@ function calculateRunningAverage(values: number[]): AveragedStat {
   };
 }
 
+/**
+ * Calculate the frequency of each term in a list of terms.
+ * @param values
+ */
 function calculateFrequency<T>(values: T[]): JsonObject {
   return mapValues(countBy(values), (count) => Math.round((count * 100) / values.length));
 }
 
+/**
+ * Utility to keep track of one value which might change over time
+ */
 function createLastValueStat<T>() {
   let lastValue: T;
   return (value?: T) => {
@@ -150,6 +155,10 @@ function createLastValueStat<T>() {
   };
 }
 
+/**
+ * Utility to keep track of a limited queue of values which changes over time
+ * dropping older values as they slide out of the window we wish to track
+ */
 function createRunningAveragedStat<T>(runningAverageWindowSize: number) {
   const queue = new Array<T>();
   return (value?: T) => {

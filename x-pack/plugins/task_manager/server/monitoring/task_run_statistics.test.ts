@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import { Subject } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
-import { take, tap, bufferCount, startWith, map } from 'rxjs/operators';
+import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { asTaskRunEvent, asTaskPollingCycleEvent } from '../task_events';
@@ -21,7 +21,6 @@ import {
   SummarizedTaskRunStat,
 } from './task_run_statistics';
 import { taskManagerMock } from '../task_manager.mock';
-import { mockLogger } from '../test_utils';
 import { AggregatedStat } from './runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 
@@ -36,20 +35,13 @@ describe('Task Run Statistics', () => {
 
   test('returns a running average of task drift', async () => {
     const runAtDrift = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
+    const events = new Subject<TaskLifecycleEvent>();
     const taskManager = taskManagerMock.create({
-      events: new Subject<TaskLifecycleEvent>().pipe(
-        startWith(
-          ...runAtDrift.map((drift) => mockTaskRunEvent({ runAt: runAtMillisecondsAgo(drift) }))
-        )
-      ),
+      events,
     });
 
     const runningAverageWindowSize = 5;
-    const taskRunAggregator = createTaskRunAggregator(
-      taskManager,
-      runningAverageWindowSize,
-      mockLogger()
-    );
+    const taskRunAggregator = createTaskRunAggregator(taskManager, runningAverageWindowSize);
 
     function expectWindowEqualsUpdate(
       taskStat: AggregatedStat<SummarizedTaskRunStat>,
@@ -65,6 +57,10 @@ describe('Task Run Statistics', () => {
     return new Promise((resolve) => {
       taskRunAggregator
         .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(value),
@@ -84,38 +80,30 @@ describe('Task Run Statistics', () => {
           expectWindowEqualsUpdate(taskStats[7], runAtDrift.slice(3, 8));
           resolve();
         });
+
+      for (const drift of runAtDrift) {
+        events.next(mockTaskRunEvent({ runAt: runAtMillisecondsAgo(drift) }));
+      }
     });
   });
 
   test('returns polling stats', async () => {
     const expectedTimestamp: string[] = [];
+    const events = new Subject<TaskLifecycleEvent>();
     const taskManager = taskManagerMock.create({
-      events: new Subject<TaskLifecycleEvent>().pipe(
-        startWith(
-          asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)),
-          asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed))
-        )
-      ),
+      events,
     });
 
     const runningAverageWindowSize = 5;
-    const taskRunAggregator = createTaskRunAggregator(
-      taskManager,
-      runningAverageWindowSize,
-      mockLogger()
-    );
+    const taskRunAggregator = createTaskRunAggregator(taskManager, runningAverageWindowSize);
 
     return new Promise((resolve) => {
       taskRunAggregator
         .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(value),
@@ -161,6 +149,17 @@ describe('Task Run Statistics', () => {
           ]);
           resolve();
         });
+
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      events.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
     });
   });
 });
