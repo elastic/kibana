@@ -6,6 +6,7 @@
 
 import { shallow, mount } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
@@ -79,7 +80,7 @@ describe('JobsTableComponent', () => {
     expect(href).toEqual("/app/ml/jobs?mlManagement=(jobId:'job%20id%20with%20spaces')");
   });
 
-  test('should call onJobStateChange when the switch is clicked to be true/open', () => {
+  test('should call onJobStateChange when the switch is clicked to be true/open', async () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={false}
@@ -94,7 +95,9 @@ describe('JobsTableComponent', () => {
       .simulate('click', {
         target: { checked: true },
       });
-    expect(onJobStateChangeMock.mock.calls[0]).toEqual([securityJobs[0], 1571022859393, true]);
+    await waitFor(() => {
+      expect(onJobStateChangeMock.mock.calls[0]).toEqual([securityJobs[0], 1571022859393, true]);
+    });
   });
 
   test('should have a switch when it is not in the loading state', () => {
