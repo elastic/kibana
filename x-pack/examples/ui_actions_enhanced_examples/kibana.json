@@ -9,7 +9,6 @@
   "optionalPlugins": [],
   "requiredBundles": [
     "embeddable",
-    "dashboardEnhanced",
     "kibanaUtils",
     "kibanaReact",
     "share"
