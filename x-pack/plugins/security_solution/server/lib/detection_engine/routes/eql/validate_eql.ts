@@ -30,7 +30,7 @@ export const validateEql = async ({
       index: index.join(','),
       body: {
         query,
-        size: 1,
+        size: 0,
       },
     },
     { ignore: [400] }
