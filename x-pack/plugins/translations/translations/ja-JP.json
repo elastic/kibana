@@ -9479,7 +9479,6 @@
     "xpack.lens.configPanel.color.tooltip.custom": "［自動］モードに戻すには、カスタム色をオフにしてください。",
     "xpack.lens.configPanel.color.tooltip.disabled": "レイヤーに「内訳条件」が含まれている場合は、個別の系列をカスタム色にできません。",
     "xpack.lens.configPanel.selectVisualization": "ビジュアライゼーションを選択してください",
-    "xpack.lens.configure.addConfig": "構成を追加",
     "xpack.lens.configure.editConfig": "構成の編集",
     "xpack.lens.configure.emptyConfig": "ここにフィールドをドロップ",
     "xpack.lens.dataPanelWrapper.switchDatasource": "データソースに切り替える",

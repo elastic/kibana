@@ -39,7 +39,7 @@ interface BaseProps {
   value?: unknown;
 
   /**
-   * The React element which which be passed the draggable handlers
+   * The React element which will be passed the draggable handlers
    */
   children: React.ReactElement;
 
