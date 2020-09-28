@@ -113,7 +113,9 @@ $pageWidth: 1200px;
   }
 
   .kbnOverviewMore__content {
-    justify-content: center;
+    @include euiBreakpoint('m', 'l', 'xl') {
+      justify-content: center;
+    }
   }
 }
 
