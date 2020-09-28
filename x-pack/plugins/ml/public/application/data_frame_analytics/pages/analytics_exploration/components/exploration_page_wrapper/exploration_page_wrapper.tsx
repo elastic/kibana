@@ -29,6 +29,7 @@ interface Props {
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
   FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
+  defaultIsTraining?: boolean;
 }
 
 export const ExplorationPageWrapper: FC<Props> = ({
@@ -36,6 +37,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
   title,
   EvaluatePanel,
   FeatureImportanceSummaryPanel,
+  defaultIsTraining,
 }) => {
   const {
     indexPattern,
@@ -86,6 +88,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
             needsDestIndexPattern={needsDestIndexPattern}
             setEvaluateSearchQuery={setSearchQuery}
             title={title}
+            defaultIsTraining={defaultIsTraining}
           />
         )}
     </>
