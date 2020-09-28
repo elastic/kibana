@@ -30,20 +30,20 @@ import {
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
 } from './specs';
-import { SavedObjectReference } from '../../../../core/types';
 import { ExpressionAstFunction } from '../ast';
+import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
  * register a function in `expressions` plugin.
  */
-export interface ExpressionFunctionDefinition<
+export type ExpressionFunctionDefinition<
   Name extends string,
   Input,
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+> = PersistableStateDefinition<ExpressionAstFunction['arguments']> & {
   /**
    * The name of the function, as will be used in expression.
    */
@@ -96,41 +96,6 @@ export interface ExpressionFunctionDefinition<
   fn(input: Input, args: Arguments, context: Context): Output;
 
   /**
-   * telemetry function
-   * @param state any previous or current version of the ast for this function
-   */
-  telemetry?(state: ExpressionAstFunction, telemetryData: Record<string, any>): void;
-
-  /**
-   * migrate function
-   * This function will be executed for arguments of an expression function before being executed for the
-   * current expression function. This means all arguments will already be migrated when this method is
-   * called on an expression function
-   * @param state any previous or current version of the ast for this function
-   */
-  migrate?(state: ExpressionAstFunction): ExpressionAstFunction;
-
-  /**
-   * extract function takes the state and returns same state with references extracted
-   * and array of references
-   * @param state
-   */
-  extract?(
-    state: ExpressionAstFunction['arguments']
-  ): { args: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
-
-  /**
-   * inject function takes the state with extracted references and a list of references and
-   * returns state with references injected.
-   * @param state
-   * @param references
-   */
-  inject?(
-    state: ExpressionAstFunction['arguments'],
-    references: SavedObjectReference[]
-  ): ExpressionAstFunction['arguments'];
-
-  /**
    * @deprecated Use `inputTypes` instead.
    */
   context?: {
@@ -139,7 +104,7 @@ export interface ExpressionFunctionDefinition<
      */
     types: AnyExpressionFunctionDefinition['inputTypes'];
   };
-}
+};
 
 /**
  * Type to capture every possible expression function definition.

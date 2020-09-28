@@ -31,8 +31,8 @@ import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
-
 import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
 export interface ExpressionExecOptions {
   /**
@@ -87,7 +87,8 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
-export class Executor<Context extends Record<string, unknown> = Record<string, unknown>> {
+export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
+  implements PersistableState<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -236,25 +237,19 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public extract(ast: ExpressionAstExpression) {
     const allReferences: SavedObjectReference[] = [];
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
-      const { args, references } = fn.extract(link.arguments);
-      link.arguments = args;
+      const { state, references } = fn.extract(link.arguments);
+      link.arguments = state;
       allReferences.push(...references);
     });
-    return { ast: newAst, references: allReferences };
-  }
-
-  public migrate(ast: ExpressionAstExpression) {
-    return this.walkAst(cloneDeep(ast), (fn, link) => {
-      const newLink = fn.migrate(link);
-      link.function = newLink.function;
-      link.arguments = newLink.arguments;
-    });
+    return { state: newAst, references: allReferences };
   }
 
   public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, any>) {
-    return this.walkAst(cloneDeep(ast), (fn, link) => {
-      fn.telemetry(link, telemetryData);
+    this.walkAst(cloneDeep(ast), (fn, link) => {
+      telemetryData = fn.telemetry(link.arguments, telemetryData);
     });
+
+    return telemetryData;
   }
 
   public fork(): Executor<Context> {

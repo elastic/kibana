@@ -156,7 +156,6 @@ describe('Executor', () => {
   describe('.inject', () => {
     const executor = new Executor();
 
-    const migrateFn = jest.fn().mockImplementation((args, version) => args);
     const injectFn = jest.fn().mockImplementation((args, references) => args);
     const extractFn = jest.fn().mockReturnValue({ args: {}, references: [] });
 
@@ -174,9 +173,6 @@ describe('Executor', () => {
       },
       inject: (state: ExpressionAstFunction['arguments']) => {
         return injectFn(state);
-      },
-      migrate: (state: ExpressionAstFunction) => {
-        return migrateFn(state);
       },
       fn: jest.fn(),
     };
@@ -196,15 +192,6 @@ describe('Executor', () => {
           parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
         );
         expect(extractFn).toBeCalledTimes(5);
-      });
-    });
-
-    describe('.migrate', () => {
-      test('calls migrate function for every expression function in expression', () => {
-        executor.migrate(
-          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
-        );
-        expect(migrateFn).toBeCalledTimes(5);
       });
     });
   });

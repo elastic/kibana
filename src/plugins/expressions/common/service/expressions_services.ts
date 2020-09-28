@@ -22,6 +22,7 @@ import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -83,7 +84,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService {
+export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -255,14 +256,6 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
-  };
-
-  /**
-   * Migrates expression AST to the latest version. This function should be called whenever expression is read from any place where expression could be from previous kibana version.
-   * @param state old version of expression AST
-   */
-  public readonly migrate = (state: ExpressionAstExpression) => {
-    return this.executor.migrate(state);
   };
 
   /**

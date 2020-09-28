@@ -24,8 +24,9 @@ import { ExpressionValue } from '../expression_types/types';
 import { ExecutionContext } from '../execution';
 import { ExpressionAstFunction } from '../ast';
 import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
-export class ExpressionFunction {
+export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
    * Name of function
    */
@@ -64,11 +65,13 @@ export class ExpressionFunction {
   inputTypes: string[] | undefined;
 
   disabled: boolean;
-  telemetry: (state: ExpressionAstFunction, telemetryData: Record<string, any>) => void;
-  migrate: (state: ExpressionAstFunction) => ExpressionAstFunction;
+  telemetry: (
+    state: ExpressionAstFunction['arguments'],
+    telemetryData: Record<string, any>
+  ) => Record<string, any>;
   extract: (
     state: ExpressionAstFunction['arguments']
-  ) => { args: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
+  ) => { state: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
   inject: (
     state: ExpressionAstFunction['arguments'],
     references: SavedObjectReference[]
@@ -86,7 +89,6 @@ export class ExpressionFunction {
       context,
       disabled,
       telemetry,
-      migrate,
       inject,
       extract,
     } = functionDefinition;
@@ -99,10 +101,9 @@ export class ExpressionFunction {
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.disabled = disabled || false;
-    this.telemetry = telemetry || (() => {});
-    this.migrate = migrate || identity;
+    this.telemetry = telemetry || ((s, c) => c);
     this.inject = inject || identity;
-    this.extract = extract || ((s) => ({ args: s, references: [] }));
+    this.extract = extract || ((s) => ({ state: s, references: [] }));
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);
