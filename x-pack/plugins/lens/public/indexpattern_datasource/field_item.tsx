@@ -183,12 +183,13 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       ownFocus
       className="lnsFieldItem__popoverAnchor"
       display="block"
+      data-test-sub="lnsFieldListPanelField"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
           label={field.displayName}
           value={value}
-          data-test-subj="lnsFieldListPanelField"
+          data-test-subj={`lnsFieldListPanelField-${field.name}`}
           draggable
         >
           <FieldButton
@@ -196,7 +197,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               exists ? 'exists' : 'missing'
             }`}
             isActive={infoIsOpen}
-            data-test-subj={`lnsFieldListPanelField-${field.name}`}
             onClick={togglePopover}
             aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
               defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
