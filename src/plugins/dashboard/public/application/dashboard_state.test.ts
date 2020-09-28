@@ -23,6 +23,10 @@ import { getSavedDashboardMock } from './test_helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { DashboardContainer, DashboardContainerInput } from '.';
+import { Optional } from '@kbn/utility-types';
+import { DashboardContainerOptions } from './embeddable/dashboard_container';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -46,6 +50,23 @@ describe('DashboardState', function () {
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
     });
+  }
+
+  function initDashboardContainer(initialInput?: Optional<DashboardContainerInput>) {
+    const { doStart } = embeddablePluginMock.createInstance();
+    const defaultInput: DashboardContainerInput = {
+      id: '123',
+      viewMode: ViewMode.EDIT,
+      filters: [] as DashboardContainerInput['filters'],
+      query: {} as DashboardContainerInput['query'],
+      timeRange: {} as DashboardContainerInput['timeRange'],
+      useMargins: true,
+      title: 'ultra awesome test dashboard',
+      isFullScreenMode: false,
+      panels: {} as DashboardContainerInput['panels'],
+    };
+    const input = { ...defaultInput, ...(initialInput ?? {}) };
+    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerOptions);
   }
 
   describe('syncTimefilterWithDashboard', function () {
@@ -92,6 +113,43 @@ describe('DashboardState', function () {
 
       expect(mockTime.to).toBe(savedDashboard.timeTo);
       expect(mockTime.from).toBe(savedDashboard.timeFrom);
+    });
+  });
+
+  describe('Dashboard Container Changes', () => {
+    beforeEach(() => {
+      initDashboardState();
+    });
+
+    test('expanedPanelId in container input casues state update', () => {
+      dashboardState.setExpandedPanelId = jest.fn();
+
+      const dashboardContainer = initDashboardContainer({
+        expandedPanelId: 'theCoolestPanelOnThisDashboard',
+      });
+
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(
+        'theCoolestPanelOnThisDashboard'
+      );
+    });
+
+    test('expanedPanelId is not updated when it is the same', () => {
+      dashboardState.setExpandedPanelId = jest
+        .fn()
+        .mockImplementation(dashboardState.setExpandedPanelId);
+
+      const dashboardContainer = initDashboardContainer({
+        expandedPanelId: 'theCoolestPanelOnThisDashboard',
+      });
+
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(1);
+
+      dashboardContainer.updateInput({ expandedPanelId: 'woah it changed' });
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(2);
     });
   });
 
