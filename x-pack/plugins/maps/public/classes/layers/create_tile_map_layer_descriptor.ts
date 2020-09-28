@@ -143,7 +143,7 @@ export function createTileMapLayerDescriptor({
         maxSize: 18,
         field: metricStyleField,
         fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as SizeDynamicOptions)
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions)
             .fieldMetaOptions,
           isEnabled: false,
         },
