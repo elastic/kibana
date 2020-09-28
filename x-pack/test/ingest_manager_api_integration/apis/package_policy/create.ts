@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
+      console.log(agentPolicyResponse);
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -90,6 +91,25 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'filetest-1',
             description: '',
             namespace: 'InvalidNamespace',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+        await supertest
+          .post(`/api/ingest_manager/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace:
+              'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
             policy_id: agentPolicyId,
             enabled: true,
             output_id: '',

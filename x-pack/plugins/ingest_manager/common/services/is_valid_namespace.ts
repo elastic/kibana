@@ -33,7 +33,12 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
         }
       ),
     };
-  } else if (new Blob([namespace]).size > 100) {
+  }
+  // Node.js doesn't have Blob, and browser doesn't have Buffer :)
+  else if (
+    (typeof Blob === 'function' && new Blob([namespace]).size > 100) ||
+    (typeof Buffer === 'function' && Buffer.from(namespace).length > 100)
+  ) {
     return {
       valid: false,
       error: i18n.translate('xpack.ingestManager.namespaceValidation.tooLongErrorMessage', {
