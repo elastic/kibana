@@ -6,6 +6,7 @@
 
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
   Vector2,
@@ -617,5 +618,21 @@ export const relatedEventCountOfTypeForNode: (
     } else {
       return nodeStats.events.byCategory[category];
     }
+  }
+);
+
+/**
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
+ */
+export const panelViewAndParameters = createSelector(
+  (state: DataState) => state.locationSearch,
+  resolverComponentInstanceID,
+  /* eslint-disable-next-line no-shadow */
+  (locationSearch, resolverComponentInstanceID) => {
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
   }
 );

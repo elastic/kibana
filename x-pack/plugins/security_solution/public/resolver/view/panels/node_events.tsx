@@ -176,7 +176,7 @@ const NodeEventsLink = memo(
       panelView: 'nodeEventsOfType',
       panelParameters: {
         nodeID,
-        eventType,
+        eventCategory: eventType,
       },
     });
     return (

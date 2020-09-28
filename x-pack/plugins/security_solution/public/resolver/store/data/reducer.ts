@@ -8,6 +8,8 @@ import { Reducer } from 'redux';
 import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
+import * as selectors from './selectors';
+import * as nodeEventsOfTypeModel from './node_events_of_type_model';
 
 const initialState: DataState = {
   relatedEvents: new Map(),
@@ -26,8 +28,18 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         },
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
+      locationSearch: action.payload.locationSearch,
     };
-    return nextState;
+    const panelViewAndParameters = selectors.panelViewAndParameters(nextState);
+    return {
+      ...nextState,
+      // Remove `nodeEventsOfType` if it is no longer relevant
+      nodeEventsOfType:
+        nextState.nodeEventsOfType &&
+        nodeEventsOfTypeModel.isValid(nextState.nodeEventsOfType, panelViewAndParameters)
+          ? nextState.nodeEventsOfType
+          : undefined,
+    };
   } else if (action.type === 'appRequestedResolverData') {
     // keep track of what we're requesting, this way we know when to request and when not to.
     const nextState: DataState = {
@@ -101,6 +113,33 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
     return nextState;
+  } else if (action.type === 'serverReturnedRelatedEventsOfType') {
+    if (nodeEventsOfTypeModel.isValid(action.payload, selectors.panelViewAndParameters(state))) {
+      if (state.nodeEventsOfType) {
+        // combine the new and old data.
+        const updated = nodeEventsOfTypeModel.updatedWith(state.nodeEventsOfType, action.payload);
+        if (updated) {
+          // There is no existing data, use the new data.
+          const next: DataState = {
+            ...state,
+            nodeEventsOfType: updated,
+          };
+          return next;
+        } else {
+          // this should never happen.
+          throw new Error('Could not handle related event data because of an internal error.');
+        }
+      } else {
+        // There is no existing data, use the new data.
+        const next: DataState = {
+          ...state,
+          nodeEventsOfType: action.payload,
+        };
+      }
+    } else {
+      // the action is stale, ignore it
+      return state;
+    }
   } else {
     return state;
   }

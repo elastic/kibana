@@ -207,11 +207,35 @@ export interface TreeFetcherParameters {
   indices: string[];
 }
 
+interface NodeEventsOfTypeState {
+  /**
+   * The nodeID that `events` are related to.
+   */
+  nodeID: string;
+  /**
+   * The category that `events` have in common.
+   */
+  eventCategory: string;
+  /**
+   * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
+   */
+  events: SafeResolverEvent[];
+  /**
+   * The cursor, if any, that can be used to retrieve more events.
+   */
+  cursor: null | string;
+}
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
+  /**
+   * @deprecated Use the API
+   */
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
+
+  readonly nodeEventsOfType?: NodeEventsOfTypeState;
 
   readonly tree?: {
     /**
@@ -256,6 +280,11 @@ export interface DataState {
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
 }
 
 /**
@@ -685,7 +714,7 @@ export type PanelViewAndParameters =
         /**
          * A parameter used to filter the events. For example, events that don't contain `eventType` in their `event.category` field may be hidden.
          */
-        eventType: string;
+        eventCategory: string;
       };
     }
   | {

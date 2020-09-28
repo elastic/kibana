@@ -214,7 +214,7 @@ function EventDetailBreadcrumbs({
 
   const nodeEventsOfTypeLinkNavProps = useLinkProps({
     panelView: 'nodeEventsOfType',
-    panelParameters: { nodeID, eventType: breadcrumbEventCategory },
+    panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
   const breadcrumbs = useMemo(() => {
     return [

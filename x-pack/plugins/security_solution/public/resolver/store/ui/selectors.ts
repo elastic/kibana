@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decode, encode } from 'rison-node';
+import { encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { isPanelViewAndParameters } from '../../models/location_search';
 import { eventID } from '../../../../common/endpoint/models/event';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
+import { parameterName } from '../parameter_name';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -42,21 +44,10 @@ export const panelViewAndParameters = createSelector(
   (state: ResolverUIState) => state.locationSearch,
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
-    if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
-      // Equivalent to `null`
-      return defaultParameters();
-    }
-    const urlSearchParams = new URLSearchParams(locationSearch);
-    const value = urlSearchParams.get(parameterName(resolverComponentInstanceID));
-    if (value === null) {
-      // Equivalent to `null`
-      return defaultParameters();
-    }
-    const decodedValue: unknown = decode(value);
-    if (isPanelViewAndParameters(decodedValue)) {
-      return decodedValue;
-    }
-    return defaultParameters();
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
   }
 );
 
@@ -104,7 +95,7 @@ export const relatedEventsRelativeHrefs: (
           panelView: 'nodeEventsOfType',
           panelParameters: {
             nodeID,
-            eventType: category,
+            eventCategory: category,
           },
         };
         hrefsByCategory.set(category, relativeHref(categoryPanelParams));
@@ -144,20 +135,3 @@ export const relatedEventDetailHrefs: (
     return hrefsByEntityID;
   };
 });
-
-/**
- * The parameter name that we use to read/write state to the query string
- */
-export function parameterName(resolverComponentInstanceID: string): string {
-  return `resolver-${resolverComponentInstanceID}`;
-}
-/**
- * The default parameters to use when no (valid) location search is available.
- */
-export function defaultParameters(): PanelViewAndParameters {
-  // Note, this really should be a selector. it needs to know about the state of the app so it can select
-  // the origin event.
-  return {
-    panelView: 'nodes',
-  };
-}

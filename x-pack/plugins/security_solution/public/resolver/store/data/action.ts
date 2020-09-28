@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
+import {
+  ResolverPaginatedEvents,
+  ResolverRelatedEvents,
+  ResolverTree,
+  SafeEndpointEvent,
+} from '../../../../common/endpoint/types';
 import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
@@ -53,9 +58,32 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
+interface ServerReturnedRelatedEventsOfType {
+  readonly type: 'serverReturnedRelatedEventsOfType';
+  readonly payload: {
+    /**
+     * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
+     */
+    events: SafeEndpointEvent[];
+    /**
+     * The cursor, if any, that can be used to retrieve more events.
+     */
+    cursor: string | null;
+    /**
+     * The nodeID that `events` are related to.
+     */
+    nodeID: string;
+    /**
+     * The category that `events` have in common.
+     */
+    eventCategory: string;
+  };
+}
+
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerReturnedRelatedEventData
+  | ServerReturnedRelatedEventsOfType
   | AppRequestedResolverData
   | AppAbortedResolverDataRequest;
