@@ -533,5 +533,72 @@ describe('terms', () => {
         },
       });
     });
+
+    it('should update state with valid value if value is out of the range', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      instance.find(EuiRange).prop('onChange')!(
+        {
+          target: {
+            value: '27',
+          },
+        } as React.ChangeEvent<HTMLInputElement>,
+        true
+      );
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  size: 20,
+                },
+              },
+            },
+          },
+        },
+      });
+      instance.find(EuiRange).prop('onChange')!(
+        {
+          target: {
+            value: '-7',
+          },
+        } as React.ChangeEvent<HTMLInputElement>,
+        true
+      );
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
   });
 });

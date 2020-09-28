@@ -138,6 +138,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   },
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const SEPARATOR = '$$$';
+    const MIN_NUMBER_OF_VALUES = 1;
+    const MAX_NUMBER_OF_VALUES = 20;
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
         return orderBy.type;
@@ -180,8 +182,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
           fullWidth
         >
           <FixedEuiRange
-            min={1}
-            max={20}
+            min={MIN_NUMBER_OF_VALUES}
+            max={MAX_NUMBER_OF_VALUES}
             step={1}
             value={currentColumn.params.size}
             showInput
@@ -189,17 +191,24 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             compressed
             onChange={(
               e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-            ) =>
+            ) => {
+              let value = Number((e.target as HTMLInputElement).value);
+              if (value > MAX_NUMBER_OF_VALUES) {
+                value = MAX_NUMBER_OF_VALUES;
+              } else if (value < MIN_NUMBER_OF_VALUES) {
+                value = MIN_NUMBER_OF_VALUES;
+              }
+
               setState(
                 updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
                   paramName: 'size',
-                  value: Number((e.target as HTMLInputElement).value),
+                  value,
                 })
-              )
-            }
+              );
+            }}
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
               defaultMessage: 'Number of values',
             })}
