@@ -32,7 +32,7 @@ The `Pull Request` feature in TeamCity:
 - Automatically discovers pull request branches in GitHub
   - Option to filter by contributor type (members of same org, org+external contributor, everyone)
   - Option to filter by target branch (e.g. only discover Pull Requests targeting master)
-  - Works by essentially modifying the VCS root branch spec (so you should NOT add anything to branch spec if you are using this)
+  - Works by essentially modifying the VCS root branch spec (so you should NOT add anything related to PRs to branch spec if you are using this)
   - Draft PRs do get discovered
 - Adds some Pull Request information to build overview pages
 - Adds a few parameters available to build configurations:
@@ -57,7 +57,7 @@ The Pull Request feature may be enough to cover your needs. Otherwise, you'll ne
 - TeamCity doesn't have the ability to cancel currently-running builds when a new commit is pushed
 - TeamCity does not add fork information (e.g. the owner) to build configuration parameters
 - Builds CAN be triggered for branches not yet discovered
-  - You can turn off discovery altogether, and a branch will still be build-able. It will be show up in the UI and build whenever triggered via an external trigger.
+  - You can turn off discovery altogether, and a branch will still be build-able. When triggered externally, it will show up in the UI and build.
 
 How to [trigger a build via API](https://www.jetbrains.com/help/teamcity/rest-api-reference.html#Triggering+a+Build):
 
