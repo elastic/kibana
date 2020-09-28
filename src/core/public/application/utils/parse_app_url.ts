@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getUrlOrigin } from '@kbn/std';
+import { resolve } from 'url';
 import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
 
@@ -24,25 +26,36 @@ import { App, ParsedAppUrl } from '../types';
  * Parse given url and return the associated app id and path if any app matches, or undefined if none do.
  * Input can either be:
  *
- * - a path containing the basePath,
- *   ie `/base-path/app/my-app/some-path`
+ * - a absolute path containing the basePath,
+ *   e.g `/base-path/app/my-app/some-path`
  *
  * - an absolute url matching the `origin` of the kibana instance (as seen by the browser),
- *   i.e `https://kibana:8080/base-path/app/my-app/some-path`
+ *   e.g `https://kibana:8080/base-path/app/my-app/some-path`
+ *
+ * - a path relative to the provided `currentUrl`.
+ *   e.g with `currentUrl` being `https://kibana:8080/base-path/app/current-app/some-path`
+ *   `../other-app/other-path` will be converted to `/base-path/app/other-app/other-path`
  */
 export const parseAppUrl = (
   url: string,
   basePath: IBasePath,
   apps: Map<string, App<unknown>>,
-  getOrigin: () => string = () => window.location.origin
+  currentUrl: string = window.location.href
 ): ParsedAppUrl | undefined => {
-  const origin = getOrigin();
+  const currentOrigin = getUrlOrigin(currentUrl);
+  const currentPath = currentUrl.substring(currentOrigin.length);
 
   // remove the origin from the given url
-  if (url.startsWith(origin)) {
-    url = url.substring(origin.length);
+  if (url.startsWith(currentOrigin)) {
+    url = url.substring(currentOrigin.length);
   }
-  // if using a basePath and the url path does not starts with it
+
+  // if the path is relative (i.e `../../to/somewhere`), we convert it to absolute
+  if (!url.startsWith('/')) {
+    url = resolve(currentPath, url);
+  }
+
+  // if using a basePath and the absolute path does not starts with it, it can't be a match
   const basePathValue = basePath.get();
   if (basePathValue && !url.startsWith(basePathValue)) {
     return undefined;
