@@ -5,22 +5,12 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { JSErrors } from './JSErrors';
-import { I18LABELS } from '../translations';
 
 export function ImpactfulMetrics() {
   return (
     <EuiPanel>
-      <EuiTitle size="s">
-        <h3>{I18LABELS.impactfulMetrics}</h3>
-      </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiFlexGroup wrap>
         <EuiFlexItem style={{ flexBasis: 650 }}>

@@ -37,12 +37,6 @@ export const I18LABELS = {
       defaultMessage: 'Page load distribution',
     }
   ),
-  impactfulMetrics: i18n.translate(
-    'xpack.apm.rum.dashboard.impactfulMetrics.label',
-    {
-      defaultMessage: 'Impactful metrics',
-    }
-  ),
   jsErrors: i18n.translate(
     'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
     {
