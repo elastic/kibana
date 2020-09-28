@@ -60,6 +60,10 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   const { browserFields, indexPattern, indicesExist } = useSourcererScope();
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
+  // this will run when a user navigates to the Security Solution app and when they navigate between
+  // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
+  // a background task solution can be built on the server side. Once a background task solution is available we
+  // can remove this.
   useUpgradeEndpointPackage();
 
   return (

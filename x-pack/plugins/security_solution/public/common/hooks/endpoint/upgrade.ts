@@ -57,7 +57,7 @@ export const useUpgradeEndpointPackage = () => {
     const abortController = new AbortController();
 
     // cancel any ongoing requests
-    const cleanup = () => {
+    const abortRequests = () => {
       abortController.abort();
     };
 
@@ -73,18 +73,22 @@ export const useUpgradeEndpointPackage = () => {
 
           // if we're not a privileged user then return and don't try to check the status of the endpoint package
           if (!hasPermissions) {
-            return cleanup;
+            return abortRequests;
           }
 
           // ignore the response for now since we aren't notifying the user
           await sendUpgradeEndpointPackage(context.services.http, { signal });
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+
+          // ignore the error that occurs from aborting a request
+          if (!abortController.signal.aborted) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
         }
 
-        return cleanup;
+        return abortRequests;
       })();
     }
   }, [ingestEnabled, context.services.http]);
