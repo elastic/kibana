@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-interface FailedShards {
+interface FailedShard {
   shard: number;
   index: string;
   node: string;
@@ -41,7 +39,7 @@ interface FailedShards {
   };
 }
 
-interface EsError {
+export interface EsError {
   body: {
     statusCode: number;
     error: string;
@@ -56,51 +54,20 @@ interface EsError {
         ];
         type: string;
         reason: string;
+        failed_shards: FailedShard[];
         caused_by: {
           type: string;
           reason: string;
           phase: string;
           grouped: boolean;
-          failed_shards: FailedShards[];
+          failed_shards: FailedShard[];
+          script_stack: string[];
         };
       };
     };
   };
 }
 
-export function getCause(error: EsError) {
-  const cause = error.body?.attributes?.error?.root_cause;
-  if (cause) {
-    return cause[0];
-  }
-
-  const failedShards = error.body?.attributes?.error?.caused_by?.failed_shards;
-
-  if (failedShards && failedShards[0] && failedShards[0].reason) {
-    return error.body?.attributes?.error?.caused_by?.failed_shards[0].reason;
-  }
-}
-
-export function getPainlessError(error: EsError) {
-  const cause = getCause(error);
-
-  if (!cause) {
-    return;
-  }
-
-  const { lang, script } = cause;
-
-  if (lang !== 'painless') {
-    return;
-  }
-
-  return {
-    lang,
-    script,
-    message: i18n.translate('discover.painlessError.painlessScriptedFieldErrorMessage', {
-      defaultMessage: "Error with Painless scripted field '{script}'.",
-      values: { script },
-    }),
-    error: error.body?.message,
-  };
+export function isEsError(e: any): e is EsError {
+  return !!e.body?.attributes;
 }
