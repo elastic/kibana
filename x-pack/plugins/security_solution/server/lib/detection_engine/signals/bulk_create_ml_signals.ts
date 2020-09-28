@@ -34,6 +34,7 @@ interface BulkCreateMlSignalsParams {
   refresh: RefreshTypes;
   tags: string[];
   throttle: string;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -82,10 +83,10 @@ const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<E
 };
 
 export const bulkCreateMlSignals = async (
-  params: BulkCreateMlSignalsParams,
-  buildRuleMessage: BuildRuleMessage
+  params: BulkCreateMlSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
+  const buildRuleMessage = params.buildRuleMessage;
   return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };

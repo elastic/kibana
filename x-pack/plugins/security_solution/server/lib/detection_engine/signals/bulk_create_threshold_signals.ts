@@ -41,6 +41,7 @@ interface BulkCreateThresholdSignalsParams {
   tags: string[];
   throttle: string;
   startedAt: Date;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 interface FilterObject {
@@ -185,8 +186,7 @@ export const transformThresholdResultsToEcs = (
 };
 
 export const bulkCreateThresholdSignals = async (
-  params: BulkCreateThresholdSignalsParams,
-  buildRuleMessage: BuildRuleMessage
+  params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
@@ -197,6 +197,7 @@ export const bulkCreateThresholdSignals = async (
     params.ruleParams.threshold!,
     params.ruleParams.ruleId
   );
+  const buildRuleMessage = params.buildRuleMessage;
 
   return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };
