@@ -253,10 +253,6 @@ export const useMetricsK8sAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  // useEffect(() => {
-  //   getMetricsK8sAnomalies();
-  // }, [getMetricsK8sAnomalies]);
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });

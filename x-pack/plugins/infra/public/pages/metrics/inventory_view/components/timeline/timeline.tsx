@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -189,8 +189,15 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     );
   }
 
-  function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
-    return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
+  function generateAnnotationData(results: number[][]): LineAnnotationDatum[] {
+    return results.map((anomaly, index) => {
+      const [val, score] = anomaly;
+      return {
+        dataValue: val,
+        details: `Score: ${score}`,
+        header: `Anomaly`,
+      };
+    });
   }
 
   return (
@@ -208,19 +215,18 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       </TimelineHeader>
       <TimelineChartContainer>
         <Chart>
-          {(anomalies || []).map((a) => {
-            return (
-              <LineAnnotation
-                key={a.id}
-                id={a.id}
-                domainType={AnnotationDomainTypes.XDomain}
-                dataValues={generateAnnotationData([a.startTime, 0])}
-                style={annotationStyle}
-                marker={<EuiIcon onClick={() => alert('clicked')} type="alert" />}
-                markerPosition={'bottom'}
-              />
-            );
-          })}
+          {anomalies && (
+            <LineAnnotation
+              id={'anomalies'}
+              domainType={AnnotationDomainTypes.XDomain}
+              dataValues={generateAnnotationData(
+                anomalies.map((a) => [a.startTime, a.anomalyScore])
+              )}
+              style={annotationStyle}
+              marker={<div style={{ background: 'red', padding: 5 }} />}
+              markerPosition={'bottom'}
+            />
+          )}
           <MetricExplorerSeriesChart
             type={MetricsExplorerChartType.area}
             metric={chartMetric}
@@ -257,7 +263,7 @@ const annotationStyle = {
   line: {
     strokeWidth: 3,
     stroke: '#f00',
-    opacity: 1,
+    opacity: 0,
   },
   details: {
     fontSize: 12,

@@ -251,10 +251,6 @@ export const useMetricsHostsAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  // useEffect(() => {
-  //   getMetricsHostsAnomalies();
-  // }, [getMetricsHostsAnomalies]); // TODO: FIgure out the deps here.
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
