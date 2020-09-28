@@ -69,6 +69,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         reactNodeId: 'monitoringLogstashNodeAdvancedApp',
         $scope,
         $injector,
+        telemetryPageViewTitle: 'logstash_node_advanced',
       });
 
       $scope.$watch(
@@ -81,6 +82,15 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
           this.setTitle(
             i18n.translate('xpack.monitoring.logstash.node.advanced.routeTitle', {
               defaultMessage: 'Logstash - {nodeName} - Advanced',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.advanced.pageTitle', {
+              defaultMessage: 'Logstash node: {nodeName}',
               values: {
                 nodeName: data.nodeSummary.name,
               },

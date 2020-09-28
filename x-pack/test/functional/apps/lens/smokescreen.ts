@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
 
-  describe('lens smokescreen tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/77969
+  describe.skip('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -66,11 +67,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // legend item(s), so we're using a class selector here.
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
+
     it('should create an xy visualization with filters aggregation', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
+      // Change the IP field to filters
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
@@ -78,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
 
+      // Verify that the field was persisted from the transition
       expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });

@@ -23,13 +23,7 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).relativeUrls !== undefined;
 }
 
-export function getFullUrls<TaskPayloadType>({
-  config,
-  job,
-}: {
-  config: ReportingConfig;
-  job: TaskPayloadPDF | TaskPayloadPNG;
-}) {
+export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
   const [basePath, protocol, hostname, port] = [
     config.kbnConfig.get('server', 'basePath'),
     config.get('kibanaServer', 'protocol'),

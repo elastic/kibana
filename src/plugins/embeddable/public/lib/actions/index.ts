@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './apply_filter_action';
 export * from './edit_panel_action';

@@ -11,7 +11,9 @@ import {
 } from '../../server/lib/helpers/setup_request';
 import {
   SPAN_TYPE,
+  AGENT_NAME,
   TRANSACTION_TYPE,
+  SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
@@ -19,8 +21,10 @@ import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const { start, end, uiFiltersES } = setup;
 
@@ -35,6 +39,17 @@ export function getRumPageLoadTransactionsProjection({
           field: 'transaction.marks.navigationTiming.fetchStart',
         },
       },
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': {
+                  value: `*${urlQuery}*`,
+                },
+              },
+            },
+          ]
+        : []),
       ...uiFiltersES,
     ],
   };
@@ -69,6 +84,39 @@ export function getRumLongTasksProjection({
   return {
     apm: {
       events: [ProcessorEvent.span],
+    },
+    body: {
+      query: {
+        bool,
+      },
+    },
+  };
+}
+
+export function getRumErrorsProjection({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const { start, end, uiFiltersES } = setup;
+
+  const bool = {
+    filter: [
+      { range: rangeFilter(start, end) },
+      { term: { [AGENT_NAME]: 'rum-js' } },
+      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+      {
+        term: {
+          [SERVICE_LANGUAGE_NAME]: 'javascript',
+        },
+      },
+      ...uiFiltersES,
+    ],
+  };
+
+  return {
+    apm: {
+      events: [ProcessorEvent.error],
     },
     body: {
       query: {

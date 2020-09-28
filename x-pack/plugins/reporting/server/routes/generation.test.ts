@@ -74,8 +74,8 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      createJobFnFactory: () => () => ({ jobParamsTest: { test1: 'yes' } }),
-      runTaskFnFactory: () => () => ({ runParamsTest: { test2: 'yes' } }),
+      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
+      runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;
   });
@@ -163,9 +163,21 @@ describe('POST /api/reporting/generate', () => {
       .then(({ body }) => {
         expect(body).toMatchObject({
           job: {
-            id: expect.any(String),
+            attempts: 0,
+            created_by: 'Tom Riddle',
+            id: 'foo',
+            index: 'foo-index',
+            jobtype: 'printable_pdf',
+            payload: {
+              createJobTest: {
+                test1: 'yes',
+              },
+            },
+            priority: 10,
+            status: 'pending',
+            timeout: 10000,
           },
-          path: expect.any(String),
+          path: 'undefined/api/reporting/jobs/download/foo',
         });
       });
   });

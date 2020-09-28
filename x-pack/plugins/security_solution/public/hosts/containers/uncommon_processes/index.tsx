@@ -9,22 +9,26 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { PageInfoPaginated, UncommonProcessesEdges } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { createFilter } from '../../../common/containers/helpers';
-
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  HostUncommonProcessesRequestOptions,
-  HostUncommonProcessesStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { HostsQueries } from '../../../../common/search_strategy/security_solution/hosts';
-import { DocValueFields, SortField } from '../../../../common/search_strategy';
+  DocValueFields,
+  SortField,
+  PageInfoPaginated,
+  HostsUncommonProcessesEdges,
+  HostsQueries,
+  HostsUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+} from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -41,13 +45,14 @@ export interface UncommonProcessesArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  uncommonProcesses: UncommonProcessesEdges[];
+  uncommonProcesses: HostsUncommonProcessesEdges[];
 }
 
 interface UseUncommonProcesses {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -57,6 +62,7 @@ export const useUncommonProcesses = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -65,15 +71,14 @@ export const useUncommonProcesses = ({
   const { activePage, limit } = useSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [uncommonProcessesRequest, setUncommonProcessesRequest] = useState<
-    HostUncommonProcessesRequestOptions
+    HostsUncommonProcessesRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.uncommonProcesses,
     filterQuery: createFilter(filterQuery),
@@ -119,14 +124,14 @@ export const useUncommonProcesses = ({
   );
 
   const uncommonProcessesSearch = useCallback(
-    (request: HostUncommonProcessesRequestOptions) => {
+    (request: HostsUncommonProcessesRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostUncommonProcessesRequestOptions, HostUncommonProcessesStrategyResponse>(
+          .search<HostsUncommonProcessesRequestOptions, HostsUncommonProcessesStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
@@ -135,7 +140,7 @@ export const useUncommonProcesses = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setUncommonProcessesResponse((prevResponse) => ({
@@ -148,7 +153,7 @@ export const useUncommonProcesses = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -181,7 +186,7 @@ export const useUncommonProcesses = ({
     setUncommonProcessesRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -197,7 +202,7 @@ export const useUncommonProcesses = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, skip, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);
