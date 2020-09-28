@@ -16,7 +16,7 @@ import {
 } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { SearchResponse } from '../../types';
+import { SearchResponse, EqlSearchResponse, BaseHit } from '../../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
@@ -53,6 +53,8 @@ export type SearchTypes =
 
 export interface SignalSource {
   [key: string]: SearchTypes;
+  // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
+  // actually have @timestamp if a timestamp override is used
   '@timestamp': string;
   signal?: {
     // parent is deprecated: new signals should populate parents instead
@@ -60,6 +62,10 @@ export interface SignalSource {
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
+    group?: {
+      id: string;
+      index?: number;
+    };
     rule: {
       id: string;
     };
@@ -116,6 +122,9 @@ export interface GetResponse {
 export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type BaseSignalHit = BaseHit<SignalSource>;
+
+export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleTypeParams;
@@ -140,11 +149,15 @@ export interface Ancestor {
 }
 
 export interface Signal {
-  rule: Partial<RulesSchema>;
+  rule: RulesSchema;
   // DEPRECATED: use parents instead of parent
   parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];
+  group?: {
+    id: string;
+    index?: number;
+  };
   original_time?: string;
   original_event?: SearchTypes;
   status: Status;
@@ -155,7 +168,7 @@ export interface Signal {
 export interface SignalHit {
   '@timestamp': string;
   event: object;
-  signal: Partial<Signal>;
+  signal: Signal;
 }
 
 export interface AlertAttributes {
