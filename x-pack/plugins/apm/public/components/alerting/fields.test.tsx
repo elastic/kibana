@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { ServiceField, TransactionTypeField } from './fields';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { expectTextsInDocument } from '../../utils/testHelpers';
 
 describe('alerting fields', () => {
@@ -25,10 +25,21 @@ describe('alerting fields', () => {
         { text: 'Foo', value: 'foo' },
         { text: 'Bar', value: 'bar' },
       ];
-      const component = render(
+      const { getByText, getByTestId } = render(
         <TransactionTypeField currentValue="Foo" options={options} />
       );
-      expectTextsInDocument(component, ['Foo']);
+
+      act(() => {
+        fireEvent.click(getByText('Foo'));
+      });
+
+      const selectBar = getByTestId('transactionTypeField');
+      expect(selectBar instanceof HTMLSelectElement).toBeTruthy();
+      const selectOptions = (selectBar as HTMLSelectElement).options;
+      expect(selectOptions.length).toEqual(2);
+      expect(
+        Object.values(selectOptions).map((option) => option.value)
+      ).toEqual(['foo', 'bar']);
     });
     it('renders read-only field when single option available', () => {
       const options = [{ text: 'Bar', value: 'bar' }];

@@ -62,15 +62,15 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const fields = [
     <ServiceField value={serviceName} />,
-    <EnvironmentField
-      currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
-    />,
     <TransactionTypeField
       currentValue={params.transactionType}
       options={transactionTypes.map((key) => ({ text: key, value: key }))}
       onChange={(e) => setAlertParams('transactionType', e.target.value)}
+    />,
+    <EnvironmentField
+      currentValue={params.environment}
+      options={environmentOptions}
+      onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
     <IsAboveField
       value={params.threshold}

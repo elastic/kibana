@@ -55,16 +55,14 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
-  const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
-    [TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST].includes(transactionType)
-  );
 
-  if (serviceName && !supportedTransactionTypes.length) {
+  if (serviceName && !transactionTypes.length) {
     return null;
   }
 
-  // 'page-load' for RUM, 'request' otherwise
-  const transactionType = supportedTransactionTypes[0];
+  const transactionType = transactionTypes.find(
+    (type) => type === urlParams.transactionType
+  );
 
   const defaults: Params = {
     windowSize: 15,

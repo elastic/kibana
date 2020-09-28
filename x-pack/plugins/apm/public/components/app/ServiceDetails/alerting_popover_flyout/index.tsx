@@ -53,7 +53,7 @@ interface Props {
   canReadAnomalies: boolean;
 }
 
-export function AlertIntegrations(props: Props) {
+export function AlertingPopoverAndFlyout(props: Props) {
   const { canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
 
   const plugin = useApmPluginContext();

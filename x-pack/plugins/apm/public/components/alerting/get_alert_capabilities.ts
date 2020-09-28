@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useApmPluginContext } from './useApmPluginContext';
+import { Capabilities } from 'kibana/public';
+import { ApmPluginSetupDeps } from '../../plugin';
 
-export const useAlertingIntegrations = () => {
-  const plugin = useApmPluginContext();
-
-  const capabilities = plugin.core.application.capabilities;
+export const getAlertingCapabilities = (
+  plugins: ApmPluginSetupDeps,
+  capabilities: Capabilities
+) => {
   const canReadAlerts = !!capabilities.apm['alerting:show'];
   const canSaveAlerts = !!capabilities.apm['alerting:save'];
-  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
+  const isAlertingPluginEnabled = 'alerts' in plugins;
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-  const isMlPluginEnabled = 'ml' in plugin.plugins;
+  const isMlPluginEnabled = 'ml' in plugins;
   const canReadAnomalies = !!(
     isMlPluginEnabled &&
     capabilities.ml.canAccessML &&

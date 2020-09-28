@@ -74,6 +74,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue} title={label}>
       <EuiSelect
+        data-test-subj="transactionTypeField"
         value={currentValue}
         options={options}
         onChange={onChange}
