@@ -72,7 +72,7 @@ const tooltipContent = i18n.translate(
   'xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTooltipContent',
   {
     defaultMessage:
-      'The magnitude of feature importance shows how significantly the feature affects the prediction for a given data point.',
+      'Total feature importance values indicate how significantly a field affects the predictions across all the training data.',
   }
 );
 
