@@ -27,7 +27,7 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 export interface UXMetrics {
   cls: string;
   fid: number;
-  lcp: string;
+  lcp: number;
   tbt: number;
   fcp: number;
   lcpRanks: number[];
