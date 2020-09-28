@@ -60,16 +60,16 @@ export const ScriptExpandedRowComponent: FC<ComponentProps> = ({
   journey,
   fetchScreenshot,
 }) => {
+  if (!journey || journey.steps.length === 0) {
+    return <EmptyStepState checkGroup={checkGroup} />;
+  }
+
   if (journey.loading) {
     return (
       <div>
         <EuiLoadingSpinner />
       </div>
     );
-  }
-
-  if (!journey || journey.steps.length === 0) {
-    return <EmptyStepState checkGroup={checkGroup} />;
   }
 
   if (journey.steps.some(someStepEnd))
