@@ -20,6 +20,7 @@ import {
   PolicyDetailsRouteState,
   TrustedAppsListPageRouteState,
 } from '../../../../../../common/endpoint/types';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -118,17 +119,24 @@ ConfigureEndpointPackagePolicy.displayName = 'ConfigureEndpointPackagePolicy';
 const TrustedAppsMessage = memo<{
   navigateTo: TrustedAppsListPageRouteState['onBackButtonNavigateTo'];
 }>(({ navigateTo }) => {
+  const {
+    services: {
+      application: { getUrlForApp },
+    },
+  } = useKibana();
   const trustedAppsListUrl = getTrustedAppsListPath();
   const trustedAppsListRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
     return {
-      backButtonUrl: '',
+      backButtonUrl: navigateTo[1]?.path
+        ? `${getUrlForApp('ingestManager')}${navigateTo[1].path}`
+        : undefined,
       onBackButtonNavigateTo: navigateTo,
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
         { defaultMessage: 'Back to edit integration' }
       ),
     };
-  }, [navigateTo]);
+  }, [getUrlForApp, navigateTo]);
 
   return (
     <>
