@@ -30,6 +30,6 @@ For example, when you add the `account_number` field, the display changes to a l
 account numbers.
 +
 [role="screenshot"]
-image::images/tutorial-discover-3.png[Image shows a dropdown menu with 5 account numbers, which match the previous query for account balance]
+image::images/tutorial-discover-3.png[Image showing a dropdown with five account numbers, which match the previous query for account balance]
 
 Now that you know what your documents contain, it's time to gain insight into your data with visualizations.
