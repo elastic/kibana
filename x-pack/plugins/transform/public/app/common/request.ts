@@ -130,22 +130,27 @@ export function getPreviewTransformRequestBody(
   return request;
 }
 
+export const getCreateTransformSettingsRequestBody = (
+  transformDetailsState: StepDetailsExposedState
+): { settings: PutTransformsRequestSchema['settings'] } => {
+  // have to use Record<> here because typeof schema is readonly
+  const tempSettings = {} as Record<string, number | null | undefined>;
+
+  if (transformDetailsState.transformSettingsMaxPageSearchSize) {
+    tempSettings.max_page_search_size = transformDetailsState.transformSettingsMaxPageSearchSize;
+  }
+  if (transformDetailsState.transformSettingsDocsPerSecond) {
+    tempSettings.docs_per_second = transformDetailsState.transformSettingsDocsPerSecond;
+  }
+
+  return { settings: tempSettings };
+};
+
 export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsRequestSchema => {
-  const tempSettings = {
-    settings: {} as Record<string, number | null | undefined>,
-  };
-  if (transformDetailsState.transformSettingsMaxPageSearchSize) {
-    tempSettings.settings.max_page_search_size =
-      transformDetailsState.transformSettingsMaxPageSearchSize;
-  }
-  if (transformDetailsState.transformSettingsDocsPerSecond) {
-    tempSettings.settings.docs_per_second = transformDetailsState.transformSettingsDocsPerSecond;
-  }
-
   return {
     ...getPreviewTransformRequestBody(
       indexPatternTitle,
@@ -176,7 +181,7 @@ export const getCreateTransformRequestBody = (
         }
       : {}),
     // conditionally add additional settings
-    ...tempSettings,
+    ...getCreateTransformSettingsRequestBody(transformDetailsState),
   };
 };
 
