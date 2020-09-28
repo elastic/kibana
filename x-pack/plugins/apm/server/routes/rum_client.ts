@@ -108,14 +108,13 @@ export const rumPageViewsTrendRoute = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     const {
-      query: { breakdowns, urlQuery, percentile },
+      query: { breakdowns, urlQuery },
     } = context.params;
 
     return getPageViewTrends({
       setup,
       breakdowns,
       urlQuery,
-      percentile: Number(percentile),
     });
   },
 }));
@@ -141,13 +140,12 @@ export const rumVisitorsBreakdownRoute = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery },
     } = context.params;
 
     return getVisitorBreakdown({
       setup,
       urlQuery,
-      percentile: Number(percentile),
     });
   },
 }));

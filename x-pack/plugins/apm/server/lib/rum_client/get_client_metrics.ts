@@ -20,11 +20,11 @@ import {
 export async function getClientMetrics({
   setup,
   urlQuery,
-  percentile,
+  percentile = 50,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   urlQuery?: string;
-  percentile: number;
+  percentile?: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
