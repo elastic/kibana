@@ -98,7 +98,7 @@ export function UXMetrics() {
                   <EuiText>
                     <FormattedMessage
                       id="xpack.apm.ux.dashboard.webCoreVitals.help"
-                      defaultMessage={'Learn more about'}
+                      defaultMessage="Learn more about"
                     />
                     <EuiLink
                       href="https://web.dev/vitals/"
