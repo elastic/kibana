@@ -99,7 +99,7 @@ The break down of the ages of the account holders are displayed
 in a ring around the balance ranges.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-pie-3.png[Final pie chart, displaying all of the above mentioned changes.]
+image::images/tutorial-visualize-pie-3.png[Final pie chart showing all of the changes]
 
 . Click *Save*, then enter `Pie Example` in the *Title* field.
 
