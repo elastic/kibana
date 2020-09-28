@@ -133,6 +133,12 @@ $pageWidth: 1200px;
   }
 }
 
+.kbnOverviewDataManage__item:not(:only-child) {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    flex: 0 0 calc(50% - #{$euiSizeM * 2});
+  }
+}
+
 .kbnOverviewFooter {
   // Prevent children from rendering as flex items
   .euiFlexItem {

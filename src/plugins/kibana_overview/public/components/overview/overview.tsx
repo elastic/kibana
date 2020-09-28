@@ -161,6 +161,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
             <EuiFlexGroup
+              alignItems="flexStart"
               className={`kbnOverviewSupplements ${
                 newsFetchResult && newsFetchResult.feedItems.length
                   ? 'kbnOverviewSupplements--hasNews'

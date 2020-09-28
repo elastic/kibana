@@ -53,9 +53,9 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup className="kbnOverviewDataManage__content">
+        <EuiFlexGroup className="kbnOverviewDataManage__content" wrap>
           {features.map((feature) => (
-            <EuiFlexItem key={feature.id}>
+            <EuiFlexItem className="kbnOverviewDataManage__item" key={feature.id}>
               <Synopsis
                 id={feature.id}
                 onClick={createAppNavigationHandler(feature.path)}
