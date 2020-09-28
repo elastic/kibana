@@ -315,3 +315,14 @@ export const showDataGridColumnChartErrorMessageToast = (
     })
   );
 };
+
+export const getProcessedFields = (originalObj: object) => {
+  const obj: { [key: string]: any } = { ...originalObj };
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key]) && obj[key].length === 1) {
+      obj[key] = obj[key][0];
+    }
+  }
+
+  return obj;
+};

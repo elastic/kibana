@@ -7,7 +7,7 @@
 import type { SearchResponse7 } from '../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { EsSorting, UseDataGridReturnType } from '../../components/data_grid';
+import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
 import { isKeywordAndTextType } from '../common/fields';
@@ -47,12 +47,13 @@ export const getIndexData = async (
         }, {} as EsSorting);
 
       const { pageIndex, pageSize } = pagination;
+      // TODO: remove results_field from `fields` when possible
       const resp: SearchResponse7 = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
-          query: searchQuery,
           fields: ['*'],
-          _source: false,
+          _source: jobConfig.dest.results_field,
+          query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
           ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -60,8 +61,11 @@ export const getIndexData = async (
       });
 
       setRowCount(resp.hits.total.value);
+      const docs = resp.hits.hits.map((d) => ({
+        ...getProcessedFields(d.fields),
+        [jobConfig.dest.results_field]: d._source[jobConfig.dest.results_field],
+      }));
 
-      const docs = resp.hits.hits.map((d) => d.fields);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {

@@ -23,6 +23,7 @@ import {
   useRenderCellValue,
   EsSorting,
   UseIndexDataReturnType,
+  getProcessedFields,
 } from '../../../../components/data_grid';
 import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
@@ -31,16 +32,6 @@ import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = SearchResponse7;
 
-const getProcessedFields = (originalObj: object) => {
-  const obj: { [key: string]: any } = { ...originalObj };
-  for (const key of Object.keys(obj)) {
-    if (Array.isArray(obj[key]) && obj[key].length === 1) {
-      obj[key] = obj[key][0];
-    }
-  }
-
-  return obj;
-};
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: any,
