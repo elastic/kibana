@@ -20,6 +20,7 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
+  IClusterClient,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -27,6 +28,7 @@ import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
   ALERTS,
+  SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
@@ -73,6 +75,7 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
+  private telemetryElasticsearchClient: IClusterClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -143,14 +146,32 @@ export class Plugin {
 
     // Initialize telemetry
     if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
-        maxBucketSize: config.ui.max_bucket_size,
-      });
+      registerMonitoringCollection(
+        plugins.telemetryCollectionManager,
+        this.cluster,
+        () => this.telemetryElasticsearchClient,
+        {
+          maxBucketSize: config.ui.max_bucket_size,
+        }
+      );
     }
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      core.savedObjects.registerType({
+        name: SAVED_OBJECT_TELEMETRY,
+        hidden: true,
+        namespaceType: 'agnostic',
+        mappings: {
+          properties: {
+            reportedClusterUuids: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
     }
 
     // Always create the bulk uploader
@@ -229,7 +250,13 @@ export class Plugin {
     };
   }
 
-  start() {}
+  start({ elasticsearch }: CoreStart) {
+    // TODO: For the telemetry plugin to work, we need to provide the new ES client.
+    // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
+    // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
+    // We will update the client in a follow up PR.
+    this.telemetryElasticsearchClient = elasticsearch.client;
+  }
 
   stop() {
     if (this.cluster) {

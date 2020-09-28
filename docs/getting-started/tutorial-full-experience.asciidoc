@@ -25,7 +25,14 @@ curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/shakespeare.
 curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/accounts.zip
 curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/logs.jsonl.gz
 
-Two of the data sets are compressed. To extract the files, use the following commands:
+Alternatively, for Windows users, run the following commands in Powershell:
+
+[source,shell]
+Invoke-RestMethod https://download.elastic.co/demos/kibana/gettingstarted/8.x/shakespeare.json -OutFile shakespeare.json
+Invoke-RestMethod https://download.elastic.co/demos/kibana/gettingstarted/8.x/accounts.zip -OutFile accounts.zip
+Invoke-RestMethod https://download.elastic.co/demos/kibana/gettingstarted/8.x/logs.jsonl.gz -OutFile logs.jsonl.gz
+
+Two of the data sets are compressed. To extract the files, use these commands:
 
 [source,shell]
 unzip accounts.zip
