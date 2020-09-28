@@ -233,7 +233,7 @@ export class VisualizeEmbeddableFactory
   public async checkTitle(props: OnSaveProps): Promise<true> {
     const savedObjectsClient = await this.deps.start().core.savedObjects.client;
     const overlays = await this.deps.start().core.overlays;
-    return await checkForDuplicateTitle(
+    return checkForDuplicateTitle(
       {
         title: props.newTitle,
         copyOnSave: false,
