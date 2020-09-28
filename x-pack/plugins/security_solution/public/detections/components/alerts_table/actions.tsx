@@ -15,10 +15,13 @@ import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/typ
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { GetOneTimeline, TimelineResult, GetTimelineDetailsQuery } from '../../../graphql/types';
+import { GetOneTimeline, TimelineResult } from '../../../graphql/types';
 import {
   TimelineNonEcsData,
   TimelineEventsDetailsItem,
+  TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineEventsQueries,
 } from '../../../../common/search_strategy/timeline';
 import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -34,7 +37,6 @@ import {
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { timelineDetailsQuery } from '../../../timelines/containers/details/index.gql_query';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -154,6 +156,7 @@ export const sendAlertToTimelineAction = async ({
   ecsData,
   nonEcsData,
   updateTimelineIsLoading,
+  searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
   let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
@@ -172,24 +175,24 @@ export const sendAlertToTimelineAction = async ({
             id: timelineId,
           },
         }),
-        apolloClient.query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>({
-          query: timelineDetailsQuery,
-          fetchPolicy: 'no-cache',
-          variables: {
+        searchStrategyClient.search<
+          TimelineEventsDetailsRequestOptions,
+          TimelineEventsDetailsStrategyResponse
+        >(
+          {
             defaultIndex: [],
             docValueFields: [],
-            eventId: ecsData._id,
             indexName: ecsData._index ?? '',
-            sourceId: 'default',
+            eventId: ecsData._id,
+            factoryQueryType: TimelineEventsQueries.details,
           },
-        }),
+          {
+            strategy: 'securitySolutionTimelineSearchStrategy',
+          }
+        ),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-      const eventData: TimelineEventsDetailsItem[] = getOr(
-        [],
-        'data.source.TimelineDetails.data',
-        eventDataResp
-      );
+      const eventData: TimelineEventsDetailsItem[] = getOr([], 'data', eventDataResp);
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         openAlertInBasicTimeline = false;
