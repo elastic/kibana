@@ -56,7 +56,7 @@ export class MissingDataAlert extends BaseAlert {
   public static paramDetails = {
     duration: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
-        defaultMessage: `Notify if data is missing for`,
+        defaultMessage: `Notify if monitoring data is missing for`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
@@ -70,7 +70,7 @@ export class MissingDataAlert extends BaseAlert {
 
   public type = ALERT_MISSING_DATA;
   public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {
-    defaultMessage: 'Missing data',
+    defaultMessage: 'Missing monitoring data',
   });
 
   protected defaultParams: MissingDataParams = {
@@ -108,14 +108,14 @@ export class MissingDataAlert extends BaseAlert {
       description: i18n.translate(
         'xpack.monitoring.alerts.missingData.actionVariables.stackProducts',
         {
-          defaultMessage: 'The stack products missing data.',
+          defaultMessage: 'The stack products missing monitoring data.',
         }
       ),
     },
     {
       name: 'count',
       description: i18n.translate('xpack.monitoring.alerts.missingData.actionVariables.count', {
-        defaultMessage: 'The number of stack products missing data.',
+        defaultMessage: 'The number of stack products missing monitoring data.',
       }),
     },
     {
@@ -169,7 +169,7 @@ export class MissingDataAlert extends BaseAlert {
       return {
         instanceKey: `${missing.clusterUuid}:${missing.stackProduct}:${missing.stackProductUuid}`,
         clusterUuid: missing.clusterUuid,
-        shouldFire: missing.gapDuration > duration && missing.gapDuration <= limit,
+        shouldFire: missing.gapDuration > duration,
         severity: AlertSeverity.Danger,
         meta: { missing, limit },
         ccs: missing.ccs,

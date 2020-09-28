@@ -119,7 +119,7 @@ export async function fetchMissingData(
   nowInMS: number
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMS;
-  const startMs = endMs - limit - limit * 0.25; // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
+  const startMs = endMs - limit - 3 * 60 * 1000; // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 
   const nameFields = [
     'source_node.name',
@@ -259,9 +259,7 @@ export async function fetchMissingData(
 
   const response = await callCluster('search', params);
   const indexBuckets = get(response, 'aggregations.index.buckets', []) as IndexBucketESResponse[];
-  const uniqueList: {
-    [id: string]: AlertMissingData;
-  } = {};
+  const missingData: AlertMissingData[] = [];
   for (const indexBucket of indexBuckets) {
     const clusterBuckets = indexBucket.clusters.buckets;
     for (const clusterBucket of clusterBuckets) {
@@ -279,18 +277,17 @@ export async function fetchMissingData(
           }
         }
 
-        uniqueList[`${clusterUuid}::${stackProduct}::${stackProductUuid}`] = {
+        missingData.push({
           stackProduct,
           stackProductUuid,
           stackProductName,
           clusterUuid,
           gapDuration: differenceInMs,
           ccs: indexBucket.key.includes(':') ? indexBucket.key.split(':')[0] : null,
-        };
+        });
       }
     }
   }
 
-  const missingData = Object.values(uniqueList);
   return missingData;
 }
