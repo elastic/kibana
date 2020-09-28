@@ -28,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
-      console.log(agentPolicyResponse);
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
