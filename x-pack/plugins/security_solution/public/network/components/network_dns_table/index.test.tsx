@@ -54,24 +54,20 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
-            data={mockData.NetworkDns.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="dns"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkDns.pageInfo
-            )}
-            totalCount={mockData.NetworkDns.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkDnsTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkDnsTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -81,18 +77,14 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkDnsTable
-              data={mockData.NetworkDns.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+              data={mockData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
               id="dns"
               isInspect={false}
               loading={false}
               loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkDns.pageInfo
-              )}
-              totalCount={mockData.NetworkDns.totalCount}
+              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+              totalCount={mockData.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
