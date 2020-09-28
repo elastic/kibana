@@ -103,5 +103,5 @@ const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To
 export const dashboardSavedObjectTypeMigrations = {
   '7.0.0': flow(migrations700),
   '7.3.0': flow(migrations730),
-  '7.8.2': flow(migrateMatchAllQuery),
+  '7.9.3': flow(migrateMatchAllQuery),
 };

@@ -659,7 +659,8 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
  * This migration script is related to:
  *   @link https://github.com/elastic/kibana/pull/62194
  *   @link https://github.com/elastic/kibana/pull/14644
- * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated that script was added into 7.8.2
+ * Important: migration scripts was moved from 6.7.2 -> 7.9.3
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated that script was added into 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -788,6 +789,6 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.4.2': flow(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
-  '7.8.2': flow(migrateMatchAllQuery),
+  '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
 };

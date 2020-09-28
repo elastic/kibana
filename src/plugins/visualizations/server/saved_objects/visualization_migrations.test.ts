@@ -1461,8 +1461,8 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.8.2', () => {
-    const migrationFn = visualizationSavedObjectTypeMigrations['7.8.2'];
+  describe('7.9.3', () => {
+    const migrationFn = visualizationSavedObjectTypeMigrations['7.9.3'];
 
     it('should migrate obsolete match_all query', () => {
       const migratedDoc = migrationFn(
