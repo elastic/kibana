@@ -20,8 +20,14 @@
 import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
 import { ReactVisController } from './react_vis_controller';
 
+export type ReactVisTypeOptions = Omit<BaseVisTypeOptions, 'visualization' | 'toExpressionAst'>;
+
+/**
+ * This class should only be used for visualizations not using the `toExpressionAst` with a custom renderer.
+ * If you implement a custom renderer you should just mount a react component inside this.
+ */
 export class ReactVisType extends BaseVisType {
-  constructor(opts: Omit<BaseVisTypeOptions, 'visualization'>) {
+  constructor(opts: ReactVisTypeOptions) {
     super({
       ...opts,
       visualization: ReactVisController,
