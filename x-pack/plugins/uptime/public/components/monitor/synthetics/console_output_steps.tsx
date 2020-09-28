@@ -5,6 +5,7 @@
  */
 
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { JourneyState } from '../../../state/reducers/journey';
 import { ConsoleStep } from './console_step';
@@ -17,10 +18,20 @@ export const ConsoleOutputStepList: FC<ConsoleOutputStepListProps> = ({ journey 
   return (
     <div>
       <EuiTitle>
-        <h4>No steps ran</h4>
+        <h4>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.consoleStepList.title"
+            defaultMessage="No steps ran"
+          />
+        </h4>
       </EuiTitle>
       <EuiSpacer />
-      <p>This journey failed to run, recorded console output is shown below:</p>
+      <p>
+        <FormattedMessage
+          id="xpack.uptime.synthetics.consoleStepList.message"
+          defaultMessage="This journey failed to run, recorded console output is shown below:"
+        />
+      </p>
       <EuiSpacer />
       <EuiCodeBlock>
         {journey.steps.map((s) => (
