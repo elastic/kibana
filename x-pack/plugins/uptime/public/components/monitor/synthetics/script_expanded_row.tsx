@@ -6,8 +6,10 @@
 
 import {
   EuiAccordion,
+  EuiBasicTable,
   EuiCode,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -24,6 +26,7 @@ import { journeySelector } from '../../../state/selectors';
 import { StatusBadge } from './status_badge';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 import { Accordion } from './accordion';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface ScriptExpandedRowProps {
   checkGroup?: string;
@@ -82,6 +85,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
     );
   }
   if (journey.steps.length === 0) {
+    console.log('weird journey:', journey);
     return <div>Didn't find any steps sadly</div>;
   }
   return (
@@ -186,24 +190,48 @@ const JourneyWithExecutedSteps: FC<JourneyWithExecutedStepsProps> = ({
   );
 };
 
+interface ConsoleStepProps {
+  step: Ping;
+}
+
+const ConsoleStep: FC<ConsoleStepProps> = ({ step }) => {
+  const c = useContext(UptimeThemeContext);
+
+  let typeColor: string | null;
+  if (step.synthetics?.type === 'stderr') {
+    typeColor = c.colors.danger;
+  } else {
+    typeColor = null;
+  }
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>{step.timestamp}</EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ color: typeColor }}>
+        {step.synthetics?.type}
+      </EuiFlexItem>
+      <EuiFlexItem>{step.synthetics?.payload?.message}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 interface ConsoleOutputStepsProps {
   journey: JourneyState;
 }
 
 const ConsoleOutputSteps: FC<ConsoleOutputStepsProps> = ({ journey }) => {
+  console.log(journey);
   return (
     <div>
       <EuiTitle>
         <h4>No steps ran</h4>
       </EuiTitle>
       <EuiSpacer />
-      <p>This journey failed to run, recorded console output is shown below</p>
+      <p>This journey failed to run, recorded console output is shown below:</p>
       <EuiSpacer />
       <EuiCodeBlock>
         {journey.steps.map((s) => (
-          <p>
-            <span>{s.synthetics?.type}</span>: <span>{s.synthetics?.payload?.message}</span>
-          </p>
+          <ConsoleStep step={s} />
         ))}
       </EuiCodeBlock>
     </div>
