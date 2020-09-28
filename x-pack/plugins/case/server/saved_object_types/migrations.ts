@@ -44,7 +44,12 @@ export const caseMigrations = {
       ...doc,
       attributes: {
         ...attributesWithoutConnectorId,
-        connector: { id: connector_id, name: '', type: '', fields: [] },
+        connector: {
+          id: connector_id ?? 'none',
+          name: connector_id ? '' : 'none',
+          type: connector_id ? '' : '.none',
+          fields: [],
+        },
       },
       references: doc.references || [],
     };

@@ -47,8 +47,11 @@ describe('POST configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+        },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -78,8 +81,11 @@ describe('POST configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+        },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
@@ -89,12 +95,15 @@ describe('POST configuration', () => {
     );
   });
 
-  it('throws when missing connector_id', async () => {
+  it('throws when missing connector.id', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_name: 'My connector 2',
+        connector: {
+          name: 'My connector 2',
+          type: '.jira',
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -110,12 +119,39 @@ describe('POST configuration', () => {
     expect(res.payload.isBoom).toEqual(true);
   });
 
-  it('throws when missing connector_name', async () => {
+  it('throws when missing connector.name', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: '456',
+        connector: {
+          id: '456',
+          type: '.jira',
+        },
+        closure_type: 'close-by-pushing',
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('throws when missing connector.type', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -136,8 +172,11 @@ describe('POST configuration', () => {
       path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+        },
       },
     });
 

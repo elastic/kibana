@@ -107,39 +107,42 @@ export const getConnectorFromConfiguration = (
   caseConfigure: SavedObjectsFindResponse<CasesConfigureAttributes>
 ): CaseConnector => ({
   id:
-    caseConfigure.saved_objects.length > 0
+    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
       ? caseConfigure.saved_objects[0].attributes.connector.id
       : 'none',
   name:
-    caseConfigure.saved_objects.length > 0
+    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
       ? caseConfigure.saved_objects[0].attributes.connector.name
       : 'none',
   type:
-    caseConfigure.saved_objects.length > 0
+    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
       ? caseConfigure.saved_objects[0].attributes.connector.type
       : '.none',
   fields: {},
 });
 
 export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
-  id: connector.id,
-  name: connector.name,
-  type: connector.type,
-  fields: Object.keys(connector.fields).map((fieldKey) => ({
-    key: fieldKey,
-    value: connector.fields[fieldKey],
-  })),
+  id: connector?.id ?? 'none',
+  name: connector?.name ?? 'none',
+  type: connector?.type ?? '.none',
+  fields: connector?.fields
+    ? Object.keys(connector.fields).map((fieldKey) => ({
+        key: fieldKey,
+        value: connector.fields[fieldKey],
+      }))
+    : [],
 });
 
 export const transformESConnectorToCaseConnector = (connector: ESCaseConnector): CaseConnector => ({
-  id: connector.id,
-  name: connector.name,
-  type: connector.type,
-  fields: connector.fields.reduce(
-    (fields, field) => ({
-      ...fields,
-      [field.key]: field.value,
-    }),
-    {}
-  ),
+  id: connector?.id ?? 'none',
+  name: connector?.name ?? 'none',
+  type: connector?.type ?? '.none',
+  fields:
+    connector?.fields.reduce(
+      (fields, field) => ({
+        ...fields,
+        [field.key]: field.value,
+      }),
+      {}
+    ) ?? {},
 });
