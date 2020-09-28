@@ -101,6 +101,34 @@ $pageWidth: 1200px;
   width: $euiSizeL * 2;
 }
 
+.kbnOverviewData--expanded {
+  flex-direction: column;
+
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+.kbnOverviewDataAdd__actions {
+  // Prevent children from rendering as flex items
+  display: block;
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.kbnOverviewDataAdd__content,
+.kbnOverviewDataManage__content {
+  & .euiIcon__fillSecondary {
+    fill: $euiColorDarkestShade;
+  }
+}
+
 .kbnOverviewFooter {
   // Prevent children from rendering as flex items
   .euiFlexItem {

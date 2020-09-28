@@ -33,11 +33,11 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, features }) => (
-  <section className="homDataAdd" aria-labelledby="homDataAdd__title">
+  <section className="kbnOverviewDataAdd" aria-labelledby="kbnOverviewDataAdd__title">
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiTitle size="s">
-          <h2 id="homDataAdd__title">
+          <h2 id="kbnOverviewDataAdd__title">
             <FormattedMessage
               id="kibana_overview.addData.sectionTitle"
               defaultMessage="Ingest your data"
@@ -46,7 +46,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
         </EuiTitle>
       </EuiFlexItem>
 
-      <EuiFlexItem className="homDataAdd__actions" grow={false}>
+      <EuiFlexItem className="kbnOverviewDataAdd__actions" grow={false}>
         <EuiButtonEmpty iconType="visTable" href="#/tutorial_directory/sampleData" size="xs">
           <FormattedMessage
             id="kibana_overview.addData.sampleDataButtonLabel"
@@ -58,7 +58,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
 
     <EuiSpacer size="m" />
 
-    <EuiFlexGroup className="homDataAdd__content">
+    <EuiFlexGroup className="kbnOverviewDataAdd__content">
       {features.map((feature) => (
         <EuiFlexItem key={feature.id}>
           <Synopsis

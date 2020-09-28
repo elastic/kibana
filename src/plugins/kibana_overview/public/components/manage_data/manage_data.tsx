@@ -19,7 +19,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGrid, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-expect-error untyped service
 import { FeatureCatalogueEntry } from '../../services';
@@ -38,12 +38,12 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
 
     {features.length > 0 && (
       <section
-        className="homDataManage"
-        aria-labelledby="homDataManage__title"
-        data-test-subj="homDataManage"
+        className="kbnOverviewDataManage"
+        aria-labelledby="kbnOverviewDataManage__title"
+        data-test-subj="kbnOverviewDataManage"
       >
         <EuiTitle size="s">
-          <h2 id="homDataManage__title">
+          <h2 id="kbnOverviewDataManage__title">
             <FormattedMessage
               id="kibana_overview.manageData.sectionTitle"
               defaultMessage="Manage your data"
@@ -53,7 +53,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGrid className="homDataManage__content" columns={2}>
+        <EuiFlexGroup className="kbnOverviewDataManage__content">
           {features.map((feature) => (
             <EuiFlexItem key={feature.id}>
               <Synopsis
@@ -67,7 +67,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
               />
             </EuiFlexItem>
           ))}
-        </EuiFlexGrid>
+        </EuiFlexGroup>
       </section>
     )}
   </>

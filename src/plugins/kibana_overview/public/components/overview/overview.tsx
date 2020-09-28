@@ -24,7 +24,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiImage,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
@@ -220,7 +219,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         ? 'kbnOverviewData--compressed'
                         : 'kbnOverviewData--expanded'
                     }`}
-                    direction="column"
                   >
                     <EuiFlexItem>
                       <AddData addBasePath={addBasePath} features={addDataFeatures} />
