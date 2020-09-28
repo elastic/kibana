@@ -29,5 +29,8 @@ export const help: FunctionHelp<FunctionFactory<typeof savedVisualization>> = {
         defaultMessage: `Specifies the option to hide the legend`,
       }
     ),
+    title: i18n.translate('xpack.canvas.functions.savedVisualization.args.titleHelpText', {
+      defaultMessage: `The title for the visualization object`,
+    }),
   },
 };
