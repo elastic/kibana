@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
@@ -364,12 +363,12 @@ describe('UserActionTree ', () => {
 
       await waitFor(() => {
         wrapper.update();
-      });
 
-      wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
-        .first()
-        .simulate('click');
+        wrapper
+          .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
+          .first()
+          .simulate('click');
+      });
 
       expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
     });
@@ -396,14 +395,13 @@ describe('UserActionTree ', () => {
 
       await waitFor(() => {
         wrapper.update();
+        expect(
+          wrapper
+            .find(`[data-test-subj="comment-create-action-${commentId}"]`)
+            .first()
+            .hasClass('outlined')
+        ).toBeTruthy();
       });
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="comment-create-action-${commentId}"]`)
-          .first()
-          .hasClass('outlined')
-      ).toBeTruthy();
     });
   });
 });

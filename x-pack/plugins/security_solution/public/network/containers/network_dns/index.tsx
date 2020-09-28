@@ -13,7 +13,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { NetworkDnsEdges, PageInfoPaginated } from '../../../graphql/types';
+import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
