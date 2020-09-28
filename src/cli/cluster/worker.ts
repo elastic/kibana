@@ -86,7 +86,7 @@ export class Worker extends EventEmitter {
     this.processBinder = new BinderFor(process);
 
     this.env = {
-      NODE_OPTIONS: process.env.NODE_OPTIONS || '',
+      NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4000',
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
     };
