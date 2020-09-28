@@ -14,7 +14,7 @@ jest.mock('./common', () => {
   };
 });
 
-import { installTransformForDataset } from './install';
+import { installTransformForDataStream } from './install';
 import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
@@ -91,11 +91,11 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    await installTransformForDataset(
+    await installTransformForDataStream(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
             name: 'endpoint.metadata',
@@ -263,11 +263,11 @@ describe('test transform install', () => {
       >)
     );
     legacyScopedClusterClient.callAsCurrentUser = jest.fn();
-    await installTransformForDataset(
+    await installTransformForDataStream(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
             name: 'endpoint.metadata_current',
@@ -346,11 +346,11 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    await installTransformForDataset(
+    await installTransformForDataStream(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
             name: 'endpoint.metadata',

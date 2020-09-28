@@ -9,7 +9,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { saveInstalledEsRefs } from '../../packages/install';
 import * as Registry from '../../registry';
 import {
-  Dataset,
+  RegistryDataStream,
   ElasticsearchAssetType,
   EsAssetReference,
   RegistryPackage,
@@ -24,12 +24,12 @@ interface TransformInstallation {
   content: string;
 }
 
-interface TransformPathDataset {
+interface TransformPathDataStream {
   path: string;
-  dataset: Dataset;
+  data_stream: RegistryDataStream;
 }
 
-export const installTransformForDataset = async (
+export const installTransformForDataStream = async (
   registryPackage: RegistryPackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
@@ -51,28 +51,31 @@ export const installTransformForDataset = async (
     callCluster,
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
-  // install the latest dataset
-  const datasets = registryPackage.datasets;
-  if (!datasets?.length) return [];
+  // install the latest data stream
+  const dataStreams = registryPackage.data_streams;
+  if (!dataStreams?.length) return [];
   const installNameSuffix = `${registryPackage.version}`;
 
   const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
-    const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
-      transformPaths.forEach((path) => {
-        if (isDatasetTransform(path, dataset.path)) {
-          acc.push({ path, dataset });
-        }
-      });
-      return acc;
-    }, []);
+    const transformPathDataStreams = dataStreams.reduce<TransformPathDataStream[]>(
+      (acc, dataStream) => {
+        transformPaths.forEach((path) => {
+          if (isDataStreamTransform(path, dataStream.path)) {
+            acc.push({ path, data_stream: dataStream });
+          }
+        });
+        return acc;
+      },
+      []
+    );
 
-    const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
-      (acc, transformPathDataset) => {
-        if (transformPathDataset) {
+    const transformRefs = transformPathDataStreams.reduce<EsAssetReference[]>(
+      (acc, transformPathDataStream) => {
+        if (transformPathDataStream) {
           acc.push({
-            id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
+            id: getTransformNameForInstallation(transformPathDataStream, installNameSuffix),
             type: ElasticsearchAssetType.transform,
           });
         }
@@ -84,14 +87,14 @@ export const installTransformForDataset = async (
     // get and save transform refs before installing transforms
     await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
 
-    const transforms: TransformInstallation[] = transformPathDatasets.map(
-      (transformPathDataset: TransformPathDataset) => {
+    const transforms: TransformInstallation[] = transformPathDataStreams.map(
+      (transformPathDataStream: TransformPathDataStream) => {
         return {
           installationName: getTransformNameForInstallation(
-            transformPathDataset,
+            transformPathDataStream,
             installNameSuffix
           ),
-          content: getAsset(transformPathDataset.path).toString('utf-8'),
+          content: getAsset(transformPathDataStream.path).toString('utf-8'),
         };
       }
     );
@@ -126,7 +129,7 @@ const isTransform = (path: string) => {
   return pathParts.type === ElasticsearchAssetType.transform;
 };
 
-const isDatasetTransform = (path: string, datasetName: string) => {
+const isDataStreamTransform = (path: string, datasetName: string) => {
   const pathParts = Registry.pathParts(path);
   return (
     !path.endsWith('/') &&
@@ -160,9 +163,9 @@ async function installTransform({
 }
 
 const getTransformNameForInstallation = (
-  transformDataset: TransformPathDataset,
+  transformDataStream: TransformPathDataStream,
   suffix: string
 ) => {
-  const filename = transformDataset?.path.split('/')?.pop()?.split('.')[0];
-  return `${transformDataset.dataset.type}-${transformDataset.dataset.name}-${filename}-${suffix}`;
+  const filename = transformDataStream?.path.split('/')?.pop()?.split('.')[0];
+  return `${transformDataStream.data_stream.type}-${transformDataStream.data_stream.name}-${filename}-${suffix}`;
 };

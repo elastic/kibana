@@ -68,7 +68,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          datasets: [
+          data_streams: [
             { type: 'logs', name: 'foo', streams: [{ input: 'foo' }] },
             { type: 'logs', name: 'bar', streams: [{ input: 'bar' }] },
             { type: 'logs', name: 'bar2', streams: [{ input: 'bar' }] },
@@ -102,7 +102,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          datasets: [
+          data_streams: [
             {
               type: 'logs',
               name: 'foo',
@@ -173,7 +173,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          datasets: [
+          data_streams: [
             {
               type: 'logs',
               name: 'foo',

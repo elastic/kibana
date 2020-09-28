@@ -17,13 +17,13 @@ const findStreamsForInputType = (
 ): Array<RegistryStream & { data_stream: { dataset: string } }> => {
   const streams: Array<RegistryStream & { data_stream: { dataset: string } }> = [];
 
-  (packageInfo.datasets || []).forEach((dataset) => {
-    (dataset.streams || []).forEach((stream) => {
+  (packageInfo.data_streams || []).forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
         streams.push({
           ...stream,
           data_stream: {
-            dataset: dataset.name,
+            dataset: dataStream.name,
           },
         });
       }

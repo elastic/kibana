@@ -44,7 +44,7 @@ export {
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,
-  Dataset,
+  RegistryDataStream,
   RegistryElasticsearch,
   AssetReference,
   EsAssetReference,

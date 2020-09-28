@@ -32,7 +32,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
       },
     },
     status: InstallationStatus.notInstalled,
-    datasets: [
+    data_streams: [
       {
         name: 'foo',
         streams: [

@@ -92,11 +92,11 @@ export const validatePackagePolicy = (
     return inputs;
   }, {} as Record<string, RegistryInput>);
 
-  const registryStreamsByDataset: Record<string, RegistryStream[]> = (
-    packageInfo.datasets || []
-  ).reduce((datasets, registryDataset) => {
-    datasets[registryDataset.name] = registryDataset.streams || [];
-    return datasets;
+  const registryStreamsByDataStream: Record<string, RegistryStream[]> = (
+    packageInfo.data_streams || []
+  ).reduce((dataStreams, registryDataStream) => {
+    dataStreams[registryDataStream.name] = registryDataStream.streams || [];
+    return dataStreams;
   }, {} as Record<string, RegistryStream[]>);
 
   // Validate each package policy input with either its own config fields or streams
@@ -140,7 +140,7 @@ export const validatePackagePolicy = (
         if (stream.vars) {
           const streamVarsByName = (
             (
-              registryStreamsByDataset[stream.data_stream.dataset].find(
+              registryStreamsByDataStream[stream.data_stream.dataset].find(
                 (registryStream) => registryStream.input === input.type
               ) || {}
             ).vars || []

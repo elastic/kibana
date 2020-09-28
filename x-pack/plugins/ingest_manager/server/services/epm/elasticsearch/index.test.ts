@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset } from '../../../types';
-import { getDatasetAssetBaseName } from './index';
+import { RegistryDataStream } from '../../../types';
+import { getRegistryDataStreamAssetBaseName } from './index';
 
 test('getBaseName', () => {
-  const dataset: Dataset = {
+  const dataStream: RegistryDataStream = {
     name: 'nginx.access',
     title: 'Nginx Acess Logs',
     release: 'beta',
@@ -17,6 +17,6 @@ test('getBaseName', () => {
     package: 'nginx',
     path: 'access',
   };
-  const name = getDatasetAssetBaseName(dataset);
+  const name = getRegistryDataStreamAssetBaseName(dataStream);
   expect(name).toStrictEqual('logs-nginx.access');
 });

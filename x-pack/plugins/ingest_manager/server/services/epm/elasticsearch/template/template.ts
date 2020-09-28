@@ -6,13 +6,13 @@
 
 import { Field, Fields } from '../../fields/field';
 import {
-  Dataset,
+  RegistryDataStream,
   CallESAsCurrentUser,
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
-import { getDatasetAssetBaseName } from '../index';
+import { getRegistryDataStreamAssetBaseName } from '../index';
 
 interface Properties {
   [key: string]: any;
@@ -222,22 +222,24 @@ function getDefaultProperties(field: Field): Properties {
 /**
  * Generates the template name out of the given information
  */
-export function generateTemplateName(dataset: Dataset): string {
-  return getDatasetAssetBaseName(dataset);
+export function generateTemplateName(dataStream: RegistryDataStream): string {
+  return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
 /**
- * Returns a map of the dataset path fields to elasticsearch index pattern.
- * @param datasets an array of Dataset objects
+ * Returns a map of the data stream path fields to elasticsearch index pattern.
+ * @param dataStreams an array of RegistryDataStream objects
  */
-export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
-  if (!datasets) {
+export function generateESIndexPatterns(
+  dataStreams: RegistryDataStream[] | undefined
+): Record<string, string> {
+  if (!dataStreams) {
     return {};
   }
 
   const patterns: Record<string, string> = {};
-  for (const dataset of datasets) {
-    patterns[dataset.path] = generateTemplateName(dataset) + '-*';
+  for (const dataStream of dataStreams) {
+    patterns[dataStream.path] = generateTemplateName(dataStream) + '-*';
   }
   return patterns;
 }

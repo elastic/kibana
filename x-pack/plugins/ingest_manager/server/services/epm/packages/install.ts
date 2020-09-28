@@ -42,7 +42,7 @@ import {
   ingestErrorToResponseOptions,
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
-import { installTransformForDataset } from '../elasticsearch/transform/install';
+import { installTransformForDataStream } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
@@ -302,7 +302,7 @@ export async function installPackage({
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
+  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.data_streams);
 
   // add the package installation to the saved object.
   // if some installation already exists, just update install info
@@ -368,7 +368,7 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
-  const installedTransforms = await installTransformForDataset(
+  const installedTransforms = await installTransformForDataStream(
     registryPackageInfo,
     paths,
     callCluster,

@@ -11,12 +11,12 @@ import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
-  if (dataset === 'dataset1') {
+  if (dataset === 'datastream1') {
     return [
       {
         buffer: Buffer.from(`
 type: log
-metricset: ["dataset1"]
+metricset: ["datastream1"]
 paths:
 {{#each paths}}
 - {{this}}
@@ -45,10 +45,10 @@ describe('Package policy service', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await packagePolicyService.assignPackageStream(
         ({
-          datasets: [
+          data_streams: [
             {
               type: 'logs',
-              name: 'package.dataset1',
+              name: 'package.datastream1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
@@ -64,8 +64,8 @@ describe('Package policy service', () => {
             enabled: true,
             streams: [
               {
-                id: 'dataset01',
-                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                id: 'datastream01',
+                data_stream: { dataset: 'package.datastream1', type: 'logs' },
                 enabled: true,
                 vars: {
                   paths: {
@@ -84,8 +84,8 @@ describe('Package policy service', () => {
           enabled: true,
           streams: [
             {
-              id: 'dataset01',
-              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              id: 'datastream01',
+              data_stream: { dataset: 'package.datastream1', type: 'logs' },
               enabled: true,
               vars: {
                 paths: {
@@ -93,7 +93,7 @@ describe('Package policy service', () => {
                 },
               },
               compiled_stream: {
-                metricset: ['dataset1'],
+                metricset: ['datastream1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',
               },
@@ -106,9 +106,9 @@ describe('Package policy service', () => {
     it('should work with config variables at the input level', async () => {
       const inputs = await packagePolicyService.assignPackageStream(
         ({
-          datasets: [
+          data_streams: [
             {
-              name: 'package.dataset1',
+              name: 'package.datastream1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
@@ -130,8 +130,8 @@ describe('Package policy service', () => {
             },
             streams: [
               {
-                id: 'dataset01',
-                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                id: 'datastream01',
+                data_stream: { dataset: 'package.datastream1', type: 'logs' },
                 enabled: true,
               },
             ],
@@ -150,11 +150,11 @@ describe('Package policy service', () => {
           },
           streams: [
             {
-              id: 'dataset01',
-              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              id: 'datastream01',
+              data_stream: { dataset: 'package.datastream1', type: 'logs' },
               enabled: true,
               compiled_stream: {
-                metricset: ['dataset1'],
+                metricset: ['datastream1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',
               },
