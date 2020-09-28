@@ -6,10 +6,12 @@
 import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
+import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
+import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;
@@ -38,6 +40,12 @@ export function ClientMetrics() {
     },
     [uxQuery]
   );
+
+  const { setSharedData } = useContext(CsmSharedContext);
+
+  useEffect(() => {
+    setSharedData({ totalPageViews: data?.pageViews?.value ?? 0 });
+  }, [data, setSharedData]);
 
   const STAT_STYLE = { width: '240px' };
 

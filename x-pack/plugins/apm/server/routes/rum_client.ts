@@ -15,6 +15,7 @@ import { getPageLoadDistBreakdown } from '../lib/rum_client/get_pl_dist_breakdow
 import { getRumServices } from '../lib/rum_client/get_rum_services';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
+import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
 import { getUrlSearch } from '../lib/rum_client/get_url_search';
 
@@ -199,5 +200,29 @@ export const rumUrlSearch = createRoute(() => ({
     } = context.params;
 
     return getUrlSearch({ setup, urlQuery, percentile: Number(percentile) });
+  },
+}));
+
+export const rumJSErrors = createRoute(() => ({
+  path: '/api/apm/rum-client/js-errors',
+  params: {
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.type({ pageSize: t.string, pageIndex: t.string }),
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      query: { pageSize, pageIndex },
+    } = context.params;
+
+    return getJSErrors({
+      setup,
+      pageSize: Number(pageSize),
+      pageIndex: Number(pageIndex),
+    });
   },
 }));
