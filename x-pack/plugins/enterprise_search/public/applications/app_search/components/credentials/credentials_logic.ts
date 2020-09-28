@@ -189,12 +189,6 @@ export const CredentialsLogic = kea<
         onApiTokenUpdateSuccess: () => '',
       },
     ],
-    activeApiTokenIsExisting: [
-      false,
-      {
-        showCredentialsForm: (_, activeApiToken) => !!activeApiToken.id,
-      },
-    ],
     shouldShowCredentialsForm: [
       false,
       {
@@ -221,6 +215,10 @@ export const CredentialsLogic = kea<
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
         return isCredentialsDetailsComplete === false || isCredentialsDataComplete === false;
       },
+    ],
+    activeApiTokenIsExisting: [
+      () => [selectors.activeApiToken],
+      (activeApiToken) => !!activeApiToken.id,
     ],
   }),
   listeners: ({ actions, values }) => ({
