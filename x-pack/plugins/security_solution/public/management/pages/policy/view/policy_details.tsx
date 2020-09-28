@@ -50,16 +50,11 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyAdvanced } from './policy_advanced';
 import * as AdvancedPolicySchema from '../../../../../schema.json';
 
-type AdvancedPolicySchemaType = {key: string, first_supported_version: string, last_supported_version: string};
-
-const AdvancedPolicyForms = React.memo(() => {
-    ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map((advancedKey, index) => {
-      const configPath = advancedKey.key.split('.');
-      configPath.shift(); // removes the os - need to change later
-      console.log(configPath);
-      return (<PolicyAdvanced key={index} configPath={configPath}/>);
-    })
-});
+interface AdvancedPolicySchemaType {
+  key: string;
+  first_supported_version: string;
+  last_supported_version: string;
+}
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -84,6 +79,22 @@ export const PolicyDetails = React.memo(() => {
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
+
+  const AdvancedPolicyForms = () => {
+    return ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
+      (advancedField, index) => {
+        const configPath = advancedField.key.split('.');
+        return (
+          <PolicyAdvanced
+            key={index}
+            configPath={configPath}
+            firstSupportedVersion={advancedField.first_supported_version}
+            lastSupportedVersion={advancedField.last_supported_version}
+          />
+        );
+      }
+    );
+  };
 
   // Handle showing update statuses
   useEffect(() => {
@@ -259,8 +270,8 @@ export const PolicyDetails = React.memo(() => {
         <LinuxEvents />
 
         <EuiSpacer size="l" />
-        <PolicyAdvanced configPath={['advanced', 'elasticsearch', 'tls', 'verify_peer']} />
-        <PolicyAdvanced configPath={["advanced", "elasticsearch", "tls", "verify_hostname"]} />
+
+        <AdvancedPolicyForms />
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

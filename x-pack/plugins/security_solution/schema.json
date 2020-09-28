@@ -9,5 +9,5 @@
     "key": "windows.advanced.elasticsearch.tls.verify_hostname",
     "first_supported_version": "7.10",
     "documentation": "whether to verify tls hostname"
-  },
+  }
 ]
