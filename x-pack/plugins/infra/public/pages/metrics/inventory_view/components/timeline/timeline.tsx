@@ -216,7 +216,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 domainType={AnnotationDomainTypes.XDomain}
                 dataValues={generateAnnotationData([a.startTime, 0])}
                 style={annotationStyle}
-                marker={<EuiIcon onClick={() => alert('clicked')} iconType="alert" />}
+                marker={<EuiIcon onClick={() => alert('clicked')} type="alert" />}
                 markerPosition={'bottom'}
               />
             );
