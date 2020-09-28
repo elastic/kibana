@@ -105,6 +105,18 @@ $pageWidth: 1200px;
   width: $euiSizeL * 2;
 }
 
+.kbnOverviewSupplements--noNews .kbnOverviewMore {
+  h2 {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      text-align: center;
+    }
+  }
+
+  .kbnOverviewMore__content {
+    justify-content: center;
+  }
+}
+
 .kbnOverviewData--expanded {
   flex-direction: column;
 
