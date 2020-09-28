@@ -7,7 +7,8 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
-import '../../../../common/mock/match_media.ts';
+import '../../../../common/mock/match_media';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -26,8 +27,25 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 
-jest.mock('../../../../common/components/link_to');
+// not sure why this can't be imported from '../../../../common/mock/formatted_relative';
+// but sure enough it needs to be inline in this one file
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
+jest.mock('../../../../common/components/link_to');
+jest.mock('../../policy/store/policy_list/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+  return {
+    ...originalModule,
+    sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  };
+});
 describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -35,7 +53,6 @@ describe('when on the list page', () => {
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
-
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);

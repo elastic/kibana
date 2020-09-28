@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     /**
@@ -88,6 +89,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
+      await browser.scrollTop();
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
