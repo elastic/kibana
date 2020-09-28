@@ -24,7 +24,7 @@ import { ConfigObservable } from '../types';
 export function registerVegaUsageCollector(
   collectorSet: UsageCollectionSetup,
   config: ConfigObservable
-): void {
+) {
   const collector = collectorSet.makeUsageCollector(getUsageCollector(config));
 
   collectorSet.registerCollector(collector);
