@@ -5,7 +5,9 @@
  */
 
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Accordion } from './accordion';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 import { StatusBadge } from './status_badge';
@@ -26,7 +28,14 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
         <div>
           <EuiText>
             <strong>
-              {index + 1}. {step.synthetics?.step.name}
+              <FormattedMessage
+                id="xpack.uptime.synthetics.executedStep.stepName"
+                defaultMessage="{stepNumber}. {stepName}"
+                values={{
+                  stepNumber: index + 1,
+                  stepName: step.synthetics?.step.name,
+                }}
+              />
             </strong>
           </EuiText>
         </div>
@@ -49,7 +58,12 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
             <EuiFlexItem>
               <Accordion
                 id={step.synthetics?.step?.name + String(index)}
-                buttonContent="Step script"
+                buttonContent={i18n.translate(
+                  'xpack.uptime.synthetics.executedStep.scriptHeading',
+                  {
+                    defaultMessage: 'Step script',
+                  }
+                )}
                 overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
                 language="javascript"
               >
@@ -57,7 +71,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
               </Accordion>
               <Accordion
                 id={`${step.synthetics?.step?.name}_error`}
-                buttonContent="Error"
+                buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
+                  defaultMessage: 'Error',
+                })}
                 language="html"
                 overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
               >
@@ -65,7 +81,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
               </Accordion>
               <Accordion
                 id={`${step.synthetics?.step?.name}_stack`}
-                buttonContent="Stack trace"
+                buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
+                  defaultMessage: 'Stack trace',
+                })}
                 language="html"
                 overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
               >
