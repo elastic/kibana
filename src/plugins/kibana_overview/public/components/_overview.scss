@@ -87,6 +87,12 @@ $pageWidth: 1200px;
   }
 }
 
+.kbnOverviewMore__item {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    max-width: calc(33.333333333333333% - #{$euiSizeM * 2});
+  }
+}
+
 .kbnOverviewSolution__icon {
   background-color: $euiColorEmptyShade !important;
   box-shadow: none !important;
