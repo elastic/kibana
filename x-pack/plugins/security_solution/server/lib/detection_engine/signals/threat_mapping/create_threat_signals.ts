@@ -6,9 +6,9 @@
 
 import { getThreatList } from './get_threat_list';
 
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignals = async ({
   threatMapping,

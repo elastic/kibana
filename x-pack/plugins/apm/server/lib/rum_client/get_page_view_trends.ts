@@ -18,6 +18,7 @@ export async function getPageViewTrends({
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   breakdowns?: string;
+  urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -45,7 +46,7 @@ export async function getPageViewTrends({
                   terms: {
                     field: breakdownItem.fieldName,
                     size: 9,
-                    missing: 'Other',
+                    missing: 'Others',
                   },
                 },
               }
@@ -102,7 +103,7 @@ export async function getPageViewTrends({
         });
         // Top 9 plus others, get a diff from parent bucket total
         if (bCount > top9Count) {
-          res.Other = bCount - top9Count;
+          res.Others = bCount - top9Count;
         }
       }
 

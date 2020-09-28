@@ -109,7 +109,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const closeAddExceptionModal = useCallback(() => {
     setShouldShowAddExceptionModal(false);
     setAddExceptionModalState(addExceptionModalInitialState);
-  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
+  }, []);
 
   const onAddExceptionCancel = useCallback(() => {
     closeAddExceptionModal();
@@ -305,33 +305,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
 
-  const AddExceptionModal = useCallback(
-    () =>
-      shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null ? (
-        <AddExceptionModalComponent
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
-        />
-      ) : null,
-    [
-      shouldShowAddExceptionModal,
-      addExceptionModalState.alertData,
-      addExceptionModalState.ruleName,
-      addExceptionModalState.ruleId,
-      addExceptionModalState.ruleIndices,
-      addExceptionModalState.exceptionListType,
-      onAddExceptionCancel,
-      onAddExceptionConfirm,
-      alertStatus,
-    ]
-  );
-
   const button = (
     <EuiButtonIcon
       aria-label="context menu"
@@ -482,7 +455,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           </EuiPopover>
         </EventsTdContent>
       </EventsTd>
-      <AddExceptionModal />
+      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
+        <AddExceptionModalComponent
+          ruleName={addExceptionModalState.ruleName}
+          ruleId={addExceptionModalState.ruleId}
+          ruleIndices={addExceptionModalState.ruleIndices}
+          exceptionListType={addExceptionModalState.exceptionListType}
+          alertData={addExceptionModalState.alertData}
+          onCancel={onAddExceptionCancel}
+          onConfirm={onAddExceptionConfirm}
+          alertStatus={alertStatus}
+        />
+      )}
     </>
   );
 };

@@ -13,6 +13,25 @@ import { documentationService } from '../../../services/documentation';
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
+  runtime: {
+    value: 'runtime',
+    isBeta: true,
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
+      defaultMessage: 'Runtime',
+    }),
+    // TODO: Add this once the page exists.
+    // documentation: {
+    //   main: '/runtime_field.html',
+    // },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldLongDescription"
+          defaultMessage="Runtime fields define scripts that calculate field values at runtime."
+        />
+      </p>
+    ),
+  },
   text: {
     value: 'text',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
@@ -925,6 +944,7 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'rank_feature',
   'rank_features',
+  'runtime',
   'search_as_you_type',
   'shape',
   'text',
