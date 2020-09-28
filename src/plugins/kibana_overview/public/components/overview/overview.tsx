@@ -161,7 +161,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
             <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
-            <EuiFlexGroup>
+            <EuiFlexGroup
+              className={`kbnOverviewSupplements ${
+                newsFetchResult && newsFetchResult.feedItems.length
+                  ? 'kbnOverviewSupplements--hasNews'
+                  : 'kbnOverviewSupplements--noNews'
+              }`}
+            >
               {newsFetchResult && newsFetchResult.feedItems.length ? (
                 <EuiFlexItem grow={1}>
                   <NewsFeed newsFetchResult={newsFetchResult} />
@@ -169,19 +175,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               ) : null}
 
               <EuiFlexItem grow={3}>
-                <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
-                  <EuiTitle size="s">
-                    <h2 id="kbnOverviewMore__title">
-                      <FormattedMessage
-                        id="kibana_overview.more.title"
-                        defaultMessage="Do more with Elastic"
-                      />
-                    </h2>
-                  </EuiTitle>
+                {solutions.length ? (
+                  <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
+                    <EuiTitle size="s">
+                      <h2 id="kbnOverviewMore__title">
+                        <FormattedMessage
+                          id="kibana_overview.more.title"
+                          defaultMessage="Do more with Elastic"
+                        />
+                      </h2>
+                    </EuiTitle>
 
-                  <EuiSpacer size="m" />
+                    <EuiSpacer size="m" />
 
-                  {solutions.length ? (
                     <EuiFlexGroup className="kbnOverviewMore__content">
                       {solutions.map(({ id, title, description, icon, path }) => (
                         <EuiFlexItem className="kbnOverviewMore__item" key={id}>
@@ -206,25 +212,25 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
-                  ) : (
-                    <EuiFlexGroup
-                      className={`kibanaOverview__Data ${
-                        addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                          ? 'kibanaOverview__Data--compressed'
-                          : 'kibanaOverview__Data--expanded'
-                      }`}
-                      direction="column"
-                    >
-                      <EuiFlexItem>
-                        <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                      </EuiFlexItem>
+                  </section>
+                ) : (
+                  <EuiFlexGroup
+                    className={`kbnOverviewData ${
+                      addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                        ? 'kbnOverviewData--compressed'
+                        : 'kbnOverviewData--expanded'
+                    }`}
+                    direction="column"
+                  >
+                    <EuiFlexItem>
+                      <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                    </EuiFlexItem>
 
-                      <EuiFlexItem>
-                        <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                </section>
+                    <EuiFlexItem>
+                      <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
