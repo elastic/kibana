@@ -70,7 +70,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
 }
 
 export type FormSchema<T extends FormData = FormData> = {
-  [K in keyof T]: FieldConfig<T, T[K]> | FormSchema<T[K]>;
+  [K in keyof T]?: FieldConfig<T, T[K]> | FormSchema<T[K]>;
 };
 
 export interface FormConfig<T extends FormData = FormData, I extends FormData = T> {
