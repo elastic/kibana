@@ -21,7 +21,7 @@ The search returns all account numbers between zero and 99 with balances in
 excess of 47,500. Results appear for account numbers 8, 32, 78, 85, and 97.
 +
 [role="screenshot"]
-image::images/tutorial-discover-2.png[Image demonstrating search results for account numbers between zero and ninety nine with balances in excess of 47,500. At the top of the image is a heading that reads "5 hits", and dsiplaying results for account numbers 8, 32, 78, 85, and 97.]
+image::images/tutorial-discover-2.png[Image showing the search results for account numbers between zero and 99, with balances in excess of 47,500]
 +
 . Hover over the list of *Available fields*, then
 click *Add* next to each field you want include in the table.
