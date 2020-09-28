@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './canvas_to_dashboard_drilldown';
+export * from './app2_to_dashboard_drilldown';

@@ -6,21 +6,21 @@
 
 import { Trigger } from '../../../../../src/plugins/ui_actions/public';
 
-export const SAMPLE_ML_JOB_CLICK_TRIGGER = 'SAMPLE_ML_JOB_CLICK_TRIGGER';
+export const SAMPLE_APP1_CLICK_TRIGGER = 'SAMPLE_APP1_CLICK_TRIGGER';
 
-export const sampleMlJobClickTrigger: Trigger<'SAMPLE_ML_JOB_CLICK_TRIGGER'> = {
-  id: SAMPLE_ML_JOB_CLICK_TRIGGER,
-  title: 'ML job click',
-  description: 'Sample trigger, which represents a click in ML app on an ML job.',
+export const sampleApp1ClickTrigger: Trigger<'SAMPLE_APP1_CLICK_TRIGGER'> = {
+  id: SAMPLE_APP1_CLICK_TRIGGER,
+  title: 'App 1 trigger fired on click',
+  description: 'Could be a click on a ML job in ML app.',
 };
 
 declare module '../../../../../src/plugins/ui_actions/public' {
   export interface TriggerContextMapping {
-    [SAMPLE_ML_JOB_CLICK_TRIGGER]: SampleMlJobClickContext;
+    [SAMPLE_APP1_CLICK_TRIGGER]: SampleApp1ClickContext;
   }
 }
 
-export interface SampleMlJobClickContext {
+export interface SampleApp1ClickContext {
   job: SampleMlJob;
 }
 

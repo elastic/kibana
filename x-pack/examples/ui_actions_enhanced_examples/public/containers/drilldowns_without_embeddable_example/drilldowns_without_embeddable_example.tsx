@@ -17,7 +17,7 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJob, SampleMlJobClickContext } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER, SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 
 export const job: SampleMlJob = {
   job_id: '123',
@@ -25,7 +25,7 @@ export const job: SampleMlJob = {
   description: 'This is some ML job.',
 };
 
-export const context: SampleMlJobClickContext = { job };
+export const context: SampleApp1ClickContext = { job };
 
 export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddable } = useUiActions();
@@ -87,7 +87,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
   return (
     <>
       <EuiText>
-        <h3>Without embeddable example</h3>
+        <h3>Without embeddable example (app 1)</h3>
         <p>
           <em>Drilldown Manager</em> can be integrated into any app in Kibana. This example shows
           that drilldown manager can be used in an app which does not use embeddables and executes
@@ -106,7 +106,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
             iconType="play"
             iconSide="left"
             onClick={() =>
-              plugins.uiActionsEnhanced.executeTriggerActions(SAMPLE_ML_JOB_CLICK_TRIGGER, context)
+              plugins.uiActionsEnhanced.executeTriggerActions(SAMPLE_APP1_CLICK_TRIGGER, context)
             }
           >
             Execute click action
@@ -120,7 +120,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
             onClose={() => setShowManager(false)}
             viewMode={viewRef.current}
             dynamicActionManager={managerWithoutEmbeddable}
-            triggers={[SAMPLE_ML_JOB_CLICK_TRIGGER]}
+            triggers={[SAMPLE_APP1_CLICK_TRIGGER]}
           />
         </EuiFlyout>
       )}

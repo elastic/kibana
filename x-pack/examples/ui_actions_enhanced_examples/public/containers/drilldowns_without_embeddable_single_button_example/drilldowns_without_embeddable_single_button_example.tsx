@@ -7,10 +7,7 @@
 import React from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiFlyout } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import {
-  sampleCanavsElementClickContext,
-  SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER,
-} from '../../triggers';
+import { sampleApp2ClickContext, SAMPLE_APP2_CLICK_TRIGGER } from '../../triggers';
 
 export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddableSingleButton } = useUiActions();
@@ -20,12 +17,12 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
   return (
     <>
       <EuiText>
-        <h3>Without embeddable example (single button)</h3>
+        <h3>Without embeddable example, single button (app 2)</h3>
         <p>
           This example is the same as <em>Without embeddable example</em> but it shows that
           drilldown manager actions and user created drilldowns can be combined in one menu, this is
           useful, for example, for Canvas where clicking on a Canvas element would show the combined
-          menu of drilldown manager actiosn and drilldown actions.
+          menu of drilldown manager actions and drilldown actions.
         </p>
       </EuiText>
 
@@ -40,8 +37,8 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
             iconSide="left"
             onClick={() =>
               plugins.uiActionsEnhanced.executeTriggerActions(
-                SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER,
-                sampleCanavsElementClickContext
+                SAMPLE_APP2_CLICK_TRIGGER,
+                sampleApp2ClickContext
               )
             }
           >
@@ -56,7 +53,7 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
             onClose={() => setShowManager(false)}
             viewMode={viewRef.current}
             dynamicActionManager={managerWithoutEmbeddableSingleButton}
-            triggers={[SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER]}
+            triggers={[SAMPLE_APP2_CLICK_TRIGGER]}
           />
         </EuiFlyout>
       )}

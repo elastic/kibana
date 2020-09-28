@@ -10,7 +10,7 @@ import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/p
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { ActionExecutionContext } from '../../../../../../src/plugins/ui_actions/public';
-import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJobClickContext } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext } from '../../triggers';
 import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 function isValidUrl(url: string) {
@@ -27,24 +27,24 @@ export interface Config extends SerializableState {
   openInNewTab: boolean;
 }
 
-type Trigger = typeof SAMPLE_ML_JOB_CLICK_TRIGGER;
-type Context = SampleMlJobClickContext;
+type Trigger = typeof SAMPLE_APP1_CLICK_TRIGGER;
+type Context = SampleApp1ClickContext;
 
 export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trigger[] }>;
 
-export const SAMPLE_ML_TO_URL_DRILLDOWN = 'SAMPLE_ML_TO_URL_DRILLDOWN';
+export const APP1_TO_URL_DRILLDOWN = 'APP1_TO_URL_DRILLDOWN';
 
-export class SampleMlToUrlDrilldown implements Drilldown<Config, Trigger> {
-  public readonly id = SAMPLE_ML_TO_URL_DRILLDOWN;
+export class App1ToUrlDrilldown implements Drilldown<Config, Trigger> {
+  public readonly id = APP1_TO_URL_DRILLDOWN;
 
   public readonly order = 8;
 
-  public readonly getDisplayName = () => 'Go to URL';
+  public readonly getDisplayName = () => 'Go to URL (from app 1)';
 
   public readonly euiIcon = 'link';
 
   supportedTriggers(): Trigger[] {
-    return [SAMPLE_ML_JOB_CLICK_TRIGGER];
+    return [SAMPLE_APP1_CLICK_TRIGGER];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({

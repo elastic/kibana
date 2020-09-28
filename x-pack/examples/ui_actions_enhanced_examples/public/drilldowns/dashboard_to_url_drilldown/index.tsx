@@ -15,6 +15,7 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../../src/plugins/ui_actions/public';
+import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 function isValidUrl(url: string) {
   try {
@@ -27,7 +28,7 @@ function isValidUrl(url: string) {
 
 export type ActionContext = ChartActionContext;
 
-export interface Config {
+export interface Config extends SerializableState {
   url: string;
   openInNewTab: boolean;
 }

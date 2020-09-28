@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { SampleMlJob, SampleMlJobClickContext } from '../../triggers';
+import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 import { EmbeddableRoot } from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
 import { useUiActions } from '../../context';
@@ -29,7 +29,7 @@ export const job: SampleMlJob = {
   description: 'This is some ML job.',
 };
 
-export const context: SampleMlJobClickContext = { job };
+export const context: SampleApp1ClickContext = { job };
 
 export const DrilldownsWithEmbeddableExample: React.FC = () => {
   const { plugins, managerWithEmbeddable } = useUiActions();

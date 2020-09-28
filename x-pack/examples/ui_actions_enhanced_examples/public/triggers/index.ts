@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './sample_ml_triggers';
-export * from './sample_canvas_trigger';
+export * from './sample_app1_trigger';
+export * from './sample_app2_trigger';

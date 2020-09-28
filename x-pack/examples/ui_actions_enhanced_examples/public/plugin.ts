@@ -14,26 +14,26 @@ import {
 } from '../../../../x-pack/plugins/ui_actions_enhanced/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
-import { SampleMlToUrlDrilldown } from './drilldowns/ml_to_url_drilldown';
-import { SampleMlToDashboardDrilldown } from './drilldowns/ml_to_dashboard_drilldown';
+import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
+import { App1ToUrlDrilldown } from './drilldowns/app1_to_url_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import {
-  sampleMlJobClickTrigger,
-  sampleCanvasElementClickTrigger,
-  SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER,
-  SampleCanvasElementClickContext,
-  sampleCanavsElementClickContext,
+  sampleApp1ClickTrigger,
+  sampleApp2ClickTrigger,
+  SAMPLE_APP2_CLICK_TRIGGER,
+  SampleApp2ClickContext,
+  sampleApp2ClickContext,
 } from './triggers';
 import { mount } from './mount';
 import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '../../../plugins/ui_actions_enhanced/public';
-import { SampleCanvasToDashboardDrilldown } from './drilldowns/canvas_to_dashboard_drilldown';
+import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
 
 export interface SetupDependencies {
   dashboard: DashboardSetup;
@@ -67,19 +67,19 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardHelloWorldDrilldown());
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
-    uiActions.registerDrilldown(new SampleMlToUrlDrilldown());
-    uiActions.registerDrilldown(new SampleMlToDashboardDrilldown({ start }));
-    uiActions.registerDrilldown(new SampleCanvasToDashboardDrilldown({ start }));
+    uiActions.registerDrilldown(new App1ToUrlDrilldown());
+    uiActions.registerDrilldown(new App1ToDashboardDrilldown({ start }));
+    uiActions.registerDrilldown(new App2ToDashboardDrilldown({ start }));
 
-    uiActions.registerTrigger(sampleMlJobClickTrigger);
-    uiActions.registerTrigger(sampleCanvasElementClickTrigger);
+    uiActions.registerTrigger(sampleApp1ClickTrigger);
+    uiActions.registerTrigger(sampleApp2ClickTrigger);
 
-    uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
+    uiActions.addTriggerAction(SAMPLE_APP2_CLICK_TRIGGER, {
       id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
       order: 2,
       getDisplayName: () => 'Add drilldown',
       getIconType: () => 'plusInCircle',
-      isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
+      isCompatible: async ({ workpadId, elementId }: SampleApp2ClickContext) =>
         workpadId === '123' && elementId === '456',
       execute: async () => {
         const { core: coreStart, plugins: pluginsStart, self } = start();
@@ -89,8 +89,8 @@ export class UiActionsEnhancedExamplesPlugin
               onClose: () => handle.close(),
               viewMode: 'create',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
-              triggers: [SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER],
-              placeContext: { sampleCanavsElementClickContext },
+              triggers: [SAMPLE_APP2_CLICK_TRIGGER],
+              placeContext: { sampleCanavsElementClickContext: sampleApp2ClickContext },
             })
           ),
           {
@@ -99,12 +99,12 @@ export class UiActionsEnhancedExamplesPlugin
         );
       },
     });
-    uiActions.addTriggerAction(SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER, {
+    uiActions.addTriggerAction(SAMPLE_APP2_CLICK_TRIGGER, {
       id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
       order: 1,
       getDisplayName: () => 'Manage drilldowns',
       getIconType: () => 'list',
-      isCompatible: async ({ workpadId, elementId }: SampleCanvasElementClickContext) =>
+      isCompatible: async ({ workpadId, elementId }: SampleApp2ClickContext) =>
         workpadId === '123' && elementId === '456',
       execute: async () => {
         const { core: coreStart, plugins: pluginsStart, self } = start();
@@ -114,8 +114,8 @@ export class UiActionsEnhancedExamplesPlugin
               onClose: () => handle.close(),
               viewMode: 'manage',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
-              triggers: [SAMPLE_CANVAS_ELEMENT_CLICK_TRIGGER],
-              placeContext: { sampleCanavsElementClickContext },
+              triggers: [SAMPLE_APP2_CLICK_TRIGGER],
+              placeContext: { sampleCanavsElementClickContext: sampleApp2ClickContext },
             })
           ),
           {
