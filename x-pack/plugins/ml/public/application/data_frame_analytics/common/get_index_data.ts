@@ -51,6 +51,8 @@ export const getIndexData = async (
         index: jobConfig.dest.index,
         body: {
           query: searchQuery,
+          fields: ['*'],
+          _source: false,
           from: pageIndex * pageSize,
           size: pageSize,
           ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -59,7 +61,7 @@ export const getIndexData = async (
 
       setRowCount(resp.hits.total.value);
 
-      const docs = resp.hits.hits.map((d) => d._source);
+      const docs = resp.hits.hits.map((d) => d.fields);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {

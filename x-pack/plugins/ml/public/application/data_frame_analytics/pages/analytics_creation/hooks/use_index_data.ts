@@ -31,6 +31,16 @@ import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = SearchResponse7;
 
+const getProcessedFields = (originalObj: object) => {
+  const obj: { [key: string]: any } = { ...originalObj };
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key]) && obj[key].length === 1) {
+      obj[key] = obj[key][0];
+    }
+  }
+
+  return obj;
+};
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: any,
@@ -81,6 +91,8 @@ export const useIndexData = (
         query, // isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
+        fields: ['*'],
+        _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
       },
     };
@@ -88,8 +100,7 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map((d) => d._source);
-
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
       setRowCount(resp.hits.total.value);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
