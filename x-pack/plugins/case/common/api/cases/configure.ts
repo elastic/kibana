@@ -70,6 +70,7 @@ const ConfigureCaseConnectorRt = rt.type({
   id: rt.string,
   name: rt.string,
   type: rt.string,
+  fields: rt.UnknownRecord,
 });
 
 const CasesConfigureBasicRt = rt.type({
@@ -108,3 +109,11 @@ export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
 export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
 export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesRt>;
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
+
+export type ESCasesConfigureConnector = Omit<ConfigureCaseConnector, 'fields'> & {
+  fields: Array<{ key: string; value: unknown }>;
+};
+
+export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
+  connector: ESCasesConfigureConnector;
+};

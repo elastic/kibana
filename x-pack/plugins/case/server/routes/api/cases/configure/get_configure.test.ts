@@ -39,6 +39,7 @@ describe('GET configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
       ...mockCaseConfigure[0].attributes,
+      connector: { ...mockCaseConfigure[0].attributes.connector, fields: {} },
       version: mockCaseConfigure[0].version,
     });
   });
@@ -62,6 +63,7 @@ describe('GET configuration', () => {
         id: '789',
         name: 'My connector 3',
         type: '.jira',
+        fields: {},
       },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',

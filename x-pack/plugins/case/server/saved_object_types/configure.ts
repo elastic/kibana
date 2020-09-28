@@ -42,6 +42,17 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
           type: {
             type: 'keyword',
           },
+          fields: {
+            properties: {
+              key: {
+                type: 'keyword',
+              },
+              value: {
+                // Are we sure that the value will be only a string or string[]. What if they are objects?
+                type: 'text',
+              },
+            },
+          },
         },
       },
       closure_type: {

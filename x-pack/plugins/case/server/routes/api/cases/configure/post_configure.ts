@@ -51,6 +51,11 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           client,
           attributes: {
             ...query,
+            connector: {
+              ...query.connector,
+              // Reserve for future implementations
+              fields: [],
+            },
             created_at: creationDate,
             created_by: { email, full_name, username },
             updated_at: null,
@@ -59,7 +64,12 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         });
 
         return response.ok({
-          body: CaseConfigureResponseRt.encode({ ...post.attributes, version: post.version ?? '' }),
+          body: CaseConfigureResponseRt.encode({
+            ...post.attributes,
+            // Reserve for future implementations
+            connector: { ...post.attributes.connector, fields: {} },
+            version: post.version ?? '',
+          }),
         });
       } catch (error) {
         return response.customError(wrapError(error));
