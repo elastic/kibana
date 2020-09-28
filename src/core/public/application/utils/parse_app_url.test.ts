@@ -134,6 +134,9 @@ describe('parseAppUrl', () => {
       );
       expect(parseAppUrl('/base-path/unknown-path', basePath, apps, getOrigin)).toEqual(undefined);
     });
+    it('returns undefined when the path does not start with the base path', () => {
+      expect(parseAppUrl('/app/foo', basePath, apps, getOrigin)).toBeUndefined();
+    });
   });
 
   describe('with absolute urls', () => {
@@ -319,6 +322,11 @@ describe('parseAppUrl', () => {
           getOrigin
         )
       ).toEqual(undefined);
+    });
+    it('returns undefined when the path does not contain the base path', () => {
+      expect(parseAppUrl('https://kibana.local:8080/app/foo', basePath, apps, getOrigin)).toEqual(
+        undefined
+      );
     });
   });
 });

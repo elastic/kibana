@@ -21,9 +21,12 @@ import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
 
 /**
- * Parse given url and return the associated app id and path if any app matches.
+ * Parse given url and return the associated app id and path if any app matches, or undefined if none do.
  * Input can either be:
- * - a path containing the basePath, ie `/base-path/app/my-app/some-path`
+ *
+ * - a path containing the basePath,
+ *   ie `/base-path/app/my-app/some-path`
+ *
  * - an absolute url matching the `origin` of the kibana instance (as seen by the browser),
  *   i.e `https://kibana:8080/base-path/app/my-app/some-path`
  */
@@ -33,7 +36,19 @@ export const parseAppUrl = (
   apps: Map<string, App<unknown>>,
   getOrigin: () => string = () => window.location.origin
 ): ParsedAppUrl | undefined => {
-  url = removeBasePath(url, basePath, getOrigin());
+  const origin = getOrigin();
+
+  // remove the origin from the given url
+  if (url.startsWith(origin)) {
+    url = url.substring(origin.length);
+  }
+  // if using a basePath and the url path does not starts with it
+  const basePathValue = basePath.get();
+  if (basePathValue && !url.startsWith(basePathValue)) {
+    return undefined;
+  }
+
+  url = basePath.remove(url);
   if (!url.startsWith('/')) {
     return undefined;
   }
@@ -49,11 +64,4 @@ export const parseAppUrl = (
       };
     }
   }
-};
-
-const removeBasePath = (url: string, basePath: IBasePath, origin: string): string => {
-  if (url.startsWith(origin)) {
-    url = url.substring(origin.length);
-  }
-  return basePath.remove(url);
 };
