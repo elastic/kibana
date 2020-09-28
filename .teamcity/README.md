@@ -23,6 +23,7 @@
 - Job that has a version string as an "output", rather than an artifact/file, with consumption in a different job
 - Clone a list of jobs and modify dependencies/configuration for a second pipeline
 - Promote/deploy a built artifact through the UI by selecting previously built artifact (or automatically build a new one and deploy if successful)
+- Custom Build IDs using service messages
 
 ## Kibana Builds
 
