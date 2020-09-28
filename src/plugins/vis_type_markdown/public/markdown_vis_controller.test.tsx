@@ -20,7 +20,7 @@
 import React from 'react';
 import { wait } from '@testing-library/dom';
 import { render, cleanup } from '@testing-library/react/pure';
-import { MarkdownVisWrapper } from './markdown_vis_controller';
+import MarkdownVisComponent from './markdown_vis_controller';
 
 afterEach(cleanup);
 
@@ -36,7 +36,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
 
     await wait(() => getByTestId('markdownBody'));
@@ -60,7 +60,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
 
     await wait(() => getByTestId('markdownBody'));
@@ -82,7 +82,7 @@ describe('markdown vis controller', () => {
     };
 
     const { getByTestId, getByText, rerender } = render(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
+      <MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />
     );
 
     await wait(() => getByTestId('markdownBody'));
@@ -90,9 +90,7 @@ describe('markdown vis controller', () => {
     expect(getByText(/initial/i)).toBeInTheDocument();
 
     vis.params.markdown = 'Updated';
-    rerender(
-      <MarkdownVisWrapper visParams={vis.params} renderComplete={jest.fn()} fireEvent={jest.fn()} />
-    );
+    rerender(<MarkdownVisComponent {...vis.params} renderComplete={jest.fn()} />);
 
     expect(getByText(/Updated/i)).toBeInTheDocument();
   });
@@ -114,11 +112,7 @@ describe('markdown vis controller', () => {
 
     it('should be called on initial rendering', async () => {
       const { getByTestId } = render(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
       await wait(() => getByTestId('markdownBody'));
@@ -128,11 +122,7 @@ describe('markdown vis controller', () => {
 
     it('should be called on successive render when params change', async () => {
       const { getByTestId, rerender } = render(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
       await wait(() => getByTestId('markdownBody'));
@@ -142,24 +132,14 @@ describe('markdown vis controller', () => {
       renderComplete.mockClear();
       vis.params.markdown = 'changed';
 
-      rerender(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      rerender(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
 
       expect(renderComplete).toHaveBeenCalledTimes(1);
     });
 
     it('should be called on successive render even without data change', async () => {
       const { getByTestId, rerender } = render(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
+        <MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />
       );
 
       await wait(() => getByTestId('markdownBody'));
@@ -168,13 +148,7 @@ describe('markdown vis controller', () => {
 
       renderComplete.mockClear();
 
-      rerender(
-        <MarkdownVisWrapper
-          visParams={vis.params}
-          renderComplete={renderComplete}
-          fireEvent={jest.fn()}
-        />
-      );
+      rerender(<MarkdownVisComponent {...vis.params} renderComplete={renderComplete} />);
 
       expect(renderComplete).toHaveBeenCalledTimes(1);
     });
