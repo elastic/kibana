@@ -212,7 +212,7 @@ export function LayerPanel(
                         isDraggedOperation(dragDropContext.dragging) &&
                         group.groupId !== dragDropContext.dragging.groupId
                           ? 'replace'
-                          : 'copy'
+                          : 'add'
                       }
                       data-test-subj={group.dataTestSubj}
                       draggable={!dimensionContainerState.isOpen}
