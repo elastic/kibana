@@ -1242,7 +1242,7 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "type": "long"
                             },
                             "ratio": {
-                              "type": "long"
+                              "type": "float"
                             }
                           }
                         },
@@ -1255,7 +1255,7 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "type": "long"
                             },
                             "ratio": {
-                              "type": "long"
+                              "type": "float"
                             }
                           }
                         },
@@ -1268,7 +1268,7 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "type": "long"
                             },
                             "ratio": {
-                              "type": "long"
+                              "type": "float"
                             }
                           }
                         }
