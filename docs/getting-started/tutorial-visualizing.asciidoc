@@ -16,7 +16,7 @@ To visualize the Shakespeare data and compare the number of speaking parts in th
 . Click *Create new*, then click *Lens* on the *New Visualization* window.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-wizard-step-1.png[Image showing different options for your new visualization, such as "lens", "area", "control", and others]
+image::images/tutorial-visualize-wizard-step-1.png[Image showing different options for your new visualization]
 
 . Make sure the index pattern is *shakes*.
 
