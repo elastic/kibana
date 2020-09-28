@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, EuiIcon } from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -18,6 +18,9 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  LineAnnotation,
+  AnnotationDomainTypes,
+  LineAnnotationDatum,
 } from '@elastic/charts';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
@@ -49,18 +52,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-  const [start] = useState(moment().toDate().getTime());
 
-  const SORT_DEFAULTS = {
-    direction: 'desc' as const,
-    field: 'anomalyScore' as const,
-  };
-
-  const PAGINATION_DEFAULTS = {
-    pageSize: 100,
-  };
-
-  const { loading, error, timeseries, reload } = useTimeline(
+  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
     filterQueryAsJson,
     [metric],
     nodeType,
@@ -72,21 +65,23 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     isVisible
   );
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults({
+  const anomalyParams = {
     sourceId: 'default',
-    startTime: moment(new Date(start)).subtract(10, 'd').toDate().getTime(),
-    endTime: start,
-    defaultSortOptions: SORT_DEFAULTS,
-    defaultPaginationOptions: PAGINATION_DEFAULTS,
-  });
+    startTime,
+    endTime,
+    defaultSortOptions: {
+      direction: 'desc' as const,
+      field: 'anomalyScore' as const,
+    },
+    defaultPaginationOptions: { pageSize: 100 },
+  };
 
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults({
-    sourceId: 'default',
-    startTime: moment(new Date(start)).subtract(10, 'd').toDate().getTime(),
-    endTime: start,
-    defaultSortOptions: SORT_DEFAULTS,
-    defaultPaginationOptions: PAGINATION_DEFAULTS,
-  });
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
+    anomalyParams
+  );
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
+    anomalyParams
+  );
 
   const getAnomalies = useMemo(() => {
     if (nodeType === 'host') {
@@ -96,13 +91,13 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     }
   }, [nodeType, getMetricsK8sAnomalies, getMetricsHostsAnomalies]);
 
-  // const anomalies = useMemo(() => {
-  //   if (nodeType === 'host') {
-  //     return metricsHostsAnomalies;
-  //   } else if (nodeType === 'pod') {
-  //     return metricsK8sAnomalies;
-  //   }
-  // }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  const anomalies = useMemo(() => {
+    if (nodeType === 'host') {
+      return metricsHostsAnomalies;
+    } else if (nodeType === 'pod') {
+      return metricsK8sAnomalies;
+    }
+  }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type)?.textLC;
 
@@ -194,6 +189,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     );
   }
 
+  function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
+    return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
+  }
+
   return (
     <TimelineContainer>
       <TimelineHeader>
@@ -209,6 +208,19 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       </TimelineHeader>
       <TimelineChartContainer>
         <Chart>
+          {(anomalies || []).map((a) => {
+            return (
+              <LineAnnotation
+                key={a.id}
+                id={a.id}
+                domainType={AnnotationDomainTypes.XDomain}
+                dataValues={generateAnnotationData([a.startTime, 0])}
+                style={annotationStyle}
+                marker={<EuiIcon onClick={() => alert('clicked')} iconType="alert" />}
+                markerPosition={'bottom'}
+              />
+            );
+          })}
           <MetricExplorerSeriesChart
             type={MetricsExplorerChartType.area}
             metric={chartMetric}
@@ -239,6 +251,21 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       </TimelineChartContainer>
     </TimelineContainer>
   );
+};
+
+const annotationStyle = {
+  line: {
+    strokeWidth: 3,
+    stroke: '#f00',
+    opacity: 1,
+  },
+  details: {
+    fontSize: 12,
+    fontFamily: 'Arial',
+    fontStyle: 'bold',
+    fill: 'gray',
+    padding: 0,
+  },
 };
 
 const TimelineContainer = euiStyled.div`
