@@ -6,13 +6,13 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { ResetPercentileZoom } from './ResetPercentileZoom';
-import { useUxQuery } from '../hooks/useUxQuery';
 
 export interface PercentileRange {
   min?: number | null;
@@ -20,6 +20,10 @@ export interface PercentileRange {
 }
 
 export function PageLoadDistribution() {
+  const { urlParams, uiFilters } = useUrlParams();
+
+  const { start, end, searchTerm } = urlParams;
+
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
@@ -27,16 +31,19 @@ export function PageLoadDistribution() {
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
-  const uxQuery = useUxQuery();
-
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (uxQuery) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
           params: {
             query: {
-              ...uxQuery,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
               ...(percentileRange.min && percentileRange.max
                 ? {
                     minPercentile: String(percentileRange.min),
@@ -49,7 +56,14 @@ export function PageLoadDistribution() {
       }
       return Promise.resolve(null);
     },
-    [uxQuery, percentileRange.min, percentileRange.max]
+    [
+      end,
+      start,
+      uiFilters,
+      percentileRange.min,
+      percentileRange.max,
+      searchTerm,
+    ]
   );
 
   const onPercentileChange = (min: number, max: number) => {

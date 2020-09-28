@@ -9,26 +9,33 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUxQuery } from '../hooks/useUxQuery';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 export function VisitorBreakdown() {
-  const uxQuery = useUxQuery();
+  const { urlParams, uiFilters } = useUrlParams();
+
+  const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (uxQuery) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/visitor-breakdown',
           params: {
             query: {
-              ...uxQuery,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [uxQuery]
+    [end, start, uiFilters, searchTerm]
   );
 
   return (

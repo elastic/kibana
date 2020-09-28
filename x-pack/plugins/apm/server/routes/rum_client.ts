@@ -26,10 +26,7 @@ export const percentileRangeRt = t.partial({
 const uxQueryRt = t.intersection([
   uiFiltersRt,
   rangeRt,
-  t.type({
-    percentile: t.string,
-  }),
-  t.partial({ urlQuery: t.string }),
+  t.partial({ urlQuery: t.string, percentile: t.string }),
 ]);
 
 export const rumClientMetricsRoute = createRoute(() => ({
