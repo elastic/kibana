@@ -177,16 +177,14 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <span>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-                      defaultMessage="Overall feature importance"
-                    />
-                  </span>
-                </EuiTitle>
-              </EuiFlexItem>
+              <EuiTitle size="xs">
+                <span>
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
+                    defaultMessage="Overall feature importance"
+                  />
+                </span>
+              </EuiTitle>
               <EuiFlexItem grow={false}>
                 <EuiIconTip content={tooltipContent} />
               </EuiFlexItem>
