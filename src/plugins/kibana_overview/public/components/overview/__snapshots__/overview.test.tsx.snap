@@ -69,7 +69,10 @@ exports[`Overview render 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
       <EuiFlexItem
         grow={1}
       >
@@ -138,145 +141,99 @@ exports[`Overview render 1`] = `
           <EuiSpacer
             size="m"
           />
-          <EuiFlexGroup>
+          <EuiFlexGroup
+            className="kbnOverviewMore__content"
+          >
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="kibana"
             >
               <EuiCard
-                description={<span />}
+                className="kbnOverviewSolution"
+                description=""
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="logoKibana"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Kibana"
-                    url="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Kibana
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Kibana"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-2"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution two
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution two"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution two"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution two
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution two"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-3"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution three
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution three"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution three"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution three
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution three"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-4"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution four
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution four"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution four"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution four
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution four"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -363,7 +320,10 @@ exports[`Overview without features 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
       <EuiFlexItem
         grow={1}
       >
@@ -432,145 +392,99 @@ exports[`Overview without features 1`] = `
           <EuiSpacer
             size="m"
           />
-          <EuiFlexGroup>
+          <EuiFlexGroup
+            className="kbnOverviewMore__content"
+          >
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="kibana"
             >
               <EuiCard
-                description={<span />}
+                className="kbnOverviewSolution"
+                description=""
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="logoKibana"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Kibana"
-                    url="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_kibana_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Kibana
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Kibana"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-2"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution two
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution two"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution two"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_2_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution two
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution two"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-3"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution three
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution three"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution three"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_3_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution three
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution three"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
             <EuiFlexItem
+              className="kbnOverviewMore__item"
               key="solution-4"
             >
               <EuiCard
-                description={
-                  <span>
-                    Description of solution four
-                  </span>
-                }
+                className="kbnOverviewSolution"
+                description="Description of solution four"
                 icon={
                   <EuiToken
-                    className="homSolutionPanel__icon"
+                    className="kbnOverviewSolution__icon"
                     fill="light"
                     iconType="empty"
                     shape="circle"
                     size="l"
                   />
                 }
-                image={
-                  <EuiImage
-                    alt="Solution four"
-                    url="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
-                  />
-                }
+                image="/plugins/kibanaOverview/assets/solutions_solution_4_dark_2x.png"
                 onClick={[Function]}
-                title={
-                  <EuiTitle
-                    size="s"
-                  >
-                    <h3>
-                      Solution four
-                    </h3>
-                  </EuiTitle>
-                }
+                title="Solution four"
+                titleElement="h3"
+                titleSize="xs"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -657,7 +571,10 @@ exports[`Overview without solutions 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
       <EuiFlexItem
         grow={1}
       >
@@ -706,44 +623,22 @@ exports[`Overview without solutions 1`] = `
       <EuiFlexItem
         grow={3}
       >
-        <section
-          aria-labelledby="kbnOverviewMore__title"
-          className="kbnOverviewMore"
+        <EuiFlexGroup
+          className="kbnOverviewData kbnOverviewData--expanded"
         >
-          <EuiTitle
-            size="s"
-          >
-            <h2
-              id="kbnOverviewMore__title"
-            >
-              <FormattedMessage
-                defaultMessage="Do more with Elastic"
-                id="kibana_overview.more.title"
-                values={Object {}}
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer
-            size="m"
-          />
-          <EuiFlexGroup
-            className="kibanaOverview__Data kibanaOverview__Data--expanded"
-            direction="column"
-          >
-            <EuiFlexItem>
-              <AddData
-                addBasePath={[Function]}
-                features={Array []}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ManageData
-                addBasePath={[Function]}
-                features={Array []}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </section>
+          <EuiFlexItem>
+            <AddData
+              addBasePath={[Function]}
+              features={Array []}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageData
+              addBasePath={[Function]}
+              features={Array []}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule

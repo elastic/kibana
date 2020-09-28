@@ -46,9 +46,9 @@ exports[`FeedItem render 1`] = `
         >
           <p>
             <time
-              dateTime="2020-08-30"
+              dateTime="2020-08-31"
             >
-              30 August 2020
+              31 August 2020
             </time>
           </p>
         </EuiText>
@@ -83,9 +83,9 @@ exports[`FeedItem render 1`] = `
         >
           <p>
             <time
-              dateTime="2020-08-13"
+              dateTime="2020-08-14"
             >
-              13 August 2020
+              14 August 2020
             </time>
           </p>
         </EuiText>
@@ -120,9 +120,9 @@ exports[`FeedItem render 1`] = `
         >
           <p>
             <time
-              dateTime="2020-07-31"
+              dateTime="2020-08-01"
             >
-              31 July 2020
+              01 August 2020
             </time>
           </p>
         </EuiText>

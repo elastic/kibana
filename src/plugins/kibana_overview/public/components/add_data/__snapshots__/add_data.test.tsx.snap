@@ -2,8 +2,8 @@
 
 exports[`AddData render 1`] = `
 <section
-  aria-labelledby="homDataAdd__title"
-  className="homDataAdd"
+  aria-labelledby="kbnOverviewDataAdd__title"
+  className="kbnOverviewDataAdd"
 >
   <EuiFlexGroup
     alignItems="center"
@@ -15,7 +15,7 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="homDataAdd__title"
+          id="kbnOverviewDataAdd__title"
         >
           <FormattedMessage
             defaultMessage="Ingest your data"
@@ -26,7 +26,7 @@ exports[`AddData render 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      className="homDataAdd__actions"
+      className="kbnOverviewDataAdd__actions"
       grow={false}
     >
       <EuiButtonEmpty
@@ -46,7 +46,7 @@ exports[`AddData render 1`] = `
     size="m"
   />
   <EuiFlexGroup
-    className="homDataAdd__content"
+    className="kbnOverviewDataAdd__content"
   >
     <EuiFlexItem
       key="home_tutorial_directory"
