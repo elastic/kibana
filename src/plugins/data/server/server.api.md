@@ -624,7 +624,7 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
-    addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
+    addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
@@ -700,8 +700,6 @@ export class IndexPattern implements IIndexPattern {
     intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
-    // (undocumented)
-    isTimeBasedWildcard(): boolean;
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
