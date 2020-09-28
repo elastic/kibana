@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(sourceStatus.indicesExist).to.eql(['auditbeat-*']);
     });
 
-    it('should find indexes as being available when they exist', async () => {
+    it.skip('should find indexes as being available when they exist', async () => {
       const { body: sourceStatus } = await supertest
         .post('/internal/search/securitySolutionIndexFields/')
         .set('kbn-xsrf', 'true')
