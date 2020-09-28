@@ -26,7 +26,7 @@ If you have a subscription that supports the {report-features}, you can create a
 Click *Share > PDF reports > Generate PDF*.
 
 [role="screenshot"]
-image::images/canvas-generate-pdf.gif[Image depicting generate pdf option]
+image::images/canvas-generate-pdf.gif[Image showing how to generate a PDF]
 
 For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
 
