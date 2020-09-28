@@ -55,7 +55,7 @@ import {
   EQL_TYPE,
   EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
-import { TIMELINE } from '../screens/timeline';
+import { TIMELINE } from '../screens/timelines';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });

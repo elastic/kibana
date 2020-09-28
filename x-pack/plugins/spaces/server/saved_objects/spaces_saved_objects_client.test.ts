@@ -10,6 +10,8 @@ import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectTypeRegistry } from 'src/core/server';
 import { SpacesClient } from '../lib/spaces_client';
+import { spacesClientMock } from '../lib/spaces_client/spaces_client.mock';
+import Boom from 'boom';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
@@ -129,6 +131,34 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
     });
 
     describe('#find', () => {
+      const EMPTY_RESPONSE = { saved_objects: [], total: 0, per_page: 20, page: 1 };
+
+      test(`returns empty result if user is unauthorized in this space`, async () => {
+        const { client, baseClient, spacesService } = await createSpacesSavedObjectsClient();
+        const spacesClient = spacesClientMock.create();
+        spacesClient.getAll.mockResolvedValue([]);
+        spacesService.scopedClient.mockResolvedValue(spacesClient);
+
+        const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toEqual(EMPTY_RESPONSE);
+        expect(baseClient.find).not.toHaveBeenCalled();
+      });
+
+      test(`returns empty result if user is unauthorized in any space`, async () => {
+        const { client, baseClient, spacesService } = await createSpacesSavedObjectsClient();
+        const spacesClient = spacesClientMock.create();
+        spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
+        spacesService.scopedClient.mockResolvedValue(spacesClient);
+
+        const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toEqual(EMPTY_RESPONSE);
+        expect(baseClient.find).not.toHaveBeenCalled();
+      });
+
       test(`passes options.type to baseClient if valid singular type specified`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = {

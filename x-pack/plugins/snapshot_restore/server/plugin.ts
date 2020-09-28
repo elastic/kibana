@@ -86,6 +86,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       management: {
         data: [PLUGIN.id],
       },
+      catalogue: [PLUGIN.id],
       privileges: [
         {
           requiredClusterPrivileges: [...APP_REQUIRED_CLUSTER_PRIVILEGES],

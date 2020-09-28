@@ -53,6 +53,7 @@ interface Props {
 export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => (
   <EuiFlexItem
     key={solution.id}
+    data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
     className={`${
       solution.id === 'kibana' ? 'homSolutions__group homSolutions__group--single' : ''
     } homSolutions__item`}

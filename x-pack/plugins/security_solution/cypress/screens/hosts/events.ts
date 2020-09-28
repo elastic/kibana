@@ -6,8 +6,6 @@
 
 export const CLOSE_MODAL = '[data-test-subj="modal-inspect-close"]';
 
-export const EVENTS_PAGE = '[data-test-subj="pageContainer"]';
-
 export const EVENTS_VIEWER_FIELDS_BUTTON =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
 

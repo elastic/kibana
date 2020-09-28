@@ -8,7 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { get } from 'lodash';
 import { ReportingCore } from '../../';
-import { JobSource, ReportingUser } from '../../types';
+import { ReportDocument } from '../../lib/store';
+import { ReportingUser } from '../../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
@@ -130,7 +131,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       });
     },
 
-    get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
+    get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<ReportDocument | void> {
       if (!id) return Promise.resolve();
       const username = getUsername(user);
 

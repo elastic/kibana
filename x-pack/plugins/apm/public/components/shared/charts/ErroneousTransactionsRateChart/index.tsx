@@ -6,6 +6,7 @@
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { max } from 'lodash';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
@@ -56,6 +57,7 @@ export function ErroneousTransactionsRateChart() {
   );
 
   const errorRates = data?.erroneousTransactionsRate || [];
+  const maxRate = max(errorRates.map((errorRate) => errorRate.y));
 
   return (
     <EuiPanel>
@@ -70,7 +72,7 @@ export function ErroneousTransactionsRateChart() {
       <CustomPlot
         {...syncedChartsProps}
         noHits={data?.noHits}
-        yMax={1}
+        yMax={maxRate === 0 ? 1 : undefined}
         series={[
           {
             color: theme.euiColorVis7,
