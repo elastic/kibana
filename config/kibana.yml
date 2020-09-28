@@ -76,9 +76,6 @@
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 #elasticsearch.shardTimeout: 30000
 
-# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
-#elasticsearch.startupTimeout: 5000
-
 # Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
 #elasticsearch.logQueries: false
 

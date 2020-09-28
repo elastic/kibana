@@ -199,10 +199,6 @@ making an outbound SSL/TLS connection to {es}. Valid values are `"full"`,
 using `"certificate"` skips hostname verification, and using `"none"` skips
 verification entirely. *Default: `"full"`*
 
-| `elasticsearch.startupTimeout:`
- | Time in milliseconds to wait for {es} at {kib} startup before retrying.
-*Default: `5000`*
-
 |[[elasticsearch-user-passwd]] `elasticsearch.username:` and `elasticsearch.password:`
  | If your {es} is protected with basic authentication, these settings provide
 the username and password that the {kib} server uses to perform maintenance

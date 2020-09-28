@@ -70,7 +70,6 @@ export const configSchema = schema.object({
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-  startupTimeout: schema.duration({ defaultValue: '5s' }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
     {

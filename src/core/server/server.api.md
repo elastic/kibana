@@ -355,7 +355,6 @@ export const config: {
             shardTimeout: Type<import("moment").Duration>;
             requestTimeout: Type<import("moment").Duration>;
             pingTimeout: Type<import("moment").Duration>;
-            startupTimeout: Type<import("moment").Duration>;
             logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
                 verificationMode: Type<"none" | "certificate" | "full">;

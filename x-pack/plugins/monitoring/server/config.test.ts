@@ -86,7 +86,6 @@ describe('config schema', () => {
               "truststore": Object {},
               "verificationMode": "full",
             },
-            "startupTimeout": "PT5S",
           },
           "enabled": true,
           "logs": Object {
