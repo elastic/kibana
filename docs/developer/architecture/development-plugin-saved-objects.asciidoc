@@ -226,31 +226,63 @@ evolution:
 src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
 [source,typescript]
 ----
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType, SavedObjectMigrationFn } from 'src/core/server';
+import uuid from 'uuid';
+
+interface DashboardVisualizationPre110 {
+  title: string;
+  subtitle: string;
+  panels: Array<{}>;
+}
+interface DashboardVisualization110 {
+  title: string;
+  panels: Array<{}>;
+}
+
+interface DashboardVisualization140 {
+  title: string;
+  panels: Array<{ id: string }>;
+}
+
+const migrateDashboardVisualization110: SavedObjectMigrationFn<
+  DashboardVisualizationPre110, // <1>
+  DashboardVisualization110
+> = (doc) => {
+  const { subtitle, ...attributesWithoutSubtitle } = doc.attributes;
+  return {
+    ...doc, // <2>
+    attributes: {
+      ...attributesWithoutSubtitle,
+      title: `${doc.attributes.title} - ${doc.attributes.subtitle}`,
+    },
+  };
+};
+
+const migrateDashboardVisualization140: SavedObjectMigrationFn<
+  DashboardVisualization110,
+  DashboardVisualization140
+> = (doc) => {
+  const outPanels = doc.attributes.panels?.map((panel) => {
+    return { ...panel, id: uuid.v4() };
+  });
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      panels: outPanels,
+    },
+  };
+};
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', // <1>
   /** ... */
   migrations: {
     // Takes a pre 1.1.0 doc, and converts it to 1.1.0
-    '1.1.0': (doc: DashboardVisualizationPre110): DashboardVisualization110 => { // <1>
-      return {
-        ...doc, // <2>
-        attributes: {
-          ...doc.attributes,
-          title: `${doc.attributes.title} - ${doc.attributes.subtitle}`
-        }
-      }
-    },
+    '1.1.0': migrateDashboardVisualization110,
 
     // Takes a 1.1.0 doc, and converts it to 1.4.0
-    '1.4.0': (doc: DashboardVisualization110): DashboardVisualization140 => { // <3>
-      doc.attributes.panels = doc.attributes.panels.map(panel => {
-        panel.id = uuid.v4();
-        return panel;
-      });
-      return doc;
-    },
+    '1.4.0': migrateDashboardVisualization140,  // <3>
   },
 };
 ----
@@ -259,11 +291,21 @@ allows TypeScript to ensure that you are properly handling the input and output
 types correctly as the schema evolves.
 <2> Returning a shallow copy is necessary to avoid type errors when using
 different types for the input and output shape.
-<3> Migrations do not have to be defined for every version, only those in which
-the schema needs to change.
+<3> Migrations do not have to be defined for every version. The version number
+of a migration must always be the earliest Kibana version in which this
+migration was released. So if you are creating a migration which will be
+part of the v7.10.0 release, but will also be backported and released as
+v7.9.3, the migration version should be: 7.9.3.
 
-Migrations should be written defensively. If a document is encountered that is
-not in the expected shape, migrations are encouraged to throw an exception to
-abort the upgrade. A bug in a migration will cause downtime for our users, it
-is critical that you have extensive tests to ensure that migrations behave as
-expected with all possible input documents.
+Migrations should be written defensively, an exception in a migration function
+will prevent a Kibana upgrade from succeeding and will cause downtime for our
+users. Having said that, if a document is encountered that is not in the
+expected shape, migrations are encouraged to throw an exception to abort the
+upgrade. In most scenarios, it is better to fail an upgrade than to silently
+ignore a corrupt document which can cause unexpected behaviour at some future
+point in time.
+
+It is critical that you have extensive tests to ensure that migrations behave
+as expected with all possible input documents. Given how simple it is to test
+all the branch conditions in a migration function and the high impact of a bug
+in this code, there's really no reason not to aim for 100% test code coverage.
