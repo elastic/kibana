@@ -231,7 +231,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-            defaultMessage: 'Choose a function',
+            defaultMessage: 'Select a function',
           })}
         </EuiFormLabel>
         <EuiSpacer size="s" />
@@ -247,7 +247,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiFormRow
           data-test-subj="indexPattern-field-selection-row"
           label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-            defaultMessage: 'Choose a field',
+            defaultMessage: 'Select a field',
           })}
           fullWidth
           isInvalid={Boolean(incompatibleSelectedOperationType)}
