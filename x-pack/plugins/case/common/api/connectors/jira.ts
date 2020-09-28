@@ -6,10 +6,9 @@
 
 import * as rt from 'io-ts';
 
-export const JiraFieldsRT = rt.union([
-  rt.literal('summary'),
-  rt.literal('description'),
-  rt.literal('comments'),
-]);
+export const JiraFieldsRT = rt.type({
+  issueType: rt.string,
+  priority: rt.union([rt.string, rt.null]),
+});
 
 export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;

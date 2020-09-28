@@ -6,10 +6,10 @@
 
 import * as rt from 'io-ts';
 
-export const ServiceNowFieldsRT = rt.union([
-  rt.literal('short_description'),
-  rt.literal('description'),
-  rt.literal('comments'),
-]);
+export const ServiceNowFieldsRT = rt.type({
+  short_description: rt.string,
+  description: rt.union([rt.string, rt.null]),
+  comments: rt.union([rt.array(rt.string), rt.null]),
+});
 
 export type ServiceNowFieldsType = rt.TypeOf<typeof ServiceNowFieldsRT>;

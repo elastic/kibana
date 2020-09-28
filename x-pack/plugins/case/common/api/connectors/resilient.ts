@@ -6,10 +6,10 @@
 
 import * as rt from 'io-ts';
 
-export const ResilientFieldsRT = rt.union([
-  rt.literal('name'),
-  rt.literal('description'),
-  rt.literal('comments'),
-]);
+export const ResilientFieldsRT = rt.type({
+  name: rt.string,
+  description: rt.union([rt.string, rt.null]),
+  comments: rt.union([rt.array(rt.string), rt.null]),
+});
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;

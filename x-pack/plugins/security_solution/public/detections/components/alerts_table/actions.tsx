@@ -170,6 +170,7 @@ export const sendAlertToTimelineAction = async ({
           fetchPolicy: 'no-cache',
           variables: {
             id: timelineId,
+            tryTemplateFirst: true,
           },
         }),
         apolloClient.query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>({
