@@ -119,7 +119,7 @@ To visualize geographic information in the log file data, use <<maps,Maps>>.
 .. Set the *End date* to `May 20, 2015 @ 12:00:00.000`.
 +
 [role="screenshot"]
-image::images/gs_maps_time_filter.png[Image displaying time filter for Maps tutorial]
+image::images/gs_maps_time_filter.png[Image showing the time filter for Maps tutorial]
 
 .. Click *Update*
 
