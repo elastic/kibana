@@ -6,10 +6,21 @@
 
 /* eslint-disable react/display-name */
 
-import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { memo } from 'react';
+
+/**
+ * Text to use in place of an undefined timestamp value
+ */
+
+export const noTimestampRetrievedText = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved',
+  {
+    defaultMessage: 'No timestamp retrieved',
+  }
+);
 
 /**
  * A bold version of EuiCode to display certain titles with
@@ -59,33 +70,3 @@ export const StyledTime = memo(styled('time')`
   display: inline-block;
   text-align: start;
 `);
-
-/**
- * Long formatter (to second) for DateTime
- */
-export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-});
-
-/**
- * @returns {string} A nicely formatted string for a date
- */
-export function formatDate(
-  /** To be passed through Date->Intl.DateTimeFormat */ timestamp: ConstructorParameters<
-    typeof Date
-  >[0]
-): string {
-  const date = new Date(timestamp);
-  if (isFinite(date.getTime())) {
-    return formatter.format(date);
-  } else {
-    return i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate', {
-      defaultMessage: 'Invalid Date',
-    });
-  }
-}
