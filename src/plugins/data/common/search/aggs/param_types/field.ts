@@ -84,7 +84,7 @@ export class FieldParamType extends BaseParamType {
       }
 
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField || 1 === 1) {
+      if (!validField) {
         throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
