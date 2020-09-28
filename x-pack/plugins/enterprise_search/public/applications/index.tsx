@@ -14,16 +14,15 @@ import { getContext, resetContext } from 'kea';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart, ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
-import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
-import { LicenseProvider } from './shared/licensing';
+import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { mountLicensingLogic } from './shared/licensing';
 import { mountHttpLogic } from './shared/http';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { IExternalUrl } from './shared/enterprise_search_url';
+import { externalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
-  externalUrl: IExternalUrl;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -39,14 +38,18 @@ export const KibanaContext = React.createContext({});
 
 export const renderApp = (
   App: React.FC<IInitialAppData>,
-  params: AppMountParameters,
-  core: CoreStart,
-  plugins: PluginsSetup,
-  config: ClientConfigType,
-  { externalUrl, errorConnecting, ...initialData }: ClientData
+  { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
+  { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
+  const { publicUrl, errorConnecting, ...initialData } = data;
+  externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+
   resetContext({ createStore: true });
   const store = getContext().store as Store;
+
+  const unmountLicensingLogic = mountLicensingLogic({
+    license$: plugins.licensing.license$,
+  });
 
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
@@ -61,25 +64,23 @@ export const renderApp = (
       <KibanaContext.Provider
         value={{
           config,
-          externalUrl,
           navigateToUrl: core.application.navigateToUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
         }}
       >
-        <LicenseProvider license$={plugins.licensing.license$}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-            </Router>
-          </Provider>
-        </LicenseProvider>
+        <Provider store={store}>
+          <Router history={params.history}>
+            <App {...initialData} />
+          </Router>
+        </Provider>
       </KibanaContext.Provider>
     </I18nProvider>,
     params.element
   );
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
   };
@@ -91,15 +92,8 @@ export const renderApp = (
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
  * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
-interface IHeaderActionsProps {
-  externalUrl: IExternalUrl;
-}
 
-export const renderHeaderActions = (
-  HeaderActions: React.FC<IHeaderActionsProps>,
-  kibanaHeaderEl: HTMLElement,
-  externalUrl: IExternalUrl
-) => {
-  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
+export const renderHeaderActions = (HeaderActions: React.FC, kibanaHeaderEl: HTMLElement) => {
+  ReactDOM.render(<HeaderActions />, kibanaHeaderEl);
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };
