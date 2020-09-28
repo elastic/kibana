@@ -21,6 +21,7 @@ import {
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { TrustedAppsUrlParams } from '../pages/trusted_apps/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -89,18 +90,13 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-interface ListPaginationParams {
-  page_index: number;
-  page_size: number;
-}
-
-const isDefaultOrMissing = (value: number | undefined, defaultValue: number) => {
+const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
   return value === undefined || value === defaultValue;
 };
 
 const normalizeListPaginationParams = (
-  params?: Partial<ListPaginationParams>
-): Partial<ListPaginationParams> => {
+  params?: Partial<TrustedAppsUrlParams>
+): Partial<TrustedAppsUrlParams> => {
   if (params) {
     return {
       ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
@@ -109,13 +105,19 @@ const normalizeListPaginationParams = (
       ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
         ? { page_size: params.page_size }
         : {}),
+      ...(!isDefaultOrMissing(params.show, undefined) ? { show: params.show } : {}),
     };
   } else {
     return {};
   }
 };
 
-const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+/**
+ * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
+ * @param query
+ * @param key
+ */
+export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
   const value = query[key];
 
   return Array.isArray(value) ? value[value.length - 1] : value;
@@ -135,12 +137,12 @@ const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
 
 export const extractListPaginationParams = (
   query: querystring.ParsedUrlQuery
-): ListPaginationParams => ({
+): TrustedAppsUrlParams => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
 });
 
-export const getTrustedAppsListPath = (params?: Partial<ListPaginationParams>): string => {
+export const getTrustedAppsListPath = (params?: Partial<TrustedAppsUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });

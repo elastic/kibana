@@ -19,7 +19,6 @@ export {
   DataGridItem,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
 } from './types';

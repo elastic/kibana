@@ -11,6 +11,7 @@ import { ConfigSchema } from './config';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 
 describe('Security Plugin', () => {
@@ -44,6 +45,7 @@ describe('Security Plugin', () => {
 
     mockDependencies = ({
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
     } as unknown) as PluginSetupDependencies;
   });

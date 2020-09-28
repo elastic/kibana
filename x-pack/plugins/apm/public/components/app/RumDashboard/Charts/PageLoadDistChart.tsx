@@ -18,6 +18,7 @@ import {
   TooltipValueFormatter,
   DARK_THEME,
   LIGHT_THEME,
+  Fit,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
@@ -115,12 +116,14 @@ export function PageLoadDistChart({
             tickFormat={(d) => numeral(d).format('0.0') + '%'}
           />
           <LineSeries
+            fit={Fit.Linear}
             id={'PagesPercentage'}
             name={I18LABELS.overall}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_CATMULL_ROM}
+            lineSeriesStyle={{ point: { visible: false } }}
           />
           {breakdown && (
             <BreakdownSeries

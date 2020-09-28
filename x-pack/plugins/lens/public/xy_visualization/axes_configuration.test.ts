@@ -203,7 +203,7 @@ describe('axes_configuration', () => {
 
   it('should map auto series to left axis', () => {
     const formatFactory = jest.fn();
-    const groups = getAxesConfiguration([sampleLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([sampleLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('left');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
@@ -213,7 +213,7 @@ describe('axes_configuration', () => {
   it('should map auto series to right axis if formatters do not match', () => {
     const formatFactory = jest.fn();
     const twoSeriesLayer = { ...sampleLayer, accessors: ['yAccessorId', 'yAccessorId2'] };
-    const groups = getAxesConfiguration([twoSeriesLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([twoSeriesLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -227,7 +227,7 @@ describe('axes_configuration', () => {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
     };
-    const groups = getAxesConfiguration([threeSeriesLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([threeSeriesLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -240,9 +240,9 @@ describe('axes_configuration', () => {
     const formatFactory = jest.fn();
     const groups = getAxesConfiguration(
       [{ ...sampleLayer, yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }] }],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
@@ -260,9 +260,9 @@ describe('axes_configuration', () => {
           yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
@@ -284,9 +284,9 @@ describe('axes_configuration', () => {
           yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });

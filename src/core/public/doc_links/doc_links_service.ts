@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { deepFreeze } from '@kbn/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { deepFreeze } from '../../utils';
 
 interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;

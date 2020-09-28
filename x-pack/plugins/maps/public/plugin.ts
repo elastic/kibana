@@ -30,7 +30,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import { createMapsUrlGenerator } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
@@ -121,7 +121,7 @@ export class MapsPlugin
       title: getAppTitle(),
       order: 4000,
       icon: `plugins/${APP_ID}/icon.svg`,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(context, params) {
         const { renderApp } = await lazyLoadMapModules();

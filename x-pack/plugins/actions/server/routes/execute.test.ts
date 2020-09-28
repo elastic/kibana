@@ -8,7 +8,7 @@ import { executeActionRoute } from './execute';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
+import { verifyApiAccess, ActionTypeDisabledError, asHttpRequestExecutionSource } from '../lib';
 import { actionsClientMock } from '../actions_client.mock';
 import { ActionTypeExecutorResult } from '../types';
 
@@ -61,6 +61,7 @@ describe('executeActionRoute', () => {
       params: {
         someData: 'data',
       },
+      source: asHttpRequestExecutionSource(req),
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -97,6 +98,7 @@ describe('executeActionRoute', () => {
     expect(actionsClient.execute).toHaveBeenCalledWith({
       actionId: '1',
       params: {},
+      source: asHttpRequestExecutionSource(req),
     });
 
     expect(res.ok).not.toHaveBeenCalled();

@@ -1,3 +1,4 @@
 .lnsVisualizationContainer {
+  @include euiScrollBar;
   overflow: auto;
 }

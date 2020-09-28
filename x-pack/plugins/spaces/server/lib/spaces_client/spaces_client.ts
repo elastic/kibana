@@ -50,9 +50,9 @@ export class SpacesClient {
   public async canEnumerateSpaces(): Promise<boolean> {
     if (this.useRbac()) {
       const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { hasAllRequested } = await checkPrivileges.globally(
-        this.authorization!.actions.space.manage
-      );
+      const { hasAllRequested } = await checkPrivileges.globally({
+        kibana: this.authorization!.actions.space.manage,
+      });
       this.debugLogger(`SpacesClient.canEnumerateSpaces, using RBAC. Result: ${hasAllRequested}`);
       return hasAllRequested;
     }
@@ -87,9 +87,11 @@ export class SpacesClient {
 
       const privilege = privilegeFactory(this.authorization!);
 
-      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, {
+        kibana: privilege,
+      });
 
-      const authorized = privileges.filter((x) => x.authorized).map((x) => x.resource);
+      const authorized = privileges.kibana.filter((x) => x.authorized).map((x) => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
@@ -102,7 +104,7 @@ export class SpacesClient {
           `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
         this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
-        throw Boom.forbidden();
+        throw Boom.forbidden(); // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
       }
 
       this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
@@ -234,7 +236,7 @@ export class SpacesClient {
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.globally(action);
+    const { username, hasAllRequested } = await checkPrivileges.globally({ kibana: action });
 
     if (hasAllRequested) {
       this.auditLogger.spacesAuthorizationSuccess(username, method);
@@ -252,7 +254,9 @@ export class SpacesClient {
     forbiddenMessage: string
   ) {
     const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
+    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
+      kibana: action,
+    });
 
     if (hasAllRequested) {
       this.auditLogger.spacesAuthorizationSuccess(username, method, [spaceId]);

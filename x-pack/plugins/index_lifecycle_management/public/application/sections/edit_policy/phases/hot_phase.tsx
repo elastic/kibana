@@ -27,6 +27,7 @@ import {
   PhaseErrorMessage,
   ErrableFormRow,
   SetPriorityInput,
+  Forcemerge,
 } from '../components';
 
 const maxSizeStoredUnits = [
@@ -313,6 +314,15 @@ export class HotPhase extends PureComponent<Props> {
             </Fragment>
           ) : null}
         </EuiDescribedFormGroup>
+        {phaseData.rolloverEnabled ? (
+          <Forcemerge
+            phase={'hot'}
+            phaseData={phaseData}
+            setPhaseData={setPhaseData}
+            isShowingErrors={isShowingErrors}
+            errors={errors}
+          />
+        ) : null}
         <SetPriorityInput<HotPhaseInterface>
           errors={errors}
           phaseData={phaseData}

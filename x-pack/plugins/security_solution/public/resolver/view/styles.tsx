@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
+
 import styled from 'styled-components';
-import { Panel } from './panels';
 
 /**
  * The top level DOM element for Resolver
@@ -40,7 +42,7 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
 /**
  * The Panel, styled for use in `ResolverMap`.
  */
-export const StyledPanel = styled(Panel)`
+export const StyledPanel = styled(EuiPanel)`
   position: absolute;
   left: 0;
   top: 0;
@@ -59,4 +61,27 @@ export const GraphContainer = styled.div`
   display: flex;
   flex-grow: 1;
   contain: layout;
+`;
+
+/**
+ * See `RelatedEventLimitWarning`
+ */
+export const LimitWarningsEuiCallOut = styled(EuiCallOut)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
 `;

@@ -14,9 +14,9 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -26,13 +26,14 @@ export function VisitorBreakdown() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [end, start, uiFilters]
+    [end, start, uiFilters, searchTerm]
   );
 
   return (
@@ -47,14 +48,20 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart options={data?.browsers} />
+          <VisitorBreakdownChart
+            options={data?.browsers}
+            loading={status !== 'success'}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart options={data?.os} />
+          <VisitorBreakdownChart
+            options={data?.os}
+            loading={status !== 'success'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

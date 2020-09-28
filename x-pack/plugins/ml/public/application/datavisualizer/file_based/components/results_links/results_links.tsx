@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
@@ -12,7 +12,13 @@ import { ml } from '../../../../services/ml_api_service';
 import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { MlCommonGlobalState } from '../../../../../../common/types/ml_url_generator';
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../../src/plugins/discover/public';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -36,12 +42,70 @@ export const ResultsLinks: FC<Props> = ({
     to: 'now',
   });
   const [showCreateJobLink, setShowCreateJobLink] = useState(false);
-  const [globalStateString, setGlobalStateString] = useState('');
+  const [globalState, setGlobalState] = useState<MlCommonGlobalState | undefined>();
+
+  const [discoverLink, setDiscoverLink] = useState('');
   const {
     services: {
       http: { basePath },
     },
   } = useMlKibana();
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+
+  const {
+    services: {
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
+  } = useMlKibana();
+
+  useEffect(() => {
+    let unmounted = false;
+
+    const getDiscoverUrl = async (): Promise<void> => {
+      const state: DiscoverUrlGeneratorState = {
+        indexPatternId,
+      };
+
+      if (globalState?.time) {
+        state.timeRange = globalState.time;
+      }
+      if (!unmounted) {
+        const discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        setDiscoverLink(discoverUrl);
+      }
+    };
+    getDiscoverUrl();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [indexPatternId, getUrlGenerator]);
+
+  const openInDataVisualizer = useCallback(async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+      pageState: {
+        index: indexPatternId,
+        globalState,
+      },
+    });
+    await navigateToPath(path);
+  }, [indexPatternId, globalState]);
+
+  const redirectToADCreateJobsSelectTypePage = useCallback(async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+      pageState: {
+        index: indexPatternId,
+        globalState,
+      },
+    });
+    await navigateToPath(path);
+  }, [indexPatternId, globalState]);
 
   useEffect(() => {
     setShowCreateJobLink(checkPermission('canCreateJob') && mlNodesAvailable());
@@ -49,11 +113,13 @@ export const ResultsLinks: FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    const _g =
-      timeFieldName !== undefined
-        ? `&_g=(time:(from:'${duration.from}',mode:quick,to:'${duration.to}'))`
-        : '';
-    setGlobalStateString(_g);
+    const _globalState: MlCommonGlobalState = {
+      time: {
+        from: duration.from,
+        to: duration.to,
+      },
+    };
+    setGlobalState(_globalState);
   }, [duration]);
 
   async function updateTimeValues(recheck = true) {
@@ -89,7 +155,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`${basePath.get()}/app/discover#/?&_a=(index:'${indexPatternId}')${globalStateString}`}
+            href={discoverLink}
           />
         </EuiFlexItem>
       )}
@@ -108,7 +174,7 @@ export const ResultsLinks: FC<Props> = ({
                 />
               }
               description=""
-              href={`#/jobs/new_job/step/job_type?index=${indexPatternId}${globalStateString}`}
+              onClick={redirectToADCreateJobsSelectTypePage}
             />
           </EuiFlexItem>
         )}
@@ -124,7 +190,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`#/jobs/new_job/datavisualizer?index=${indexPatternId}${globalStateString}`}
+            onClick={openInDataVisualizer}
           />
         </EuiFlexItem>
       )}

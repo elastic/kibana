@@ -5,12 +5,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ANOMALY_SEVERITY } from '../../ml/common';
+import {
+  getSeverityType,
+  getSeverityColor as mlGetSeverityColor,
+} from '../../ml/common';
+import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
   anomalyScore?: number;
   actualValue?: number;
   jobId?: string;
+  healthStatus: ServiceHealthStatus;
+}
+
+export function getSeverity(score: number | undefined) {
+  if (score === undefined) {
+    return ANOMALY_SEVERITY.UNKNOWN;
+  }
+
+  return getSeverityType(score);
+}
+
+export function getSeverityColor(score: number) {
+  return mlGetSeverityColor(score);
 }
 
 export const ML_ERRORS = {

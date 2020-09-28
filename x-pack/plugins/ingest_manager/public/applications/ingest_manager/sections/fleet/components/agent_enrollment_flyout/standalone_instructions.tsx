@@ -31,7 +31,7 @@ interface Props {
 
 const RUN_INSTRUCTIONS = './elastic-agent run';
 
-export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const { notifications } = core;
@@ -189,4 +189,4 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
       <EuiSteps steps={steps} />
     </>
   );
-};
+});
