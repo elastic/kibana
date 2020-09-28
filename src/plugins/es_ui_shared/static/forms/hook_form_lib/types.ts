@@ -25,19 +25,36 @@ import { Subject, Subscription } from './lib';
 type Required<T> = T extends FormData ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
 
 export interface FormHook<T extends FormData = FormData> {
+  /**  Flag that indicates if the form has been submitted at least once. It is set to `true` when we call `submit()`. */
   readonly isSubmitted: boolean;
+  /** Flag that indicates if the form is being submitted. */
   readonly isSubmitting: boolean;
+  /** Flag that indicates if the form is valid. It can have three values: `true | false | undefined`. */
   readonly isValid: boolean | undefined;
+  /** The form id. If none was provided, "default" will be returned. */
   readonly id: string;
+  /**
+   * This handlers submits the form and returns its data and validity. If the form is not valid, the data will be `null`
+   * as only valid data is passed through the `serializer(s)` before being returned.
+   */
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  /** Use this handler to get the validity of the form. */
   validate: () => Promise<boolean>;
   subscribe: (handler: OnUpdateHandler<T>) => Subscription;
+  /** Sets a field value imperatively. */
   setFieldValue: (fieldName: string, value: FieldValue) => void;
+  /** Sets a field errors imperatively. */
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
+  /** Access any field on the form. */
   getFields: () => FieldsMap;
+  /**
+   * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
+   * If you are only interested in the raw form data, pass `unflatten: false` to the handler
+   */
   getFormData: (options?: { unflatten?: boolean }) => T;
-  /* Returns a list of all errors in the form */
+  /* Returns an array with of all errors in the form. */
   getErrors: () => string[];
+  /** Resets the form to its initial state. */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
