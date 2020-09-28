@@ -172,14 +172,16 @@ describe('getConnections', () => {
         environment: 'ENVIRONMENT_NOT_DEFINED',
       });
 
-      const environments = new Set();
-
-      connections.forEach((conn) =>
-        environments.add(conn.source['service.environment'])
-      );
-      expect(
-        connections.some((conn) => conn.source['service.environment'] !== null)
-      ).toBeFalsy();
+      const connectionsPairs = getConnectionsPairs(connections);
+      expect(connectionsPairs).toEqual([
+        'opbeans-go:null -> opbeans-java:null',
+        'opbeans-node:null -> opbeans-python:null',
+        'opbeans-node:null -> opbeans-ruby:null',
+        'opbeans-python:null -> opbeans-node:null',
+        'opbeans-python:null -> opbeans-ruby:null',
+        'opbeans-ruby:null -> opbeans-node:null',
+        'opbeans-ruby:null -> opbeans-python:null',
+      ]);
     });
   });
 });
