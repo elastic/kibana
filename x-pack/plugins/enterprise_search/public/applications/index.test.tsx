@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { AppMountParameters } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
 
@@ -15,37 +14,38 @@ import { AppSearch } from './app_search';
 import { WorkplaceSearch } from './workplace_search';
 
 describe('renderApp', () => {
-  let params: AppMountParameters;
-  const core = coreMock.createStart();
-  const plugins = {
-    licensing: licensingMock.createSetup(),
+  const kibanaDeps = {
+    params: coreMock.createAppMountParamters(),
+    core: coreMock.createStart(),
+    plugins: { licensing: licensingMock.createStart() },
   } as any;
-  const config = {};
-  const data = {} as any;
+  const pluginData = {
+    config: {},
+    data: {},
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    params = coreMock.createAppMountParamters();
   });
 
   it('mounts and unmounts UI', () => {
     const MockApp = () => <div className="hello-world">Hello world!</div>;
 
-    const unmount = renderApp(MockApp, params, core, plugins, config, data);
-    expect(params.element.querySelector('.hello-world')).not.toBeNull();
+    const unmount = renderApp(MockApp, kibanaDeps, pluginData);
+    expect(kibanaDeps.params.element.querySelector('.hello-world')).not.toBeNull();
 
     unmount();
-    expect(params.element.innerHTML).toEqual('');
+    expect(kibanaDeps.params.element.innerHTML).toEqual('');
   });
 
   it('renders AppSearch', () => {
-    renderApp(AppSearch, params, core, plugins, config, data);
-    expect(params.element.querySelector('.setupGuide')).not.toBeNull();
+    renderApp(AppSearch, kibanaDeps, pluginData);
+    expect(kibanaDeps.params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 
   it('renders WorkplaceSearch', () => {
-    renderApp(WorkplaceSearch, params, core, plugins, config, data);
-    expect(params.element.querySelector('.setupGuide')).not.toBeNull();
+    renderApp(WorkplaceSearch, kibanaDeps, pluginData);
+    expect(kibanaDeps.params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 });
 
@@ -54,7 +54,7 @@ describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');
     const MockHeaderActions = () => <button className="hello-world">Hello World</button>;
 
-    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl, {} as any);
+    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl);
     expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
 
     unmount();
