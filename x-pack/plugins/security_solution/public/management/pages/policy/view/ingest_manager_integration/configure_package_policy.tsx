@@ -133,7 +133,7 @@ const TrustedAppsMessage = memo<{
       onBackButtonNavigateTo: navigateTo,
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
-        { defaultMessage: 'Back to edit integration' }
+        { defaultMessage: 'Back to Edit Integration' }
       ),
     };
   }, [getUrlForApp, navigateTo]);

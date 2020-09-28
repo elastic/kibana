@@ -7,6 +7,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
@@ -94,17 +95,31 @@ export const TrustedAppsPage = memo(() => {
 
 TrustedAppsPage.displayName = 'TrustedAppsPage';
 
+const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+
+  .euiIcon {
+    width: ${({ theme }) => theme.eui.euiIconSizes.small};
+    height: ${({ theme }) => theme.eui.euiIconSizes.small};
+  }
+
+  .text {
+    font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  }
+`;
+
 const BackToExternalAppButton = memo<TrustedAppsListPageRouteState>(
   ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo }) => {
     const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
 
     return (
-      // eslint-disable-next-line @elastic/eui/href-or-on-click
-      <EuiButtonEmpty
+      <EuiButtonEmptyStyled
         flush="left"
+        size="xs"
         iconType="arrowLeft"
         href={backButtonUrl!}
         onClick={handleBackOnClick}
+        textProps={{ className: 'text' }}
       >
         {backButtonLabel || (
           <FormattedMessage
@@ -112,7 +127,7 @@ const BackToExternalAppButton = memo<TrustedAppsListPageRouteState>(
             defaultMessage="Back"
           />
         )}
-      </EuiButtonEmpty>
+      </EuiButtonEmptyStyled>
     );
   }
 );
