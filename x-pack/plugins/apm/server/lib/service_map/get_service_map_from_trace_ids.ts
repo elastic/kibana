@@ -13,11 +13,15 @@ import { Connection, ConnectionNode } from '../../../common/service_map';
 import { Setup } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
-export function getConnections(
-  paths?: ConnectionNode[][],
-  serviceName?: string,
-  environment?: string
-) {
+export function getConnections({
+  paths,
+  serviceName,
+  environment,
+}: {
+  paths: ConnectionNode[][] | undefined;
+  serviceName: string | undefined;
+  environment: string | undefined;
+}) {
   if (!paths) {
     return [];
   }
@@ -82,11 +86,11 @@ export async function getServiceMapFromTraceIds({
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;
 
   return {
-    connections: getConnections(
-      serviceMapScriptedAggValue?.paths,
+    connections: getConnections({
+      paths: serviceMapScriptedAggValue?.paths,
       serviceName,
-      environment
-    ),
+      environment,
+    }),
     discoveredServices: serviceMapScriptedAggValue?.discoveredServices ?? [],
   };
 }
