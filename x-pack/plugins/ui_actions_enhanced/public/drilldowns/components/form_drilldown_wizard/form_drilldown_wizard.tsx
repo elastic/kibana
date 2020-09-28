@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
@@ -17,6 +16,7 @@ import {
 } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
@@ -102,10 +102,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         external
         data-test-subj={'getMoreActionsLink'}
       >
-        <FormattedMessage
-          id="xpack.uiActionsEnhanced.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel"
-          defaultMessage="Get more actions"
-        />
+        {txtGetMoreActions}
       </EuiLink>
     </EuiText>
   );
