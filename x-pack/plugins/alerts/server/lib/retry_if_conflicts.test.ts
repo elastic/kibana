@@ -32,9 +32,9 @@ describe('retry_if_conflicts', () => {
         getOperationConflictsTimes(i)
       );
       expect(result).toBe(MockResult);
-      expect(MockLogger.warn).toBeCalledTimes(i);
+      expect(MockLogger.debug).toBeCalledTimes(i);
       for (let j = 0; j < i; j++) {
-        expect(MockLogger.warn).nthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
+        expect(MockLogger.debug).nthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
       }
     });
   }
@@ -47,9 +47,9 @@ describe('retry_if_conflicts', () => {
         getOperationConflictsTimes(RetryForConflictsAttempts + 1)
       )
     ).rejects.toThrowError(SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId));
-    expect(MockLogger.warn).toBeCalledTimes(RetryForConflictsAttempts);
-    expect(MockLogger.error).toBeCalledTimes(1);
-    expect(MockLogger.error).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
+    expect(MockLogger.debug).toBeCalledTimes(RetryForConflictsAttempts);
+    expect(MockLogger.warn).toBeCalledTimes(1);
+    expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
   });
 });
 

@@ -10,19 +10,20 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import { random } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 
 // number of times to retry when conflicts occur
-export const RetryForConflictsAttempts = 5;
+// note: it seems unlikely that we'd need more than one retry, but leaving
+// this statically configurable in case we DO need > 1
+export const RetryForConflictsAttempts = 1;
 
-// milliseconds to wait before retrying when conflicts occur, this may help
-// prevent stampeding herd, if we get conflicts from a number of simultaneous
-// requests
-const RetryForConflictsDelayMin = 0;
-const RetryForConflictsDelayMax = 250;
+// milliseconds to wait before retrying when conflicts occur
+// note: we considered making this random, to help avoid a stampede, but
+// with 1 retry it probably doesn't matter, and adding randomness could
+// make it harder to diagnose issues
+const RetryForConflictsDelay = 250;
 
 // retry an operation if it runs into 409 Conflict's, up to a limit
 export async function retryIfConflicts<T>(
@@ -31,31 +32,27 @@ export async function retryIfConflicts<T>(
   operation: RetryableForConflicts<T>,
   retries: number = RetryForConflictsAttempts
 ): Promise<T> {
-  let error: Error;
-
   // run the operation, return if no errors or throw if not a conflict error
   try {
     return await operation();
   } catch (err) {
-    error = err;
     if (!SavedObjectsErrorHelpers.isConflictError(err)) {
       throw err;
     }
-  }
 
-  // must be a conflict; if no retries left, throw it
-  if (retries <= 0) {
-    logger.error(`${name} conflict, exceeded retries`);
-    throw error;
-  }
+    // must be a conflict; if no retries left, throw it
+    if (retries <= 0) {
+      logger.warn(`${name} conflict, exceeded retries`);
+      throw err;
+    }
 
-  // delay a bit before retrying
-  logger.warn(`${name} conflict, retrying ...`);
-  await waitBeforeNextRetry();
-  return await retryIfConflicts(logger, name, operation, retries - 1);
+    // delay a bit before retrying
+    logger.debug(`${name} conflict, retrying ...`);
+    await waitBeforeNextRetry();
+    return await retryIfConflicts(logger, name, operation, retries - 1);
+  }
 }
 
 async function waitBeforeNextRetry(): Promise<void> {
-  const millis = random(RetryForConflictsDelayMin, RetryForConflictsDelayMax);
-  await new Promise((resolve) => setTimeout(resolve, millis));
+  await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
 }

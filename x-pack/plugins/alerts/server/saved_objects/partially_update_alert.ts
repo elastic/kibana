@@ -8,8 +8,7 @@ import { pick } from 'lodash';
 import { RawAlert } from '../types';
 
 import {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
+  SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '../../../../../src/core/server';
@@ -24,12 +23,13 @@ export interface PartiallyUpdateAlertSavedObjectOptions {
   namespace?: string; // only should be used  with ISavedObjectsRepository
 }
 
-type SavedObjectClient = SavedObjectsClientContract | ISavedObjectsRepository;
+// typed this way so we can send a SavedObjectClient or SavedObjectRepository
+type SavedObjectClientForUpdate = Pick<SavedObjectsClient, 'update'>;
 
 // direct, partial update to an alert saved object via scoped SavedObjectsClient
 // using namespace set in the client
 export async function partiallyUpdateAlert(
-  savedObjectsClient: SavedObjectClient,
+  savedObjectsClient: SavedObjectClientForUpdate,
   id: string,
   attributes: PartiallyUpdateableAlertAttributes,
   options: PartiallyUpdateAlertSavedObjectOptions = {}

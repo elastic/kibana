@@ -109,16 +109,16 @@ async function update(success: boolean) {
       },
     });
   } catch (err) {
-    // only checking the error messages in this test
-    expect(logger.error).lastCalledWith(
+    // only checking the warn messages in this test
+    expect(logger.warn).lastCalledWith(
       `alertsClient.update('alert-id') conflict, exceeded retries`
     );
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');
 
-  // only checking the warning messages in this test
-  expect(logger.warn).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);
+  // only checking the debug messages in this test
+  expect(logger.debug).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);
 }
 
 async function updateApiKey(success: boolean) {
@@ -205,7 +205,7 @@ function expectSuccess(
   expect(success).toBe(true);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(count);
   // message content checked in the update test
-  expect(logger.warn).toBeCalledTimes(1);
+  expect(logger.debug).toHaveBeenCalled();
 }
 
 // tests to run when the method is expected to fail
@@ -217,8 +217,8 @@ function expectConflict(success: boolean, err: Error, method: 'update' | 'create
   expect(success).toBe(false);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(ConflictAfterRetries);
   // message content checked in the update test
-  expect(logger.warn).toBeCalledTimes(RetryForConflictsAttempts);
-  expect(logger.error).toBeCalledTimes(1);
+  expect(logger.debug).toBeCalledTimes(RetryForConflictsAttempts);
+  expect(logger.warn).toBeCalledTimes(1);
 }
 
 // wrapper to call the test function with a it's own name

@@ -20,7 +20,11 @@ export const AlertAttributesExcludedFromAAD = [
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
-export type AlertAttributesExcludedFromAADType = typeof AlertAttributesExcludedFromAAD[number];
+export type AlertAttributesExcludedFromAADType =
+  | 'scheduledTaskId'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'updatedBy';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
