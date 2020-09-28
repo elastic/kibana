@@ -72,7 +72,7 @@ export function createTaskPoller<T, H>({
     // emit a polling event on a fixed interval
     pollInterval$.pipe(
       switchMap((period) => {
-        logger.info(`Task poller now using interval of ${period}ms`);
+        logger.debug(`Task poller now using interval of ${period}ms`);
         return interval(period);
       }),
       mapTo(none)
