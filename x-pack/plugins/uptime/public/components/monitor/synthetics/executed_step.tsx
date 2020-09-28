@@ -13,13 +13,13 @@ import { Ping } from '../../../../common/runtime_types';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
-interface StepComponentProps {
+interface ExecutedStepProps {
   step: Ping;
   index: number;
   fetchScreenshot: (stepIndex: number) => void;
 }
 
-export const StepComponent: FC<StepComponentProps> = ({ step, index, fetchScreenshot }) => {
+export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreenshot }) => {
   return (
     <>
       <div style={{ padding: '8px' }}>
@@ -42,6 +42,7 @@ export const StepComponent: FC<StepComponentProps> = ({ step, index, fetchScreen
                 isLoading={step.synthetics.screenshotLoading}
                 screenshot={step.synthetics.blob}
                 stepIndex={step.synthetics.step.index}
+                stepName={step.synthetics?.step?.name}
                 fetchScreenshot={fetchScreenshot}
               />
             </EuiFlexItem>

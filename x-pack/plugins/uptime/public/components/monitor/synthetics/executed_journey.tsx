@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { Ping } from '../../../../common/runtime_types';
 import { JourneyState } from '../../../state/reducers/journey';
-import { StepComponent } from './executed_step';
+import { ExecutedStep } from './executed_step';
 
 interface StepStatusCount {
   succeeded: number;
@@ -50,12 +50,7 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey, fetchScreen
         {journey.steps
           .filter((step) => step.synthetics?.type === 'step/end')
           .map((step, index) => (
-            <StepComponent
-              key={index}
-              index={index}
-              step={step}
-              fetchScreenshot={fetchScreenshot}
-            />
+            <ExecutedStep key={index} index={index} step={step} fetchScreenshot={fetchScreenshot} />
           ))}
       </EuiFlexGroup>
     </div>

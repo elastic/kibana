@@ -13,24 +13,30 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
 import { useIntersection } from 'react-use';
 import { UptimeThemeContext } from '../../../contexts';
 
-interface ScreenshotDisplayProps {
+interface StepScreenshotDisplayProps {
   isLoading: boolean;
   screenshot: string;
   stepIndex: number;
   fetchScreenshot: (stepIndex: number) => void;
+  stepName?: string;
 }
 
 const THUMBNAIL_WIDTH = 320;
 const THUMBNAIL_HEIGHT = 180;
+const POPOVER_IMG_WIDTH = 640;
+const POPOVER_IMG_HEIGHT = 360;
 
-export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
+export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   isLoading,
   screenshot,
   stepIndex,
+  stepName,
   fetchScreenshot,
 }) => {
   const containerRef = useRef(null);
@@ -63,7 +69,24 @@ export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
             <input
               type="image"
               src={screenshotSrc}
-              alt="full-size screenshot"
+              alt={
+                stepName
+                  ? i18n.translate(
+                      'xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltText',
+                      {
+                        defaultMessage: 'Full screenshot for step with name {stepName}',
+                        values: {
+                          stepName,
+                        },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltTextWithoutName',
+                      {
+                        defaultMessage: 'Full screenshot',
+                      }
+                    )
+              }
               style={{ objectFit: 'contain' }}
               onClick={() => setIsOverlayOpen(false)}
             />
@@ -81,7 +104,18 @@ export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
                 objectPosition: 'center top',
               }}
               src={screenshotSrc}
-              alt="stuff"
+              alt={
+                stepName
+                  ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
+                      defaultMessage: 'Screenshot for step with name {stepName}',
+                      values: {
+                        stepName,
+                      },
+                    })
+                  : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
+                      defaultMessage: 'Screenshot',
+                    })
+              }
               onClick={() => setIsOverlayOpen(true)}
               onMouseEnter={() => setIsImagePopoverOpen(true)}
               onMouseLeave={() => setIsImagePopoverOpen(false)}
@@ -91,10 +125,20 @@ export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
           isOpen={isImagePopoverOpen}
         >
           <img
-            alt="stuff"
+            alt={
+              stepName
+                ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText', {
+                    defaultMessage: 'Thumbnail screenshot for step with name {stepName}',
+                    values: {
+                      stepName,
+                    },
+                  })
+                : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
+                    defaultMessage: 'Thumbnail screenshot',
+                  })
+            }
             src={screenshotSrc}
-            // TODO: extract these vals to a constant and @media
-            style={{ width: 640, height: 360, objectFit: 'contain' }}
+            style={{ width: POPOVER_IMG_WIDTH, height: POPOVER_IMG_HEIGHT, objectFit: 'contain' }}
           />
         </EuiPopover>
       </>
@@ -107,7 +151,12 @@ export const StepScreenshotDisplay: FC<ScreenshotDisplayProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <strong>No image available</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.uptime.synthetics.screenshot.noImageMessage"
+                defaultMessage="No image available"
+              />
+            </strong>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
