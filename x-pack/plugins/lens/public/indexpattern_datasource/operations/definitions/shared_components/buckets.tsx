@@ -35,6 +35,7 @@ interface BucketContainerProps {
   invalidMessage: string;
   onRemoveClick: () => void;
   removeTitle: string;
+  isNotRemovable?: boolean;
   children: React.ReactNode;
   dataTestSubj?: string;
 }
@@ -46,6 +47,7 @@ const BucketContainer = ({
   removeTitle,
   children,
   dataTestSubj,
+  isNotRemovable,
 }: BucketContainerProps) => {
   return (
     <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
@@ -75,6 +77,7 @@ const BucketContainer = ({
             onClick={onRemoveClick}
             aria-label={removeTitle}
             title={removeTitle}
+            disabled={isNotRemovable}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
