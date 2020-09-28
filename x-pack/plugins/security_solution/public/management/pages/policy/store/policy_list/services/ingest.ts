@@ -24,7 +24,7 @@ export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`
 export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
-const INGEST_API_FLEET_AGENTS = `${INGEST_API_FLEET}/agents`;
+export const INGEST_API_FLEET_AGENTS = `${INGEST_API_FLEET}/agents`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 

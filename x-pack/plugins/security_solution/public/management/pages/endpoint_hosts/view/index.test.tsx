@@ -152,13 +152,6 @@ describe('when on the list page', () => {
   });
 
   describe('when determining when to show the enrolling message', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(ingestServices, 'sendGetFleetAgentsWithEndpoint')
-        .mockImplementation(() =>
-          Promise.resolve({ total: 5, list: [], totalInactive: 0, page: 1, perPage: 10 })
-        );
-    });
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -170,6 +163,7 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
         });
       });
       const renderResult = render();
@@ -186,6 +180,7 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
         });
       });
       const renderResult = render();
@@ -202,6 +197,7 @@ describe('when on the list page', () => {
         });
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
         });
       });
       const renderResult = render();

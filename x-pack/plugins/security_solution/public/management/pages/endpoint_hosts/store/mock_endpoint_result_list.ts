@@ -18,11 +18,13 @@ import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
+  INGEST_API_FLEET_AGENTS,
 } from '../../policy/store/policy_list/services/ingest';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
+  GetAgentsResponse,
 } from '../../../../../../ingest_manager/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 
@@ -87,6 +89,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse = generator.generatePolicyResponse(),
   agentPolicy = generator.generateAgentPolicy(),
   queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
+  totalAgentsUsingEndpoint = 0,
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: HostResultList['hosts'];
@@ -95,6 +98,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
   queryStrategyVersion?: MetadataQueryStrategyVersions;
+  totalAgentsUsingEndpoint?: number;
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
@@ -141,6 +145,17 @@ const endpointListApiPathHandlerMocks = ({
         page: 1,
         perPage: 10,
         total: endpointPackagePolicies?.length,
+      };
+    },
+
+    // List of Agents using Endpoint
+    [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
+      return {
+        total: totalAgentsUsingEndpoint,
+        list: [],
+        totalInactive: 0,
+        page: 1,
+        perPage: 10,
       };
     },
   };
