@@ -5,7 +5,7 @@
  */
 import {
   PackageInfo,
-  RegistryConfigTemplate,
+  RegistryPolicyTemplate,
   RegistryVarsEntry,
   RegistryStream,
   PackagePolicy,
@@ -46,9 +46,9 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): PackageP
   const inputs: PackagePolicy['inputs'] = [];
 
   // Assume package will only ever ship one package policy template for now
-  const packagePolicyTemplate: RegistryConfigTemplate | null =
-    packageInfo.config_templates && packageInfo.config_templates[0]
-      ? packageInfo.config_templates[0]
+  const packagePolicyTemplate: RegistryPolicyTemplate | null =
+    packageInfo.policy_templates && packageInfo.policy_templates[0]
+      ? packageInfo.policy_templates[0]
       : null;
 
   // Create package policy input property

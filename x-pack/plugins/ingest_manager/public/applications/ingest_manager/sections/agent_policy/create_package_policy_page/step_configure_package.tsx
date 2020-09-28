@@ -53,14 +53,14 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
-    packageInfo.config_templates &&
-    packageInfo.config_templates[0] &&
-    packageInfo.config_templates[0].inputs &&
-    packageInfo.config_templates[0].inputs.length ? (
+    packageInfo.policy_templates &&
+    packageInfo.policy_templates[0] &&
+    packageInfo.policy_templates[0].inputs &&
+    packageInfo.policy_templates[0].inputs.length ? (
       <>
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" gutterSize="none">
-          {packageInfo.config_templates[0].inputs.map((packageInput) => {
+          {packageInfo.policy_templates[0].inputs.map((packageInput) => {
             const packagePolicyInput = packagePolicy.inputs.find(
               (input) => input.type === packageInput.type
             );

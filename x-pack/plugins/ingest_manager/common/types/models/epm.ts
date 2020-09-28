@@ -68,7 +68,7 @@ export interface RegistryPackage {
   internal?: boolean;
   format_version: string;
   data_streams?: RegistryDataStream[];
-  config_templates?: RegistryConfigTemplate[];
+  policy_templates?: RegistryPolicyTemplate[];
   download: string;
   path: string;
 }
@@ -80,7 +80,7 @@ interface RegistryImage {
   size?: string;
   type?: string;
 }
-export interface RegistryConfigTemplate {
+export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
@@ -128,7 +128,7 @@ export type RegistrySearchResult = Pick<
   | 'download'
   | 'path'
   | 'data_streams'
-  | 'config_templates'
+  | 'policy_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;

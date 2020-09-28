@@ -34,14 +34,14 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
   describe('packageToPackagePolicyInputs', () => {
     it('returns empty array for packages with no config templates', () => {
       expect(packageToPackagePolicyInputs(mockPackage)).toEqual([]);
-      expect(packageToPackagePolicyInputs({ ...mockPackage, config_templates: [] })).toEqual([]);
+      expect(packageToPackagePolicyInputs({ ...mockPackage, policy_templates: [] })).toEqual([]);
     });
 
     it('returns empty array for packages with a config template but no inputs', () => {
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          config_templates: [{ inputs: [] }],
+          policy_templates: [{ inputs: [] }],
         } as unknown) as PackageInfo)
       ).toEqual([]);
     });
@@ -50,13 +50,13 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          config_templates: [{ inputs: [{ type: 'foo' }] }],
+          policy_templates: [{ inputs: [{ type: 'foo' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
-          config_templates: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
+          policy_templates: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([
         { type: 'foo', enabled: true, streams: [] },
@@ -73,7 +73,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
             { type: 'logs', dataset: 'bar', streams: [{ input: 'bar' }] },
             { type: 'logs', dataset: 'bar2', streams: [{ input: 'bar' }] },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'foo' }, { type: 'bar' }],
             },
@@ -129,7 +129,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
               ],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'foo' }, { type: 'bar' }],
             },
@@ -221,7 +221,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
               ],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [
                 {
@@ -372,13 +372,13 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       });
     });
     it('returns package policy with inputs', () => {
-      const mockPackageWithConfigTemplates = ({
+      const mockPackageWithPolicyTemplates = ({
         ...mockPackage,
-        config_templates: [{ inputs: [{ type: 'foo' }] }],
+        policy_templates: [{ inputs: [{ type: 'foo' }] }],
       } as unknown) as PackageInfo;
 
       expect(
-        packageToPackagePolicy(mockPackageWithConfigTemplates, '1', '2', 'default', 'pkgPolicy-1')
+        packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', '2', 'default', 'pkgPolicy-1')
       ).toEqual({
         policy_id: '1',
         namespace: 'default',

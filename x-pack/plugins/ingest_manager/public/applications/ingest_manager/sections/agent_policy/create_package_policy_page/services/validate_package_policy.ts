@@ -74,11 +74,11 @@ export const validatePackagePolicy = (
   }
 
   if (
-    !packageInfo.config_templates ||
-    packageInfo.config_templates.length === 0 ||
-    !packageInfo.config_templates[0] ||
-    !packageInfo.config_templates[0].inputs ||
-    packageInfo.config_templates[0].inputs.length === 0
+    !packageInfo.policy_templates ||
+    packageInfo.policy_templates.length === 0 ||
+    !packageInfo.policy_templates[0] ||
+    !packageInfo.policy_templates[0].inputs ||
+    packageInfo.policy_templates[0].inputs.length === 0
   ) {
     validationResults.inputs = null;
     return validationResults;
@@ -87,7 +87,7 @@ export const validatePackagePolicy = (
   const registryInputsByType: Record<
     string,
     RegistryInput
-  > = packageInfo.config_templates[0].inputs.reduce((inputs, registryInput) => {
+  > = packageInfo.policy_templates[0].inputs.reduce((inputs, registryInput) => {
     inputs[registryInput.type] = registryInput;
     return inputs;
   }, {} as Record<string, RegistryInput>);

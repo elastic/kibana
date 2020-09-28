@@ -52,7 +52,7 @@ describe('Package policy service', () => {
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'log' }],
             },
@@ -113,7 +113,7 @@ describe('Package policy service', () => {
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'log' }],
             },
