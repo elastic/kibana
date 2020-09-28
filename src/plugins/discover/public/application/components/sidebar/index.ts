@@ -18,3 +18,4 @@
  */
 
 export { DiscoverSidebar } from './discover_sidebar';
+export { DiscoverSidebarMobile } from './discover_sidebar_mobile';

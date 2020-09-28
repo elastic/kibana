@@ -11,3 +11,21 @@
     }
   }
 }
+
+.dscSidebar__mobile {
+  width: 100%;
+  padding: 0 $euiSizeS $euiSizeS;
+  .dscSidebar__sectionStatic {
+    padding: 0;
+  }
+  .dscSidebar__mobileButton {
+    justify-content: space-between;
+  }
+  .dscSidebar__mobileBadge {
+    margin-left: $euiSizeXS;
+  }
+}
+
+.dscSidebarFlyout__header {
+  align-items: center;
+}
