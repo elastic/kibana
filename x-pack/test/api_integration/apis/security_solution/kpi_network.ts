@@ -201,13 +201,13 @@ export default function ({ getService }: FtrProviderContext) {
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
-        networkEvents: 665,
+        networkEvents: 1333,
         uniqueFlowId: 124,
         uniqueSourcePrivateIps: null,
         uniqueSourcePrivateIpsHistogram: null,
         uniqueDestinationPrivateIps: null,
         uniqueDestinationPrivateIpsHistogram: null,
-        dnsQueries: 0,
+        dnsQueries: 44,
         tlsHandshakes: 1,
       };
 

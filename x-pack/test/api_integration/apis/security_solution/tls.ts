@@ -5,18 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-// @ts-expect-error
-import { tlsQuery } from '../../../../plugins/security_solution/public/network/containers/tls/index.gql_query';
-import { NetworkQueries } from '../../../../plugins/security_solution/common/search_strategy';
-
 import {
+  NetworkQueries,
   Direction,
-  // @ts-expect-error
-  TlsFields,
+  NetworkTlsFields,
   FlowTarget,
-  // @ts-expect-error
-  GetTlsQuery,
-} from '../../../../plugins/security_solution/public/graphql/types';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
+import {} from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -106,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             ip: SOURCE_IP,
             flowTarget: FlowTarget.source,
-            sort: { field: TlsFields._id, direction: Direction.desc },
+            sort: { field: NetworkTlsFields._id, direction: Direction.desc },
             pagination: {
               activePage: 0,
               cursorStart: 0,
@@ -136,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             ip: DESTINATION_IP,
             flowTarget: FlowTarget.destination,
-            sort: { field: TlsFields._id, direction: Direction.desc },
+            sort: { field: NetworkTlsFields._id, direction: Direction.desc },
             pagination: {
               activePage: 0,
               cursorStart: 0,
@@ -171,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             ip: '',
             flowTarget: FlowTarget.source,
-            sort: { field: TlsFields._id, direction: Direction.desc },
+            sort: { field: NetworkTlsFields._id, direction: Direction.desc },
             pagination: {
               activePage: 0,
               cursorStart: 0,
@@ -200,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             ip: '',
             flowTarget: FlowTarget.destination,
-            sort: { field: TlsFields._id, direction: Direction.desc },
+            sort: { field: NetworkTlsFields._id, direction: Direction.desc },
             pagination: {
               activePage: 0,
               cursorStart: 0,
