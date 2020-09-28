@@ -6,13 +6,12 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { FC } from 'react';
-import { JourneyState } from '../../../state/reducers/journey';
 
 interface EmptyStepStateProps {
-  journey: JourneyState;
+  checkGroup: string;
 }
 
-export const EmptyStepState: FC<EmptyStepStateProps> = ({ journey: { checkGroup } }) => (
+export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
   <EuiEmptyPrompt
     iconType="cross"
     title={<h2>There are no steps for this journey</h2>}
