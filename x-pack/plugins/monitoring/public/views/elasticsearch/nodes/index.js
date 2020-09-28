@@ -95,38 +95,41 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       $scope.$watch(
         () => this.data,
-        () => this.renderReact(this.data || {})
+        (data) => {
+          if (!data) {
+            return;
+          }
+
+          const { clusterStatus, nodes, totalNodeCount } = data;
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: totalNodeCount,
+          };
+
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <ElasticsearchNodes
+                    clusterStatus={clusterStatus}
+                    clusterUuid={globalState.cluster_uuid}
+                    setupMode={setupMode}
+                    nodes={nodes}
+                    alerts={this.alerts}
+                    showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+                    {...this.getPaginationTableProps(pagination)}
+                  />
+                  {bottomBarComponent}
+                </Fragment>
+              )}
+            />
+          );
+        }
       );
-
-      this.renderReact = ({ clusterStatus, nodes, totalNodeCount }) => {
-        const pagination = {
-          ...this.pagination,
-          totalItemCount: totalNodeCount,
-        };
-
-        super.renderReact(
-          <SetupModeRenderer
-            scope={$scope}
-            injector={$injector}
-            productName={ELASTICSEARCH_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <ElasticsearchNodes
-                  clusterStatus={clusterStatus}
-                  clusterUuid={globalState.cluster_uuid}
-                  setupMode={setupMode}
-                  nodes={nodes}
-                  alerts={this.alerts}
-                  showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                  {...this.getPaginationTableProps(pagination)}
-                />
-                {bottomBarComponent}
-              </Fragment>
-            )}
-          />
-        );
-      };
     }
   },
 });
