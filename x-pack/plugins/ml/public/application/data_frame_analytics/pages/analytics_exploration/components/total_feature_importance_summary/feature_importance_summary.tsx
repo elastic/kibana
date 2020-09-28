@@ -72,7 +72,7 @@ const tooltipContent = i18n.translate(
   'xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTooltipContent',
   {
     defaultMessage:
-      'Shows to what degree a given feature of a data point contributes to the prediction. The magnitude of feature importance shows how significantly the feature affects the prediction both locally (for a given data point) or generally (for the whole data set).',
+      'The magnitude of feature importance shows how significantly the feature affects the prediction for a given data point.',
   }
 );
 
@@ -92,7 +92,12 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     let _barSeriesSpec: Partial<BarSeriesSpec> = {
       xAccessor: 'featureName',
       yAccessors: ['meanImportance'],
-      id: 'magnitude',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analytics.exploration.featureImportanceYSeriesName',
+        {
+          defaultMessage: 'magnitude',
+        }
+      ) as string,
     };
     let classificationType:
       | 'binary_classification'
@@ -168,38 +173,44 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
 
   return (
     <EuiPanel>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <span>
+      <div>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
+                      defaultMessage="Overall feature importance"
+                    />
+                  </span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip content={tooltipContent} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSpacer />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              target="_blank"
+              iconType="help"
+              iconSide="left"
+              color="primary"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
+            >
               <FormattedMessage
-                id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-                defaultMessage="Overall feature importance"
+                id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
+                defaultMessage="Feature importance docs"
               />
-            </span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltipContent} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSpacer />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            target="_blank"
-            iconType="help"
-            iconSide="left"
-            color="primary"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
-              defaultMessage="Feature importance docs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
       <Chart
         className="story-chart"
         size={{
@@ -222,7 +233,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         />
         <Axis id="y-axis" title="" position={Position.Left} />
         <BarSeries
-          id="bars"
+          id="magnitude"
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           data={plotData}
