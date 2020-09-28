@@ -10,9 +10,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/react_beautiful_dnd';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
