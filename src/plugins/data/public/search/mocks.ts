@@ -34,6 +34,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
+    showError: jest.fn(),
     searchSource: searchSourceMock,
   };
 }
