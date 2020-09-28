@@ -12,9 +12,12 @@ import {
   CustomConfigurePackagePolicyContent,
   CustomConfigurePackagePolicyProps,
 } from '../../../../../../../ingest_manager/public';
-import { getPolicyDetailPath } from '../../../../common/routing';
+import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
-import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import {
+  PolicyDetailsRouteState,
+  TrustedAppsListPageRouteState,
+} from '../../../../../../common/endpoint/types';
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -32,20 +35,26 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
       policyUrl = getPolicyDetailPath(packagePolicyId);
     }
 
+    const navigateTo = useMemo<
+      PolicyDetailsRouteState['onSaveNavigateTo'] &
+        PolicyDetailsRouteState['onCancelNavigateTo'] &
+        TrustedAppsListPageRouteState['onBackButtonNavigateTo']
+    >(() => {
+      return [
+        'ingestManager',
+        { path: `#/policies/${agentPolicyId}/edit-integration/${packagePolicyId}` },
+      ];
+    }, [agentPolicyId, packagePolicyId]);
+
     const policyDetailRouteState = useMemo((): undefined | PolicyDetailsRouteState => {
       if (from !== 'edit') {
         return undefined;
       }
-      const navigateTo: PolicyDetailsRouteState['onSaveNavigateTo'] &
-        PolicyDetailsRouteState['onCancelNavigateTo'] = [
-        'ingestManager',
-        { path: `#/policies/${agentPolicyId}/edit-integration/${packagePolicyId}` },
-      ];
       return {
         onSaveNavigateTo: navigateTo,
         onCancelNavigateTo: navigateTo,
       };
-    }, [agentPolicyId, from, packagePolicyId]);
+    }, [from, navigateTo]);
 
     return (
       <>
@@ -57,25 +66,30 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
           <EuiText size="s">
             <p>
               {from === 'edit' ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfiguration"
-                  defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
-                  values={{
-                    advancedConfigOptionsLink: (
-                      <LinkToApp
-                        data-test-subj="editLinkToPolicyDetails"
-                        appId={MANAGEMENT_APP_ID}
-                        appPath={policyUrl}
-                        appState={policyDetailRouteState}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfigurationLink"
-                          defaultMessage="here"
-                        />
-                      </LinkToApp>
-                    ),
-                  }}
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfiguration"
+                    defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
+                    values={{
+                      advancedConfigOptionsLink: (
+                        <LinkToApp
+                          data-test-subj="editLinkToPolicyDetails"
+                          appId={MANAGEMENT_APP_ID}
+                          appPath={policyUrl}
+                          appState={policyDetailRouteState}
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfigurationLink"
+                            defaultMessage="here"
+                          />
+                        </LinkToApp>
+                      ),
+                    }}
+                  />
+                  <div>
+                    <TrustedAppsMessage navigateTo={navigateTo} />
+                  </div>
+                </>
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
@@ -91,3 +105,40 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
 );
 
 ConfigureEndpointPackagePolicy.displayName = 'ConfigureEndpointPackagePolicy';
+
+const TrustedAppsMessage = memo<{
+  navigateTo: TrustedAppsListPageRouteState['onBackButtonNavigateTo'];
+}>(({ navigateTo }) => {
+  const trustedAppsListUrl = getTrustedAppsListPath();
+  const trustedAppsListRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
+    return {
+      backButtonUrl: '',
+      onBackButtonNavigateTo: navigateTo,
+    };
+  }, [navigateTo]);
+
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessage"
+        defaultMessage="Click {link} to view global Trusted Applications"
+        values={{
+          link: (
+            <LinkToApp
+              data-test-subj="viewTrustedApps"
+              appId={MANAGEMENT_APP_ID}
+              appPath={trustedAppsListUrl}
+              appState={trustedAppsListRouteState}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageLinkLabel"
+                defaultMessage="here"
+              />
+            </LinkToApp>
+          ),
+        }}
+      />
+    </>
+  );
+});
+TrustedAppsMessage.displayName = 'TrustedAppsMessage';
