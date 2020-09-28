@@ -14,4 +14,4 @@ export const useRequest = jest.fn(() => ({
 }));
 
 // just passing through the reimports
-export { getShared } from '../../../ml/public';
+export { getMlSharedImports } from '../../../ml/public';

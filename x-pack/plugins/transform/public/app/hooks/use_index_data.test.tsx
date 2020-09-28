@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from 'src/core/public';
 
-import { getShared, UseIndexDataReturnType } from '../../shared_imports';
+import { getMlSharedImports, UseIndexDataReturnType } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -34,7 +34,7 @@ const query: SimpleQuery = {
 
 describe('Transform: useIndexData()', () => {
   test('indexPattern set triggers loading', async (done) => {
-    const mlShared = await getShared();
+    const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
       <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
     );
@@ -71,7 +71,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       fields: [] as any[],
     } as SearchItems['indexPattern'];
 
-    const mlShared = await getShared();
+    const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
       const {
@@ -89,7 +89,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       return <DataGrid {...props} />;
     };
     const { getByText } = render(
-      <MlSharedContext.Provider value={mlShared}>
+      <MlSharedContext.Provider value={mlSharedImports}>
         <Wrapper />
       </MlSharedContext.Provider>
     );

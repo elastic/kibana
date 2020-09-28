@@ -17,7 +17,7 @@ jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
 import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
-import { getShared } from '../../../../../shared_imports';
+import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
@@ -30,7 +30,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', async () => {
-    const mlShared = await getShared();
+    const mlShared = await getMlSharedImports();
     const item: TransformListRow = transformListRow;
 
     const { getByText, getByTestId } = render(
