@@ -27,7 +27,7 @@ describe('CredentialsLogic', () => {
       write: true,
       access_all_engines: true,
     },
-    activeApiTokenIsExisting: false,
+    isActiveApiTokenExisting: false,
     activeApiTokenRawName: '',
     apiTokens: [],
     dataLoading: true,
@@ -90,7 +90,7 @@ describe('CredentialsLogic', () => {
       const values = {
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
       };
 
       describe('activeApiToken', () => {
@@ -131,7 +131,7 @@ describe('CredentialsLogic', () => {
         const values = {
           ...DEFAULT_VALUES,
           activeApiToken: expect.any(Object),
-          activeApiTokenIsExisting: expect.any(Boolean),
+          isActiveApiTokenExisting: expect.any(Boolean),
         };
 
         it("should remove an engine from the active api token's engine list", () => {
@@ -181,7 +181,7 @@ describe('CredentialsLogic', () => {
       const values = {
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
       };
 
       describe('activeApiToken', () => {
@@ -259,7 +259,7 @@ describe('CredentialsLogic', () => {
     describe('onApiTokenCreateSuccess', () => {
       const values = {
         ...DEFAULT_VALUES,
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
         apiTokens: expect.any(Array),
         activeApiToken: expect.any(Object),
         activeApiTokenRawName: expect.any(String),
@@ -573,7 +573,7 @@ describe('CredentialsLogic', () => {
       const values = {
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
       };
 
       describe('activeApiToken', () => {
@@ -602,7 +602,7 @@ describe('CredentialsLogic', () => {
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
         activeApiTokenRawName: expect.any(String),
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
       };
 
       describe('activeApiToken', () => {
@@ -646,7 +646,7 @@ describe('CredentialsLogic', () => {
           access_all_engines: expect.any(Boolean),
           engines: expect.any(Array),
         },
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
       };
 
       describe('activeApiToken.access_all_engines', () => {
@@ -859,7 +859,7 @@ describe('CredentialsLogic', () => {
     describe('showCredentialsForm', () => {
       const values = {
         ...DEFAULT_VALUES,
-        activeApiTokenIsExisting: expect.any(Boolean),
+        isActiveApiTokenExisting: expect.any(Boolean),
         activeApiToken: expect.any(Object),
         activeApiTokenRawName: expect.any(String),
         formErrors: expect.any(Array),
@@ -1159,7 +1159,7 @@ describe('CredentialsLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('activeApiTokenIsExisting', () => {
+    describe('isActiveApiTokenExisting', () => {
       it('should be false if the token has no id', () => {
         mount({
           activeApiToken: {
@@ -1168,7 +1168,7 @@ describe('CredentialsLogic', () => {
           },
         });
 
-        expect(CredentialsLogic.values.activeApiTokenIsExisting).toEqual(false);
+        expect(CredentialsLogic.values.isActiveApiTokenExisting).toEqual(false);
       });
 
       it('should be true if the token has an id', () => {
@@ -1179,7 +1179,7 @@ describe('CredentialsLogic', () => {
           },
         });
 
-        expect(CredentialsLogic.values.activeApiTokenIsExisting).toEqual(true);
+        expect(CredentialsLogic.values.isActiveApiTokenExisting).toEqual(true);
       });
     });
   });
