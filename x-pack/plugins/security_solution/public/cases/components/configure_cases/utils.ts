@@ -49,6 +49,7 @@ export const getNoneConnector = (): ConfigureCaseConnector => ({
   id: 'none',
   name: 'none',
   type: '.none',
+  fields: {},
 });
 
 export const getConnectorById = (
@@ -62,6 +63,7 @@ export const normalizeActionConnector = (
   id: actionConnector.id,
   name: actionConnector.name,
   type: actionConnector.actionTypeId,
+  fields: {},
 });
 
 export const normalizeCaseConnector = (

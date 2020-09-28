@@ -39,6 +39,7 @@ describe('GET configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
       ...mockCaseConfigure[0].attributes,
+      connector: { ...mockCaseConfigure[0].attributes.connector, fields: {} },
       version: mockCaseConfigure[0].version,
     });
   });
@@ -58,8 +59,12 @@ describe('GET configuration', () => {
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
-      connector_id: '123',
-      connector_name: 'My connector',
+      connector: {
+        id: '789',
+        name: 'My connector 3',
+        type: '.jira',
+        fields: {},
+      },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',
       created_by: {

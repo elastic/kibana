@@ -13,7 +13,6 @@ import {
   EuiComboBoxOptionOption,
   EuiSelectOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { SettingFieldsProps } from '../types';
@@ -21,6 +20,8 @@ import { ResilientSettingFields } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+
+import * as i18n from './translations';
 
 const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ResilientSettingFields
@@ -107,20 +108,11 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
             .filter((type) => type.label != null)
         : []
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector, allIncidentTypes]);
+  }, [connector, allIncidentTypes, incidentTypes]);
 
   return (
     <>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.securitySolution.case.settings.resilient.incidentComboBoxLabel',
-          {
-            defaultMessage: 'Incident Type',
-          }
-        )}
-      >
+      <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
         <EuiComboBox
           fullWidth
           isLoading={isLoadingIncidentTypes}
@@ -128,6 +120,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
           data-test-subj="incidentTypeComboBox"
           options={incidentTypesComboBoxOptions}
           selectedOptions={selectedIncidentTypesComboBoxOptions}
+          placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
           onChange={(selectedOptions: Array<{ label: string; value?: string }>) => {
             setSelectedIncidentTypesComboBoxOptions(
               selectedOptions.map((selectedOption) => ({
@@ -150,19 +143,12 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.securitySolution.case.settings.resilient.severitySelectFieldLabel',
-          {
-            defaultMessage: 'Severity',
-          }
-        )}
-      >
+      <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL}>
         <EuiSelect
           isLoading={isLoadingSeverity}
           disabled={isLoadingSeverity}
           fullWidth
+          hasNoInitialSelection
           data-test-subj="severitySelect"
           options={severitySelectOptions}
           value={severityCode}

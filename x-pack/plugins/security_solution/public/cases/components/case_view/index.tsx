@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
 
 import * as i18n from './translations';
 import { Case, CaseConnector } from '../../containers/types';
@@ -187,9 +188,9 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
 
-    const [isValidConnector] = useMemo(() => {
+    const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
-      return [!!connector];
+      return [connector?.name ?? '', !!connector];
     }, [connectors, caseData.connector]);
 
     const currentExternalIncident = useMemo(
@@ -201,7 +202,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
-      connector: caseData.connector,
+      connector: {
+        ...caseData.connector,
+        name: isEmpty(caseData.connector.name) ? connectorName : caseData.connector.name,
+      },
       caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,
@@ -309,6 +313,7 @@ export const CaseComponent = React.memo<CaseProps>(
           <HeaderPage
             backOptions={backOptions}
             data-test-subj="case-view-title"
+            hideSourcerer={true}
             titleNode={
               <EditableTitle
                 disabled={!userCanCrud}
@@ -394,12 +399,13 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  isLoading={isLoadingConnectors}
+                  isLoading={isLoadingConnectors && updateKey === 'connector'}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
                   selectedConnector={caseData.connector.id}
                   caseFields={caseData.connector.fields}
                   userActions={caseUserActions}
+                  disabled={!userCanCrud}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -418,7 +424,7 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   }
   if (isLoading) {
     return (
-      <MyEuiFlexGroup justifyContent="center" alignItems="center">
+      <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
         </EuiFlexItem>

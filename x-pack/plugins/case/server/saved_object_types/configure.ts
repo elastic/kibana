@@ -42,6 +42,16 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
           type: {
             type: 'keyword',
           },
+          fields: {
+            properties: {
+              key: {
+                type: 'text',
+              },
+              value: {
+                type: 'text',
+              },
+            },
+          },
         },
       },
       closure_type: {

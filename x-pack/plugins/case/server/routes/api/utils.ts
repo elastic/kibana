@@ -138,8 +138,9 @@ export const flattenCaseSavedObject = ({
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   ...savedObject.attributes,
-  connector:
-    transformESConnectorToCaseConnector(savedObject.attributes.connector) ?? caseConfigureConnector,
+  connector: savedObject.attributes.connector
+    ? transformESConnectorToCaseConnector(savedObject.attributes.connector)
+    : caseConfigureConnector,
 });
 
 export const transformComments = (

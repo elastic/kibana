@@ -57,7 +57,11 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           client,
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
-            ...queryWithoutVersion,
+            ...(queryWithoutVersion.connector
+              ? {
+                  connector: { ...queryWithoutVersion.connector, fields: [] },
+                }
+              : queryWithoutVersion),
             updated_at: updateDate,
             updated_by: { email, full_name, username },
           },
@@ -67,6 +71,12 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
             ...patch.attributes,
+            connector: {
+              ...(patch.attributes.connector
+                ? patch.attributes.connector
+                : myCaseConfigure.saved_objects[0].attributes.connector),
+              fields: {},
+            },
             version: patch.version ?? '',
           }),
         });

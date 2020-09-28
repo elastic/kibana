@@ -37,6 +37,7 @@ import {
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   Type,
+  EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 import {
   ThreatIndexOrUndefined,
@@ -56,6 +57,7 @@ export interface RuleTypeParams {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;

@@ -111,6 +111,11 @@ export const Create = React.memo(() => {
     }
   }, [connectors, configureConnector, isLoadingCaseConfigure, setFieldValue]);
 
+  // Reset fields when changing connector
+  useEffect(() => {
+    setFields({});
+  }, [connectorId]);
+
   useEffect(
     () =>
       setOptions(
@@ -163,7 +168,6 @@ export const Create = React.memo(() => {
         ? normalizeActionConnector(caseConnector)
         : getNoneConnector();
 
-      // `postCase`'s type is incorrect, it actually returns a promise
       await postCase({ ...dataWithoutConnectorId, connector: { ...connectorToUpdate, fields } });
     }
   }, [submit, postCase, fields, connectors]);

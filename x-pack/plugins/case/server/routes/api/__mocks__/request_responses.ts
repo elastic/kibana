@@ -11,6 +11,7 @@ export const newCase: CasePostRequest = {
   title: 'My new case',
   description: 'A description',
   tags: ['new', 'case'],
+  connector: null,
 };
 
 export const getActions = (): FindActionResult[] => [
@@ -59,7 +60,11 @@ export const getActions = (): FindActionResult[] => [
 ];
 
 export const newConfiguration: CasesConfigureRequest = {
-  connector_id: '456',
-  connector_name: 'My connector 2',
+  connector: {
+    id: '456',
+    name: 'My connector 2',
+    type: '.jira',
+    fields: {},
+  },
   closure_type: 'close-by-pushing',
 };
