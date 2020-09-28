@@ -15,7 +15,7 @@ import {
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
-import { App1ToUrlDrilldown } from './drilldowns/app1_to_url_drilldown';
+import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -67,7 +67,7 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardHelloWorldDrilldown());
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
-    uiActions.registerDrilldown(new App1ToUrlDrilldown());
+    uiActions.registerDrilldown(new App1HelloWorldDrilldown());
     uiActions.registerDrilldown(new App1ToDashboardDrilldown({ start }));
     uiActions.registerDrilldown(new App2ToDashboardDrilldown({ start }));
 
