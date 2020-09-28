@@ -25,6 +25,62 @@
 - Promote/deploy a built artifact through the UI by selecting previously built artifact (or automatically build a new one and deploy if successful)
 - Custom Build IDs using service messages
 
+## Pull Requests
+
+The `Pull Request` feature in TeamCity:
+
+- Automatically discovers pull request branches in GitHub
+  - Option to filter by contributor type (members of same org, org+external contributor, everyone)
+  - Option to filter by target branch (e.g. only discover Pull Requests targeting master)
+  - Works by essentially modifying the VCS root branch spec (so you should NOT add anything to branch spec if you are using this)
+  - Draft PRs do get discovered
+- Adds some Pull Request information to build overview pages
+- Adds a few parameters available to build configurations:
+  - teamcity.pullRequest.number
+  - teamcity.pullRequest.title
+  - teamcity.pullRequest.source.branch
+  - teamcity.pullRequest.target.branch
+  - (Notice that source owner is not available - there's no information for forks)
+- Requires a token for API interaction
+
+That's it. There's no interaction with labels/comments/etc. Triggering is handled via the standard triggering options.
+
+So, if you only want to:
+
+- Build on new commit (e.g. not via comment) or via the TeamCity UI
+- Start builds for users not covered by the filter options using the TeamCity UI
+
+The Pull Request feature may be enough to cover your needs. Otherwise, you'll need something additional (an external bot, or a new teamcity plugin, etc).
+
+### Other PR notes
+
+- TeamCity doesn't have the ability to cancel currently-running builds when a new commit is pushed
+- TeamCity does not add fork information (e.g. the owner) to build configuration parameters
+- Builds CAN be triggered for branches not yet discovered
+  - You can turn off discovery altogether, and a branch will still be build-able. It will be show up in the UI and build whenever triggered via an external trigger.
+
+How to [trigger a build via API](https://www.jetbrains.com/help/teamcity/rest-api-reference.html#Triggering+a+Build):
+
+```
+POST https://teamcity-server/app/rest/buildQueue
+
+<build branchName="pull/78662">
+  <buildType id="Your_Build_Configuration_ID" />
+</build>
+```
+
+and with additional properties:
+
+```
+<build branchName="pull/78662">
+  <buildType id="Your_Build_Configuration_ID" />
+  <properties>
+    <property name="env.GITHUB_PR_OWNER" value="cool-username"/>
+    <property name="env.GITHUB_PR_REPO" value="kibana"/>
+  </properties>
+</build>
+```
+
 ## Kibana Builds
 
 ### Baseline CI
@@ -88,3 +144,7 @@ Desires:
 - snapshot dependency only on `Build Snapshot`
 - same as `Promote Snapshot` but skips testing
 - can only be triggered manually
+
+```
+
+```
