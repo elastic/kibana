@@ -32,6 +32,9 @@ describe('ApmConfiguration', () => {
   beforeEach(() => {
     packageMock.raw = {
       version: '8.0.0',
+      build: {
+        sha: 'sha',
+      },
     };
   });
 
@@ -47,10 +50,22 @@ describe('ApmConfiguration', () => {
     expect(config.getConfig('myservice').serviceName).toBe('myservice-9_2_1');
   });
 
-  it('sets the giv revision in globalLabels', () => {
+  it('sets the git revision from `git rev-parse` command in non distribution mode', () => {
     gitRevExecMock.mockReturnValue('some-git-rev');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
     expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('some-git-rev');
+  });
+
+  it('sets the git revision from `pkg.build.sha` in distribution mode', () => {
+    gitRevExecMock.mockReturnValue('dev-sha');
+    packageMock.raw = {
+      version: '9.2.1',
+      build: {
+        sha: 'distribution-sha',
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, {}, true);
+    expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('distribution-sha');
   });
 
   it('reads the kibana uuid from the uuid file', () => {

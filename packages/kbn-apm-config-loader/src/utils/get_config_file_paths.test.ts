@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { getConfigPath } from '@kbn/utils';
 import { getConfigurationFilePaths } from './get_config_file_paths';
 
@@ -25,10 +25,11 @@ describe('getConfigurationFilePaths', () => {
   const cwd = process.cwd();
 
   it('retrieve the config file paths from the command line arguments', () => {
-    const argv = ['--config', '/some/path', '-c', '/some-other-path'];
+    const argv = ['--config', './relative-path', '-c', '/absolute-path'];
+
     expect(getConfigurationFilePaths(argv)).toEqual([
-      resolve(cwd, '/some/path'),
-      resolve(cwd, '/some-other-path'),
+      resolve(cwd, join('.', 'relative-path')),
+      '/absolute-path',
     ]);
   });
 

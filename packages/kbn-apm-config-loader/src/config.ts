@@ -51,6 +51,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
 export class ApmConfiguration {
   private baseConfig?: any;
   private kibanaVersion: string;
+  private pkgBuild: Record<string, any>;
 
   constructor(
     private readonly rootDir: string,
@@ -58,8 +59,9 @@ export class ApmConfiguration {
     private readonly isDistributable: boolean
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { version } = require(join(this.rootDir, 'package.json'));
+    const { version, build } = require(join(this.rootDir, 'package.json'));
     this.kibanaVersion = version.replace(/\./g, '_');
+    this.pkgBuild = build;
   }
 
   public getConfig(serviceName: string): ApmAgentConfig {
@@ -122,6 +124,9 @@ export class ApmConfiguration {
   }
 
   private getGitRev() {
+    if (this.isDistributable) {
+      return this.pkgBuild.sha;
+    }
     try {
       return execSync('git rev-parse --short HEAD', {
         encoding: 'utf-8' as BufferEncoding,

@@ -20,7 +20,7 @@
 import { relative, resolve } from 'path';
 import { getConfigFromFiles } from './read_config';
 
-const fixtureFile = (name: string) => resolve(`${__dirname}/../../__fixtures__/${name}`);
+const fixtureFile = (name: string) => resolve(__dirname, '..', '..', '__fixtures__', name);
 
 test('reads single yaml from file system and parses to json', () => {
   const config = getConfigFromFiles([fixtureFile('config.yml')]);
@@ -29,13 +29,13 @@ test('reads single yaml from file system and parses to json', () => {
 });
 
 test('returns a deep object', () => {
-  const config = getConfigFromFiles([fixtureFile('/config_flat.yml')]);
+  const config = getConfigFromFiles([fixtureFile('config_flat.yml')]);
 
   expect(config).toMatchSnapshot();
 });
 
 test('reads and merges multiple yaml files from file system and parses to json', () => {
-  const config = getConfigFromFiles([fixtureFile('/one.yml'), fixtureFile('/two.yml')]);
+  const config = getConfigFromFiles([fixtureFile('one.yml'), fixtureFile('two.yml')]);
 
   expect(config).toMatchSnapshot();
 });
@@ -44,7 +44,7 @@ test('should inject an environment variable value when setting a value with ${EN
   process.env.KBN_ENV_VAR1 = 'val1';
   process.env.KBN_ENV_VAR2 = 'val2';
 
-  const config = getConfigFromFiles([fixtureFile('/en_var_ref_config.yml')]);
+  const config = getConfigFromFiles([fixtureFile('en_var_ref_config.yml')]);
 
   delete process.env.KBN_ENV_VAR1;
   delete process.env.KBN_ENV_VAR2;
@@ -54,7 +54,7 @@ test('should inject an environment variable value when setting a value with ${EN
 
 test('should throw an exception when referenced environment variable in a config value does not exist', () => {
   expect(() =>
-    getConfigFromFiles([fixtureFile('/en_var_ref_config.yml')])
+    getConfigFromFiles([fixtureFile('en_var_ref_config.yml')])
   ).toThrowErrorMatchingSnapshot();
 });
 
@@ -66,14 +66,14 @@ describe('different cwd()', () => {
   afterAll(() => process.chdir(originalCwd));
 
   test('resolves relative files based on the cwd', () => {
-    const relativePath = relative(tempCwd, fixtureFile('/one.yml'));
+    const relativePath = relative(tempCwd, fixtureFile('one.yml'));
     const config = getConfigFromFiles([relativePath]);
 
     expect(config).toMatchSnapshot();
   });
 
   test('fails to load relative paths, not found because of the cwd', () => {
-    const relativePath = relative(resolve(__dirname, '../../'), fixtureFile('/one.yml'));
+    const relativePath = relative(resolve(__dirname, '..', '..'), fixtureFile('one.yml'));
     expect(() => getConfigFromFiles([relativePath])).toThrowError(/ENOENT/);
   });
 });
