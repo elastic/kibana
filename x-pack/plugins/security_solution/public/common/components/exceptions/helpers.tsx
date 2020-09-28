@@ -399,10 +399,8 @@ export const getCodeSignatureValue = (
       trusted: (signature.trusted && signature.trusted[0]) ?? '',
     }));
   } else {
-    const codeSignatures: CodeSignature | CodeSignature[] | undefined =
-      file && file.Ext && file.Ext.code_signature;
-    const signature: CodeSignature | undefined = !Array.isArray(codeSignatures)
-      ? codeSignatures
+    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+      ? codeSignature
       : undefined;
     const subjectName: string | undefined =
       signature && signature.subject_name && signature.subject_name[0];
