@@ -18,6 +18,7 @@ export {
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
+  getProcessedFields,
   ChartData,
   DataGrid,
   EsSorting,

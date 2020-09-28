@@ -20,6 +20,7 @@ import {
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
+  getProcessedFields,
   EsSorting,
   UseIndexDataReturnType,
   INDEX_STATUS,
@@ -84,6 +85,8 @@ export const useIndexData = (
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
+        fields: ['*'],
+        _source: false,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
         query: isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
@@ -100,7 +103,7 @@ export const useIndexData = (
       return;
     }
 
-    const docs = resp.hits.hits.map((d) => d._source);
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
 
     setRowCount(resp.hits.total.value);
     setTableItems(docs);
