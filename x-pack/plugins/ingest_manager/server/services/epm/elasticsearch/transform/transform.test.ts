@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JsonObject } from '../../../../../../infra/common/typed_json';
+
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
@@ -91,6 +93,21 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({
+        count: 1,
+        transforms: [
+          {
+            dest: {
+              index: 'index',
+            },
+          },
+        ],
+      } as {
+        count: number;
+        transforms: JsonObject[];
+      })
+    );
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -134,7 +151,15 @@ describe('test transform install', () => {
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
+
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+      [
+        'transport.request',
+        {
+          method: 'GET',
+          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+        },
+      ],
       [
         'transport.request',
         {
@@ -150,6 +175,14 @@ describe('test transform install', () => {
           method: 'DELETE',
           query: 'force=true',
           path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'DELETE',
+          path: '/index',
           ignore: [404],
         },
       ],
@@ -346,6 +379,21 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({
+        count: 1,
+        transforms: [
+          {
+            dest: {
+              index: 'index',
+            },
+          },
+        ],
+      } as {
+        count: number;
+        transforms: JsonObject[];
+      })
+    );
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -385,8 +433,16 @@ describe('test transform install', () => {
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
-
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(legacyScopedClusterClient.callAsCurrentUser.mock.calls));
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+      [
+        'transport.request',
+        {
+          method: 'GET',
+          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+        },
+      ],
       [
         'transport.request',
         {
@@ -402,6 +458,14 @@ describe('test transform install', () => {
           method: 'DELETE',
           query: 'force=true',
           path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'DELETE',
+          path: '/index',
           ignore: [404],
         },
       ],
