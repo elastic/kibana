@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'brace/mode/json';
 import React, { useCallback } from 'react';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../public';
