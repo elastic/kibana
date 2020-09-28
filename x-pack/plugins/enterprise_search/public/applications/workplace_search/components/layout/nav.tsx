@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
 import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
@@ -24,10 +24,6 @@ import {
 } from '../../routes';
 
 export const WorkplaceSearchNav: React.FC = () => {
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
-
   // TODO: icons
   return (
     <SideNav product={WORKPLACE_SEARCH_PLUGIN}>

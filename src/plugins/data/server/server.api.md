@@ -44,6 +44,7 @@ import { DeleteDocumentParams } from 'elasticsearch';
 import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { Duration } from 'moment';
+import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
@@ -623,7 +624,7 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
-    addScriptedField(name: string, script: string, fieldType?: string, lang?: string): Promise<void>;
+    addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
@@ -699,8 +700,6 @@ export class IndexPattern implements IIndexPattern {
     intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
-    // (undocumented)
-    isTimeBasedWildcard(): boolean;
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
