@@ -391,7 +391,7 @@ const updateExistingIndex = async ({
 }) => {
   const { settings, mappings } = indexTemplate.template;
 
-  // for now, remove from object so as not to update stream or dataset properties of the index until type and name
+  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
   // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;

@@ -177,13 +177,13 @@ async function installPipeline({
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
 
-const isDataStreamPipeline = (path: string, dataStreamName: string) => {
+const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   const pathParts = Registry.pathParts(path);
   return (
     !isDirectory({ path }) &&
     pathParts.type === ElasticsearchAssetType.ingestPipeline &&
     pathParts.dataset !== undefined &&
-    dataStreamName === pathParts.dataset
+    dataStreamDataset === pathParts.dataset
   );
 };
 const isPipeline = (path: string) => {

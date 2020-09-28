@@ -347,7 +347,7 @@ export async function installPackage({
 
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified
-  // per dataset and we should then save them
+  // per data stream and we should then save them
   await installILMPolicy(paths, callCluster);
 
   // installs versionized pipelines without removing currently installed ones
