@@ -28,7 +28,7 @@ export type AllowedSchemaTypes =
   | 'date'
   | 'float';
 
-export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
+export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
   switch (type) {
     case 'keyword':
     case 'text':
@@ -40,6 +40,8 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
     case 'float':
     case 'long':
       return 'number';
+    case 'array':
+      return 'array';
     default:
       throw new Error(`Unknown schema type ${type}`);
   }
@@ -66,10 +68,22 @@ export function isObjectMapping(entity: any) {
   return false;
 }
 
+function isArrayMapping(entity: any): entity is { type: 'array'; items: object } {
+  return typeof entity === 'object' && entity.type === 'array' && typeof entity.items === 'object';
+}
+
+function getValueMapping(value: any) {
+  return isObjectMapping(value) ? transformToEsMapping(value) : value;
+}
+
 function transformToEsMapping(usageMappingValue: any) {
   const fieldMapping: any = { properties: {} };
   for (const [key, value] of Object.entries(usageMappingValue)) {
-    fieldMapping.properties[key] = isObjectMapping(value) ? transformToEsMapping(value) : value;
+    if (isArrayMapping(value)) {
+      fieldMapping.properties[key] = { ...value, items: getValueMapping(value.items) };
+    } else {
+      fieldMapping.properties[key] = getValueMapping(value);
+    }
   }
   return fieldMapping;
 }
