@@ -64,19 +64,6 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
-  // Set defaults
-  useEffect(() => {
-    if (!urgency) {
-      onChange('urgency', '3');
-    }
-    if (!impact) {
-      onChange('impact', '3');
-    }
-    if (!severity) {
-      onChange('severity', '3');
-    }
-  }, [urgency, impact, severity, onChange]);
-
   return (
     <>
       <EuiFormRow
@@ -93,6 +80,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           data-test-subj="urgencySelect"
           options={selectOptions}
           value={urgency}
+          hasNoInitialSelection
           onChange={(e) => {
             onChange('urgency', e.target.value);
           }}
@@ -115,6 +103,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               data-test-subj="severitySelect"
               options={selectOptions}
               value={severity}
+              hasNoInitialSelection
               onChange={(e) => {
                 onChange('severity', e.target.value);
               }}
@@ -136,6 +125,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               data-test-subj="impactSelect"
               options={selectOptions}
               value={impact}
+              hasNoInitialSelection
               onChange={(e) => {
                 onChange('impact', e.target.value);
               }}

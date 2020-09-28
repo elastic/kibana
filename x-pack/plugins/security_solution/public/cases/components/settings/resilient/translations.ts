@@ -19,3 +19,24 @@ export const SEVERITY_API_ERROR = i18n.translate(
     defaultMessage: 'Unable to get severity',
   }
 );
+
+export const INCIDENT_TYPES_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.case.settings.resilient.incidentTypesPlaceholder',
+  {
+    defaultMessage: 'Choose types',
+  }
+);
+
+export const INCIDENT_TYPES_LABEL = i18n.translate(
+  'xpack.securitySolution.case.settings.resilient.incidentTypesLabel',
+  {
+    defaultMessage: 'Incident Type',
+  }
+);
+
+export const SEVERITY_LABEL = i18n.translate(
+  'xpack.securitySolution.case.settings.resilient.severityLabel',
+  {
+    defaultMessage: 'Severity',
+  }
+);
