@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger, CoreStart } from '../../../../../../src/core/server';
@@ -12,19 +12,6 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
-
-// Allowlist for the fields that we copy from the original event to the
-// telemetry event.
-// Top level fields:
-const allowlistTop = ['@timestamp', 'agent', 'Endpoint', 'ecs', 'elastic'];
-// file.* fields:
-const allowlistFile = ['path', 'size', 'created', 'accessed', 'mtime', 'directory', 'hash'];
-// file.Ext.* fields:
-const allowlistFileExt = ['code_signature', 'malware_classification'];
-// file.* fields:
-const allowlistHost = ['os'];
-// event.* fields:
-const allowlistEvent = ['kind'];
 
 export type SearchTypes =
   | string
@@ -80,6 +67,80 @@ export interface ESClusterInfo {
  */
 export function getClusterInfo(callCluster: LegacyAPICaller) {
   return callCluster<ESClusterInfo>('info');
+}
+
+interface AllowlistFields {
+  [key: string]: boolean | AllowlistFields;
+}
+
+// Allow list for the data we include in the events. True means that it is deep-cloned
+// blindly. Object contents means that we only copy the fields that appear explicitly in
+// the sub-object.
+const allowlistEventFields: AllowlistFields = {
+  '@timestamp': true,
+  agent: true,
+  Endpoint: true,
+  ecs: true,
+  elastic: true,
+  event: true,
+  file: {
+    name: true,
+    path: true,
+    size: true,
+    created: true,
+    accessed: true,
+    mtime: true,
+    directory: true,
+    hash: true,
+    Ext: {
+      code_signature: true,
+      malware_classification: true,
+    },
+  },
+  host: {
+    os: true,
+  },
+  process: {
+    name: true,
+    executable: true,
+    command_line: true,
+    hash: true,
+    Ext: {
+      code_signature: true,
+    },
+    parent: {
+      name: true,
+      executable: true,
+      command_line: true,
+      hash: true,
+      Ext: {
+        code_signature: true,
+      },
+    },
+  },
+};
+
+export function copyAllowlistedFields(
+  allowlist: AllowlistFields,
+  event: TelemetryEvent
+): TelemetryEvent {
+  const newEvent: TelemetryEvent = {};
+  for (const key in allowlist) {
+    if (key in event) {
+      if (allowlist[key] === true) {
+        newEvent[key] = cloneDeep(event[key]);
+      } else if (typeof allowlist[key] === 'object' && typeof event[key] === 'object') {
+        const values = copyAllowlistedFields(
+          allowlist[key] as AllowlistFields,
+          event[key] as TelemetryEvent
+        );
+        if (Object.keys(values).length > 0) {
+          newEvent[key] = values;
+        }
+      }
+    }
+  }
+  return newEvent;
 }
 
 export class TelemetryEventsSender {
@@ -143,21 +204,7 @@ export class TelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      const newObj: TelemetryEvent = pick(obj, allowlistTop);
-      if ('file' in obj) {
-        newObj.file = pick(obj.file, allowlistFile);
-        if (obj.file?.Ext !== undefined) {
-          newObj.file.Ext = pick(obj.file.Ext, allowlistFileExt);
-        }
-      }
-      if ('host' in obj) {
-        newObj.host = pick(obj.host, allowlistHost);
-      }
-      if ('event' in obj) {
-        newObj.event = pick(obj.event, allowlistEvent);
-      }
-
-      return newObj;
+      return copyAllowlistedFields(allowlistEventFields, obj);
     });
   }
 
@@ -171,25 +218,27 @@ export class TelemetryEventsSender {
       return;
     }
 
-    // Checking opt-in status is relatively expensive (calls a saved-object), so
-    // we only check it when we have things to send.
-    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
-    if (!this.isOptedIn) {
-      this.logger.debug(`Telemetry is not opted-in.`);
-      this.queue = [];
-      return;
-    }
-
-    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
-    this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-
-    const clusterInfo = await this.fetchClusterInfo();
-    this.logger.debug(
-      `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-    );
-
     try {
       this.isSending = true;
+
+      // Checking opt-in status is relatively expensive (calls a saved-object), so
+      // we only check it when we have things to send.
+      this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+      if (!this.isOptedIn) {
+        this.logger.debug(`Telemetry is not opted-in.`);
+        this.queue = [];
+        this.isSending = false;
+        return;
+      }
+
+      const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+
+      const clusterInfo = await this.fetchClusterInfo();
+      this.logger.debug(
+        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
+      );
+
       const toSend: TelemetryEvent[] = cloneDeep(this.queue);
       this.queue = [];
 
@@ -203,6 +252,7 @@ export class TelemetryEventsSender {
       this.sendEvents(toSend);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
+      this.queue = [];
     }
     this.isSending = false;
   }

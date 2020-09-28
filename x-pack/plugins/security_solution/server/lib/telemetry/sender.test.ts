@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender } from './sender';
+import { TelemetryEventsSender, copyAllowlistedFields } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 describe('TelemetryEventsSender', () => {
@@ -28,7 +28,6 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
-            something_else: 'nope',
           },
           agent: {
             name: 'test',
@@ -142,6 +141,72 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['queue'].length).toBe(0);
       expect(sender['sendEvents']).toBeCalledTimes(0);
+    });
+  });
+});
+
+describe('allowlistEventFields', () => {
+  const allowlist = {
+    a: true,
+    b: true,
+    c: {
+      d: true,
+    },
+  };
+
+  it('filters top level', () => {
+    const event = {
+      a: 'a',
+      a1: 'a1',
+      b: 'b',
+      b1: 'b1',
+    };
+    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+      a: 'a',
+      b: 'b',
+    });
+  });
+
+  it('filters nested', () => {
+    const event = {
+      a: {
+        a1: 'a1',
+      },
+      a1: 'a1',
+      b: {
+        b1: 'b1',
+      },
+      b1: 'b1',
+      c: {
+        d: 'd',
+        e: 'e',
+        f: 'f',
+      },
+    };
+    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+      a: {
+        a1: 'a1',
+      },
+      b: {
+        b1: 'b1',
+      },
+      c: {
+        d: 'd',
+      },
+    });
+  });
+
+  it("doesn't create empty objects", () => {
+    const event = {
+      a: 'a',
+      b: 'b',
+      c: {
+        e: 'e',
+      },
+    };
+    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+      a: 'a',
+      b: 'b',
     });
   });
 });
