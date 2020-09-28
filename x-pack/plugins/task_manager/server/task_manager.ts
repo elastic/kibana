@@ -54,7 +54,7 @@ import {
   PollingErrorType,
   createObservableMonitor,
 } from './polling';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
+import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
   FetchResult,
