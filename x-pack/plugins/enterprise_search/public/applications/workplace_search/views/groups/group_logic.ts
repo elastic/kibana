@@ -9,6 +9,8 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
+
 import {
   FlashMessagesLogic,
   flashAPIErrors,
@@ -44,8 +46,8 @@ export interface IGroupActions {
   showSharedSourcesModal(): void;
   showManageUsersModal(): void;
   resetFlashMessages(): void;
-  initializeGroup(groupId: string, history: History): { groupId: string; history: History };
-  deleteGroup(history: History): { history: History };
+  initializeGroup(groupId: string): { groupId: string };
+  deleteGroup(): void;
   updateGroupName(): void;
   saveGroupSources(): void;
   saveGroupUsers(): void;
@@ -95,7 +97,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
     showManageUsersModal: () => true,
     resetFlashMessages: () => true,
     initializeGroup: (groupId: string, history: History) => ({ groupId, history }),
-    deleteGroup: (history: History) => ({ history }),
+    deleteGroup: () => true,
     updateGroupName: () => true,
     saveGroupSources: () => true,
     saveGroupUsers: () => true,
@@ -209,29 +211,30 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeGroup: async ({ groupId, history }) => {
+    initializeGroup: async ({ groupId }) => {
       try {
         const response = await HttpLogic.values.http.get(`/api/workplace_search/groups/${groupId}`);
         actions.onInitializeGroup(response);
       } catch (e) {
-        history.push(GROUPS_PATH);
-
         const error = e.response.status === 404 ? `Unable to find group with ID: ${groupId}` : e;
 
         FlashMessagesLogic.actions.setQueuedMessages({
           type: 'error',
           message: error,
         });
+
+        KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       }
     },
-    deleteGroup: async ({ history }) => {
+    deleteGroup: async () => {
       const {
         group: { id, name },
       } = values;
       try {
         await HttpLogic.values.http.delete(`/api/workplace_search/groups/${id}`);
-        history.push(GROUPS_PATH);
         setQueuedSuccessMessage(`Group "${name}" was successfully deleted`);
+
+        KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
       }

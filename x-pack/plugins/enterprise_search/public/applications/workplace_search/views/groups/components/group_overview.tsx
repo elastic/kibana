@@ -7,8 +7,6 @@
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
-import { History } from 'history';
 
 import {
   EuiButton,
@@ -37,7 +35,6 @@ import { GroupUsersTable } from './group_users_table';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 export const GroupOverview: React.FC = () => {
-  const history = useHistory() as History;
   const {
     deleteGroup,
     showSharedSourcesModal,
@@ -141,9 +138,7 @@ export const GroupOverview: React.FC = () => {
           <EuiOverlayMask>
             <EuiConfirmModal
               onCancel={hideConfirmDeleteModal}
-              onConfirm={() => {
-                deleteGroup(history);
-              }}
+              onConfirm={deleteGroup}
               confirmButtonText={`Delete ${name}`}
               title="Confirm"
               cancelButtonText="Cancel"

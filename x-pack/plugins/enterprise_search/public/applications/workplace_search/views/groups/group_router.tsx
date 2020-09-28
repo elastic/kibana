@@ -7,8 +7,7 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { Route, Switch, useHistory, useParams } from 'react-router-dom';
-import { History } from 'history';
+import { Route, Switch, useParams } from 'react-router-dom';
 
 import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
 import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
@@ -21,7 +20,6 @@ import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
 
 export const GroupRouter: React.FC = () => {
-  const history = useHistory() as History;
   const { groupId } = useParams() as { groupId: string };
 
   const { messages } = useValues(FlashMessagesLogic);
@@ -31,7 +29,7 @@ export const GroupRouter: React.FC = () => {
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
-    initializeGroup(groupId, history);
+    initializeGroup(groupId);
     return resetGroup;
   }, []);
 
