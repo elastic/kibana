@@ -6,10 +6,9 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { getTimepickerRisonData } from '../rison_helpers';
 import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface MlRisonData {
   ml?: {
@@ -25,8 +24,6 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {}, external }: Props) {
-  const location = useLocation();
-
   const {
     core,
     plugins: { ml },
@@ -36,7 +33,8 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
   if (query.ml?.jobIds) {
     jobIds = query.ml.jobIds;
   }
-  const { time, refreshInterval } = getTimepickerRisonData(location.search);
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = urlParams;
 
   // default to link to ML Anomaly Detection jobs management page
   const mlADLink = useMlHref(ml, core.http.basePath.get(), {
@@ -45,8 +43,14 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
       jobId: jobIds,
       groupIds: ['apm'],
       globalState: {
-        time,
-        refreshInterval,
+        time:
+          rangeFrom !== undefined && rangeTo !== undefined
+            ? { from: rangeFrom, to: rangeTo }
+            : undefined,
+        refreshInterval:
+          refreshPaused !== undefined && refreshInterval !== undefined
+            ? { pause: refreshPaused, value: refreshInterval }
+            : undefined,
       },
     },
   });

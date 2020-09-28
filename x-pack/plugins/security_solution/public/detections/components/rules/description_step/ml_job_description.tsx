@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { ML_PAGES, MlSummaryJob, useMlHref } from '../../../../../../ml/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -75,27 +75,12 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
   const {
     services: { http, ml },
   } = useKibana();
-  const [jobUrl, setJobUrl] = useState(http.basePath.prepend('/app/ml/jobs'));
-  useEffect(() => {
-    let isCancelled = false;
-    const generateLink = async () => {
-      if (ml?.urlGenerator !== undefined) {
-        const href = await ml.urlGenerator.createUrl({
-          page: 'jobs',
-          pageState: {
-            jobId: [jobId],
-          },
-        });
-        if (!isCancelled) {
-          setJobUrl(href);
-        }
-      }
-    };
-    generateLink();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ml?.urlGenerator, jobId]);
+  const jobUrl = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: [jobId],
+    },
+  });
 
   const job = jobs.find(({ id }) => id === jobId);
 

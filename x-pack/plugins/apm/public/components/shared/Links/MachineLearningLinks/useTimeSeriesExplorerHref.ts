@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useLocation } from 'react-router-dom';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { getTimepickerRisonData } from '../rison_helpers';
-import { RefreshInterval } from '../../../../../../../../src/plugins/data/common/query';
 import { useMlHref } from '../../../../../../ml/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 export function useTimeSeriesExplorerHref({
   jobId,
@@ -24,16 +22,23 @@ export function useTimeSeriesExplorerHref({
     core,
     plugins: { ml },
   } = useApmPluginContext();
-  const location = useLocation();
-  const { time, refreshInterval } = getTimepickerRisonData(location.search);
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = urlParams;
 
+  const timeRange =
+    rangeFrom !== undefined && rangeTo !== undefined
+      ? { from: rangeFrom, to: rangeTo }
+      : undefined;
   const mlAnomalyDetectionHref = useMlHref(ml, core.http.basePath.get(), {
     page: 'timeseriesexplorer',
     pageState: {
       jobIds: [jobId],
-      timeRange: time,
-      refreshInterval: refreshInterval as RefreshInterval,
-      zoom: time,
+      timeRange,
+      refreshInterval:
+        refreshPaused !== undefined && refreshInterval !== undefined
+          ? { pause: refreshPaused, value: refreshInterval }
+          : undefined,
+      zoom: timeRange,
       ...(serviceName && transactionType
         ? {
             entities: {
