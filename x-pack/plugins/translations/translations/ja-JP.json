@@ -15883,7 +15883,6 @@
     "xpack.securitySolution.endpoint.resolver.panel.table.row.count": "カウント",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.eventType": "イベントタイプ",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.processNameTitle": "プロセス名",
-    "xpack.securitySolution.endpoint.resolver.panel.table.row.timestampInvalidLabel": "無効",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.timestampTitle": "タイムスタンプ",
     "xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription": "値が見つかりません",
     "xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded": "{numberOfEventsMissing} {category}件のイベントを表示できませんでした。データの上限に達しました。",
