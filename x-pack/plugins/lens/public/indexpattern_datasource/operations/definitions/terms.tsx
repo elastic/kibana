@@ -48,12 +48,13 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   };
 }
 
-export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
+export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top values',
   }),
   priority: 3, // Higher than any metric
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
@@ -95,23 +96,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => ({
-    id: columnId,
-    enabled: true,
-    type: 'terms',
-    schema: 'segment',
-    params: {
-      field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-      order: column.params.orderDirection,
-      size: column.params.size,
-      otherBucket: false,
-      otherBucketLabel: 'Other',
-      missingBucket: false,
-      missingBucketLabel: 'Missing',
-    },
-  }),
+  toEsAggsConfig: (column, columnId, _indexPattern) => {
+    return {
+      id: columnId,
+      enabled: true,
+      type: 'terms',
+      schema: 'segment',
+      params: {
+        field: column.sourceField,
+        orderBy:
+          column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        order: column.params.orderDirection,
+        size: column.params.size,
+        otherBucket: false,
+        otherBucketLabel: 'Other',
+        missingBucket: false,
+        missingBucketLabel: 'Missing',
+      },
+    };
+  },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
