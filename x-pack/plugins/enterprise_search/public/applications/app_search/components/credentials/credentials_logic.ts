@@ -13,12 +13,7 @@ import { HttpLogic } from '../../../shared/http';
 import { IMeta } from '../../../../../common/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IEngine } from '../../types';
-import { IApiToken, ICredentialsDetails } from './types';
-
-interface ITokenReadWrite {
-  name: 'read' | 'write';
-  checked: boolean;
-}
+import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
 const defaultApiToken: IApiToken = {
   name: '',
