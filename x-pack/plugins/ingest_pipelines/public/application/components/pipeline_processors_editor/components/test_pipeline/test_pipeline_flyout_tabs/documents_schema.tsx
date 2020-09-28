@@ -82,6 +82,30 @@ export const documentsSchema: FormSchema = {
           }
         },
       },
+      {
+        validator: ({ value }: ValidationFuncArg<any, any>) => {
+          const parsedJSON = JSON.parse(value);
+
+          const isMissingSourceField = parsedJSON.find((document: { _source?: object }) => {
+            if (!document._source) {
+              return true;
+            }
+
+            return false;
+          });
+
+          if (isMissingSourceField) {
+            return {
+              message: i18n.translate(
+                'xpack.ingestPipelines.testPipelineFlyout.documentsForm.sourceFieldRequiredError',
+                {
+                  defaultMessage: 'Documents require a _source field.',
+                }
+              ),
+            };
+          }
+        },
+      },
     ],
   },
 };

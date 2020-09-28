@@ -540,6 +540,91 @@
         }
       }
     },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "properties": {
+            "license": {
+              "type": "keyword"
+            },
+            "clusterUuid": {
+              "type": "keyword"
+            },
+            "metricbeatUsed": {
+              "type": "boolean"
+            },
+            "elasticsearch": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "kibana": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "logstash": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "beats": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "apm": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "rollups": {
       "properties": {
         "index_patterns": {

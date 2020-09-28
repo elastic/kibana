@@ -54,7 +54,7 @@ describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');
     const MockHeaderActions = () => <button className="hello-world">Hello World</button>;
 
-    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl, {} as any);
+    const unmount = renderHeaderActions(MockHeaderActions, mockHeaderEl);
     expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
 
     unmount();
