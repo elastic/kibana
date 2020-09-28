@@ -24,7 +24,7 @@ import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
+import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
 import {
   VisualizeServices,

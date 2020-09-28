@@ -215,22 +215,29 @@ const sampleLayer: LayerArgs = {
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
   yTitle: '',
+  yRightTitle: '',
   legend: {
     type: 'lens_xy_legendConfig',
     isVisible: false,
     position: Position.Top,
   },
-  showXAxisTitle: true,
-  showYAxisTitle: true,
+  axisTitlesVisibilitySettings: {
+    type: 'lens_xy_axisTitlesVisibilityConfig',
+    x: true,
+    yLeft: true,
+    yRight: true,
+  },
   tickLabelsVisibilitySettings: {
     type: 'lens_xy_tickLabelsConfig',
     x: true,
-    y: false,
+    yLeft: false,
+    yRight: false,
   },
   gridlinesVisibilitySettings: {
     type: 'lens_xy_gridlinesConfig',
     x: true,
-    y: false,
+    yLeft: false,
+    yRight: false,
   },
   layers,
 });
@@ -291,7 +298,8 @@ describe('xy_expression', () => {
   test('tickLabelsConfig produces the correct arguments', () => {
     const args: AxesSettingsConfig = {
       x: true,
-      y: false,
+      yLeft: false,
+      yRight: false,
     };
 
     const result = tickLabelsConfig.fn(null, args, createMockExecutionContext());
@@ -305,7 +313,8 @@ describe('xy_expression', () => {
   test('gridlinesConfig produces the correct arguments', () => {
     const args: AxesSettingsConfig = {
       x: true,
-      y: false,
+      yLeft: false,
+      yRight: false,
     };
 
     const result = gridlinesConfig.fn(null, args, createMockExecutionContext());
@@ -1417,7 +1426,12 @@ describe('xy_expression', () => {
     test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
       const { data, args } = sampleArgs();
 
-      args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
+      args.tickLabelsVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
 
       const instance = shallow(
         <XYChart
@@ -1444,7 +1458,12 @@ describe('xy_expression', () => {
     test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
       const { data, args } = sampleArgs();
 
-      args.tickLabelsVisibilitySettings = { x: true, y: false, type: 'lens_xy_tickLabelsConfig' };
+      args.tickLabelsVisibilitySettings = {
+        x: true,
+        yLeft: false,
+        yRight: false,
+        type: 'lens_xy_tickLabelsConfig',
+      };
 
       const instance = shallow(
         <XYChart
@@ -1471,7 +1490,12 @@ describe('xy_expression', () => {
     test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
       const { data, args } = sampleArgs();
 
-      args.tickLabelsVisibilitySettings = { x: true, y: true, type: 'lens_xy_tickLabelsConfig' };
+      args.tickLabelsVisibilitySettings = {
+        x: true,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
 
       const instance = shallow(
         <XYChart
@@ -1498,7 +1522,12 @@ describe('xy_expression', () => {
     test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
       const { data, args } = sampleArgs();
 
-      args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
+      args.tickLabelsVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
 
       const instance = shallow(
         <XYChart
@@ -1556,16 +1585,19 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
-          y: true,
+          yLeft: true,
+          yRight: true,
         },
         gridlinesVisibilitySettings: {
           type: 'lens_xy_gridlinesConfig',
           x: true,
-          y: false,
+          yLeft: false,
+          yRight: false,
         },
         layers: [
           {
@@ -1635,16 +1667,19 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
-          y: false,
+          yLeft: false,
+          yRight: false,
         },
         gridlinesVisibilitySettings: {
           type: 'lens_xy_gridlinesConfig',
           x: true,
-          y: false,
+          yLeft: false,
+          yRight: false,
         },
         layers: [
           {
@@ -1701,16 +1736,19 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
-          y: false,
+          yLeft: false,
+          yRight: false,
         },
         gridlinesVisibilitySettings: {
           type: 'lens_xy_gridlinesConfig',
           x: true,
-          y: false,
+          yLeft: false,
+          yRight: false,
         },
         layers: [
           {
@@ -1894,7 +1932,12 @@ describe('xy_expression', () => {
     test('it should hide the X axis title if the corresponding switch is off', () => {
       const { data, args } = sampleArgs();
 
-      args.showXAxisTitle = false;
+      args.axisTitlesVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_axisTitlesVisibilityConfig',
+      };
 
       const component = shallow(
         <XYChart
@@ -1921,7 +1964,12 @@ describe('xy_expression', () => {
     test('it should show the X axis gridlines if the setting is on', () => {
       const { data, args } = sampleArgs();
 
-      args.gridlinesVisibilitySettings = { x: true, y: false, type: 'lens_xy_gridlinesConfig' };
+      args.gridlinesVisibilitySettings = {
+        x: true,
+        yLeft: false,
+        yRight: false,
+        type: 'lens_xy_gridlinesConfig',
+      };
 
       const component = shallow(
         <XYChart

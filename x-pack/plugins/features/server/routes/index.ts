@@ -26,7 +26,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
       },
     },
     (context, request, response) => {
-      const allFeatures = featureRegistry.getAll();
+      const allFeatures = featureRegistry.getAllKibanaFeatures();
 
       return response.ok({
         body: allFeatures

@@ -104,20 +104,27 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       const title =
         currentNamespaces.length === 1
           ? i18n.translate('xpack.spaces.management.shareToSpace.shareNewSuccessTitle', {
-              defaultMessage: 'Saved Object is now shared!',
+              defaultMessage: 'Object is now shared',
             })
           : i18n.translate('xpack.spaces.management.shareToSpace.shareEditSuccessTitle', {
-              defaultMessage: 'Saved Object updated',
+              defaultMessage: 'Object was updated',
             });
       if (spacesToAdd.length > 0) {
         await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
         const spaceNames = spacesToAdd.map(
           (spaceId) => spaces.find((space) => space.id === spaceId)!.name
         );
-        const text = i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessText', {
-          defaultMessage: `'{object}' was added to the following spaces:\n{spaces}`,
-          values: { object: meta.title, spaces: spaceNames.join(', ') },
-        });
+        const spaceCount = spaceNames.length;
+        const text =
+          spaceCount === 1
+            ? i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextSingular', {
+                defaultMessage: `'{object}' was added to 1 space.`,
+                values: { object: meta.title },
+              })
+            : i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextPlural', {
+                defaultMessage: `'{object}' was added to {spaceCount} spaces.`,
+                values: { object: meta.title, spaceCount },
+              });
         toastNotifications.addSuccess({ title, text });
       }
       if (spacesToRemove.length > 0) {
@@ -125,10 +132,20 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
         const spaceNames = spacesToRemove.map(
           (spaceId) => spaces.find((space) => space.id === spaceId)!.name
         );
-        const text = i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessText', {
-          defaultMessage: `'{object}' was removed from the following spaces:\n{spaces}`,
-          values: { object: meta.title, spaces: spaceNames.join(', ') },
-        });
+        const spaceCount = spaceNames.length;
+        const text =
+          spaceCount === 1
+            ? i18n.translate(
+                'xpack.spaces.management.shareToSpace.shareRemoveSuccessTextSingular',
+                {
+                  defaultMessage: `'{object}' was removed from 1 space.`,
+                  values: { object: meta.title },
+                }
+              )
+            : i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessTextPlural', {
+                defaultMessage: `'{object}' was removed from {spaceCount} spaces.`,
+                values: { object: meta.title, spaceCount },
+              });
         toastNotifications.addSuccess({ title, text });
       }
       onObjectUpdated();
@@ -210,7 +227,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
               <h2>
                 <FormattedMessage
                   id="xpack.spaces.management.shareToSpaceFlyoutHeader"
-                  defaultMessage="Share saved object to space"
+                  defaultMessage="Share to space"
                 />
               </h2>
             </EuiTitle>

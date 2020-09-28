@@ -37,12 +37,12 @@
   }
 }
 
-.lnsFieldItem__fieldPopoverPanel {
+.lnsFieldItem__fieldPanel {
   min-width: 260px;
   max-width: 300px;
 }
 
-.lnsFieldItem__popoverButtonGroup {
-  // Enforce lowercase for buttons or else some browsers inherit all caps from popover title
+.lnsFieldItem__buttonGroup {
+  // Enforce lowercase for buttons or else some browsers inherit all caps from flyout title
   text-transform: none;
 }

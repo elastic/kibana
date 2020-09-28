@@ -83,7 +83,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     data: agentPoliciesData,
     error: agentPoliciesError,
     isLoading: isAgentPoliciesLoading,
-    sendRequest: refreshAgentPolicies,
+    resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
     page: 1,
     perPage: 1000,

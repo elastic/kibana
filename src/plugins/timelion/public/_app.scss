@@ -1,8 +1,5 @@
-@import '@elastic/eui/src/global_styling/variables/header';
-
 .timApp {
   position: relative;
-  min-height: calc(100vh - #{$euiHeaderChildSize});
   background: $euiColorEmptyShade;
 
   [ng-click] {

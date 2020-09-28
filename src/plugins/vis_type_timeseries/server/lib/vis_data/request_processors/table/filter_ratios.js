@@ -18,22 +18,27 @@
  */
 
 const filter = (metric) => metric.type === 'filter_ratio';
+import { esQuery } from '../../../../../../data/server';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
-export function ratios(req, panel) {
+export function ratios(req, panel, esQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       if (column.metrics.some(filter)) {
         column.metrics.filter(filter).forEach((metric) => {
-          overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`, {
-            query_string: { query: metric.numerator || '*', analyze_wildcard: true },
-          });
-          overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`, {
-            query_string: { query: metric.denominator || '*', analyze_wildcard: true },
-          });
+          overwrite(
+            doc,
+            `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
+            esQuery.buildEsQuery(indexPatternObject, metric.numerator, [], esQueryConfig)
+          );
+          overwrite(
+            doc,
+            `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
+            esQuery.buildEsQuery(indexPatternObject, metric.denominator, [], esQueryConfig)
+          );
 
           let numeratorPath = `${metric.id}-numerator>_count`;
           let denominatorPath = `${metric.id}-denominator>_count`;
@@ -46,7 +51,7 @@ export function ratios(req, panel) {
               }),
             };
             overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);
-            overwrite(doc, `${aggBody}.timeseries.aggs.${metric.id}-denominator.aggs`, aggBody);
+            overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-denominator.aggs`, aggBody);
             numeratorPath = `${metric.id}-numerator>metric`;
             denominatorPath = `${metric.id}-denominator>metric`;
           }

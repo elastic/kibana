@@ -118,6 +118,11 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
+        } else {
+          results[datafeedId] = {
+            started: false,
+            error: error.body,
+          };
         }
       }
     }

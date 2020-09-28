@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverRelatedAlerts, ResolverEvent } from '../../../../../common/endpoint/types';
+import { ResolverRelatedAlerts, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedAlerts } from './node';
 import { AlertsQuery } from '../queries/alerts';
 import { PaginationBuilder } from './pagination';
@@ -45,7 +45,7 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     );
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<SafeResolverEvent>) => {
     const results = this.query.formatResponse(response);
     this.relatedAlerts = createRelatedAlerts(
       this.entityID,

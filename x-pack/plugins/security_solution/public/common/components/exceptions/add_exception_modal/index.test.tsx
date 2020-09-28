@@ -8,17 +8,19 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
+import { useAsync } from '../../../../shared_imports';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -27,10 +29,12 @@ import { ExceptionListItemSchema } from '../../../../../../lists/common';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../builder');
+jest.mock('../../../../shared_imports');
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -46,6 +50,11 @@ describe('When the add exception modal is opened', () => {
       .spyOn(builder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
 
+    (useAsync as jest.Mock).mockImplementation(() => ({
+      start: jest.fn(),
+      loading: false,
+    }));
+
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
       jest.fn(),
@@ -58,9 +67,9 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
-    (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
       {
-        isLoading: false,
         indexPatterns: stubIndexPattern,
       },
     ]);
@@ -76,9 +85,9 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        true,
         {
-          isLoading: true,
           indexPatterns: stubIndexPattern,
         },
       ]);
@@ -102,7 +111,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is no alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AddExceptionModal
@@ -116,7 +125,7 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [] }));
+      await waitFor(() => callProps.onChange({ exceptionItems: [] }));
     });
     it('has the add exception button disabled', () => {
       expect(
@@ -138,7 +147,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
         ecsData: { _id: 'test-id' },
         nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
@@ -157,7 +166,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -189,7 +200,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
         ecsData: { _id: 'test-id' },
         nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
@@ -208,7 +219,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -241,11 +254,11 @@ describe('When the add exception modal is opened', () => {
       onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
       exceptionListItems: ExceptionListItemSchema[];
     };
-    beforeEach(() => {
+    beforeEach(async () => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        false,
         {
-          isLoading: false,
           indexPatterns: {
             ...stubIndexPattern,
             fields: [
@@ -276,7 +289,9 @@ describe('When the add exception modal is opened', () => {
         </ThemeProvider>
       );
       callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
     });
     it('has the add exception button enabled', () => {
       expect(
@@ -305,8 +320,8 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     describe('when a "is in list" entry is added', () => {
-      it('should have the bulk close checkbox disabled', () => {
-        act(() =>
+      it('should have the bulk close checkbox disabled', async () => {
+        await waitFor(() =>
           callProps.onChange({
             exceptionItems: [
               ...callProps.exceptionListItems,

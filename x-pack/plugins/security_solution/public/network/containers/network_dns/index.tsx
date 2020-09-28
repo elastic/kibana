@@ -6,15 +6,14 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { NetworkDnsEdges, PageInfoPaginated } from '../../../graphql/types';
+import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -23,7 +22,11 @@ import {
   NetworkDnsStrategyResponse,
   MatrixOverOrdinalHistogramData,
 } from '../../../../common/search_strategy/security_solution/network';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -47,6 +50,7 @@ export interface NetworkDnsArgs {
 
 interface UseNetworkDns {
   id?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -58,23 +62,20 @@ export const useNetworkDns = ({
   endDate,
   filterQuery,
   id = ID,
+  indexNames,
   skip,
   startDate,
   type,
 }: UseNetworkDns): [boolean, NetworkDnsArgs] => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const { activePage, sort, isPtrIncluded, limit } = useSelector(
-    (state: State) => getNetworkDnsSelector(state),
-    shallowEqual
-  );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { activePage, sort, isPtrIncluded, limit } = useShallowEqualSelector(getNetworkDnsSelector);
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.dns,
     filterQuery: createFilter(filterQuery),
     isPtrIncluded,
@@ -130,7 +131,7 @@ export const useNetworkDns = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkDnsResponse((prevResponse) => ({
@@ -144,7 +145,7 @@ export const useNetworkDns = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -175,14 +176,10 @@ export const useNetworkDns = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         isPtrIncluded,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -193,12 +190,12 @@ export const useNetworkDns = ({
           to: endDate,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
 
   useEffect(() => {
     networkDnsSearch(networkDnsRequest);

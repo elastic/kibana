@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Feature } from '../../../../../plugins/features/server';
+import { KibanaFeature } from '../../../../../plugins/features/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.be.an(Array);
 
-        const featureIds = body.map((b: Feature) => b.id);
+        const featureIds = body.map((b: KibanaFeature) => b.id);
         expect(featureIds.sort()).to.eql(
           [
             'discover',

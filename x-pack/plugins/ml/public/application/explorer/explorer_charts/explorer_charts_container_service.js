@@ -11,11 +11,23 @@
  * and manages the layout of the charts in the containing div.
  */
 
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import get from 'lodash/get';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import each from 'lodash/each';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import find from 'lodash/find';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import sortBy from 'lodash/sortBy';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import map from 'lodash/map';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import reduce from 'lodash/reduce';
 
 import { buildConfig } from './explorer_chart_config_builder';
@@ -111,7 +123,7 @@ export const anomalyDataChange = function (
 
   // Query 1 - load the raw metric data.
   function getMetricData(config, range) {
-    const { jobId, detectorIndex, entityFields, interval } = config;
+    const { jobId, detectorIndex, entityFields, bucketSpanSeconds } = config;
 
     const job = mlJobService.getJob(jobId);
 
@@ -122,14 +134,14 @@ export const anomalyDataChange = function (
       return mlResultsService
         .getMetricData(
           config.datafeedConfig.indices,
-          config.entityFields,
+          entityFields,
           datafeedQuery,
           config.metricFunction,
           config.metricFieldName,
           config.timeField,
           range.min,
           range.max,
-          config.interval
+          bucketSpanSeconds * 1000
         )
         .toPromise();
     } else {
@@ -175,7 +187,14 @@ export const anomalyDataChange = function (
         };
 
         return mlResultsService
-          .getModelPlotOutput(jobId, detectorIndex, criteriaFields, range.min, range.max, interval)
+          .getModelPlotOutput(
+            jobId,
+            detectorIndex,
+            criteriaFields,
+            range.min,
+            range.max,
+            bucketSpanSeconds * 1000
+          )
           .toPromise()
           .then((resp) => {
             // Return data in format required by the explorer charts.
@@ -218,7 +237,7 @@ export const anomalyDataChange = function (
         [config.jobId],
         range.min,
         range.max,
-        config.interval,
+        config.bucketSpanSeconds * 1000,
         1,
         MAX_SCHEDULED_EVENTS
       )
@@ -252,7 +271,7 @@ export const anomalyDataChange = function (
       config.timeField,
       range.min,
       range.max,
-      config.interval
+      config.bucketSpanSeconds * 1000
     );
   }
 

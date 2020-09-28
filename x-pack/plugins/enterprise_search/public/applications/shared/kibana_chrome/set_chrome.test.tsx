@@ -12,18 +12,24 @@ import React from 'react';
 import { mockKibanaContext, mountWithKibanaContext } from '../../__mocks__';
 
 jest.mock('./generate_breadcrumbs', () => ({
+  useEnterpriseSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useAppSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
 }));
-import { useAppSearchBreadcrumbs, useWorkplaceSearchBreadcrumbs } from './generate_breadcrumbs';
+import {
+  useEnterpriseSearchBreadcrumbs,
+  useAppSearchBreadcrumbs,
+  useWorkplaceSearchBreadcrumbs,
+} from './generate_breadcrumbs';
 
 jest.mock('./generate_title', () => ({
+  enterpriseSearchTitle: jest.fn((title: any) => title),
   appSearchTitle: jest.fn((title: any) => title),
   workplaceSearchTitle: jest.fn((title: any) => title),
 }));
-import { appSearchTitle, workplaceSearchTitle } from './generate_title';
+import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
+import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
 
 describe('Set Kibana Chrome helpers', () => {
   beforeEach(() => {
@@ -33,6 +39,27 @@ describe('Set Kibana Chrome helpers', () => {
   afterEach(() => {
     expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalled();
     expect(mockKibanaContext.setDocTitle).toHaveBeenCalled();
+  });
+
+  describe('SetEnterpriseSearchChrome', () => {
+    it('sets breadcrumbs and document title', () => {
+      mountWithKibanaContext(<SetEnterpriseSearchChrome text="Hello World" />);
+
+      expect(enterpriseSearchTitle).toHaveBeenCalledWith(['Hello World']);
+      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
+        {
+          text: 'Hello World',
+          path: '/current-path',
+        },
+      ]);
+    });
+
+    it('sets empty breadcrumbs and document title when isRoot is true', () => {
+      mountWithKibanaContext(<SetEnterpriseSearchChrome isRoot />);
+
+      expect(enterpriseSearchTitle).toHaveBeenCalledWith([]);
+      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
+    });
   });
 
   describe('SetAppSearchChrome', () => {

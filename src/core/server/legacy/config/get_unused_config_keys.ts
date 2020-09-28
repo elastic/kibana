@@ -18,31 +18,21 @@
  */
 
 import { difference } from 'lodash';
-import { unset } from '../../../../legacy/utils';
-import { getFlattenedObject } from '../../../utils';
+import { getFlattenedObject } from '@kbn/std';
 import { hasConfigPathIntersection } from '../../config';
-import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
+import { LegacyConfig, LegacyVars } from '../types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));
 
 export async function getUnusedConfigKeys({
   coreHandledConfigPaths,
-  pluginSpecs,
-  disabledPluginSpecs,
   settings,
   legacyConfig,
 }: {
   coreHandledConfigPaths: string[];
-  pluginSpecs: LegacyPluginSpec[];
-  disabledPluginSpecs: LegacyPluginSpec[];
   settings: LegacyVars;
   legacyConfig: LegacyConfig;
 }) {
-  // remove config values from disabled plugins
-  for (const spec of disabledPluginSpecs) {
-    unset(settings, spec.getConfigPrefix());
-  }
-
   const inputKeys = getFlattenedKeys(settings);
   const appliedKeys = getFlattenedKeys(legacyConfig.get());
 

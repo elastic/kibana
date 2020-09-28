@@ -1,0 +1,20 @@
+{
+  "name": "@kbn/std",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2",
+    "tsd": "^0.13.1"
+  },
+  "dependencies": {
+    "@kbn/utility-types": "1.0.0",
+    "lodash": "^4.17.15"
+  }
+}

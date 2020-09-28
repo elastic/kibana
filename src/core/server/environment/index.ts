@@ -18,3 +18,4 @@
  */
 
 export { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
+export { config, PidConfigType } from './pid_config';

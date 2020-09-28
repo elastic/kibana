@@ -13,7 +13,7 @@ import { appendSearch } from './helpers';
 
 export const getNetworkUrl = (search?: string) => `${appendSearch(search)}`;
 
-export const getIPDetailsUrl = (
+export const getNetworkDetailsUrl = (
   detailName: string,
   flowTarget?: FlowTarget | FlowTargetSourceDest,
   search?: string

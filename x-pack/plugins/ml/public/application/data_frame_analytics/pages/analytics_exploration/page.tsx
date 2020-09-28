@@ -26,11 +26,12 @@ import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
-import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 export const Page: FC<{
   jobId: string;
-  analysisType: ANALYSIS_CONFIG_TYPE;
+  analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />

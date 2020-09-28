@@ -348,7 +348,7 @@ export const Page: FC = () => {
         earliest,
         latest,
         existMetricFields,
-        aggInterval.expression
+        aggInterval.asMilliseconds()
       );
 
       // Add the metric stats to the existing stats in the corresponding config.

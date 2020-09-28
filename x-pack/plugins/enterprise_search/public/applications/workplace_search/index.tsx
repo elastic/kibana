@@ -31,7 +31,7 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -46,7 +46,7 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
       <Route>
-        <Layout navigation={<WorkplaceSearchNav />}>
+        <Layout navigation={<WorkplaceSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorState />
           ) : (

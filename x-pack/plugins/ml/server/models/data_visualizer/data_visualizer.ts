@@ -468,7 +468,7 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: number,
+    intervalMs: number,
     maxExamples: number
   ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
@@ -526,7 +526,7 @@ export class DataVisualizer {
                 timeFieldName,
                 earliestMs,
                 latestMs,
-                interval
+                intervalMs
               );
               batchStats.push(stats);
             }
@@ -710,7 +710,7 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: number
+    intervalMs: number
   ): Promise<DocumentCountStats> {
     const index = indexPatternTitle;
     const size = 0;
@@ -718,11 +718,12 @@ export class DataVisualizer {
 
     // Don't use the sampler aggregation as this can lead to some potentially
     // confusing date histogram results depending on the date range of data amongst shards.
+
     const aggs = {
       eventRate: {
         date_histogram: {
           field: timeFieldName,
-          interval,
+          fixed_interval: `${intervalMs}ms`,
           min_doc_count: 1,
         },
       },
@@ -756,7 +757,7 @@ export class DataVisualizer {
 
     return {
       documentCounts: {
-        interval,
+        interval: intervalMs,
         buckets,
       },
     };

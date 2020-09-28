@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { PathConfigType } from '@kbn/utils';
 import { mkdir } from './fs';
 import { Logger } from '../logging';
-import { PathConfigType } from '../path';
 
 export async function createDataFolder({
   pathConfig,

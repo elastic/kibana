@@ -51,6 +51,10 @@
     }
   }
 
+  &__addProcessorButton {
+    width: fit-content;
+  }
+
   &__onFailureHandlerContainer {
     margin-top: $euiSizeS;
     margin-bottom: $euiSizeS;

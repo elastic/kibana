@@ -7,6 +7,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import intersection from 'lodash/intersection';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
@@ -25,6 +27,7 @@ import {
 } from './i18n';
 import {
   ActionFactory,
+  BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
   SerializedAction,
@@ -64,6 +67,7 @@ export function createFlyoutManageDrilldowns({
   storage,
   toastService,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
 }: {
   actionFactories: ActionFactory[];
@@ -71,6 +75,7 @@ export function createFlyoutManageDrilldowns({
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
+  triggerPickerDocsLink?: string;
 }) {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
@@ -125,7 +130,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object,
+        actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
         selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };
@@ -161,6 +166,7 @@ export function createFlyoutManageDrilldowns({
         return (
           <FlyoutDrilldownWizard
             docsLink={docsLink}
+            triggerPickerDocsLink={triggerPickerDocsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}

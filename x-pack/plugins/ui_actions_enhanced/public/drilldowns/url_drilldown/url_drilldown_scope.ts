@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import partition from 'lodash/partition';
+import { getFlattenedObject } from '@kbn/std';
 import { UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
-import { getFlattenedObject } from '../../../../../../src/core/public';
 
 export function buildScope<
   ContextScope extends object = object,

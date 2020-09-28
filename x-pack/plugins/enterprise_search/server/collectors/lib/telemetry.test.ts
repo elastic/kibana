@@ -15,7 +15,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 
 import { getSavedObjectAttributesFromRepo, incrementUICounter } from './telemetry';
 
-describe('App Search Telemetry Usage Collector', () => {
+describe('Telemetry helpers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

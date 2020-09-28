@@ -7,12 +7,30 @@
 import { GeoEcs } from '../../../../ecs/geo';
 import { Maybe } from '../../..';
 
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
 export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
   destination_ips = 'destination_ips',
   source_ips = 'source_ips',
+}
+
+export enum FlowTarget {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
 }
 
 export enum FlowTargetSourceDest {

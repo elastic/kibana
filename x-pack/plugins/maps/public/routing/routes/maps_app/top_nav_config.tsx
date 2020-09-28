@@ -21,7 +21,6 @@ import {
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-// @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public';
@@ -68,17 +67,17 @@ export function getTopNavConfig({
     savedMap.description = newDescription;
     savedMap.copyOnSave = newCopyOnSave;
 
-    let id;
+    let savedObjectId;
     try {
       savedMap.syncWithStore();
-      id = await savedMap.save({
+      savedObjectId = await savedMap.save({
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       });
       // id not returned when save fails because of duplicate title check.
       // return and let user confirm duplicate title.
-      if (!id) {
+      if (!savedObjectId) {
         return {};
       }
     } catch (err) {
@@ -106,7 +105,7 @@ export function getTopNavConfig({
 
     getCoreChrome().docTitle.change(savedMap.title);
     setBreadcrumbs();
-    goToSpecifiedPath(`/map/${id}${window.location.hash}`);
+    goToSpecifiedPath(`/map/${savedObjectId}${window.location.hash}`);
 
     const newlyCreated = newCopyOnSave || isNewMap;
     if (newlyCreated && !returnToOrigin) {
@@ -114,14 +113,14 @@ export function getTopNavConfig({
     } else if (!!originatingApp && returnToOrigin) {
       if (newlyCreated && stateTransfer) {
         stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-          state: { id, type: MAP_SAVED_OBJECT_TYPE },
+          state: { input: { savedObjectId }, type: MAP_SAVED_OBJECT_TYPE },
         });
       } else {
         getNavigateToApp()(originatingApp);
       }
     }
 
-    return { id };
+    return { id: savedObjectId };
   }
 
   if (hasSaveAndReturnConfig) {

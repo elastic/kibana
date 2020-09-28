@@ -16,7 +16,7 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
@@ -30,6 +30,7 @@ export function PageViewsTrend() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
               ...(breakdown
                 ? {
                     breakdowns: JSON.stringify(breakdown),
@@ -41,7 +42,7 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdown]
+    [end, start, uiFilters, breakdown, searchTerm]
   );
 
   return (
@@ -56,6 +57,7 @@ export function PageViewsTrend() {
           <BreakdownFilter
             selectedBreakdown={breakdown}
             onBreakdownChange={setBreakdown}
+            dataTestSubj={'pvBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

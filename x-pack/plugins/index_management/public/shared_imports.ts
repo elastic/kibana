@@ -8,6 +8,7 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  UseRequestResponse,
   sendRequest,
   useRequest,
   Forms,
@@ -43,4 +44,7 @@ export {
 
 export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export { reactRouterNavigate } from '../../../../src/plugins/kibana_react/public';
+export {
+  createKibanaReactContext,
+  reactRouterNavigate,
+} from '../../../../src/plugins/kibana_react/public';

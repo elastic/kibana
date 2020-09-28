@@ -13,6 +13,7 @@ describe('SlackParamsFields renders', () => {
     const actionParams = {
       message: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <SlackParamsFields
         actionParams={actionParams}

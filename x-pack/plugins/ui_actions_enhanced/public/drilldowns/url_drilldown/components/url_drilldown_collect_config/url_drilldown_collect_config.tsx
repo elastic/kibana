@@ -41,6 +41,7 @@ export interface UrlDrilldownCollectConfig {
   onConfig: (newConfig: UrlDrilldownConfig) => void;
   scope: UrlDrilldownScope;
   syntaxHelpDocsLink?: string;
+  variablesHelpDocsLink?: string;
 }
 
 export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
@@ -48,6 +49,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   onConfig,
   scope,
   syntaxHelpDocsLink,
+  variablesHelpDocsLink,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const urlTemplate = config.url.template ?? '';
@@ -95,7 +97,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         labelAppend={
           <AddVariableButton
             variables={scopeVariables}
-            variablesHelpLink={syntaxHelpDocsLink}
+            variablesHelpLink={variablesHelpDocsLink}
             onSelect={(variable: string) => {
               if (textAreaRef.current) {
                 updateUrlTemplate(

@@ -84,7 +84,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get histograms for fields
+   * @api {post} /api/ml/data_visualizer/get_field_histograms/:indexPatternTitle Get histograms for fields
    * @apiName GetHistogramsForFields
    * @apiDescription Returns the histograms on a list fields in the specified index pattern.
    *

@@ -18,7 +18,6 @@
  */
 
 export * from './system_api';
-export * from './normalize_path';
 // @ts-ignore
 export { KbnAccessibleClickProvider } from './kbn_accessible_click';
 // @ts-ignore
