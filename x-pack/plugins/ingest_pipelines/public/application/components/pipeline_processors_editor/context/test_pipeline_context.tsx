@@ -15,6 +15,7 @@ import {
 } from '../deserialize';
 import { serialize } from '../serialize';
 import { Document } from '../types';
+import { useIsMounted } from '../use_is_mounted';
 
 export interface TestPipelineData {
   config: {
@@ -134,6 +135,7 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
 export const TestPipelineContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData);
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const updateTestOutputPerProcessor = useCallback(
     async (documents: Document[] | undefined, processors: DeserializeResult) => {
@@ -158,6 +160,10 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         verbose: true,
         pipeline: { ...serializedProcessorsWithTag },
       });
+
+      if (!isMounted.current) {
+        return;
+      }
 
       if (error) {
         dispatch({
@@ -187,7 +193,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         },
       });
     },
-    [services.api, services.notifications.toasts]
+    [isMounted, services.api, services.notifications.toasts]
   );
 
   return (
