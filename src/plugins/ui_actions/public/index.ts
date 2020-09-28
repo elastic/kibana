@@ -31,6 +31,7 @@ export {
   ActionDefinition as UiActionsActionDefinition,
   createAction,
   IncompatibleActionError,
+  ActionDefinitionContext as UiActionsActionDefinitionContext,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export {

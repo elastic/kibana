@@ -36,7 +36,8 @@ import {
 import { DOC_TYPE, Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { isLensBrushEvent, isLensFilterEvent } from '../../types';
+import { isLensBrushEvent, isLensFilterEvent, isLensControlsEvent } from '../../types';
+import { LensChartControls } from '../../xy_visualization/xy_expression';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
@@ -79,6 +80,7 @@ export class Embeddable
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
+  private chartControls: LensChartControls;
   private isInitialized = false;
 
   private externalSearchContext: {
@@ -226,6 +228,9 @@ export class Embeddable
         embeddable: this,
       });
     }
+    if (isLensControlsEvent(event)) {
+      this.chartControls = event.data;
+    }
   };
 
   async reload() {
@@ -240,6 +245,12 @@ export class Embeddable
         this.render(this.domNode);
       }
     }
+  }
+
+  async toPngBlob() {
+    if (!this.chartControls) throw new Error('Chart controls not available.');
+    if (!this.chartControls.toPngBlob) throw new Error('Lens <Chart> .toPngBlob() not available.');
+    return await this.chartControls.toPngBlob();
   }
 
   async initializeOutput() {

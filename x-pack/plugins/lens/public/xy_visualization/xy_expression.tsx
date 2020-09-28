@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import {
@@ -68,6 +68,7 @@ type XYChartRenderProps = XYChartProps & {
   histogramBarTarget: number;
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
+  onControls?: (controls: LensChartControls) => void;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -187,6 +188,9 @@ export const getXyChartRenderer = (dependencies: {
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
+          onControls={(data) => {
+            handlers.event({ name: 'controls', data });
+          }}
         />
       </I18nProvider>,
       domNode,
@@ -219,6 +223,16 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
+export interface LensChartControls {
+  toPngBlob?: () => Promise<Blob>;
+}
+
+const toBlob = async (blobOrUrl: Blob | string): Promise<Blob> => {
+  if (typeof blobOrUrl === 'object') return blobOrUrl;
+  const response = await fetch(blobOrUrl);
+  return await response.blob();
+};
+
 export function XYChart({
   data,
   args,
@@ -228,10 +242,27 @@ export function XYChart({
   histogramBarTarget,
   onClickValue,
   onSelectRange,
+  onControls,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const chartRef = React.useRef<null | Chart>(null);
+
+  React.useEffect(() => {
+    if (!onControls) return;
+    const controls: LensChartControls = {
+      toPngBlob: async () => {
+        const snapshot = chartRef.current!.getPNGSnapshot({
+          backgroundColor: 'white',
+          pixelRatio: 2,
+        });
+        if (!snapshot) throw new Error('Could not generate PNG.');
+        return toBlob(snapshot.blobOrDataUrl);
+      },
+    };
+    onControls(controls);
+  }, [onControls]);
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
@@ -359,7 +390,7 @@ export function XYChart({
   };
 
   return (
-    <Chart>
+    <Chart ref={chartRef}>
       <Settings
         showLegend={
           legend.isVisible && !legend.showSingleSeries
