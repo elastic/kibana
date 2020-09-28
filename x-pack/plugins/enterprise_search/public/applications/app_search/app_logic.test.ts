@@ -56,6 +56,15 @@ describe('AppLogic', () => {
         }),
       });
     });
+
+    it('gracefully handles missing initial data', () => {
+      AppLogic.actions.initializeAppData({});
+
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        hasInitialized: true,
+      });
+    });
   });
 
   describe('setOnboardingComplete()', () => {

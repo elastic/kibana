@@ -38,6 +38,9 @@ uiRoutes.when('/elasticsearch/indices', {
         title: i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
           defaultMessage: 'Elasticsearch - Indices',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.indices.pageTitle', {
+          defaultMessage: 'Elasticsearch indices',
+        }),
         storageKey: 'elasticsearch.indices',
         apiUrlFn: () =>
           `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
