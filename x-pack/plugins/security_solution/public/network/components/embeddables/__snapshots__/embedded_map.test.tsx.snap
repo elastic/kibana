@@ -1,34 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
-<Embeddable>
-  <EmbeddableHeader
-    title="Network map"
-  >
-    <EuiText
-      size="xs"
+<I18nProvider>
+  <Component>
+    <ApolloProvider
+      client={
+        ApolloClient {
+          "cache": InMemoryCache {
+            "addTypename": true,
+            "cacheKeyRoot": KeyTrie {
+              "weakness": true,
+            },
+            "config": Object {
+              "addTypename": true,
+              "dataIdFromObject": [Function],
+              "fragmentMatcher": HeuristicFragmentMatcher {},
+              "freezeResults": false,
+              "resultCaching": true,
+            },
+            "data": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "maybeBroadcastWatch": [Function],
+            "optimisticData": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "silenceBroadcast": false,
+            "storeReader": StoreReader {
+              "executeSelectionSet": [Function],
+              "executeStoreQuery": [Function],
+              "executeSubSelectedArray": [Function],
+              "freezeResults": false,
+            },
+            "storeWriter": StoreWriter {},
+            "typenameDocumentCache": Map {},
+            "watches": Set {},
+          },
+          "defaultOptions": Object {},
+          "disableNetworkFetches": false,
+          "link": ApolloLink {
+            "request": [Function],
+          },
+          "mutate": [Function],
+          "query": [Function],
+          "queryDeduplication": true,
+          "reFetchObservableQueries": [Function],
+          "resetStore": [Function],
+          "resetStoreCallbacks": Array [],
+          "ssrMode": false,
+          "store": DataStore {
+            "cache": InMemoryCache {
+              "addTypename": true,
+              "cacheKeyRoot": KeyTrie {
+                "weakness": true,
+              },
+              "config": Object {
+                "addTypename": true,
+                "dataIdFromObject": [Function],
+                "fragmentMatcher": HeuristicFragmentMatcher {},
+                "freezeResults": false,
+                "resultCaching": true,
+              },
+              "data": DepTrackingCache {
+                "data": Object {},
+                "depend": [Function],
+              },
+              "maybeBroadcastWatch": [Function],
+              "optimisticData": DepTrackingCache {
+                "data": Object {},
+                "depend": [Function],
+              },
+              "silenceBroadcast": false,
+              "storeReader": StoreReader {
+                "executeSelectionSet": [Function],
+                "executeStoreQuery": [Function],
+                "executeSubSelectedArray": [Function],
+                "freezeResults": false,
+              },
+              "storeWriter": StoreWriter {},
+              "typenameDocumentCache": Map {},
+              "watches": Set {},
+            },
+          },
+          "version": "2.3.8",
+          "watchQuery": [Function],
+        }
+      }
     >
-      <EuiLink
-        href="https://www.elastic.co/guide/en/security/mocked-test-branch/conf-map-ui.html"
-        target="_blank"
+      <Provider
+        store={
+          Object {
+            "dispatch": [Function],
+            "getState": [Function],
+            "replaceReducer": [Function],
+            "subscribe": [Function],
+            Symbol(observable): [Function],
+          }
+        }
       >
-        Map configuration help
-      </EuiLink>
-    </EuiText>
-  </EmbeddableHeader>
-  <InPortal
-    node={<div />}
-  >
-    <MapToolTip />
-  </InPortal>
-  <EmbeddableMap
-    maintainRatio={true}
-  >
-    <Loader
-      data-test-subj="loading-panel"
-      overlay={true}
-      size="xl"
-    />
-  </EmbeddableMap>
-</Embeddable>
+        <ThemeProvider
+          theme={[Function]}
+        >
+          <DragDropContext
+            onDragEnd={[MockFunction]}
+          >
+            <EmbeddedMapComponent
+              endDate="2019-08-28T05:50:57.877Z"
+              filters={Array []}
+              query={
+                Object {
+                  "language": "kuery",
+                  "query": "",
+                }
+              }
+              setQuery={[MockFunction]}
+              startDate="2019-08-28T05:50:47.877Z"
+            />
+          </DragDropContext>
+        </ThemeProvider>
+      </Provider>
+    </ApolloProvider>
+  </Component>
+</I18nProvider>
 `;

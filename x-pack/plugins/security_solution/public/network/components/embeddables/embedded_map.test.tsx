@@ -9,6 +9,8 @@ import React from 'react';
 
 import '../../../common/mock/match_media';
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
+import { TestProviders } from '../../../common/mock';
+
 import { EmbeddedMapComponent } from './embedded_map';
 
 const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
@@ -26,13 +28,15 @@ describe('EmbeddedMapComponent', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EmbeddedMapComponent
-        endDate="2019-08-28T05:50:57.877Z"
-        filters={[]}
-        query={{ query: '', language: 'kuery' }}
-        setQuery={setQuery}
-        startDate="2019-08-28T05:50:47.877Z"
-      />
+      <TestProviders>
+        <EmbeddedMapComponent
+          endDate="2019-08-28T05:50:57.877Z"
+          filters={[]}
+          query={{ query: '', language: 'kuery' }}
+          setQuery={setQuery}
+          startDate="2019-08-28T05:50:47.877Z"
+        />
+      </TestProviders>
     );
     expect(wrapper).toMatchSnapshot();
   });
