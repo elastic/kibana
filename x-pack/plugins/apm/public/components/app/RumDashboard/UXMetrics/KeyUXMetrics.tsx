@@ -38,7 +38,7 @@ interface Props {
 export function KeyUXMetrics({ data, loading }: Props) {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end, serviceName, searchTerm } = urlParams;
 
   const { data: longTaskData, status } = useFetcher(
     (callApmApi) => {
@@ -46,13 +46,18 @@ export function KeyUXMetrics({ data, loading }: Props) {
         return callApmApi({
           pathname: '/api/apm/rum-client/long-task-metrics',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [start, end, serviceName, uiFilters, searchTerm]
   );
 
   // Note: FCP value is in ms unit

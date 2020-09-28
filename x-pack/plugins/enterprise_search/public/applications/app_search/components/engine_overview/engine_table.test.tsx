@@ -5,7 +5,7 @@
  */
 
 import '../../../__mocks__/kea.mock';
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../__mocks__/enterprise_search_url.mock';
 import { mockHttpValues } from '../../../__mocks__/';
 
 import React from 'react';
