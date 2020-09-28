@@ -210,11 +210,17 @@ export const transactionGroupsErrorRateRoute = createRoute(() => ({
     const { params } = context;
     const { serviceName } = params.path;
     const { transactionType, transactionName } = params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return getErrorRate({
       serviceName,
       transactionType,
       transactionName,
       setup,
+      searchAggregatedTransactions,
     });
   },
 }));

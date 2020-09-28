@@ -96,10 +96,12 @@ async function getErrorStats({
   setup,
   serviceName,
   environment,
+  searchAggregatedTransactions,
 }: {
   setup: Options['setup'];
   serviceName: string;
   environment?: string;
+  searchAggregatedTransactions: boolean;
 }) {
   const setupWithBlankUiFilters = {
     ...setup,
@@ -108,6 +110,7 @@ async function getErrorStats({
   const { noHits, average } = await getErrorRate({
     setup: setupWithBlankUiFilters,
     serviceName,
+    searchAggregatedTransactions,
   });
   return { avgErrorRate: noHits ? null : average };
 }

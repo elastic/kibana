@@ -6,7 +6,7 @@
 
 import { ReportingCore } from '../../../';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
-import { ConditionalHeaders } from '../../../types';
+import { ConditionalHeaders } from '../../common';
 
 export const getCustomLogo = async (
   reporting: ReportingCore,

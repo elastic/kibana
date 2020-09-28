@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useFetchIndex } from '../../../containers/source';
 import {
   stubIndexPattern,
   stubIndexPatternWithFields,
@@ -26,6 +26,7 @@ import * as builder from '../builder';
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
+jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../builder');
@@ -50,9 +51,9 @@ describe('When the edit exception modal is opened', () => {
       { isLoading: false },
       jest.fn(),
     ]);
-    (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
       {
-        isLoading: false,
         indexPatterns: stubIndexPatternWithFields,
       },
     ]);
@@ -65,15 +66,14 @@ describe('When the edit exception modal is opened', () => {
   });
 
   describe('when the modal is loading', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+    it('renders the loading spinner', async () => {
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        true,
         {
-          isLoading: true,
           indexPatterns: stubIndexPattern,
         },
       ]);
-      wrapper = mount(
+      const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={[]}
@@ -86,16 +86,16 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-    });
-    it('renders the loading spinner', () => {
-      expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+      });
     });
   });
 
   describe('when an endpoint exception with exception data is passed', () => {
     describe('when exception entry fields are included in the index pattern', () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         const exceptionItemMock = {
           ...getExceptionListItemSchemaMock(),
           entries: [
@@ -116,7 +116,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -144,7 +146,7 @@ describe('When the edit exception modal is opened', () => {
 
     describe("when exception entry fields aren't included in the index pattern", () => {
       let wrapper: ReactWrapper;
-      beforeEach(() => {
+      beforeEach(async () => {
         wrapper = mount(
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
@@ -159,7 +161,9 @@ describe('When the edit exception modal is opened', () => {
           </ThemeProvider>
         );
         const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+        await waitFor(() => {
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+        });
       });
       it('has the edit exception button enabled', () => {
         expect(
@@ -188,7 +192,7 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when an detection exception with entries is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
@@ -203,7 +207,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
     });
     it('has the edit exception button enabled', () => {
       expect(
@@ -227,7 +233,7 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when an exception with no entries is passed', () => {
     let wrapper: ReactWrapper;
-    beforeEach(() => {
+    beforeEach(async () => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -243,7 +249,9 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       const callProps = ExceptionBuilderComponent.mock.calls[0][0];
-      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
     });
     it('has the edit exception button disabled', () => {
       expect(

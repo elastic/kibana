@@ -9,9 +9,9 @@ const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN_ID = 'ingest_pipelines';
 
-export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
+export const MANAGEMENT_APP_ID = 'management';
 
-export const BASE_PATH = '/';
+export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
 
 export const API_BASE_PATH = '/api/ingest_pipelines';
 

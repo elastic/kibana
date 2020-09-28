@@ -113,11 +113,12 @@ export class Server {
     const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyPlugins = await this.legacy.discoverPlugins();
+    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
     await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyPlugins);
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -166,7 +167,6 @@ export class Server {
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
       status: statusSetup,
-      legacyPlugins,
       uiPlugins,
     });
 
@@ -247,10 +247,6 @@ export class Server {
     });
 
     await this.http.start();
-
-    await this.rendering.start({
-      legacy: this.legacy,
-    });
 
     return this.coreStart;
   }
