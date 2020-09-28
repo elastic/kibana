@@ -121,6 +121,11 @@ export function createTileMapLayerDescriptor({
         field: metricStyleField,
         color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
+        fieldMetaOptions: {
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions)
+            .fieldMetaOptions,
+          isEnabled: false,
+        },
       },
     },
     [VECTOR_STYLES.LINE_COLOR]: {
@@ -137,6 +142,11 @@ export function createTileMapLayerDescriptor({
         ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
         maxSize: 18,
         field: metricStyleField,
+        fieldMetaOptions: {
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as SizeDynamicOptions)
+            .fieldMetaOptions,
+          isEnabled: false,
+        },
       },
     };
   }
