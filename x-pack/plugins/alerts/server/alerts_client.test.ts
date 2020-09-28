@@ -1696,14 +1696,22 @@ describe('muteAll()', () => {
         muteAll: false,
       },
       references: [],
+      version: '123',
     });
 
     await alertsClient.muteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      muteAll: true,
-      mutedInstanceIds: [],
-      updatedBy: 'elastic',
-    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        muteAll: true,
+        mutedInstanceIds: [],
+        updatedBy: 'elastic',
+      },
+      {
+        version: '123',
+      }
+    );
   });
 
   describe('authorization', () => {
@@ -1785,11 +1793,18 @@ describe('unmuteAll()', () => {
     });
 
     await alertsClient.unmuteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      muteAll: false,
-      mutedInstanceIds: [],
-      updatedBy: 'elastic',
-    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        muteAll: false,
+        mutedInstanceIds: [],
+        updatedBy: 'elastic',
+      },
+      {
+        version: '123',
+      }
+    );
   });
 
   describe('authorization', () => {
