@@ -9,7 +9,7 @@ Searches using the given `search` method. Overrides the `AbortSignal` with one t
 <b>Signature:</b>
 
 ```typescript
-search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
+search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
 ```
 
 ## Parameters
@@ -21,7 +21,7 @@ search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearc
 
 <b>Returns:</b>
 
-`Observable<IEsSearchResponse>`
+`Observable<IKibanaSearchResponse>`
 
 `Observalbe` emitting the search response or an error.
 

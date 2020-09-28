@@ -24,8 +24,8 @@ import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import {
   getCombinedSignal,
   AbortError,
-  IEsSearchRequest,
-  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
@@ -86,7 +86,7 @@ export class SearchInterceptor {
    */
   protected handleSearchError(
     e: any,
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     timeoutSignal: AbortSignal,
     appAbortSignal?: AbortSignal
   ): Error {
@@ -111,10 +111,10 @@ export class SearchInterceptor {
    * @internal
    */
   protected runSearch(
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     signal: AbortSignal,
     strategy?: string
-  ): Observable<IEsSearchResponse> {
+  ): Observable<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(searchRequest);
@@ -196,9 +196,9 @@ export class SearchInterceptor {
    * @returns `Observalbe` emitting the search response or an error.
    */
   public search(
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     options?: ISearchOptions
-  ): Observable<IEsSearchResponse> {
+  ): Observable<IKibanaSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
       if (options?.abortSignal?.aborted) {
