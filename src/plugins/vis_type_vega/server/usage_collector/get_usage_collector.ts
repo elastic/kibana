@@ -32,6 +32,17 @@ const VEGA_USAGE_TYPE = 'vis_type_vega';
 const checkVegaSchemaType = (schemaURL: string, type: VegaType) =>
   schemaURL.includes(`//vega.github.io/schema/${type}/`);
 
+// we want to exclude the Vega Sample Data visualizations from the stats
+// in order to have more accurate results
+const excludedFromStatsVisualizations = [
+  '[Flights] Airport Connections (Hover Over Airport)',
+  '[Flights] Departure Count Map',
+  '[Logs] File Type Scatter Plot',
+  '[Logs] Source and Destination Sankey Chart',
+  '[Logs] Visitors Map',
+  '[eCommerce] Sales Count Map',
+];
+
 const getStats = async (callCluster: LegacyAPICaller, index: string) => {
   const searchParams = {
     size: 10000,
@@ -56,11 +67,15 @@ const getStats = async (callCluster: LegacyAPICaller, index: string) => {
   const finalTelemetry = esResponse.hits.hits.reduce(
     (telemetry, hit) => {
       const visualization = get(hit, '_source.visualization', { visState: '{}' });
-      const visState: { type?: string; params?: { spec?: string } } = JSON.parse(
+      const visState: { title: string; type?: string; params?: { spec?: string } } = JSON.parse(
         visualization.visState
       );
 
-      if (visState.type === 'vega' && visState.params?.spec)
+      if (
+        visState.type === 'vega' &&
+        visState.params?.spec &&
+        !excludedFromStatsVisualizations.includes(visState.title)
+      )
         try {
           const spec = parse(visState.params.spec, { legacyRoot: false });
 

@@ -112,6 +112,30 @@ describe('Vega visualization usage collector', () => {
     expect(result).toBeUndefined();
   });
 
+  test('Should ingnore sample data visualizations', async () => {
+    const result = await usageCollector.fetch(
+      getMockCallCluster([
+        {
+          _id: 'visualization:sampledata-123',
+          _source: {
+            type: 'visualization',
+            visualization: {
+              visState: JSON.stringify({
+                type: 'vega',
+                title: '[Logs] Visitors Map',
+                params: {
+                  spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
+                },
+              }),
+            },
+          },
+        },
+      ])
+    );
+
+    expect(result).toBeUndefined();
+  });
+
   test('Summarizes visualizations response data', async () => {
     const result = await usageCollector.fetch(getMockCallCluster(mockedSavedObjects));
 
