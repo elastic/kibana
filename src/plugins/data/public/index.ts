@@ -230,6 +230,8 @@ import {
   formatHitProvider,
 } from './index_patterns';
 
+export type { IndexPatternsService } from './index_patterns';
+
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -262,8 +264,11 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  IndexPatternSpec,
   fieldList,
 } from '../common';
+
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -415,6 +420,7 @@ export {
   StatefulSearchBarProps,
   FilterBar,
   QueryStringInput,
+  QueryStringInputProps,
   IndexPatternSelect,
 } from './ui';
 

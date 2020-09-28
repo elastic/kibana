@@ -20,6 +20,7 @@ interface Arguments {
   timerange: TimeRangeArg | null;
   colors: SeriesStyle[] | null;
   hideLegend: boolean | null;
+  title: string | null;
 }
 
 type Output = EmbeddableExpression<VisualizeInput>;
@@ -62,9 +63,14 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         help: argHelp.hideLegend,
         required: false,
       },
+      title: {
+        types: ['string'],
+        help: argHelp.title,
+        required: false,
+      },
     },
     type: EmbeddableExpressionType,
-    fn: (input, { id, timerange, colors, hideLegend }) => {
+    fn: (input, { id, timerange, colors, hideLegend, title }) => {
       const filters = input ? input.and : [];
 
       const visOptions: VisualizeInput['vis'] = {};
@@ -91,6 +97,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           timeRange: timerange || defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,
+          title: title === null ? undefined : title,
         },
         embeddableType: EmbeddableTypes.visualization,
         generatedAt: Date.now(),

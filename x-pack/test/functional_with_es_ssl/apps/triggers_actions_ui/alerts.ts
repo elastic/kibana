@@ -40,8 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/77401
-  describe.skip('alerts', function () {
+  describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -382,9 +381,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteAll');
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation', { timeout: 5000 });
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      await pageObjects.common.closeToast();
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 10 alerts');
+      });
 
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);

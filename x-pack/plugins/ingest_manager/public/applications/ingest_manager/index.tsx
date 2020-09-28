@@ -22,9 +22,16 @@ import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentPolicyApp, FleetApp, DataStreamApp } from './sections';
-import { DepsContext, ConfigContext, useConfig } from './hooks';
+import {
+  DepsContext,
+  ConfigContext,
+  useConfig,
+  useCore,
+  sendSetup,
+  sendGetPermissionsCheck,
+  licenseService,
+} from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
-import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
 import './index.scss';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -279,4 +286,5 @@ export function renderApp(
 export const teardownIngestManager = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
+  licenseService.stop();
 };

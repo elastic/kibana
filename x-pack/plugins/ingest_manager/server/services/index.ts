@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { AgentStatus, Agent, EsAssetReference } from '../types';
 import * as settingsService from './settings';
+import { getAgent, listAgents } from './agents';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
@@ -41,7 +42,7 @@ export interface AgentService {
   /**
    * Get an Agent by id
    */
-  getAgent(soClient: SavedObjectsClientContract, agentId: string): Promise<Agent>;
+  getAgent: typeof getAgent;
   /**
    * Authenticate an agent with access toekn
    */
@@ -56,20 +57,7 @@ export interface AgentService {
   /**
    * List agents
    */
-  listAgents(
-    soClient: SavedObjectsClientContract,
-    options: {
-      page: number;
-      perPage: number;
-      kuery?: string;
-      showInactive: boolean;
-    }
-  ): Promise<{
-    agents: Agent[];
-    total: number;
-    page: number;
-    perPage: number;
-  }>;
+  listAgents: typeof listAgents;
 }
 
 // Saved object services
