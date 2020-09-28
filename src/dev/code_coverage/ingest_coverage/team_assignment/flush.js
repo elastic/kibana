@@ -17,17 +17,28 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { tryCatch as tc } from '../either';
+import { writeFileSync } from 'fs';
+import shell from 'shelljs';
+import { tryCatch } from '../either';
+import { id } from '../utils';
 
-const ROOT = resolve(__dirname, '../../../../..');
+const encoding = 'utf8';
+const appendUtf8 = { flag: 'a', encoding };
 
-const resolveFromRoot = resolve.bind(null, ROOT);
+export const flush = (dest) => (log) => (assignments) => {
+  log.verbose(`\n### Flushing assignments to: \n\t${dest}`);
 
-const resolved = (path) => () => resolveFromRoot(path);
+  const writeToFile = writeFileSync.bind(null, dest);
 
-const getContents = (path) => tc(() => readFileSync(path, 'utf8'));
+  writeToFile('', { encoding });
 
-// fetch :: String -> Left | Right
-export const fetch = (path) => tc(resolved(path)).chain(getContents);
+  for (const xs of assignments) xs.forEach((x) => writeToFile(`${x}\n`, appendUtf8));
+
+  tryCatch(() => maybeShowSize(dest)).fold(id, (x) => {
+    log.verbose(`\n### Flushed [${x}] lines`);
+  });
+};
+function maybeShowSize(x) {
+  const { output } = shell.exec(`wc -l ${x}`, { silent: true });
+  return output.match(/\s*\d*\s*/)[0].trim();
+}

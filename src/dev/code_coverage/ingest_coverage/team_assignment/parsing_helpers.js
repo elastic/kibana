@@ -17,21 +17,14 @@
  * under the License.
  */
 
-import { createFailError } from '@kbn/dev-utils';
-import { ES_HOST } from '../constants';
-import { pretty, green } from '../utils';
+import { always } from '../utils';
+import * as Either from '../either';
 
-const { Client } = require('@elastic/elasticsearch');
+const coverageDelimRe = /^#CC#\s/;
 
-const node = ES_HOST;
-const client = new Client({ node });
+export const empties = (x) => x !== '';
+export const comments = (x) => !/^#\s{1,3}/.test(x);
+const dropDelim = (x) => x.replace(coverageDelimRe, '');
 
-export const update = (id) => (log) => async (body) => {
-  try {
-    await client.ingest.putPipeline({ id, body });
-    log.verbose(`### Ingestion Pipeline ID: ${green(id)}`);
-    log.verbose(`### Payload Partial: \n${body.slice(0, 600)}...`);
-  } catch (e) {
-    throw createFailError(`${pretty(e.meta)}`);
-  }
-};
+export const dropCCDelim = (x) =>
+  Either.fromNullable(coverageDelimRe.test(x)).fold(always(x), always(dropDelim(x)));
