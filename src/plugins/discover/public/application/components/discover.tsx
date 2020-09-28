@@ -210,7 +210,10 @@ export function Discover({
                 fullWidth
                 onClick={() => setIsFlyoutVisible(true)}
               >
-                Fields
+                <FormattedMessage
+                  id="discover.fieldChooser.fieldsMobileButtonLabel"
+                  defaultMessage="Fields"
+                />
                 <EuiBadge className="dscSidebar__mobileBadge" color="accent">
                   5
                 </EuiBadge>
