@@ -39,10 +39,12 @@ You’re presented a table of all fields and associated data types in the index.
 Now create an index pattern for the Logstash index, which
 contains time series data.
 
-. Define an index pattern named `logstash*`.
-. Click *Next step*.
-. Open the *Time Filter field name* dropdown and select *@timestamp*.
-. Click *Create index pattern*.
+. Create an index pattern named `logstash*`, then click *Next step*.
+
+. From the *Time field* dropdown, select *@timestamp, then click *Create index pattern*.
++
+[role="screenshot"]
+image::images/tutorial_index_patterns.png[Image showing how to create an index pattern]
 
 NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
