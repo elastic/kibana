@@ -6,11 +6,12 @@
 
 import { getConnections } from './get_service_map_from_trace_ids';
 import serviceMapFromTraceIdsScriptResponse from './mock_responses/get_service_map_from_trace_ids_script_response.json';
+import serviceMapFromTraceIdsScriptResponseEnvNotDefined from './mock_responses/get_service_map_from_trace_ids_script_response_env_not_defined.json';
 import { PromiseReturnType } from '../../../typings/common';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 describe('getConnections', () => {
-  describe('if no filter is given', () => {
+  describe('if neither service name or environment is given', () => {
     it('includes all connections', () => {
       const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
@@ -42,7 +43,13 @@ describe('getConnections', () => {
           (conn) => conn.source['service.environment'] === environment
         )
       ).toBeTruthy();
-      expect(connections).toMatchSnapshot();
+      const serviceNames = new Set();
+      connections.forEach((conn) =>
+        serviceNames.add(conn.source['service.name'])
+      );
+      ['opbeans-python', 'opbeans-node', 'opbeans-ruby'].forEach((name) =>
+        expect(serviceNames.has(name)).toBeTruthy()
+      );
     });
   });
 
@@ -58,7 +65,13 @@ describe('getConnections', () => {
         serviceName
       );
 
-      expect(connections).toMatchSnapshot();
+      const serviceNames = new Set();
+      connections.forEach((conn) =>
+        serviceNames.add(conn.source['service.name'])
+      );
+      ['opbeans-python', 'opbeans-node', 'opbeans-ruby'].forEach((name) =>
+        expect(serviceNames.has(name)).toBeTruthy()
+      );
     });
   });
 
@@ -85,7 +98,7 @@ describe('getConnections', () => {
 
   describe('if environment is "not defined"', () => {
     it('excludes connections with source environment set', () => {
-      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+      const response = serviceMapFromTraceIdsScriptResponseEnvNotDefined as PromiseReturnType<
         typeof fetchServicePathsFromTraceIds
       >;
       const environment = 'ENVIRONMENT_NOT_DEFINED';
@@ -96,20 +109,14 @@ describe('getConnections', () => {
         environment
       );
 
-      expect(connections).toMatchSnapshot();
-    });
-  });
+      const environments = new Set();
 
-  describe('if environment is "all" (missing)', () => {
-    it('includes both connections with and without source environment set', () => {
-      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
-        typeof fetchServicePathsFromTraceIds
-      >;
-      const connections = getConnections(
-        response.aggregations?.service_map.value.paths
+      connections.forEach((conn) =>
+        environments.add(conn.source['service.environment'])
       );
-
-      expect(connections).toMatchSnapshot();
+      expect(
+        connections.some((conn) => conn.source['service.environment'] !== null)
+      ).toBeFalsy();
     });
   });
 });
