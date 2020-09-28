@@ -15,7 +15,7 @@ import {
   GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageError,
+  IBulkInstallPackageHTTPError,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -175,7 +175,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
 
 const bulkInstallServiceResponseToHttpEntry = (
   result: BulkInstallResponse
-): BulkInstallPackageInfo | IBulkInstallPackageError => {
+): BulkInstallPackageInfo | IBulkInstallPackageHTTPError => {
   if (isBulkInstallError(result)) {
     const { statusCode, body } = ingestErrorToResponseOptions(result.error);
     return {

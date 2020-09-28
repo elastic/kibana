@@ -5,18 +5,18 @@
  */
 
 import { ElasticsearchAssetType, Installation, KibanaAssetType } from '../../../types';
-import { SavedObject } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 jest.mock('./install');
 jest.mock('./bulk_install_packages');
-jest.mock('./get', () => ({
-  ...(jest.requireActual('./get') as {}),
-  getInstallation: jest.fn(async () => {
-    return mockInstallation.attributes;
-  }),
-}));
-import { bulkInstallPackages } from './bulk_install_packages';
+jest.mock('./get');
+
+import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 const { ensureInstalledDefaultPackages } = jest.requireActual('./install');
+const { isBulkInstallError: actualIsBulkInstallError } = jest.requireActual(
+  './bulk_install_packages'
+);
+import { getInstallation } from './get';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -26,6 +26,14 @@ import { createAppContextStartContractMock } from '../../../mocks';
 const mockedBulkInstallPackages = bulkInstallPackages as jest.MockedFunction<
   typeof bulkInstallPackages
 >;
+const mockedIsBulkInstallError = isBulkInstallError as jest.MockedFunction<
+  typeof isBulkInstallError
+>;
+const mockedGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
+
+// I was unable to get the actual implementation set in the `jest.mock()` call at the top to work
+// so this will set the `isBulkInstallError` function back to the actual implementation
+mockedIsBulkInstallError.mockImplementation(actualIsBulkInstallError);
 
 const mockInstallation: SavedObject<Installation> = {
   id: 'test-pkg',
@@ -36,7 +44,7 @@ const mockInstallation: SavedObject<Installation> = {
     installed_kibana: [{ type: KibanaAssetType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     es_index_patterns: { pattern: 'pattern-name' },
-    name: 'test packagek',
+    name: 'test package',
     version: '1.0.0',
     install_status: 'installed',
     install_version: '1.0.0',
@@ -45,17 +53,22 @@ const mockInstallation: SavedObject<Installation> = {
 };
 
 describe('ensureInstalledDefaultPackages', () => {
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(async () => {
+    soClient = savedObjectsClientMock.create();
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
     appContextService.stop();
   });
   it('should return an array of Installation objects when successful', async () => {
+    mockedGetInstallation.mockImplementation(async () => {
+      return mockInstallation.attributes;
+    });
     mockedBulkInstallPackages.mockImplementationOnce(async function () {
       return [
         {
-          name: 'blah',
+          name: mockInstallation.attributes.name,
           assets: [],
           newVersion: '',
           oldVersion: '',
@@ -63,12 +76,14 @@ describe('ensureInstalledDefaultPackages', () => {
         },
       ];
     });
-    const soClient = savedObjectsClientMock.create();
     const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
     expect(resp).toEqual([mockInstallation.attributes]);
   });
   it('should throw the first Error it finds', async () => {
     class SomeCustomError extends Error {}
+    mockedGetInstallation.mockImplementation(async () => {
+      return mockInstallation.attributes;
+    });
     mockedBulkInstallPackages.mockImplementationOnce(async function () {
       return [
         {
@@ -102,9 +117,28 @@ describe('ensureInstalledDefaultPackages', () => {
         },
       ];
     });
-    const soClient = savedObjectsClientMock.create();
     const installPromise = ensureInstalledDefaultPackages(soClient, jest.fn());
+    expect.assertions(2);
     expect(installPromise).rejects.toThrow(SomeCustomError);
     expect(installPromise).rejects.toThrow('abc 123');
+  });
+  it('should throw an error when get installation returns undefined', async () => {
+    mockedGetInstallation.mockImplementation(async () => {
+      return undefined;
+    });
+    mockedBulkInstallPackages.mockImplementationOnce(async function () {
+      return [
+        {
+          name: 'undefined package',
+          assets: [],
+          newVersion: '',
+          oldVersion: '',
+          statusCode: 200,
+        },
+      ];
+    });
+    const installPromise = ensureInstalledDefaultPackages(soClient, jest.fn());
+    expect.assertions(1);
+    expect(installPromise).rejects.toThrow();
   });
 });
