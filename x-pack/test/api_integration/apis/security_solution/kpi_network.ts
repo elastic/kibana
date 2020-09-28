@@ -251,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(kpiNetwork.dnsQueries).to.eql(expectedResult.dnsQueries);
       });
 
-      it('Make sure that we get KpiNetwork networkEvents data', async () => {
+      it.skip('Make sure that we get KpiNetwork networkEvents data', async () => {
         const { body: kpiNetwork } = await supertest
           .post('/internal/search/securitySolutionSearchStrategy/networkKpiNetworkEventsQuery')
           .set('kbn-xsrf', 'true')
