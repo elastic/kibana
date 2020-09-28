@@ -30,7 +30,7 @@ The default Elastic logo image appears on the page.
 . To replace the Elastic logo with your own image, select the image, then use the editor.
 
 [role="screenshot"]
-image::images/canvas-image-element.png[Image showing logo editor]
+image::images/canvas-image-element.png[Image showing how to add the image element]
 
 [float]
 === Customize your data with metrics
