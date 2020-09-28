@@ -45,27 +45,27 @@ export function UserPercentile() {
     {
       value: '50',
       inputDisplay: 'P50 (Median)',
-      'data-test-subj': 'p50-percentile',
+      'data-test-subj': 'p50Percentile',
     },
     {
       value: '75',
       inputDisplay: 'P75',
-      'data-test-subj': 'p75-percentile',
+      'data-test-subj': 'p75Percentile',
     },
     {
       value: '90',
       inputDisplay: 'P90',
-      'data-test-subj': 'p90-percentile',
+      'data-test-subj': 'p90Percentile',
     },
     {
       value: '95',
       inputDisplay: 'P95',
-      'data-test-subj': 'p95-percentile',
+      'data-test-subj': 'p95Percentile',
     },
     {
       value: '99',
       inputDisplay: 'P99',
-      'data-test-subj': 'p99-percentile',
+      'data-test-subj': 'p99Percentile',
     },
   ];
 
@@ -75,6 +75,7 @@ export function UserPercentile() {
 
   return (
     <EuiSuperSelect
+      data-test-subj="uxPercentileSelect"
       style={{ width: 150 }}
       options={options}
       valueOfSelected={String(percentile ?? DEFAULT_P)}

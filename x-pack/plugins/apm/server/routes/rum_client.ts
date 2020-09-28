@@ -45,7 +45,7 @@ export const rumClientMetricsRoute = createRoute(() => ({
     return getClientMetrics({
       setup,
       urlQuery,
-      percentile: Number(percentile),
+      percentile: percentile ? Number(percentile) : undefined,
     });
   },
 }));
@@ -163,7 +163,7 @@ export const rumWebCoreVitals = createRoute(() => ({
     return getWebCoreVitals({
       setup,
       urlQuery,
-      percentile: Number(percentile),
+      percentile: percentile ? Number(percentile) : undefined,
     });
   },
 }));
