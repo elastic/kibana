@@ -13,7 +13,7 @@ Create a JSON file of your workpad that you can export outside of {kib}.
 Click *Share > Download as JSON*.
 
 [role="screenshot"]
-image::images/canvas-export-workpad.png[Export single workpad through JSON, from "share" dropdown]
+image::images/canvas-export-workpad.png[Export single workpad through JSON, from Share dropdown]
 
 Want to export multiple workpads? Go to the *Canvas* home page, select the workpads you want to export, then click *Export*.
 
