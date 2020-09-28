@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-
+import React from 'react';
 import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
 interface IStatisticCardProps {
   title: string;
@@ -17,10 +16,6 @@ interface IStatisticCardProps {
 }
 
 export const StatisticCard: React.FC<IStatisticCardProps> = ({ title, count = 0, actionPath }) => {
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
-
   const linkProps = actionPath
     ? {
         href: getWorkplaceSearchUrl(actionPath),
