@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
@@ -44,6 +44,15 @@ function PromptContainer({ children }: { children: ReactNode }) {
         {children}
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <EuiLoadingSpinner
+      size="xl"
+      style={{ position: 'absolute', top: '50%', left: '50%' }}
+    />
   );
 }
 
@@ -109,13 +118,14 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       ref={ref}
     >
       <Cytoscape
-        elements={data?.elements ?? []}
+        elements={data.elements}
         height={height}
         serviceName={serviceName}
         style={getCytoscapeDivStyle(theme)}
       >
         <Controls />
         {serviceName && <EmptyBanner />}
+        {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
     </div>
