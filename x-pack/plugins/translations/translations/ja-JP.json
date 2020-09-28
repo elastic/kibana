@@ -502,7 +502,6 @@
     "core.status.redTitle": "赤",
     "core.status.yellowTitle": "黄色",
     "dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName": "最小化",
-    "dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName": "全画面",
     "dashboard.addExistingVisualizationLinkText": "既存のユーザーを追加",
     "dashboard.addNewVisualizationText": "またはこのダッシュボードに新規オブジェクトを追加",
     "dashboard.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりませんでした。",
