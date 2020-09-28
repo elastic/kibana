@@ -141,15 +141,18 @@
           }
         },
         "packages": {
-          "properties": {
-            "name": {
-              "type": "keyword"
-            },
-            "version": {
-              "type": "keyword"
-            },
-            "enabled": {
-              "type": "boolean"
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
             }
           }
         }
@@ -540,6 +543,94 @@
         }
       }
     },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "license": {
+                "type": "keyword"
+              },
+              "clusterUuid": {
+                "type": "keyword"
+              },
+              "metricbeatUsed": {
+                "type": "boolean"
+              },
+              "elasticsearch": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "kibana": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "logstash": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "beats": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "apm": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "rollups": {
       "properties": {
         "index_patterns": {
@@ -635,18 +726,21 @@
               "type": "long"
             },
             "os": {
-              "properties": {
-                "full_name": {
-                  "type": "keyword"
-                },
-                "platform": {
-                  "type": "keyword"
-                },
-                "version": {
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "long"
+              "type": "array",
+              "items": {
+                "properties": {
+                  "full_name": {
+                    "type": "keyword"
+                  },
+                  "platform": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "long"
+                  }
                 }
               }
             },
@@ -686,10 +780,16 @@
           "type": "number"
         },
         "enabledAuthProviders": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "httpAuthSchemes": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },
@@ -821,16 +921,28 @@
                   "type": "boolean"
                 },
                 "autorefreshInterval": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "dateRangeEnd": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "dateRangeStart": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "monitor_frequency": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "monitor_name_stats": {
                   "properties": {

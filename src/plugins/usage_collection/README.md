@@ -63,7 +63,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (callCluster: APICluster) => {
+        fetch: async (callCluster: APICluster, esClient: IClusterClient) => {
 
         // query ES and get some data
         // summarize the data into a model
@@ -86,9 +86,9 @@ Some background:
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
 - The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest`, where the request headers are expected to have read privilege on the entire `.kibana' index.
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `esClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.kibana' index. 
 
-Note: there will be many cases where you won't need to use the `callCluster` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
+Note: there will be many cases where you won't need to use the `callCluster` (or `esClient`) function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 
 ```ts
 // server/plugin.ts
@@ -140,6 +140,14 @@ The `AllowedSchemaTypes` is the list of allowed schema types for the usage field
 'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
 ```
 
+### Arrays
+
+If any of your properties is an array, the schema definition must follow the convention below:
+
+```
+{ type: 'array', items: {...mySchemaDefinitionOfTheEntriesInTheArray} }
+```
+
 ### Example
 
 ```ts
@@ -152,6 +160,8 @@ export const myCollector = makeUsageCollector<Usage>({
       some_obj: {
         total: 123,
       },
+      some_array: ['value1', 'value2'],
+      some_array_of_obj: [{total: 123}],
     };
   },
   schema: {
@@ -162,6 +172,18 @@ export const myCollector = makeUsageCollector<Usage>({
       total: {
         type: 'number',
       },
+    },
+    some_array: {
+      type: 'array',
+      items: { type: 'keyword' }    
+    },
+    some_array_of_obj: {
+      type: 'array',
+      items: { 
+        total: {
+          type: 'number',
+        },
+      },   
     },
   },
 });
@@ -302,4 +324,4 @@ These saved objects are automatically consumed by the stats API and surfaced und
 By storing these metrics and their counts as key-value pairs, we can add more metrics without having
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
 
-The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this. We are building a new way of reporting telemetry called [Pulse](../../../rfcs/text/0008_pulse.md) that will help on making these UI-Metrics easier to consume.
+The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this.

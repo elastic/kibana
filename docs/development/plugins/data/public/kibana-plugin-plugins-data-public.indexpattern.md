@@ -41,7 +41,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
+|  [addScriptedField(name, script, fieldType)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
@@ -52,7 +52,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
-|  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
