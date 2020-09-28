@@ -54,7 +54,7 @@ export const findAllSOs = async <T = unknown>(
 
   savedObjectResults = initialSOs;
 
-  // The saved object client can't actually page through more than the first 10000
+  // The saved object client can't actually page through more than the first 10,000
   // results, due to the same `index.max_result_window` constraint. The commented out
   // code below is an example of paging through rest of results when the SO client
   // offers that kind of support.
