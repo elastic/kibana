@@ -7,6 +7,7 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigurePackagePolicyContent,
@@ -70,9 +71,9 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
           iconType="iInCircle"
         >
           <EuiText size="s">
-            <p>
-              {from === 'edit' ? (
-                <>
+            {from === 'edit' ? (
+              <>
+                <p>
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfiguration"
                     defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
@@ -92,17 +93,19 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
                       ),
                     }}
                   />
-                  <div>
-                    <TrustedAppsMessage navigateTo={navigateTo} />
-                  </div>
-                </>
-              ) : (
+                </p>
+                <p>
+                  <TrustedAppsMessage navigateTo={navigateTo} />
+                </p>
+              </>
+            ) : (
+              <p>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
                   defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent policy."
                 />
-              )}
-            </p>
+              </p>
+            )}
           </EuiText>
         </EuiCallOut>
       </>
@@ -120,6 +123,10 @@ const TrustedAppsMessage = memo<{
     return {
       backButtonUrl: '',
       onBackButtonNavigateTo: navigateTo,
+      backButtonLabel: i18n.translate(
+        'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
+        { defaultMessage: 'Back to edit integration' }
+      ),
     };
   }, [navigateTo]);
 

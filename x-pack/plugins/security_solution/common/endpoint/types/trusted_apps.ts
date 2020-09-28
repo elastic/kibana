@@ -74,5 +74,7 @@ export interface TrustedAppsListPageRouteState {
   /** Where the user should be redirected to when the `Back` button is clicked */
   onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
   /** The URL for the `Back` button */
-  backButtonUrl: string;
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
 }
