@@ -60,15 +60,16 @@ interface BaseProps {
   'data-test-subj'?: string;
 
   /**
-   * Indicates whether or not the currently dragged item
-   * can will be moved instead of copied
+   * Indicates to the user whether the currently dragged item
+   * will be moved or copied
    */
   dragType?: 'copy' | 'move';
 
   /**
-   *
+   * Indicates to the user whether the drop action will
+   * replace something that is existing or add a new one
    */
-  dropType?: 'copy' | 'replace';
+  dropType?: 'add' | 'replace';
 }
 
 /**
@@ -148,7 +149,7 @@ const DragDropInner = React.memo(function DragDropInner(
     isDragging,
     isNotDroppable,
     dragType = 'copy',
-    dropType = 'copy',
+    dropType = 'add',
   } = props;
 
   const classes = classNames(
