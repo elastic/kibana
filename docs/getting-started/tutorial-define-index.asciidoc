@@ -24,7 +24,7 @@ Otherwise, click *Create index pattern*.
 . In the *Index pattern field*, enter `shakes*`.
 +
 [role="screenshot"]
-image::images/tutorial-pattern-1.png[]
+image::images/tutorial-pattern-1.png[Image showing how to enter shakes* in Index Pattern Name field]
 
 . Click *Next step*.
 . Select the *Time Filter field name*, then click *Create index pattern*.
@@ -48,6 +48,5 @@ NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
 available, open the menu, then go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
 `curl -XGET "http://localhost:9200/_cat/indices"`.
-
 
 
