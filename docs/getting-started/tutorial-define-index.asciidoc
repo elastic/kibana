@@ -24,7 +24,7 @@ index named `shakespeare,` and the accounts data set, which has an index named
 . In the *Index pattern name* field, enter `shakes*`.
 +
 [role="screenshot"]
-image::images/tutorial-pattern-1.png[shakes* index patterns]
+image::images/tutorial-pattern-1.png[Image showing how to enter shakes* in Index Pattern Name field]
 
 . Click *Next step*.
 
@@ -46,6 +46,5 @@ contains the time series data.
 +
 [role="screenshot"]
 image::images/tutorial_index_patterns.png[All tutorial index patterns]
-
 
 

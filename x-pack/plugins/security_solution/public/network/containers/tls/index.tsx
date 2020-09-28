@@ -6,11 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -67,9 +67,8 @@ export const useNetworkTls = ({
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTlsSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);

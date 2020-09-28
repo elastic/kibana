@@ -5,7 +5,6 @@
  */
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -28,13 +27,9 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+}));
 
 jest.mock('../../../../common/components/link_to');
 
@@ -87,7 +82,6 @@ describe('Body', () => {
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {
