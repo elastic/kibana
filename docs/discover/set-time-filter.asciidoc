@@ -53,4 +53,4 @@ when you hover over a valid start point.
 * Click the dropdown, then select an interval.
 
 [role="screenshot"]
-image::images/Histogram-Time.png[Time range selector in Histogram (drop down menu)]
+image::images/Histogram-Time.png[Time range selector in Histogram dropdown]
