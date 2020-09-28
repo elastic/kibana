@@ -30,7 +30,6 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
-    elasticsearch.preserveHost
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.shardTimeout

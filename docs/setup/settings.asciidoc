@@ -68,11 +68,6 @@ currently do not have an inspector, for example Timelion and Monitoring.
  | Time in milliseconds to wait for {es} to respond to pings.
 *Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
 
-| `elasticsearch.preserveHost:`
- | When the value is `true`, {kib} uses the hostname specified in the
-<<server-host, `server.host`>> setting. When the value is `false`, {kib} uses
-the hostname of the host that connects to this {kib} instance. *Default: `true`*
-
 |[[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist:`
  | List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`

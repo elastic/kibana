@@ -45,7 +45,6 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  preserveHost: schema.boolean({ defaultValue: true }),
   username: schema.maybe(
     schema.conditional(
       schema.contextRef('dist'),

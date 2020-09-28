@@ -348,7 +348,6 @@ export const config: {
             sniffInterval: Type<false | import("moment").Duration>;
             sniffOnConnectionFault: Type<boolean>;
             hosts: Type<string | string[]>;
-            preserveHost: Type<boolean>;
             username: Type<string | undefined>;
             password: Type<string | undefined>;
             requestHeadersWhitelist: Type<string | string[]>;

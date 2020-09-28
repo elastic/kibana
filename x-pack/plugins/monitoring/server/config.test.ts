@@ -72,7 +72,6 @@ describe('config schema', () => {
             "logFetchCount": 10,
             "logQueries": false,
             "pingTimeout": "PT30S",
-            "preserveHost": true,
             "requestHeadersWhitelist": Array [
               "authorization",
             ],
