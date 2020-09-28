@@ -14,7 +14,8 @@ import {
 import { Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { debounceTime } from 'rxjs/operators';
+import { throttleTime } from 'rxjs/operators';
+import { isString } from 'lodash';
 import { MonitoringStats, RawMonitoringStats, summarizeMonitoringStats } from '../monitoring';
 
 export function healthRoute(
@@ -25,9 +26,9 @@ export function healthRoute(
 ) {
   /* Log Task Manager stats as a Debug log line at a fixed interval */
   monitoringStats.then((monitoringStats$) => {
-    monitoringStats$
-      .pipe(debounceTime(requiredFreshness))
-      .subscribe((stats) => logger.debug(JSON.stringify(summarizeMonitoringStats(stats))));
+    monitoringStats$.pipe(throttleTime(requiredFreshness)).subscribe((stats) => {
+      logger.debug(JSON.stringify(summarizeMonitoringStats(stats)));
+    });
   });
 
   router.get(
@@ -40,7 +41,7 @@ export function healthRoute(
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
-      const { lastUpdate, stats } = await getLatestStats(await monitoringStats);
+      const stats = await getLatestStats(await monitoringStats);
       const now = Date.now();
       const timestamp = new Date(now).toISOString();
 
@@ -49,23 +50,38 @@ export function healthRoute(
        * the stats in the body of the api call. This makes it easier for monitoring
        * services to mark the service as broken
        */
-      // if (now - Date.parse(lastUpdate) > requiredFreshness) {
-      //   return res.internalError({
-      //     body: {
-      //       message: new Error('Task Manager monitored stats are out of date'),
-      //       attributes: { lastUpdate, timestamp, stats },
-      //     },
-      //   });
-      // }
+      if (
+        now -
+          getOldestTimestamp(
+            stats.lastUpdate,
+            stats.stats.runtime?.value.polling.lastSuccessfulPoll
+          ) >
+        requiredFreshness
+      ) {
+        return res.internalError({
+          body: {
+            message: new Error('Task Manager monitored stats are out of date'),
+            attributes: { timestamp, ...summarizeMonitoringStats(stats) },
+          },
+        });
+      }
       return res.ok({
-        body: { lastUpdate, timestamp, stats },
+        body: { timestamp, ...summarizeMonitoringStats(stats) },
       });
     }
   );
 }
 
+function getOldestTimestamp(...timestamps: unknown[]): number {
+  return Math.min(
+    ...timestamps
+      .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
+      .filter((timestamp) => !isNaN(timestamp))
+  );
+}
+
 async function getLatestStats(monitoringStats$: Observable<MonitoringStats>) {
-  return new Promise<RawMonitoringStats>((resolve) =>
-    monitoringStats$.pipe(take(1)).subscribe((stats) => resolve(summarizeMonitoringStats(stats)))
+  return new Promise<MonitoringStats>((resolve) =>
+    monitoringStats$.pipe(take(1)).subscribe((stats) => resolve(stats))
   );
 }
