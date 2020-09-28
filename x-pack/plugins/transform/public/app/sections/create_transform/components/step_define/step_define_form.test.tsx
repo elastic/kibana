@@ -71,7 +71,7 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const { getByLabelText } = render(
+    const { getByText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <MlSharedContext.Provider value={mlShared}>
@@ -83,7 +83,8 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByLabelText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
     await wait();
     done();
   });

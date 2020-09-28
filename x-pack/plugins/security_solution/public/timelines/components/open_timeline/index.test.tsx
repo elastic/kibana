@@ -10,8 +10,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
@@ -533,18 +532,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
+      wrapper.update();
+
+      expect(
+        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
+      ).toEqual({});
+
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+
       await waitFor(() => {
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find('[data-test-subj="open-timeline"]')
-            .last()
-            .prop('itemIdToExpandedNotesRowMap')
-        ).toEqual({});
-
-        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-
         expect(
           wrapper
             .find('[data-test-subj="open-timeline"]')
