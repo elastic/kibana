@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { enhancedEsSearchStrategyProvider } from './es_search_strategy';
-export { eqlSearchStrategyProvider } from './eql_search_strategy';
+import * as t from 'io-ts';
+
+export const eqlValidationSchema = t.exact(
+  t.type({
+    valid: t.boolean,
+    errors: t.array(t.string),
+  })
+);
+
+export type EqlValidationSchema = t.TypeOf<typeof eqlValidationSchema>;

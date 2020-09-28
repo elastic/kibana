@@ -16,7 +16,7 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
-import { ShardsResponse } from '../../../types';
+import { EqlSearchResponse, ShardsResponse } from '../../../types';
 import {
   RuleAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -28,6 +28,7 @@ import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engin
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getEqlValidationSchemaMock } from '../../../../../common/detection_engine/schemas/request/eql_validation_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -570,6 +571,22 @@ export const getEmptySignalsResponse = (): SignalSearchResponse => ({
   aggregations: {
     alertsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
   },
+});
+
+export const getEmptyEqlSearchResponse = (): EqlSearchResponse<unknown> => ({
+  hits: { total: { value: 0, relation: 'eq' }, events: [] },
+  is_partial: false,
+  is_running: false,
+  took: 1,
+  timed_out: false,
+});
+
+export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
+  hits: { total: { value: 0, relation: 'eq' }, sequences: [] },
+  is_partial: false,
+  is_running: false,
+  took: 1,
+  timed_out: false,
 });
 
 export const getSuccessfulSignalUpdateResponse = () => ({

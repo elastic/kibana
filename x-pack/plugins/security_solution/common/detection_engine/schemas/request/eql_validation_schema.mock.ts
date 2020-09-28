@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { enhancedEsSearchStrategyProvider } from './es_search_strategy';
-export { eqlSearchStrategyProvider } from './eql_search_strategy';
+import { EqlValidationSchema } from './eql_validation_schema';
+
+export const getEqlValidationSchemaMock = (): EqlValidationSchema => ({
+  index: ['index-123'],
+  query: 'process where process.name == "regsvr32.exe"',
+});

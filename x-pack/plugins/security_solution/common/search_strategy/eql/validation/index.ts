@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { enhancedEsSearchStrategyProvider } from './es_search_strategy';
-export { eqlSearchStrategyProvider } from './eql_search_strategy';
+export * from './helpers';

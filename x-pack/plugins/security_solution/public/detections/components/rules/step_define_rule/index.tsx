@@ -240,7 +240,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
+                    index,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                  config={{
+                    ...schema.queryBar,
+                    label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
               ) : (
@@ -249,6 +254,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
+                    label: i18n.QUERY_BAR_LABEL,
                     labelAppend: (
                       <MyLabelButton
                         data-test-subj="importQueryFromSavedTimeline"
