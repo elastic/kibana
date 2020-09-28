@@ -6,15 +6,7 @@
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -56,20 +48,24 @@ const showingFirstDocs = i18n.translate(
   }
 );
 
-const trainingSubsetOptions = [
-  {
-    id: 'training',
-    label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel', {
-      defaultMessage: 'Training',
-    }),
-  },
-  {
-    id: 'testing',
-    label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel', {
-      defaultMessage: 'Testing',
-    }),
-  },
-];
+const filters = {
+  options: [
+    {
+      id: 'training',
+      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel', {
+        defaultMessage: 'Training',
+      }),
+    },
+    {
+      id: 'testing',
+      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel', {
+        defaultMessage: 'Testing',
+      }),
+    },
+  ],
+  columnId: 'ml.is_training',
+  key: { training: true, testing: false },
+};
 
 interface Props {
   indexPattern: IndexPattern;
@@ -99,7 +95,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     const [globalState, setGlobalState] = useUrlState('_g');
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
     const [defaultQueryString, setDefaultQueryString] = useState<string | undefined>();
-    const [idToSelectedMap, setIdToSelectedMap] = useState<any>({}); // TODO: update type
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
@@ -182,33 +177,12 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem>
-                      <ExplorationQueryBar
-                        indexPattern={indexPattern}
-                        setSearchQuery={setSearchQuery}
-                        defaultQueryString={defaultQueryString}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonGroup
-                        legend={i18n.translate(
-                          'xpack.ml.dataframe.analytics.explorationResults.buttonGroupLegend',
-                          {
-                            defaultMessage: 'Analytics results training subset selector',
-                          }
-                        )}
-                        name="analyticsResultsTrainingSubsetSelector"
-                        data-test-subj="mlAnalyticsTrainingSubsetSelector"
-                        options={trainingSubsetOptions}
-                        type="multi"
-                        idToSelectedMap={idToSelectedMap}
-                        onChange={(optionId) => {
-                          setIdToSelectedMap({ [optionId]: !idToSelectedMap[optionId] });
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <ExplorationQueryBar
+                    indexPattern={indexPattern}
+                    setSearchQuery={setSearchQuery}
+                    defaultQueryString={defaultQueryString}
+                    filters={filters}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiFormRow
