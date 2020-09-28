@@ -556,3 +556,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 }
 
 export { TableListView };
+
+// eslint-disable-next-line import/no-default-export
+export default TableListView;

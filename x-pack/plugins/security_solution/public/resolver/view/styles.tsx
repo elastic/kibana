@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
 
 import styled from 'styled-components';
 
@@ -61,4 +61,27 @@ export const GraphContainer = styled.div`
   display: flex;
   flex-grow: 1;
   contain: layout;
+`;
+
+/**
+ * See `RelatedEventLimitWarning`
+ */
+export const LimitWarningsEuiCallOut = styled(EuiCallOut)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
 `;
