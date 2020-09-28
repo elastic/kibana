@@ -118,7 +118,8 @@ export function FieldSelect({
         }));
     }
 
-    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
+    const [metaFields, nonMetaFields] = _.partition(normalFields, (field) => fieldMap[field].meta);
+    const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
       fieldsArr.length > 0 && {
@@ -140,10 +141,18 @@ export function FieldSelect({
       })
     );
 
+    const metaFieldsOptions = constructFieldsOptions(
+      metaFields,
+      i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
+        defaultMessage: 'Meta fields',
+      })
+    );
+
     return [
       ...fieldNamesToOptions(specialFields),
       availableFieldsOptions,
       emptyFieldsOptions,
+      metaFieldsOptions,
     ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
