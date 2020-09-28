@@ -433,8 +433,7 @@ describe('test transform install', () => {
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(legacyScopedClusterClient.callAsCurrentUser.mock.calls));
+
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
       [
         'transport.request',
