@@ -108,13 +108,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
     }
   }, [issueTypes, issueType, issueTypesSelectOptions, onChange]);
 
-  // Set default priority
-  useEffect(() => {
-    if (!priority && prioritiesSelectOptions.length > 0) {
-      onChange('priority', prioritiesSelectOptions[0].value as string);
-    }
-  }, [priority, prioritiesSelectOptions, onChange]);
-
   return (
     <>
       <EuiFormRow
@@ -160,6 +153,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
                     data-test-subj="prioritySelect"
                     options={prioritiesSelectOptions}
                     value={priority}
+                    hasNoInitialSelection
                     onChange={(e) => {
                       onChange('priority', e.target.value);
                     }}
