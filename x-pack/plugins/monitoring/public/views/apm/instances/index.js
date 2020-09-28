@@ -67,7 +67,8 @@ uiRoutes.when('/apm/instances', {
         () => this.data,
         (data) => {
           const { pagination, sorting, onTableChange } = this;
-          this.renderReact(
+
+          const component = (
             <SetupModeRenderer
               scope={this.scope}
               injector={this.injector}
@@ -90,6 +91,7 @@ uiRoutes.when('/apm/instances', {
               )}
             />
           );
+          this.renderReact(component);
         }
       );
     }

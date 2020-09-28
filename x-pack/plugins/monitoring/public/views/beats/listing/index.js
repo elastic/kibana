@@ -40,6 +40,7 @@ uiRoutes.when('/beats/beats', {
         pageTitle: i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
           defaultMessage: 'Beats listing',
         }),
+        telemetryPageViewTitle: 'beats_listing',
         storageKey: 'beats.beats',
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',

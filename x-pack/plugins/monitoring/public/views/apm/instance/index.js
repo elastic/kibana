@@ -44,6 +44,7 @@ uiRoutes.when('/apm/instances/:uuid', {
             apm: 'APM server',
           },
         }),
+        telemetryPageViewTitle: 'apm_server_instance',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',

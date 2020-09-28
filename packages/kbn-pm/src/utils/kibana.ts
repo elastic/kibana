@@ -22,6 +22,8 @@ import Path from 'path';
 import multimatch from 'multimatch';
 import isPathInside from 'is-path-inside';
 
+import { resolveDepsForProject, YarnLock } from './yarn_lock';
+import { Log } from './log';
 import { ProjectMap, getProjects, includeTransitiveProjects } from './projects';
 import { Project } from './project';
 import { getProjectPaths } from '../config';
@@ -132,5 +134,27 @@ export class Kibana {
 
   isOutsideRepo(project: Project) {
     return !this.isPartOfRepo(project);
+  }
+
+  resolveAllProductionDependencies(yarnLock: YarnLock, log: Log) {
+    const kibanaDeps = resolveDepsForProject({
+      project: this.kibanaProject,
+      yarnLock,
+      kbn: this,
+      includeDependentProject: true,
+      productionDepsOnly: true,
+      log,
+    })!;
+
+    const xpackDeps = resolveDepsForProject({
+      project: this.getProject('x-pack')!,
+      yarnLock,
+      kbn: this,
+      includeDependentProject: true,
+      productionDepsOnly: true,
+      log,
+    })!;
+
+    return new Map([...kibanaDeps.entries(), ...xpackDeps.entries()]);
   }
 }
