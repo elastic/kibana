@@ -107,8 +107,14 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
             .filter((type) => type.label != null)
         : []
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector, allIncidentTypes]);
+  }, [connector, allIncidentTypes, incidentTypes]);
+
+  // Set default severity
+  useEffect(() => {
+    if (!severityCode && severitySelectOptions.length > 0) {
+      onChange('severityCode', severitySelectOptions[0].value as string);
+    }
+  }, [severityCode, severitySelectOptions, onChange]);
 
   return (
     <>

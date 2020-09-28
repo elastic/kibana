@@ -106,8 +106,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
     if (!issueType && issueTypesSelectOptions.length > 0) {
       onChange('issueType', issueTypesSelectOptions[0].value as string);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [issueTypes, issueTypesSelectOptions, onChange]);
+  }, [issueTypes, issueType, issueTypesSelectOptions, onChange]);
 
   // Set default priority
   useEffect(() => {
