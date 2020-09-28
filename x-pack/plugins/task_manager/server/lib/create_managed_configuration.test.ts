@@ -6,6 +6,7 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
+import { mockLogger } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import {
   createManagedConfiguration,
@@ -14,6 +15,7 @@ import {
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
+  const logger = mockLogger();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -26,6 +28,7 @@ describe('createManagedConfiguration()', () => {
     const maxWorkersSubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
     const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
       errors$: new Subject<Error>(),
       startingMaxWorkers: 1,
       startingPollInterval: 2,
@@ -44,6 +47,7 @@ describe('createManagedConfiguration()', () => {
     const errors$ = new Subject<Error>();
     const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       errors$,
+      logger,
       startingMaxWorkers: 100,
       startingPollInterval: 100,
     });
@@ -62,6 +66,7 @@ describe('createManagedConfiguration()', () => {
       const { maxWorkersConfiguration$ } = createManagedConfiguration({
         errors$,
         startingMaxWorkers,
+        logger,
         startingPollInterval: 1,
       });
       maxWorkersConfiguration$.subscribe(subscription);
@@ -83,6 +88,15 @@ describe('createManagedConfiguration()', () => {
       clock.tick(1);
       expect(subscription).toHaveBeenCalledTimes(2);
       expect(subscription).toHaveBeenNthCalledWith(2, 80);
+    });
+
+    test('should log a warning when the configuration changes from the starting value', async () => {
+      const { errors$ } = setupScenario(100);
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
+      );
     });
 
     test('should increase configuration back to normal incrementally after an error is emitted', async () => {
@@ -134,6 +148,7 @@ describe('createManagedConfiguration()', () => {
       const errors$ = new Subject<Error>();
       const subscription = jest.fn();
       const { pollIntervalConfiguration$ } = createManagedConfiguration({
+        logger,
         errors$,
         startingPollInterval,
         startingMaxWorkers: 1,
@@ -157,6 +172,15 @@ describe('createManagedConfiguration()', () => {
       clock.tick(1);
       expect(subscription).toHaveBeenCalledTimes(2);
       expect(subscription).toHaveBeenNthCalledWith(2, 120);
+    });
+
+    test('should log a warning when the configuration changes from the starting value', async () => {
+      const { errors$ } = setupScenario(100);
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
+      );
     });
 
     test('should decrease configuration back to normal incrementally after an error is emitted', async () => {

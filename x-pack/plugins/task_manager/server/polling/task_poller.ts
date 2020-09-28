@@ -15,6 +15,7 @@ import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../types';
 import { pullFromSet } from '../lib/pull_from_set';
 import {
   Result,
@@ -30,6 +31,7 @@ import { timeoutPromiseAfter } from './timeout_promise_after';
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
 interface Opts<T, H> {
+  logger: Logger;
   pollInterval$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
@@ -52,6 +54,7 @@ interface Opts<T, H> {
  *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
 export function createTaskPoller<T, H>({
+  logger,
   pollInterval$,
   getCapacity,
   pollRequests$,
@@ -68,7 +71,10 @@ export function createTaskPoller<T, H>({
     pollRequests$,
     // emit a polling event on a fixed interval
     pollInterval$.pipe(
-      switchMap((period) => interval(period)),
+      switchMap((period) => {
+        logger.info(`Task poller now using interval of ${period}ms`);
+        return interval(period);
+      }),
       mapTo(none)
     )
   ).pipe(

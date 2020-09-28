@@ -151,6 +151,7 @@ export class TaskManager {
     this.store.events.subscribe((event) => this.events$.next(event));
 
     const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger: this.logger,
       errors$: this.store.errors$,
       startingMaxWorkers: opts.config.max_workers,
       startingPollInterval: opts.config.poll_interval,
@@ -173,6 +174,7 @@ export class TaskManager {
     this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
+          logger: this.logger,
           pollInterval$: pollIntervalConfiguration$,
           bufferCapacity: opts.config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
