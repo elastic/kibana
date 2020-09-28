@@ -102,7 +102,9 @@ export const EmbeddedMapComponent = ({
     deepEqual
   );
 
-  const [mapIndexPatterns, setMapIndexPatterns] = useState(kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title)));
+  const [mapIndexPatterns, setMapIndexPatterns] = useState(
+    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+  );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -112,16 +114,17 @@ export const EmbeddedMapComponent = ({
 
   const { services } = useKibana();
 
-
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title));
+      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
+        sourcererScope.selectedPatterns.includes(kip.title)
+      );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         return newIndexPatterns;
       }
       return prevMapIndexPatterns;
-    })
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns])
+    });
+  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
