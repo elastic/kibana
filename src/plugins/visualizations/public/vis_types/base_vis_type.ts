@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 
@@ -43,8 +43,8 @@ interface CommonBaseVisTypeOptions {
   inspectorAdapters?: Adapters | (() => Adapters);
 }
 
-interface ExpressionBaseVisTypeOptions extends CommonBaseVisTypeOptions {
-  toExpressionAst: VisToExpressionAst;
+interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
+  toExpressionAst: VisToExpressionAst<TVisParams>;
   visualization?: undefined;
 }
 
@@ -53,9 +53,11 @@ interface VisualizationBaseVisTypeOptions extends CommonBaseVisTypeOptions {
   visualization: VisualizationControllerConstructor | undefined;
 }
 
-export type BaseVisTypeOptions = ExpressionBaseVisTypeOptions | VisualizationBaseVisTypeOptions;
+export type BaseVisTypeOptions<TVisParams = VisParams> =
+  | ExpressionBaseVisTypeOptions<TVisParams>
+  | VisualizationBaseVisTypeOptions;
 
-export class BaseVisType {
+export class BaseVisType<TVisParams = VisParams> {
   name: string;
   title: string;
   description: string;
@@ -77,9 +79,9 @@ export class BaseVisType {
   setup?: unknown;
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
-  toExpressionAst?: VisToExpressionAst;
+  toExpressionAst?: VisToExpressionAst<TVisParams>;
 
-  constructor(opts: BaseVisTypeOptions) {
+  constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
       throw new Error('vis_type must define its icon or image');
     }
