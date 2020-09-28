@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../common/types/app_search';
-export { IRole, TRole, TAbility } from './utils/role';
+import { IEngine } from '../../types';
 
-export interface IEngine {
+export interface ICredentialsDetails {
+  engines: IEngine[];
+}
+
+export interface IApiToken {
+  access_all_engines?: boolean;
+  key?: string;
+  engines?: string[];
+  id?: number;
   name: string;
+  read?: boolean;
   type: string;
-  language: string;
-  result_fields: object[];
+  write?: boolean;
 }
