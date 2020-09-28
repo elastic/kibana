@@ -17,14 +17,6 @@
  * under the License.
  */
 
-/**
- * Class used to signify that a request timed out. Useful for applications to conditionally handle
- * this type of error differently than other errors.
- */
-export class RequestTimeoutError extends Error {
-  constructor(message = 'Request timed out') {
-    super(message);
-    this.message = message;
-    this.name = 'RequestTimeoutError';
-  }
-}
+export { loadConfiguration } from './config_loader';
+export type { ApmConfiguration } from './config';
+export type { ApmAgentConfig } from './types';
