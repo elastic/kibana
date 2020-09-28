@@ -24,40 +24,13 @@ import { Ping } from '../../../../common/runtime_types';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
-import { StatusBadge } from './status_badge';
-import { StepScreenshotDisplay } from './step_screenshot_display';
-import { Accordion } from './accordion';
 import { UptimeThemeContext } from '../../../contexts';
 import { EmptyStepState } from './empty_journey';
+import { ExecutedJourney } from './executed_journey';
 
 interface ScriptExpandedRowProps {
   checkGroup?: string;
 }
-
-interface StepStatusCount {
-  succeeded: number;
-  failed: number;
-}
-
-function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
-  if (cur.synthetics?.payload?.status === 'succeeded') {
-    prev.succeeded += 1;
-    return prev;
-  }
-  prev.failed += 1;
-  return prev;
-}
-
-function statusMessage(count: StepStatusCount) {
-  if (count.succeeded === 0) {
-    return `${count.failed} Steps - all failed.`;
-  } else if (count.failed === 0) {
-    return `${count.succeeded} Steps - all succeeded`;
-  }
-  return `${count.succeeded + count.failed} Steps - ${count.succeeded} succeeded`;
-}
-
-const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
 export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
   const { checkGroup } = props;
@@ -91,103 +64,6 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = (props) => {
   }
   return (
     <ScriptExpandedRowComponent {...props} fetchScreenshot={fetchScreenshot} journey={journey} />
-  );
-};
-
-const StepComponent: FC<{
-  step: Ping;
-  index: number;
-  fetchScreenshot: (stepIndex: number) => void;
-}> = ({ step, index, fetchScreenshot }) => {
-  console.log('step', step);
-  return (
-    <>
-      <div style={{ padding: '8px' }}>
-        <div>
-          <EuiText>
-            <strong>
-              {index + 1}. {step.synthetics?.step.name}
-            </strong>
-          </EuiText>
-        </div>
-        <EuiSpacer size="s" />
-        <div>
-          <StatusBadge status={step.synthetics.payload.status} />
-        </div>
-        <EuiSpacer />
-        <div>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <StepScreenshotDisplay
-                isLoading={step.synthetics.screenshotLoading}
-                screenshot={step.synthetics.blob}
-                stepIndex={step.synthetics.step.index}
-                fetchScreenshot={fetchScreenshot}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Accordion
-                id={step.synthetics?.step?.name + String(index)}
-                buttonContent="Step script"
-                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-                language="javascript"
-              >
-                {step.synthetics?.payload?.source}
-              </Accordion>
-              <Accordion
-                id={`${step.synthetics?.step?.name}_error`}
-                buttonContent="Error"
-                language="html"
-                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-              >
-                {step.synthetics?.payload?.error?.message}
-              </Accordion>
-              <Accordion
-                id={`${step.synthetics?.step?.name}_stack`}
-                buttonContent="Stack trace"
-                language="html"
-                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-              >
-                {step.synthetics?.payload?.error?.stack}
-              </Accordion>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
-      <EuiSpacer />
-    </>
-  );
-};
-
-interface JourneyWithExecutedStepsProps {
-  journey: JourneyState;
-  fetchScreenshot: (stepIndex: number) => void;
-}
-
-const JourneyWithExecutedSteps: FC<JourneyWithExecutedStepsProps> = ({
-  journey,
-  fetchScreenshot,
-}) => {
-  return (
-    <div>
-      <EuiText>
-        <h3>Summary information</h3>
-        <p>{statusMessage(journey.steps.reduce(reduceStepStatus, { succeeded: 0, failed: 0 }))}</p>
-      </EuiText>
-      <EuiSpacer />
-      <EuiFlexGroup direction="column">
-        {journey.steps
-          .filter((step) => step.synthetics?.type === 'step/end')
-          .map((step, index) => (
-            <StepComponent
-              key={index}
-              index={index}
-              step={step}
-              fetchScreenshot={fetchScreenshot}
-            />
-          ))}
-      </EuiFlexGroup>
-    </div>
   );
 };
 
@@ -246,7 +122,6 @@ type ComponentProps = ScriptExpandedRowProps & {
 
 export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ journey, fetchScreenshot }) => {
   const hasStepEnd = journey.steps.some((step) => step.synthetics?.type === 'step/end');
-  if (hasStepEnd)
-    return <JourneyWithExecutedSteps journey={journey} fetchScreenshot={fetchScreenshot} />;
+  if (hasStepEnd) return <ExecutedJourney journey={journey} fetchScreenshot={fetchScreenshot} />;
   return <ConsoleOutputSteps journey={journey} />;
 };

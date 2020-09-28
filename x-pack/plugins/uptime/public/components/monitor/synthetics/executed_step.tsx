@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC } from 'react';
+import { Accordion } from './accordion';
+import { StepScreenshotDisplay } from './step_screenshot_display';
+import { StatusBadge } from './status_badge';
+import { Ping } from '../../../../common/runtime_types';
+
+const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
+
+interface StepComponentProps {
+  step: Ping;
+  index: number;
+  fetchScreenshot: (stepIndex: number) => void;
+}
+
+export const StepComponent: FC<StepComponentProps> = ({ step, index, fetchScreenshot }) => {
+  return (
+    <>
+      <div style={{ padding: '8px' }}>
+        <div>
+          <EuiText>
+            <strong>
+              {index + 1}. {step.synthetics?.step.name}
+            </strong>
+          </EuiText>
+        </div>
+        <EuiSpacer size="s" />
+        <div>
+          <StatusBadge status={step.synthetics.payload.status} />
+        </div>
+        <EuiSpacer />
+        <div>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <StepScreenshotDisplay
+                isLoading={step.synthetics.screenshotLoading}
+                screenshot={step.synthetics.blob}
+                stepIndex={step.synthetics.step.index}
+                fetchScreenshot={fetchScreenshot}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Accordion
+                id={step.synthetics?.step?.name + String(index)}
+                buttonContent="Step script"
+                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+                language="javascript"
+              >
+                {step.synthetics?.payload?.source}
+              </Accordion>
+              <Accordion
+                id={`${step.synthetics?.step?.name}_error`}
+                buttonContent="Error"
+                language="html"
+                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+              >
+                {step.synthetics?.payload?.error?.message}
+              </Accordion>
+              <Accordion
+                id={`${step.synthetics?.step?.name}_stack`}
+                buttonContent="Stack trace"
+                language="html"
+                overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+              >
+                {step.synthetics?.payload?.error?.stack}
+              </Accordion>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+      <EuiSpacer />
+    </>
+  );
+};
