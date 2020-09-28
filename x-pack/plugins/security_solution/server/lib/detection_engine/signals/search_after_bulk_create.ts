@@ -126,6 +126,7 @@ export const searchAfterAndBulkCreate = async ({
           searchDuration,
         }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter(
           {
+            buildRuleMessage,
             searchAfterSortId: sortId,
             index: inputIndexPattern,
             from: tuple.from.toISOString(),
@@ -205,6 +206,7 @@ export const searchAfterAndBulkCreate = async ({
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
           } = await singleBulkCreate({
+            buildRuleMessage,
             filteredEvents,
             ruleParams,
             services,

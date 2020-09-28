@@ -240,6 +240,7 @@ export const signalRulesAlertType = ({
             enabled,
             refresh,
             tags,
+            buildRuleMessage,
           });
           result.success = success;
           result.createdSignalsCount = createdItemsCount;
@@ -267,6 +268,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            buildRuleMessage,
           });
 
           const {
@@ -294,6 +296,7 @@ export const signalRulesAlertType = ({
             enabled,
             refresh,
             tags,
+            buildRuleMessage,
           });
           result.success = success;
           result.createdSignalsCount = createdItemsCount;
