@@ -140,6 +140,14 @@ The `AllowedSchemaTypes` is the list of allowed schema types for the usage field
 'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
 ```
 
+### Arrays
+
+If any of your properties is an array, the schema definition must follow the convention below:
+
+```
+{ type: 'array', items: {...mySchemaDefinitionOfTheEntriesInTheArray} }
+```
+
 ### Example
 
 ```ts
@@ -152,6 +160,8 @@ export const myCollector = makeUsageCollector<Usage>({
       some_obj: {
         total: 123,
       },
+      some_array: ['value1', 'value2'],
+      some_array_of_obj: [{total: 123}],
     };
   },
   schema: {
@@ -162,6 +172,18 @@ export const myCollector = makeUsageCollector<Usage>({
       total: {
         type: 'number',
       },
+    },
+    some_array: {
+      type: 'array',
+      items: { type: 'keyword' }    
+    },
+    some_array_of_obj: {
+      type: 'array',
+      items: { 
+        total: {
+          type: 'number',
+        },
+      },   
     },
   },
 });
