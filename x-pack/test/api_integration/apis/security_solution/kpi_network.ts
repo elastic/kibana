@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(kpiNetwork.uniqueFlowId).to.eql(expectedResult.uniqueFlowId);
       });
 
-      it('Make sure that we get KpiNetwork DNS data', async () => {
+      it.skip('Make sure that we get KpiNetwork DNS data', async () => {
         const { body: kpiNetwork } = await supertest
           .post('/internal/search/securitySolutionSearchStrategy/networkKpiDnsQuery')
           .set('kbn-xsrf', 'true')
