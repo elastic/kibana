@@ -186,12 +186,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                       {solutions.map(({ id, title, description, icon, path }) => (
                         <EuiFlexItem key={id}>
                           <EuiCard
-                            title={
-                              <EuiTitle size="s">
-                                <h3>{title}</h3>
-                              </EuiTitle>
-                            }
-                            description={<span>{description}</span>}
+                            description={description ? description : ''}
                             icon={
                               <EuiToken
                                 iconType={icon}
@@ -201,14 +196,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                                 className="homSolutionPanel__icon"
                               />
                             }
-                            image={
-                              <EuiImage
-                                // Image file names must be snake case
-                                url={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
-                                alt={title}
-                              />
-                            }
+                            image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
                             onClick={createAppNavigationHandler(path)}
+                            title={title}
+                            titleElement="h3"
+                            titleSize="xs"
                           />
                         </EuiFlexItem>
                       ))}
