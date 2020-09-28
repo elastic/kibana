@@ -14,11 +14,13 @@ interface ConsoleStepProps {
 }
 
 export const ConsoleStep: FC<ConsoleStepProps> = ({ step }) => {
-  const c = useContext(UptimeThemeContext);
+  const {
+    colors: { danger },
+  } = useContext(UptimeThemeContext);
 
   let typeColor: string | null;
   if (step.synthetics?.type === 'stderr') {
-    typeColor = c.colors.danger;
+    typeColor = danger;
   } else {
     typeColor = null;
   }
