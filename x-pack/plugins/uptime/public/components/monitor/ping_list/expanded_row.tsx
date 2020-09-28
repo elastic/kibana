@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore formatNumber
+
 import { formatNumber } from '@elastic/eui/lib/services/format';
 import {
   EuiCallOut,
@@ -12,13 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBadge,
   EuiText,
-  EuiPopover,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
@@ -58,7 +55,21 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
 
   if (ping.monitor.type === 'suitejourney' || ping.monitor.type === 'browser') {
-    return <ScriptExpandedRow checkGroup={ping.monitor.check_group} />;
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiCallOut
+            iconType="beaker"
+            title={i18n.translate('xpack.uptime.synthetics.experimentalCallout.title', {
+              defaultMessage: 'Experimental feature',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ScriptExpandedRow checkGroup={ping.monitor.check_group} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   // Show the error block
