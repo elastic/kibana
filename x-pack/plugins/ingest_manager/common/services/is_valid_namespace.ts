@@ -42,7 +42,7 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
     return {
       valid: false,
       error: i18n.translate('xpack.ingestManager.namespaceValidation.tooLongErrorMessage', {
-        defaultMessage: 'Namespace is too long',
+        defaultMessage: 'Namespace cannot be more than 100 bytes',
       }),
     };
   }
