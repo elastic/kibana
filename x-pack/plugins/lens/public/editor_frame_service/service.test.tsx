@@ -53,7 +53,7 @@ describe('editor_frame service', () => {
           query: { query: '', language: 'lucene' },
           filters: [],
           showNoDataPopover: jest.fn(),
-          visualizeTriggerFieldContext: {
+          initialContext: {
             indexPatternId: '1',
             fieldName: 'test',
           },

@@ -46,7 +46,7 @@ export interface EditorFrameProps {
     isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -69,7 +69,7 @@ export function EditorFrame(props: EditorFrameProps) {
           props.datasourceMap,
           state.datasourceStates,
           props.doc?.references,
-          props.visualizeTriggerFieldContext
+          props.initialContext
         )
           .then((result) => {
             if (!isUnmounted) {
@@ -281,7 +281,7 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
-              visualizeTriggerFieldContext={props.visualizeTriggerFieldContext}
+              visualizeTriggerFieldContext={props.initialContext}
             />
           )
         }

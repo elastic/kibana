@@ -135,7 +135,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      visualizeTriggerFieldContext?: VisualizeFieldContext
+      initialContext?: VisualizeFieldContext
     ) {
       return loadInitialState({
         persistedState,
@@ -144,7 +144,7 @@ export function getIndexPatternDatasource({
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
-        visualizeTriggerFieldContext,
+        initialContext,
       });
     },
 

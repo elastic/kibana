@@ -22,7 +22,7 @@ export const visualizeFieldAction = (application: ApplicationStart) =>
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: VisualizeFieldContext) => {
       application.navigateToApp('lens', {
-        state: context,
+        state: { type: ACTION_VISUALIZE_LENS_FIELD, payload: context },
       });
     },
   });

@@ -45,7 +45,7 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  visualizeTriggerFieldContext,
+  initialContext,
 }: LensAppProps) {
   const {
     data,
@@ -66,9 +66,7 @@ export function App({
   const [state, setState] = useState<LensAppState>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
-      query: visualizeTriggerFieldContext
-        ? data.query.queryString.getQuery()
-        : data.query.queryString.getDefaultQuery(),
+      query: data.query.queryString.getQuery(),
       filters: data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
@@ -145,9 +143,9 @@ export function App({
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
     // can be loaded without a full page refresh. If the user navigates to Lens from Discover
     // we keep the filters
-    if (visualizeTriggerFieldContext) return;
-
-    data.query.filterManager.setAppFilters([]);
+    if (!initialContext) {
+      data.query.filterManager.setAppFilters([]);
+    }
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
@@ -191,7 +189,7 @@ export function App({
     uiSettings,
     data.query,
     history,
-    visualizeTriggerFieldContext,
+    initialContext,
   ]);
 
   useEffect(() => {
@@ -581,7 +579,7 @@ export function App({
               doc: state.persistedDoc,
               onError,
               showNoDataPopover,
-              visualizeTriggerFieldContext,
+              initialContext,
               onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));

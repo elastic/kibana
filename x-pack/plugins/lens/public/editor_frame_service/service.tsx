@@ -135,7 +135,7 @@ export class EditorFrameService {
             savedQuery,
             onChange,
             showNoDataPopover,
-            visualizeTriggerFieldContext,
+            initialContext,
           }
         ) => {
           domElement = element;
@@ -163,7 +163,7 @@ export class EditorFrameService {
                 savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
-                visualizeTriggerFieldContext={visualizeTriggerFieldContext}
+                initialContext={initialContext}
               />
             </I18nProvider>,
             domElement

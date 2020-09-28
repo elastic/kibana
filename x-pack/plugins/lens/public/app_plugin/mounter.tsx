@@ -26,9 +26,9 @@ import {
   LensByReferenceInput,
   LensByValueInput,
 } from '../editor_frame_service/embeddable/embeddable';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
 import { LensAttributeService } from '../lens_attribute_service';
-import { LensAppServices, RedirectToOriginProps } from './types';
+import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export async function mountApp(
@@ -47,7 +47,7 @@ export async function mountApp(
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer(params.history);
-  const historyLocationState = params.history.location.state as VisualizeFieldContext;
+  const historyLocationState = params.history.location.state as HistoryLocationState;
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
 
   const lensServices: LensAppServices = {
@@ -134,9 +134,9 @@ export async function mountApp(
         onAppLeave={params.onAppLeave}
         setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
-        visualizeTriggerFieldContext={
-          historyLocationState && 'indexPatternId' in historyLocationState
-            ? historyLocationState
+        initialContext={
+          historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+            ? historyLocationState.payload
             : undefined
         }
       />

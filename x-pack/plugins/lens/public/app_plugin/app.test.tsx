@@ -280,6 +280,7 @@ describe('Lens App', () => {
             },
             "doc": undefined,
             "filters": Array [],
+            "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
@@ -288,7 +289,6 @@ describe('Lens App', () => {
             },
             "savedQuery": undefined,
             "showNoDataPopover": [Function],
-            "visualizeTriggerFieldContext": undefined,
           },
         ],
       ]

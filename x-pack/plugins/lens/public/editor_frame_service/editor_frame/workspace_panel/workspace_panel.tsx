@@ -195,33 +195,22 @@ export function InnerWorkspacePanel({
     }
   }, [expression, localState.expressionBuildError]);
 
-  useEffect(() => {
-    if (
-      !activeDatasourceId ||
-      !visualizeTriggerFieldContext ||
-      localState.visualizeTriggerSuggestionsLoaded ||
-      title
-    ) {
-      return;
-    }
-
+  if (visualizeTriggerFieldContext && !localState.visualizeTriggerSuggestionsLoaded && !title) {
     const suggestions = getSuggestions({
-      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
+      datasourceMap,
       datasourceStates,
       visualizationMap,
       activeVisualizationId,
       visualizationState,
       visualizeTriggerFieldContext,
     });
-
     if (suggestions.length) {
       const selectedSuggestion =
         suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
       switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
       setLocalState((s) => ({ ...s, visualizeTriggerSuggestionsLoaded: true }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visualizeTriggerFieldContext, visualizationState]);
+  }
 
   function onDrop() {
     if (suggestionForDraggedField) {

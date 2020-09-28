@@ -41,7 +41,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
   // This should be replaced with a top-down state
@@ -146,7 +146,7 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    visualizeTriggerFieldContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?

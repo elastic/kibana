@@ -1165,49 +1165,6 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
       });
-
-      it('should apply a bucketed aggregation for a date field', () => {
-        const suggestions = getDatasourceSuggestionsForVisualizeField(
-          stateWithEmptyLayer(),
-          '1',
-          'timestamp'
-        );
-
-        expect(suggestions).toContainEqual(
-          expect.objectContaining({
-            state: expect.objectContaining({
-              layers: {
-                previousLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'id2'],
-                  columns: {
-                    id1: expect.objectContaining({
-                      operationType: 'date_histogram',
-                      sourceField: 'timestamp',
-                    }),
-                    id2: expect.objectContaining({
-                      operationType: 'count',
-                    }),
-                  },
-                }),
-              },
-            }),
-            table: {
-              changeType: 'initial',
-              label: undefined,
-              isMultiRow: true,
-              columns: [
-                expect.objectContaining({
-                  columnId: 'id1',
-                }),
-                expect.objectContaining({
-                  columnId: 'id2',
-                }),
-              ],
-              layerId: 'previousLayer',
-            },
-          })
-        );
-      });
     });
 
     describe('finding the layer that is using the current index pattern', () => {

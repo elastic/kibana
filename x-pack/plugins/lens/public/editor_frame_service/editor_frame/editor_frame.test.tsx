@@ -977,7 +977,7 @@ describe('editor_frame', () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
-            visualizeTriggerFieldContext={{
+            initialContext={{
               indexPatternId: '1',
               fieldName: 'test',
             }}

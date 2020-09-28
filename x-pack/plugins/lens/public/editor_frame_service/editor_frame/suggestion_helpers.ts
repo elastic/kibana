@@ -73,15 +73,20 @@ export function getSuggestions({
   const datasourceTableSuggestions = _.flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
-      const dataSourceSuggestions = visualizeTriggerFieldContext
-        ? datasource.getDatasourceSuggestionsForVisualizeField(
-            datasourceState,
-            visualizeTriggerFieldContext.indexPatternId,
-            visualizeTriggerFieldContext.fieldName
-          )
-        : field
-        ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
-        : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState);
+      let dataSourceSuggestions;
+      if (visualizeTriggerFieldContext) {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
+          datasourceState,
+          visualizeTriggerFieldContext.indexPatternId,
+          visualizeTriggerFieldContext.fieldName
+        );
+      } else if (field) {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
+      } else {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
+          datasourceState
+        );
+      }
       return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
     })
   );

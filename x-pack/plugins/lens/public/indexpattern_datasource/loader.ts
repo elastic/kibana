@@ -180,7 +180,7 @@ export async function loadInitialState({
   defaultIndexPatternId,
   storage,
   indexPatternsService,
-  visualizeTriggerFieldContext,
+  initialContext,
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
@@ -188,7 +188,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
@@ -204,15 +204,13 @@ export async function loadInitialState({
       : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
-  const currentIndexPatternId = visualizeTriggerFieldContext?.indexPatternId ?? requiredPatterns[0];
+  const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
   setLastUsedIndexPatternId(storage, currentIndexPatternId);
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: visualizeTriggerFieldContext
-      ? [visualizeTriggerFieldContext.indexPatternId]
-      : requiredPatterns,
+    patterns: initialContext ? [initialContext.indexPatternId] : requiredPatterns,
   });
   if (state) {
     return {

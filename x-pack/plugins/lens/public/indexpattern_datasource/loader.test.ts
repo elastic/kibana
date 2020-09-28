@@ -447,7 +447,7 @@ describe('loader', () => {
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
-        visualizeTriggerFieldContext: {
+        initialContext: {
           indexPatternId: '1',
           fieldName: '',
         },
