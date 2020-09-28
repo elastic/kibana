@@ -19,6 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+
+jest.mock('brace/mode/json', () => ({}));
+
 import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 

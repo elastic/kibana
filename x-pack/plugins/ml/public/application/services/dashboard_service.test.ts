@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('brace/mode/json', () => ({}));
+
 import { dashboardServiceProvider } from './dashboard_service';
 import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
 import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';

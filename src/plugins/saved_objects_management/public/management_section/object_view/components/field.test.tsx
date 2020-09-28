@@ -20,6 +20,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
+
+jest.mock('brace/mode/json', () => ({}));
+
 import { Field } from './field';
 import { FieldState, FieldType } from '../../types';
 
