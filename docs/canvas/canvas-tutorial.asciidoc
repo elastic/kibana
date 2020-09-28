@@ -70,7 +70,7 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 .. Click *Run*.
 
 [role="screenshot"]
-image::images/canvas-metric-element.png[image displaying changes to canvas workpad]
+image::images/canvas-metric-element.png[Image showing changes to the Canvas workpad]
 
 [float]
 === Show off your data with charts
