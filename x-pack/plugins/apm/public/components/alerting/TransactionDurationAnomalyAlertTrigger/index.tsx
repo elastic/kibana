@@ -20,10 +20,6 @@ import {
 } from './SelectAnomalySeverity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
-import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
@@ -53,21 +49,17 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
+  const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
   if (serviceName && !transactionTypes.length) {
     return null;
   }
 
-  const transactionType = transactionTypes.find(
-    (type) => type === urlParams.transactionType
-  );
-
   const defaults: Params = {
     windowSize: 15,
     windowUnit: 'm',
-    transactionType,
+    transactionType: transactionType || transactionTypes[0],
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
@@ -80,7 +72,11 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
 
   const fields = [
     <ServiceField value={serviceName} />,
-    <TransactionTypeField currentValue={transactionType} />,
+    <TransactionTypeField
+      currentValue={params.transactionType}
+      options={transactionTypes.map((key) => ({ text: key, value: key }))}
+      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+    />,
     <EnvironmentField
       currentValue={params.environment}
       options={environmentOptions}

@@ -57,7 +57,7 @@ export function TransactionTypeField({
   options,
   onChange,
 }: {
-  currentValue: string;
+  currentValue?: string;
   options?: EuiSelectOption[];
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }) {
