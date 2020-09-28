@@ -587,3 +587,35 @@ export const relatedEventTotalForProcess: (
     };
   }
 );
+
+/**
+ * Total count of events related to `node`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode: (
+  state: DataState
+) => (nodeID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string) => {
+    const nodeStats = stats(nodeID);
+    return nodeStats === undefined ? undefined : nodeStats.events.total;
+  }
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const relatedEventCountOfTypeForNode: (
+  state: DataState
+) => (nodeID: string, category: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string, category: string) => {
+    const nodeStats = stats(nodeID);
+    if (!nodeStats) {
+      return undefined;
+    } else {
+      return nodeStats.events.byCategory[category];
+    }
+  }
+);

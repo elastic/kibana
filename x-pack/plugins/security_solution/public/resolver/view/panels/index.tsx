@@ -29,7 +29,7 @@ export const PanelRouter = memo(function () {
     return (
       <NodeEventsOfType
         nodeID={params.panelParameters.nodeID}
-        eventType={params.panelParameters.eventType}
+        eventCategory={params.panelParameters.eventType}
       />
     );
   } else if (params.panelView === 'eventDetail') {

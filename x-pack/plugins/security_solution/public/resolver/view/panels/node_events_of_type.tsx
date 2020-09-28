@@ -26,27 +26,25 @@ import { useFormattedDate } from './use_formatted_date';
  */
 export const NodeEventsOfType = memo(function NodeEventsOfType({
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
-  const eventCount = useSelector(
-    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
-  );
-  const eventsInCategoryCount = useSelector(
-    (state: ResolverState) =>
-      selectors.relatedEventsStats(state)(nodeID)?.events.byCategory[eventType]
-  );
-  const events = useSelector(
+  const { processEvent, eventCount, eventsInCategoryCount, events } = useSelector(
     useCallback(
       (state: ResolverState) => {
-        return selectors.relatedEventsByCategory(state)(nodeID, eventType);
+        return {
+          processEvent: selectors.processEventForID(state)(nodeID),
+          eventCount: selectors.totalRelatedEventCountForNode(state)(nodeID),
+          eventsInCategoryCount: selectors.relatedEventCountOfTypeForNode(state)(
+            nodeID,
+            eventCategory
+          ),
+          events: selectors.relatedEventsByCategory(state)(nodeID, eventCategory),
+        };
       },
-      [eventType, nodeID]
+      [eventCategory, nodeID]
     )
   );
 
@@ -58,13 +56,13 @@ export const NodeEventsOfType = memo(function NodeEventsOfType({
         <>
           <NodeEventsOfTypeBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
-            eventType={eventType}
+            eventCategory={eventCategory}
             eventCount={eventCount}
             nodeID={nodeID}
             eventsInCategoryCount={eventsInCategoryCount}
           />
           <EuiSpacer size="l" />
-          <NodeEventList eventType={eventType} nodeID={nodeID} events={events} />
+          <NodeEventList eventType={eventCategory} nodeID={nodeID} events={events} />
         </>
       )}
     </StyledPanel>
@@ -154,7 +152,7 @@ const NodeEventList = memo(function NodeEventList({
  */
 const NodeEventsOfTypeBreadcrumbs = memo(function ({
   nodeName,
-  eventType,
+  eventCategory,
   eventCount,
   nodeID,
   /**
@@ -163,7 +161,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
   eventsInCategoryCount,
 }: {
   nodeName: React.ReactNode;
-  eventType: string;
+  eventCategory: string;
   /**
    * The events to list.
    */
@@ -218,7 +216,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
           text: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
-              values={{ count: eventsInCategoryCount, category: eventType }}
+              values={{ count: eventsInCategoryCount, category: eventCategory }}
               defaultMessage="{count} {category}"
             />
           ),

@@ -328,6 +328,24 @@ export const relatedEventDetailHrefs = composeSelectors(
 );
 
 /**
+ * Total count of events related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.totalRelatedEventCountForNode
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const relatedEventCountOfTypeForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountOfTypeForNode
+);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
