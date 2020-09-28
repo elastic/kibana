@@ -18,7 +18,7 @@
  */
 
 import { ATTRIBUTE_SERVICE_KEY } from './attribute_service';
-import { mockAttributeService } from './attribute_service_mock';
+import { mockAttributeService } from './attribute_service.mock';
 import { coreMock } from '../../../../core/public/mocks';
 
 interface TestAttributes {

@@ -19,10 +19,10 @@ import {
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { AlertServices } from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { BuildRuleMessage } from '../rule_messages';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
