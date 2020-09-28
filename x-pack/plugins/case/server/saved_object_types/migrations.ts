@@ -20,8 +20,8 @@ interface UnsanitizedConfigure {
 interface SanitizedCase {
   connector: {
     id: string;
-    name: string;
-    type: string;
+    name: string | null;
+    type: string | null;
     fields: Array<Record<string, unknown>>;
   };
 }
@@ -29,8 +29,8 @@ interface SanitizedCase {
 interface SanitizedConfigure {
   connector: {
     id: string;
-    name: string;
-    type: string;
+    name: string | null;
+    type: string | null;
     fields: Array<Record<string, unknown>>;
   };
 }
@@ -47,8 +47,8 @@ export const caseMigrations = {
         ...attributesWithoutConnectorId,
         connector: {
           id: connector_id ?? 'none',
-          name: connector_id ? '' : 'none',
-          type: connector_id ? '' : '.none',
+          name: connector_id ? null : 'none',
+          type: connector_id ? null : '.none',
           fields: [],
         },
       },
@@ -70,7 +70,7 @@ export const configureMigrations = {
         connector: {
           id: connector_id ?? 'none',
           name: connector_name ?? 'none',
-          type: connector_id ? '' : '.none',
+          type: connector_id ? null : '.none',
           fields: [],
         },
       },
