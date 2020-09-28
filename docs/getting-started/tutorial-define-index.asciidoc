@@ -47,5 +47,11 @@ contains the time series data.
 [role="screenshot"]
 image::images/tutorial_index_patterns.png[All tutorial index patterns]
 
+NOTE: When you define an index pattern, the indices that match that pattern must
+exist in Elasticsearch and they must contain data. To check if the indices are
+available, open the menu, go to *Dev Tools > Console*, then enter `GET _cat/indices`. Alternately, use
+`curl -XGET "http://localhost:9200/_cat/indices"`.
+For Windows, run `Invoke-RestMethod -Uri "http://localhost:9200/_cat/indices"` in Powershell.
+
 
 
