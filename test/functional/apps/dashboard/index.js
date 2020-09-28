@@ -48,7 +48,7 @@ export default function ({ getService, loadTestFile }) {
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./empty_dashboard'));
+      // loadTestFile(require.resolve('./empty_dashboard'));
       loadTestFile(require.resolve('./url_field_formatter'));
       loadTestFile(require.resolve('./embeddable_rendering'));
       loadTestFile(require.resolve('./create_and_add_embeddables'));

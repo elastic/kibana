@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  DatatableColumnType,
-} from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
 
 interface FormatColumn {
   format: string;

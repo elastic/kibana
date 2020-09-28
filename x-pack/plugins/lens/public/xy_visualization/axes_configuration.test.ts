@@ -7,7 +7,6 @@
 import { LayerArgs } from './types';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -100,7 +99,7 @@ describe('axes_configuration', () => {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: ES_FIELD_TYPES.DATE,
+            type: 'date',
             field: 'order_date',
             source: 'esaggs',
             index: 'indexPatternId',
@@ -124,7 +123,7 @@ describe('axes_configuration', () => {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: ES_FIELD_TYPES.STRING,
+            type: 'string',
             field: 'category.keyword',
             source: 'esaggs',
             index: 'indexPatternId',
@@ -148,7 +147,7 @@ describe('axes_configuration', () => {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: ES_FIELD_TYPES.INTEGER,
+            type: 'number',
             source: 'esaggs',
             index: 'indexPatternId',
             sourceParams: {
@@ -161,7 +160,7 @@ describe('axes_configuration', () => {
           id: 'yAccessorId2',
           name: 'Other column',
           meta: {
-            type: ES_FIELD_TYPES.INTEGER,
+            type: 'number',
             source: 'esaggs',
             index: 'indexPatternId',
             sourceParams: {
@@ -174,7 +173,7 @@ describe('axes_configuration', () => {
           id: 'yAccessorId3',
           name: 'Other column',
           meta: {
-            type: ES_FIELD_TYPES.INTEGER,
+            type: 'number',
             source: 'esaggs',
             index: 'indexPatternId',
             sourceParams: {
@@ -187,7 +186,7 @@ describe('axes_configuration', () => {
           id: 'yAccessorId4',
           name: 'Other column',
           meta: {
-            type: ES_FIELD_TYPES.INTEGER,
+            type: 'number',
             source: 'esaggs',
             index: 'indexPatternId',
             sourceParams: {

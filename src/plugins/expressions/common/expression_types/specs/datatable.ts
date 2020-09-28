@@ -57,7 +57,8 @@ export type DatatableColumnType =
   | 'conflict'
   | 'object'
   | 'nested'
-  | 'histogram';
+  | 'histogram'
+  | 'null';
 
 /**
  * This type represents a row in a `Datatable`.

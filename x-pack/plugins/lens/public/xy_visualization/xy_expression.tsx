@@ -25,6 +25,7 @@ import {
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
   Datatable,
+  DatatableRow,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -522,14 +523,14 @@ export function XYChart({
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-          const tableConverted: KibanaDatatable = {
+          const tableConverted: Datatable = {
             ...table,
-            rows: table.rows.map((row) => {
+            rows: table.rows.map((row: DatatableRow) => {
               const newRow = { ...row };
               for (const column of table.columns) {
                 const record = newRow[column.id];
                 if (record && !isPrimitive(record)) {
-                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
+                  newRow[column.id] = formatFactory(column.meta.params).convert(record);
                 }
               }
               return newRow;

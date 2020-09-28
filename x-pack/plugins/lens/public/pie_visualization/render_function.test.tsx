@@ -13,7 +13,6 @@ import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -34,9 +33,9 @@ describe('PieVisualization component', () => {
         first: {
           type: 'datatable',
           columns: [
-            { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
-            { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
-            { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
           ],
           rows: [
             { a: 6, b: 2, c: 'I', d: 'Row 1' },
