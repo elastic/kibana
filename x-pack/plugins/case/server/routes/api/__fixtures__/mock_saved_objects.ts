@@ -6,7 +6,7 @@
 
 import { SavedObject } from 'kibana/server';
 import {
-  CasesConfigureAttributes,
+  ESCasesConfigureAttributes,
   CommentAttributes,
   ESCaseAttributes,
 } from '../../../../common/api';
@@ -292,7 +292,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
   },
 ];
 
-export const mockCaseConfigure: Array<SavedObject<CasesConfigureAttributes>> = [
+export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> = [
   {
     type: 'cases-configure',
     id: 'mock-configuration-1',
@@ -301,6 +301,7 @@ export const mockCaseConfigure: Array<SavedObject<CasesConfigureAttributes>> = [
         id: '789',
         name: 'My connector 3',
         type: '.jira',
+        fields: [],
       },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',

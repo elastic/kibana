@@ -51,6 +51,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
+          fields: {},
         },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
@@ -85,6 +86,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
+          fields: {},
         },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
@@ -103,6 +105,7 @@ describe('POST configuration', () => {
         connector: {
           name: 'My connector 2',
           type: '.jira',
+          fields: {},
         },
         closure_type: 'close-by-pushing',
       },
@@ -127,6 +130,7 @@ describe('POST configuration', () => {
         connector: {
           id: '456',
           type: '.jira',
+          fields: {},
         },
         closure_type: 'close-by-pushing',
       },
@@ -151,6 +155,7 @@ describe('POST configuration', () => {
         connector: {
           id: '456',
           name: 'My connector 2',
+          fields: {},
         },
         closure_type: 'close-by-pushing',
       },
@@ -176,6 +181,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
+          fields: {},
         },
       },
     });
@@ -314,7 +320,10 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: CASE_CONFIGURE_URL,
       method: 'post',
-      body: { ...newConfiguration, connector_id: 'no-version' },
+      body: {
+        ...newConfiguration,
+        connector: { id: 'no-version', name: 'no version', type: '.no-version', fields: {} },
+      },
     });
 
     const context = createRouteContext(

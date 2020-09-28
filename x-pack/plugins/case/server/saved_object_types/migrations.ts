@@ -31,6 +31,7 @@ interface SanitizedConfigure {
     id: string;
     name: string;
     type: string;
+    fields: Array<Record<string, unknown>>;
   };
 }
 
@@ -66,7 +67,12 @@ export const configureMigrations = {
       ...doc,
       attributes: {
         ...restAttributes,
-        connector: { id: connector_id, name: connector_name, type: '' },
+        connector: {
+          id: connector_id ?? 'none',
+          name: connector_name ?? 'none',
+          type: connector_id ? '' : '.none',
+          fields: [],
+        },
       },
       references: doc.references || [],
     };

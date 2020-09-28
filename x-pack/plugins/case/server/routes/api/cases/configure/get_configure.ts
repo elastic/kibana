@@ -26,6 +26,10 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
             myCaseConfigure.saved_objects.length > 0
               ? CaseConfigureResponseRt.encode({
                   ...myCaseConfigure.saved_objects[0].attributes,
+                  connector: {
+                    ...myCaseConfigure.saved_objects[0].attributes.connector,
+                    fields: {},
+                  },
                   version: myCaseConfigure.saved_objects[0].version ?? '',
                 })
               : {},
