@@ -44,6 +44,11 @@ const appServices = {
   api: apiService,
   notifications: notificationServiceMock.createSetupContract(),
   history,
+  urlGenerators: {
+    getUrlGenerator: jest.fn().mockReturnValue({
+      createUrl: jest.fn(),
+    }),
+  },
 };
 
 export const setupEnvironment = () => {

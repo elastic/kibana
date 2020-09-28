@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -23,10 +22,10 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { useWithSource } from '../../source';
 import * as i18n from './translations';
+import { DocValueFields } from '../../../../../common/search_strategy';
 
-// const ID = 'timelineEventsLastEventTimeQuery';
+const ID = 'timelineEventsLastEventTimeQuery';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -35,26 +34,29 @@ export interface UseTimelineLastEventTimeArgs {
 }
 
 interface UseTimelineLastEventTimeProps {
+  docValueFields: DocValueFields[];
   indexKey: LastEventIndexKey;
+  indexNames: string[];
   details: LastTimeDetails;
 }
 
 export const useTimelineLastEventTime = ({
+  docValueFields,
   indexKey,
+  indexNames,
   details,
 }: UseTimelineLastEventTimeProps): [boolean, UseTimelineLastEventTimeArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
-  const { docValueFields } = useWithSource('default');
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [TimelineLastEventTimeRequest, setTimelineLastEventTimeRequest] = useState<
     TimelineEventsLastEventTimeRequestOptions
   >({
-    defaultIndex,
-    factoryQueryType: TimelineEventsQueries.lastEventTime,
+    defaultIndex: indexNames,
     docValueFields,
+    factoryQueryType: TimelineEventsQueries.lastEventTime,
+    id: ID,
     indexKey,
     details,
   });
@@ -133,7 +135,8 @@ export const useTimelineLastEventTime = ({
     setTimelineLastEventTimeRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
+        docValueFields,
         indexKey,
         details,
       };
@@ -142,7 +145,7 @@ export const useTimelineLastEventTime = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, details, indexKey]);
+  }, [indexNames, details, docValueFields, indexKey]);
 
   useEffect(() => {
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
