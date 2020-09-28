@@ -98,6 +98,60 @@ describe('<TemplateEdit />', () => {
 
       expect(find('fieldsListItem').length).toBe(1);
     });
+
+    it('allows you to save the template', async () => {
+      const { actions } = testBed;
+      // Logistics
+      await actions.completeStepOne();
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      // Submit the form
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const { version } = templateToEdit;
+
+      const expected = {
+        name: 'index_template_without_mappings',
+        indexPatterns: ['indexPattern1'],
+        version,
+        _kbnMeta: {
+          type: 'default',
+          isLegacy: templateToEdit._kbnMeta.isLegacy,
+          hasDatastream: false,
+        },
+      };
+
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    it('allows you to view the "Request" tab', async () => {
+      const { actions, exists } = testBed;
+
+      // Logistics
+      await actions.completeStepOne();
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      await actions.review.selectTab('request');
+
+      expect(exists('requestTab')).toBe(true);
+    });
   });
 
   describe('with mappings', () => {
