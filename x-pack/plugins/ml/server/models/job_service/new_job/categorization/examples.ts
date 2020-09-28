@@ -61,6 +61,7 @@ export function categorizationExamplesProvider({
       size,
       body: {
         fields: [categorizationFieldName],
+        _source: false,
         query,
         sort: ['_doc'],
       },
