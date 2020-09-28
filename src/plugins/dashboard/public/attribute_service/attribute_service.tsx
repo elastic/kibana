@@ -27,7 +27,6 @@ import {
   IEmbeddable,
   Container,
   EmbeddableStart,
-  EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
 import { I18nStart, NotificationsStart } from '../../../../core/public';
@@ -47,8 +46,8 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     attributes: A,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  unwrapMethod?: (savedObjectId: string) => Promise<A>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
+  unwrapMethod?: (savedObjectId: string) => Promise<A>;
 }
 
 export class AttributeService<
@@ -58,8 +57,6 @@ export class AttributeService<
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > {
-  private embeddableFactory?: EmbeddableFactory;
-
   constructor(
     private type: string,
     private showSaveModal: (
@@ -68,20 +65,19 @@ export class AttributeService<
     ) => void,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
-    private options?: AttributeServiceOptions<SavedObjectAttributes>
+    private options: AttributeServiceOptions<SavedObjectAttributes>,
+    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory']
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(this.type);
       }
-      this.embeddableFactory = factory;
     }
   }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
-    if (this.inputIsRefType(input) && this.options && this.options.unwrapMethod) {
+    if (this.inputIsRefType(input) && this.options.unwrapMethod) {
       return this.options.unwrapMethod(input.savedObjectId);
     }
     return input[ATTRIBUTE_SERVICE_KEY];

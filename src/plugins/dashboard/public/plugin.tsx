@@ -493,8 +493,8 @@ export class DashboardPlugin
           showSaveModal,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
+          options,
+          embeddable.getEmbeddableFactory
         ),
     };
   }
