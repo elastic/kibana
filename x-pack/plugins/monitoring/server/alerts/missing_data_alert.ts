@@ -62,7 +62,7 @@ export class MissingDataAlert extends BaseAlert {
     } as CommonAlertParamDetail,
     limit: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
-        defaultMessage: `Look this far back in time for any data`,
+        defaultMessage: `Look this far back in time for monitoring data`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
