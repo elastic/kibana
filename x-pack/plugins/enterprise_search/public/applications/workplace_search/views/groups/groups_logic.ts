@@ -263,7 +263,6 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
       // Debounce search results when typing
       await breakpoint(300);
 
-      FlashMessagesLogic.actions.clearFlashMessages();
       actions.setGroupsLoading();
 
       const {
@@ -324,6 +323,18 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    openNewGroupModal: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    resetGroupsFilters: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    toggleFilterSourcesDropdown: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    toggleFilterUsersDropdown: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
