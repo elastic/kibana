@@ -896,7 +896,9 @@ describe('CredentialsLogic', () => {
 
       describe('activeApiTokenRawName', () => {
         it('should set `activeApiTokenRawName` to the name of the provided token', () => {
-          mount();
+          mount({
+            activeApiTokenRawName: 'Some Name',
+          });
 
           CredentialsLogic.actions.showCredentialsForm(newToken);
           expect(CredentialsLogic.values).toEqual({
@@ -906,7 +908,9 @@ describe('CredentialsLogic', () => {
         });
 
         it('should set `activeApiTokenRawName` to the default value if no token is provided', () => {
-          mount();
+          mount({
+            activeApiTokenRawName: 'Some Name',
+          });
 
           CredentialsLogic.actions.showCredentialsForm();
           expect(CredentialsLogic.values).toEqual({
@@ -914,18 +918,6 @@ describe('CredentialsLogic', () => {
             activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
           });
         });
-
-        // TODO: This fails, is this an issue? Instead of reseting back to the default value, it sets it to the previously
-        // used value... to be honest, this should probably just be a selector
-        // it('should set `activeApiTokenRawName` back to the default value if no token is provided', () => {
-        //   mount();
-        //   CredentialsLogic.actions.showCredentialsForm(newToken);
-        //   CredentialsLogic.actions.showCredentialsForm();
-        //   expect(CredentialsLogic.values).toEqual({
-        //     ...values,
-        //     activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
-        // });
-        // });
       });
 
       describe('activeApiToken', () => {

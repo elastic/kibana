@@ -182,8 +182,7 @@ export const CredentialsLogic = kea<
       '',
       {
         setTokenName: (_, activeApiTokenRawName) => activeApiTokenRawName,
-        showCredentialsForm: (activeApiTokenRawName, activeApiToken) =>
-          activeApiToken.name || activeApiTokenRawName,
+        showCredentialsForm: (_, activeApiToken) => activeApiToken.name,
         hideCredentialsForm: () => '',
         onApiTokenCreateSuccess: () => '',
         onApiTokenUpdateSuccess: () => '',
