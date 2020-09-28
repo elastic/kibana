@@ -20,6 +20,7 @@ import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 import { UXMetrics } from './UXMetrics';
 import { VisitorBreakdownMap } from './VisitorBreakdownMap';
+import { ImpactfulMetrics } from './ImpactfulMetrics';
 
 export const FULL_HEIGHT = { height: '100%' };
 
@@ -81,6 +82,36 @@ export function RumDashboard() {
             </>
           )}
         </EuiResizableContainer>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" wrap>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
+              <PageLoadDistribution />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
+              <PageViewsTrend />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={3}>
+            <EuiPanel>
+              <VisitorBreakdown />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiPanel>
+              <VisitorBreakdownMap />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ImpactfulMetrics />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

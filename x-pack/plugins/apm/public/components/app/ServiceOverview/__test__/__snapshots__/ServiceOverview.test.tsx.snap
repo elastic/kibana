@@ -223,30 +223,21 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiBadge euiBadge--hollow euiBadge--iconLeft"
-          title="test"
+          class="euiToolTipAnchor"
         >
           <span
-            class="euiBadge__content"
+            class="euiBadge euiBadge--iconLeft"
+            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+            title="2 environments"
           >
             <span
-              class="euiBadge__text"
+              class="euiBadge__content"
             >
-              test
-            </span>
-          </span>
-        </span>
-        <span
-          class="euiBadge euiBadge--hollow euiBadge--iconLeft"
-          title="dev"
-        >
-          <span
-            class="euiBadge__content"
-          >
-            <span
-              class="euiBadge__text"
-            >
-              dev
+              <span
+                class="euiBadge__text"
+              >
+                2 environments
+              </span>
             </span>
           </span>
         </span>

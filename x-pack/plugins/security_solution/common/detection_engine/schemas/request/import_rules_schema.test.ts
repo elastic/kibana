@@ -20,6 +20,8 @@ import {
 import {
   getImportRulesSchemaMock,
   getImportRulesSchemaDecodedMock,
+  getImportThreatMatchRulesSchemaMock,
+  getImportThreatMatchRulesSchemaDecodedMock,
 } from './import_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
@@ -1789,6 +1791,18 @@ describe('import rules schema', () => {
         exceptions_list: [],
         filters: [],
       };
+      expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters on an imported rule', () => {
+      const payload = getImportThreatMatchRulesSchemaMock();
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getImportThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
   });

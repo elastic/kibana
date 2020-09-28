@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return a 500 with invalid source policy', async () => {
+      it('should return a 404 with invalid source policy', async () => {
         await supertest
           .post(`/api/ingest_manager/agent_policies/INVALID_POLICY_ID/copy`)
           .set('kbn-xsrf', 'xxxx')
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'Copied policy',
             description: '',
           })
-          .expect(500);
+          .expect(404);
       });
 
       it('should return a 400 with invalid payload', async () => {

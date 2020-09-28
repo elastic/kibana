@@ -37,6 +37,18 @@ export const I18LABELS = {
       defaultMessage: 'Page load distribution',
     }
   ),
+  jsErrors: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
+    {
+      defaultMessage: 'JavaScript errors',
+    }
+  ),
+  highTrafficPages: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages',
+    {
+      defaultMessage: 'High traffic pages',
+    }
+  ),
   resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -77,6 +89,47 @@ export const I18LABELS = {
     'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
     {
       defaultMessage: 'Page load duration by region',
+    }
+  ),
+  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
+    defaultMessage: 'Search by url',
+  }),
+  getSearchResultsLabel: (total: number) =>
+    i18n.translate('xpack.apm.rum.filters.searchResults', {
+      defaultMessage: '{total} Search results',
+      values: { total },
+    }),
+  topPages: i18n.translate('xpack.apm.rum.filters.topPages', {
+    defaultMessage: 'Top pages',
+  }),
+  select: i18n.translate('xpack.apm.rum.filters.select', {
+    defaultMessage: 'Select',
+  }),
+  url: i18n.translate('xpack.apm.rum.filters.url', {
+    defaultMessage: 'Url',
+  }),
+  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
+    defaultMessage: 'Match this query',
+  }),
+  loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
+    defaultMessage: 'Loading results',
+  }),
+  noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
+    defaultMessage: 'No results available',
+  }),
+  totalErrors: i18n.translate('xpack.apm.rum.jsErrors.totalErrors', {
+    defaultMessage: 'Total errors',
+  }),
+  errorRate: i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+    defaultMessage: 'Error rate',
+  }),
+  errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
+    defaultMessage: 'Error message',
+  }),
+  impactedPageLoads: i18n.translate(
+    'xpack.apm.rum.jsErrors.impactedPageLoads',
+    {
+      defaultMessage: 'Impacted page loads',
     }
   ),
 };

@@ -3,15 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
+import { ObservabilityPluginSetupDeps } from '../plugin';
 import { renderApp } from './';
 
 describe('renderApp', () => {
-  it('renders', () => {
+  it('renders', async () => {
+    const plugins = ({
+      usageCollection: { reportUiStats: () => {} },
+    } as unknown) as ObservabilityPluginSetupDeps;
     const core = ({
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
       chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
@@ -24,7 +27,7 @@ describe('renderApp', () => {
     } as unknown) as AppMountParameters;
 
     expect(() => {
-      const unmount = renderApp(core, params);
+      const unmount = renderApp(core, plugins, params);
       unmount();
     }).not.toThrowError();
   });
