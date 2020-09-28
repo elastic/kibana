@@ -7,8 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-jest.mock('brace/mode/json', () => ({}));
-
 import { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 

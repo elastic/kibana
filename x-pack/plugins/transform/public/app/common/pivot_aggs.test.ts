@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('brace/mode/json', () => ({}));
-
 import { getAggConfigFromEsAgg } from './pivot_aggs';
 import {
   FilterAggForm,

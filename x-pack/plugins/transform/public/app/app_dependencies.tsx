@@ -8,6 +8,8 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ScopedHistory } from 'kibana/public';
 
+import 'brace/mode/json';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 

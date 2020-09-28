@@ -7,8 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-jest.mock('brace/mode/json', () => ({}));
-
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
