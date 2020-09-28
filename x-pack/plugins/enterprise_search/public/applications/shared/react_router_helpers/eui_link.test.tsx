@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/shallow_usecontext.mock';
+import '../../__mocks__/kea.mock';
 import '../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiLink, EuiButton } from '@elastic/eui';
 
-import { mockKibanaContext, mockHistory } from '../../__mocks__';
+import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
 import { EuiReactRouterLink, EuiReactRouterButton } from './eui_link';
 
@@ -69,7 +69,7 @@ describe('EUI & React Router Component Helpers', () => {
       wrapper.find(EuiLink).simulate('click', simulatedEvent);
 
       expect(simulatedEvent.preventDefault).toHaveBeenCalled();
-      expect(mockKibanaContext.navigateToUrl).toHaveBeenCalled();
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
@@ -81,7 +81,7 @@ describe('EUI & React Router Component Helpers', () => {
       };
       wrapper.find(EuiLink).simulate('click', simulatedEvent);
 
-      expect(mockKibanaContext.navigateToUrl).not.toHaveBeenCalled();
+      expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
     });
 
     it('calls inherited onClick actions in addition to default navigation', () => {

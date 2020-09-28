@@ -18,9 +18,11 @@
  */
 
 import _ from 'lodash';
+import { ReactElement } from 'react';
 import { VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
+import { Vis } from '../vis';
 
 interface CommonBaseVisTypeOptions {
   name: string;
@@ -41,6 +43,8 @@ interface CommonBaseVisTypeOptions {
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
+  isDeprecated?: boolean;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 }
 
 interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
@@ -80,6 +84,8 @@ export class BaseVisType<TVisParams = VisParams> {
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst<TVisParams>;
+  isDeprecated: boolean;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -117,6 +123,8 @@ export class BaseVisType<TVisParams = VisParams> {
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
+    this.isDeprecated = opts.isDeprecated || false;
+    this.getDeprecationMessage = opts.getDeprecationMessage;
   }
 
   public get schemas() {
