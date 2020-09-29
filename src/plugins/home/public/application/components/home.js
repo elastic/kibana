@@ -143,6 +143,8 @@ export class Home extends Component {
                   </h1>
                 </EuiTitle>
               }
+              showDevToolsLink
+              showManagementLink
             />
           </div>
         </header>

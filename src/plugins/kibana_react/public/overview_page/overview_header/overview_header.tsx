@@ -25,14 +25,19 @@ import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kiban
 
 interface Props {
   title: JSX.Element;
+  showDevToolsLink?: boolean;
+  showManagementLink?: boolean;
 }
 
-export const OverviewHeader: FC<Props> = ({ title }) => {
+export const OverviewHeader: FC<Props> = ({ title, showManagementLink, showDevToolsLink }) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
 
-  const { management: showManagement, dev_tools: showDevtools } = application.capabilities.navLinks;
+  const {
+    management: isManagementEnabled,
+    dev_tools: isDevToolsEnabled,
+  } = application.capabilities.navLinks;
 
   return (
     <EuiFlexGroup>
@@ -49,7 +54,7 @@ export const OverviewHeader: FC<Props> = ({ title }) => {
             </RedirectAppLinks>
           </EuiFlexItem>
 
-          {showManagement ? (
+          {showManagementLink && isManagementEnabled ? (
             <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
               <RedirectAppLinks application={application}>
                 <EuiButtonEmpty iconType="gear" href={'/app/management'}>
@@ -61,7 +66,7 @@ export const OverviewHeader: FC<Props> = ({ title }) => {
             </EuiFlexItem>
           ) : null}
 
-          {showDevtools ? (
+          {showDevToolsLink && isDevToolsEnabled ? (
             <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
               <RedirectAppLinks application={application}>
                 <EuiButtonEmpty iconType="wrench" href={'/app/dev_tools#/console'}>

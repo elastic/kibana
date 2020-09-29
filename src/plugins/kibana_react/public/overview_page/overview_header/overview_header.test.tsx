@@ -30,7 +30,7 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 
-afterEach(() => jest.clearAllMocks());
+afterAll(() => jest.clearAllMocks());
 
 const mockTitle = <h1>Page Title</h1>;
 

@@ -20,6 +20,7 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
@@ -30,11 +31,11 @@ import {
 import './index';
 
 interface Props {
+  /** The path to set as the new default route in advanced settings */
   path: string;
-  className?: string;
 }
 
-export const OverviewFooter: FC<Props> = ({ path, className }) => {
+export const OverviewFooter: FC<Props> = ({ path }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {
@@ -43,7 +44,8 @@ export const OverviewFooter: FC<Props> = ({ path, className }) => {
     },
   } = useKibana<CoreStart>();
 
-  const isAdvancedSettingsEnabled = application.capabilities.advancedSettings.show;
+  const { show, save } = application.capabilities.advancedSettings;
+  const isAdvancedSettingsEnabled = show && save;
 
   const defaultRoutebutton =
     defaultRoute === path ? (
@@ -64,7 +66,11 @@ export const OverviewFooter: FC<Props> = ({ path, className }) => {
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
-          toasts.addSuccess('Set this page as your landing page');
+          toasts.addSuccess(
+            i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
+              defaultMessage: 'The Kibana overview is now your landing page.',
+            })
+          );
         }}
         size="xs"
       >
@@ -76,7 +82,7 @@ export const OverviewFooter: FC<Props> = ({ path, className }) => {
     );
 
   return (
-    <footer className={`kbnOverviewFooter ${className}`}>
+    <footer className={`kbnOverviewFooter`}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {isAdvancedSettingsEnabled ? defaultRoutebutton : null}
