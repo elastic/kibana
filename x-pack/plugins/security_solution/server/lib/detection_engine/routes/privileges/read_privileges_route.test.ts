@@ -20,6 +20,9 @@ describe('read_privileges route', () => {
 
     mockSecurity = securityMock.createSetup();
     mockSecurity.authc.isAuthenticated.mockReturnValue(false);
+    mockSecurity.authz.checkPrivilegesDynamicallyWithRequest.mockImplementation(() => () => ({
+      hasAllRequested: true,
+    }));
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivilegesResult());
     readPrivilegesRoute(server.router, mockSecurity, false);
   });
@@ -36,6 +39,7 @@ describe('read_privileges route', () => {
         ...getMockPrivilegesResult(),
         is_authenticated: false,
         has_encryption_key: true,
+        can_read_actions: true,
       };
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expectedBody);
@@ -47,6 +51,7 @@ describe('read_privileges route', () => {
         ...getMockPrivilegesResult(),
         is_authenticated: true,
         has_encryption_key: true,
+        can_read_actions: true,
       };
 
       const response = await server.inject(getPrivilegeRequest(), context);
@@ -85,6 +90,7 @@ describe('read_privileges route', () => {
         ...getMockPrivilegesResult(),
         is_authenticated: false,
         has_encryption_key: true,
+        can_read_actions: false,
       };
 
       const response = await server.inject(getPrivilegeRequest(), context);

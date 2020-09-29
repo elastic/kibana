@@ -23,6 +23,7 @@ describe('usePrivilegeUser', () => {
         hasIndexWrite: null,
         isAuthenticated: null,
         loading: true,
+        canReadActions: null,
       });
     });
   });
@@ -40,6 +41,7 @@ describe('usePrivilegeUser', () => {
         hasIndexWrite: true,
         isAuthenticated: true,
         loading: false,
+        canReadActions: true,
       });
     });
   });
@@ -61,6 +63,7 @@ describe('usePrivilegeUser', () => {
         hasIndexWrite: false,
         isAuthenticated: false,
         loading: false,
+        canReadActions: false,
       });
     });
   });
