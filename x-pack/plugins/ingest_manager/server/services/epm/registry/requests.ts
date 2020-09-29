@@ -6,13 +6,10 @@
 
 import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
-import HttpProxyAgent from 'http-proxy-agent';
-import type { HttpsProxyAgent as IHttpsProxyAgent } from 'https-proxy-agent';
-import HttpsProxyAgent from 'https-proxy-agent';
-import { getProxyForUrl as getProxyFromEnvForUrl } from 'proxy-from-env';
 import { streamToString } from './streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { getProxyAgent, getProxyForUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
@@ -86,43 +83,16 @@ function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
 }
 
-type ProxyAgent = IHttpsProxyAgent | HttpProxyAgent;
-export function getFetchOptions(url: string): RequestInit | {} {
-  // start with env values and can add from flags, defaults, etc later
-  const proxyUrl = getProxyFromEnvForUrl(url);
+export function getFetchOptions(targetUrl: string): RequestInit | {} {
+  const proxyUrl = getProxyForUrl(targetUrl);
   if (!proxyUrl) {
     return {};
   }
 
   const logger = appContextService.getLogger();
-  logger.info(`Using proxy ${proxyUrl} from environment variable`);
+  logger.debug(`Using ${proxyUrl} from environment variable as proxy for ${targetUrl}`);
 
   return {
-    agent: getProxyAgent(proxyUrl, url),
+    agent: getProxyAgent({ proxyUrl, targetUrl }),
   };
-}
-
-export function getProxyAgent(proxyUrl: string, endpointUrl: string): ProxyAgent {
-  const endpointParsed = new URL(endpointUrl);
-  const proxyParsed = new URL(proxyUrl);
-
-  const agentOptions = {
-    host: proxyParsed.hostname,
-    port: Number(proxyParsed.port),
-    protocol: proxyParsed.protocol,
-    // the proxied URL's host is put in the header instead of the server's actual host
-    // headers: proxySettings.proxyHeaders,
-    headers: {
-      Host: endpointParsed.host,
-    },
-    // rejectUnauthorized: proxySettings.proxyRejectUnauthorizedCertificates,
-  };
-
-  const isHttps = endpointParsed.protocol === 'https:';
-  const agent: ProxyAgent = isHttps
-    ? // @ts-expect-error ts(7009) HttpsProxyAgent isn't a class so TS complains about using `new`
-      new HttpsProxyAgent(agentOptions)
-    : new HttpProxyAgent(proxyUrl);
-
-  return agent;
 }
