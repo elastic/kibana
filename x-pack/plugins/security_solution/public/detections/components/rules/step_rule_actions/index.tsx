@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
@@ -34,6 +35,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
+import { useUserInfo } from '../../user_info';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -141,6 +143,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [isLoading, throttleOptions]
   );
 
+  const { canReadActions } = useUserInfo();
+
   return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription schema={schema} data={initialState} columns="single" />
@@ -148,31 +152,35 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepRuleActions">
-          <EuiForm>
-            <UseField
-              path="throttle"
-              component={ThrottleSelectField}
-              componentProps={throttleFieldComponentProps}
-            />
-            {throttle !== stepActionsDefaultValue.throttle ? (
-              <>
-                <EuiSpacer />
-                <UseField
-                  path="actions"
-                  component={RuleActionsField}
-                  componentProps={{
-                    messageVariables: actionMessageParams,
-                  }}
-                />
-              </>
-            ) : (
-              <UseField path="actions" component={GhostFormField} />
-            )}
-            <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
-            <UseField path="enabled" component={GhostFormField} />
-          </EuiForm>
-        </Form>
+        {canReadActions ? (
+          <Form form={form} data-test-subj="stepRuleActions">
+            <EuiForm>
+              <UseField
+                path="throttle"
+                component={ThrottleSelectField}
+                componentProps={throttleFieldComponentProps}
+              />
+              {throttle !== stepActionsDefaultValue.throttle ? (
+                <>
+                  <EuiSpacer />
+                  <UseField
+                    path="actions"
+                    component={RuleActionsField}
+                    componentProps={{
+                      messageVariables: actionMessageParams,
+                    }}
+                  />
+                </>
+              ) : (
+                <UseField path="actions" component={GhostFormField} />
+              )}
+              <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
+              <UseField path="enabled" component={GhostFormField} />
+            </EuiForm>
+          </Form>
+        ) : (
+          <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
