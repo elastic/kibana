@@ -341,6 +341,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
           {...droppableProvided.droppableProps}
         >
           {GroupDataProviders}
+          {droppableProvided.placeholder}
         </DroppableContainer>
       ),
       [GroupDataProviders, isLastGroup]

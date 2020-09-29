@@ -174,30 +174,36 @@ export const EventsCount = React.memo(EventsCountComponent);
 
 EventsCount.displayName = 'EventsCount';
 
-export const PagingControlComponent = ({
-  activePage,
-  isLoading,
-  onPageClick,
-  totalPages,
-}: {
+interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
   totalPages: number;
-}) => (
-  <>
-    {isLoading ? (
-      `${i18n.LOADING}...`
-    ) : (
-      <EuiPagination
-        data-test-subj="timeline-pagination"
-        pageCount={totalPages}
-        activePage={activePage}
-        onPageClick={onPageClick}
-      />
-    )}
-  </>
-);
+}
+
+const PagingControlComponent: React.FC<PagingControlProps> = ({
+  activePage,
+  isLoading,
+  onPageClick,
+  totalPages,
+}) => {
+  if (isLoading) {
+    return <>{`${i18n.LOADING}...`}</>;
+  }
+
+  if (!totalPages) {
+    return null;
+  }
+
+  return (
+    <EuiPagination
+      data-test-subj="timeline-pagination"
+      pageCount={totalPages}
+      activePage={activePage}
+      onPageClick={onPageClick}
+    />
+  );
+};
 
 PagingControlComponent.displayName = 'PagingControlComponent';
 
