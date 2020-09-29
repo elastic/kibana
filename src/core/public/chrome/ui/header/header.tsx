@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
@@ -88,7 +88,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
+    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
@@ -97,7 +97,6 @@ export function Header({
 
   return (
     <>
-      <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           <EuiHeader
@@ -112,6 +111,7 @@ export function Header({
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
                   />,
+                  <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],
                 borders: 'none',
               },
