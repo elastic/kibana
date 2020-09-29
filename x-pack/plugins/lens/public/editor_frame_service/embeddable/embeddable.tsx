@@ -295,6 +295,12 @@ export class Embeddable
     return this.deps.attributeService.getInputAsValueType(input);
   };
 
+  // same API as Visualize
+  public getVisualizationDescription() {
+    // mind that savedViz is loaded in async way here
+    return this.savedVis && this.savedVis.description;
+  }
+
   destroy() {
     super.destroy();
     if (this.domNode) {
