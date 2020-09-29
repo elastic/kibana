@@ -261,14 +261,6 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(res.statusCode).equal(404);
       });
-      it('should have created the index for the transform', async function () {
-        // the  index is defined in the transform file
-        const res = await es.transport.request({
-          method: 'GET',
-          path: `/logs-all_assets.test_log_current-default`,
-        });
-        expect(res.statusCode).equal(200);
-      });
       it('should have uninstalled the kibana assets', async function () {
         let resDashboard;
         try {
