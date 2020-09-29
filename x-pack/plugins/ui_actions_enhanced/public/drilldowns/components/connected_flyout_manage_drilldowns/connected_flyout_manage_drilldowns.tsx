@@ -8,7 +8,6 @@ import React, { useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 // eslint-disable-next-line no-restricted-imports
 import intersection from 'lodash/intersection';
-import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
