@@ -99,7 +99,7 @@ describe('<TemplateEdit />', () => {
       expect(find('fieldsListItem').length).toBe(1);
     });
 
-    it('allows you to save the template', async () => {
+    it('allows you to save an unmodified template', async () => {
       const { actions } = testBed;
       // Logistics
       await actions.completeStepOne();
@@ -134,7 +134,7 @@ describe('<TemplateEdit />', () => {
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
 
-    it('allows you to view the "Request" tab', async () => {
+    it('allows you to view the "Request" tab of an unmodified template', async () => {
       const { actions, exists } = testBed;
 
       // Logistics
