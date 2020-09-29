@@ -45,7 +45,8 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
-import { installTransformForDataset } from '../elasticsearch/transform/install';
+import { installTransform } from '../elasticsearch/transform/install';
+import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -325,7 +326,7 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
-  const installedTransforms = await installTransformForDataset(
+  const installedTransforms = await installTransform(
     registryPackageInfo,
     paths,
     callCluster,
