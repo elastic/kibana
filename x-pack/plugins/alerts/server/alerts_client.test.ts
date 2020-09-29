@@ -769,7 +769,9 @@ describe('create()', () => {
 
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
-    actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
+    // Reset from default behaviour
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockRejectedValue(new Error('Test Error'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
