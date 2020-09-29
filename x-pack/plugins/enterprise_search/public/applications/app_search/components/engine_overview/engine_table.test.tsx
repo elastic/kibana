@@ -6,11 +6,9 @@
 
 import '../../../__mocks__/kea.mock';
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mockHttpValues } from '../../../__mocks__/';
+import { mockHttpValues, mountWithIntl } from '../../../__mocks__/';
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
@@ -21,24 +19,22 @@ import { EngineTable } from './engine_table';
 describe('EngineTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
-  const wrapper = mount(
-    <I18nProvider>
-      <EngineTable
-        data={[
-          {
-            name: 'test-engine',
-            created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-            document_count: 99999,
-            field_count: 10,
-          },
-        ]}
-        pagination={{
-          totalEngines: 50,
-          pageIndex: 0,
-          onPaginate,
-        }}
-      />
-    </I18nProvider>
+  const wrapper = mountWithIntl(
+    <EngineTable
+      data={[
+        {
+          name: 'test-engine',
+          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+          document_count: 99999,
+          field_count: 10,
+        },
+      ]}
+      pagination={{
+        totalEngines: 50,
+        pageIndex: 0,
+        onPaginate,
+      }}
+    />
   );
   const table = wrapper.find(EuiBasicTable);
 
@@ -78,13 +74,8 @@ describe('EngineTable', () => {
   });
 
   it('handles empty data', () => {
-    const emptyWrapper = mount(
-      <I18nProvider>
-        <EngineTable
-          data={[]}
-          pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }}
-        />
-      </I18nProvider>
+    const emptyWrapper = mountWithIntl(
+      <EngineTable data={[]} pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }} />
     );
     const emptyTable = emptyWrapper.find(EuiBasicTable);
 
