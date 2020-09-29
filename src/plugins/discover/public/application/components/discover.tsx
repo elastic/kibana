@@ -216,7 +216,7 @@ export function Discover({
                   defaultMessage="Fields"
                 />
                 <EuiBadge className="dscSidebar__mobileBadge" color="accent">
-                  5
+                  {state.columns[0] === '_source' ? 0 : state.columns.length}
                 </EuiBadge>
               </EuiButton>
             </div>

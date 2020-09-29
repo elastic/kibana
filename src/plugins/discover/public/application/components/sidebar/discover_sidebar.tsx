@@ -26,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -188,50 +189,61 @@ export function DiscoverSidebar({
               <div className="dscSidebar__scrollSectionList">
                 {fields.length > 0 && (
                   <>
-                    <EuiAccordion
-                      id="dscSelectedFields"
-                      initialIsOpen={true}
-                      buttonContent={
-                        <EuiText size="xs">
-                          <strong>
-                            <FormattedMessage
-                              id="discover.fieldChooser.filter.selectedFieldsTitle"
-                              defaultMessage="Selected fields"
-                            />
-                          </strong>
-                        </EuiText>
-                      }
-                    >
-                      <EuiSpacer size="s" />
-                      <ul
-                        className="dscFieldList dscFieldList--selected"
-                        aria-labelledby="selected_fields"
-                        data-test-subj={`fieldList-selected`}
-                      >
-                        {selectedFields.map((field: IndexPatternField) => {
-                          return (
-                            <li
-                              key={`field${field.name}`}
-                              data-attr-field={field.name}
-                              className="dscSidebar__item"
-                            >
-                              <DiscoverField
-                                field={field}
-                                indexPattern={selectedIndexPattern}
-                                onAddField={onAddField}
-                                onRemoveField={onRemoveField}
-                                onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
-                                selected={true}
-                                useShortDots={useShortDots}
-                                mobile={mobile}
-                              />
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </EuiAccordion>
-                    {selectedFields && selectedFields.length > 0 ? <EuiSpacer size="m" /> : null}
+                    {selectedFields &&
+                    selectedFields.length > 0 &&
+                    selectedFields[0].displayName !== '_source' ? (
+                      <>
+                        <EuiAccordion
+                          id="dscSelectedFields"
+                          initialIsOpen={true}
+                          buttonContent={
+                            <EuiText size="xs">
+                              <strong>
+                                <FormattedMessage
+                                  id="discover.fieldChooser.filter.selectedFieldsTitle"
+                                  defaultMessage="Selected fields"
+                                />
+                              </strong>
+                            </EuiText>
+                          }
+                          extraAction={
+                            <EuiNotificationBadge size="m" color="subdued">
+                              {selectedFields.length}
+                            </EuiNotificationBadge>
+                          }
+                        >
+                          <EuiSpacer size="s" />
+                          <ul
+                            className="dscFieldList dscFieldList--selected"
+                            aria-labelledby="selected_fields"
+                            data-test-subj={`fieldList-selected`}
+                          >
+                            {selectedFields.map((field: IndexPatternField) => {
+                              return (
+                                <li
+                                  key={`field${field.name}`}
+                                  data-attr-field={field.name}
+                                  className="dscSidebar__item"
+                                >
+                                  <DiscoverField
+                                    field={field}
+                                    indexPattern={selectedIndexPattern}
+                                    onAddField={onAddField}
+                                    onRemoveField={onRemoveField}
+                                    onAddFilter={onAddFilter}
+                                    getDetails={getDetailsByField}
+                                    selected={true}
+                                    useShortDots={useShortDots}
+                                    mobile={mobile}
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </EuiAccordion>
+                        <EuiSpacer size="m" />{' '}
+                      </>
+                    ) : null}
                     <EuiAccordion
                       id="dscAvailableFields"
                       initialIsOpen={true}
@@ -244,6 +256,11 @@ export function DiscoverSidebar({
                             />
                           </strong>
                         </EuiText>
+                      }
+                      extraAction={
+                        <EuiNotificationBadge size="m" color="subdued">
+                          {popularFields.length + unpopularFields.length}
+                        </EuiNotificationBadge>
                       }
                     >
                       <EuiSpacer size="s" />
