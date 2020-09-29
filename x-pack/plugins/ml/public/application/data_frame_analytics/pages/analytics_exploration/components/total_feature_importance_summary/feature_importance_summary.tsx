@@ -120,13 +120,15 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       // if binary classification
       if (totalFeatureImportance[0].classes.length === 2) {
         classificationType = 'binary_classification';
-        sortedData = (totalFeatureImportance as ClassificationTotalFeatureImportance[]).map((d) => {
-          return {
-            featureName: d.feature_name,
-            // in case of binary classification, both classes will have the same mean importance
-            meanImportance: d.classes[0].importance.mean_magnitude,
-          };
-        });
+        sortedData = (totalFeatureImportance as ClassificationTotalFeatureImportance[])
+          .map((d) => {
+            return {
+              featureName: d.feature_name,
+              // in case of binary classification, both classes will have the same mean importance
+              meanImportance: d.classes[0].importance.mean_magnitude,
+            };
+          })
+          .sort((a, b) => b.meanImportance - a.meanImportance);
       }
 
       // if multiclass classification
