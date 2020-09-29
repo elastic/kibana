@@ -39,54 +39,6 @@ exports[`OverviewHeader render 1`] = `
           </EuiButtonEmpty>
         </mockConstructor>
       </EuiFlexItem>
-      <EuiFlexItem
-        className="kbnOverviewHeader__actionItem"
-        grow={false}
-      >
-        <mockConstructor
-          application={
-            Object {
-              "capabilities": Object {
-                "navLinks": Object {
-                  "dev_tools": true,
-                  "management": true,
-                },
-              },
-            }
-          }
-        >
-          <EuiButtonEmpty
-            href="/app/management"
-            iconType="gear"
-          >
-            Manage
-          </EuiButtonEmpty>
-        </mockConstructor>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="kbnOverviewHeader__actionItem"
-        grow={false}
-      >
-        <mockConstructor
-          application={
-            Object {
-              "capabilities": Object {
-                "navLinks": Object {
-                  "dev_tools": true,
-                  "management": true,
-                },
-              },
-            }
-          }
-        >
-          <EuiButtonEmpty
-            href="/app/dev_tools#/console"
-            iconType="wrench"
-          >
-            Dev tools
-          </EuiButtonEmpty>
-        </mockConstructor>
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
 </EuiFlexGroup>

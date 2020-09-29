@@ -2,7 +2,7 @@
 
 exports[`OverviewFooter render 1`] = `
 <footer
-  className="kbnOverviewFooter undefined"
+  className="kbnOverviewFooter"
 >
   <EuiFlexGroup
     alignItems="center"
@@ -10,19 +10,7 @@ exports[`OverviewFooter render 1`] = `
   >
     <EuiFlexItem
       grow={false}
-    >
-      <EuiButtonEmpty
-        iconType="home"
-        onClick={[Function]}
-        size="xs"
-      >
-        <FormattedMessage
-          defaultMessage="Make this my landing page"
-          id="kibana-react.overviewFooter.makeDefaultRouteLink"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+    />
     <EuiFlexItem
       grow={false}
     >

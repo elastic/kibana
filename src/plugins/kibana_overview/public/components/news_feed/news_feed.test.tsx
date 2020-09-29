@@ -32,7 +32,7 @@ const mockNewsFetchResult = {
       hash: 'hash1',
       linkText: 'Read more on the blog',
       linkUrl: 'link-blog-post-1',
-      publishOn: moment('2020-08-31T04:23:47Z'),
+      publishOn: moment('2020-08-31T11:23:47Z'),
       title: 'Blog Post 1',
     },
     {
@@ -42,7 +42,7 @@ const mockNewsFetchResult = {
       hash: 'hash2',
       linkText: 'Read more on the blog',
       linkUrl: 'link-blog-post-2',
-      publishOn: moment('2020-08-14T04:23:47Z'),
+      publishOn: moment('2020-08-14T11:23:47Z'),
       title: 'Alerting and anomaly detection for uptime and reliability',
     },
     {
@@ -52,7 +52,7 @@ const mockNewsFetchResult = {
       hash: 'hash3',
       linkText: 'Learn more on the blog',
       linkUrl: 'link-blog-post-3',
-      publishOn: moment('2020-08-01T04:23:47Z'),
+      publishOn: moment('2020-08-01T11:23:47Z'),
       title: 'Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management',
     },
   ],
