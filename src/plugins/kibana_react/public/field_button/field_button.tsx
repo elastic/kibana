@@ -19,8 +19,7 @@
 
 import './field_button.scss';
 import classNames from 'classnames';
-import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
-import { CommonProps } from '@elastic/eui';
+import React, { ReactNode, HTMLAttributes } from 'react';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -54,13 +53,10 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   size?: ButtonSize;
   className?: string;
   /**
-   * The component always renders a `<button>` and therefore will always need an `onClick`
+   * The component will render a `<button>` when provided an `onClick`
    */
-  onClick: () => void;
-  /**
-   * Pass more button props to the actual `<button>` element
-   */
-  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
+  onClick?: () => void;
+  dataTestSubj?: string;
 }
 
 const sizeToClassNameMap = {
@@ -82,8 +78,7 @@ export function FieldButton({
   className,
   isDraggable = false,
   onClick,
-  buttonProps,
-  ...rest
+  dataTestSubj,
 }: FieldButtonProps) {
   const classes = classNames(
     'kbnFieldButton',
@@ -93,27 +88,31 @@ export function FieldButton({
     className
   );
 
-  const buttonClasses = classNames(
-    'kbn-resetFocusState kbnFieldButton__button',
-    buttonProps && buttonProps.className
-  );
-
   return (
-    <div className={classes} {...rest}>
-      <button
-        onClick={(e) => {
-          if (e.type === 'click') {
-            e.currentTarget.focus();
-          }
-          onClick();
-        }}
-        {...buttonProps}
-        className={buttonClasses}
-      >
-        {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
-        {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
-        {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
-      </button>
+    <div className={classes}>
+      {onClick ? (
+        <button
+          onClick={(e) => {
+            if (e.type === 'click') {
+              e.currentTarget.focus();
+            }
+            onClick();
+          }}
+          data-test-subj={dataTestSubj}
+          className={'kbn-resetFocusState kbnFieldButton__button'}
+        >
+          {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+          {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
+          {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+        </button>
+      ) : (
+        <div className={'kbn-resetFocusState kbnFieldButton__button'} data-test-subj={dataTestSubj}>
+          {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+          {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
+          {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+        </div>
+      )}
+
       {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
     </div>
   );
