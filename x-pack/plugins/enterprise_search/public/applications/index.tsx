@@ -41,6 +41,7 @@ export const renderApp = (
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
+    history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setDocTitle: core.chrome.docTitle.change,
@@ -55,9 +56,7 @@ export const renderApp = (
     errorConnecting,
     readOnlyMode: initialData.readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic({
-    history: params.history,
-  });
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
