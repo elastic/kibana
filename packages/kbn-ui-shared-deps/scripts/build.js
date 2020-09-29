@@ -40,7 +40,7 @@ run(
     );
 
     /** @param {webpack.Stats} stats */
-    const onCompilationComplete = (stats) => {
+    const onCompilationComplete = async (stats) => {
       const took = Math.round((stats.endTime - stats.startTime) / 1000);
 
       if (!stats.hasErrors() && !stats.hasWarnings()) {
@@ -69,10 +69,7 @@ run(
 
           log.debug('metrics:', metrics);
 
-          reporter.metrics(metrics).catch((error) => {
-            log.error('Failed to report stats with CiStatsReporter');
-            log.error(error);
-          });
+          await reporter.metrics(metrics);
         }
 
         log.success(`webpack completed in about ${took} seconds`);
@@ -89,11 +86,9 @@ run(
 
     if (flags.watch) {
       compiler.hooks.done.tap('report on stats', (stats) => {
-        try {
-          onCompilationComplete(stats);
-        } catch (error) {
+        onCompilationComplete(stats).catch((error) => {
           log.error(error.message);
-        }
+        });
       });
 
       compiler.hooks.watchRun.tap('report on start', () => {
@@ -116,7 +111,7 @@ run(
       return;
     }
 
-    onCompilationComplete(
+    await onCompilationComplete(
       await new Promise((resolve, reject) => {
         compiler.run((error, stats) => {
           if (error) {
