@@ -11,7 +11,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import ReactDOM from 'react-dom';
 
-import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+// import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
