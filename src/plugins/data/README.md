@@ -4,7 +4,7 @@ The `data` plugin provides common data access services for solutions and applica
 
 ## Autocomplete
 
-The autocomplete service can provide suggestions for field names and field values.
+The autocomplete service provides suggestions for field names and values.
 
 It is pre-wired into the `TopNavMenu` component, but can be used independently.
 
