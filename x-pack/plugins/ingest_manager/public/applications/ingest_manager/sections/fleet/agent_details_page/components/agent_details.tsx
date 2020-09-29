@@ -100,6 +100,19 @@ export const AgentDetailsContent: React.FunctionComponent<{
             ),
         },
         {
+          title: i18n.translate('xpack.ingestManager.agentDetails.releaseLabel', {
+            defaultMessage: 'Agent release',
+          }),
+          description:
+            typeof agent.local_metadata.elastic === 'object' &&
+            typeof agent.local_metadata.elastic.agent === 'object' &&
+            typeof agent.local_metadata.elastic.agent.snapshot === 'boolean'
+              ? agent.local_metadata.elastic.agent.snapshot === true
+                ? 'snapshot'
+                : 'stable'
+              : '-',
+        },
+        {
           title: i18n.translate('xpack.ingestManager.agentDetails.platformLabel', {
             defaultMessage: 'Platform',
           }),
