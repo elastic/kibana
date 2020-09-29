@@ -141,14 +141,13 @@ export const EmbeddedMapComponent = ({
           services.embeddable
         );
         if (isSubscribed) {
-          // Ensure at least one `securitySolution:defaultIndex` kibana index pattern exists before creating embeddable
           if (mapIndexPatterns.length === 0) {
             setIsIndexError(true);
             return;
+          } else {
+            setEmbeddable(embeddableObject);
+            setIsIndexError(false);
           }
-
-          setEmbeddable(embeddableObject);
-          setIsIndexError(false);
         }
       } catch (e) {
         if (isSubscribed) {
