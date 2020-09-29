@@ -10,7 +10,7 @@ import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {

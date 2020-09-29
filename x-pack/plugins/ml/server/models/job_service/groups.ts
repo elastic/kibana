@@ -8,7 +8,7 @@ import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { MlJobsResponse } from './jobs';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 interface Group {
   id: string;

@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
-import { JobsInSpaces } from '../../saved_objects';
-import { MlClient } from '../../lib/ml_client';
+import type { JobsInSpaces } from '../../saved_objects';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];

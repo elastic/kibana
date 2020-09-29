@@ -10,7 +10,7 @@ import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
   /**

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 import { mlLog } from '../../client/log';
 
 export function upgradeCheckProvider(mlClient: MlClient) {

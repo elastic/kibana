@@ -30,8 +30,8 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
-import { JobsInSpaces } from '../../saved_objects';
-import { MlClient } from '../../lib/ml_client';
+import type { JobsInSpaces } from '../../saved_objects';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface MlJobsResponse {
   jobs: Job[];

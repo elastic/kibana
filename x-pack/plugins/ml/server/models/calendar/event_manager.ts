@@ -5,7 +5,7 @@
  */
 
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface CalendarEvent {
   calendar_id?: string;

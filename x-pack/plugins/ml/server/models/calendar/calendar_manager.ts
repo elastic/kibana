@@ -6,7 +6,7 @@
 
 import { difference } from 'lodash';
 import { EventManager, CalendarEvent } from './event_manager';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 
 interface BasicCalendar {
   job_ids: string[];

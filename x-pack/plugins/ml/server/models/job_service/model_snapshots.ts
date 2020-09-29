@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
-import { JobsInSpaces } from '../../saved_objects';
+import type { JobsInSpaces } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelSnapshotsResponse {

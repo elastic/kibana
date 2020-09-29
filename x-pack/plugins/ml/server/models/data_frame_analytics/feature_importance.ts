@@ -11,7 +11,7 @@ import {
   isRegressionAnalysis,
 } from '../../../common/util/analytics_utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../common/constants/data_frame_analytics';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 // Obtains data for the data frame analytics feature importance functionalities
 // such as baseline, decision paths, or importance summary.
 export function analyticsFeatureImportanceProvider(
