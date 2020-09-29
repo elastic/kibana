@@ -109,8 +109,10 @@ export const ItemDetailsCard: FC = memo(({ children }) => {
                 {childElements.has(ItemDetailsAction) && (
                   <EuiFlexItem grow={1}>
                     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                      {childElements.get(ItemDetailsAction)?.map((action) => (
-                        <EuiFlexItem grow={false}>{action}</EuiFlexItem>
+                      {childElements.get(ItemDetailsAction)?.map((action, index) => (
+                        <EuiFlexItem grow={false} key={index}>
+                          {action}
+                        </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
                   </EuiFlexItem>
