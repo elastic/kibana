@@ -221,6 +221,26 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           typeText: 'Count2',
         });
       });
+      describe('and when the user clicks the registry events link', () => {
+        beforeEach(async () => {
+          const link = await simulator().resolve('resolver:panel:node-events:event-type-link');
+          const first = link?.first();
+          expect(first).toBeTruthy();
+
+          if (first) {
+            first.simulate('click', { button: 0 });
+          }
+        });
+        it('should show links to two events', async () => {
+          await expect(
+            simulator().map(
+              () =>
+                simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
+            )
+          ).toYieldEqualTo(2);
+          // data-test-subj="resolver:panel:node-events-in-category:event-link"
+        });
+      });
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {

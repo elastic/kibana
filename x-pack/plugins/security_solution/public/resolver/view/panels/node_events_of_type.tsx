@@ -109,7 +109,10 @@ const NodeEventsListItem = memo(function ({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty {...linkProps}>
+      <EuiButtonEmpty
+        data-test-subj="resolver:panel:node-events-in-category:event-link"
+        {...linkProps}
+      >
         <DescriptiveName event={event} />
       </EuiButtonEmpty>
     </>
