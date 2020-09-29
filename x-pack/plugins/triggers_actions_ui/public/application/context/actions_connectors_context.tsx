@@ -5,17 +5,14 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpSetup, ApplicationStart, DocLinksStart, ToastsSetup } from 'kibana/public';
 import { ActionTypeModel, ActionConnector } from '../../types';
 import { TypeRegistry } from '../type_registry';
 
 export interface ActionsConnectorsContextValue {
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: ToastsSetup;
   capabilities: ApplicationStart['capabilities'];
   reloadConnectors?: () => Promise<ActionConnector[] | void>;
   docLinks: DocLinksStart;
