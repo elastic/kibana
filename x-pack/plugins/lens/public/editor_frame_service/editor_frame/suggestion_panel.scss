@@ -1,3 +1,6 @@
+@import '../../mixins';
+@import '../../variables';
+
 .lnsSuggestionPanel__title {
   margin-left: $euiSizeXS / 2;
 }
