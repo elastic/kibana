@@ -138,9 +138,12 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                       stepName,
                     },
                   })
-                : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
-                    defaultMessage: 'Thumbnail screenshot',
-                  })
+                : i18n.translate(
+                    'xpack.uptime.synthetics.screenshotDisplay.thumbnailAltTextWithoutName',
+                    {
+                      defaultMessage: 'Thumbnail screenshot',
+                    }
+                  )
             }
             src={screenshotSrc}
             style={{ width: POPOVER_IMG_WIDTH, height: POPOVER_IMG_HEIGHT, objectFit: 'contain' }}
