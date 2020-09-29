@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/shallow_usecontext.mock';
-import '../../__mocks__/react_router_history.mock';
-import { mockKibanaContext, mockHistory } from '../../__mocks__';
+import '../../__mocks__/kea.mock';
+import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
-jest.mock('../react_router_helpers', () => ({ letBrowserHandleEvent: jest.fn(() => false) }));
+jest.mock('../react_router_helpers', () => ({
+  letBrowserHandleEvent: jest.fn(() => false),
+  createHref: jest.requireActual('../react_router_helpers').createHref,
+}));
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
@@ -50,21 +52,23 @@ describe('useBreadcrumbs', () => {
 
   it('prevents default navigation and uses React Router history on click', () => {
     const breadcrumb = useBreadcrumbs([{ text: '', path: '/test' }])[0] as any;
+
+    expect(breadcrumb.href).toEqual('/app/enterprise_search/test');
+    expect(mockHistory.createHref).toHaveBeenCalled();
+
     const event = { preventDefault: jest.fn() };
     breadcrumb.onClick(event);
 
-    expect(mockKibanaContext.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test');
-    expect(mockHistory.createHref).toHaveBeenCalled();
     expect(event.preventDefault).toHaveBeenCalled();
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
   });
 
   it('does not call createHref if shouldNotCreateHref is passed', () => {
     const breadcrumb = useBreadcrumbs([
       { text: '', path: '/test', shouldNotCreateHref: true },
     ])[0] as any;
-    breadcrumb.onClick({ preventDefault: () => null });
 
-    expect(mockKibanaContext.navigateToUrl).toHaveBeenCalledWith('/test');
+    expect(breadcrumb.href).toEqual('/test');
     expect(mockHistory.createHref).not.toHaveBeenCalled();
   });
 
@@ -74,7 +78,7 @@ describe('useBreadcrumbs', () => {
     (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
     breadcrumb.onClick();
 
-    expect(mockKibanaContext.navigateToUrl).not.toHaveBeenCalled();
+    expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('does not generate link behavior if path is excluded', () => {
