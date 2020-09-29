@@ -32,6 +32,7 @@ function sampleArgs() {
     accessor: 'a',
     layerId: 'l1',
     title: 'My fanci metric chart',
+    metricTitle: 'My fanci metric chart',
     mode: 'full',
   };
 
