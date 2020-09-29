@@ -1449,6 +1449,9 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
+    // Warning: (ae-forgotten-export) The symbol "ISessionService" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
+    session: ISessionService;
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1463,7 +1466,6 @@ export interface ISearchStart {
     aggs: AggsStart;
     search: ISearchGeneric;
     searchSource: ISearchStartSearchSource;
-    // Warning: (ae-forgotten-export) The symbol "ISessionService" needs to be exported by the entry point index.d.ts
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // (undocumented)

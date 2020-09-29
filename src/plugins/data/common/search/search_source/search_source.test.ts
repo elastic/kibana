@@ -22,6 +22,7 @@ import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
+import { getSessionServiceMock } from '../session/mocks';
 
 jest.mock('./legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -67,7 +68,7 @@ describe('SearchSource', () => {
     searchSourceDependencies = {
       getConfig: jest.fn(),
       search: mockSearchMethod,
-      session: {} as any,
+      session: getSessionServiceMock(),
       onResponse: (req, res) => res,
       legacy: {
         callMsearch: jest.fn(),

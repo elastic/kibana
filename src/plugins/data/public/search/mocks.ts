@@ -20,29 +20,15 @@
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { ISearchSetup, ISearchStart } from './types';
 import { searchSourceMock, createSearchSourceMock } from '../../common/search/search_source/mocks';
+import { getSessionServiceMock } from '../../common/mocks';
 
 export * from '../../common/search/search_source/mocks';
-
-function getSessionService() {
-  return {
-    session: {
-      clear: jest.fn(),
-      restore: jest.fn(),
-      start: jest.fn(),
-      get: jest.fn(),
-      trackSearch: jest.fn(),
-      trackSearchId: jest.fn(),
-      trackSearchComplete: jest.fn(),
-      trackSearchError: jest.fn(),
-    },
-  };
-}
 
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     __enhance: jest.fn(),
-    ...getSessionService(),
+    session: getSessionServiceMock(),
   };
 }
 
@@ -52,7 +38,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     search: jest.fn(),
     showError: jest.fn(),
     searchSource: searchSourceMock,
-    ...getSessionService(),
+    session: getSessionServiceMock(),
   };
 }
 
