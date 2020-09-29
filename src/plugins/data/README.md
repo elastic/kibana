@@ -27,7 +27,7 @@ KQL suggestion functions are registered in X-Pack, so this API does not return r
 ### Fetch Value Suggestions
 
 The `getValueSuggestions` function returns suggestions for field values.
-This is helpful when you want to provide a user with options to choose from, for example when constructing a filter. 
+This is helpful when you want to provide a user with options, for example when constructing a filter. 
 
 ```.ts
 
