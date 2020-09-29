@@ -69,17 +69,6 @@ module.exports = function () {
     }),
 
     // used by the test tasks
-    //    runs the check_single_version_dependencies script to ensure the same dependencies across different package.json uses the same version
-    checkSingleVersionDependencies: scriptWithGithubChecks({
-      title: 'Check single version dependencies',
-      cmd: NODE,
-      args: [
-        'scripts/check_single_version_dependencies',
-        '--quiet', // only log errors, not warnings
-      ],
-    }),
-
-    // used by the test tasks
     //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
     checkLockfileSymlinks: scriptWithGithubChecks({
       title: 'Check lockfile symlinks',

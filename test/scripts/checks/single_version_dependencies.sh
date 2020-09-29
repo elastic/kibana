@@ -2,4 +2,6 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:checkSingleVersionDependencies
+checks-reporter-with-killswitch "Check single version dependencies" \
+  node scripts/check_single_version_dependencies \
+    --quiet
