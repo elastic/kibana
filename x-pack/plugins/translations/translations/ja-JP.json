@@ -1200,7 +1200,6 @@
     "data.search.aggs.metrics.uniqueCountTitle": "ユニークカウント",
     "data.search.aggs.otherBucket.labelForMissingValuesLabel": "欠測値のラベル",
     "data.search.aggs.otherBucket.labelForOtherBucketLabel": "他のバケットのラベル",
-    "data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage": "保存した {fieldParameter} パラメーターが無効になりました。新しいフィールドを選択してください。",
     "data.search.aggs.paramTypes.field.requiredFieldParameterErrorMessage": "{fieldParameter} は必須パラメーターです",
     "data.search.aggs.percentageOfLabel": "{label} の割合",
     "data.search.aggs.string.customLabel": "カスタムラベル",
