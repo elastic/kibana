@@ -123,7 +123,6 @@ const setUpModule = async (
       },
     };
 
-    // console.log(JSON.stringify(aggregations, null, 2))
     return {
       ...defaultDatafeedConfig,
       job_id: id,
