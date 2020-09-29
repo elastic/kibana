@@ -15,11 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './PaletteLegends';
 import { ColorPaletteFlexItem } from './ColorPaletteFlexItem';
 import {
-  AN_AVERAGE_LABEL,
-  A_GOOD_LABEL,
+  CV_AVERAGE_LABEL,
+  CV_GOOD_LABEL,
   LESS_LABEL,
   MORE_LABEL,
-  A_POOR_LABEL,
+  CV_POOR_LABEL,
 } from './translations';
 
 export interface Thresholds {
@@ -51,7 +51,7 @@ export function getCoreVitalTooltipMessage(
     values: {
       percentage,
       title: title?.toLowerCase(),
-      exp: good ? A_GOOD_LABEL : bad ? A_POOR_LABEL : AN_AVERAGE_LABEL,
+      exp: good ? CV_GOOD_LABEL : bad ? CV_POOR_LABEL : CV_AVERAGE_LABEL,
       moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
       value: good || average ? thresholds.good : thresholds.bad,
       averageMessage: average

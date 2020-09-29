@@ -14,14 +14,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { getCoreVitalTooltipMessage, Thresholds } from './CoreVitalItem';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  NEEDS_IMPROVEMENT_LABEL,
-  GOOD_LABEL,
-  POOR_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_GOOD_LABEL,
+  LEGEND_POOR_LABEL,
 } from './translations';
 
 const PaletteLegend = styled(EuiHealth)`
@@ -58,10 +59,14 @@ export function PaletteLegends({
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const palette = euiPaletteForStatus(3);
-  const labels = [GOOD_LABEL, NEEDS_IMPROVEMENT_LABEL, POOR_LABEL];
+  const labels = [
+    LEGEND_GOOD_LABEL,
+    LEGEND_NEEDS_IMPROVEMENT_LABEL,
+    LEGEND_POOR_LABEL,
+  ];
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize={'s'}>
+    <EuiFlexGroup responsive={false} gutterSize="s">
       {palette.map((color, ind) => (
         <EuiFlexItem
           key={ind}
@@ -86,6 +91,14 @@ export function PaletteLegends({
               <PaletteLegend color={color}>
                 <EuiText size="xs">
                   {labels[ind]} ({ranks?.[ind]}%)
+                  <FormattedMessage
+                    id="xpack.apm.rum.coreVitals.paletteLegend.rankPercentage"
+                    defaultMessage="{labelsInd} ({ranksInd}%)"
+                    values={{
+                      labelsInd: labels[ind],
+                      ranksInd: ranks?.[ind],
+                    }}
+                  />
                 </EuiText>
               </PaletteLegend>
             </StyledSpan>

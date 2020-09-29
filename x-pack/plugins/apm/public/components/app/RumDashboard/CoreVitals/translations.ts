@@ -47,36 +47,36 @@ export const SUM_LONG_TASKS = i18n.translate(
   }
 );
 
-export const A_POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
+export const CV_POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
   defaultMessage: 'a poor',
 });
 
-export const A_GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
+export const CV_GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
   defaultMessage: 'a good',
 });
 
-export const AN_AVERAGE_LABEL = i18n.translate(
+export const CV_AVERAGE_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.average',
   {
     defaultMessage: 'an average',
   }
 );
 
-export const POOR_LABEL = i18n.translate(
+export const LEGEND_POOR_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.legends.poor',
   {
     defaultMessage: 'Poor',
   }
 );
 
-export const GOOD_LABEL = i18n.translate(
+export const LEGEND_GOOD_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.legends.good',
   {
     defaultMessage: 'Good',
   }
 );
 
-export const NEEDS_IMPROVEMENT_LABEL = i18n.translate(
+export const LEGEND_NEEDS_IMPROVEMENT_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.legends.needsImprovement',
   {
     defaultMessage: 'Needs improvement',
