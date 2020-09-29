@@ -11,7 +11,7 @@ values, and operators.
 image::images/kql-autocomplete.png[Autocomplete in Search bar]
 
 If you prefer to use Kibana’s legacy query language, based on the
-<<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field and turn it off.
+<<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field, and then turn off KQL.
 
 [discrete]
 === Terms query
