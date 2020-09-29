@@ -21,17 +21,18 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { VisParams } from './timelion_vis_fn';
+import { TimelionVisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
 
-export type TimelionOptionsProps = VisOptionsProps<VisParams>;
+export type TimelionOptionsProps = VisOptionsProps<TimelionVisParams>;
 
 function TimelionOptions({ stateParams, setValue, setValidity }: TimelionOptionsProps) {
-  const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
-    setValue,
-  ]);
+  const setInterval = useCallback(
+    (value: TimelionVisParams['interval']) => setValue('interval', value),
+    [setValue]
+  );
   const setExpressionInput = useCallback(
-    (value: VisParams['expression']) => setValue('expression', value),
+    (value: TimelionVisParams['expression']) => setValue('expression', value),
     [setValue]
   );
 

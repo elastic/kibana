@@ -42,10 +42,10 @@ interface Arguments {
 export interface TimelionRenderValue {
   visData: TimelionSuccessResponse;
   visType: 'timelion';
-  visParams: VisParams;
+  visParams: TimelionVisParams;
 }
 
-export type VisParams = Arguments;
+export type TimelionVisParams = Arguments;
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'timelion_vis',

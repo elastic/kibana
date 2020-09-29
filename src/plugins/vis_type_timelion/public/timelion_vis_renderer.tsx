@@ -43,19 +43,15 @@ export const getTimelionVisRenderer: (
     const [seriesList] = visData.sheet;
 
     render(
-      <VisualizationContainer>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <KibanaContextProvider services={{ ...deps }}>
-            {seriesList && (
-              <TimelionVisComponent
-                interval={visParams.interval}
-                seriesList={seriesList}
-                renderComplete={handlers.done}
-                fireEvent={handlers.event}
-              />
-            )}
-          </KibanaContextProvider>
-        </Suspense>
+      <VisualizationContainer showNoResult={!seriesList}>
+        <KibanaContextProvider services={{ ...deps }}>
+          <TimelionVisComponent
+            interval={visParams.interval}
+            seriesList={seriesList}
+            renderComplete={handlers.done}
+            fireEvent={handlers.event}
+          />
+        </KibanaContextProvider>
       </VisualizationContainer>,
       domNode
     );

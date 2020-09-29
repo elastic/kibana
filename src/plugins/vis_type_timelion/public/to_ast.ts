@@ -19,13 +19,13 @@
 
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { Vis } from '../../visualizations/public';
-import { TimelionExpressionFunctionDefinition } from './timelion_vis_fn';
+import { TimelionExpressionFunctionDefinition, TimelionVisParams } from './timelion_vis_fn';
 
 const escapeString = (data: string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
-export const toExpressionAst = (vis: Vis) => {
+export const toExpressionAst = (vis: Vis<TimelionVisParams>) => {
   const timelion = buildExpressionFunction<TimelionExpressionFunctionDefinition>('timelion_vis', {
     expression: escapeString(vis.params.expression),
     interval: escapeString(vis.params.interval),
