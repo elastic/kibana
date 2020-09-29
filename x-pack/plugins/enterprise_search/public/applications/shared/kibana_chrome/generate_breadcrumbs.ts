@@ -16,7 +16,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
-import { letBrowserHandleEvent } from '../react_router_helpers';
+import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 /**
  * Generate React-Router-friendly EUI breadcrumb objects
@@ -40,7 +40,7 @@ export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
     const breadcrumb = { text } as EuiBreadcrumb;
 
     if (path) {
-      const href = shouldNotCreateHref ? path : (history.createHref({ pathname: path }) as string);
+      const href = createHref(path, history, { shouldNotCreateHref });
 
       breadcrumb.href = href;
       breadcrumb.onClick = (event) => {

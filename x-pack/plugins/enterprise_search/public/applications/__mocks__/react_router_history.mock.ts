@@ -15,7 +15,7 @@ export const mockHistory = {
     pathname: '/current-path',
   },
   listen: jest.fn(() => jest.fn()),
-};
+} as any;
 export const mockLocation = {
   key: 'someKey',
   pathname: '/current-path',

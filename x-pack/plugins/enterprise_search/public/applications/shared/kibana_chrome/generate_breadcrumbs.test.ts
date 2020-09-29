@@ -8,7 +8,10 @@ import '../../__mocks__/kea.mock';
 import '../../__mocks__/react_router_history.mock';
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
-jest.mock('../react_router_helpers', () => ({ letBrowserHandleEvent: jest.fn(() => false) }));
+jest.mock('../react_router_helpers', () => ({
+  letBrowserHandleEvent: jest.fn(() => false),
+  createHref: jest.requireActual('../react_router_helpers').createHref,
+}));
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
