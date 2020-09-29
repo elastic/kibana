@@ -24,20 +24,9 @@ test(`omits blocked headers`, async () => {
     trailer: 's are for trucks',
   };
 
-  const filteredHeaders = await omitBlockedHeaders({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
-    decryptedHeaders: {
-      ...permittedHeaders,
-      ...blockedHeaders,
-    },
+  const filteredHeaders = omitBlockedHeaders({
+    ...permittedHeaders,
+    ...blockedHeaders,
   });
 
   expect(filteredHeaders).toEqual(permittedHeaders);

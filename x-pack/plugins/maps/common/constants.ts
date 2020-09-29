@@ -37,6 +37,7 @@ export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
@@ -165,7 +166,12 @@ export enum GRID_RESOLUTION {
   COARSE = 'COARSE',
   FINE = 'FINE',
   MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
 }
+
+export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
+export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
+export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 
@@ -229,8 +235,6 @@ export enum SCALING_TYPES {
   TOP_HITS = 'TOP_HITS',
   MVT = 'MVT',
 }
-
-export const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export enum MVT_FIELD_TYPE {
   STRING = 'String',
