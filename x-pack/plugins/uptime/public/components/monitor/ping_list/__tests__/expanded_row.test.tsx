@@ -92,9 +92,21 @@ describe('PingListExpandedRow', () => {
   it('renders a synthetics expanded row for synth monitor', () => {
     ping.monitor.type = 'suitejourney';
     expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchInlineSnapshot(`
-      <ScriptExpandedRow
-        checkGroup="check_group_id"
-      />
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem>
+          <EuiCallOut
+            iconType="beaker"
+            title="Experimental feature"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ScriptExpandedRow
+            checkGroup="check_group_id"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     `);
   });
 });

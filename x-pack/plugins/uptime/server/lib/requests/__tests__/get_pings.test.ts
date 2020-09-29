@@ -143,6 +143,11 @@ describe('getAll', () => {
                       },
                     },
                   },
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
                 ],
               },
             },
@@ -195,6 +200,11 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
                     },
                   },
                 ],
@@ -251,6 +261,11 @@ describe('getAll', () => {
                       },
                     },
                   },
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
                 ],
               },
             },
@@ -303,6 +318,11 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
                     },
                   },
                   Object {
@@ -362,6 +382,11 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
                     },
                   },
                   Object {
