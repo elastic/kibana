@@ -47,7 +47,7 @@ image::images/intro-data-tutorial.png[Ways to get data in from the home page]
 
 {kib} uses an
 <<index-patterns, index pattern>> to tell it which {es} indices to explore.
-If you add upload a file, run a built-in tutorial, or add sample data, you get an index pattern for free,
+If you upload a file, run a built-in tutorial, or add sample data, you get an index pattern for free,
 and are good to start exploring. If you load your own data, you can create
 an index pattern in <<management, Stack Management>>.
 
