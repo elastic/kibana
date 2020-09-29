@@ -89,6 +89,7 @@ const RowActions = React.memo<{
   const hasWriteCapabilites = useCapabilities().write;
 
   const isUnenrolling = agent.status === 'unenrolling';
+  const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <ContextMenuActions
@@ -139,6 +140,7 @@ const RowActions = React.memo<{
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           icon="refresh"
+          disabled={!isAgentUpgradeable(agent, kibanaVersion)}
           onClick={() => {
             onUpgradeClick();
           }}
@@ -363,7 +365,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
-          {isAgentUpgradeable({ agentVersion: version, kibanaVersion }) ? (
+          {isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                 <EuiIcon size="m" type="alert" color="warning" />

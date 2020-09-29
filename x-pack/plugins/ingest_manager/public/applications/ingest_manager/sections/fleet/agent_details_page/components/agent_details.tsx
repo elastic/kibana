@@ -79,10 +79,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
                 <EuiFlexItem grow={false} className="eui-textNoWrap">
                   {agent.local_metadata.elastic.agent.version}
                 </EuiFlexItem>
-                {isAgentUpgradeable({
-                  agentVersion: agent.local_metadata.elastic.agent.version,
-                  kibanaVersion,
-                }) ? (
+                {isAgentUpgradeable(agent, kibanaVersion) ? (
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="s" className="eui-textNoWrap">
                       <EuiIcon size="m" type="alert" color="warning" />

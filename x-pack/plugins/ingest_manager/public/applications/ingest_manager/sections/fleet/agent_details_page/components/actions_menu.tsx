@@ -15,6 +15,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
+import { isAgentUpgradeable } from '../../../../services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -115,6 +116,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="refresh"
+            disabled={!isAgentUpgradeable(agent, kibanaVersion)}
             onClick={() => {
               setIsUpgradeModalOpen(true);
             }}

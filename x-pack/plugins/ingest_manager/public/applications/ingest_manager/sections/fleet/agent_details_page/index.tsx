@@ -160,10 +160,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agentData.item.local_metadata.elastic.agent.version}
                     </EuiFlexItem>
-                    {isAgentUpgradeable({
-                      agentVersion: agentData.item.local_metadata.elastic.agent.version,
-                      kibanaVersion,
-                    }) ? (
+                    {isAgentUpgradeable(agentData.item, kibanaVersion) ? (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
                           aria-label={i18n.translate(
