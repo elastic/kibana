@@ -132,10 +132,10 @@ export async function getWebCoreVitals({
   // Divide by 1000 to convert ms into seconds
   return {
     cls: String(cls?.values[pkey]?.toFixed(2) || 0),
-    fid: ((fid?.values[pkey] || 0) / 1000).toFixed(2),
-    lcp: ((lcp?.values[pkey] || 0) / 1000).toFixed(2),
-    tbt: tbt?.values[pkey] || 0,
-    fcp: fcp?.values[pkey] || 0,
+    fid: fid?.values[pkey] ?? 0,
+    lcp: lcp?.values[pkey] ?? 0,
+    tbt: tbt?.values[pkey] ?? 0,
+    fcp: fcp?.values[pkey] ?? 0,
 
     lcpRanks: getRanksPercentages(lcpRanks?.values ?? defaultRanks),
     fidRanks: getRanksPercentages(fidRanks?.values ?? defaultRanks),

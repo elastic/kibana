@@ -10,7 +10,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageError,
+  IBulkInstallPackageHTTPError,
 } from '../../../../plugins/ingest_manager/common';
 
 export default function (providerContext: FtrProviderContext) {
@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(entry.oldVersion).equal('0.1.0');
         expect(entry.newVersion).equal('0.3.0');
 
-        const err = body.response[1] as IBulkInstallPackageError;
+        const err = body.response[1] as IBulkInstallPackageHTTPError;
         expect(err.statusCode).equal(404);
         expect(body.response[1].name).equal('blahblah');
       });
