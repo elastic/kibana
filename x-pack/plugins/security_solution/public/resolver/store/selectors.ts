@@ -312,19 +312,11 @@ export const panelViewAndParameters = composeSelectors(
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
 
 /**
- * @deprecated
+ * @deprecated use `useLinkProps`
  */
 export const relatedEventsRelativeHrefs = composeSelectors(
   uiStateSelector,
   uiSelectors.relatedEventsRelativeHrefs
-);
-
-/**
- * @deprecated
- */
-export const relatedEventDetailHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventDetailHrefs
 );
 
 /**
@@ -343,6 +335,15 @@ export const totalRelatedEventCountForNode = composeSelectors(
 export const relatedEventCountOfTypeForNode = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventCountOfTypeForNode
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
+ */
+export const nodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategory
 );
 
 /**

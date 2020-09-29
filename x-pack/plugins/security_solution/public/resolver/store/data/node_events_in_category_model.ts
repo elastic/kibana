@@ -7,6 +7,7 @@ import { PanelViewAndParameters, NodeEventsInCategoryState } from '../../types';
 
 /**
  * True if `nodeEventsInCategory` contains data that is relevant to `panelViewAndParameters`.
+ * This is used by the reducer to enforce that the nodeEventsInCategory state is always valid.
  */
 export function isValid(
   nodeEventsInCategory: NodeEventsInCategoryState,

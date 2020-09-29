@@ -78,7 +78,7 @@ export const relativeHref: (
 
 /**
  * Returns a map of ecs category name to urls for use in panel navigation.
- * @deprecated
+ * @deprecated use `useLinkProps`
  */
 export const relatedEventsRelativeHrefs: (
   state: ResolverUIState
@@ -102,35 +102,5 @@ export const relatedEventsRelativeHrefs: (
       });
     }
     return hrefsByCategory;
-  };
-});
-
-/**
- * Returns a map of event entity ids to urls for use in navigation.
- * @deprecated
- */
-export const relatedEventDetailHrefs: (
-  state: ResolverUIState
-) => (
-  category: string,
-  nodeID: string,
-  events: SafeResolverEvent[]
-) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
-  return (category: string, nodeID: string, events: SafeResolverEvent[]) => {
-    const hrefsByEntityID = new Map<string, string | undefined>();
-    events.map((event) => {
-      const entityID = String(eventID(event));
-      const eventDetailPanelParams: PanelViewAndParameters = {
-        panelView: 'eventDetail',
-        panelParameters: {
-          nodeID,
-          eventCategory: category,
-          eventID: entityID,
-        },
-      };
-      hrefsByEntityID.set(entityID, relativeHref(eventDetailPanelParams));
-      return event;
-    });
-    return hrefsByEntityID;
   };
 });

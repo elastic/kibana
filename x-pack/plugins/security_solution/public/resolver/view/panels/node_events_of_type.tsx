@@ -33,22 +33,16 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const { processEvent, eventCount, eventsInCategoryCount, events } = useSelector(
-    useCallback(
-      (state: ResolverState) => {
-        return {
-          processEvent: selectors.processEventForID(state)(nodeID),
-          eventCount: selectors.totalRelatedEventCountForNode(state)(nodeID),
-          eventsInCategoryCount: selectors.relatedEventCountOfTypeForNode(state)(
-            nodeID,
-            eventCategory
-          ),
-          events: selectors.relatedEventsByCategory(state)(nodeID, eventCategory),
-        };
-      },
-      [eventCategory, nodeID]
-    )
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
   );
+  const eventCount = useSelector((state: ResolverState) =>
+    selectors.totalRelatedEventCountForNode(state)(nodeID)
+  );
+  const eventsInCategoryCount = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
+  );
+  const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
   return (
     <StyledPanel>
@@ -64,7 +58,7 @@ export const NodeEventsInCategory = memo(function ({
             eventsInCategoryCount={eventsInCategoryCount}
           />
           <EuiSpacer size="l" />
-          <NodeEventList eventType={eventCategory} nodeID={nodeID} events={events} />
+          <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
         </>
       )}
     </StyledPanel>
@@ -77,11 +71,11 @@ export const NodeEventsInCategory = memo(function ({
 const NodeEventsListItem = memo(function ({
   event,
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   event: SafeResolverEvent;
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
   const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
@@ -89,7 +83,7 @@ const NodeEventsListItem = memo(function ({
     panelView: 'eventDetail',
     panelParameters: {
       nodeID,
-      eventCategory: eventType,
+      eventCategory,
       eventID: String(eventModel.eventID(event)),
     },
   });
@@ -126,11 +120,11 @@ const NodeEventsListItem = memo(function ({
  * Renders a list of events with a separator in between.
  */
 const NodeEventList = memo(function NodeEventList({
-  eventType,
+  eventCategory,
   events,
   nodeID,
 }: {
-  eventType: string;
+  eventCategory: string;
   /**
    * The events to list.
    */
@@ -141,7 +135,7 @@ const NodeEventList = memo(function NodeEventList({
     <>
       {events.map((event, index) => (
         <Fragment key={index}>
-          <NodeEventsListItem nodeID={nodeID} eventType={eventType} event={event} />
+          <NodeEventsListItem nodeID={nodeID} eventCategory={eventCategory} event={event} />
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
