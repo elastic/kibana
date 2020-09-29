@@ -10,16 +10,36 @@ import {
   EuiFlexItem,
   EuiHealth,
   euiPaletteForStatus,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { getCoreVitalTooltipMessage, Thresholds } from './CoreVitalItem';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_GOOD_LABEL,
+  LEGEND_POOR_LABEL,
+} from './translations';
 
 const PaletteLegend = styled(EuiHealth)`
   &:hover {
     cursor: pointer;
     text-decoration: underline;
-    background-color: #e7f0f7;
+  }
+`;
+
+const StyledSpan = styled.span<{
+  darkMode: boolean;
+}>`
+  &:hover {
+    background-color: ${(props) =>
+      props.darkMode
+        ? euiDarkVars.euiColorLightestShade
+        : euiLightVars.euiColorLightestShade};
   }
 `;
 
@@ -36,10 +56,17 @@ export function PaletteLegends({
   onItemHover,
   thresholds,
 }: Props) {
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   const palette = euiPaletteForStatus(3);
+  const labels = [
+    LEGEND_GOOD_LABEL,
+    LEGEND_NEEDS_IMPROVEMENT_LABEL,
+    LEGEND_POOR_LABEL,
+  ];
 
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup responsive={false} gutterSize="s">
       {palette.map((color, ind) => (
         <EuiFlexItem
           key={ind}
@@ -60,7 +87,21 @@ export function PaletteLegends({
             )}
             position="bottom"
           >
-            <PaletteLegend color={color}>{ranks?.[ind]}%</PaletteLegend>
+            <StyledSpan darkMode={darkMode}>
+              <PaletteLegend color={color}>
+                <EuiText size="xs">
+                  {labels[ind]} ({ranks?.[ind]}%)
+                  <FormattedMessage
+                    id="xpack.apm.rum.coreVitals.paletteLegend.rankPercentage"
+                    defaultMessage="{labelsInd} ({ranksInd}%)"
+                    values={{
+                      labelsInd: labels[ind],
+                      ranksInd: ranks?.[ind],
+                    }}
+                  />
+                </EuiText>
+              </PaletteLegend>
+            </StyledSpan>
           </EuiToolTip>
         </EuiFlexItem>
       ))}
