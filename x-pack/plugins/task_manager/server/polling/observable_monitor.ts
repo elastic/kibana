@@ -5,8 +5,16 @@
  */
 
 import { Subject, Observable, throwError, interval, timer, Subscription } from 'rxjs';
-import { exhaustMap, tap, takeUntil, switchMap, switchMapTo, catchError } from 'rxjs/operators';
 import { noop } from 'lodash';
+import {
+  exhaustMap,
+  tap,
+  takeUntil,
+  switchMap,
+  switchMapTo,
+  catchError,
+  startWith,
+} from 'rxjs/operators';
 
 const DEFAULT_HEARTBEAT_INTERVAL = 1000;
 
@@ -31,6 +39,7 @@ export function createObservableMonitor<T, E>(
   return new Observable((subscriber) => {
     const subscription: Subscription = interval(heartbeatInterval)
       .pipe(
+        startWith(0),
         // switch from the heartbeat interval to the instantiated observable until it completes / errors
         exhaustMap(() => takeUntilDurationOfInactivity(observableFactory(), inactivityTimeout)),
         // if an error is thrown, catch it, notify and try to recover
