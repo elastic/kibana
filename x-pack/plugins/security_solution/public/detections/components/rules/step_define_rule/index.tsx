@@ -7,6 +7,8 @@
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
@@ -14,7 +16,6 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timelin
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -46,6 +47,9 @@ import {
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { EqlQueryBar } from '../eql_query_bar';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -123,9 +127,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
   const ruleType = formRuleType || initialState.ruleType;
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(index, RuleStep.defineRule);
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
 
   // reset form when rule type changes
   useEffect(() => {
@@ -186,7 +188,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatternQueryBar}
+        indexPatterns={indexPatterns}
         schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
@@ -227,31 +229,46 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-              <UseField
-                path="queryBar"
-                config={{
-                  ...schema.queryBar,
-                  labelAppend: (
-                    <MyLabelButton
-                      data-test-subj="importQueryFromSavedTimeline"
-                      onClick={handleOpenTimelineSearch}
-                    >
-                      {i18n.IMPORT_TIMELINE_QUERY}
-                    </MyLabelButton>
-                  ),
-                }}
-                component={QueryBarDefineRule}
-                componentProps={{
-                  browserFields,
-                  idAria: 'detectionEngineStepDefineRuleQueryBar',
-                  indexPattern: indexPatternQueryBar,
-                  isDisabled: isLoading,
-                  isLoading: indexPatternLoadingQueryBar,
-                  dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-                  openTimelineSearch,
-                  onCloseTimelineSearch: handleCloseTimelineSearch,
-                }}
-              />
+              {isEqlRule(ruleType) ? (
+                <UseField
+                  key="EqlQueryBar"
+                  path="queryBar"
+                  component={EqlQueryBar}
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                />
+              ) : (
+                <UseField
+                  key="QueryBarDefineRule"
+                  path="queryBar"
+                  config={{
+                    ...schema.queryBar,
+                    labelAppend: (
+                      <MyLabelButton
+                        data-test-subj="importQueryFromSavedTimeline"
+                        onClick={handleOpenTimelineSearch}
+                      >
+                        {i18n.IMPORT_TIMELINE_QUERY}
+                      </MyLabelButton>
+                    ),
+                  }}
+                  component={QueryBarDefineRule}
+                  componentProps={{
+                    browserFields,
+                    idAria: 'detectionEngineStepDefineRuleQueryBar',
+                    indexPattern: indexPatterns,
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+                    openTimelineSearch,
+                    onCloseTimelineSearch: handleCloseTimelineSearch,
+                  }}
+                />
+              )}
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
@@ -273,7 +290,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={ruleType === 'threshold'}
+            $isVisible={isThresholdRule(ruleType)}
             data-test-subj="thresholdInput"
             fullWidth
           >

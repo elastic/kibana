@@ -80,7 +80,8 @@ export const legendConfig: ExpressionFunctionDefinition<
 
 export interface AxesSettingsConfig {
   x: boolean;
-  y: boolean;
+  yLeft: boolean;
+  yRight: boolean;
 }
 
 type TickLabelsConfigResult = AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
@@ -103,10 +104,16 @@ export const tickLabelsConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the tick labels of the x-axis are visible.',
       }),
     },
-    y: {
+    yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yAxisTickLabels.help', {
-        defaultMessage: 'Specifies whether or not the tick labels of the y-axis are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the left y-axis are visible.',
+      }),
+    },
+    yRight: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the right y-axis are visible.',
       }),
     },
   },
@@ -138,16 +145,65 @@ export const gridlinesConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the gridlines of the x-axis are visible.',
       }),
     },
-    y: {
+    yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yAxisgridlines.help', {
-        defaultMessage: 'Specifies whether or not the gridlines of the y-axis are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisgridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the left y-axis are visible.',
+      }),
+    },
+    yRight: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisgridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the right y-axis are visible.',
       }),
     },
   },
   fn: function fn(input: unknown, args: AxesSettingsConfig) {
     return {
       type: 'lens_xy_gridlinesConfig',
+      ...args,
+    };
+  },
+};
+
+type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
+  type: 'lens_xy_axisTitlesVisibilityConfig';
+};
+
+export const axisTitlesVisibilityConfig: ExpressionFunctionDefinition<
+  'lens_xy_axisTitlesVisibilityConfig',
+  null,
+  AxesSettingsConfig,
+  AxisTitlesVisibilityConfigResult
+> = {
+  name: 'lens_xy_axisTitlesVisibilityConfig',
+  aliases: [],
+  type: 'lens_xy_axisTitlesVisibilityConfig',
+  help: `Configure the xy chart's axis titles appearance`,
+  inputTypes: ['null'],
+  args: {
+    x: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.xAxisTitle.help', {
+        defaultMessage: 'Specifies whether or not the title of the x-axis are visible.',
+      }),
+    },
+    yLeft: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisTitle.help', {
+        defaultMessage: 'Specifies whether or not the title of the left y-axis are visible.',
+      }),
+    },
+    yRight: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisTitle.help', {
+        defaultMessage: 'Specifies whether or not the title of the right y-axis are visible.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: AxesSettingsConfig) {
+    return {
+      type: 'lens_xy_axisTitlesVisibilityConfig',
       ...args,
     };
   },
@@ -329,11 +385,13 @@ export type LayerArgs = LayerConfig & {
 export interface XYArgs {
   xTitle: string;
   yTitle: string;
+  yRightTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
-  showXAxisTitle?: boolean;
-  showYAxisTitle?: boolean;
+  axisTitlesVisibilitySettings?: AxesSettingsConfig & {
+    type: 'lens_xy_axisTitlesVisibilityConfig';
+  };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
 }
@@ -346,8 +404,8 @@ export interface XYState {
   layers: LayerConfig[];
   xTitle?: string;
   yTitle?: string;
-  showXAxisTitle?: boolean;
-  showYAxisTitle?: boolean;
+  yRightTitle?: string;
+  axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
 }

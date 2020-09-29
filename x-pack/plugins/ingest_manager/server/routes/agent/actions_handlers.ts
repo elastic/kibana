@@ -11,6 +11,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 import { ActionsService } from '../../services/agents';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -38,18 +39,8 @@ export const postNewAgentActionHandlerBuilder = function (
       };
 
       return response.ok({ body });
-    } catch (e) {
-      if (e.isBoom) {
-        return response.customError({
-          statusCode: e.output.statusCode,
-          body: { message: e.message },
-        });
-      }
-
-      return response.customError({
-        statusCode: 500,
-        body: { message: e.message },
-      });
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
   };
 };

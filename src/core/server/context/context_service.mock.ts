@@ -21,9 +21,9 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ContextService, ContextSetup } from './context_service';
 import { contextMock } from '../../utils/context.mock';
 
-const createSetupContractMock = () => {
+const createSetupContractMock = (mockContext = {}) => {
   const setupContract: jest.Mocked<ContextSetup> = {
-    createContextContainer: jest.fn().mockImplementation(() => contextMock.create()),
+    createContextContainer: jest.fn().mockImplementation(() => contextMock.create(mockContext)),
   };
   return setupContract;
 };

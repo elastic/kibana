@@ -10,6 +10,7 @@ import {
   ILegacyScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
+  Capabilities,
 } from 'src/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -52,6 +53,7 @@ export interface GlobalSearchProviderContext {
     uiSettings: {
       client: IUiSettingsClient;
     };
+    capabilities: Observable<Capabilities>;
   };
 }
 

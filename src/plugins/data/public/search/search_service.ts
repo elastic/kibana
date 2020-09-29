@@ -17,21 +17,31 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
-import { getCallMsearch } from './legacy/call_msearch';
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import {
+  createSearchSource,
+  ISearchGeneric,
+  SearchSource,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { ConfigSchema } from '../../config';
+import {
+  SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -49,6 +59,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
@@ -71,11 +83,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
 
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+      uiSettings,
+    });
+
+    if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
+      aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
+    }
+
     return {
-      aggs: this.aggsService.setup({
-        registerFunction: expressions.registerFunction,
-        uiSettings,
-      }),
+      aggs,
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
@@ -107,6 +126,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
+      },
       searchSource: {
         /**
          * creates searchsource based on serialized search source fields

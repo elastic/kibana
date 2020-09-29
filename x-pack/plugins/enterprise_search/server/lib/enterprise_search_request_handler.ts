@@ -14,7 +14,7 @@ import {
   Logger,
 } from 'src/core/server';
 import { ConfigType } from '../index';
-import { JSON_HEADER } from '../../common/constants';
+import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
 interface IConstructorDependencies {
   config: ConfigType;
@@ -46,6 +46,7 @@ export interface IEnterpriseSearchRequestHandler {
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
   private log: Logger;
+  private headers: Record<string, string> = {};
 
   constructor({ config, log }: IConstructorDependencies) {
     this.log = log;
@@ -80,6 +81,9 @@ export class EnterpriseSearchRequestHandler {
         // Call the Enterprise Search API
         const apiResponse = await fetch(url, { method, headers, body });
 
+        // Handle response headers
+        this.setResponseHeaders(apiResponse);
+
         // Handle authentication redirects
         if (apiResponse.url.endsWith('/login') || apiResponse.url.endsWith('/ent/select')) {
           return this.handleAuthenticationError(response);
@@ -88,7 +92,13 @@ export class EnterpriseSearchRequestHandler {
         // Handle 400-500+ responses from the Enterprise Search server
         const { status } = apiResponse;
         if (status >= 500) {
-          return this.handleServerError(response, apiResponse, url);
+          if (this.headers[READ_ONLY_MODE_HEADER] === 'true') {
+            // Handle 503 read-only mode errors
+            return this.handleReadOnlyModeError(response);
+          } else {
+            // Handle unexpected server errors
+            return this.handleServerError(response, apiResponse, url);
+          }
         } else if (status >= 400) {
           return this.handleClientError(response, apiResponse);
         }
@@ -100,7 +110,11 @@ export class EnterpriseSearchRequestHandler {
         }
 
         // Pass successful responses back to the front-end
-        return response.custom({ statusCode: status, body: json });
+        return response.custom({
+          statusCode: status,
+          headers: this.headers,
+          body: json,
+        });
       } catch (e) {
         // Catch connection/auth errors
         return this.handleConnectionError(response, e);
@@ -160,7 +174,7 @@ export class EnterpriseSearchRequestHandler {
     const { status } = apiResponse;
     const body = await this.getErrorResponseBody(apiResponse);
 
-    return response.customError({ statusCode: status, body });
+    return response.customError({ statusCode: status, headers: this.headers, body });
   }
 
   async handleServerError(response: KibanaResponseFactory, apiResponse: Response, url: string) {
@@ -172,14 +186,22 @@ export class EnterpriseSearchRequestHandler {
       'Enterprise Search encountered an internal server error. Please contact your system administrator if the problem persists.';
 
     this.log.error(`Enterprise Search Server Error ${status} at <${url}>: ${message}`);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+  }
+
+  handleReadOnlyModeError(response: KibanaResponseFactory) {
+    const errorMessage =
+      'Enterprise Search is in read-only mode. Actions that create, update, or delete information are disabled.';
+
+    this.log.error(`Cannot perform action: ${errorMessage}`);
+    return response.customError({ statusCode: 503, headers: this.headers, body: errorMessage });
   }
 
   handleInvalidDataError(response: KibanaResponseFactory, url: string, json: object) {
     const errorMessage = 'Invalid data received from Enterprise Search';
 
     this.log.error(`Invalid data received from <${url}>: ${JSON.stringify(json)}`);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
   }
 
   handleConnectionError(response: KibanaResponseFactory, e: Error) {
@@ -188,14 +210,26 @@ export class EnterpriseSearchRequestHandler {
     this.log.error(errorMessage);
     if (e instanceof Error) this.log.debug(e.stack as string);
 
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
   }
 
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
 
     this.log.error(errorMessage);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+  }
+
+  /**
+   * Set response headers
+   *
+   * Currently just forwards the read-only mode header, but we can expand this
+   * in the future to pass more headers from Enterprise Search as we need them
+   */
+
+  setResponseHeaders(apiResponse: Response) {
+    const readOnlyMode = apiResponse.headers.get(READ_ONLY_MODE_HEADER);
+    this.headers[READ_ONLY_MODE_HEADER] = readOnlyMode as 'true' | 'false';
   }
 
   /**

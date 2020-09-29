@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
 import { Map as MbMap } from 'mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
@@ -48,7 +48,7 @@ const makeProperty = (
     field,
     (new MockLayer(mockStyle) as unknown) as IVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     },
     false
   );

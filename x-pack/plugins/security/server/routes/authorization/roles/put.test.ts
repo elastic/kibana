@@ -87,6 +87,7 @@ const putRoleTest = (
         id: 'feature_1',
         name: 'feature 1',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             ui: [],

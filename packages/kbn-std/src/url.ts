@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ParsedQuery } from 'query-string';
+
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
+import type { ParsedQuery } from 'query-string';
 
 /**
  * We define our own typings because the current version of @types/node

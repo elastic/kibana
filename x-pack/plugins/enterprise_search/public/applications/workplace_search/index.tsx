@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 import { IInitialAppData } from '../../../common/types';
-import { KibanaContext, IKibanaContext } from '../index';
+import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
@@ -24,14 +24,14 @@ import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
 
 export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
   return !config.host ? <WorkplaceSearchUnconfigured /> : <WorkplaceSearchConfigured {...props} />;
 };
 
 export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -46,7 +46,7 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
       <Route>
-        <Layout navigation={<WorkplaceSearchNav />}>
+        <Layout navigation={<WorkplaceSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorState />
           ) : (

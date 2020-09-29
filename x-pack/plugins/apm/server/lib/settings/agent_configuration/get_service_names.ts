@@ -9,17 +9,26 @@ import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
+import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggregated_transactions';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
-export async function getServiceNames({ setup }: { setup: Setup }) {
+export async function getServiceNames({
+  setup,
+  searchAggregatedTransactions,
+}: {
+  setup: Setup;
+  searchAggregatedTransactions: boolean;
+}) {
   const { apmEventClient } = setup;
 
   const params = {
     apm: {
       events: [
-        ProcessorEvent.transaction,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

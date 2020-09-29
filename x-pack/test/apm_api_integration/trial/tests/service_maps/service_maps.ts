@@ -54,17 +54,17 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             elements
               .filter((element) => element.data['service.name'] !== undefined)
               .map((element) => element.data['service.name'])
-          );
+          ).sort();
 
           expectSnapshot(serviceNames).toMatchInline(`
             Array [
-              "opbeans-rum",
+              "opbeans-dotnet",
               "opbeans-go",
+              "opbeans-java",
               "opbeans-node",
               "opbeans-python",
               "opbeans-ruby",
-              "opbeans-java",
-              "opbeans-dotnet",
+              "opbeans-rum",
             ]
           `);
 
@@ -72,17 +72,32 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             elements
               .filter((element) => element.data.target?.startsWith('>'))
               .map((element) => element.data.target)
-          );
+          ).sort();
 
           expectSnapshot(externalDestinations).toMatchInline(`
             Array [
-              ">postgresql",
               ">elasticsearch",
+              ">postgresql",
               ">redis",
             ]
           `);
 
           expectSnapshot(elements).toMatch();
+        });
+
+        it('returns service map elements filtering by environment not defined', async () => {
+          const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
+          const { body, status } = await supertest.get(
+            `/api/apm/service-map?start=${start}&end=${end}&environment=${ENVIRONMENT_NOT_DEFINED}`
+          );
+          expect(status).to.be(200);
+          const environments = new Set();
+          body.elements.forEach((element: { data: Record<string, any> }) => {
+            environments.add(element.data['service.environment']);
+          });
+          expect(environments.size).to.eql(1);
+          expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
+          expectSnapshot(body).toMatch();
         });
       });
     });
@@ -138,9 +153,38 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
         );
 
-        expectSnapshot(dataWithAnomalies.length).toMatchInline(`1`);
+        expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
         expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
           Array [
+            Object {
+              "data": Object {
+                "agent.name": "rum-js",
+                "id": "opbeans-rum",
+                "service.environment": "testing",
+                "service.name": "opbeans-rum",
+                "serviceAnomalyStats": Object {
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
+                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
+                  "transactionType": "page-load",
+                },
+              },
+            },
+            Object {
+              "data": Object {
+                "agent.name": "python",
+                "id": "opbeans-python",
+                "service.environment": "production",
+                "service.name": "opbeans-python",
+                "serviceAnomalyStats": Object {
+                  "actualValue": 66218.0833333333,
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
+                  "jobId": "apm-production-229a-high_mean_transaction_duration",
+                  "transactionType": "request",
+                },
+              },
+            },
             Object {
               "data": Object {
                 "agent.name": "java",
@@ -148,8 +192,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-java",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 1707977.2499999995,
-                  "anomalyScore": 0.12232533657975532,
+                  "actualValue": 14901.32,
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },

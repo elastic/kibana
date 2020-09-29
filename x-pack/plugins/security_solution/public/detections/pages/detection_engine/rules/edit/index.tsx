@@ -118,6 +118,7 @@ const EditRulePageComponent: FC = () => {
   const tabs = useMemo(
     () => [
       {
+        'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
         disabled: rule?.immutable,
@@ -140,6 +141,7 @@ const EditRulePageComponent: FC = () => {
         ),
       },
       {
+        'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
         disabled: rule?.immutable,
@@ -163,6 +165,7 @@ const EditRulePageComponent: FC = () => {
         ),
       },
       {
+        'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
         disabled: rule?.immutable,
@@ -185,6 +188,7 @@ const EditRulePageComponent: FC = () => {
         ),
       },
       {
+        'data-test-subj': 'edit-rule-actions-tab',
         id: RuleStep.ruleActions,
         name: ruleI18n.ACTIONS,
         content: (
@@ -387,6 +391,7 @@ const EditRulePageComponent: FC = () => {
 
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="ruleEditSubmitButton"
               fill
               onClick={onSubmit}
               iconType="save"

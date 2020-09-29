@@ -8,12 +8,12 @@ import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlUrlGenerator } from '../../../../../contexts/kibana';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;
-  analysisType: ANALYSIS_CONFIG_TYPE;
+  analysisType: DataFrameAnalysisConfigType;
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {

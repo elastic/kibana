@@ -20,7 +20,7 @@ interface FormattedMetric {
 type GroupsConfiguration = Array<{
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
-  formatter: IFieldFormat;
+  formatter?: IFieldFormat;
   series: Array<{ layer: string; accessor: string }>;
 }>;
 
@@ -33,9 +33,9 @@ export function isFormatterCompatible(
 
 export function getAxesConfiguration(
   layers: LayerConfig[],
-  tables: Record<string, KibanaDatatable>,
-  formatFactory: (mapping: SerializedFieldFormat) => IFieldFormat,
-  shouldRotate: boolean
+  shouldRotate: boolean,
+  tables?: Record<string, KibanaDatatable>,
+  formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
 ): GroupsConfiguration {
   const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
     auto: [],
@@ -43,13 +43,13 @@ export function getAxesConfiguration(
     right: [],
   };
 
-  layers.forEach((layer) => {
-    const table = tables[layer.layerId];
+  layers?.forEach((layer) => {
+    const table = tables?.[layer.layerId];
     layer.accessors.forEach((accessor) => {
       const mode =
         layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
         'auto';
-      let formatter: SerializedFieldFormat = table.columns.find((column) => column.id === accessor)
+      let formatter: SerializedFieldFormat = table?.columns.find((column) => column.id === accessor)
         ?.formatHint || { id: 'number' };
       if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
         formatter = {
@@ -70,16 +70,18 @@ export function getAxesConfiguration(
   series.auto.forEach((currentSeries) => {
     if (
       series.left.length === 0 ||
-      series.left.every((leftSeries) =>
-        isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-      )
+      (tables &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
     ) {
       series.left.push(currentSeries);
     } else if (
       series.right.length === 0 ||
-      series.right.every((rightSeries) =>
-        isFormatterCompatible(rightSeries.fieldFormat, currentSeries.fieldFormat)
-      )
+      (tables &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
     ) {
       series.right.push(currentSeries);
     } else if (series.right.length >= series.left.length) {
@@ -95,7 +97,7 @@ export function getAxesConfiguration(
     axisGroups.push({
       groupId: 'left',
       position: shouldRotate ? 'bottom' : 'left',
-      formatter: formatFactory(series.left[0].fieldFormat),
+      formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
     });
   }
@@ -104,7 +106,7 @@ export function getAxesConfiguration(
     axisGroups.push({
       groupId: 'right',
       position: shouldRotate ? 'top' : 'right',
-      formatter: formatFactory(series.right[0].fieldFormat),
+      formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
     });
   }

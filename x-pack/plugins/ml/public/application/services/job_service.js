@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
-import each from 'lodash/each';
-import find from 'lodash/find';
-import get from 'lodash/get';
-import isNumber from 'lodash/isNumber';
+import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -797,7 +793,6 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   let path = '';
 
   if (resultsPage !== undefined) {
-    path += '#/';
     path += resultsPage;
   }
 
