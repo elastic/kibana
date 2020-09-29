@@ -12,10 +12,10 @@ import { ActionGroupId } from './alert_type';
 import { Logger } from '../../types';
 
 interface LatestEntityLocation {
-  location: string[];
+  location: number[] | null;
   shapeLocationId: string;
   entityName: string;
-  dateInShape: string;
+  dateInShape: string | null;
   docId: string;
 }
 
@@ -35,13 +35,30 @@ export function transformResults(
       // @ts-expect-error
       .flatMap((bucket: unknown, bucketKey: string) => {
         const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
-        return _.map(subBuckets, (subBucket) => ({
-          location: _.get(subBucket, `entityHits.hits.hits[0].fields.${geoField}`, null),
-          shapeLocationId: bucketKey,
-          entityName: subBucket.key,
-          dateInShape: _.get(subBucket, `entityHits.hits.hits[0].fields.${dateField}[0]`, null),
-          docId: _.get(subBucket, `entityHits.hits.hits[0]._id`),
-        }));
+        return _.map(subBuckets, (subBucket) => {
+          const locationFieldResult = _.get(`entityHits.hits.hits[0].fields.${geoField}[0]`, '');
+          const location = locationFieldResult
+            ? _.chain(locationFieldResult)
+                .split(', ')
+                .map((coordString) => +coordString)
+                .reverse()
+                .value()
+            : null;
+          const dateInShape = _.get(
+            subBucket,
+            `entityHits.hits.hits[0].fields.${dateField}[0]`,
+            null
+          );
+          const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
+
+          return {
+            location,
+            shapeLocationId: bucketKey,
+            entityName: subBucket.key,
+            dateInShape,
+            docId,
+          };
+        });
       })
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
       .sortedUniqBy('entityName')
@@ -52,15 +69,15 @@ export function transformResults(
 interface EntityMovementDescriptor {
   entityName: string;
   currLocation: {
-    location: string[];
+    location: number[] | null;
     shapeId: string;
-    date: string;
+    date: string | null;
     docId: string;
   };
   prevLocation: {
-    location: string[];
+    location: number[] | null;
     shapeId: string;
-    date: string;
+    date: string | null;
     docId: string;
   };
 }
@@ -85,8 +102,8 @@ export function getMovedEntities(
           }: {
             entityName: string;
             shapeLocationId: string;
-            dateInShape: string;
-            location: string[];
+            dateInShape: string | null;
+            location: number[] | null;
             docId: string;
           }
         ) => {
@@ -158,7 +175,6 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       ? state
       : await getShapesFilters(
           params.boundaryIndexTitle,
-          params.boundaryType,
           params.boundaryGeoField,
           params.geoField,
           services.callCluster,
@@ -217,6 +233,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
           currentBoundaryId: currLocation.shapeId,
           previousLocation: prevLocation.location,
           previousBoundaryId: prevLocation.shapeId,
+          crossingLine: [prevLocation.location, currLocation.location],
           crossingDocumentId: currLocation.docId,
           timeOfDetection: currIntervalEndTime,
         });

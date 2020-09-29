@@ -18,7 +18,6 @@ import {
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
-export type BoundaryType = 'entireIndex'; // Will expand to cover more, i.e. - providedShapes, etc.
 export const ActionGroupId = 'tracking threshold met';
 
 const actionVariableContextCrossingEventTimeStampLabel = i18n.translate(
@@ -32,6 +31,13 @@ const actionVariableContextCurrentLocationLabel = i18n.translate(
   'xpack.alertingBuiltins.geoThreshold.actionVariableContextCurrentLocationLabel',
   {
     defaultMessage: 'The most recently captured location of the entity',
+  }
+);
+
+const actionVariableContextCrossingLineLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextCrossingLineLabel',
+  {
+    defaultMessage: 'Line between the two locations that were used to determine the crossing event',
   }
 );
 
@@ -80,6 +86,7 @@ const actionVariables = {
     { name: 'currentBoundaryId', description: actionVariableContextCurrentBoundaryIdLabel },
     { name: 'previousLocation', description: actionVariableContextPreviousLocationLabel },
     { name: 'previousBoundaryId', description: actionVariableContextPreviousBoundaryIdLabel },
+    { name: 'crossingLine', description: actionVariableContextCrossingLineLabel },
     { name: 'crossingDocumentId', description: actionVariableContextCrossingDocumentIdLabel },
     { name: 'timeOfDetection', description: actionVariableContextTimeOfDetectionLabel },
   ],

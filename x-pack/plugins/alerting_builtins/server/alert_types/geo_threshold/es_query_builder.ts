@@ -7,7 +7,6 @@
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from '../../types';
-import { GEO_THRESHOLD_ID } from './alert_type';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
@@ -15,7 +14,6 @@ const MAX_QUERY_SIZE = 10000;
 
 export async function getShapesFilters(
   boundaryIndexTitle: string,
-  boundaryType: string,
   boundaryGeoField: string,
   geoField: string,
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
@@ -25,38 +23,32 @@ export async function getShapesFilters(
 ) {
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
-  switch (boundaryType) {
-    case 'entireIndex':
-      // Get all shapes in index
-      const boundaryData: SearchResponse<Record<string, unknown>> = await callCluster('search', {
-        index: boundaryIndexTitle,
-        body: {
-          size: MAX_QUERY_SIZE,
-        },
-      });
-      boundaryData.hits.hits.forEach(({ _index, _id }) => {
-        filters[_id] = {
-          geo_shape: {
-            [geoField]: {
-              indexed_shape: {
-                index: _index,
-                id: _id,
-                path: boundaryGeoField,
-              },
-            },
+  // Get all shapes in index
+  const boundaryData: SearchResponse<Record<string, unknown>> = await callCluster('search', {
+    index: boundaryIndexTitle,
+    body: {
+      size: MAX_QUERY_SIZE,
+    },
+  });
+  boundaryData.hits.hits.forEach(({ _index, _id }) => {
+    filters[_id] = {
+      geo_shape: {
+        [geoField]: {
+          indexed_shape: {
+            index: _index,
+            id: _id,
+            path: boundaryGeoField,
           },
-        };
-      });
-      if (boundaryNameField) {
-        boundaryData.hits.hits.forEach(
-          ({ _source, _id }: { _source: Record<string, unknown>; _id: string }) => {
-            shapesIdsNamesMap[_id] = _source[boundaryNameField];
-          }
-        );
+        },
+      },
+    };
+  });
+  if (boundaryNameField) {
+    boundaryData.hits.hits.forEach(
+      ({ _source, _id }: { _source: Record<string, unknown>; _id: string }) => {
+        shapesIdsNamesMap[_id] = _source[boundaryNameField];
       }
-      break;
-    default:
-      log.info(`alert ${GEO_THRESHOLD_ID}:${alertId} Unsupported type: ${boundaryType}`);
+    );
   }
   return {
     shapesFilters: filters,
@@ -72,7 +64,6 @@ export async function executeEsQueryFactory(
     boundaryGeoField,
     geoField,
     boundaryIndexTitle,
-    boundaryType,
   }: {
     entity: string;
     index: string;
@@ -80,7 +71,6 @@ export async function executeEsQueryFactory(
     boundaryGeoField: string;
     geoField: string;
     boundaryIndexTitle: string;
-    boundaryType: string;
     boundaryNameField?: string;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
