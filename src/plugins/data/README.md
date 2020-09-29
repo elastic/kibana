@@ -50,7 +50,7 @@ Coming soon.
 
 ## Query
 
-The query service is responsible for managing the configuration of a search query (`QueryState`): filters, timerange and query string, as well as other settings such as the auto refresh behavior and saved queries.
+The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
 
 It contains sub-services for each of those configurations:
  - `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
