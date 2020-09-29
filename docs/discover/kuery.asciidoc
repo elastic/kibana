@@ -156,8 +156,9 @@ for the term
 [discrete]
 === Nested field queries
 
-A main consideration for querying {ref}/nested.html[nested fields] is how to match parts of the nested query to the individual nested documents.
-There are two approaches:
+A main consideration for querying {ref}/nested.html[nested fields] is how to
+match parts of the nested query to the individual nested documents.
+You can:
 
 * *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
 * *Match parts of the query to different nested documents.* This is how a regular object field works.
