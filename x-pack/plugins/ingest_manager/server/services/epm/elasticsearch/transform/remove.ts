@@ -46,6 +46,7 @@ export const deleteTransforms = async (
         ignore: [404],
       });
 
+      // expect this to be 1
       for (const transform of transformResponse.transforms) {
         await callCluster('transport.request', {
           method: 'DELETE',
