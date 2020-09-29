@@ -6,23 +6,27 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
 import { useMount } from 'react-use';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../triggers_actions_ui/public/common';
+} from '../../../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { LogDocumentCountAlertParams, Comparator } from '../../../../../common/alerting/logs/types';
-import { DocumentCount } from './document_count';
+import { AlertsContextValue } from '../../../../../../../triggers_actions_ui/public/application/context/alerts_context';
+import {
+  AlertParams,
+  Comparator,
+  ThresholdType,
+  isRatioAlert,
+} from '../../../../../../common/alerting/logs/log_threshold/types';
+import { Threshold } from './threshold';
 import { Criteria } from './criteria';
-import { useSourceId } from '../../../../containers/source_id';
-import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
-import { GroupByExpression } from '../../shared/group_by_expression/group_by_expression';
+import { TypeSwitcher } from './type_switcher';
+import { useSourceId } from '../../../../../containers/source_id';
+import { LogSourceProvider, useLogSourceContext } from '../../../../../containers/logs/log_source';
+import { GroupByExpression } from '../../../shared/group_by_expression/group_by_expression';
+import { Errors } from '../validation';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -36,8 +40,8 @@ interface LogsContextMeta {
 
 export type AlertsContext = AlertsContextValue<LogsContextMeta>;
 interface Props {
-  errors: IErrorObject;
-  alertParams: Partial<LogDocumentCountAlertParams>;
+  errors: Errors;
+  alertParams: Partial<AlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
   alertsContext: AlertsContext;
@@ -46,14 +50,30 @@ interface Props {
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
-const DEFAULT_EXPRESSION = {
+const DEFAULT_BASE_EXPRESSION = {
+  timeSize: 5,
+  timeUnit: 'm',
+};
+
+const DEFAULT_COUNT_EXPRESSION = {
+  ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
     comparator: Comparator.GT,
   },
   criteria: [DEFAULT_CRITERIA],
-  timeSize: 5,
-  timeUnit: 'm',
+};
+
+const DEFAULT_RATIO_EXPRESSION = {
+  ...DEFAULT_BASE_EXPRESSION,
+  count: {
+    value: 2,
+    comparator: Comparator.GT,
+  },
+  criteria: [
+    [DEFAULT_CRITERIA],
+    [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
+  ],
 };
 
 export const ExpressionEditor: React.FC<Props> = (props) => {
@@ -125,10 +145,10 @@ export const Editor: React.FC<Props> = (props) => {
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
   useMount(() => {
-    for (const [key, value] of Object.entries({ ...DEFAULT_EXPRESSION, ...alertParams })) {
+    for (const [key, value] of Object.entries({ ...DEFAULT_COUNT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
-      setHasSetDefaults(true);
     }
+    setHasSetDefaults(true);
   });
 
   const supportedFields = useMemo(() => {
@@ -153,22 +173,19 @@ export const Editor: React.FC<Props> = (props) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
-  const updateCount = useCallback(
-    (countParams) => {
-      const nextCountParams = { ...alertParams.count, ...countParams };
-      setAlertParams('count', nextCountParams);
+  const updateThreshold = useCallback(
+    (thresholdParams) => {
+      const nextThresholdParams = { ...alertParams.count, ...thresholdParams };
+      setAlertParams('count', nextThresholdParams);
     },
     [alertParams.count, setAlertParams]
   );
 
-  const updateCriterion = useCallback(
-    (idx, criterionParams) => {
-      const nextCriteria = alertParams.criteria?.map((criterion, index) => {
-        return idx === index ? { ...criterion, ...criterionParams } : criterion;
-      });
-      setAlertParams('criteria', nextCriteria ? nextCriteria : []);
+  const updateCriteria = useCallback(
+    (criteria: AlertParams['criteria']) => {
+      setAlertParams('criteria', criteria);
     },
-    [alertParams, setAlertParams]
+    [setAlertParams]
   );
 
   const updateTimeSize = useCallback(
@@ -192,46 +209,46 @@ export const Editor: React.FC<Props> = (props) => {
     [setAlertParams]
   );
 
-  const addCriterion = useCallback(() => {
-    const nextCriteria = alertParams?.criteria
-      ? [...alertParams.criteria, DEFAULT_CRITERIA]
-      : [DEFAULT_CRITERIA];
-    setAlertParams('criteria', nextCriteria);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [alertParams, setAlertParams]);
-
-  const removeCriterion = useCallback(
-    (idx) => {
-      const nextCriteria = alertParams?.criteria?.filter((criterion, index) => {
-        return index !== idx;
-      });
-      setAlertParams('criteria', nextCriteria);
+  const updateType = useCallback(
+    (type: ThresholdType) => {
+      const defaults = type === 'count' ? DEFAULT_COUNT_EXPRESSION : DEFAULT_RATIO_EXPRESSION;
+      // Reset properties that don't make sense switching from one context to the other
+      for (const [key, value] of Object.entries({
+        criteria: defaults.criteria,
+        count: defaults.count,
+      })) {
+        setAlertParams(key, value);
+      }
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [alertParams, setAlertParams]
+    [setAlertParams]
   );
 
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
+  const criteriaComponent = alertParams.criteria ? (
+    <Criteria
+      fields={supportedFields}
+      criteria={alertParams.criteria}
+      errors={errors.criteria}
+      alertParams={alertParams}
+      context={alertsContext}
+      sourceId={sourceId}
+      updateCriteria={updateCriteria}
+    />
+  ) : null;
+
   return (
     <>
-      <DocumentCount
+      <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
+
+      {alertParams.criteria && !isRatioAlert(alertParams.criteria) && criteriaComponent}
+
+      <Threshold
         comparator={alertParams.count?.comparator}
         value={alertParams.count?.value}
-        updateCount={updateCount}
-        errors={errors.count as IErrorObject}
-      />
-
-      <Criteria
-        fields={supportedFields}
-        criteria={alertParams.criteria}
-        updateCriterion={updateCriterion}
-        removeCriterion={removeCriterion}
-        errors={errors.criteria as IErrorObject}
-        alertParams={alertParams}
-        context={alertsContext}
-        sourceId={sourceId}
+        updateThreshold={updateThreshold}
+        errors={errors.threshold}
       />
 
       <ForLastExpression
@@ -239,7 +256,7 @@ export const Editor: React.FC<Props> = (props) => {
         timeWindowUnit={alertParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
-        errors={errors as { [key: string]: string[] }}
+        errors={{ timeWindowSize: errors.timeWindowSize, timeSizeUnit: errors.timeSizeUnit }}
       />
 
       <GroupByExpression
@@ -248,20 +265,9 @@ export const Editor: React.FC<Props> = (props) => {
         fields={groupByFields}
       />
 
-      <div>
-        <EuiButtonEmpty
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'plusInCircleFilled'}
-          onClick={addCriterion}
-        >
-          <FormattedMessage
-            id="xpack.infra.logs.alertFlyout.addCondition"
-            defaultMessage="Add condition"
-          />
-        </EuiButtonEmpty>
-      </div>
+      {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
+
+      <EuiSpacer size="l" />
     </>
   );
 };
@@ -269,3 +275,13 @@ export const Editor: React.FC<Props> = (props) => {
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
 export default ExpressionEditor;
+
+// NOTE: Temporary until EUI allow empty values in EuiExpression
+// components.
+export const ExpressionLike = ({ text }: { text: string }) => {
+  return (
+    <div className="euiExpression euiExpression-isUppercase euiExpression--secondary">
+      <span className="euiExpression__description">{text}</span>
+    </div>
+  );
+};
