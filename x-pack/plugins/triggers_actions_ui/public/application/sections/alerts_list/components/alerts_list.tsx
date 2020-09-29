@@ -93,7 +93,12 @@ export const AlertsList: React.FunctionComponent = () => {
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypesState, page, searchText, typesFilter, actionTypesFilter]);
+  }, [alertTypesState, page, searchText]);
+
+  useEffect(() => {
+    loadAlertsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(typesFilter), JSON.stringify(actionTypesFilter)]);
 
   useEffect(() => {
     (async () => {

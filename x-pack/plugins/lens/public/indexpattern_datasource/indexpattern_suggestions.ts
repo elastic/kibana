@@ -483,11 +483,15 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
   const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
   const firstBucketLabel =
-    currentFields.find((field) => field.name === layer.columns[firstBucket].sourceField)
-      ?.displayName || '';
+    currentFields.find((field) => {
+      const column = layer.columns[firstBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
   const secondBucketLabel =
-    currentFields.find((field) => field.name === layer.columns[secondBucket].sourceField)
-      ?.displayName || '';
+    currentFields.find((field) => {
+      const column = layer.columns[secondBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
 
   return buildSuggestion({
     state,
