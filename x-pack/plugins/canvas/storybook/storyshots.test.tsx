@@ -111,3 +111,5 @@ addSerializer(styleSheetSerializer);
 //   // Don't snapshot tests that start with 'redux'
 //   storyNameRegex: /^((?!.*?redux).)*$/,
 // });
+
+test.todo('Storyshots');
