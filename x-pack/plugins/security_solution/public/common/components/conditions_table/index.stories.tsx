@@ -6,46 +6,22 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { createItems, TEST_COLUMNS } from './test_utils';
 import { ConditionsTable } from '.';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-interface TestItem {
-  name: string;
-  value: string;
-}
-
-const columns: Array<EuiTableFieldDataColumnType<TestItem>> = [
-  { field: 'name', name: 'Name', textOnly: true, width: '50%' },
-  { field: 'value', name: 'Value', textOnly: true, width: '50%' },
-];
-
 storiesOf('Components|ConditionsTable', module)
   .add('single item', () => {
-    const items: TestItem[] = [{ name: 'item 1', value: 'value 1' }];
-
-    return <ConditionsTable items={items} columns={columns} badge="and" />;
+    return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
   })
   .add('and', () => {
-    const items: TestItem[] = [
-      { name: 'item 1', value: 'value 1' },
-      { name: 'item 2', value: 'value 2' },
-      { name: 'item 3', value: 'value 3' },
-    ];
-
-    return <ConditionsTable items={items} columns={columns} badge="and" />;
+    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
   })
   .add('or', () => {
-    const items: TestItem[] = [
-      { name: 'item 1', value: 'value 1' },
-      { name: 'item 2', value: 'value 2' },
-      { name: 'item 3', value: 'value 3' },
-    ];
-
-    return <ConditionsTable items={items} columns={columns} badge="or" />;
+    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
   });
