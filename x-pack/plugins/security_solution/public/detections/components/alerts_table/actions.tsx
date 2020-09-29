@@ -173,6 +173,7 @@ export const sendAlertToTimelineAction = async ({
           fetchPolicy: 'no-cache',
           variables: {
             id: timelineId,
+            timelineType: TimelineType.template,
           },
         }),
         searchStrategyClient.search<

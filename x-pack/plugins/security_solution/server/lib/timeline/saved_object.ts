@@ -58,7 +58,7 @@ export interface ResponseTemplateTimeline {
 }
 
 export interface Timeline {
-  getTimeline: (request: FrameworkRequest, timelineId: string) => Promise<TimelineSavedObject>;
+  getTimeline: (request: FrameworkRequest, timelineId: string, timelineType?: TimelineTypeLiteralWithNull) => Promise<TimelineSavedObject>;
 
   getAllTimeline: (
     request: FrameworkRequest,
@@ -95,9 +95,28 @@ export interface Timeline {
 
 export const getTimeline = async (
   request: FrameworkRequest,
-  timelineId: string
+  timelineId: string,
+  timelineType: TimelineTypeLiteralWithNull = TimelineType.default,
 ): Promise<TimelineSavedObject> => {
-  return getSavedTimeline(request, timelineId);
+  let timelineIdToUse = timelineId
+  try {
+    if (timelineType === TimelineType.template) {
+      const options = {
+        type: timelineSavedObjectType,
+        perPage: 1,
+        page: 1,
+        filter: `siem-ui-timeline.attributes.timelineTemplateId: ${timelineId}`,
+      };
+      const result = await getAllSavedTimeline(request, options);
+      if (result.totalCount === 1) {
+        timelineIdToUse = result.timeline[0].savedObjectId;
+      }
+    }
+  }
+  finally {
+    return getSavedTimeline(request, timelineIdToUse);
+  }
+
 };
 
 export const getTimelineByTemplateTimelineId = async (

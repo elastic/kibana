@@ -106,14 +106,14 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: t.savedObjectId,
+              id: timelineType === TimelineType.default ?  t.savedObjectId : t.templateTimelineId,
               key: `${t.title}-${index}`,
               title: t.title,
-              checked: t.savedObjectId === timelineId ? 'on' : undefined,
+            checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId) ? 'on' : undefined,
             } as EuiSelectableOption)
         ),
     ],
-    [hideUntitled, timelineId]
+    [hideUntitled, timelineId, timelineType]
   );
 
   return (
