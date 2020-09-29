@@ -61,13 +61,13 @@ export class Percentiles extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="visTypeTimeseries.percentile.percentileAriaLabel"
+              id="visTypeTimeseries.percentile.percentile"
               defaultMessage="Percentile"
             />
           }
         >
           <EuiFieldNumber
-            aria-label={i18n.translate('visTypeTimeseries.percentile.modeOptions.lineLabel', {
+            aria-label={i18n.translate('visTypeTimeseries.percentile.percentileAriaLabel', {
               defaultMessage: 'Percentile',
             })}
             placeholder={0}
