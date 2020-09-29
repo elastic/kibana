@@ -17,14 +17,23 @@ function getConnectionsPairs(connections: Connection[]) {
         : conn.destination['span.type'];
       return `${source} -> ${destination}`;
     })
-    .filter((_) => _)
-    .sort();
+    .filter((_) => _);
 }
 
 describe('getConnections', () => {
   describe('with environments defined', () => {
     const paths = [
       [
+        {
+          'service.environment': 'testing',
+          'service.name': 'opbeans-ruby',
+          'agent.name': 'ruby',
+        },
+        {
+          'service.environment': null,
+          'service.name': 'opbeans-node',
+          'agent.name': 'nodejs',
+        },
         {
           'service.environment': 'production',
           'service.name': 'opbeans-go',
@@ -44,13 +53,13 @@ describe('getConnections', () => {
       [
         {
           'service.environment': 'testing',
-          'service.name': 'opbeans-python',
-          'agent.name': 'python',
+          'service.name': 'opbeans-ruby',
+          'agent.name': 'ruby',
         },
         {
           'service.environment': 'testing',
-          'service.name': 'opbeans-node',
-          'agent.name': 'nodejs',
+          'service.name': 'opbeans-python',
+          'agent.name': 'python',
         },
         {
           'span.subtype': 'http',
@@ -66,12 +75,15 @@ describe('getConnections', () => {
           serviceName: undefined,
           environment: undefined,
         });
+
         const connectionsPairs = getConnectionsPairs(connections);
         expect(connectionsPairs).toEqual([
+          'opbeans-ruby:testing -> opbeans-node:null',
+          'opbeans-node:null -> opbeans-go:production',
           'opbeans-go:production -> opbeans-java:production',
           'opbeans-java:production -> external',
-          'opbeans-node:testing -> external',
-          'opbeans-python:testing -> opbeans-node:testing',
+          'opbeans-ruby:testing -> opbeans-python:testing',
+          'opbeans-python:testing -> external',
         ]);
       });
     });
@@ -87,6 +99,8 @@ describe('getConnections', () => {
         const connectionsPairs = getConnectionsPairs(connections);
 
         expect(connectionsPairs).toEqual([
+          'opbeans-ruby:testing -> opbeans-node:null',
+          'opbeans-node:null -> opbeans-go:production',
           'opbeans-go:production -> opbeans-java:production',
           'opbeans-java:production -> external',
         ]);
@@ -102,8 +116,8 @@ describe('getConnections', () => {
         const connectionsPairs = getConnectionsPairs(connections);
 
         expect(connectionsPairs).toEqual([
-          'opbeans-node:testing -> external',
-          'opbeans-python:testing -> opbeans-node:testing',
+          'opbeans-ruby:testing -> opbeans-python:testing',
+          'opbeans-python:testing -> external',
         ]);
       });
     });
@@ -119,8 +133,10 @@ describe('getConnections', () => {
         const connectionsPairs = getConnectionsPairs(connections);
 
         expect(connectionsPairs).toEqual([
-          'opbeans-node:testing -> external',
-          'opbeans-python:testing -> opbeans-node:testing',
+          'opbeans-ruby:testing -> opbeans-node:null',
+          'opbeans-node:null -> opbeans-go:production',
+          'opbeans-go:production -> opbeans-java:production',
+          'opbeans-java:production -> external',
         ]);
       });
     });
@@ -136,8 +152,12 @@ describe('getConnections', () => {
         const connectionsPairs = getConnectionsPairs(connections);
 
         expect(connectionsPairs).toEqual([
-          'opbeans-node:testing -> external',
-          'opbeans-python:testing -> opbeans-node:testing',
+          'opbeans-ruby:testing -> opbeans-node:null',
+          'opbeans-node:null -> opbeans-go:production',
+          'opbeans-go:production -> opbeans-java:production',
+          'opbeans-java:production -> external',
+          'opbeans-ruby:testing -> opbeans-python:testing',
+          'opbeans-python:testing -> external',
         ]);
       });
       it('shows all connections for production environment', () => {
@@ -150,6 +170,8 @@ describe('getConnections', () => {
         const connectionsPairs = getConnectionsPairs(connections);
 
         expect(connectionsPairs).toEqual([
+          'opbeans-ruby:testing -> opbeans-node:null',
+          'opbeans-node:null -> opbeans-go:production',
           'opbeans-go:production -> opbeans-java:production',
           'opbeans-java:production -> external',
         ]);
@@ -160,6 +182,23 @@ describe('getConnections', () => {
   describe('environment is "not defined"', () => {
     it('shows all connections where environment is not set', () => {
       const environmentNotDefinedPaths = [
+        [
+          {
+            'service.environment': 'production',
+            'service.name': 'opbeans-go',
+            'agent.name': 'go',
+          },
+          {
+            'service.environment': 'production',
+            'service.name': 'opbeans-java',
+            'agent.name': 'java',
+          },
+          {
+            'span.subtype': 'http',
+            'span.destination.service.resource': '172.18.0.6:3000',
+            'span.type': 'external',
+          },
+        ],
         [
           {
             'service.environment': null,
@@ -205,8 +244,8 @@ describe('getConnections', () => {
       expect(connectionsPairs).toEqual([
         'opbeans-go:null -> opbeans-java:null',
         'opbeans-java:null -> external',
-        'opbeans-node:null -> external',
         'opbeans-python:null -> opbeans-node:null',
+        'opbeans-node:null -> external',
       ]);
     });
   });

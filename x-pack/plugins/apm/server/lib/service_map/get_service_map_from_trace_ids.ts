@@ -28,21 +28,28 @@ export function getConnections({
 
   if (serviceName || environment) {
     paths = paths.filter((path) => {
-      return path.some((node) => {
-        if (serviceName && node[SERVICE_NAME] !== serviceName) {
-          return false;
-        }
+      return (
+        path
+          // Only apply the filter on node that contains service name, this filters out external nodes
+          .filter((node) => {
+            return node[SERVICE_NAME];
+          })
+          .some((node) => {
+            if (serviceName && node[SERVICE_NAME] !== serviceName) {
+              return false;
+            }
 
-        if (!environment) {
-          return true;
-        }
+            if (!environment) {
+              return true;
+            }
 
-        if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-          return !node[SERVICE_ENVIRONMENT];
-        }
+            if (environment === ENVIRONMENT_NOT_DEFINED.value) {
+              return !node[SERVICE_ENVIRONMENT];
+            }
 
-        return node[SERVICE_ENVIRONMENT] === environment;
-      });
+            return node[SERVICE_ENVIRONMENT] === environment;
+          })
+      );
     });
   }
 
