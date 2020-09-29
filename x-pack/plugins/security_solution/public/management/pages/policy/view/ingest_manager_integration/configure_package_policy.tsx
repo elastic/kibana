@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiButton,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigurePackagePolicyContent,
   CustomConfigurePackagePolicyProps,
@@ -21,6 +30,7 @@ import {
   TrustedAppsListPageRouteState,
 } from '../../../../../../common/endpoint/types';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -32,38 +42,6 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
     packagePolicyId,
     packagePolicy: { policy_id: agentPolicyId },
   }: CustomConfigurePackagePolicyProps) => {
-    let policyUrl = '';
-    if (from === 'edit' && packagePolicyId) {
-      // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
-      policyUrl = getPolicyDetailPath(packagePolicyId);
-    }
-
-    const navigateTo = useMemo<
-      PolicyDetailsRouteState['onSaveNavigateTo'] &
-        PolicyDetailsRouteState['onCancelNavigateTo'] &
-        TrustedAppsListPageRouteState['onBackButtonNavigateTo']
-    >(() => {
-      return [
-        'ingestManager',
-        {
-          path: `#${pagePathGetters.edit_integration({
-            policyId: agentPolicyId,
-            packagePolicyId: packagePolicyId!,
-          })}`,
-        },
-      ];
-    }, [agentPolicyId, packagePolicyId]);
-
-    const policyDetailRouteState = useMemo((): undefined | PolicyDetailsRouteState => {
-      if (from !== 'edit') {
-        return undefined;
-      }
-      return {
-        onSaveNavigateTo: navigateTo,
-        onCancelNavigateTo: navigateTo,
-      };
-    }, [from, navigateTo]);
-
     return (
       <>
         <EuiSpacer size="m" />
@@ -74,30 +52,10 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
           <EuiText size="s">
             {from === 'edit' ? (
               <>
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfiguration"
-                    defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
-                    values={{
-                      advancedConfigOptionsLink: (
-                        <LinkToApp
-                          data-test-subj="editLinkToPolicyDetails"
-                          appId={MANAGEMENT_APP_ID}
-                          appPath={policyUrl}
-                          appState={policyDetailRouteState}
-                        >
-                          <FormattedMessage
-                            id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfigurationLink"
-                            defaultMessage="here"
-                          />
-                        </LinkToApp>
-                      ),
-                    }}
-                  />
-                </p>
-                <p>
-                  <TrustedAppsMessage navigateTo={navigateTo} />
-                </p>
+                <EditFlowMessage
+                  agentPolicyId={agentPolicyId}
+                  integrationPolicyId={packagePolicyId!}
+                />
               </>
             ) : (
               <p>
@@ -113,53 +71,126 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
     );
   }
 );
-
 ConfigureEndpointPackagePolicy.displayName = 'ConfigureEndpointPackagePolicy';
 
-const TrustedAppsMessage = memo<{
-  navigateTo: TrustedAppsListPageRouteState['onBackButtonNavigateTo'];
-}>(({ navigateTo }) => {
+const EditFlowMessage = memo<{
+  agentPolicyId: string;
+  integrationPolicyId: string;
+}>(({ agentPolicyId, integrationPolicyId }) => {
   const {
     services: {
       application: { getUrlForApp },
     },
   } = useKibana();
-  const trustedAppsListUrl = getTrustedAppsListPath();
-  const trustedAppsListRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
-    return {
-      backButtonUrl: navigateTo[1]?.path
-        ? `${getUrlForApp('ingestManager')}${navigateTo[1].path}`
-        : undefined,
-      onBackButtonNavigateTo: navigateTo,
-      backButtonLabel: i18n.translate(
-        'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
-        { defaultMessage: 'Back to Edit Integration' }
-      ),
-    };
-  }, [getUrlForApp, navigateTo]);
+
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  const navigateBackToIngest = useMemo<
+    PolicyDetailsRouteState['onSaveNavigateTo'] &
+      PolicyDetailsRouteState['onCancelNavigateTo'] &
+      TrustedAppsListPageRouteState['onBackButtonNavigateTo']
+  >(() => {
+    return [
+      'ingestManager',
+      {
+        path: `#${pagePathGetters.edit_integration({
+          policyId: agentPolicyId,
+          packagePolicyId: integrationPolicyId!,
+        })}`,
+      },
+    ];
+  }, [agentPolicyId, integrationPolicyId]);
+
+  const handleClosePopup = useCallback(() => setIsMenuOpen(false), []);
+
+  const handleSecurityPolicyAction = useNavigateToAppEventHandler<PolicyDetailsRouteState>(
+    MANAGEMENT_APP_ID,
+    {
+      path: getPolicyDetailPath(integrationPolicyId),
+      state: {
+        onSaveNavigateTo: navigateBackToIngest,
+        onCancelNavigateTo: navigateBackToIngest,
+      },
+    }
+  );
+
+  const handleTrustedAppsAction = useNavigateToAppEventHandler<TrustedAppsListPageRouteState>(
+    MANAGEMENT_APP_ID,
+    {
+      path: getTrustedAppsListPath(),
+      state: {
+        backButtonUrl: navigateBackToIngest[1]?.path
+          ? `${getUrlForApp('ingestManager')}${navigateBackToIngest[1].path}`
+          : undefined,
+        onBackButtonNavigateTo: navigateBackToIngest,
+        backButtonLabel: i18n.translate(
+          'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
+          { defaultMessage: 'Back to Edit Integration' }
+        ),
+      },
+    }
+  );
+
+  const menuButton = useMemo(() => {
+    return (
+      <EuiButton
+        size="s"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={() => setIsMenuOpen((prevState) => !prevState)}
+        data-test-subj="endpointActions"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.menuButton"
+          defaultMessage="Actions"
+        />
+      </EuiButton>
+    );
+  }, []);
 
   return (
-    <>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessage"
-        defaultMessage="Click {link} to view global Trusted Applications"
-        values={{
-          link: (
-            <LinkToApp
-              data-test-subj="viewTrustedApps"
-              appId={MANAGEMENT_APP_ID}
-              appPath={trustedAppsListUrl}
-              appState={trustedAppsListRouteState}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageLinkLabel"
-                defaultMessage="here"
-              />
-            </LinkToApp>
-          ),
-        }}
-      />
-    </>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.message"
+          defaultMessage="More advanced configuration options can be found by selecting an action from the menu"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={menuButton}
+          isOpen={isMenuOpen}
+          closePopover={handleClosePopup}
+          anchorPosition="downRight"
+          panelPaddingSize="s"
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key="policyDetails"
+                onClick={handleSecurityPolicyAction}
+                data-test-subj="editLinkToPolicyDetails"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionSecurityPolicy"
+                  defaultMessage="Edit Security Policy"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="trustedApps"
+                onClick={handleTrustedAppsAction}
+                data-test-subj="trustedAppsAction"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionTrustedApps"
+                  defaultMessage="View Trusted Applications"
+                />
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
-TrustedAppsMessage.displayName = 'TrustedAppsMessage';
+EditFlowMessage.displayName = 'EditFlowMessage';
