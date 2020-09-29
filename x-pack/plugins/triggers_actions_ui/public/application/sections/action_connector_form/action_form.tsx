@@ -311,6 +311,8 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               defaultMessage={defaultActionMessage ?? undefined}
               docLinks={docLinks}
+              http={http}
+              toastNotifications={toastNotifications}
               actionConnector={actionConnector}
             />
           </Suspense>

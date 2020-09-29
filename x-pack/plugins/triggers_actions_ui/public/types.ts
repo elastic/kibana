@@ -54,6 +54,8 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   docLinks: DocLinksStart;
+  http?: HttpSetup;
+  toastNotifications: ToastsSetup;
   actionConnector?: ActionConnector;
 }
 
