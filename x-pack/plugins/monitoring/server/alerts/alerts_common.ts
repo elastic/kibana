@@ -63,21 +63,18 @@ export class AlertingDefaults {
 }
 
 export const createLink = (
-  translateStr: string,
   linkText: string,
   linkURL: string,
   type: AlertMessageTokenType = AlertMessageTokenType.DocLink
 ) => {
+  const link = type === AlertMessageTokenType.DocLink ? { url: linkURL } : { partialUrl: linkURL };
   return {
-    text: i18n.translate(translateStr, {
-      defaultMessage: `#start_link${linkText}#end_link`,
-    }),
+    text: linkText,
     tokens: [
       {
+        ...link,
         startToken: '#start_link',
         endToken: '#end_link',
-        partialUrl: linkURL,
-        url: linkURL,
         type,
       } as AlertMessageDocLinkToken,
     ],

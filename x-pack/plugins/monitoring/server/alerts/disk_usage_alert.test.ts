@@ -36,7 +36,7 @@ describe('DiskUsageAlert', () => {
     expect(alert.type).toBe(ALERT_DISK_USAGE);
     expect(alert.label).toBe('Disk Usage');
     expect(alert.defaultThrottle).toBe('1d');
-    expect(alert.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
+    expect(alert.defaultParams).toStrictEqual({ threshold: 90, duration: '5m' });
     expect(alert.actionVariables).toStrictEqual([
       { name: 'nodes', description: 'The list of nodes reporting high disk usage.' },
       { name: 'count', description: 'The number of nodes reporting high disk usage.' },
@@ -89,6 +89,7 @@ describe('DiskUsageAlert', () => {
     };
     const kibanaUrl = 'http://localhost:5601';
 
+    const hasScheduledActions = jest.fn();
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
     const getState = jest.fn();
@@ -97,6 +98,7 @@ describe('DiskUsageAlert', () => {
         callCluster: jest.fn(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
+            hasScheduledActions,
             replaceState,
             scheduleActions,
             getState,
@@ -151,143 +153,6 @@ describe('DiskUsageAlert', () => {
       });
     });
 
-    it('should not fire actions if under threshold', async () => {
-      (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            diskUsage: 1,
-          },
-        ];
-      });
-      const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        params: alert.defaultParams,
-      } as any);
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            ccs: undefined,
-            cluster: {
-              clusterUuid,
-              clusterName,
-            },
-            diskUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              lastCheckedMS: 0,
-              message: null,
-              resolvedMS: 0,
-              severity: 'danger',
-              triggeredMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            diskUsage: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              diskUsage: 91,
-              nodeId,
-              nodeName,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: null,
-            diskUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              message: {
-                text:
-                  'The disk usage on node myNodeName is now under the threshold, currently reporting at 1.00% as of #resolved',
-                tokens: [
-                  {
-                    startToken: '#resolved',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `Disk usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-        internalShortMessage: `Disk usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-        clusterName,
-        count,
-        nodes: `${nodeName}:1.00`,
-        state: 'resolved',
-      });
-    });
-
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
       (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
@@ -323,187 +188,6 @@ describe('DiskUsageAlert', () => {
         nodes: `${nodeName}:${diskUsage.toFixed(2)}`,
         state: 'firing',
       });
-    });
-
-    it('should show proper counts for resolved and firing nodes', async () => {
-      (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            diskUsage: 1,
-          },
-          {
-            ...stat,
-            nodeId: 'anotherNode',
-            nodeName: 'anotherNode',
-            diskUsage: 99,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              diskUsage: 91,
-              nodeId,
-              nodeName,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              diskUsage: 100,
-              nodeId: 'anotherNode',
-              nodeName: 'anotherNode',
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: null,
-            diskUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              message: {
-                text:
-                  'The disk usage on node myNodeName is now under the threshold, currently reporting at 1.00% as of #resolved',
-                tokens: [
-                  {
-                    startToken: '#resolved',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-          {
-            ccs: null,
-            cluster: { clusterUuid, clusterName },
-            diskUsage: 99,
-            nodeId: 'anotherNode',
-            nodeName: 'anotherNode',
-            ui: {
-              isFiring: true,
-              message: {
-                text:
-                  'Node #start_linkanotherNode#end_link is reporting disk usage of 99.00% at #absolute',
-                nextSteps: [
-                  {
-                    text: '#start_linkCheck hot threads#end_link',
-                    tokens: [
-                      {
-                        startToken: '#start_link',
-                        endToken: '#end_link',
-                        type: 'docLink',
-                        partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkCheck long running tasks#end_link',
-                    tokens: [
-                      {
-                        startToken: '#start_link',
-                        endToken: '#end_link',
-                        type: 'docLink',
-                        partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
-                      },
-                    ],
-                  },
-                ],
-                tokens: [
-                  {
-                    startToken: '#absolute',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                  {
-                    startToken: '#start_link',
-                    endToken: '#end_link',
-                    type: 'link',
-                    url: 'elasticsearch/nodes/anotherNode',
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 0,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledTimes(1);
-      expect(scheduleActions.mock.calls[0]).toEqual([
-        'default',
-        {
-          action:
-            '[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
-          actionPlain: 'Verify disk usage levels across affected nodes.',
-          internalFullMessage:
-            'Disk usage alert is firing for 1 node(s) in cluster: testCluster. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
-          internalShortMessage:
-            'Disk usage alert is firing for 1 node(s) in cluster: testCluster. Verify disk usage levels across affected nodes.',
-          nodes: 'anotherNode:99.00',
-          clusterName,
-          count,
-          state: 'firing',
-        },
-      ]);
     });
 
     it('should fire with different messaging for cloud', async () => {

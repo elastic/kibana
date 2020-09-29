@@ -190,13 +190,15 @@ export class CpuUsageAlert extends BaseAlert {
       }),
       nextSteps: [
         createLink(
-          'xpack.monitoring.alerts.cpuUsage.ui.nextSteps.hotThreads',
-          'Check hot threads',
+          i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.hotThreads', {
+            defaultMessage: '#start_linkCheck hot threads#end_link',
+          }),
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
         ),
         createLink(
-          'xpack.monitoring.alerts.cpuUsage.ui.nextSteps.runningTasks',
-          'Check long running tasks',
+          i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.runningTasks', {
+            defaultMessage: '#start_linkCheck long running tasks#end_link',
+          }),
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
         ),
       ],
@@ -338,48 +340,71 @@ export class CpuUsageAlert extends BaseAlert {
     clusters: AlertCluster[],
     services: AlertServices
   ) {
-    const currentUTC = +new Date();
     for (const cluster of clusters) {
-      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
-      if (!nodes.length) {
+      const nodes = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
+      if (nodes.length === 0) {
         continue;
       }
-
-      const instanceId = `.monitoring:${this.type}:${cluster.clusterUuid}`;
+      const firingNodeUuids = nodes.reduce((list: string[], node) => {
+        const stat = node.meta as AlertCpuUsageNodeStats;
+        if (node.shouldFire) {
+          list.push(stat.nodeId);
+        }
+        return list;
+      }, [] as string[]);
+      firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
+      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const state = instance.getState() as AlertInstanceState;
-      const newAlertStates: AlertInstanceState['alertStates'] = [];
-      const oldAlertStates = (state?.alertStates || []) as AlertCpuUsageState[];
-
+      const state = (instance.getState() as unknown) as AlertInstanceState;
+      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
+      let shouldExecuteActions = false;
       for (const node of nodes) {
-        const stat = node.meta as AlertCpuUsageState;
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertCpuUsageState;
+        const stat = node.meta as AlertCpuUsageNodeStats;
+        let nodeState: AlertCpuUsageState;
+        const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
+          const nodeAlertState = alertState as AlertCpuUsageState;
+          return (
+            nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
+            nodeAlertState.nodeId === (node.meta as AlertCpuUsageNodeStats).nodeId
+          );
+        });
+        if (indexInState > -1) {
+          nodeState = alertInstanceState.alertStates[indexInState] as AlertCpuUsageState;
+        } else {
+          nodeState = this.getDefaultAlertState(cluster, node) as AlertCpuUsageState;
+        }
         nodeState.cpuUsage = stat.cpuUsage;
         nodeState.nodeId = stat.nodeId;
         nodeState.nodeName = stat.nodeName;
 
         if (node.shouldFire) {
-          nodeState.ui.triggeredMS = currentUTC;
-          nodeState.ui.isFiring = true;
-          nodeState.ui.severity = node.severity;
-          newAlertStates.push(nodeState);
-        } else {
-          const lastNodeState = oldAlertStates.find(
-            (oldNodeState) => nodeState.nodeId === oldNodeState.nodeId
-          );
-          if (lastNodeState?.ui.isFiring) {
-            nodeState.ui.resolvedMS = currentUTC;
-            newAlertStates.push(nodeState);
+          if (!nodeState.ui.isFiring) {
+            nodeState.ui.triggeredMS = new Date().valueOf();
           }
+          nodeState.ui.isFiring = true;
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          nodeState.ui.severity = node.severity;
+          nodeState.ui.resolvedMS = 0;
+          shouldExecuteActions = true;
+        } else if (!node.shouldFire && nodeState.ui.isFiring) {
+          nodeState.ui.isFiring = false;
+          nodeState.ui.resolvedMS = new Date().valueOf();
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          shouldExecuteActions = true;
         }
-
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-
-        const alertInstanceState = { alertStates: newAlertStates };
-        instance.replaceState(alertInstanceState);
-        if (newAlertStates.length && !instance.hasScheduledActions()) {
-          this.executeActions(instance, alertInstanceState, null, cluster);
+        if (indexInState === -1) {
+          alertInstanceState.alertStates.push(nodeState);
+        } else {
+          alertInstanceState.alertStates = [
+            ...alertInstanceState.alertStates.slice(0, indexInState),
+            nodeState,
+            ...alertInstanceState.alertStates.slice(indexInState + 1),
+          ];
         }
+      }
+      instance.replaceState(alertInstanceState);
+      if (shouldExecuteActions) {
+        this.executeActions(instance, alertInstanceState, null, cluster);
       }
     }
   }

@@ -78,6 +78,7 @@ describe('CpuUsageAlert', () => {
     };
     const kibanaUrl = 'http://localhost:5601';
 
+    const hasScheduledActions = jest.fn();
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
     const getState = jest.fn();
@@ -86,6 +87,7 @@ describe('CpuUsageAlert', () => {
         callCluster: jest.fn(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
+            hasScheduledActions,
             replaceState,
             scheduleActions,
             getState,
@@ -133,6 +135,7 @@ describe('CpuUsageAlert', () => {
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
           {
+            ccs: undefined,
             cluster: { clusterUuid, clusterName },
             cpuUsage,
             nodeId,
@@ -150,7 +153,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        partialUrl:
+                        url:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
@@ -162,7 +165,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        partialUrl:
+                        url:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],
@@ -502,7 +505,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        partialUrl:
+                        url:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
@@ -514,7 +517,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        partialUrl:
+                        url:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],

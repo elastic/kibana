@@ -157,30 +157,35 @@ export class DiskUsageAlert extends BaseAlert {
       }),
       nextSteps: [
         createLink(
-          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk',
-          'Tune for disk usage',
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk', {
+            defaultMessage: '#start_linkTune for disk usage#end_link',
+          }),
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
         ),
         createLink(
-          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk',
-          'Identify large indices',
-          `elasticsearch/indices`,
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.identifyIndices', {
+            defaultMessage: '#start_linkIdentify large indices#end_link',
+          }),
+          'elasticsearch/indices',
           AlertMessageTokenType.Link
         ),
         createLink(
-          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies',
-          'Implement ILM policies',
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies', {
+            defaultMessage: '#start_linkImplement ILM policies#end_link',
+          }),
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
         ),
         createLink(
-          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes',
-          'Add more data nodes',
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes', {
+            defaultMessage: '#start_linkAdd more data nodes#end_link',
+          }),
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
         ),
         createLink(
-          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment',
-          'Resize your deployment (ECE)',
-          `{elasticWebsiteUrl}/guide/en/cloud-enterprise/{docLinkVersion}/ece-resize-deployment.html`
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment', {
+            defaultMessage: '#start_linkResize your deployment (ECE)#end_link',
+          }),
+          `{elasticWebsiteUrl}/guide/en/cloud-enterprise/current/ece-resize-deployment.html`
         ),
       ],
       tokens: [
@@ -293,50 +298,6 @@ export class DiskUsageAlert extends BaseAlert {
     }
   }
 
-  private executeDeltas(
-    services: AlertServices,
-    cluster: AlertCluster,
-    newAlertStates: AlertDiskUsageState[],
-    oldAlertStates: AlertDiskUsageState[]
-  ) {
-    const deltaFiringStates = [];
-    const deltaResolvedStates = [];
-    const deltaInstanceIdPrefix: string = `.monitoring:${this.type}:${
-      cluster.clusterUuid
-    }:${Date.now()}:`;
-
-    for (const newAlertState of newAlertStates) {
-      const relatedOldState = oldAlertStates.find(
-        (oldState) =>
-          oldState.nodeId === newAlertState.nodeId &&
-          oldState.ui.isFiring !== newAlertState.ui.isFiring &&
-          oldState.ui.resolvedMS !== newAlertState.ui.resolvedMS
-      );
-      if (!relatedOldState) {
-        if (newAlertState.ui.isFiring) {
-          deltaFiringStates.push(newAlertState);
-        } else if (newAlertState.ui.resolvedMS) {
-          deltaResolvedStates.push(newAlertState);
-        }
-      }
-    }
-
-    if (deltaFiringStates.length + deltaResolvedStates.length === newAlertStates.length) {
-      /** No delta changes, so we do nothing */
-      return;
-    }
-
-    if (deltaFiringStates.length) {
-      const instance = services.alertInstanceFactory(`${deltaInstanceIdPrefix}:firing`);
-      this.executeActions(instance, { alertStates: deltaFiringStates }, null, cluster);
-    }
-
-    if (deltaResolvedStates.length) {
-      const instance = services.alertInstanceFactory(`${deltaInstanceIdPrefix}:resolved`);
-      this.executeActions(instance, { alertStates: deltaResolvedStates }, null, cluster);
-    }
-  }
-
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
@@ -344,18 +305,20 @@ export class DiskUsageAlert extends BaseAlert {
     logger: Logger,
     state: any
   ) {
-    const currentUTC = Date.now();
+    const currentUTC = +new Date();
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {
         continue;
       }
 
-      const instanceId = `.monitoring:${this.type}:${cluster.clusterUuid}`;
+      const firingNodeUuids = nodes
+        .filter((node) => node.shouldFire)
+        .map((node) => node.meta.nodeId)
+        .join(',');
+      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const instanceState = instance.getState() as AlertInstanceState;
       const newAlertStates: AlertDiskUsageState[] = [];
-      const oldAlertStates = (instanceState?.alertStates || []) as AlertDiskUsageState[];
 
       for (const node of nodes) {
         const stat = node.meta as AlertDiskUsageState;
@@ -369,25 +332,9 @@ export class DiskUsageAlert extends BaseAlert {
           nodeState.ui.isFiring = true;
           nodeState.ui.severity = node.severity;
           newAlertStates.push(nodeState);
-        } else {
-          const lastNodeState = oldAlertStates.find(
-            (oldNodeState) => nodeState.nodeId === oldNodeState.nodeId
-          );
-          if (lastNodeState?.ui.isFiring) {
-            nodeState.ui.resolvedMS = currentUTC;
-            newAlertStates.push(nodeState);
-          }
         }
-
         nodeState.ui.message = this.getUiMessage(nodeState, node);
       }
-
-      /**
-       * Addresses lost delta triggers if executed between throttle states, context:
-       * https://github.com/elastic/kibana/pull/75419#discussion_r490497639. This is
-       * a temporary solution until: https://github.com/elastic/kibana/issues/49405 is implemented
-       */
-      this.executeDeltas(services, cluster, newAlertStates, oldAlertStates);
 
       const alertInstanceState = { alertStates: newAlertStates };
       instance.replaceState(alertInstanceState);
