@@ -25,13 +25,16 @@ exports[`FeedItem render 1`] = `
     className="kbnOverviewNews__content"
   >
     <article
+      aria-labelledby="kbnOverviewNews__title0"
       key="Blog Post 1"
     >
       <header>
         <EuiTitle
           size="xxs"
         >
-          <h3>
+          <h3
+            id="kbnOverviewNews__title0"
+          >
             <EuiLink
               href="link-blog-post-1"
               target="_blank"
@@ -62,13 +65,16 @@ exports[`FeedItem render 1`] = `
       </EuiText>
     </article>
     <article
+      aria-labelledby="kbnOverviewNews__title1"
       key="Alerting and anomaly detection for uptime and reliability"
     >
       <header>
         <EuiTitle
           size="xxs"
         >
-          <h3>
+          <h3
+            id="kbnOverviewNews__title1"
+          >
             <EuiLink
               href="link-blog-post-2"
               target="_blank"
@@ -99,13 +105,16 @@ exports[`FeedItem render 1`] = `
       </EuiText>
     </article>
     <article
+      aria-labelledby="kbnOverviewNews__title2"
       key="Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management"
     >
       <header>
         <EuiTitle
           size="xxs"
         >
-          <h3>
+          <h3
+            id="kbnOverviewNews__title2"
+          >
             <EuiLink
               href="link-blog-post-3"
               target="_blank"

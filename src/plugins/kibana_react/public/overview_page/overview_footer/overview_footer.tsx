@@ -37,7 +37,10 @@ interface Props {
 export const OverviewFooter: FC<Props> = ({ path, className }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
-    services: { application },
+    services: {
+      application,
+      notifications: { toasts },
+    },
   } = useKibana<CoreStart>();
 
   const isAdvancedSettingsEnabled = application.capabilities.advancedSettings.show;
@@ -61,6 +64,7 @@ export const OverviewFooter: FC<Props> = ({ path, className }) => {
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
+          toasts.addSuccess('Set this page as your landing page');
         }}
         size="xs"
       >

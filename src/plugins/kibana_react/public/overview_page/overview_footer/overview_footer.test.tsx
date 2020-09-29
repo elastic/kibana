@@ -23,7 +23,10 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   useKibana: jest.fn().mockReturnValue({
-    services: { application: { capabilities: { advancedSettings: { show: true } } } },
+    services: {
+      application: { capabilities: { advancedSettings: { show: true } } },
+      notifications: { toast: { addSuccess: jest.fn() } },
+    },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),

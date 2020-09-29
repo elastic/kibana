@@ -128,21 +128,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   const pageTitle = (
-    <header>
-      <EuiFlexGroup gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="xxl" type="logoKibana" />
-        </EuiFlexItem>
+    <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="xxl" type="logoKibana" />
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h1 id="kbnOverviewHeader__title">
-              <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </header>
+      <EuiFlexItem>
+        <EuiTitle size="m">
+          <h1 id="kbnOverviewHeader__title">
+            <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return (

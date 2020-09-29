@@ -37,31 +37,33 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
     <EuiSpacer size="m" />
 
     <div className="kbnOverviewNews__content">
-      {newsFetchResult.feedItems.slice(0, 3).map(({ title, description, linkUrl, publishOn }) => (
-        <article key={title}>
-          <header>
-            <EuiTitle size="xxs">
-              <h3>
-                <EuiLink href={linkUrl} target="_blank">
-                  {title}
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+      {newsFetchResult.feedItems
+        .slice(0, 3)
+        .map(({ title, description, linkUrl, publishOn }, index) => (
+          <article key={title} aria-labelledby={`kbnOverviewNews__title${index}`}>
+            <header>
+              <EuiTitle size="xxs">
+                <h3 id={`kbnOverviewNews__title${index}`}>
+                  <EuiLink href={linkUrl} target="_blank">
+                    {title}
+                  </EuiLink>
+                </h3>
+              </EuiTitle>
 
-            <EuiText size="xs" color="subdued">
-              <p>
-                <time dateTime={publishOn.format('YYYY-MM-DD')}>
-                  {publishOn.format('DD MMMM YYYY')}
-                </time>
-              </p>
+              <EuiText size="xs" color="subdued">
+                <p>
+                  <time dateTime={publishOn.format('YYYY-MM-DD')}>
+                    {publishOn.format('DD MMMM YYYY')}
+                  </time>
+                </p>
+              </EuiText>
+            </header>
+
+            <EuiText size="xs">
+              <p>{description}</p>
             </EuiText>
-          </header>
-
-          <EuiText size="xs">
-            <p>{description}</p>
-          </EuiText>
-        </article>
-      ))}
+          </article>
+        ))}
     </div>
   </section>
 );
