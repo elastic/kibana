@@ -32,7 +32,14 @@ export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
 
 export type HasData = () => Promise<boolean>;
 
-export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+export type ObservabilityFetchDataPlugins = Exclude<
+  ObservabilityApp,
+  'observability' | 'stack_monitoring'
+>;
+
+export interface DataHandler<
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+> {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData;
 }

@@ -194,55 +194,15 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'isPreconfigured',
       name: '',
-      render: (value: number, item: ActionConnectorTableItem) => {
-        if (item.isPreconfigured) {
-          return (
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  data-test-subj="preConfiguredTitleMessage"
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
-                    {
-                      defaultMessage: 'Preconfigured',
-                    }
-                  )}
-                  tooltipContent="This connector can't be deleted."
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }
+      render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  canDelete
-                    ? i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                        { defaultMessage: 'Delete this connector' }
-                      )
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                        { defaultMessage: 'Unable to delete connectors' }
-                      )
-                }
-              >
-                <EuiButtonIcon
-                  isDisabled={!canDelete}
-                  data-test-subj="deleteConnector"
-                  aria-label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
-                    { defaultMessage: 'Delete' }
-                  )}
-                  onClick={() => setConnectorsToDelete([item.id])}
-                  iconType={'trash'}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+            <DeleteOperation
+              canDelete={canDelete}
+              item={item}
+              onDelete={() => setConnectorsToDelete([item.id])}
+            />
           </EuiFlexGroup>
         );
       },
@@ -344,28 +304,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     />
   );
 
-  const noPermissionPrompt = (
-    <EuiEmptyPrompt
-      iconType="securityApp"
-      title={
-        <h1>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
-            defaultMessage="No permissions to create connectors"
-          />
-        </h1>
-      }
-      body={
-        <p data-test-subj="permissionDeniedMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateDescription"
-            defaultMessage="Contact your system administrator."
-          />
-        </p>
-      }
-    />
-  );
-
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
@@ -397,6 +335,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
           { defaultMessage: 'connectors' }
         )}
+        setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
@@ -411,7 +350,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
         <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
       )}
-      {data.length === 0 && !canSave && noPermissionPrompt}
+      {data.length === 0 && !canSave && <NoPermissionPrompt />}
       <ActionsConnectorsContextProvider
         value={{
           actionTypeRegistry,
@@ -442,3 +381,76 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;
 }
+
+const DeleteOperation: React.FunctionComponent<{
+  item: ActionConnectorTableItem;
+  canDelete: boolean;
+  onDelete: () => void;
+}> = ({ item, canDelete, onDelete }) => {
+  if (item.isPreconfigured) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiBetaBadge
+          data-test-subj="preConfiguredTitleMessage"
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+            {
+              defaultMessage: 'Preconfigured',
+            }
+          )}
+          tooltipContent="This connector can't be deleted."
+        />
+      </EuiFlexItem>
+    );
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={
+          canDelete
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
+                { defaultMessage: 'Delete this connector' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
+                { defaultMessage: 'Unable to delete connectors' }
+              )
+        }
+      >
+        <EuiButtonIcon
+          isDisabled={!canDelete}
+          data-test-subj="deleteConnector"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
+            { defaultMessage: 'Delete' }
+          )}
+          onClick={onDelete}
+          iconType={'trash'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+const NoPermissionPrompt: React.FunctionComponent<{}> = () => (
+  <EuiEmptyPrompt
+    iconType="securityApp"
+    title={
+      <h1>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
+          defaultMessage="No permissions to create connectors"
+        />
+      </h1>
+    }
+    body={
+      <p data-test-subj="permissionDeniedMessage">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateDescription"
+          defaultMessage="Contact your system administrator."
+        />
+      </p>
+    }
+  />
+);
