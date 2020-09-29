@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RegistryPackage } from '../../../types';
+import { InstallablePackage } from '../../../types';
 import * as Registry from '../registry';
 import { getArchiveFilelist } from '../registry/cache';
 
@@ -16,7 +16,7 @@ import { getArchiveFilelist } from '../registry/cache';
 // and different package and version structure
 
 export function getAssets(
-  packageInfo: RegistryPackage,
+  packageInfo: InstallablePackage,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): string[] {
@@ -48,7 +48,7 @@ export function getAssets(
 }
 
 export async function getAssetsData(
-  packageInfo: RegistryPackage,
+  packageInfo: InstallablePackage,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {

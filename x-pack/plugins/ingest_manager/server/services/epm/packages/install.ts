@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo, InstallSource } from '../../../../common';
+import { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -20,7 +20,6 @@ import {
   EsAssetReference,
   ElasticsearchAssetType,
   InstallType,
-  RegistryPackage,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -272,7 +271,7 @@ export async function installPackageFromRegistry({
     paths,
     removable,
     internal,
-    registryPackageInfo,
+    packageInfo: registryPackageInfo,
     installType,
     installSource,
   });
@@ -302,7 +301,7 @@ async function installPackage({
   paths,
   removable,
   internal,
-  registryPackageInfo,
+  packageInfo,
   installType,
   installSource,
 }: {
@@ -314,11 +313,11 @@ async function installPackage({
   paths: string[];
   removable: boolean;
   internal: boolean;
-  registryPackageInfo: RegistryPackage;
+  packageInfo: InstallablePackage;
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.data_streams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   // add the package installation to the saved object.
   // if some installation already exists, just update install info
@@ -370,14 +369,14 @@ async function installPackage({
 
   // installs versionized pipelines without removing currently installed ones
   const installedPipelines = await installPipelines(
-    registryPackageInfo,
+    packageInfo,
     paths,
     callCluster,
     savedObjectsClient
   );
   // install or update the templates referencing the newly installed pipelines
   const installedTemplates = await installTemplates(
-    registryPackageInfo,
+    packageInfo,
     callCluster,
     paths,
     savedObjectsClient
@@ -387,7 +386,7 @@ async function installPackage({
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
   const installedTransforms = await installTransform(
-    registryPackageInfo,
+    packageInfo,
     paths,
     callCluster,
     savedObjectsClient

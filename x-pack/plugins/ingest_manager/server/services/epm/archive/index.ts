@@ -6,12 +6,11 @@
 
 import yaml from 'js-yaml';
 import { uniq } from 'lodash';
-import { title } from 'process';
 
 import {
   ArchivePackage,
-  Dataset,
-  RegistryConfigTemplate,
+  RegistryPolicyTemplate,
+  RegistryDataStream,
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
@@ -125,8 +124,8 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
     );
   }
 
-  const datasets = parseAndVerifyDatasets(paths, name, version);
-  const configTemplates = parseAndVerifyConfigTemplates(manifest);
+  const dataStreams = parseAndVerifyDatasets(paths, name, version);
+  const policyTemplates = parseAndVerifyPolicyTemplates(manifest);
 
   return {
     name,
@@ -135,33 +134,37 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
     type,
     categories,
     format_version: formatVersion,
-    datasets,
-    config_templates: configTemplates,
+    data_streams: dataStreams,
+    policy_templates: policyTemplates,
   };
 }
 
-function parseAndVerifyDatasets(paths: string[], pkgName: string, pkgVersion: string): Dataset[] {
-  // A dataset is made up of a subdirectory of name-version/dataset/, containing a manifest.yml
-  let datasetPaths: string[] = [];
-  const datasets: Dataset[] = [];
+function parseAndVerifyDatasets(
+  paths: string[],
+  pkgName: string,
+  pkgVersion: string
+): RegistryDataStream[] {
+  // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
+  let dataStreamPaths: string[] = [];
+  const dataStreams: RegistryDataStream[] = [];
 
   // pick all paths matching name-version/dataset/DATASET_PATH/...
   // from those, pick all unique dataset paths
   paths
-    .filter((path) => path.startsWith(`${pkgName}-${pkgVersion}/dataset/`))
+    .filter((path) => path.startsWith(`${pkgName}-${pkgVersion}/data_stream/`))
     .forEach((path) => {
       const parts = path.split('/');
-      if (parts.length > 2 && parts[2]) datasetPaths.push(parts[2]);
+      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
     });
 
-  datasetPaths = uniq(datasetPaths);
+  dataStreamPaths = uniq(dataStreamPaths);
 
-  datasetPaths.forEach((datasetPath) => {
-    const manifestFile = `${pkgName}-${pkgVersion}/dataset/${datasetPath}/manifest.yml`;
+  dataStreamPaths.forEach((dataStreamPath) => {
+    const manifestFile = `${pkgName}-${pkgVersion}/data_stream/${dataStreamPath}/manifest.yml`;
     const manifestBuffer = cacheGet(manifestFile);
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
-        `No manifest.yml file found for dataset '${datasetPath}'`
+        `No manifest.yml file found for data stream '${dataStreamPath}'`
       );
     }
 
@@ -170,35 +173,35 @@ function parseAndVerifyDatasets(paths: string[], pkgName: string, pkgVersion: st
       manifest = yaml.load(manifestBuffer.toString());
     } catch (error) {
       throw new PackageInvalidArchiveError(
-        `Could not parse package manifest for dataset '${datasetPath}': ${error}.`
+        `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
       );
     }
 
     const { title: datasetTitle, release, ingest_pipeline: ingestPipeline, type } = manifest;
     if (!(datasetTitle && release && type)) {
       throw new PackageInvalidArchiveError(
-        `Invalid manifest for dataset '${datasetPath}': one or more fields missing of 'title', 'release', 'type'`
+        `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'release', 'type'`
       );
     }
-    const streams = parseAndVerifyStreams(manifest, datasetPath);
+    const streams = parseAndVerifyStreams(manifest, dataStreamPath);
 
     // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
-    return datasets.push({
-      name: `${pkgName}.${datasetPath}`,
+    return dataStreams.push({
+      dataset: `${pkgName}.${dataStreamPath}`,
       title: datasetTitle,
       release,
       package: pkgName,
       ingest_pipeline: ingestPipeline || 'default',
-      path: datasetPath,
+      path: dataStreamPath,
       type,
       streams,
     });
   });
 
-  return datasets;
+  return dataStreams;
 }
 
-function parseAndVerifyStreams(manifest: any, datasetPath: string): RegistryStream[] {
+function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
   const streams: RegistryStream[] = [];
   const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
@@ -213,10 +216,10 @@ function parseAndVerifyStreams(manifest: any, datasetPath: string): RegistryStre
       } = manifestStream;
       if (!(input && streamTitle)) {
         throw new PackageInvalidArchiveError(
-          `Invalid manifest for dataset ${datasetPath}: stream is missing one or more fields of: input, title`
+          `Invalid manifest for data stream ${dataStreamPath}: stream is missing one or more fields of: input, title`
         );
       }
-      const vars = parseAndVerifyVars(manifestVars, `dataset ${datasetPath}`);
+      const vars = parseAndVerifyVars(manifestVars, `data stream ${dataStreamPath}`);
       // default template path name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L143
       streams.push({
         input,
@@ -267,15 +270,15 @@ function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVars
   return vars;
 }
 
-function parseAndVerifyConfigTemplates(manifest: any): RegistryConfigTemplate[] {
-  const configTemplates: RegistryConfigTemplate[] = [];
-  const manifestConfigTemplates = manifest.config_templates;
-  if (manifestConfigTemplates && manifestConfigTemplates > 0) {
-    manifestConfigTemplates.forEach((configTemplate: any) => {
-      const { name, title: configTemplateTitle, description, inputs, multiple } = configTemplate;
-      if (!(name && configTemplateTitle && description && inputs)) {
+function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+  const policyTemplates: RegistryPolicyTemplate[] = [];
+  const manifestPolicyTemplates = manifest.policy_templates;
+  if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
+    manifestPolicyTemplates.forEach((policyTemplate: any) => {
+      const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
+      if (!(name && policyTemplateTitle && description && inputs)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in config template: ${configTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in policy template: ${policyTemplate}`
         );
       }
 
@@ -285,16 +288,16 @@ function parseAndVerifyConfigTemplates(manifest: any): RegistryConfigTemplate[] 
       let parsedMultiple = true;
       if (typeof multiple === 'boolean' && multiple === false) parsedMultiple = false;
 
-      configTemplates.push({
+      policyTemplates.push({
         name,
-        title: configTemplateTitle,
+        title: policyTemplateTitle,
         description,
         inputs: parsedInputs,
         multiple: parsedMultiple,
       });
     });
   }
-  return configTemplates;
+  return policyTemplates;
 }
 
 function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {

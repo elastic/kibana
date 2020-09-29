@@ -52,6 +52,7 @@ export {
   KibanaAssetReference,
   ElasticsearchAssetType,
   RegistryPackage,
+  InstallablePackage,
   AssetType,
   Installable,
   KibanaAssetType,
