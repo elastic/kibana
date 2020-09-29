@@ -11,6 +11,7 @@ import {
   createTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
+  createAnomalyScoreFilter,
 } from './common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
@@ -35,6 +36,7 @@ export const createMetricsHostsAnomaliesQuery = (
 
   const filters = [
     ...createJobIdsFilters(jobIds),
+    ...createAnomalyScoreFilter(50),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];

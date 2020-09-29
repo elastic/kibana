@@ -175,16 +175,6 @@ async function fetchMetricsHostsAnomalies(
 
   const finalizeFetchLogEntryAnomaliesSpan = startTracingSpan('fetch metrics hosts anomalies');
 
-  // console.log(
-  //   'data',
-  //   JSON.stringify(
-  //     await mlSystem.mlAnomalySearch(
-  //       createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
-  //     ),
-  //     null,
-  //     2
-  //   )
-  // );
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
       createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
