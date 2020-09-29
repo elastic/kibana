@@ -69,13 +69,11 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
           // selected sample was not found. select a new one:
           // sorted by total number of requests, but only pick
           // from buckets that have samples
-          const bucketsSortedByPreference = response.buckets
+          const bucketsSortedByCount = response.buckets
             .filter((bucket) => !isEmpty(bucket.samples))
             .sort((bucket) => bucket.count);
 
-          const preferredSample = maybe(
-            bucketsSortedByPreference[0]?.samples[0]
-          );
+          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
 
           history.push({
             ...history.location,
