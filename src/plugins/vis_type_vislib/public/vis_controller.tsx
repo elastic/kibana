@@ -68,7 +68,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
       this.container.appendChild(this.legendEl);
     }
 
-    render(esResponse: any, visParams: VisParams) {
+    render(esResponse: any, visParams: VisParams): Promise<void> {
       if (this.vislibVis) {
         this.destroy();
       }
