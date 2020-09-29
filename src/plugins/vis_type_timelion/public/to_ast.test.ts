@@ -18,10 +18,11 @@
  */
 
 import { Vis } from 'src/plugins/visualizations/public';
+import { TimelionVisParams } from './timelion_vis_fn';
 import { toExpressionAst } from './to_ast';
 
 describe('timelion vis toExpressionAst function', () => {
-  let vis: Vis;
+  let vis: Vis<TimelionVisParams>;
 
   beforeEach(() => {
     vis = {
