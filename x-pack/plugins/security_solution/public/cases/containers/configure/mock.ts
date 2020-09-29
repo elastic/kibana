@@ -5,7 +5,7 @@
  */
 
 import {
-  Connector,
+  ActionConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
 } from '../../../../../case/common/api';
@@ -28,7 +28,7 @@ export const mapping: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
 ];
-export const connectorsMock: Connector[] = [
+export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
@@ -104,8 +104,12 @@ export const connectorsMock: Connector[] = [
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: '.jira',
+    fields: null,
+  },
   closure_type: 'close-by-pushing',
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -113,16 +117,24 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
 };
 
 export const caseConfigurationMock: CasesConfigureRequest = {
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: '.jira',
+    fields: null,
+  },
   closure_type: 'close-by-user',
 };
 
 export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   createdAt: '2020-04-06T13:03:18.657Z',
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
-  connectorId: '123',
-  connectorName: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: '.jira',
+    fields: null,
+  },
   closureType: 'close-by-pushing',
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },

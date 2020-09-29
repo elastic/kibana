@@ -51,8 +51,12 @@ describe('usePushToService', () => {
     },
   };
   const defaultArgs = {
-    caseConnectorId: mockConnector.id,
-    caseConnectorName: mockConnector.name,
+    connector: {
+      id: mockConnector.id,
+      name: mockConnector.name,
+      type: '.test',
+      fields: null,
+    },
     caseId,
     caseServices,
     caseStatus: 'open',
@@ -84,8 +88,12 @@ describe('usePushToService', () => {
       expect(postPushToService).toBeCalledWith({
         caseId,
         caseServices,
-        connectorId: mockConnector.id,
-        connectorName: mockConnector.name,
+        connector: {
+          fields: null,
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: '.test',
+        },
         updateCase,
       });
       expect(result.current.pushCallouts).toBeNull();
@@ -143,7 +151,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: '.none',
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -162,7 +175,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: '.none',
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -181,7 +199,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: '.not-exist',
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -202,7 +225,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: '.not-exist',
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {

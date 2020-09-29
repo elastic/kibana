@@ -37,7 +37,10 @@ const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
   userCanCrud: true,
-  caseData: { ...basicCase, connectorId: 'servicenow-2' },
+  caseData: {
+    ...basicCase,
+    connector: { id: 'servicenow-2', name: 'SN', type: '.test', fields: null },
+  },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
 };
@@ -452,7 +455,10 @@ describe('CaseView ', () => {
         <Router history={mockHistory}>
           <CaseComponent
             {...caseProps}
-            caseData={{ ...caseProps.caseData, connectorId: 'servicenow-1' }}
+            caseData={{
+              ...caseProps.caseData,
+              connector: { id: 'servicenow-1', name: 'SN 1', type: '.test', fields: null },
+            }}
           />
         </Router>
       </TestProviders>

@@ -37,8 +37,12 @@ describe('usePostPushToService', () => {
         hasDataToPush: false,
       },
     },
-    connectorName: 'connector name',
-    connectorId: '123',
+    connector: {
+      id: '123',
+      name: 'connector name',
+      type: '.jira',
+      fields: { issueType: 'Task', priority: 'Low', labels: [] },
+    },
     updateCase,
   };
   const sampleServiceRequestData = {
@@ -60,6 +64,9 @@ describe('usePostPushToService', () => {
     title: pushedCase.title,
     updatedAt: pushedCase.updatedAt,
     updatedBy: serviceConnectorUser,
+    issueType: 'Task',
+    labels: [],
+    priority: 'Low',
   };
   const sampleCaseServices = {
     '123': {
@@ -108,8 +115,8 @@ describe('usePostPushToService', () => {
       expect(spyOnPushCase).toBeCalledWith(
         samplePush.caseId,
         {
-          connector_id: samplePush.connectorId,
-          connector_name: samplePush.connectorName,
+          connector_id: samplePush.connector.id,
+          connector_name: samplePush.connector.name,
           external_id: serviceConnector.id,
           external_title: serviceConnector.title,
           external_url: serviceConnector.url,
@@ -130,8 +137,12 @@ describe('usePostPushToService', () => {
       result.current.postPushToService(samplePush);
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
-        samplePush.connectorId,
-        formatServiceRequestData(basicCase, '123', sampleCaseServices as CaseServices),
+        samplePush.connector.id,
+        formatServiceRequestData(
+          basicCase,
+          samplePush.connector,
+          sampleCaseServices as CaseServices
+        ),
         abortCtrl.signal
       );
     });
@@ -141,8 +152,12 @@ describe('usePostPushToService', () => {
     const samplePush2 = {
       caseId: pushedCase.id,
       caseServices: {},
-      connectorName: 'connector name',
-      connectorId: 'none',
+      connector: {
+        name: 'connector name',
+        id: 'none',
+        type: '.none',
+        fields: {},
+      },
       updateCase,
     };
     const spyOnPushToService = jest.spyOn(api, 'pushToService');
@@ -155,8 +170,8 @@ describe('usePostPushToService', () => {
       result.current.postPushToService(samplePush2);
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
-        samplePush2.connectorId,
-        formatServiceRequestData(basicCase, 'none', {}),
+        samplePush2.connector.id,
+        formatServiceRequestData(basicCase, samplePush2.connector, {}),
         abortCtrl.signal
       );
     });
@@ -193,15 +208,22 @@ describe('usePostPushToService', () => {
 
   it('formatServiceRequestData - current connector', () => {
     const caseServices = sampleCaseServices;
-    const result = formatServiceRequestData(pushedCase, '123', caseServices);
+    const result = formatServiceRequestData(pushedCase, samplePush.connector, caseServices);
     expect(result).toEqual(sampleServiceRequestData);
   });
 
   it('formatServiceRequestData - connector with history', () => {
     const caseServices = sampleCaseServices;
-    const result = formatServiceRequestData(pushedCase, '456', caseServices);
+    const connector = {
+      id: '456',
+      name: 'connector 2',
+      type: '.test',
+      fields: { issueType: 'Task', priority: 'High', labels: ['test'] },
+    };
+    const result = formatServiceRequestData(pushedCase, connector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
+      ...connector.fields,
       externalId: 'other_external_id',
     });
   });
@@ -210,9 +232,16 @@ describe('usePostPushToService', () => {
     const caseServices = {
       '123': sampleCaseServices['123'],
     };
-    const result = formatServiceRequestData(pushedCase, '456', caseServices);
+    const connector = {
+      id: '456',
+      name: 'connector 2',
+      type: '.test',
+      fields: { issueType: 'Task', priority: 'High', labels: [] },
+    };
+    const result = formatServiceRequestData(pushedCase, connector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
+      ...connector.fields,
       externalId: null,
     });
   });

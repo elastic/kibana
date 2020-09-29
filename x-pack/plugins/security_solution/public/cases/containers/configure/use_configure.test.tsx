@@ -17,8 +17,12 @@ import * as api from './api';
 jest.mock('./api');
 
 const configuration: ConnectorConfiguration = {
-  connectorId: '456',
-  connectorName: 'My Connector 2',
+  connector: {
+    id: '456',
+    name: 'My connector 2',
+    type: '.test',
+    fields: null,
+  },
   closureType: 'close-by-pushing',
 };
 
@@ -56,12 +60,10 @@ describe('useConfigure', () => {
       expect(result.current).toEqual({
         ...initialState,
         closureType: caseConfigurationCamelCaseResponseMock.closureType,
-        connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
-        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        connector: caseConfigurationCamelCaseResponseMock.connector,
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
-          connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
-          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+          connector: caseConfigurationCamelCaseResponseMock.connector,
         },
         version: caseConfigurationCamelCaseResponseMock.version,
         firstLoad: true,
@@ -155,9 +157,9 @@ describe('useConfigure', () => {
 
       result.current.persistCaseConfigure(configuration);
 
-      expect(result.current.connectorId).toEqual('123');
+      expect(result.current.connector.id).toEqual('123');
       await waitForNextUpdate();
-      expect(result.current.connectorId).toEqual('456');
+      expect(result.current.connector.id).toEqual('456');
     });
   });
 
@@ -179,9 +181,9 @@ describe('useConfigure', () => {
 
       result.current.persistCaseConfigure(configuration);
 
-      expect(result.current.connectorId).toEqual('123');
+      expect(result.current.connector.id).toEqual('123');
       await waitForNextUpdate();
-      expect(result.current.connectorId).toEqual('456');
+      expect(result.current.connector.id).toEqual('456');
     });
   });
 
@@ -239,12 +241,10 @@ describe('useConfigure', () => {
       expect(result.current).toEqual({
         ...initialState,
         closureType: caseConfigurationCamelCaseResponseMock.closureType,
-        connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
-        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        connector: caseConfigurationCamelCaseResponseMock.connector,
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
-          connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
-          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+          connector: caseConfigurationCamelCaseResponseMock.connector,
         },
         firstLoad: true,
         loading: false,

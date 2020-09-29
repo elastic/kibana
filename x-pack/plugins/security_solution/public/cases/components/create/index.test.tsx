@@ -72,6 +72,12 @@ const sampleData = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
+  connector: {
+    fields: null,
+    id: 'none',
+    name: 'none',
+    type: '.none',
+  },
 };
 const defaultPostCase = {
   isLoading: false,
