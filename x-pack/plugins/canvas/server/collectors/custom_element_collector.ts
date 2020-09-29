@@ -40,7 +40,7 @@ export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
       max: { type: 'long' },
       avg: { type: 'float' },
     },
-    functions_in_use: { type: 'keyword' },
+    functions_in_use: { type: 'array', items: { type: 'keyword' } },
   },
 };
 

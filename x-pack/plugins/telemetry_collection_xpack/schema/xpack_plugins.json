@@ -55,7 +55,10 @@
               "type": "long"
             },
             "in_use": {
-              "type": "keyword"
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
             },
             "per_element": {
               "properties": {
@@ -111,7 +114,10 @@
               }
             },
             "functions_in_use": {
-              "type": "keyword"
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
             }
           }
         }

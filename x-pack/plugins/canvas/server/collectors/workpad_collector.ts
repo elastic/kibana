@@ -75,7 +75,7 @@ export const workpadSchema: MakeSchemaFrom<WorkpadTelemetry> = {
   },
   functions: {
     total: { type: 'long' },
-    in_use: { type: 'keyword' },
+    in_use: { type: 'array', items: { type: 'keyword' } },
     per_element: {
       avg: { type: 'float' },
       min: { type: 'long' },
