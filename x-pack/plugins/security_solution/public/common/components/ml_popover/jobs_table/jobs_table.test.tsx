@@ -6,13 +6,12 @@
 
 import { shallow, mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, waitForElement, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
 import { SecurityJob } from '../types';
 import { createKibanaContextProviderMock } from '../../../lib/kibana/kibana_react.mock';
-import { render, waitForElement } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 
