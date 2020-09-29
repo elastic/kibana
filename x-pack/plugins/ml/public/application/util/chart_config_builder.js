@@ -9,7 +9,7 @@
  * in the source metric data.
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 

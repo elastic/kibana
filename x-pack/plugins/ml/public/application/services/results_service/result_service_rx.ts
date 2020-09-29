@@ -13,8 +13,7 @@
 // Returned response contains a results property containing the requested aggregation.
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { each, get } from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
