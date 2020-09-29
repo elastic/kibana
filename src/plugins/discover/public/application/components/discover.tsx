@@ -32,6 +32,8 @@ import {
   EuiFlyoutHeader,
   EuiButtonIcon,
   EuiTitle,
+  EuiShowFor,
+  EuiHideFor,
 } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
@@ -97,42 +99,40 @@ export function Discover({
 
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout
-        className="eui-showFor--xs eui-showFor--s"
-        onClose={() => setIsFlyoutVisible(false)}
-        aria-labelledby="flyoutTitle"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2 id="flyoutTitle">
-                  {i18n.translate('discover.fieldList.flyoutHeading', {
-                    defaultMessage: 'Field list',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <DiscoverSidebar
-            columns={state.columns}
-            fieldCounts={fieldCounts}
-            hits={rows}
-            indexPatternList={indexPatternList}
-            onAddField={addColumn}
-            onAddFilter={onAddFilter}
-            onRemoveField={onRemoveColumn}
-            selectedIndexPattern={searchSource && searchSource.getField('index')}
-            setIndexPattern={setIndexPattern}
-            mobile
-          />
-        </EuiFlyoutBody>
-      </EuiFlyout>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2 id="flyoutTitle">
+                    {i18n.translate('discover.fieldList.flyoutHeading', {
+                      defaultMessage: 'Field list',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <DiscoverSidebar
+              columns={state.columns}
+              fieldCounts={fieldCounts}
+              hits={rows}
+              indexPatternList={indexPatternList}
+              onAddField={addColumn}
+              onAddFilter={onAddFilter}
+              onRemoveField={onRemoveColumn}
+              selectedIndexPattern={searchSource && searchSource.getField('index')}
+              setIndexPattern={setIndexPattern}
+              mobile
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      </EuiShowFor>
     );
   }
 
@@ -179,48 +179,51 @@ export function Discover({
         {flyout}
         <main className="dscApp__frame">
           <>
-            <div className="dscSidebar dscSidebar__desktop eui-hideFor--xs eui-hidenFor--s">
-              <DiscoverSidebar
-                columns={state.columns}
-                fieldCounts={fieldCounts}
-                hits={rows}
-                indexPatternList={indexPatternList}
-                onAddField={addColumn}
-                onAddFilter={onAddFilter}
-                onRemoveField={onRemoveColumn}
-                selectedIndexPattern={searchSource && searchSource.getField('index')}
-                setIndexPattern={setIndexPattern}
-              />
-            </div>
-            <div className="dscSidebar dscSidebar__mobile eui-showFor--xs eui-showFor--s">
-              <DiscoverSidebarMobile
-                columns={state.columns}
-                fieldCounts={fieldCounts}
-                hits={rows}
-                indexPatternList={indexPatternList}
-                onAddField={addColumn}
-                onAddFilter={onAddFilter}
-                onRemoveField={onRemoveColumn}
-                selectedIndexPattern={searchSource && searchSource.getField('index')}
-                setIndexPattern={setIndexPattern}
-              />
-              <EuiButton
-                contentProps={{ className: 'dscSidebar__mobileButton' }}
-                iconSide="right"
-                iconType="arrowRight"
-                fullWidth
-                onClick={() => setIsFlyoutVisible(true)}
-              >
-                <FormattedMessage
-                  id="discover.fieldChooser.fieldsMobileButtonLabel"
-                  defaultMessage="Fields"
+            <EuiHideFor sizes={['xs', 's']}>
+              <div className="dscSidebar dscSidebar__desktop">
+                <DiscoverSidebar
+                  columns={state.columns}
+                  fieldCounts={fieldCounts}
+                  hits={rows}
+                  indexPatternList={indexPatternList}
+                  onAddField={addColumn}
+                  onAddFilter={onAddFilter}
+                  onRemoveField={onRemoveColumn}
+                  selectedIndexPattern={searchSource && searchSource.getField('index')}
+                  setIndexPattern={setIndexPattern}
                 />
-                <EuiBadge className="dscSidebar__mobileBadge" color="accent">
-                  {state.columns[0] === '_source' ? 0 : state.columns.length}
-                </EuiBadge>
-              </EuiButton>
-            </div>
-
+              </div>
+            </EuiHideFor>
+            <EuiShowFor sizes={['xs', 's']}>
+              <div className="dscSidebar dscSidebar__mobile">
+                <DiscoverSidebarMobile
+                  columns={state.columns}
+                  fieldCounts={fieldCounts}
+                  hits={rows}
+                  indexPatternList={indexPatternList}
+                  onAddField={addColumn}
+                  onAddFilter={onAddFilter}
+                  onRemoveField={onRemoveColumn}
+                  selectedIndexPattern={searchSource && searchSource.getField('index')}
+                  setIndexPattern={setIndexPattern}
+                />
+                <EuiButton
+                  contentProps={{ className: 'dscSidebar__mobileButton' }}
+                  iconSide="right"
+                  iconType="arrowRight"
+                  fullWidth
+                  onClick={() => setIsFlyoutVisible(true)}
+                >
+                  <FormattedMessage
+                    id="discover.fieldChooser.fieldsMobileButtonLabel"
+                    defaultMessage="Fields"
+                  />
+                  <EuiBadge className="dscSidebar__mobileBadge" color="accent">
+                    {state.columns[0] === '_source' ? 0 : state.columns.length}
+                  </EuiBadge>
+                </EuiButton>
+              </div>
+            </EuiShowFor>
             <>
               {resultState === 'none' && (
                 <DiscoverNoResults
