@@ -176,9 +176,6 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         .sort((a, b) => b.meanImportance - a.meanImportance);
     }
 
-    // sort from largest importance at top to smallest importance at bottom
-    // sortedData = sortedData.sort((a, b) => b.meanImportance - a.meanImportance);
-
     // only show legend if it's a multiclass
     const _showLegend = classificationType === 'multiclass_classification';
     const _chartHeight =
