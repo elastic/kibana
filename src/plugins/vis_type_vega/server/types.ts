@@ -16,25 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Observable } from 'rxjs';
+import { HomeServerPluginSetup } from '../../home/server';
+import { UsageCollectionSetup } from '../../usage_collection/server';
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+export type ConfigObservable = Observable<{ kibana: { index: string } }>;
 
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypeVegaPlugin } from './plugin';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    enableExternalUrls: true,
-  },
-  schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
-    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
-  ],
-};
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VisTypeVegaPlugin(initializerContext);
+export interface VegaSavedObjectAttributes {
+  title: string;
+  type: string;
+  params: {
+    spec: string;
+  };
 }
 
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
+export interface VisTypeVegaPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+  home?: HomeServerPluginSetup;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeVegaPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeVegaPluginStart {}
