@@ -17,7 +17,6 @@ import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import { TagOverflow } from '../../../../../common/components/tag_overflow';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -38,6 +37,7 @@ import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { TagsDisplay } from './tag_display';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -211,7 +211,10 @@ export const getColumns = ({
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: Rule['tags']) => {
-        return value == null ? getEmptyTagValue() : <TagOverflow tags={value} />;
+        if (value != null && value.length > 0) {
+          return <TagsDisplay tags={value} />;
+        }
+        return getEmptyTagValue();
       },
       truncateText: true,
       width: '20%',
