@@ -9,10 +9,10 @@ import { EuiPanel, EuiResizableContainer } from '@elastic/eui';
 import { VisitorBreakdown } from '../VisitorBreakdown';
 import { VisitorBreakdownMap } from '../VisitorBreakdownMap';
 import { FULL_HEIGHT } from '../RumDashboard';
-import { usBreakPoints } from '../hooks/useBreakPoints';
+import { useBreakPoints } from '../hooks/useBreakPoints';
 
 export function VisitorBreakdownsPanel() {
-  const { isLarge } = usBreakPoints();
+  const { isLarge } = useBreakPoints();
 
   return (
     <EuiResizableContainer

@@ -19,12 +19,12 @@ import { UXMetrics } from './UXMetrics';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
-import { usBreakPoints } from './hooks/useBreakPoints';
+import { useBreakPoints } from './hooks/useBreakPoints';
 
 export const FULL_HEIGHT = { height: '100%' };
 
 export function RumDashboard() {
-  const { isLarge, isSmall } = usBreakPoints();
+  const { isLarge, isSmall } = useBreakPoints();
 
   return (
     <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">

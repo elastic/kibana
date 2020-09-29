@@ -9,10 +9,10 @@ import { EuiPanel, EuiResizableContainer } from '@elastic/eui';
 import { FULL_HEIGHT } from '../RumDashboard';
 import { PageLoadDistribution } from '../PageLoadDistribution';
 import { PageViewsTrend } from '../PageViewsTrend';
-import { usBreakPoints } from '../hooks/useBreakPoints';
+import { useBreakPoints } from '../hooks/useBreakPoints';
 
 export function PageLoadAndViews() {
-  const { isLarge } = usBreakPoints();
+  const { isLarge } = useBreakPoints();
 
   return (
     <EuiResizableContainer

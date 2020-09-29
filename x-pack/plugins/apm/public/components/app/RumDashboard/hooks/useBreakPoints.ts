@@ -9,7 +9,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
 import { isWithinMaxBreakpoint } from '@elastic/eui';
 
-export function usBreakPoints() {
+export function useBreakPoints() {
   const [screenSizes, setScreenSizes] = useState({
     isSmall: false,
     isMedium: false,
