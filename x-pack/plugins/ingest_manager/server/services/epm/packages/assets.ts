@@ -6,6 +6,7 @@
 
 import { RegistryPackage } from '../../../types';
 import * as Registry from '../registry';
+import { getArchiveFilelist } from '../registry/cache';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`
@@ -13,12 +14,6 @@ import * as Registry from '../registry';
 // e.g. `nginx-1.2.0/data_stream/access/fields/fields.yml`
 // RegistryPackage paths have a `/package/` prefix compared to ArchiveEntry paths
 // and different package and version structure
-const EPR_PATH_PREFIX = '/package';
-function registryPathToArchivePath(registryPath: RegistryPackage['path']): string {
-  const path = registryPath.replace(`${EPR_PATH_PREFIX}/`, '');
-  const [pkgName, pkgVersion] = path.split('/');
-  return path.replace(`${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`);
-}
 
 export function getAssets(
   packageInfo: RegistryPackage,
@@ -26,17 +21,19 @@ export function getAssets(
   datasetName?: string
 ): string[] {
   const assets: string[] = [];
-  if (!packageInfo?.assets) return assets;
+  const paths = getArchiveFilelist(packageInfo.name, packageInfo.version);
+  // TODO: might be better to throw a PackageCacheError here
+  if (!paths || paths.length === 0) return assets;
 
   // Skip directories
-  for (const path of packageInfo.assets) {
+  for (const path of paths) {
     if (path.endsWith('/')) {
       continue;
     }
 
     // if dataset, filter for them
     if (datasetName) {
-      const comparePath = `${packageInfo.path}/data_stream/${datasetName}/`;
+      const comparePath = `${packageInfo.name}-${packageInfo.version}/datastream/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }
@@ -61,11 +58,10 @@ export async function getAssetsData(
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
-  const entries: Registry.ArchiveEntry[] = assets.map((registryPath) => {
-    const archivePath = registryPathToArchivePath(registryPath);
-    const buffer = Registry.getAsset(archivePath);
+  const entries: Registry.ArchiveEntry[] = assets.map((path) => {
+    const buffer = Registry.getAsset(path);
 
-    return { path: registryPath, buffer };
+    return { path, buffer };
   });
 
   return entries;
