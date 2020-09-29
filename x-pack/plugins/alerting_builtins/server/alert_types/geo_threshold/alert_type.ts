@@ -70,8 +70,51 @@ const actionVariableContextTimeOfDetectionLabel = i18n.translate(
   }
 );
 
+const actionVariables = {
+  context: [
+    {
+      name: 'crossingEventTimeStamp',
+      description: actionVariableContextCrossingEventTimeStampLabel,
+    },
+    { name: 'currentLocation', description: actionVariableContextCurrentLocationLabel },
+    { name: 'currentBoundaryId', description: actionVariableContextCurrentBoundaryIdLabel },
+    { name: 'previousLocation', description: actionVariableContextPreviousLocationLabel },
+    { name: 'previousBoundaryId', description: actionVariableContextPreviousBoundaryIdLabel },
+    { name: 'crossingDocumentId', description: actionVariableContextCrossingDocumentIdLabel },
+    { name: 'timeOfDetection', description: actionVariableContextTimeOfDetectionLabel },
+  ],
+};
+
+export const ParamsSchema = schema.object({
+  index: schema.string({ minLength: 1 }),
+  indexId: schema.string({ minLength: 1 }),
+  geoField: schema.string({ minLength: 1 }),
+  entity: schema.string({ minLength: 1 }),
+  dateField: schema.string({ minLength: 1 }),
+  trackingEvent: schema.string({ minLength: 1 }),
+  boundaryType: schema.string({ minLength: 1 }),
+  boundaryIndexTitle: schema.string({ minLength: 1 }),
+  boundaryIndexId: schema.string({ minLength: 1 }),
+  boundaryGeoField: schema.string({ minLength: 1 }),
+  boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
+});
+
+export interface GeoThresholdParams {
+  index: string;
+  indexId: string;
+  geoField: string;
+  entity: string;
+  dateField: string;
+  trackingEvent: string;
+  boundaryType: string;
+  boundaryIndexTitle: string;
+  boundaryIndexId: string;
+  boundaryGeoField: string;
+  boundaryNameField?: string;
+}
+
 export function getAlertType(
-  service: Service
+  service: Omit<Service, 'indexThreshold'>
 ): {
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
@@ -86,39 +129,13 @@ export function getAlertType(
     previousStartedAt: Date | null;
     startedAt: Date;
     services: AlertServices;
-    params: {
-      index: string;
-      indexId: string;
-      geoField: string;
-      entity: string;
-      dateField: string;
-      trackingEvent: string;
-      boundaryType: string;
-      boundaryIndexTitle: string;
-      boundaryIndexId: string;
-      boundaryGeoField: string;
-      boundaryNameField?: string;
-    };
+    params: GeoThresholdParams;
     alertId: string;
     state: AlertTypeState;
   }) => Promise<AlertTypeState>;
   validate?: {
     params?: {
-      validate: (
-        object: unknown
-      ) => {
-        index: string;
-        indexId: string;
-        geoField: string;
-        entity: string;
-        dateField: string;
-        trackingEvent: string;
-        boundaryType: string;
-        boundaryIndexTitle: string;
-        boundaryIndexId: string;
-        boundaryGeoField: string;
-        boundaryNameField?: string;
-      };
+      validate: (object: unknown) => GeoThresholdParams;
     };
   };
   name: string;
@@ -137,7 +154,7 @@ export function getAlertType(
   const actionGroupName = i18n.translate(
     'xpack.alertingBuiltins.geoThreshold.actionGroupThresholdMetTitle',
     {
-      defaultMessage: 'Tracking threshold Met',
+      defaultMessage: 'Tracking threshold met',
     }
   );
 
@@ -149,33 +166,8 @@ export function getAlertType(
     executor: getGeoThresholdExecutor(service),
     producer: BUILT_IN_ALERTS_FEATURE_ID,
     validate: {
-      params: schema.object({
-        index: schema.string({ minLength: 1 }),
-        indexId: schema.string({ minLength: 1 }),
-        geoField: schema.string({ minLength: 1 }),
-        entity: schema.string({ minLength: 1 }),
-        dateField: schema.string({ minLength: 1 }),
-        trackingEvent: schema.string({ minLength: 1 }),
-        boundaryType: schema.string({ minLength: 1 }),
-        boundaryIndexTitle: schema.string({ minLength: 1 }),
-        boundaryIndexId: schema.string({ minLength: 1 }),
-        boundaryGeoField: schema.string({ minLength: 1 }),
-        boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-      }),
+      params: ParamsSchema,
     },
-    actionVariables: {
-      context: [
-        {
-          name: 'crossingEventTimeStamp',
-          description: actionVariableContextCrossingEventTimeStampLabel,
-        },
-        { name: 'currentLocation', description: actionVariableContextCurrentLocationLabel },
-        { name: 'currentBoundaryId', description: actionVariableContextCurrentBoundaryIdLabel },
-        { name: 'previousLocation', description: actionVariableContextPreviousLocationLabel },
-        { name: 'previousBoundaryId', description: actionVariableContextPreviousBoundaryIdLabel },
-        { name: 'crossingDocumentId', description: actionVariableContextCrossingDocumentIdLabel },
-        { name: 'timeOfDetection', description: actionVariableContextTimeOfDetectionLabel },
-      ],
-    },
+    actionVariables,
   };
 }

@@ -8,7 +8,7 @@ import { Service, AlertingSetup } from '../../types';
 import { getAlertType } from './alert_type';
 
 interface RegisterParams {
-  service: Service;
+  service: Omit<Service, 'indexThreshold'>;
   alerts: AlertingSetup;
 }
 

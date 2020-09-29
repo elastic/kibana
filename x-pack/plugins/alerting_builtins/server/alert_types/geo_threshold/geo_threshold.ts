@@ -12,7 +12,7 @@ import { ActionGroupId } from './alert_type';
 import { Logger } from '../../types';
 
 interface LatestEntityLocation {
-  location: string;
+  location: string[];
   shapeLocationId: string;
   entityName: string;
   dateInShape: string;
@@ -20,7 +20,7 @@ interface LatestEntityLocation {
 }
 
 // Flatten agg results and get latest locations for each entity
-function transformResults(
+export function transformResults(
   results: SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
@@ -52,20 +52,20 @@ function transformResults(
 interface EntityMovementDescriptor {
   entityName: string;
   currLocation: {
-    location: string;
+    location: string[];
     shapeId: string;
     date: string;
     docId: string;
   };
   prevLocation: {
-    location: string;
+    location: string[];
     shapeId: string;
     date: string;
     docId: string;
   };
 }
 
-function getMovedEntities(
+export function getMovedEntities(
   currLocationArr: LatestEntityLocation[],
   prevLocationArr: LatestEntityLocation[],
   trackingEvent: string
@@ -86,7 +86,7 @@ function getMovedEntities(
             entityName: string;
             shapeLocationId: string;
             dateInShape: string;
-            location: string;
+            location: string[];
             docId: string;
           }
         ) => {

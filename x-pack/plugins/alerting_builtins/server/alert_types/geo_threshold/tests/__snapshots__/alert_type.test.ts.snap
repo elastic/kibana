@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alertType alert type creation structure is the expected value 1`] = `
+Object {
+  "context": Array [
+    Object {
+      "description": "The time the entity's crossing was recorded to arrive at its current location",
+      "name": "crossingEventTimeStamp",
+    },
+    Object {
+      "description": "The most recently captured location of the entity",
+      "name": "currentLocation",
+    },
+    Object {
+      "description": "The current boundary id containing the entity (if any)",
+      "name": "currentBoundaryId",
+    },
+    Object {
+      "description": "The previously captured location of the entity",
+      "name": "previousLocation",
+    },
+    Object {
+      "description": "The previous boundary id containing the entity (if any)",
+      "name": "previousBoundaryId",
+    },
+    Object {
+      "description": "The id of the crossing entity document",
+      "name": "crossingDocumentId",
+    },
+    Object {
+      "description": "The alert interval end time this change was recorded",
+      "name": "timeOfDetection",
+    },
+  ],
+}
+`;
