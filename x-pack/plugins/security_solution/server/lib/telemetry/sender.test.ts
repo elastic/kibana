@@ -7,6 +7,7 @@
 /* eslint-disable dot-notation */
 import { TelemetryEventsSender, copyAllowlistedFields, getV3UrlFromV2 } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -113,7 +114,7 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => true),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(async () => 'https://telemetry.elastic.co'),
+        getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
       sender['fetchClusterInfo'] = jest.fn(async () => {
         return {

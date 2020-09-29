@@ -131,17 +131,10 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
-      if (!telemetryUrl) {
-        throw new Error("Couldn't get telemetry URL");
-      }
-      const v3TelemetryUrl = getV3UrlFromV2(telemetryUrl.toString(), 'alerts-debug'); // TODO: update
-      this.logger.debug(`Telemetry URL: ${v3TelemetryUrl}`);
+      const telemetryUrl = await this.fetchTelemetryUrl();
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
 
       const clusterInfo = await this.fetchClusterInfo();
-      if (!clusterInfo) {
-        throw new Error("Couldn't get cluster Info");
-      }
       this.logger.debug(
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
@@ -154,13 +147,29 @@ export class TelemetryEventsSender {
         event.cluster_name = clusterInfo.cluster_name;
       });
 
-      await this.sendEvents(toSend, v3TelemetryUrl, clusterInfo.cluster_uuid);
+      await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       // throw err;
       this.queue = [];
     }
     this.isSending = false;
+  }
+
+  private async fetchClusterInfo(): Promise<ESClusterInfo> {
+    if (!this.core) {
+      throw Error("Couldn't fetch cluster info because core is not available");
+    }
+    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+    return getClusterInfo(callCluster);
+  }
+
+  private async fetchTelemetryUrl(): Promise<string> {
+    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+    if (!telemetryUrl) {
+      throw Error("Couldn't get telemetry URL");
+    }
+    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-debug'); // TODO: update
   }
 
   private async sendEvents(events: unknown[], telemetryUrl: string, clusterUuid: string) {
@@ -181,14 +190,6 @@ export class TelemetryEventsSender {
     } catch (err) {
       this.logger.warn(`Error sending events: ${err.response.status} ${err.response.data}`);
     }
-  }
-
-  private async fetchClusterInfo(): Promise<ESClusterInfo | undefined> {
-    if (!this.core) {
-      return undefined;
-    }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return getClusterInfo(callCluster);
   }
 }
 
@@ -284,7 +285,7 @@ export function getV3UrlFromV2(v2url: string, channel: string): string {
 export interface ESClusterInfo {
   cluster_uuid: string;
   cluster_name: string;
-  version: {
+  version?: {
     number: string;
     build_flavor: string;
     build_type: string;
