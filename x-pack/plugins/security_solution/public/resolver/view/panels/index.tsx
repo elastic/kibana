@@ -9,7 +9,7 @@
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
-import { NodeEventsOfType as NodeEventsInCategory } from './node_events_of_type';
+import { NodeEventsInCategory } from './node_events_of_type';
 import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';

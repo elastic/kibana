@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
@@ -24,7 +26,7 @@ import { useFormattedDate } from './use_formatted_date';
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
-export const NodeEventsOfType = memo(function NodeEventsOfType({
+export const NodeEventsInCategory = memo(function ({
   nodeID,
   eventCategory,
 }: {
@@ -54,7 +56,7 @@ export const NodeEventsOfType = memo(function NodeEventsOfType({
         <PanelLoading />
       ) : (
         <>
-          <NodeEventsOfTypeBreadcrumbs
+          <NodeEventsInCategoryBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
             eventCategory={eventCategory}
             eventCount={eventCount}
@@ -150,7 +152,7 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
-const NodeEventsOfTypeBreadcrumbs = memo(function ({
+const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
   eventCategory,
   eventCount,

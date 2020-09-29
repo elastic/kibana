@@ -20,7 +20,7 @@ export function isValid(
 }
 
 /**
- * Return an updated `NodeEventsOfTypeState` that has data from `first` and `second`. The `cursor` from `second` is used.
+ * Return an updated `NodeEventsInCategoryState` that has data from `first` and `second`. The `cursor` from `second` is used.
  * Returns undefined if `first` and `second` don't contain data form the same set.
  */
 export function updatedWith(
