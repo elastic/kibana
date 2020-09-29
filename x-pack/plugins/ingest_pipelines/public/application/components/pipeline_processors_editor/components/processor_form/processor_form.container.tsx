@@ -60,6 +60,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   const { form } = useForm({
     defaultValue: { fields: getProcessor().options },
   });
+  const { subscribe } = form;
 
   const handleSubmit = useCallback(
     async (shouldCloseFlyout: boolean = true) => {
@@ -92,14 +93,9 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   }, [onSubmit, processor]);
 
   useEffect(() => {
-    const subscription = form.subscribe(onFormUpdate);
+    const subscription = subscribe(onFormUpdate);
     return subscription.unsubscribe;
-
-    // TODO: Address this issue
-    // For some reason adding `form` object to the dependencies array here is causing an
-    // infinite update loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onFormUpdate]);
+  }, [onFormUpdate, subscribe]);
 
   if (processor) {
     return (

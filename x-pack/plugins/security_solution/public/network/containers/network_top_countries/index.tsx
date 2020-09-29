@@ -6,12 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -49,6 +48,7 @@ export interface NetworkTopCountriesArgs {
 interface UseNetworkTopCountries {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -60,23 +60,22 @@ export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexNames,
   skip,
   startDate,
   type,
 }: UseNetworkTopCountries): [boolean, NetworkTopCountriesArgs] => {
   const getTopCountriesSelector = networkSelectors.topCountriesSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTopCountriesSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTopCountriesSelector(state, type, flowTarget)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkTopCountriesRequest, setHostRequest] = useState<NetworkTopCountriesRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.topCountries,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -180,7 +179,7 @@ export const useNetworkTopCountries = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -195,7 +194,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

@@ -6,9 +6,18 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiPanel } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiPanel,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -139,11 +148,19 @@ export function ApmServerInstances({ apms, setupMode }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instances.heading"
+              defaultMessage="APM Instances"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={data.stats} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={data.stats} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"

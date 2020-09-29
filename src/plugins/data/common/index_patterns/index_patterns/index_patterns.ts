@@ -139,6 +139,25 @@ export class IndexPatternsService {
   };
 
   /**
+   * Get list of index pattern ids with titles
+   * @param refresh Force refresh of index pattern list
+   */
+  getIdsWithTitle = async (
+    refresh: boolean = false
+  ): Promise<Array<{ id: string; title: string }>> => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+    return this.savedObjectsCache.map((obj) => ({
+      id: obj?.id,
+      title: obj?.attributes?.title,
+    }));
+  };
+
+  /**
    * Clear index pattern list cache
    * @param id optionally clear a single id
    */
