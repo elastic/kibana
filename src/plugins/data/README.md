@@ -60,7 +60,7 @@ It contains sub-services for each of those configurations:
 
  Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
 
- A simple use case would be:
+ A simple use case is:
 
  ```.ts
  function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
