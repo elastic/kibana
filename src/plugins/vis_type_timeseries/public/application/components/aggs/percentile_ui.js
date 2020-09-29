@@ -27,10 +27,10 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiComboBox,
   EuiFieldNumber,
   EuiFormRow,
+  EuiFlexGrid,
   EuiPanel,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -53,21 +53,31 @@ class PercentilesUi extends Component {
     const defaults = { value: '', percentile: '', shade: '' };
     const model = { ...defaults, ...row };
     const { intl, panel } = this.props;
+    const flexItemStyle = { minWidth: 100 };
 
     const percentileFieldNumber = (
-      <EuiFlexItem grow={false}>
-        <EuiFieldNumber
-          aria-label={intl.formatMessage({
-            id: 'visTypeTimeseries.percentile.percentileAriaLabel',
-            defaultMessage: 'Percentile',
-          })}
-          placeholder={0}
-          max={100}
-          min={0}
-          step={1}
-          onChange={this.handleTextChange(model, 'value')}
-          value={model.value === '' ? '' : Number(model.value)}
-        />
+      <EuiFlexItem style={flexItemStyle}>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="visTypeTimeseries.percentile.percentileAriaLabel"
+              defaultMessage="Percentile"
+            />
+          }
+        >
+          <EuiFieldNumber
+            aria-label={intl.formatMessage({
+              id: 'visTypeTimeseries.percentile.percentileAriaLabel',
+              defaultMessage: 'Percentile',
+            })}
+            placeholder={0}
+            max={100}
+            min={0}
+            step={1}
+            onChange={this.handleTextChange(model, 'value')}
+            value={model.value === '' ? '' : Number(model.value)}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     );
 
@@ -94,58 +104,43 @@ class PercentilesUi extends Component {
       },
     ];
     const optionsStyle = {
-      minWidth: 300,
+      ...flexItemStyle,
     };
     if (model.mode === 'line') {
       optionsStyle.display = 'none';
     }
 
-    const labelStyle = { marginBottom: 0 };
     const htmlId = htmlIdGenerator(model.id);
     const selectedModeOption = modeOptions.find((option) => {
       return model.mode === option.value;
     });
     return (
       <EuiFlexItem key={model.id}>
-        <EuiFlexGroup
-          alignItems="center"
-          responsive={false}
-          justifyContent="spaceBetween"
-          gutterSize="s"
-          wrap
-        >
-          {percentileFieldNumber}
-
-          <EuiFlexItem grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
-              <FormattedMessage
-                id="visTypeTimeseries.percentile.modeLabel"
-                defaultMessage="Mode:"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiComboBox
-              isClearable={false}
-              id={htmlId('mode')}
-              options={modeOptions}
-              selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-              onChange={this.handleTextChange(model, 'mode')}
-              singleSelection={{ asPlainText: true }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddDeleteButtons
-              onAdd={handleAdd}
-              onDelete={handleDelete}
-              disableDelete={items.length < 2}
-              responsive={false}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true} style={optionsStyle}>
-            <EuiPanel>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
+        <EuiPanel>
+          <EuiFlexGroup key={model.id} alignItems="center">
+            <EuiFlexItem>
+              <EuiFlexGrid columns={2}>
+                {percentileFieldNumber}
+                <EuiFlexItem style={flexItemStyle}>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="visTypeTimeseries.percentile.modeLabel"
+                        defaultMessage="Mode:"
+                      />
+                    }
+                  >
+                    <EuiComboBox
+                      isClearable={false}
+                      id={htmlId('mode')}
+                      options={modeOptions}
+                      selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+                      onChange={this.handleTextChange(model, 'mode')}
+                      singleSelection={{ asPlainText: true }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem style={optionsStyle}>
                   <EuiFormRow
                     label={
                       <FormattedMessage
@@ -164,7 +159,7 @@ class PercentilesUi extends Component {
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem style={optionsStyle}>
                   <EuiFormRow
                     label={
                       <FormattedMessage
@@ -181,10 +176,18 @@ class PercentilesUi extends Component {
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexGrid>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AddDeleteButtons
+                onAdd={handleAdd}
+                onDelete={handleDelete}
+                disableDelete={items.length < 2}
+                responsive={false}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlexItem>
     );
   };
