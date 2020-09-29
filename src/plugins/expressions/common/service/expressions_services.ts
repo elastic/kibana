@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
@@ -169,8 +169,10 @@ export class ExpressionsService {
   >(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext
-  ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
+  ): Promise<Output> =>
+    this.executor.run<Input, Output, ExtraContext>(ast, input, context, options);
 
   /**
    * Get a registered `ExpressionFunction` by its name, which was registered
@@ -232,9 +234,14 @@ export class ExpressionsService {
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input = { type: 'null' } as any,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ): ExecutionContract<ExtraContext, Input, Output> => {
-    const execution = this.executor.createExecution<ExtraContext, Input, Output>(ast, context);
+    const execution = this.executor.createExecution<ExtraContext, Input, Output>(
+      ast,
+      context,
+      options
+    );
     execution.start(input);
     return execution.contract;
   };

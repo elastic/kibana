@@ -145,11 +145,18 @@ export class ExpressionLoader {
       this.execution.cancel();
     }
     this.setParams(params);
-    this.execution = getExpressionsService().execute(expression, params.context, {
-      search: params.searchContext,
-      variables: params.variables || {},
-      inspectorAdapters: params.inspectorAdapters,
-    });
+    this.execution = getExpressionsService().execute(
+      expression,
+      params.context,
+      {
+        search: params.searchContext,
+        variables: params.variables || {},
+        inspectorAdapters: params.inspectorAdapters,
+      },
+      {
+        debug: params.debug,
+      }
+    );
 
     const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
@@ -181,6 +188,7 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    this.params.debug = Boolean(params.debug);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

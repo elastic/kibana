@@ -165,8 +165,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     Input,
     Output,
     ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) {
-    const execution = this.createExecution(ast, context);
+  >(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
+  ) {
+    const execution = this.createExecution(ast, context, options);
     execution.start(input);
     return (await execution.result) as Output;
   }
