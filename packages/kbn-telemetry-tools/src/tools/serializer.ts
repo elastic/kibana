@@ -71,6 +71,33 @@ export function kindToDescriptorName(kind: number) {
   }
 }
 
+export function getConstraints(node: ts.Node, program: ts.Program): any {
+  if (ts.isTypeReferenceNode(node)) {
+    const typeChecker = program.getTypeChecker();
+    const symbol = typeChecker.getSymbolAtLocation(node.typeName);
+    const declaration = (symbol?.getDeclarations() || [])[0];
+    if (declaration) {
+      return getConstraints(declaration, program);
+    }
+    return getConstraints(node.typeName, program);
+  }
+
+  if (ts.isTypeAliasDeclaration(node)) {
+    return getConstraints(node.type, program);
+  }
+
+  if (ts.isUnionTypeNode(node)) {
+    const types = node.types.filter(discardNullOrUndefined);
+    return types.map((typeNode) => getConstraints(typeNode, program));
+  }
+
+  if (ts.isLiteralTypeNode(node) && ts.isLiteralExpression(node.literal)) {
+    return node.literal.text;
+  }
+
+  throw Error(`Unsupported constraint`);
+}
+
 export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | DescriptorValue {
   if (ts.isMethodSignature(node) || ts.isPropertySignature(node)) {
     if (node.type) {
@@ -89,8 +116,19 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
 
   // If it's defined as signature { [key: string]: OtherInterface }
-  if (ts.isIndexSignatureDeclaration(node) && node.type) {
-    return { '@@INDEX@@': getDescriptor(node.type, program) };
+  if ((ts.isIndexSignatureDeclaration(node) || ts.isMappedTypeNode(node)) && node.type) {
+    const descriptor = getDescriptor(node.type, program);
+
+    // If we know the constraints of `string` ({ [key in 'prop1' | 'prop2']: value })
+    const constraint = (node as ts.MappedTypeNode).typeParameter?.constraint;
+    if (constraint) {
+      const constraints = getConstraints(constraint, program);
+      const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      if (typeof constraintsArray[0] === 'string') {
+        return constraintsArray.reduce((acc, c) => ({ ...acc, [c]: descriptor }), {});
+      }
+    }
+    return { '@@INDEX@@': descriptor };
   }
 
   if (ts.SyntaxKind.FirstNode === node.kind) {
