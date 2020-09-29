@@ -62,6 +62,7 @@ const chromiumUserPrefs = {
       setting: 1,
     },
   },
+  'profile.managed_auto_select_certificate_for_urls': ['{"pattern":"[*.]","filter":{}}'],
 };
 
 /**

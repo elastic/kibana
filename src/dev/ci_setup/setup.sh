@@ -10,6 +10,10 @@ echo " -- PARENT_DIR='$PARENT_DIR'"
 echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
 echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
+echo " -- copying NSS database"
+mkdir -p "$HOME/.pki"
+cp -r ./packages/kbn-dev-utils/certs/nssdb "$HOME/.pki"
+
 ###
 ### install dependencies
 ###

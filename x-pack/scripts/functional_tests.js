@@ -10,6 +10,7 @@ const alwaysImportedTests = [
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/security_functional/login_selector.config.ts'),
+  require.resolve('../test/security_functional/login_selector_pki.config.ts'),
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
   require.resolve('../test/functional_embedded/config.ts'),
