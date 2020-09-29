@@ -13,6 +13,10 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
   return {
     id: 'savedObjects',
     find: (term, { aborted$, maxResults, preference }, { core }) => {
+      if (!term) {
+        return from([]);
+      }
+
       const {
         capabilities,
         savedObjects: { client, typeRegistry },

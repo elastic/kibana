@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Subscription } from 'rxjs';
 import { ApplicationStart } from 'kibana/public';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -42,48 +43,73 @@ const clearField = (field: HTMLInputElement) => {
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 const blurEvent = new FocusEvent('blur');
 
+const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
+  if (a.score < b.score) return 1;
+  if (a.score > b.score) return -1;
+  return 0;
+};
+
+const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
+  const titleA = a.title.toUpperCase(); // ignore upper and lowercase
+  const titleB = b.title.toUpperCase(); // ignore upper and lowercase
+  if (titleA < titleB) return -1;
+  if (titleA > titleB) return 1;
+  return 0;
+};
+
+const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
+  const { id, title, url, icon, type, meta } = result;
+  const option: EuiSelectableTemplateSitewideOption = {
+    key: id,
+    label: title,
+    url,
+  };
+
+  if (icon) {
+    option.icon = { type: icon };
+  }
+
+  if (type === 'application') {
+    option.meta = [{ text: meta?.categoryLabel as string }];
+  } else {
+    option.meta = [{ text: cleanMeta(type) }];
+  }
+
+  return option;
+};
+
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+  const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
   const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
   const setOptions = useCallback(
     (_options: GlobalSearchResult[]) => {
-      if (!isMounted()) return;
+      if (!isMounted()) {
+        return;
+      }
 
-      _setOptions([
-        ..._options.map(({ id, title, url, icon, type, meta }) => {
-          const option: EuiSelectableTemplateSitewideOption = {
-            key: id,
-            label: title,
-            url,
-          };
-
-          if (icon) option.icon = { type: icon };
-
-          if (type === 'application') option.meta = [{ text: meta?.categoryLabel as string }];
-          else option.meta = [{ text: cleanMeta(type) }];
-
-          return option;
-        }),
-      ]);
+      _setOptions(_options.map(resultToOption));
     },
     [isMounted, _setOptions]
   );
 
   useDebounce(
     () => {
+      // cancel pending search if not completed yet
+      if (searchSubscription.current) {
+        searchSubscription.current.unsubscribe();
+        searchSubscription.current = null;
+      }
+
       let arr: GlobalSearchResult[] = [];
-      globalSearch(searchValue, {}).subscribe({
+      searchSubscription.current = globalSearch(searchValue, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
-            arr = [...results, ...arr].sort((a, b) => {
-              if (a.score < b.score) return 1;
-              if (a.score > b.score) return -1;
-              return 0;
-            });
+            arr = [...results, ...arr].sort(sortByScore);
             setOptions(arr);
             return;
           }
@@ -91,13 +117,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           // if searchbar is empty, filter to only applications and sort alphabetically
           results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
 
-          arr = [...results, ...arr].sort((a, b) => {
-            const titleA = a.title.toUpperCase(); // ignore upper and lowercase
-            const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-            if (titleA < titleB) return -1;
-            if (titleA > titleB) return 1;
-            return 0;
-          });
+          arr = [...results, ...arr].sort(sortByTitle);
 
           setOptions(arr);
         },
