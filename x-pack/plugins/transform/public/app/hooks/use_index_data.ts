@@ -13,26 +13,16 @@ import {
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
 
-import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  getProcessedFields,
-  EsSorting,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
+
+import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
-import { useToastNotifications } from '../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
@@ -40,6 +30,19 @@ export const useIndexData = (
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
+  const {
+    ml: {
+      getFieldType,
+      getDataGridSchemaFromKibanaFieldType,
+      getFieldsFromKibanaIndexPattern,
+      showDataGridColumnChartErrorMessageToast,
+      useDataGrid,
+      useRenderCellValue,
+      EsSorting,
+      UseIndexDataReturnType,
+      INDEX_STATUS,
+    },
+  } = useAppDependencies();
 
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
