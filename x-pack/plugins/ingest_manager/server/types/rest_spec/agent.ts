@@ -172,20 +172,28 @@ export const PostAgentUnenrollRequestSchema = {
   ),
 };
 
+export const PostBulkAgentUnenrollRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
   body: schema.object({
-    source_uri: schema.string(),
+    source_uri: schema.maybe(schema.string()),
     version: schema.string(),
   }),
 };
 
-export const PostBulkAgentUnenrollRequestSchema = {
+export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-    force: schema.maybe(schema.boolean()),
+    source_uri: schema.maybe(schema.string()),
+    version: schema.string(),
   }),
 };
 

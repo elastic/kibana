@@ -6,8 +6,8 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { PostAgentUpgradeResponse } from '../../../common/types';
-import { PostAgentUpgradeRequestSchema } from '../../types';
+import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -40,6 +40,47 @@ export const postAgentUpgradeHandler: RequestHandler<
     });
 
     const body: PostAgentUpgradeResponse = {};
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const postBulkAgentsUpgradeHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const { version, source_uri: sourceUri, agents } = request.body;
+
+  // temporarily only allow upgrading to the same version as the installed kibana version
+  const kibanaVersion = appContextService.getKibanaVersion();
+  if (kibanaVersion !== version) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+      },
+    });
+  }
+
+  try {
+    if (Array.isArray(agents)) {
+      await AgentService.sendUpgradeAgentsActions(soClient, {
+        agentIds: agents,
+        sourceUri,
+        version,
+      });
+    } else {
+      await AgentService.sendUpgradeAgentsActions(soClient, {
+        kuery: agents,
+        sourceUri,
+        version,
+      });
+    }
+
+    const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

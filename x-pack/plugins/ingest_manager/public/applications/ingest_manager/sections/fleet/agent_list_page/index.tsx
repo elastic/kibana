@@ -38,7 +38,7 @@ import {
   useKibanaVersion,
 } from '../../../hooks';
 import { SearchBar, ContextMenuActions } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable, buildAgentSourceUri } from '../../../services';
+import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AgentReassignAgentPolicyFlyout,
@@ -68,6 +68,12 @@ const statusFilters = [
     status: 'error',
     label: i18n.translate('xpack.ingestManager.agentList.statusErrorFilterText', {
       defaultMessage: 'Error',
+    }),
+  },
+  {
+    status: 'upgrading',
+    label: i18n.translate('xpack.ingestManager.agentList.statusUpgradingFilterText', {
+      defaultMessage: 'Upgrading',
     }),
   },
 ] as Array<{ label: string; status: string }>;
@@ -165,6 +171,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
+  const [showUpgradeAvailable, setShowUpgradeAvailable] = useState<boolean>(false);
+
   // Table and search states
   const [search, setSearch] = useState<string>(defaultKuery);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
@@ -215,7 +223,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       .map((agentPolicy) => `"${agentPolicy}"`)
       .join(' or ')})`;
   }
-
   if (selectedStatus.length) {
     const kueryStatus = selectedStatus
       .map((status) => {
@@ -224,6 +231,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return AgentStatusKueryHelper.buildKueryForOnlineAgents();
           case 'offline':
             return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+          case 'upgrading':
+            return AgentStatusKueryHelper.buildKueryForUpgradingAgents();
           case 'error':
             return AgentStatusKueryHelper.buildKueryForErrorAgents();
         }
@@ -466,7 +475,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               agentsRequest.resendRequest();
             }}
             version={kibanaVersion}
-            sourceUri={buildAgentSourceUri(agentToUpgrade, kibanaVersion)}
           />
         </EuiPortal>
       )}
@@ -571,10 +579,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 </EuiPopover>
                 <EuiFilterButton
                   hasActiveFilters={showInactive}
-                  onClick={() => setShowInactive(!showInactive)}
+                  onClick={() => setShowUpgradeAvailable(!showUpgradeAvailable)}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.showUpgradeableFIlterLabel"
+                    id="xpack.ingestManager.agentList.showUpgradeableFilterLabel"
                     defaultMessage="Upgrade available"
                   />
                 </EuiFilterButton>

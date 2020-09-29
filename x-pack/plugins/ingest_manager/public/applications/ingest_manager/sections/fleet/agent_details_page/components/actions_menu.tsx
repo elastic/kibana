@@ -15,7 +15,6 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
-import { buildAgentSourceUri } from '../../../../../../../common/services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -63,7 +62,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <AgentUpgradeAgentModal
             agents={[agent]}
             agentCount={1}
-            sourceUri={buildAgentSourceUri(agent, kibanaVersion)}
             version={kibanaVersion}
             onClose={() => {
               setIsUpgradeModalOpen(false);

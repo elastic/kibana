@@ -128,14 +128,15 @@ export interface PostAgentUpgradeRequest {
     agentId: string;
   };
   body: {
-    source_uri: string;
+    source_uri?: string;
     version: string;
   };
 }
+
 export interface PostBulkAgentUpgradeRequest {
   body: {
     agents: string[] | string;
-    source_uri: string;
+    source_uri?: string;
     version: string;
   };
 }
