@@ -75,7 +75,7 @@ export async function getIssue({
 }): Promise<Record<string, any>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
-      params: { subAction: 'issue', subActionParams: { id } },
+      params: { subAction: 'getIncident', subActionParams: { id } },
     }),
     signal,
   });

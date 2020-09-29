@@ -88,6 +88,10 @@ export const createExternalService = (
       fields = { ...fields, labels: incident.labels };
     }
 
+    if (incident.priority) {
+      fields = { ...fields, priority: { name: incident.priority } };
+    }
+
     if (incident.parent) {
       fields = { ...fields, parent: { key: incident.parent } };
     }

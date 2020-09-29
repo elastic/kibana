@@ -14,7 +14,7 @@ import { useGetSingleIssue } from './use_get_single_issue';
 import * as i18n from './translations';
 
 interface Props {
-  selectedValue: string;
+  selectedValue: string | null;
   http: HttpSetup;
   toastNotifications: Pick<
     ToastsApi,
@@ -90,6 +90,7 @@ const SearchIssuesComponent: React.FC<Props> = ({
       singleSelection
       fullWidth
       placeholder={inputPlaceholder}
+      data-test-sub={'search-parent-issues'}
       aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
       options={options}
       isLoading={isLoadingIssues || isLoadingSingleIssue}

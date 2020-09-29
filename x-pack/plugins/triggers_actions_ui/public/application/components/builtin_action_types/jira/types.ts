@@ -22,7 +22,7 @@ export interface JiraActionParams {
     issueType: string;
     priority: string;
     labels: string[];
-    parent: string;
+    parent: string | null;
   };
 }
 
