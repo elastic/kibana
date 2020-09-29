@@ -139,6 +139,7 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
             onClick={() => setItemDetailsMap(toggleItemDetailsInMap(itemDetailsMap, item, context))}
             aria-label={itemDetailsMap[item.id] ? 'Collapse' : 'Expand'}
             iconType={itemDetailsMap[item.id] ? 'arrowUp' : 'arrowDown'}
+            data-test-subj="trustedAppsListItemExpandButton"
           />
         );
       },

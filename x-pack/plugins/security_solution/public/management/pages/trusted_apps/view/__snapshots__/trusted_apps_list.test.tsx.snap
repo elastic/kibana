@@ -114,6 +114,21 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -122,7 +137,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="5"
+              colspan="6"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -256,6 +271,21 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -264,7 +294,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="5"
+              colspan="6"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -403,6 +433,21 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -411,7 +456,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="5"
+              colspan="6"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -550,11 +595,26 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -645,14 +705,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -743,14 +824,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -841,14 +943,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -939,14 +1062,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1037,14 +1181,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1135,14 +1300,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1233,14 +1419,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1331,14 +1538,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1429,14 +1657,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1527,14 +1776,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1625,14 +1895,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1723,14 +2014,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1821,14 +2133,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -1919,14 +2252,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2017,14 +2371,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2115,14 +2490,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2213,14 +2609,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2311,14 +2728,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2409,14 +2847,35 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -2507,9 +2966,30 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
               </div>
             </td>
           </tr>
@@ -2854,6 +3334,21 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -2862,7 +3357,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
           >
             <td
               class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colspan="5"
+              colspan="6"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -2996,11 +3491,26 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3091,14 +3601,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3189,14 +3720,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3287,14 +3839,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3385,14 +3958,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3483,14 +4077,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3581,14 +4196,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3679,14 +4315,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3777,14 +4434,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3875,14 +4553,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -3973,14 +4672,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4071,14 +4791,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4169,14 +4910,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4267,14 +5029,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4365,14 +5148,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4463,14 +5267,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4561,14 +5386,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4659,14 +5505,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4757,14 +5624,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4855,14 +5743,35 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -4953,9 +5862,30 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
               </div>
             </td>
           </tr>
@@ -5300,11 +6230,26 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 </span>
               </div>
             </th>
+            <td
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_undefined_5"
+              role="columnheader"
+              scope="col"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5395,14 +6340,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5493,14 +6459,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5591,14 +6578,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5689,14 +6697,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5787,14 +6816,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5885,14 +6935,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -5983,14 +7054,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6081,14 +7173,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6179,14 +7292,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6277,14 +7411,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6375,14 +7530,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6473,14 +7649,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6571,14 +7768,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6669,14 +7887,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6767,14 +8006,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6865,14 +8125,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -6963,14 +8244,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -7061,14 +8363,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -7159,14 +8482,35 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
               </div>
             </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </td>
           </tr>
           <tr
-            class="euiTableRow euiTableRow-hasActions"
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
           >
             <td
               class="euiTableRowCell"
@@ -7257,9 +8601,30 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     class="euiScreenReaderOnly"
                     id="mockId"
                   >
-                    Delete
+                    Remove
                   </span>
                 </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width: 40px;"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="trustedAppsListItemExpandButton"
+                  type="button"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
               </div>
             </td>
           </tr>
