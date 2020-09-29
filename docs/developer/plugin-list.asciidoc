@@ -131,6 +131,10 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/real_time/README.md[realTime]
+|Real-time state and collaboration services.
+
+
 |{kib-repo}blob/{branch}/src/plugins/region_map[regionMap]
 |WARNING: Missing README.
 
