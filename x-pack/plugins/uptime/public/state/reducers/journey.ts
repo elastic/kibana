@@ -27,23 +27,15 @@ export interface JourneyState {
   error?: Error;
 }
 
-export interface JourneyStepsState {
-  journeys: JourneyState[];
-}
-
-const initialState: JourneyStepsState = {
-  journeys: [],
-};
+const initialState: JourneyState[] = [];
 
 type Payload = FetchJourneyStepsParams &
   SyntheticsJourneyApiResponse &
   GetJourneyFailPayload &
   GetStepScreenshotSuccessPayload;
 
-function loadJourney(state: JourneyStepsState, checkGroup: string) {
-  const journeyToLoad: JourneyState | undefined = state.journeys.find(
-    (j) => j.checkGroup === checkGroup
-  );
+function loadJourney(state: JourneyState[], checkGroup: string) {
+  const journeyToLoad: JourneyState | undefined = state.find((j) => j.checkGroup === checkGroup);
   if (journeyToLoad) {
     return {
       ...journeyToLoad,
@@ -57,8 +49,8 @@ function loadJourney(state: JourneyStepsState, checkGroup: string) {
   };
 }
 
-function updateJourneyError(state: JourneyStepsState, action: Action<GetJourneyFailPayload>) {
-  const journeyToUpdate: JourneyState | undefined = state.journeys.find(
+function updateJourneyError(state: JourneyState[], action: Action<GetJourneyFailPayload>) {
+  const journeyToUpdate: JourneyState | undefined = state.find(
     (j) => j.checkGroup === action.payload.checkGroup
   );
   if (journeyToUpdate) {
@@ -76,75 +68,60 @@ function updateJourneyError(state: JourneyStepsState, action: Action<GetJourneyF
   };
 }
 
-export const journeyReducer = handleActions<JourneyStepsState, Payload>(
+export const journeyReducer = handleActions<JourneyState[], Payload>(
   {
-    [String(getJourneySteps)]: (
-      state: JourneyStepsState,
-      action: Action<FetchJourneyStepsParams>
-    ) => ({
-      journeys: [
-        ...state.journeys.filter(({ checkGroup }) => checkGroup !== action.payload.checkGroup),
-        loadJourney(state, action.payload.checkGroup),
-      ],
-    }),
+    [String(getJourneySteps)]: (state: JourneyState[], action: Action<FetchJourneyStepsParams>) => [
+      ...state.filter(({ checkGroup }) => checkGroup !== action.payload.checkGroup),
+      loadJourney(state, action.payload.checkGroup),
+    ],
 
     [String(getJourneyStepsSuccess)]: (
-      state: JourneyStepsState,
+      state: JourneyState[],
       action: Action<SyntheticsJourneyApiResponse>
-    ) => ({
-      journeys: [
-        ...state.journeys.filter((j) => j.checkGroup !== action.payload.checkGroup),
-        { checkGroup: action.payload.checkGroup, steps: action.payload.steps, loading: false },
-      ],
-    }),
+    ) => [
+      ...state.filter((j) => j.checkGroup !== action.payload.checkGroup),
+      { checkGroup: action.payload.checkGroup, steps: action.payload.steps, loading: false },
+    ],
 
     [String(getJourneyStepsFail)]: (
-      state: JourneyStepsState,
+      state: JourneyState[],
       action: Action<GetJourneyFailPayload>
-    ) => ({
-      journeys: [
-        ...state.journeys.filter((j) => j.checkGroup !== action.payload.checkGroup),
-        updateJourneyError(state, action),
-      ],
-    }),
+    ) => [
+      ...state.filter((j) => j.checkGroup !== action.payload.checkGroup),
+      updateJourneyError(state, action),
+    ],
 
-    [String(getStepScreenshot)]: (
-      state: JourneyStepsState,
-      action: Action<FetchStepScreenshot>
-    ) => ({
-      journeys: state.journeys.map((j) => {
+    [String(getStepScreenshot)]: (state: JourneyState[], action: Action<FetchStepScreenshot>) =>
+      state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
         step.synthetics.screenshotLoading = true;
         return j;
       }),
-    }),
 
     [String(getStepScreenshotSuccess)]: (
-      state: JourneyStepsState,
+      state: JourneyState[],
       action: Action<GetStepScreenshotSuccessPayload>
-    ) => ({
-      journeys: state.journeys.map((j) => {
+    ) =>
+      state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
         step.synthetics.blob = action.payload.screenshot;
         step.synthetics.screenshotLoading = false;
         return j;
       }),
-    }),
 
     [String(getStepScreenshotFail)]: (
-      state: JourneyStepsState,
+      state: JourneyState[],
       action: Action<GetStepScreenshotFailPayload>
-    ) => ({
-      journeys: state.journeys.map((j) => {
+    ) =>
+      state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
         step.synthetics.screenshotLoading = false;
         // TODO: error handle
         return j;
       }),
-    }),
   },
   initialState
 );

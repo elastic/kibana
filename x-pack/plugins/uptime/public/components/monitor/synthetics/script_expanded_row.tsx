@@ -27,8 +27,8 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
     }
   }, [dispatch, checkGroup]);
 
-  const journeyState = useSelector(journeySelector);
-  const journey = journeyState.journeys.find((j) => j.checkGroup === checkGroup);
+  const journeys = useSelector(journeySelector);
+  const journey = journeys.find((j) => j.checkGroup === checkGroup);
 
   const fetchScreenshot = useCallback(
     (stepIndex: number) => {
