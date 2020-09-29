@@ -100,8 +100,10 @@ export const EmbeddedMapComponent = ({
     deepEqual
   );
 
+  const [selectedPatterns, setSelectedPatterns] = useState(sourcererScope.selectedPatterns);
+
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaIndexPatterns.filter((kip) => selectedPatterns.includes(kip.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -122,7 +124,18 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+
+    setSelectedPatterns((prevSelectedPatterns) => {
+      if (
+        !deepEqual(prevSelectedPatterns, sourcererScope.selectedPatterns) &&
+        kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+          .length === 0
+      ) {
+        setIsIndexError(true);
+      }
+      return sourcererScope.selectedPatterns;
+    });
+  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns, setIsIndexError]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -157,7 +170,7 @@ export const EmbeddedMapComponent = ({
       }
     }
 
-    if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
+    if (embeddable == null && selectedPatterns.length > 0) {
       setupEmbeddable();
     }
 
@@ -173,7 +186,7 @@ export const EmbeddedMapComponent = ({
     query,
     portalNode,
     services.embeddable,
-    sourcererScope.selectedPatterns,
+    selectedPatterns,
     setQuery,
     startDate,
   ]);
@@ -237,7 +250,7 @@ export const EmbeddedMapComponent = ({
       </InPortal>
 
       <EmbeddableMap maintainRatio={!isIndexError}>
-        {embeddable != null ? (
+        {embeddable != null && !isIndexError ? (
           <services.embeddable.EmbeddablePanel embeddable={embeddable} />
         ) : isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
