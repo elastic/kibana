@@ -16,18 +16,16 @@ const MIN_BUTTON_WIDTH = 42;
 const MIN_LARGE_BUTTON_WIDTH = 110;
 
 export const useConditionSelector = (conditions?: Conditions) => {
-  const [selectedConditionId, setSelectedConditionId] = useState<number>(0);
+  const conditionState = useState<number>(0);
+  const [selectedConditionId, setSelectedConditionId] = conditionState;
   useEffect(() => {
     if (!conditions) return;
     if (selectedConditionId > 0 && selectedConditionId > conditions.length - 1) {
       setSelectedConditionId(Math.max(0, conditions.length - 1));
     }
-  }, [conditions, selectedConditionId]);
+  }, [conditions, selectedConditionId, setSelectedConditionId]);
 
-  return [selectedConditionId, setSelectedConditionId] as [
-    number,
-    React.Dispatch<React.SetStateAction<number>>
-  ];
+  return conditionState;
 };
 
 export const ConditionCharts: React.FC<{
