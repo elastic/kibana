@@ -29,7 +29,6 @@ import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { AddExceptionModal as AddExceptionModalComponent } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
@@ -45,7 +44,6 @@ import { ExceptionListType } from '../../../../../common/shared_imports';
 interface AlertContextMenuProps {
   disabled: boolean;
   ecsRowData: Ecs;
-  nonEcsRowData: TimelineNonEcsData[];
   refetch: inputsModel.Refetch;
   timelineId: string;
 }
@@ -53,7 +51,6 @@ interface AlertContextMenuProps {
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   disabled,
   ecsRowData,
-  nonEcsRowData,
   refetch,
   timelineId,
 }) => {
