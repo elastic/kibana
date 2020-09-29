@@ -60,27 +60,15 @@ export const myCollector = makeUsageCollector<Usage>({
   isReady: () => true,
   fetch() {
     const testString = '123';
-    // query ES and get some data
 
-    // summarize the data into a model
-    // return the modeled object that includes whatever you want to track
-    try {
-      return {
-        flat: 'hello',
-        my_str: testString,
-        my_objects: {
-          total: SOME_NUMBER,
-          type: true,
-        },
-      };
-    } catch (err) {
-      return {
-        my_objects: {
-          total: 0,
-          type: true,
-        },
-      };
-    }
+    return {
+      flat: 'hello',
+      my_str: testString,
+      my_objects: {
+        total: SOME_NUMBER,
+        type: true,
+      },
+    };
   },
   schema: {
     ...someSchema,
