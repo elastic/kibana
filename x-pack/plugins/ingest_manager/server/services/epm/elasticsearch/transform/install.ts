@@ -9,7 +9,6 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { saveInstalledEsRefs } from '../../packages/install';
 import * as Registry from '../../registry';
 import {
-  RegistryDataStream,
   ElasticsearchAssetType,
   EsAssetReference,
   RegistryPackage,
@@ -24,12 +23,7 @@ interface TransformInstallation {
   content: string;
 }
 
-interface TransformPathDataStream {
-  path: string;
-  data_stream: RegistryDataStream;
-}
-
-export const installTransformForDataStream = async (
+export const installTransform = async (
   registryPackage: RegistryPackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
@@ -51,56 +45,32 @@ export const installTransformForDataStream = async (
     callCluster,
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
-  // install the latest data stream
-  const dataStreams = registryPackage.data_streams;
-  if (!dataStreams?.length) return [];
-  const installNameSuffix = `${registryPackage.version}`;
 
+  const installNameSuffix = `${registryPackage.version}`;
   const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
-    const transformPathDataStreams = dataStreams.reduce<TransformPathDataStream[]>(
-      (acc, dataStream) => {
-        transformPaths.forEach((path) => {
-          if (isDataStreamTransform(path, dataStream.path)) {
-            acc.push({ path, data_stream: dataStream });
-          }
-        });
-        return acc;
-      },
-      []
-    );
+    const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
+      acc.push({
+        id: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        type: ElasticsearchAssetType.transform,
+      });
 
-    const transformRefs = transformPathDataStreams.reduce<EsAssetReference[]>(
-      (acc, transformPathDataStream) => {
-        if (transformPathDataStream) {
-          acc.push({
-            id: getTransformNameForInstallation(transformPathDataStream, installNameSuffix),
-            type: ElasticsearchAssetType.transform,
-          });
-        }
-        return acc;
-      },
-      []
-    );
+      return acc;
+    }, []);
 
     // get and save transform refs before installing transforms
     await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
 
-    const transforms: TransformInstallation[] = transformPathDataStreams.map(
-      (transformPathDataStream: TransformPathDataStream) => {
-        return {
-          installationName: getTransformNameForInstallation(
-            transformPathDataStream,
-            installNameSuffix
-          ),
-          content: getAsset(transformPathDataStream.path).toString('utf-8'),
-        };
-      }
-    );
+    const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      return {
+        installationName: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        content: getAsset(path).toString('utf-8'),
+      };
+    });
 
     const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform });
+      return handleTransformInstall({ callCluster, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -126,20 +96,10 @@ export const installTransformForDataStream = async (
 
 const isTransform = (path: string) => {
   const pathParts = Registry.pathParts(path);
-  return pathParts.type === ElasticsearchAssetType.transform;
+  return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
-const isDataStreamTransform = (path: string, datasetName: string) => {
-  const pathParts = Registry.pathParts(path);
-  return (
-    !path.endsWith('/') &&
-    pathParts.type === ElasticsearchAssetType.transform &&
-    pathParts.dataset !== undefined &&
-    datasetName === pathParts.dataset
-  );
-};
-
-async function installTransform({
+async function handleTransformInstall({
   callCluster,
   transform,
 }: {
@@ -163,9 +123,12 @@ async function installTransform({
 }
 
 const getTransformNameForInstallation = (
-  transformDataStream: TransformPathDataStream,
+  registryPackage: RegistryPackage,
+  path: string,
   suffix: string
 ) => {
-  const filename = transformDataStream?.path.split('/')?.pop()?.split('.')[0];
-  return `${transformDataStream.data_stream.type}-${transformDataStream.data_stream.dataset}-${filename}-${suffix}`;
+  const pathPaths = path.split('/');
+  const filename = pathPaths?.pop()?.split('.')[0];
+  const folderName = pathPaths?.pop();
+  return `${registryPackage.name}.${folderName}-${filename}-${suffix}`;
 };
