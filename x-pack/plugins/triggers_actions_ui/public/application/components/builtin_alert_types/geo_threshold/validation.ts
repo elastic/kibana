@@ -36,7 +36,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
   if (!index) {
     errors.index.push(
       i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredIndexTitleText', {
-        defaultMessage: 'Index pattern title is required.',
+        defaultMessage: 'Index pattern is required.',
       })
     );
   }
@@ -76,7 +76,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
   if (!boundaryType) {
     errors.boundaryType.push(
       i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredTrackingEventText', {
-        defaultMessage: 'Tracking event is required.',
+        defaultMessage: 'Boundary type is required.',
       })
     );
   }
