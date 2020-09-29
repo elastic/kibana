@@ -10,15 +10,7 @@
  * Viewer dashboard.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import each from 'lodash/each';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import find from 'lodash/find';
+import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
