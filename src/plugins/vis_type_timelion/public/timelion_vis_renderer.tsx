@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { KibanaContextProvider } from '../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
@@ -27,13 +26,13 @@ import { VisualizationContainer } from '../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 // @ts-ignore
-const TimelionVisComponent = lazy(() => import('./components/timelion_vis'));
+const TimelionVisComponent = lazy(() => import('./components/timelion_vis_component'));
 
 export const getTimelionVisRenderer: (
   deps: TimelionVisDependencies
 ) => ExpressionRenderDefinition<TimelionRenderValue> = (deps) => ({
   name: 'timelion_vis',
-  displayName: 'Nimelion visualization',
+  displayName: 'Timelion visualization',
   reuseDomNode: true,
   render: async (domNode, { visData, visParams }, handlers) => {
     handlers.onDestroy(() => {
