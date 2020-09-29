@@ -28,13 +28,13 @@ export class KibanaURL {
     const match = path.match(/^.*\/app\/([^\/#]+)(.+)$/);
 
     if (!match) {
-      throw new Error('Unexpected Discover URL path.');
+      throw new Error('Unexpected URL path.');
     }
 
     const [, appName, appPath] = match;
 
     if (!appName || !appPath) {
-      throw new Error('Could not parse Discover URL path.');
+      throw new Error('Could not parse URL path.');
     }
 
     this.path = path;

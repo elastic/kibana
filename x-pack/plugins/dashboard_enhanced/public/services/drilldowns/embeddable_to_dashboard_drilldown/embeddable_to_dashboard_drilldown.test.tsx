@@ -96,19 +96,24 @@ describe('.execute() & getHref', () => {
         },
         plugins: {
           uiActionsEnhanced: {},
+          dashboard: {
+            dashboardUrlGenerator: new UrlGeneratorsService()
+              .setup(coreMock.createSetup())
+              .registerUrlGenerator(
+                createDashboardUrlGenerator(() =>
+                  Promise.resolve({
+                    appBasePath: 'xyz/app/dashboards',
+                    useHashedUrl: false,
+                    savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
+                  })
+                )
+              ),
+          },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>,
-      getDashboardUrlGenerator: () =>
-        new UrlGeneratorsService().setup(coreMock.createSetup()).registerUrlGenerator(
-          createDashboardUrlGenerator(() =>
-            Promise.resolve({
-              appBasePath: 'test',
-              useHashedUrl: false,
-              savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
-            })
-          )
-        ),
+      })) as unknown) as StartServicesGetter<
+        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
+      >,
     });
 
     const completeConfig: Config = {
