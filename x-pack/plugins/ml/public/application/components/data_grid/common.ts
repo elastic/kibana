@@ -105,9 +105,6 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'geo_point':
         schema = 'json';
         break;
-      case 'boolean':
-        schema = 'boolean';
-        break;
       case 'text':
         schema = NON_AGGREGATABLE;
     }
