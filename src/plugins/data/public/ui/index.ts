@@ -20,7 +20,7 @@
 export { SuggestionsComponent } from './typeahead';
 export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input/query_string_input';
+export { QueryStringInput, QueryStringInputProps } from './query_string_input';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 
 // @internal
