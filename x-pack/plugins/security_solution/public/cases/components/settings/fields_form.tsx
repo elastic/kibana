@@ -7,13 +7,14 @@
 import React, { memo, Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { AllSettingFields, CaseSettingsConnector } from './types';
+import { CaseSettingsConnector } from './types';
 import { useCaseSettings } from './use_case_settings';
+import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 
 interface Props {
   connector: CaseSettingsConnector | null;
-  onFieldsChange: (fields: AllSettingFields) => void;
-  fields?: AllSettingFields;
+  onFieldsChange: (fields: ConnectorTypeFields['fields']) => void;
+  fields: ConnectorTypeFields['fields'];
 }
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {

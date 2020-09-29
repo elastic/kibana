@@ -17,6 +17,7 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { transformCaseConnectorToEsConnector } from '../helpers';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
@@ -59,7 +60,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           updatedAttributes: {
             ...(queryWithoutVersion.connector
               ? {
-                  connector: { ...queryWithoutVersion.connector, fields: [] },
+                  connector: {
+                    ...transformCaseConnectorToEsConnector(queryWithoutVersion.connector),
+                  },
                 }
               : queryWithoutVersion),
             updated_at: updateDate,
@@ -75,7 +78,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
               ...(patch.attributes.connector
                 ? patch.attributes.connector
                 : myCaseConfigure.saved_objects[0].attributes.connector),
-              fields: {},
+              fields: null,
             },
             version: patch.version ?? '',
           }),

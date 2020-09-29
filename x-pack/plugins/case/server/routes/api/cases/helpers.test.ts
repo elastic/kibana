@@ -5,7 +5,12 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { CaseConnector, ESCaseConnector, CasesConfigureAttributes } from '../../../../common/api';
+import {
+  CaseConnector,
+  ESCaseConnector,
+  CasesConfigureAttributes,
+  ESCasesConfigureAttributes,
+} from '../../../../common/api';
 import { mockCaseConfigure } from '../__fixtures__';
 import {
   transformCaseConnectorToEsConnector,
@@ -31,7 +36,7 @@ describe('helpers', () => {
     ],
   };
 
-  const caseConfigure: SavedObjectsFindResponse<CasesConfigureAttributes> = {
+  const caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
     saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
     total: 1,
     per_page: 20,
@@ -76,12 +81,12 @@ describe('helpers', () => {
         id: '789',
         name: 'My connector 3',
         type: '.jira',
-        fields: null,
+        fields: [],
       });
     });
 
     it('transform correctly with no connector', () => {
-      const caseConfigureNoConnector: SavedObjectsFindResponse<CasesConfigureAttributes> = {
+      const caseConfigureNoConnector: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
         ...caseConfigure,
         saved_objects: [
           {

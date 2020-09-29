@@ -62,7 +62,7 @@ export const normalizeActionConnector = (
 ): Omit<ConfigureCaseConnector, 'fields'> => ({
   id: actionConnector.id,
   name: actionConnector.name,
-  type: actionConnector.actionTypeId,
+  type: actionConnector.actionTypeId as ConfigureCaseConnector['type'],
 });
 
 export const normalizeCaseConnector = (

@@ -67,7 +67,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           body: CaseConfigureResponseRt.encode({
             ...post.attributes,
             // Reserve for future implementations
-            connector: { ...post.attributes.connector, fields: {} },
+            connector: { ...post.attributes.connector, fields: null },
             version: post.version ?? '',
           }),
         });

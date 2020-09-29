@@ -53,7 +53,7 @@ describe('GET case', () => {
     expect(response.payload).toEqual(
       flattenCaseSavedObject({
         savedObject,
-        caseConfigureConnector: { id: 'none', name: 'none', type: '.none', fields: {} },
+        caseConfigureConnector: { id: 'none', name: 'none', type: '.none', fields: null },
       })
     );
     expect(response.payload.comments).toEqual([]);

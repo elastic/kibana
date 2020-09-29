@@ -28,7 +28,7 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
                   ...myCaseConfigure.saved_objects[0].attributes,
                   connector: {
                     ...myCaseConfigure.saved_objects[0].attributes.connector,
-                    fields: {},
+                    fields: null,
                   },
                   version: myCaseConfigure.saved_objects[0].version ?? '',
                 })

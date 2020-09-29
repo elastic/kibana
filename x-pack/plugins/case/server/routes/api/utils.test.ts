@@ -23,21 +23,23 @@ import {
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
+import { ESCaseConnector } from '../../../common/api/cases';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {
+    const connector: ESCaseConnector = {
+      id: '123',
+      name: 'My connector',
+      type: '.jira',
+      fields: [
+        { key: 'issueType', value: 'Task' },
+        { key: 'priority', value: 'High' },
+      ],
+    };
     it('transform correctly', () => {
       const myCase = {
         newCase,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -50,15 +52,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         external_service: null,
@@ -71,15 +65,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const myCase = {
         newCase,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -89,15 +75,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         external_service: null,
@@ -110,15 +88,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const myCase = {
         newCase,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -131,15 +101,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: [
-            { key: 'issueType', value: 'Task' },
-            { key: 'priority', value: 'High' },
-          ],
-        },
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         external_service: null,
