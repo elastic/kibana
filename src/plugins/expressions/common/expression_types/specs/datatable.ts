@@ -41,6 +41,7 @@ export const isDatatable = (datatable: unknown): datatable is Datatable =>
 
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
+ * its duplicated from KBN_FIELD_TYPES
  */
 export type DatatableColumnType =
   | '_source'
