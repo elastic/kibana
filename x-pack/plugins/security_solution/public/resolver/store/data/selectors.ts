@@ -6,6 +6,7 @@
 
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
   Vector2,
@@ -265,15 +266,15 @@ export const relatedEventsByCategory: (
   }
 );
 
-export const relatedEventCountByType: (
+export const relatedEventCountByCategory: (
   state: DataState
-) => (nodeID: string, eventType: string) => number | undefined = createSelector(
+) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
   relatedEventsStats,
   (statsMap) => {
-    return (nodeID: string, eventType: string): number | undefined => {
+    return (nodeID: string, eventCategory: string): number | undefined => {
       const stats = statsMap(nodeID);
       if (stats) {
-        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventType);
+        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventCategory);
         if (typeof value === 'number' && Number.isFinite(value)) {
           return value;
         }
@@ -587,3 +588,59 @@ export const relatedEventTotalForProcess: (
     };
   }
 );
+
+/**
+ * Total count of events related to `node`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode: (
+  state: DataState
+) => (nodeID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string) => {
+    const nodeStats = stats(nodeID);
+    return nodeStats === undefined ? undefined : nodeStats.events.total;
+  }
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const relatedEventCountOfTypeForNode: (
+  state: DataState
+) => (nodeID: string, category: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string, category: string) => {
+    const nodeStats = stats(nodeID);
+    if (!nodeStats) {
+      return undefined;
+    } else {
+      return nodeStats.events.byCategory[category];
+    }
+  }
+);
+
+/**
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
+ */
+export const panelViewAndParameters = createSelector(
+  (state: DataState) => state.locationSearch,
+  resolverComponentInstanceID,
+  /* eslint-disable-next-line no-shadow */
+  (locationSearch, resolverComponentInstanceID) => {
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
+  }
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been requested or if data failed to load.
+ */
+export const nodeEventsInCategory = (state: DataState) => {
+  return state.nodeEventsInCategory?.events ?? [];
+};
