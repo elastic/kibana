@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
@@ -33,13 +34,13 @@ import {
   EuiFlexGrid,
   EuiPanel,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
-class PercentilesUi extends Component {
+export class Percentiles extends Component {
   handleTextChange(item, name) {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
@@ -52,7 +53,7 @@ class PercentilesUi extends Component {
   renderRow = (row, i, items) => {
     const defaults = { value: '', percentile: '', shade: '' };
     const model = { ...defaults, ...row };
-    const { intl, panel } = this.props;
+    const { panel } = this.props;
     const flexItemStyle = { minWidth: 100 };
 
     const percentileFieldNumber = (
@@ -66,8 +67,7 @@ class PercentilesUi extends Component {
           }
         >
           <EuiFieldNumber
-            aria-label={intl.formatMessage({
-              id: 'visTypeTimeseries.percentile.percentileAriaLabel',
+            aria-label={i18n.translate('visTypeTimeseries.percentile.modeOptions.lineLabel', {
               defaultMessage: 'Percentile',
             })}
             placeholder={0}
@@ -89,15 +89,13 @@ class PercentilesUi extends Component {
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const modeOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.percentile.modeOptions.lineLabel',
+        label: i18n.translate('visTypeTimeseries.percentile.modeOptions.lineLabel', {
           defaultMessage: 'Line',
         }),
         value: 'line',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.percentile.modeOptions.bandLabel',
+        label: i18n.translate('visTypeTimeseries.percentile.modeOptions.bandLabel', {
           defaultMessage: 'Band',
         }),
         value: 'band',
@@ -210,15 +208,13 @@ class PercentilesUi extends Component {
   }
 }
 
-PercentilesUi.defaultProps = {
+Percentiles.defaultProps = {
   name: 'percentile',
 };
 
-PercentilesUi.propTypes = {
+Percentiles.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
 };
-
-export const Percentiles = injectI18n(PercentilesUi);

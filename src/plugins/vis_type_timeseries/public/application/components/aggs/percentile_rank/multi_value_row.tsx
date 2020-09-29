@@ -19,7 +19,7 @@
 import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 
