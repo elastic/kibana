@@ -36,7 +36,11 @@ export function transformResults(
       .flatMap((bucket: unknown, bucketKey: string) => {
         const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
         return _.map(subBuckets, (subBucket) => {
-          const locationFieldResult = _.get(`entityHits.hits.hits[0].fields.${geoField}[0]`, '');
+          const locationFieldResult = _.get(
+            subBucket,
+            `entityHits.hits.hits[0].fields.${geoField}[0]`,
+            ''
+          );
           const location = locationFieldResult
             ? _.chain(locationFieldResult)
                 .split(', ')
