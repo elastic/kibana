@@ -181,7 +181,7 @@ interface PagingControlProps {
   totalPages: number;
 }
 
-const PagingControlComponent: React.FC<PagingControlProps> = ({
+export const PagingControlComponent: React.FC<PagingControlProps> = ({
   activePage,
   isLoading,
   onPageClick,
