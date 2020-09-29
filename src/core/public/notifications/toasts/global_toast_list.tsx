@@ -62,7 +62,6 @@ export class GlobalToastList extends React.Component<Props, State> {
   public render() {
     return (
       <EuiGlobalToastList
-        // aria-label="Notification message list"
         aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
           defaultMessage: 'Notification message list',
         })}

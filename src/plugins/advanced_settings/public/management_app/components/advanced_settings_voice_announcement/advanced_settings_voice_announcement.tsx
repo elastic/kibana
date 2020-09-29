@@ -67,14 +67,13 @@ export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
     const filteredOptions = [...filteredSections];
     return (
       <EuiScreenReaderOnly>
-        <>
-          <div
-            role="region"
-            aria-live="polite"
-            aria-label={i18n.translate('advancedSettings.voiceAnnouncement.ariaLabel', {
-              defaultMessage: 'Advanced Settings results info',
-            })}
-          />
+        <div
+          role="region"
+          aria-live="polite"
+          aria-label={i18n.translate('advancedSettings.voiceAnnouncement.ariaLabel', {
+            defaultMessage: 'Advanced Settings results info',
+          })}
+        >
           <EuiDelayRender>
             {this.props.queryText ? (
               <FormattedMessage
@@ -97,7 +96,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
               />
             )}
           </EuiDelayRender>
-        </>
+        </div>
       </EuiScreenReaderOnly>
     );
   }
