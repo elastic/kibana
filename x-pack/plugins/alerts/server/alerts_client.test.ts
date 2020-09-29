@@ -778,8 +778,12 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error if create saved object fails', async () => {
+  test('throws error and invalidates API key when create saved object fails', async () => {
     const data = getMockData();
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -798,6 +802,7 @@ describe('create()', () => {
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
@@ -3926,6 +3931,52 @@ describe('update()', () => {
     );
   });
 
+  test('throws when unsecuredSavedObjectsClient update fails and invalidates newly created API key', async () => {
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '234', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actions: [],
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
+    await expect(
+      alertsClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '234' });
+  });
+
   describe('updating an alert schedule', () => {
     function mockApiCalls(
       alertId: string,
@@ -4360,13 +4411,18 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
-  test('throws when unsecuredSavedObjectsClient update fails', async () => {
+  test('throws when unsecuredSavedObjectsClient update fails and invalidates newly created API key', async () => {
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '234', api_key: 'abc' },
+    });
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
 
     await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
     );
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '234' });
   });
 
   describe('authorization', () => {
