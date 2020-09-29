@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { curry } from 'lodash';
-import uuid from 'uuid';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -14,6 +11,15 @@ import {
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  groupActionVariableDescription,
+  alertStateActionVariableDescription,
+  reasonActionVariableDescription,
+  timestampActionVariableDescription,
+  valueActionVariableDescription,
+  metricActionVariableDescription,
+  thresholdActionVariableDescription,
+} from '../common/messages';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -21,6 +27,15 @@ const condition = schema.object({
   timeUnit: schema.string(),
   timeSize: schema.number(),
   metric: schema.string(),
+  customMetric: schema.maybe(
+    schema.object({
+      type: schema.literal('custom'),
+      id: schema.string(),
+      field: schema.string(),
+      aggregation: schema.string(),
+      label: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs) => ({
@@ -42,49 +57,17 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
   },
   defaultActionGroupId: FIRED_ACTIONS.id,
   actionGroups: [FIRED_ACTIONS],
-  producer: 'metrics',
-  executor: curry(createInventoryMetricThresholdExecutor)(libs, uuid.v4()),
+  producer: 'infrastructure',
+  executor: createInventoryMetricThresholdExecutor(libs),
   actionVariables: {
     context: [
-      {
-        name: 'group',
-        description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.groupActionVariableDescription',
-          {
-            defaultMessage: 'Name of the group reporting data',
-          }
-        ),
-      },
-      {
-        name: 'valueOf',
-        description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.valueOfActionVariableDescription',
-          {
-            defaultMessage:
-              'Record of the current value of the watched metric; grouped by condition, i.e valueOf.condition0, valueOf.condition1, etc.',
-          }
-        ),
-      },
-      {
-        name: 'thresholdOf',
-        description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.thresholdOfActionVariableDescription',
-          {
-            defaultMessage:
-              'Record of the alerting threshold; grouped by condition, i.e thresholdOf.condition0, thresholdOf.condition1, etc.',
-          }
-        ),
-      },
-      {
-        name: 'metricOf',
-        description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.metricOfActionVariableDescription',
-          {
-            defaultMessage:
-              'Record of the watched metric; grouped by condition, i.e metricOf.condition0, metricOf.condition1, etc.',
-          }
-        ),
-      },
+      { name: 'group', description: groupActionVariableDescription },
+      { name: 'alertState', description: alertStateActionVariableDescription },
+      { name: 'reason', description: reasonActionVariableDescription },
+      { name: 'timestamp', description: timestampActionVariableDescription },
+      { name: 'value', description: valueActionVariableDescription },
+      { name: 'metric', description: metricActionVariableDescription },
+      { name: 'threshold', description: thresholdActionVariableDescription },
     ],
   },
 });

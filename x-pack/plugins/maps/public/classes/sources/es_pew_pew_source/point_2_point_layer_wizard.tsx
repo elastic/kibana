@@ -18,18 +18,19 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
+import { Point2PointLayerIcon } from './point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),
-  icon: 'logoElasticsearch',
+  icon: Point2PointLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
@@ -50,7 +51,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
               },
-              color: COLOR_GRADIENTS[0].value,
+              color: NUMERICAL_COLOR_PALETTES[0].value,
             },
           },
           [VECTOR_STYLES.LINE_WIDTH]: {

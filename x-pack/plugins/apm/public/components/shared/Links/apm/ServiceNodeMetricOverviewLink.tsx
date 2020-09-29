@@ -13,11 +13,11 @@ interface Props extends APMLinkExtendProps {
   serviceNodeName: string;
 }
 
-const ServiceNodeMetricOverviewLink = ({
+function ServiceNodeMetricOverviewLink({
   serviceName,
   serviceNodeName,
   ...rest
-}: Props) => {
+}: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -37,6 +37,6 @@ const ServiceNodeMetricOverviewLink = ({
       {...rest}
     />
   );
-};
+}
 
 export { ServiceNodeMetricOverviewLink };

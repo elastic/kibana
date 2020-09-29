@@ -42,12 +42,18 @@ import { FilterBarProvider } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
+import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
-import { PieChartProvider, ElasticChartProvider } from './visualizations';
+import { DataGridProvider } from './data_grid';
+import {
+  PieChartProvider,
+  ElasticChartProvider,
+  VegaDebugInspectorViewProvider,
+} from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
@@ -72,16 +78,19 @@ export const services = {
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
+  dataGrid: DataGridProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   table: TableProvider,
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
+  vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartProvider,
   supertest: KibanaSupertestProvider,
+  managementMenu: ManagementMenuProvider,
 };

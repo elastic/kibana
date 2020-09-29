@@ -20,6 +20,7 @@
 import { resolve } from 'path';
 import execa from 'execa';
 import expect from '@kbn/expect';
+import shell from 'shelljs';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -35,9 +36,14 @@ const env = {
 };
 
 describe('Ingesting coverage', () => {
+  const teamAssignmentsPath =
+    'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt';
+
   const verboseArgs = [
     'scripts/ingest_coverage.js',
     '--verbose',
+    '--teamAssignmentsPath',
+    teamAssignmentsPath,
     '--vcsInfoPath',
     'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
     '--path',
@@ -45,6 +51,21 @@ describe('Ingesting coverage', () => {
 
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
+
+  beforeAll(async () => {
+    const params = [
+      'scripts/generate_team_assignments.js',
+      '--src',
+      '.github/CODEOWNERS',
+      '--dest',
+      teamAssignmentsPath,
+    ];
+    await execa(process.execPath, params, { cwd: ROOT_DIR, env });
+  });
+
+  afterAll(() => {
+    shell.rm(teamAssignmentsPath);
+  });
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';
@@ -67,98 +88,6 @@ describe('Ingesting coverage', () => {
     it('should contain the folder structure', () => {
       const folderStructure = /(?:.*|.*-combined)\//;
       expect(folderStructure.test(actualUrl)).ok();
-    });
-  });
-  describe(`vcsInfo`, () => {
-    let stdOutWithVcsInfo = '';
-    describe(`without a commit msg in the vcs info file`, () => {
-      beforeAll(async () => {
-        const args = [
-          'scripts/ingest_coverage.js',
-          '--verbose',
-          '--vcsInfoPath',
-          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
-          '--path',
-        ];
-        const opts = [...args, resolved];
-        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-        stdOutWithVcsInfo = stdout;
-      });
-
-      it(`should be an obj w/o a commit msg`, () => {
-        const commitMsgRE = /"commitMsg"/;
-        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.not.be.ok();
-      });
-    });
-    describe(`including previous sha`, () => {
-      let stdOutWithPrevious = '';
-      beforeAll(async () => {
-        const opts = [...verboseArgs, resolved];
-        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-        stdOutWithPrevious = stdout;
-      });
-
-      it(`should have a vcsCompareUrl`, () => {
-        const previousCompareUrlRe = /vcsCompareUrl.+\s*.*https.+compare\/FAKE_PREVIOUS_SHA\.\.\.f07b34f6206/;
-        expect(previousCompareUrlRe.test(stdOutWithPrevious)).to.be.ok();
-      });
-    });
-    describe(`with a commit msg in the vcs info file`, () => {
-      beforeAll(async () => {
-        const args = [
-          'scripts/ingest_coverage.js',
-          '--verbose',
-          '--vcsInfoPath',
-          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-          '--path',
-        ];
-        const opts = [...args, resolved];
-        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-        stdOutWithVcsInfo = stdout;
-      });
-
-      it(`should be an obj w/ a commit msg`, () => {
-        const commitMsgRE = /commitMsg/;
-        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.be.ok();
-      });
-    });
-  });
-  describe(`team assignment`, () => {
-    let shouldNotHavePipelineOut = '';
-    let shouldIndeedHavePipelineOut = '';
-
-    const args = [
-      'scripts/ingest_coverage.js',
-      '--verbose',
-      '--vcsInfoPath',
-      'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-      '--path',
-    ];
-
-    const teamAssignRE = /pipeline:/;
-
-    beforeAll(async () => {
-      const summaryPath = 'jest-combined/coverage-summary-just-total.json';
-      const resolved = resolve(MOCKS_DIR, summaryPath);
-      const opts = [...args, resolved];
-      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-      shouldNotHavePipelineOut = stdout;
-    });
-    beforeAll(async () => {
-      const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
-      const resolved = resolve(MOCKS_DIR, summaryPath);
-      const opts = [...args, resolved];
-      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-      shouldIndeedHavePipelineOut = stdout;
-    });
-
-    it(`should not occur when going to the totals index`, () => {
-      const actual = teamAssignRE.test(shouldNotHavePipelineOut);
-      expect(actual).to.not.be.ok();
-    });
-    it(`should indeed occur when going to the coverage index`, () => {
-      const actual = /ingest-pipe=>team_assignment/.test(shouldIndeedHavePipelineOut);
-      expect(actual).to.be.ok();
     });
   });
 });

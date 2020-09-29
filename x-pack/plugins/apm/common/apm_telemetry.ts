@@ -74,6 +74,14 @@ export function getApmTelemetryMapping() {
     },
   };
 
+  const aggregatedTransactionsProperties = {
+    properties: {
+      expected_metric_document_count: long,
+      transaction_count: long,
+      ratio: long,
+    },
+  };
+
   return {
     properties: {
       agents: {
@@ -90,6 +98,20 @@ export function getApmTelemetryMapping() {
           },
           {}
         ),
+      },
+      aggregated_transactions: {
+        properties: {
+          current_implementation: aggregatedTransactionsProperties,
+          no_observer_name: aggregatedTransactionsProperties,
+          with_country: aggregatedTransactionsProperties,
+        },
+      },
+      environments: {
+        properties: {
+          services_without_environment: long,
+          services_with_multiple_environments: long,
+          top_enviroments: keyword,
+        },
       },
       cloud: {
         properties: {
@@ -115,6 +137,15 @@ export function getApmTelemetryMapping() {
       },
       cardinality: {
         properties: {
+          client: {
+            properties: {
+              geo: {
+                properties: {
+                  country_iso_code: { properties: { rum: oneDayProperties } },
+                },
+              },
+            },
+          },
           user_agent: {
             properties: {
               original: {
@@ -196,9 +227,12 @@ export function getApmTelemetryMapping() {
       },
       tasks: {
         properties: {
+          aggregated_transactions: tookProperties,
           agent_configuration: tookProperties,
           agents: tookProperties,
           cardinality: tookProperties,
+          cloud: tookProperties,
+          environments: tookProperties,
           groupings: tookProperties,
           indices_stats: tookProperties,
           integrations: tookProperties,

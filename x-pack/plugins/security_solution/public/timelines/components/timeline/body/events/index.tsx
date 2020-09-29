@@ -6,10 +6,13 @@
 
 import React from 'react';
 
-import { BrowserFields } from '../../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import { inputsModel } from '../../../../../common/store';
+import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
+import {
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { maxDelay } from '../../../../../common/lib/helpers/scheduler';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import {
@@ -33,6 +36,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   containerElementRef: HTMLDivElement;
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
@@ -44,6 +48,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
+  refetch: inputsModel.Refetch;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -59,6 +64,7 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   containerElementRef,
   data,
+  docValueFields,
   eventIdToNoteIds,
   getNotesByIds,
   id,
@@ -70,6 +76,7 @@ const EventsComponent: React.FC<Props> = ({
   onUpdateColumns,
   onUnPinEvent,
   pinnedEventIds,
+  refetch,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -77,14 +84,16 @@ const EventsComponent: React.FC<Props> = ({
   updateNote,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event, i) => (
+    {data.map((event) => (
       <StatefulEvent
-        containerElementRef={containerElementRef}
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
+        containerElementRef={containerElementRef}
+        disableSensorVisibility={data != null && data.length < 101}
+        docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
@@ -92,12 +101,12 @@ const EventsComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
-        maxDelay={maxDelay(i)}
         onColumnResized={onColumnResized}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
+        refetch={refetch}
         rowRenderers={rowRenderers}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}

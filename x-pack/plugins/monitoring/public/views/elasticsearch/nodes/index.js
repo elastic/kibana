@@ -15,7 +15,11 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { ELASTICSEARCH_SYSTEM_ID, CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+} from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -69,50 +73,63 @@ uiRoutes.when('/elasticsearch/nodes', {
         title: i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
           defaultMessage: 'Elasticsearch - Nodes',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.nodes.pageTitle', {
+          defaultMessage: 'Elasticsearch nodes',
+        }),
         storageKey: 'elasticsearch.nodes',
         reactNodeId: 'elasticsearchNodesReact',
         defaultData: {},
         getPageData,
         $scope,
         $injector,
-        fetchDataImmediately: false, // We want to apply pagination before sending the first request
+        fetchDataImmediately: false, // We want to apply pagination before sending the first request,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CPU_USAGE],
+          },
+        },
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       $scope.$watch(
         () => this.data,
-        () => this.renderReact(this.data || {})
+        (data) => {
+          if (!data) {
+            return;
+          }
+
+          const { clusterStatus, nodes, totalNodeCount } = data;
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: totalNodeCount,
+          };
+
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <ElasticsearchNodes
+                    clusterStatus={clusterStatus}
+                    clusterUuid={globalState.cluster_uuid}
+                    setupMode={setupMode}
+                    nodes={nodes}
+                    alerts={this.alerts}
+                    showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+                    {...this.getPaginationTableProps(pagination)}
+                  />
+                  {bottomBarComponent}
+                </Fragment>
+              )}
+            />
+          );
+        }
       );
-
-      this.renderReact = ({ clusterStatus, nodes, totalNodeCount }) => {
-        const pagination = {
-          ...this.pagination,
-          totalItemCount: totalNodeCount,
-        };
-
-        super.renderReact(
-          <SetupModeRenderer
-            scope={$scope}
-            injector={$injector}
-            productName={ELASTICSEARCH_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <ElasticsearchNodes
-                  clusterStatus={clusterStatus}
-                  clusterUuid={globalState.cluster_uuid}
-                  setupMode={setupMode}
-                  nodes={nodes}
-                  showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                  {...this.getPaginationTableProps(pagination)}
-                />
-                {bottomBarComponent}
-              </Fragment>
-            )}
-          />
-        );
-      };
     }
   },
 });

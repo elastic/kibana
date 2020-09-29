@@ -11,10 +11,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
+import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
-import { OMIT_FIELDS, CATEGORICAL_TYPES } from './form_options_validation';
+import { CATEGORICAL_TYPES } from './form_options_validation';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const containsClassificationFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) &&
@@ -31,13 +33,13 @@ const containsRegressionFieldsCb = ({ name, type }: Field) =>
 const containsOutlierFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) && name !== EVENT_RATE_FIELD_ID && BASIC_NUMERICAL_TYPES.has(type);
 
-const callbacks: Record<ANALYSIS_CONFIG_TYPE, (f: Field) => boolean> = {
+const callbacks: Record<DataFrameAnalysisConfigType, (f: Field) => boolean> = {
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: containsClassificationFieldsCb,
   [ANALYSIS_CONFIG_TYPE.REGRESSION]: containsRegressionFieldsCb,
   [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: containsOutlierFieldsCb,
 };
 
-const messages: Record<ANALYSIS_CONFIG_TYPE, JSX.Element> = {
+const messages: Record<DataFrameAnalysisConfigType, JSX.Element> = {
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.sourceObjectClassificationHelpText"

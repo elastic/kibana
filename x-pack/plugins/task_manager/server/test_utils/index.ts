@@ -23,7 +23,7 @@ export function mockLogger() {
   };
 }
 
-interface Resolvable {
+export interface Resolvable {
   resolve: () => void;
 }
 

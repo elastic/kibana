@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -25,19 +26,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { deepFreeze } from '../../utils/';
 import { AppCategory } from '../';
-
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  category?: AppCategory;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
-}
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -67,22 +56,8 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: {
-        id: string;
-        title: string;
-      };
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -120,6 +95,10 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -130,10 +109,6 @@ export class InjectedMetadataService {
 
       getPlugins: () => {
         return this.state.uiPlugins;
-      },
-
-      getLegacyMode: () => {
-        return this.state.legacyMode;
       },
 
       getLegacyMetadata: () => {
@@ -177,22 +152,8 @@ export interface InjectedMetadataSetup {
    * An array of frontend plugins in topological order.
    */
   getPlugins: () => InjectedPluginMetadata[];
-  /** Indicates whether or not we are rendering a known legacy app. */
-  getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: {
-      id: string;
-      title: string;
-    };
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
       defaults: Record<string, UiSettingsParams>;
       user?: Record<string, UserProvidedValues> | undefined;

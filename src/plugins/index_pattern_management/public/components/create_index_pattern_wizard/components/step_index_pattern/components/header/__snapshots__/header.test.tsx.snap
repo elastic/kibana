@@ -7,7 +7,7 @@ exports[`Header should mark the input as invalid 1`] = `
   >
     <h2>
       <FormattedMessage
-        defaultMessage="Step 1 of 2: Define index pattern"
+        defaultMessage="Step 1 of 2: Define an index pattern"
         id="indexPatternManagement.createIndexPattern.stepHeader"
         values={Object {}}
       />
@@ -16,13 +16,8 @@ exports[`Header should mark the input as invalid 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiForm
         isInvalid={true}
       >
@@ -34,43 +29,40 @@ exports[`Header should mark the input as invalid 1`] = `
               "Input is invalid",
             ]
           }
-          fullWidth={false}
+          fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
-            <div>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
-                  values={
-                    Object {
-                      "asterisk": <strong>
-                        *
-                      </strong>,
-                    }
+            <React.Fragment>
+              <FormattedMessage
+                defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                values={
+                  Object {
+                    "asterisk": <strong>
+                      *
+                    </strong>,
                   }
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                  values={
-                    Object {
-                      "characterList": <strong>
-                        %
-                      </strong>,
-                    }
+                }
+              />
+               
+              <FormattedMessage
+                defaultMessage="Spaces and the characters {characterList} are not allowed."
+                id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
+                values={
+                  Object {
+                    "characterList": <strong>
+                      %
+                    </strong>,
                   }
-                />
-              </p>
-            </div>
+                }
+              />
+            </React.Fragment>
           }
           isInvalid={true}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
@@ -79,6 +71,7 @@ exports[`Header should mark the input as invalid 1`] = `
         >
           <EuiFieldText
             data-test-subj="createIndexPatternNameInput"
+            fullWidth={true}
             isInvalid={true}
             name="indexPattern"
             onChange={[Function]}
@@ -91,18 +84,29 @@ exports[`Header should mark the input as invalid 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
-        data-test-subj="createIndexPatternGoToStep2Button"
-        iconType="arrowRight"
-        isDisabled={true}
-        onClick={[Function]}
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
       >
-        <FormattedMessage
-          defaultMessage="Next step"
-          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
-          values={Object {}}
-        />
-      </EuiButton>
+        <EuiButton
+          data-test-subj="createIndexPatternGoToStep2Button"
+          fill={true}
+          iconSide="right"
+          iconType="arrowRight"
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Next step"
+            id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -115,7 +119,7 @@ exports[`Header should render normally 1`] = `
   >
     <h2>
       <FormattedMessage
-        defaultMessage="Step 1 of 2: Define index pattern"
+        defaultMessage="Step 1 of 2: Define an index pattern"
         id="indexPatternManagement.createIndexPattern.stepHeader"
         values={Object {}}
       />
@@ -124,13 +128,8 @@ exports[`Header should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiForm
         isInvalid={false}
       >
@@ -138,43 +137,40 @@ exports[`Header should render normally 1`] = `
           describedByIds={Array []}
           display="row"
           error={Array []}
-          fullWidth={false}
+          fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
-            <div>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
-                  values={
-                    Object {
-                      "asterisk": <strong>
-                        *
-                      </strong>,
-                    }
+            <React.Fragment>
+              <FormattedMessage
+                defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                values={
+                  Object {
+                    "asterisk": <strong>
+                      *
+                    </strong>,
                   }
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                  values={
-                    Object {
-                      "characterList": <strong>
-                        %
-                      </strong>,
-                    }
+                }
+              />
+               
+              <FormattedMessage
+                defaultMessage="Spaces and the characters {characterList} are not allowed."
+                id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
+                values={
+                  Object {
+                    "characterList": <strong>
+                      %
+                    </strong>,
                   }
-                />
-              </p>
-            </div>
+                }
+              />
+            </React.Fragment>
           }
           isInvalid={false}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
@@ -183,6 +179,7 @@ exports[`Header should render normally 1`] = `
         >
           <EuiFieldText
             data-test-subj="createIndexPatternNameInput"
+            fullWidth={true}
             isInvalid={false}
             name="indexPattern"
             onChange={[Function]}
@@ -195,18 +192,29 @@ exports[`Header should render normally 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
-        data-test-subj="createIndexPatternGoToStep2Button"
-        iconType="arrowRight"
-        isDisabled={false}
-        onClick={[Function]}
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
       >
-        <FormattedMessage
-          defaultMessage="Next step"
-          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
-          values={Object {}}
-        />
-      </EuiButton>
+        <EuiButton
+          data-test-subj="createIndexPatternGoToStep2Button"
+          fill={true}
+          iconSide="right"
+          iconType="arrowRight"
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Next step"
+            id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

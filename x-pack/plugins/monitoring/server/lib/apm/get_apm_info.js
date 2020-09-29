@@ -73,7 +73,7 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         start,
         end,

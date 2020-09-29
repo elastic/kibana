@@ -5,7 +5,6 @@
  */
 import React, { Fragment } from 'react';
 import { isEmpty } from 'lodash';
-import { Legacy } from '../../../legacy_shims';
 import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
@@ -13,11 +12,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from '../../../components/cluster/overview';
 import { SetupModeRenderer } from '../../../components/renderers';
-import {
-  CODE_PATH_ALL,
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  KIBANA_ALERTING_ENABLED,
-} from '../../../../common/constants';
+import { CODE_PATH_ALL } from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -30,16 +25,19 @@ uiRoutes.when('/overview', {
       return routeInit({ codePaths: CODE_PATHS });
     },
   },
+  controllerAs: 'monitoringClusterOverview',
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
-      const config = $injector.get('config');
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
           defaultMessage: 'Overview',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.cluster.overview.pageTitle', {
+          defaultMessage: 'Cluster overview',
         }),
         defaultData: {},
         getPageData: async () => {
@@ -53,18 +51,19 @@ uiRoutes.when('/overview', {
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+        },
+        telemetryPageViewTitle: 'cluster_overview',
       });
+
+      this.init = () => this.renderReact(null);
 
       $scope.$watch(
         () => this.data,
         async (data) => {
           if (isEmpty(data)) {
             return;
-          }
-
-          let emailAddress = Legacy.shims.getInjected('monitoringLegacyEmailAddress') || '';
-          if (KIBANA_ALERTING_ENABLED) {
-            emailAddress = config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) || emailAddress;
           }
 
           this.renderReact(
@@ -76,7 +75,7 @@ uiRoutes.when('/overview', {
                   {flyoutComponent}
                   <Overview
                     cluster={data}
-                    emailAddress={emailAddress}
+                    alerts={this.alerts}
                     setupMode={setupMode}
                     showLicenseExpiration={showLicenseExpiration}
                   />

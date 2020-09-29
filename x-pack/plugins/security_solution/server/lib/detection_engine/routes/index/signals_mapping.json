@@ -22,9 +22,12 @@
               }
             }
           },
-          "ancestors": {
+          "parents": {
             "properties": {
               "rule": {
+                "type": "keyword"
+              },
+              "index": {
                 "type": "keyword"
               },
               "id": {
@@ -35,6 +38,35 @@
               },
               "depth": {
                 "type": "long"
+              }
+            }
+          },
+          "ancestors": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
               }
             }
           },
@@ -68,7 +100,7 @@
                 "type": "keyword"
               },
               "risk_score": {
-                "type": "keyword"
+                "type": "float"
               },
               "risk_score_mapping": {
                 "properties": {
@@ -171,6 +203,16 @@
                         "type": "keyword"
                       }
                     }
+                  }
+                }
+              },
+              "threshold": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "float"
                   }
                 }
               },
@@ -286,6 +328,12 @@
           },
           "status": {
             "type": "keyword"
+          },
+          "threshold_count": {
+            "type": "float"
+          },
+          "depth": {
+            "type": "integer"
           }
         }
       }

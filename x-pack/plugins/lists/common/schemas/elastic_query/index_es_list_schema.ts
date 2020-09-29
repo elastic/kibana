@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
@@ -13,6 +11,7 @@ import {
   created_by,
   description,
   deserializerOrUndefined,
+  immutable,
   metaOrUndefined,
   name,
   serializerOrUndefined,
@@ -20,6 +19,7 @@ import {
   type,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
 export const indexEsListSchema = t.exact(
@@ -28,6 +28,7 @@ export const indexEsListSchema = t.exact(
     created_by,
     description,
     deserializer: deserializerOrUndefined,
+    immutable,
     meta: metaOrUndefined,
     name,
     serializer: serializerOrUndefined,
@@ -35,7 +36,8 @@ export const indexEsListSchema = t.exact(
     type,
     updated_at,
     updated_by,
+    version,
   })
 );
 
-export type IndexEsListSchema = t.TypeOf<typeof indexEsListSchema>;
+export type IndexEsListSchema = t.OutputOf<typeof indexEsListSchema>;

@@ -4,6 +4,7 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
@@ -27,11 +28,9 @@ def lint() {
 
 def test() {
   tasks([
-    // These 4 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
+    // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
     kibanaPipeline.scriptTaskDocker('Mocha Tests', 'test/scripts/test/mocha.sh'),
-    kibanaPipeline.scriptTaskDocker('Karma CI Tests', 'test/scripts/test/karma_ci.sh'),
-    kibanaPipeline.scriptTaskDocker('X-Pack Karma Tests', 'test/scripts/test/xpack_karma.sh'),
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
@@ -76,7 +75,7 @@ def functionalXpack(Map params = [:]) {
     firefox: true,
     accessibility: true,
     pluginFunctional: true,
-    savedObjectsFieldMetrics: true,
+    savedObjectsFieldMetrics:true,
     pageLoadMetrics: false,
     visualRegression: false,
   ]
@@ -101,15 +100,16 @@ def functionalXpack(Map params = [:]) {
       task(kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'))
     }
 
-    if (config.pageLoadMetrics) {
-      task(kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'))
-    }
-
     if (config.savedObjectsFieldMetrics) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }
 
-    whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/']) {
+    whenChanged([
+      'x-pack/plugins/security_solution/',
+      'x-pack/test/security_solution_cypress/',
+      'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
+      'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
+    ]) {
       task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
     }
   }

@@ -7,31 +7,18 @@ import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { SortFieldTimeline, Direction } from '../../../../graphql/types';
-import { SearchProps } from './';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE, SearchProps } from './';
 
+const mockFetchAllTimeline = jest.fn();
+jest.mock('../../../containers/all', () => {
+  return {
+    useGetAllTimeline: jest.fn(() => ({
+      fetchAllTimeline: mockFetchAllTimeline,
+      timelines: [],
+    })),
+  };
+});
 describe('SelectableTimeline', () => {
-  const mockFetchAllTimeline = jest.fn();
-  const mockEuiSelectable = jest.fn();
-
-  jest.doMock('@elastic/eui', () => {
-    const originalModule = jest.requireActual('@elastic/eui');
-    return {
-      ...originalModule,
-      EuiSelectable: mockEuiSelectable.mockImplementation(({ children }) => <div>{children}</div>),
-    };
-  });
-
-  jest.doMock('../../../containers/all', () => {
-    return {
-      useGetAllTimeline: jest.fn(() => ({
-        fetchAllTimeline: mockFetchAllTimeline,
-        timelines: [],
-      })),
-    };
-  });
-
-  const { SelectableTimeline, ORIGINAL_PAGE_SIZE } = jest.requireActual('./');
-
   const props = {
     hideUntitled: false,
     getSelectableOptions: jest.fn(),
@@ -60,7 +47,7 @@ describe('SelectableTimeline', () => {
       });
     });
 
-    describe('template timeline', () => {
+    describe('timeline template', () => {
       const templateTimelineProps = { ...props, timelineType: TimelineType.template };
       beforeAll(() => {
         wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
@@ -74,7 +61,7 @@ describe('SelectableTimeline', () => {
         const searchProps: SearchProps = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Template timeline name or description');
+        expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });
@@ -93,7 +80,6 @@ describe('SelectableTimeline', () => {
       status: null,
       onlyUserFavorite: false,
       timelineType: TimelineType.default,
-      templateTimelineType: null,
     };
     beforeAll(() => {
       mount(<SelectableTimeline {...props} />);

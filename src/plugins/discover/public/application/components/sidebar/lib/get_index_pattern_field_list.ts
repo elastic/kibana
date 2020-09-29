@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { difference, map } from 'lodash';
+import { difference } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
-import { DiscoverServices } from '../../../../build_services';
 
 export function getIndexPatternFieldList(
-  indexPattern: IndexPattern,
-  fieldCounts: Record<string, number>,
-  { data }: DiscoverServices
+  indexPattern?: IndexPattern,
+  fieldCounts?: Record<string, number>
 ) {
-  if (!indexPattern || !fieldCounts) return data.indexPatterns.createFieldList(indexPattern);
+  if (!indexPattern || !fieldCounts) return [];
 
-  const fieldSpecs = indexPattern.fields.slice(0);
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
+  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
+  const unknownTypes: IndexPatternField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
-    fieldSpecs.push({
+    unknownTypes.push({
+      displayName: String(unknownFieldName),
       name: String(unknownFieldName),
       type: 'unknown',
     } as IndexPatternField);
   });
 
-  return data.indexPatterns.createFieldList(indexPattern, fieldSpecs);
+  return [...indexPattern.fields.getAll(), ...unknownTypes];
 }

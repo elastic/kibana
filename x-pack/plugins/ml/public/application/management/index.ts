@@ -11,40 +11,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { take } from 'rxjs/operators';
 
-import { CoreSetup } from 'kibana/public';
-import { MlStartDependencies, MlSetupDependencies } from '../../plugin';
+import type { CoreSetup } from 'kibana/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { MlStartDependencies } from '../../plugin';
 
-import {
-  ManagementAppMountParams,
-  ManagementSectionId,
-} from '../../../../../../src/plugins/management/public';
-import { PLUGIN_ID } from '../../../common/constants/app';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import type { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
-export function initManagementSection(
-  pluginsSetup: MlSetupDependencies,
+export function registerManagementSection(
+  management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>
 ) {
-  const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-  licensing.subscribe((license) => {
-    const management = pluginsSetup.management;
-    if (
-      management !== undefined &&
-      license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid'
-    ) {
-      management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
-        id: 'jobsListLink',
-        title: i18n.translate('xpack.ml.management.jobsListTitle', {
-          defaultMessage: 'Machine Learning Jobs',
-        }),
-        order: 2,
-        async mount(params: ManagementAppMountParams) {
-          const { mountApp } = await import('./jobs_list');
-          return mountApp(core, params);
-        },
-      });
-    }
+  return management.sections.section.insightsAndAlerting.registerApp({
+    id: 'jobsListLink',
+    title: i18n.translate('xpack.ml.management.jobsListTitle', {
+      defaultMessage: 'Machine Learning Jobs',
+    }),
+    order: 2,
+    async mount(params: ManagementAppMountParams) {
+      const { mountApp } = await import('./jobs_list');
+      return mountApp(core, params);
+    },
   });
 }

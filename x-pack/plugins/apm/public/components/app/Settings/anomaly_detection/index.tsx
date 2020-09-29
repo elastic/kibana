@@ -7,41 +7,58 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/useFetcher';
 import { LicensePrompt } from '../../../shared/LicensePrompt';
 import { useLicense } from '../../../../hooks/useLicense';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export const AnomalyDetection = () => {
+export type AnomalyDetectionApiResponse = APIReturnType<
+  '/api/apm/settings/anomaly-detection',
+  'GET'
+>;
+
+const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
+  jobs: [],
+  hasLegacyJobs: false,
+};
+
+export function AnomalyDetection() {
+  const plugin = useApmPluginContext();
+  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
-  const { refetch, data = [], status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
-    [],
-    { preservePreviousData: false }
+  const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
+    (callApmApi) => {
+      if (canGetJobs) {
+        return callApmApi({ pathname: `/api/apm/settings/anomaly-detection` });
+      }
+    },
+    [canGetJobs],
+    { preservePreviousData: false, showToastOnError: false }
   );
-
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
-  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
 
   if (!hasValidLicense) {
     return (
       <EuiPanel>
-        <LicensePrompt
-          text={i18n.translate(
-            'xpack.apm.settings.anomaly_detection.license.text',
-            {
-              defaultMessage:
-                "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability monitor your services with the aid of machine learning.",
-            }
-          )}
+        <LicensePrompt text={ML_ERRORS.INVALID_LICENSE} />
+      </EuiPanel>
+    );
+  }
+
+  if (!canGetJobs) {
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="alert"
+          body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>
     );
@@ -60,13 +77,13 @@ export const AnomalyDetection = () => {
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
           defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators in the Service map by identifying transaction duration anomalies.',
+            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
         })}
       </EuiText>
       <EuiSpacer size="l" />
       {viewAddEnvironments ? (
         <AddEnvironments
-          currentEnvironments={data.map(({ environment }) => environment)}
+          currentEnvironments={data.jobs.map(({ environment }) => environment)}
           onCreateJobSuccess={() => {
             refetch();
             setViewAddEnvironments(false);
@@ -77,9 +94,8 @@ export const AnomalyDetection = () => {
         />
       ) : (
         <JobsList
-          isLoading={isLoading}
-          hasFetchFailure={hasFetchFailure}
-          anomalyDetectionJobsByEnv={data}
+          data={data}
+          status={status}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);
           }}
@@ -87,4 +103,4 @@ export const AnomalyDetection = () => {
       )}
     </>
   );
-};
+}

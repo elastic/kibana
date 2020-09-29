@@ -74,15 +74,19 @@ export const createListItemsBulk = async ({
         const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
         return [...accum, createBody, elasticBody];
       } else {
-        // TODO: Report errors with return values from the bulk insert
+        // TODO: Report errors with return values from the bulk insert into another index or saved object
         return accum;
       }
     },
     []
   );
-
-  await callCluster('bulk', {
-    body,
-    index: listItemIndex,
-  });
+  try {
+    await callCluster('bulk', {
+      body,
+      index: listItemIndex,
+      refresh: 'wait_for',
+    });
+  } catch (error) {
+    // TODO: Log out the error with return values from the bulk insert into another index or saved object
+  }
 };

@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { Get, Set, createGetterSetter, url } from '../common';
+export {
+  createGetterSetter,
+  fieldWildcardFilter,
+  fieldWildcardMatcher,
+  Get,
+  Set,
+  url,
+} from '../common';

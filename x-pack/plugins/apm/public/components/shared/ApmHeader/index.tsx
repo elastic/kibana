@@ -5,29 +5,41 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { KueryBar } from '../KueryBar';
+import React, { ReactNode } from 'react';
+import styled from 'styled-components';
 import { DatePicker } from '../DatePicker';
 import { EnvironmentFilter } from '../EnvironmentFilter';
+import { KueryBar } from '../KueryBar';
 
-export const ApmHeader: React.FC = ({ children }) => (
-  <>
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+// Header titles with long, unbroken words, like you would see for a long URL in
+// a transaction name, with the default `work-break`, don't break, and that ends
+// up pushing the date picker off of the screen. Setting `break-all` here lets
+// it wrap even if it has a long, unbroken work. The wrapped result is not great
+// looking, since it wraps, but it doesn't push any controls off of the screen.
+const ChildrenContainerFlexItem = styled(EuiFlexItem)`
+  word-break: break-all;
+`;
 
-    <EuiSpacer />
+export function ApmHeader({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <ChildrenContainerFlexItem>{children}</ChildrenContainerFlexItem>
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-    <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem grow={3}>
-        <KueryBar />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EnvironmentFilter />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
+      <EuiSpacer />
+
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        <EuiFlexItem grow={3}>
+          <KueryBar />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EnvironmentFilter />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}

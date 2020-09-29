@@ -52,7 +52,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     if (defaultQueryString !== undefined) {
       setSearchInput({ query: defaultQueryString, language: SEARCH_QUERY_LANGUAGE.KUERY });
     }
-  }, []);
+  }, [defaultQueryString !== undefined]);
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {

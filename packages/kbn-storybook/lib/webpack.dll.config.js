@@ -20,8 +20,9 @@
 const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { REPO_ROOT } = require('@kbn/utils');
 
-const { DLL_NAME, REPO_ROOT, DLL_DIST_DIR } = require('./constants');
+const { DLL_NAME, DLL_DIST_DIR } = require('./constants');
 
 // This is the Webpack config for the DLL of CSS and JS assets that are
 // not expected to change during development.  This saves compile and run
@@ -72,7 +73,6 @@ module.exports = {
     'rxjs',
     'sinon',
     'tinycolor2',
-    './src/legacy/ui/public/styles/bootstrap/bootstrap_light.less',
   ],
   plugins: [
     // Produce the DLL and its manifest
@@ -116,22 +116,6 @@ module.exports = {
               flags: 'g',
             },
           },
-        ],
-      },
-      {
-        test: /\.less$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: path.resolve(REPO_ROOT, 'src/optimize/postcss.config.js'),
-              },
-            },
-          },
-          { loader: 'less-loader' },
         ],
       },
       {

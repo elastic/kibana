@@ -18,10 +18,8 @@ jest.mock('../../containers/errors');
 const mockWithClientState = 'mockWithClientState';
 const mockHttpLink = { mockHttpLink: 'mockHttpLink' };
 
-// @ts-ignore
-withClientState.mockReturnValue(mockWithClientState);
-// @ts-ignore
-apolloLinkHttp.createHttpLink.mockImplementation(() => mockHttpLink);
+(withClientState as jest.Mock).mockReturnValue(mockWithClientState);
+(apolloLinkHttp.createHttpLink as jest.Mock).mockImplementation(() => mockHttpLink);
 
 describe('getLinks helper', () => {
   test('It should return links in correct order', () => {

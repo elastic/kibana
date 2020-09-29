@@ -27,9 +27,15 @@ interface Props {
   jobId: string;
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
+  defaultIsTraining?: boolean;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel }) => {
+export const ExplorationPageWrapper: FC<Props> = ({
+  jobId,
+  title,
+  EvaluatePanel,
+  defaultIsTraining,
+}) => {
   const {
     indexPattern,
     isInitialized,
@@ -51,7 +57,6 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
       />
     );
   }
-
   return (
     <>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
@@ -71,6 +76,7 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
             needsDestIndexPattern={needsDestIndexPattern}
             setEvaluateSearchQuery={setSearchQuery}
             title={title}
+            defaultIsTraining={defaultIsTraining}
           />
         )}
     </>

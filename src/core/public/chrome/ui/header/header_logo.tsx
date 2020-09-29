@@ -20,7 +20,7 @@
 import { EuiHeaderLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
@@ -105,6 +105,8 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
-    />
+    >
+      Elastic
+    </EuiHeaderLogo>
   );
 }

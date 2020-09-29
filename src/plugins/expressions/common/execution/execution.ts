@@ -23,7 +23,7 @@ import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
 import { toPromise } from '../../../data/common/utils/abort_utils';
-import { RequestAdapter, DataAdapter } from '../../../inspector/common';
+import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
@@ -70,7 +70,7 @@ export class Execution<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
   Output = unknown,
-  InspectorAdapters = ExtraContext['inspectorAdapters'] extends object
+  InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object
     ? ExtraContext['inspectorAdapters']
     : DefaultInspectorAdapters
 > {
@@ -235,7 +235,7 @@ export class Execution<
           const timeEnd: number = now();
           (link as ExpressionAstFunction).debug = {
             success: true,
-            fn,
+            fn: fn.name,
             input,
             args: resolvedArgs,
             output,
@@ -253,7 +253,7 @@ export class Execution<
         if (this.params.debug) {
           (link as ExpressionAstFunction).debug = {
             success: false,
-            fn,
+            fn: fn.name,
             input,
             args,
             error,

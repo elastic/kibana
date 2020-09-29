@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { Action } from 'redux-actions';
+import { call, put, select, takeLatest } from 'redux-saga/effects';
 import {
   getMLCapabilitiesAction,
   getExistingMLJobAction,
@@ -20,6 +21,8 @@ import {
   deleteMLJob,
   getMLCapabilities,
 } from '../api/ml_anomaly';
+import { MonitorIdParam } from '../actions/types';
+import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
@@ -38,10 +41,22 @@ export function* fetchMLJobEffect() {
       getAnomalyRecordsAction.fail
     )
   );
-  yield takeLatest(
-    deleteMLJobAction.get,
-    fetchEffectFactory(deleteMLJob, deleteMLJobAction.success, deleteMLJobAction.fail)
-  );
+
+  yield takeLatest(String(deleteMLJobAction.get), function* (action: Action<MonitorIdParam>) {
+    try {
+      const response = yield call(deleteMLJob, action.payload);
+      yield put(deleteMLJobAction.success(response));
+
+      // let's delete alert as well if it's there
+      const { data: anomalyAlert } = yield select(anomalyAlertSelector);
+      if (anomalyAlert) {
+        yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string }));
+      }
+    } catch (err) {
+      yield put(deleteMLJobAction.fail(err));
+    }
+  });
+
   yield takeLatest(
     getMLCapabilitiesAction.get,
     fetchEffectFactory(

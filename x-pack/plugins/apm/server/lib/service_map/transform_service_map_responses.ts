@@ -16,8 +16,11 @@ import {
   ConnectionNode,
   ServiceConnectionNode,
   ExternalConnectionNode,
+  ConnectionElement,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { ServiceAnomaliesResponse } from './get_service_anomalies';
+import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -63,10 +66,11 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
 
 export type ServiceMapResponse = ConnectionsResponse & {
   services: ServicesResponse;
+  anomalies: ServiceAnomaliesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { discoveredServices, services, connections } = response;
+  const { discoveredServices, services, connections, anomalies } = response;
 
   const allNodes = getAllNodes(services, connections);
   const serviceNodes = getServiceNodes(allNodes);
@@ -100,21 +104,23 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       serviceName = node[SERVICE_NAME];
     }
 
-    const matchedServiceNodes = serviceNodes.filter(
-      (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
-    );
+    const matchedServiceNodes = serviceNodes
+      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+      .map((serviceNode) => pickBy(serviceNode, identity));
+    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
+
+    const serviceAnomalyStats = serviceName
+      ? anomalies.serviceAnomalies[serviceName]
+      : null;
 
     if (matchedServiceNodes.length) {
       return {
         ...map,
-        [node.id]: Object.assign(
-          {
-            id: matchedServiceNodes[0][SERVICE_NAME],
-          },
-          ...matchedServiceNodes.map((serviceNode) =>
-            pickBy(serviceNode, identity)
-          )
-        ),
+        [node.id]: {
+          id: matchedServiceNodes[0][SERVICE_NAME],
+          ...mergedServiceNode,
+          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+        },
       };
     }
 
@@ -209,9 +215,12 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
   }, []);
 
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+  const elements: ConnectionElement[] = [
+    ...dedupedConnections,
+    ...dedupedNodes,
+  ].map((element) => ({
     data: element,
   }));
 
-  return { elements };
+  return groupResourceNodes({ elements });
 }

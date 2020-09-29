@@ -155,5 +155,9 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
     );
   }
 
-  return <EuiFlexItem grow={false}>{tooltip}</EuiFlexItem>;
+  return (
+    <EuiFlexItem grow={false} data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip">
+      {tooltip}
+    </EuiFlexItem>
+  );
 }

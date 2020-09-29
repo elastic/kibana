@@ -17,12 +17,14 @@ import {
   Position,
   GeometryValue,
   XYChartSeriesIdentifier,
+  StackMode,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
+  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -83,11 +85,21 @@ export const xyChart: ExpressionFunctionDefinition<
   args: {
     xTitle: {
       types: ['string'],
-      help: 'X axis title',
+      help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
+        defaultMessage: 'X axis title',
+      }),
     },
     yTitle: {
       types: ['string'],
-      help: 'Y axis title',
+      help: i18n.translate('xpack.lens.xyChart.yLeftTitle.help', {
+        defaultMessage: 'Y left axis title',
+      }),
+    },
+    yRightTitle: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
+        defaultMessage: 'Y right axis title',
+      }),
     },
     legend: {
       types: ['lens_xy_legendConfig'],
@@ -100,6 +112,24 @@ export const xyChart: ExpressionFunctionDefinition<
       options: [...fittingFunctionDefinitions.map(({ id }) => id)],
       help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
+      }),
+    },
+    tickLabelsVisibilitySettings: {
+      types: ['lens_xy_tickLabelsConfig'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+        defaultMessage: 'Show x and y axes tick labels',
+      }),
+    },
+    gridlinesVisibilitySettings: {
+      types: ['lens_xy_gridlinesConfig'],
+      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+        defaultMessage: 'Show x and y axes gridlines',
+      }),
+    },
+    axisTitlesVisibilitySettings: {
+      types: ['lens_xy_axisTitlesVisibilityConfig'],
+      help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
+        defaultMessage: 'Show x and y axes titles',
       }),
     },
     layers: {
@@ -180,7 +210,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
-  }, []);
+  }, [setState]);
 
   return (
     <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
@@ -199,17 +229,16 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
-      !xAccessor ||
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
+      (xAccessor && data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined'))
     );
   });
 
@@ -223,6 +252,12 @@ export function XYChart({
     ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
+  const layersAlreadyFormatted: Record<string, boolean> = {};
+  // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
+  const safeXAccessorLabelRenderer = (value: unknown): string =>
+    xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
+      ? (value as string)
+      : xAxisFormatter.convert(value);
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
@@ -232,12 +267,22 @@ export function XYChart({
 
   const yAxesConfiguration = getAxesConfiguration(
     filteredLayers,
+    shouldRotate,
     data.tables,
-    formatFactory,
-    shouldRotate
+    formatFactory
   );
 
-  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
+  const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -279,16 +324,54 @@ export function XYChart({
       }
     : undefined;
 
+  const getYAxesTitles = (
+    axisSeries: Array<{ layer: string; accessor: string }>,
+    groupId: string
+  ) => {
+    const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
+    return (
+      yTitle ||
+      axisSeries
+        .map(
+          (series) =>
+            data.tables[series.layer].columns.find((column) => column.id === series.accessor)?.name
+        )
+        .filter((name) => Boolean(name))[0]
+    );
+  };
+
+  const getYAxesStyle = (groupId: string) => {
+    const style = {
+      tickLabel: {
+        visible:
+          groupId === 'right'
+            ? tickLabelsVisibilitySettings?.yRight
+            : tickLabelsVisibilitySettings?.yLeft,
+      },
+      axisTitle: {
+        visible:
+          groupId === 'right'
+            ? axisTitlesVisibilitySettings?.yRight
+            : axisTitlesVisibilitySettings?.yLeft,
+      },
+    };
+    return style;
+  };
+
   return (
     <Chart>
       <Settings
-        showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
+        showLegend={
+          legend.isVisible && !legend.showSingleSeries
+            ? chartHasMoreThanOneSeries
+            : legend.isVisible
+        }
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}
         baseTheme={chartBaseTheme}
         tooltip={{
-          headerFormatter: (d) => xAxisFormatter.convert(d.value),
+          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
@@ -333,9 +416,15 @@ export function XYChart({
 
           const points = [
             {
-              row: table.rows.findIndex(
-                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
-              ),
+              row: table.rows.findIndex((row) => {
+                if (layer.xAccessor) {
+                  if (layersAlreadyFormatted[layer.xAccessor]) {
+                    // stringify the value to compare with the chart value
+                    return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+                  }
+                  return row[layer.xAccessor] === xyGeometry.x;
+                }
+              }),
               column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
@@ -374,29 +463,38 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        showGridLines={false}
-        hide={filteredLayers[0].hide}
-        tickFormat={(d) => xAxisFormatter.convert(d)}
+        gridLine={{
+          visible: gridlinesVisibilitySettings?.x,
+          strokeWidth: 2,
+        }}
+        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
+        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
+        style={{
+          tickLabel: {
+            visible: tickLabelsVisibilitySettings?.x,
+          },
+          axisTitle: {
+            visible: axisTitlesVisibilitySettings.x,
+          },
+        }}
       />
 
-      {yAxesConfiguration.map((axis, index) => (
+      {yAxesConfiguration.map((axis) => (
         <Axis
           key={axis.groupId}
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={
-            axis.series
-              .map(
-                (series) =>
-                  data.tables[series.layer].columns.find((column) => column.id === series.accessor)
-                    ?.name
-              )
-              .filter((name) => Boolean(name))[0] || args.yTitle
-          }
-          showGridLines={false}
+          title={getYAxesTitles(axis.series, axis.groupId)}
+          gridLine={{
+            visible:
+              axis.groupId === 'right'
+                ? gridlinesVisibilitySettings?.yRight
+                : gridlinesVisibilitySettings?.yLeft,
+          }}
           hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter.convert(d)}
+          tickFormat={(d) => axis.formatter?.convert(d) || ''}
+          style={getYAxesStyle(axis.groupId)}
         />
       ))}
 
@@ -419,12 +517,45 @@ export function XYChart({
 
           const table = data.tables[layerId];
 
+          const isPrimitive = (value: unknown): boolean =>
+            value != null && typeof value !== 'object';
+
+          // what if row values are not primitive? That is the case of, for instance, Ranges
+          // remaps them to their serialized version with the formatHint metadata
+          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
+          const tableConverted: KibanaDatatable = {
+            ...table,
+            rows: table.rows.map((row) => {
+              const newRow = { ...row };
+              for (const column of table.columns) {
+                const record = newRow[column.id];
+                if (record && !isPrimitive(record)) {
+                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
+                }
+              }
+              return newRow;
+            }),
+          };
+
+          // save the id of the layer with the custom table
+          table.columns.reduce<Record<string, boolean>>(
+            (alreadyFormatted: Record<string, boolean>, { id }) => {
+              if (alreadyFormatted[id]) {
+                return alreadyFormatted;
+              }
+              alreadyFormatted[id] = table.rows.some(
+                (row, i) => row[id] !== tableConverted.rows[i][id]
+              );
+              return alreadyFormatted;
+            },
+            layersAlreadyFormatted
+          );
+
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
-          const rows = table.rows.filter(
+          const rows = tableConverted.rows.filter(
             (row) =>
-              xAccessor &&
-              typeof row[xAccessor] !== 'undefined' &&
+              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
               !(
                 splitAccessor &&
                 typeof row[splitAccessor] === 'undefined' &&
@@ -432,21 +563,42 @@ export function XYChart({
               )
           );
 
+          if (!xAccessor) {
+            rows.forEach((row) => {
+              row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
+                defaultMessage: '(empty)',
+              });
+            });
+          }
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: `${splitAccessor}-${accessor}`,
-            xAccessor,
+            xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
             data: rows,
-            xScaleType,
+            xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
             color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
+            areaSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
+            lineSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
             name(d) {
               const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
@@ -454,19 +606,28 @@ export function XYChart({
               // * Key - Y name
               // * Formatted value - Y name
               if (accessors.length > 1) {
-                return d.seriesKeys
+                const result = d.seriesKeys
                   .map((key: string | number, i) => {
-                    if (i === 0 && splitHint) {
+                    if (
+                      i === 0 &&
+                      splitHint &&
+                      splitAccessor &&
+                      !layersAlreadyFormatted[splitAccessor]
+                    ) {
                       return formatFactory(splitHint).convert(key);
                     }
                     return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
                   })
                   .join(' - ');
+                return result;
               }
 
               // For formatted split series, format the key
               // This handles splitting by dates, for example
               if (splitHint) {
+                if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
+                  return d.seriesKeys[0];
+                }
                 return formatFactory(splitHint).convert(d.seriesKeys[0]);
               }
               // This handles both split and single-y cases:
@@ -485,11 +646,16 @@ export function XYChart({
               );
             case 'bar':
             case 'bar_stacked':
+            case 'bar_percentage_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
+            case 'bar_horizontal_percentage_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             case 'area_stacked':
-              return <AreaSeries key={index} {...seriesProps} />;
+            case 'area_percentage_stacked':
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'area':
               return (
                 <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />

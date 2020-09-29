@@ -6,11 +6,9 @@
 
 import { ObservabilityApp } from '../../../typings/common';
 
-interface Stat {
+export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
-  label: string;
   value: number;
-  color?: string;
 }
 
 export interface Coordinates {
@@ -18,18 +16,13 @@ export interface Coordinates {
   y?: number;
 }
 
-interface Series {
-  label: string;
+export interface Series {
   coordinates: Coordinates[];
-  color?: string;
 }
 
 export interface FetchDataParams {
-  // The start timestamp in milliseconds of the queried time interval
-  startTime: string;
-  // The end timestamp in milliseconds of the queried time interval
-  endTime: string;
-  // The aggregation bucket size in milliseconds if applicable to the data source
+  absoluteTime: { start: number; end: number };
+  relativeTime: { start: string; end: string };
   bucketSize: string;
 }
 
@@ -39,19 +32,25 @@ export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
 
 export type HasData = () => Promise<boolean>;
 
-export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+export type ObservabilityFetchDataPlugins = Exclude<
+  ObservabilityApp,
+  'observability' | 'stack_monitoring'
+>;
+
+export interface DataHandler<
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+> {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData;
 }
 
 export interface FetchDataResponse {
-  title: string;
   appLink: string;
 }
 
 export interface LogsFetchDataResponse extends FetchDataResponse {
-  stats: Record<string, Stat>;
-  series: Record<string, Series>;
+  stats: Record<string, Stat & { label: string }>;
+  series: Record<string, Series & { label: string }>;
 }
 
 export interface MetricsFetchDataResponse extends FetchDataResponse {

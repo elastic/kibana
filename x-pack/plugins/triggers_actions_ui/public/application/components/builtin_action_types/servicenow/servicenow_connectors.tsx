@@ -12,18 +12,21 @@ import {
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
+import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
+
 import * as i18n from './translations';
-import { ServiceNowActionConnector, CasesConfigurationMapping } from './types';
+import { ServiceNowActionConnector } from './types';
 import { connectorConfiguration } from './config';
-import { FieldMapping } from './case_mappings/field_mapping';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer }) => {
+>> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
@@ -79,11 +82,23 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
             error={errors.apiUrl}
             isInvalid={isApiUrlInvalid}
             label={i18n.API_URL_LABEL}
+            helpText={
+              <EuiLink
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
+                  defaultMessage="Configure Personal Developer Instance for ServiceNow"
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth
               isInvalid={isApiUrlInvalid}
               name="apiUrl"
+              readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
               placeholder="https://<site-url>"
@@ -110,6 +125,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
             <EuiFieldText
               fullWidth
               isInvalid={isUsernameInvalid}
+              readOnly={readOnly}
               name="connector-servicenow-username"
               value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-servicenow-username-form-input"
@@ -135,6 +151,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
           >
             <EuiFieldPassword
               fullWidth
+              readOnly={readOnly}
               isInvalid={isPasswordInvalid}
               name="connector-servicenow-password"
               value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
@@ -149,14 +166,14 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isCaseOwned && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem data-test-subj="case-servicenow-mappings">
               <FieldMapping
                 disabled={true}
-                connectorActionTypeId={connectorConfiguration.id}
+                connectorConfiguration={connectorConfiguration}
                 mapping={mapping as CasesConfigurationMapping[]}
                 onChangeMapping={handleOnChangeMappingConfig}
               />
@@ -167,16 +184,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
     </>
   );
 };
-
-export const createDefaultMapping = (fields: Record<string, any>): CasesConfigurationMapping[] =>
-  Object.keys(fields).map(
-    (key) =>
-      ({
-        source: fields[key].defaultSourceField,
-        target: key,
-        actionType: fields[key].defaultActionType,
-      } as CasesConfigurationMapping)
-  );
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

@@ -35,21 +35,21 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: new Map(),
+    pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -98,7 +98,7 @@ test('injects legacy dependency to context#setup()', async () => {
     [pluginB, [pluginA]],
   ]);
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: pluginDependencies,
+    pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 

@@ -5,7 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { kpiHostDetailsQuery } from '../../../../plugins/security_solution/public/hosts/containers/kpi_host_details/index.gql_query';
+// @ts-expect-error
 import { GetKpiHostDetailsQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -17,8 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         __typename: 'KpiHostDetailsData',
         authSuccess: 0,
@@ -86,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               hostName: 'zeek-sensor-san-francisco',
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -167,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               hostName: 'zeek-sensor-san-francisco',
               inspect: false,
             },

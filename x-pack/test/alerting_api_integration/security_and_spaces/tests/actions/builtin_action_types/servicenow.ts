@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -34,8 +36,8 @@ const mapping = [
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   const mockServiceNow = {
     config: {
@@ -80,8 +82,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     describe('ServiceNow - Action Creation', () => {
       it('should return 200 when creating a servicenow action successfully', async () => {
@@ -149,7 +149,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a servicenow action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -169,7 +169,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -267,6 +267,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
     describe('ServiceNow - Executor', () => {
       let simulatedActionId: string;
+      let proxyServer: httpProxy | undefined;
+      let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/action')
@@ -282,6 +284,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             secrets: mockServiceNow.secrets,
           });
         simulatedActionId = body.id;
+
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {
+            proxyHaveBeenCalled = true;
+          }
+        );
       });
 
       describe('Validation', () => {
@@ -451,7 +461,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-
+          expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -463,6 +473,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             },
           });
         });
+      });
+
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
       });
     });
   });

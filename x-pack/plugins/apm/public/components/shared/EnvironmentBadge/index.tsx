@@ -11,8 +11,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 interface Props {
   environments: string[];
 }
-export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
-  if (environments.length < 3) {
+export function EnvironmentBadge({ environments = [] }: Props) {
+  if (environments.length < 2) {
     return (
       <>
         {environments.map((env) => (
@@ -42,4 +42,4 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
       </EuiBadge>
     </EuiToolTip>
   );
-};
+}

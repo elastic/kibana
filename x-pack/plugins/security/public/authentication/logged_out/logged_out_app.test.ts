@@ -6,7 +6,7 @@
 
 jest.mock('./logged_out_page');
 
-import { AppMount, ScopedHistory } from 'src/core/public';
+import { AppMount } from 'src/core/public';
 import { loggedOutApp } from './logged_out_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
@@ -46,7 +46,8 @@ describe('loggedOutApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      setHeaderActionMenu: jest.fn(),
+      history: scopedHistoryMock.create(),
     });
 
     const mockRenderApp = jest.requireMock('./logged_out_page').renderLoggedOutPage;

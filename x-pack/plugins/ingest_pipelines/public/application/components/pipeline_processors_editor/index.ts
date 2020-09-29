@@ -6,10 +6,14 @@
 
 export { PipelineProcessorsContextProvider, Props } from './context';
 
+export { ProcessorsEditorContextProvider } from './context';
+
 export { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
 export { OnUpdateHandlerArg, OnUpdateHandler } from './types';
 
 export { SerializeResult } from './serialize';
 
-export { LoadFromJsonButton, OnDoneLoadJsonHandler } from './components';
+export { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from './components';
+
+export { PipelineProcessorsEditor } from './pipeline_processors_editor';

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../../features/server';
+import { KibanaFeature } from '../../../../../features/server';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 
 describe('featurePrivilegeIterator', () => {
   it('handles features with no privileges', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       privileges: null,
       app: [],
+      category: { id: 'foo', label: 'foo' },
     });
 
     const actualPrivileges = Array.from(
@@ -26,9 +27,10 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('handles features with no sub-features', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -40,6 +42,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -53,6 +59,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -80,6 +89,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -96,6 +109,9 @@ describe('featurePrivilegeIterator', () => {
             all: [],
             read: ['read-type'],
           },
+          alerting: {
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -103,9 +119,10 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('filters privileges using the provided predicate', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -117,6 +134,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -130,6 +151,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -158,6 +182,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -165,10 +193,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('ignores sub features when `augmentWithSubFeaturePrivileges` is false', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -180,6 +209,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -193,6 +226,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -217,6 +253,10 @@ describe('featurePrivilegeIterator', () => {
                   savedObject: {
                     all: ['all-sub-type'],
                     read: ['read-sub-type'],
+                  },
+                  alerting: {
+                    all: ['alerting-all-sub-type'],
+                    read: ['alerting-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -247,6 +287,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -263,6 +307,9 @@ describe('featurePrivilegeIterator', () => {
             all: [],
             read: ['read-type'],
           },
+          alerting: {
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -270,10 +317,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('ignores sub features when `includeIn` is none, even if `augmentWithSubFeaturePrivileges` is true', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -285,6 +333,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -298,6 +350,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -322,6 +377,10 @@ describe('featurePrivilegeIterator', () => {
                   savedObject: {
                     all: ['all-sub-type'],
                     read: ['read-sub-type'],
+                  },
+                  alerting: {
+                    all: ['alerting-all-sub-type'],
+                    read: ['alerting-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -352,6 +411,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -368,6 +431,9 @@ describe('featurePrivilegeIterator', () => {
             all: [],
             read: ['read-type'],
           },
+          alerting: {
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -375,10 +441,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('includes sub feature privileges into both all and read when`augmentWithSubFeaturePrivileges` is true and `includeIn: read`', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -390,6 +457,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -403,6 +474,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -428,6 +502,10 @@ describe('featurePrivilegeIterator', () => {
                   savedObject: {
                     all: ['all-sub-type'],
                     read: ['read-sub-type'],
+                  },
+                  alerting: {
+                    all: ['alerting-all-sub-type'],
+                    read: ['alerting-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -459,6 +537,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type', 'all-sub-type'],
             read: ['read-type', 'read-sub-type'],
           },
+          alerting: {
+            all: ['alerting-all-type', 'alerting-all-sub-type'],
+            read: ['alerting-read-type', 'alerting-read-sub-type'],
+          },
           ui: ['ui-action', 'ui-sub-type'],
         },
       },
@@ -476,6 +558,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-sub-type'],
             read: ['read-type', 'read-sub-type'],
           },
+          alerting: {
+            all: ['alerting-all-sub-type'],
+            read: ['alerting-read-type', 'alerting-read-sub-type'],
+          },
           ui: ['ui-action', 'ui-sub-type'],
         },
       },
@@ -483,10 +569,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('does not duplicate privileges when merging', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -498,6 +585,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -511,6 +602,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -535,6 +629,9 @@ describe('featurePrivilegeIterator', () => {
                   savedObject: {
                     all: [],
                     read: ['read-type'],
+                  },
+                  alerting: {
+                    read: ['alerting-read-type'],
                   },
                   ui: ['ui-action'],
                 },
@@ -565,6 +662,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -581,6 +682,10 @@ describe('featurePrivilegeIterator', () => {
             all: [],
             read: ['read-type'],
           },
+          alerting: {
+            all: [],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -588,10 +693,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it('includes sub feature privileges into both all and read when`augmentWithSubFeaturePrivileges` is true and `includeIn: all`', () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -603,6 +709,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -616,6 +726,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -641,6 +754,10 @@ describe('featurePrivilegeIterator', () => {
                   savedObject: {
                     all: ['all-sub-type'],
                     read: ['read-sub-type'],
+                  },
+                  alerting: {
+                    all: ['alerting-all-sub-type'],
+                    read: ['alerting-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -672,6 +789,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type', 'all-sub-type'],
             read: ['read-type', 'read-sub-type'],
           },
+          alerting: {
+            all: ['alerting-all-type', 'alerting-all-sub-type'],
+            read: ['alerting-read-type', 'alerting-read-sub-type'],
+          },
           ui: ['ui-action', 'ui-sub-type'],
         },
       },
@@ -688,6 +809,9 @@ describe('featurePrivilegeIterator', () => {
             all: [],
             read: ['read-type'],
           },
+          alerting: {
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -695,10 +819,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it(`can augment primary feature privileges even if they don't specify their own`, () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           savedObject: {
@@ -737,6 +862,10 @@ describe('featurePrivilegeIterator', () => {
                     all: ['all-sub-type'],
                     read: ['read-sub-type'],
                   },
+                  alerting: {
+                    all: ['alerting-all-sub-type'],
+                    read: ['alerting-read-sub-type'],
+                  },
                   ui: ['ui-sub-type'],
                 },
               ],
@@ -767,6 +896,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-sub-type'],
             read: ['read-sub-type'],
           },
+          alerting: {
+            all: ['alerting-all-sub-type'],
+            read: ['alerting-read-sub-type'],
+          },
           ui: ['ui-sub-type'],
         },
       },
@@ -784,6 +917,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-sub-type'],
             read: ['read-sub-type'],
           },
+          alerting: {
+            all: ['alerting-all-sub-type'],
+            read: ['alerting-read-sub-type'],
+          },
           ui: ['ui-sub-type'],
         },
       },
@@ -791,10 +928,11 @@ describe('featurePrivilegeIterator', () => {
   });
 
   it(`can augment primary feature privileges even if the sub-feature privileges don't specify their own`, () => {
-    const feature = new Feature({
+    const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -806,6 +944,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: ['all-type'],
             read: ['read-type'],
+          },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -819,6 +961,9 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -867,6 +1012,10 @@ describe('featurePrivilegeIterator', () => {
             all: ['all-type'],
             read: ['read-type'],
           },
+          alerting: {
+            all: ['alerting-all-type'],
+            read: ['alerting-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -882,6 +1031,10 @@ describe('featurePrivilegeIterator', () => {
           savedObject: {
             all: [],
             read: ['read-type'],
+          },
+          alerting: {
+            all: [],
+            read: ['alerting-read-type'],
           },
           ui: ['ui-action'],
         },

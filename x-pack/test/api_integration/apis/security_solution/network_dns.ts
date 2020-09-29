@@ -5,10 +5,13 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { networkDnsQuery } from '../../../../plugins/security_solution/public/network/containers/network_dns/index.gql_query';
 import {
   Direction,
+  // @ts-expect-error
   GetNetworkDnsQuery,
+  // @ts-expect-error
   NetworkDnsFields,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', () => {
         return client
@@ -30,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
               isPtrIncluded: false,
               pagination: {
@@ -52,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
+            // @ts-expect-error
             expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
             );
@@ -65,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               isDnsHistogram: false,
               inspect: false,
               isPtrIncluded: false,
@@ -88,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
+            // @ts-expect-error
             expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
             );

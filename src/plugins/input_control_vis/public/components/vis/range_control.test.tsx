@@ -46,7 +46,7 @@ test('renders RangeControl', () => {
   const component = shallowWithIntl(
     <RangeControl control={control} controlIndex={0} stageFilter={() => {}} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('disabled', () => {
@@ -69,7 +69,7 @@ test('disabled', () => {
   const component = shallowWithIntl(
     <RangeControl control={disabledRangeControl} controlIndex={0} stageFilter={() => {}} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('ceilWithPrecision', () => {

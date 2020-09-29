@@ -20,7 +20,6 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -47,14 +46,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       const body = await (
         await supertest.get(`/api/index-patterns-plugin/get/${indexPatternId}`).expect(200)
       ).body;
-      expect(body.fields.length > 0).to.equal(true);
+      expect(typeof body.id).to.equal('string');
     });
 
     it('can update index pattern', async () => {
-      const body = await (
-        await supertest.get(`/api/index-patterns-plugin/update/${indexPatternId}`).expect(200)
-      ).body;
-      expect(body).to.eql({});
+      const resp = await supertest
+        .get(`/api/index-patterns-plugin/update/${indexPatternId}`)
+        .expect(200);
+      expect(resp.body).to.eql({});
     });
 
     it('can delete index pattern', async () => {

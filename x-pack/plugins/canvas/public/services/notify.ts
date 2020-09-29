@@ -26,7 +26,7 @@ const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   };
 };
 
-interface NotifyService {
+export interface NotifyService {
   error: (err: string | Error, opts?: ToastInputFields) => void;
   warning: (err: string | Error, opts?: ToastInputFields) => void;
   info: (err: string | Error, opts?: ToastInputFields) => void;

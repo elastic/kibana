@@ -6,12 +6,14 @@
 
 import expect from '@kbn/expect';
 
+// @ts-expect-error
 import { uncommonProcessesQuery } from '../../../../plugins/security_solution/public/hosts/containers/uncommon_processes/index.gql_query';
+// @ts-expect-error
 import { GetUncommonProcessesQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const FROM = '2000-01-01T00:00:00.000Z';
+const TO = '3000-01-01T00:00:00.000Z';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const TOTAL_COUNT = 3;
@@ -45,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
           inspect: false,
         },
       });
@@ -72,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 2,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
           inspect: false,
         },
       });
@@ -99,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
           inspect: false,
         },
       });
@@ -126,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
           inspect: false,
         },
       });

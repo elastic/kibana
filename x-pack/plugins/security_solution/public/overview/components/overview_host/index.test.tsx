@@ -7,8 +7,8 @@
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -20,78 +20,43 @@ import {
 
 import { OverviewHost } from '.';
 import { createStore, State } from '../../../common/store';
-import { overviewHostQuery } from '../../containers/overview_host/index.gql_query';
-import { GetOverviewHostQuery } from '../../../graphql/types';
-
-import { wait } from '../../../common/lib/helpers';
+import { useHostOverview } from '../../containers/overview_host';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
-
-interface MockedProvidedQuery {
-  request: {
-    query: GetOverviewHostQuery.Query;
-    fetchPolicy: string;
-    variables: GetOverviewHostQuery.Variables;
-  };
-  result: {
-    data: {
-      source: unknown;
-    };
-  };
-}
-
-const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
-  {
-    request: {
-      query: overviewHostQuery,
-      fetchPolicy: 'cache-and-network',
-      variables: {
-        sourceId: 'default',
-        timerange: { interval: '12h', from: startDate, to: endDate },
-        filterQuery: undefined,
-        defaultIndex: [
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-          'logs-*',
-        ],
-        inspect: false,
-      },
-    },
-    result: {
-      data: {
-        source: {
-          id: 'default',
-          OverviewHost: {
-            auditbeatAuditd: 1,
-            auditbeatFIM: 1,
-            auditbeatLogin: 1,
-            auditbeatPackage: 1,
-            auditbeatProcess: 1,
-            auditbeatUser: 1,
-            endgameDns: 1,
-            endgameFile: 1,
-            endgameImageLoad: 1,
-            endgameNetwork: 1,
-            endgameProcess: 1,
-            endgameRegistry: 1,
-            endgameSecurity: 1,
-            filebeatSystemModule: 1,
-            winlogbeatSecurity: 1,
-            winlogbeatMWSysmonOperational: 1,
-          },
-        },
-      },
-    },
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
+const testProps = {
+  endDate,
+  indexNames: [],
+  setQuery: jest.fn(),
+  startDate,
+};
+const MOCKED_RESPONSE = {
+  overviewHost: {
+    auditbeatAuditd: 1,
+    auditbeatFIM: 1,
+    auditbeatLogin: 1,
+    auditbeatPackage: 1,
+    auditbeatProcess: 1,
+    auditbeatUser: 1,
+    endgameDns: 1,
+    endgameFile: 1,
+    endgameImageLoad: 1,
+    endgameNetwork: 1,
+    endgameProcess: 1,
+    endgameRegistry: 1,
+    endgameSecurity: 1,
+    filebeatSystemModule: 1,
+    winlogbeatSecurity: 1,
+    winlogbeatMWSysmonOperational: 1,
   },
-];
+};
+
+jest.mock('../../containers/overview_host');
+const useHostOverviewMock = useHostOverview as jest.Mock;
+useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('OverviewHost', () => {
   const state: State = mockGlobalState;
@@ -119,7 +84,7 @@ describe('OverviewHost', () => {
   test('it renders the expected widget title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
 
@@ -129,9 +94,10 @@ describe('OverviewHost', () => {
   });
 
   test('it renders an empty subtitle while loading', () => {
+    useHostOverviewMock.mockReturnValueOnce([true, { overviewHost: {} }]);
     const wrapper = mount(
-      <TestProviders>
-        <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+      <TestProviders store={store}>
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
 
@@ -140,14 +106,10 @@ describe('OverviewHost', () => {
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
-        </MockedProvider>
+      <TestProviders store={store}>
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
-    await wait();
-    wrapper.update();
 
     expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
       'Showing: 16 events'

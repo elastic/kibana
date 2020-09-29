@@ -8,40 +8,21 @@ import { AuthenticatedUser } from '../../../security/common/model';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
 
-import { Authentications } from './authentications';
-import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
-import { IpDetails } from './ip_details';
-import { KpiHosts } from './kpi_hosts';
-import { KpiNetwork } from './kpi_network';
-import { Network } from './network';
-import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { TLS } from './tls';
-import { MatrixHistogram } from './matrix_histogram';
+import { SearchTypes } from './detection_engine/signals/types';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
-  authentications: Authentications;
-  events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  ipDetails: IpDetails;
-  matrixHistogram: MatrixHistogram;
-  network: Network;
-  kpiNetwork: KpiNetwork;
-  overview: Overview;
-  uncommonProcesses: UncommonProcesses;
-  kpiHosts: KpiHosts;
-  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -64,6 +45,12 @@ export interface TotalValue {
   relation: string;
 }
 
+export interface BaseHit<T> {
+  _index: string;
+  _id: string;
+  _source: T;
+}
+
 export interface SearchResponse<T> {
   took: number;
   timed_out: boolean;
@@ -72,25 +59,41 @@ export interface SearchResponse<T> {
   hits: {
     total: TotalValue | number;
     max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
+    hits: Array<
+      BaseHit<T> & {
+        _type: string;
+        _score: number;
+        _version?: number;
+        _explanation?: Explanation;
+        fields?: string[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        highlight?: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        inner_hits?: any;
+        matched_queries?: string[];
+        sort?: string[];
+      }
+    >;
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
+}
+
+export interface EqlSequence<T> {
+  join_keys: SearchTypes[];
+  events: Array<BaseHit<T>>;
+}
+
+export interface EqlSearchResponse<T> {
+  is_partial: boolean;
+  is_running: boolean;
+  took: number;
+  timed_out: boolean;
+  hits: {
+    total: TotalValue;
+    sequences?: Array<EqlSequence<T>>;
+    events?: Array<BaseHit<T>>;
+  };
 }
 
 export interface ShardsResponse {
@@ -98,6 +101,23 @@ export interface ShardsResponse {
   successful: number;
   failed: number;
   skipped: number;
+  failures?: ShardError[];
+}
+
+export interface ShardError {
+  shard: number;
+  index: string;
+  node: string;
+  reason: {
+    type: string;
+    reason: string;
+    index_uuid: string;
+    index: string;
+    caused_by: {
+      type: string;
+      reason: string;
+    };
+  };
 }
 
 export interface Explanation {

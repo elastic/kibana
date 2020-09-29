@@ -28,11 +28,13 @@ import {
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
-    pageFilters,
-    filterQuery,
     detailName,
-    setAbsoluteRangeDatePicker,
+    docValueFields,
+    filterQuery,
+    indexNames,
     indexPattern,
+    pageFilters,
+    setAbsoluteRangeDatePicker,
     hostDetailsPagePath,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
@@ -54,7 +56,11 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -68,6 +74,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       startDate: from,
       type,
       indexPattern,
+      indexNames,
       hostName: detailName,
       narrowDateRange,
       updateDateRange,
@@ -76,7 +83,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceHealthStatus } from '../../../common/service_health_status';
+
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -35,6 +37,19 @@ const javaService = {
   [AGENT_NAME]: 'java',
 };
 
+const anomalies = {
+  mlJobIds: ['apm-test-1234-ml-module-name'],
+  serviceAnomalies: {
+    'opbeans-test': {
+      transactionType: 'request',
+      actualValue: 10000,
+      anomalyScore: 50,
+      jobId: 'apm-test-1234-ml-module-name',
+      healthStatus: ServiceHealthStatus.warning,
+    },
+  },
+};
+
 describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
@@ -51,6 +66,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsExternal,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -59,8 +75,11 @@ describe('transformServiceMapResponses', () => {
       (element) => 'source' in element.data && 'target' in element.data
     );
 
-    // @ts-ignore
-    expect(connection?.data.target).toBe('opbeans-node');
+    expect(connection).toHaveProperty('data');
+    expect(connection?.data).toHaveProperty('target');
+    if (connection?.data && 'target' in connection.data) {
+      expect(connection.data.target).toBe('opbeans-node');
+    }
 
     expect(
       elements.find((element) => element.data.id === '>opbeans-node')
@@ -89,6 +108,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -126,6 +146,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -134,9 +155,9 @@ describe('transformServiceMapResponses', () => {
 
     const nodejsNode = nodes.find((node) => node.data.id === '>opbeans-node');
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_SUBTYPE]).toBe('aa');
   });
 
@@ -150,6 +171,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsService,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);

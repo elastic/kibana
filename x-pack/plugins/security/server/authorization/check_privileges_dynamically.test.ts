@@ -24,11 +24,13 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
       namespaceToSpaceId: jest.fn(),
     })
   )(request);
-  const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
+  const result = await checkPrivilegesDynamically({ kibana: privilegeOrPrivileges });
 
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-  expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, privilegeOrPrivileges);
+  expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, {
+    kibana: privilegeOrPrivileges,
+  });
 });
 
 test(`checkPrivileges.globally when spaces is disabled`, async () => {
@@ -43,9 +45,9 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
     mockCheckPrivilegesWithRequest,
     () => undefined
   )(request);
-  const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
+  const result = await checkPrivilegesDynamically({ kibana: privilegeOrPrivileges });
 
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-  expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(privilegeOrPrivileges);
+  expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({ kibana: privilegeOrPrivileges });
 });

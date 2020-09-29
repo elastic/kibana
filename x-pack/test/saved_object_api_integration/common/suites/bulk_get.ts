@@ -25,10 +25,13 @@ export interface BulkGetTestCase extends TestCase {
 }
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('bulk_get');
+  const expectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (
     testCases: BulkGetTestCase | BulkGetTestCase[],
     statusCode: 200 | 403

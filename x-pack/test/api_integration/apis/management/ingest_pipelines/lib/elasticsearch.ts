@@ -26,14 +26,43 @@ interface Pipeline {
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
+  let pipelinesCreated: string[] = [];
+
   const es = getService('legacyEs');
 
-  const createPipeline = (pipeline: Pipeline) => es.ingest.putPipeline(pipeline);
+  const createPipeline = (pipeline: Pipeline, cachePipeline?: boolean) => {
+    if (cachePipeline) {
+      pipelinesCreated.push(pipeline.id);
+    }
+
+    return es.ingest.putPipeline(pipeline);
+  };
 
   const deletePipeline = (pipelineId: string) => es.ingest.deletePipeline({ id: pipelineId });
+
+  const cleanupPipelines = () =>
+    Promise.all(pipelinesCreated.map(deletePipeline))
+      .then(() => {
+        pipelinesCreated = [];
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+      });
+
+  const createIndex = (index: { index: string; id: string; body: object }) => {
+    return es.index(index);
+  };
+
+  const deleteIndex = (indexName: string) => {
+    return es.indices.delete({ index: indexName });
+  };
 
   return {
     createPipeline,
     deletePipeline,
+    cleanupPipelines,
+    createIndex,
+    deleteIndex,
   };
 };

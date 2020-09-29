@@ -18,8 +18,8 @@ import {
 } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
-import { getMetricsProjection } from '../../../../../../common/projections/metrics';
-import { mergeProjection } from '../../../../../../common/projections/util/merge_projection';
+import { getMetricsProjection } from '../../../../../projections/metrics';
+import { mergeProjection } from '../../../../../projections/util/merge_projection';
 import {
   AGENT_NAME,
   LABEL_NAME,
@@ -42,9 +42,9 @@ export async function fetchAndTransformGcMetrics({
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
-  const { bucketSize } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end);
 
   const projection = getMetricsProjection({
     setup,
@@ -74,8 +74,12 @@ export async function fetchAndTransformGcMetrics({
             field: `${LABEL_NAME}`,
           },
           aggs: {
-            over_time: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
+            timeseries: {
+              date_histogram: getMetricsDateHistogramParams(
+                start,
+                end,
+                config['xpack.apm.metricsInterval']
+              ),
               aggs: {
                 // get the max value
                 max: {
@@ -105,7 +109,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   const { aggregations } = response;
 
@@ -119,7 +123,7 @@ export async function fetchAndTransformGcMetrics({
 
   const series = aggregations.per_pool.buckets.map((poolBucket, i) => {
     const label = poolBucket.key as string;
-    const timeseriesData = poolBucket.over_time;
+    const timeseriesData = poolBucket.timeseries;
 
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null

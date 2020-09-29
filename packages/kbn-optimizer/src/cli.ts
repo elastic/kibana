@@ -21,7 +21,8 @@ import 'source-map-support/register';
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
@@ -87,6 +88,11 @@ run(
       throw createFlagError('expected --report-stats to have no value');
     }
 
+    const filter = typeof flags.filter === 'string' ? [flags.filter] : flags.filter;
+    if (!Array.isArray(filter) || !filter.every((f) => typeof f === 'string')) {
+      throw createFlagError('expected --filter to be one or more strings');
+    }
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
@@ -99,6 +105,7 @@ run(
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
+      filter,
     });
 
     let update$ = runOptimizer(config);
@@ -110,7 +117,7 @@ run(
         log.warning('Unable to initialize CiStatsReporter from env');
       }
 
-      update$ = update$.pipe(reportOptimizerStats(reporter, config));
+      update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
     await update$.pipe(logOptimizerState(log, config)).toPromise();
@@ -128,12 +135,13 @@ run(
         'inspect-workers',
         'report-stats',
       ],
-      string: ['workers', 'scan-dir'],
+      string: ['workers', 'scan-dir', 'filter'],
       default: {
         core: true,
         examples: true,
         cache: true,
         'inspect-workers': true,
+        filter: [],
       },
       help: `
         --watch            run the optimizer in watch mode
@@ -142,6 +150,7 @@ run(
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable the cache
+        --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)

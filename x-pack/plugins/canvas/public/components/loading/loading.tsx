@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   text?: string;
 }
 
-export const Loading: FunctionComponent<Props> = ({
+export const Loading: FC<Props> = ({
   animated = false,
   text = '',
   backgroundColor = '#000000',

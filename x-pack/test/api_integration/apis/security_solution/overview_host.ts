@@ -7,7 +7,9 @@
 import expect from '@kbn/expect';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/security_solution/common/constants';
+// @ts-expect-error
 import { overviewHostQuery } from '../../../../plugins/security_solution/public/overview/containers//overview_host/index.gql_query';
+// @ts-expect-error
 import { GetOverviewHostQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('auditbeat/overview'));
       after(() => esArchiver.unload('auditbeat/overview'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         auditbeatAuditd: 2194,
         auditbeatFIM: 4,
@@ -53,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: DEFAULT_INDEX_PATTERN,
+              docValueFields: [],
               inspect: false,
             },
           })

@@ -32,9 +32,9 @@ export interface IVectorLayer extends ILayer {
   getJoins(): IJoin[];
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
-  getStyle(): IVectorStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -78,7 +78,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
-  getStyle(): IVectorStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
+  isFittable(): Promise<boolean>;
 }

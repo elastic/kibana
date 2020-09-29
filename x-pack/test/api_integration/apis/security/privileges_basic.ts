@@ -33,12 +33,15 @@ export default function ({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
+            ml: ['all', 'read'],
             siem: ['all', 'read'],
             ingestManager: ['all', 'read'],
+            builtInAlerts: ['all', 'read'],
+            actions: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'monitoring'],
+          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest

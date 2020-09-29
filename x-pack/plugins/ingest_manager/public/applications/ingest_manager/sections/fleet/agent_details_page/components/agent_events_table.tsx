@@ -50,13 +50,13 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     [key: string]: JSX.Element;
   }>({});
 
-  const { isLoading, data, sendRequest } = useGetOneAgentEvents(agent.id, {
+  const { isLoading, data, resendRequest } = useGetOneAgentEvents(agent.id, {
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: search && search.trim() !== '' ? search.trim() : undefined,
   });
 
-  const refresh = () => sendRequest();
+  const refresh = () => resendRequest();
 
   const total = data ? data.total : 0;
   const list = data ? data.list : [];
@@ -153,8 +153,11 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
       name: i18n.translate('xpack.ingestManager.agentEventsList.messageColumnTitle', {
         defaultMessage: 'Message',
       }),
-      render: (message: string) => <EuiText size="xs">{message}</EuiText>,
-      truncateText: true,
+      render: (value: string) => (
+        <EuiText size="xs" className="eui-textTruncate">
+          {value}
+        </EuiText>
+      ),
     },
     {
       align: RIGHT_ALIGNMENT,

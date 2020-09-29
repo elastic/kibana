@@ -32,6 +32,7 @@ export const persistTimelineMutation = gql`
           enabled
           excluded
           kqlQuery
+          type
           queryMatch {
             field
             displayField
@@ -45,6 +46,7 @@ export const persistTimelineMutation = gql`
             enabled
             excluded
             kqlQuery
+            type
             queryMatch {
               field
               displayField
@@ -56,6 +58,7 @@ export const persistTimelineMutation = gql`
         }
         description
         eventType
+        excludedRowRendererIds
         favorite {
           fullName
           userName
@@ -92,6 +95,7 @@ export const persistTimelineMutation = gql`
             serializedQuery
           }
         }
+        indexNames
         title
         dateRange {
           start

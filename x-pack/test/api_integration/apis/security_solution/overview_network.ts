@@ -5,7 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-expect-error
 import { overviewNetworkQuery } from '../../../../plugins/security_solution/public/overview/containers/overview_network/index.gql_query';
+// @ts-expect-error
 import { GetOverviewNetworkQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -17,8 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
 
       const expectedResult = {
         auditbeatSocket: 0,
@@ -45,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -59,8 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('packetbeat/overview'));
       after(() => esArchiver.unload('packetbeat/overview'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         auditbeatSocket: 0,
         filebeatCisco: 0,
@@ -86,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -100,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('auditbeat/overview'));
       after(() => esArchiver.unload('auditbeat/overview'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         auditbeatSocket: 0,
         filebeatCisco: 0,
@@ -127,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })

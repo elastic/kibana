@@ -4,39 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
-function getAllCalendars(context: RequestHandlerContext) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getAllCalendars(client: IScopedClusterClient) {
+  const cal = new CalendarManager(client);
   return cal.getAllCalendars();
 }
 
-function getCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getCalendar(client: IScopedClusterClient, calendarId: string) {
+  const cal = new CalendarManager(client);
   return cal.getCalendar(calendarId);
 }
 
-function newCalendar(context: RequestHandlerContext, calendar: FormCalendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function newCalendar(client: IScopedClusterClient, calendar: FormCalendar) {
+  const cal = new CalendarManager(client);
   return cal.newCalendar(calendar);
 }
 
-function updateCalendar(context: RequestHandlerContext, calendarId: string, calendar: Calendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function updateCalendar(client: IScopedClusterClient, calendarId: string, calendar: Calendar) {
+  const cal = new CalendarManager(client);
   return cal.updateCalendar(calendarId, calendar);
 }
 
-function deleteCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function deleteCalendar(client: IScopedClusterClient, calendarId: string) {
+  const cal = new CalendarManager(client);
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getCalendarsByIds(client: IScopedClusterClient, calendarIds: string) {
+  const cal = new CalendarManager(client);
   return cal.getCalendarsByIds(calendarIds);
 }
 
@@ -56,9 +56,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetCalendars'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await getAllCalendars(context);
+        const resp = await getAllCalendars(client);
 
         return response.ok({
           body: resp,
@@ -88,15 +88,15 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetCalendars'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       let returnValue;
       try {
         const calendarIds = request.params.calendarIds.split(',');
 
         if (calendarIds.length === 1) {
-          returnValue = await getCalendar(context, calendarIds[0]);
+          returnValue = await getCalendar(client, calendarIds[0]);
         } else {
-          returnValue = await getCalendarsByIds(context, calendarIds);
+          returnValue = await getCalendarsByIds(client, calendarIds);
         }
 
         return response.ok({
@@ -127,10 +127,10 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const body = request.body;
-        const resp = await newCalendar(context, body);
+        const resp = await newCalendar(client, body);
 
         return response.ok({
           body: resp,
@@ -162,11 +162,11 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { calendarId } = request.params;
         const body = request.body;
-        const resp = await updateCalendar(context, calendarId, body);
+        const resp = await updateCalendar(client, calendarId, body);
 
         return response.ok({
           body: resp,
@@ -196,10 +196,10 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { calendarId } = request.params;
-        const resp = await deleteCalendar(context, calendarId);
+        const resp = await deleteCalendar(client, calendarId);
 
         return response.ok({
           body: resp,

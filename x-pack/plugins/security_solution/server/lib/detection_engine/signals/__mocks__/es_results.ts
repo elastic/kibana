@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, BulkResponse, BulkItem } from '../types';
+import {
+  SignalSourceHit,
+  SignalSearchResponse,
+  BulkResponse,
+  BulkItem,
+  RuleAlertAttributes,
+  SignalHit,
+} from '../types';
 import {
   Logger,
   SavedObject,
@@ -24,6 +31,7 @@ export const sampleRuleAlertParams = (
   buildingBlockType: 'default',
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
+  eventCategoryOverride: undefined,
   falsePositives: [],
   immutable: false,
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -46,6 +54,11 @@ export const sampleRuleAlertParams = (
   machineLearningJobId: undefined,
   filters: undefined,
   savedId: undefined,
+  threshold: undefined,
+  threatFilters: undefined,
+  threatQuery: undefined,
+  threatMapping: undefined,
+  threatIndex: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   timestampOverride: undefined,
@@ -55,17 +68,29 @@ export const sampleRuleAlertParams = (
   exceptionsList: getListArrayMock(),
 });
 
-export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
-  _index: 'myFakeSignalIndex',
-  _type: 'doc',
-  _score: 100,
-  _version: 1,
-  _id: someUuid,
-  _source: {
-    someKey: 'someValue',
-    '@timestamp': '2020-04-20T21:27:45+0000',
-  },
-});
+export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
+  return {
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    type: 'alert',
+    version: '1',
+    updated_at: '2020-03-27T22:55:59.577Z',
+    attributes: {
+      actions: [],
+      enabled: true,
+      name: 'rule-name',
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      createdBy: 'sample user',
+      createdAt: '2020-03-27T22:55:59.577Z',
+      updatedBy: 'sample user',
+      schedule: {
+        interval: '5m',
+      },
+      throttle: 'no_actions',
+      params: sampleRuleAlertParams(),
+    },
+    references: [],
+  };
+};
 
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
@@ -79,6 +104,29 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 });
 
 export const sampleDocWithSortId = (
+  someUuid: string = sampleIdGuid,
+  ip?: string,
+  destIp?: string
+): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: someUuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    source: {
+      ip: ip ?? '127.0.0.1',
+    },
+    destination: {
+      ip: destIp ?? '127.0.0.1',
+    },
+  },
+  sort: ['1234567891111'],
+});
+
+export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
 ): SignalSourceHit => ({
@@ -94,7 +142,25 @@ export const sampleDocWithSortId = (
       ip: ip ?? '127.0.0.1',
     },
   },
-  sort: ['1234567891111'],
+  sort: [],
+});
+
+export const sampleDocSeverity = (
+  severity?: Array<string | number | null> | string | number | null
+): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: sampleIdGuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    event: {
+      severity: severity ?? 100,
+    },
+  },
+  sort: [],
 });
 
 export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
@@ -115,23 +181,27 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
+  delete sampleDoc.sort;
+  delete sampleDoc._source.source;
   sampleDoc._source.signal = {
     parent: {
-      rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
       type: 'event',
       index: 'myFakeSignalIndex',
-      depth: 1,
+      depth: 0,
     },
     ancestors: [
       {
-        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
-        depth: 1,
+        depth: 0,
       },
     ],
+    rule: {
+      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    },
+    depth: 1,
   };
 
   return {
@@ -150,6 +220,80 @@ export const sampleDocWithAncestors = (): SignalSearchResponse => {
     },
   };
 };
+
+export const sampleSignalHit = (): SignalHit => ({
+  '@timestamp': '2020-04-20T21:27:45+0000',
+  event: {
+    kind: 'signal',
+  },
+  signal: {
+    parents: [
+      {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+    ],
+    ancestors: [
+      {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+    ],
+    status: 'open',
+    rule: {
+      author: [],
+      id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+      created_at: '2020-04-20T21:27:45+0000',
+      updated_at: '2020-04-20T21:27:45+0000',
+      created_by: 'elastic',
+      description: 'some description',
+      enabled: true,
+      false_positives: ['false positive 1', 'false positive 2'],
+      from: 'now-6m',
+      immutable: false,
+      name: 'Query with a rule id',
+      query: 'user.name: root or user.name: admin',
+      references: ['test 1', 'test 2'],
+      severity: 'high',
+      severity_mapping: [],
+      updated_by: 'elastic_kibana',
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      to: 'now',
+      type: 'query',
+      threat: [],
+      version: 1,
+      status: 'succeeded',
+      status_date: '2020-02-22T16:47:50.047Z',
+      last_success_at: '2020-02-22T16:47:50.047Z',
+      last_success_message: 'succeeded',
+      output_index: '.siem-signals-default',
+      max_signals: 100,
+      risk_score: 55,
+      risk_score_mapping: [],
+      language: 'kuery',
+      rule_id: 'query-rule-id',
+      interval: '5m',
+      exceptions_list: getListArrayMock(),
+    },
+    depth: 1,
+  },
+});
 
 export const sampleBulkCreateDuplicateResult = {
   took: 60,
@@ -297,8 +441,9 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[]
-) => ({
+  ips?: string[],
+  destIps?: string[]
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -311,7 +456,34 @@ export const repeatedSearchResultsWithSortId = (
     total,
     max_score: 100,
     hits: Array.from({ length: pageSize }).map((x, index) => ({
-      ...sampleDocWithSortId(guids[index], ips ? ips[index] : '127.0.0.1'),
+      ...sampleDocWithSortId(
+        guids[index],
+        ips ? ips[index] : '127.0.0.1',
+        destIps ? destIps[index] : '127.0.0.1'
+      ),
+    })),
+  },
+});
+
+export const repeatedSearchResultsWithNoSortId = (
+  total: number,
+  pageSize: number,
+  guids: string[],
+  ips?: string[]
+): SignalSearchResponse => ({
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total,
+    max_score: 100,
+    hits: Array.from({ length: pageSize }).map((x, index) => ({
+      ...sampleDocNoSortId(guids[index], ips ? ips[index] : '127.0.0.1'),
     })),
   },
 });

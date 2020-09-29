@@ -7,6 +7,7 @@ import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { DataStream } from '../../types';
 import { GetDataStreamsResponse, KibanaAssetType } from '../../../common';
 import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
+import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
@@ -31,12 +32,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
             must: [
               {
                 exists: {
-                  field: 'dataset.namespace',
+                  field: 'data_stream.namespace',
                 },
               },
               {
                 exists: {
-                  field: 'dataset.name',
+                  field: 'data_stream.dataset',
                 },
               },
             ],
@@ -54,19 +55,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
             aggs: {
               dataset: {
                 terms: {
-                  field: 'dataset.name',
+                  field: 'data_stream.dataset',
                   size: 1,
                 },
               },
               namespace: {
                 terms: {
-                  field: 'dataset.namespace',
+                  field: 'data_stream.namespace',
                   size: 1,
                 },
               },
               type: {
                 terms: {
-                  field: 'dataset.type',
+                  field: 'data_stream.type',
                   size: 1,
                 },
               },
@@ -122,7 +123,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
         // then pick the dashboards from the package saved object
         const dashboards =
-          pkgSavedObject[0].attributes?.installed?.filter(
+          pkgSavedObject[0].attributes?.installed_kibana?.filter(
             (o) => o.type === KibanaAssetType.dashboard
           ) || [];
         // and then pick the human-readable titles from the dashboard saved objects
@@ -157,11 +158,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

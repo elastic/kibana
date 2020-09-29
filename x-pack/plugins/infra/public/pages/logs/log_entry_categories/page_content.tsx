@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -14,14 +14,17 @@ import {
   MissingSetupPrivilegesPrompt,
   SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
+import {
+  LogAnalysisSetupFlyout,
+  useLogAnalysisSetupFlyoutStateContext,
+} from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
-import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
-import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 export const LogEntryCategoriesPageContent = () => {
   const {
@@ -40,22 +43,16 @@ export const LogEntryCategoriesPageContent = () => {
 
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const { showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
+  const showCategoriesModuleSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
+    showModuleSetup,
+  ]);
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
       fetchJobStatus();
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
-
-  // Open flyout if there are no ML jobs
-  useEffect(() => {
-    if (setupStatus.type === 'required' && setupStatus.reason === 'missing') {
-      openFlyout();
-    }
-  }, [setupStatus, openFlyout]);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
@@ -78,8 +75,8 @@ export const LogEntryCategoriesPageContent = () => {
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
     return (
       <>
-        <LogEntryCategoriesResultsContent onOpenSetup={openFlyout} />
-        <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+        <LogEntryCategoriesResultsContent onOpenSetup={showCategoriesModuleSetup} />
+        <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
@@ -87,9 +84,11 @@ export const LogEntryCategoriesPageContent = () => {
   } else {
     return (
       <>
-        <LogEntryCategoriesSetupContent onOpenSetup={openFlyout} />
-        <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+        <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+        <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>
     );
   }
 };
+
+const allowedSetupModules = ['logs_ui_categories' as const];

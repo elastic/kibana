@@ -3,15 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import semver from 'semver';
 import { validate } from '../../../../common/validate';
-import { InternalArtifactSchema, InternalManifestSchema } from '../../schemas/artifacts';
 import {
-  manifestSchemaVersion,
+  InternalArtifactSchema,
+  InternalManifestSchema,
+  internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
+} from '../../schemas/artifacts';
+import {
   ManifestSchemaVersion,
+  SemanticVersion,
+  semanticVersion,
 } from '../../../../common/endpoint/schema/common';
-import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { manifestSchema, ManifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
+import { maybeCompressArtifact, isCompressed } from './lists';
+import { getArtifactId } from './common';
+import { ManifestVersion, manifestVersion } from '../../schemas/artifacts/manifest';
 
 export interface ManifestDiff {
   type: string;
@@ -19,52 +28,90 @@ export interface ManifestDiff {
 }
 
 export class Manifest {
-  private created: Date;
   private entries: Record<string, ManifestEntry>;
-  private schemaVersion: ManifestSchemaVersion;
+  private version: ManifestVersion;
 
-  // For concurrency control
-  private version: string;
-
-  constructor(created: Date, schemaVersion: string, version: string) {
-    this.created = created;
+  constructor(version?: Partial<ManifestVersion>) {
     this.entries = {};
-    this.version = version;
 
-    const [validated, errors] = validate(
-      (schemaVersion as unknown) as object,
-      manifestSchemaVersion
-    );
+    const decodedVersion = {
+      schemaVersion: version?.schemaVersion ?? 'v1',
+      semanticVersion: version?.semanticVersion ?? '1.0.0',
+      soVersion: version?.soVersion,
+    };
 
+    const [validated, errors] = validate(decodedVersion, manifestVersion);
     if (errors != null || validated === null) {
-      throw new Error(`Invalid manifest version: ${schemaVersion}`);
+      throw new Error(errors ?? 'Invalid version format.');
     }
 
-    this.schemaVersion = validated;
+    this.version = validated;
+  }
+
+  public static getDefault(schemaVersion?: ManifestSchemaVersion) {
+    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' });
   }
 
   public static fromArtifacts(
-    artifacts: InternalArtifactSchema[],
-    schemaVersion: string,
-    version: string
+    artifacts: InternalArtifactCompleteSchema[],
+    oldManifest: Manifest,
+    schemaVersion?: ManifestSchemaVersion
   ): Manifest {
-    const manifest = new Manifest(new Date(), schemaVersion, version);
+    const manifest = new Manifest({
+      schemaVersion,
+      semanticVersion: oldManifest.getSemanticVersion(),
+      soVersion: oldManifest.getSavedObjectVersion(),
+    });
     artifacts.forEach((artifact) => {
-      manifest.addEntry(artifact);
+      const id = getArtifactId(artifact);
+      const existingArtifact = oldManifest.getArtifact(id);
+      if (existingArtifact) {
+        manifest.addEntry(existingArtifact);
+      } else {
+        manifest.addEntry(artifact);
+      }
     });
     return manifest;
   }
 
+  public bumpSemanticVersion() {
+    const newSemanticVersion = semver.inc(this.getSemanticVersion(), 'patch');
+    if (!semanticVersion.is(newSemanticVersion)) {
+      throw new Error(`Invalid semver: ${newSemanticVersion}`);
+    }
+    this.version.semanticVersion = newSemanticVersion;
+  }
+
+  public async compressArtifact(id: string): Promise<Error | null> {
+    try {
+      const artifact = this.getArtifact(id);
+      if (artifact == null) {
+        throw new Error(`Corrupted manifest detected. Artifact ${id} not in manifest.`);
+      }
+
+      const compressedArtifact = await maybeCompressArtifact(artifact);
+      if (!isCompressed(compressedArtifact)) {
+        throw new Error(`Unable to compress artifact: ${id}`);
+      } else if (!internalArtifactCompleteSchema.is(compressedArtifact)) {
+        throw new Error(`Incomplete artifact detected: ${id}`);
+      }
+      this.addEntry(compressedArtifact);
+    } catch (err) {
+      return err;
+    }
+    return null;
+  }
+
   public getSchemaVersion(): ManifestSchemaVersion {
-    return this.schemaVersion;
+    return this.version.schemaVersion;
   }
 
-  public getVersion(): string {
-    return this.version;
+  public getSavedObjectVersion(): string | undefined {
+    return this.version.soVersion;
   }
 
-  public setVersion(version: string) {
-    this.version = version;
+  public getSemanticVersion(): SemanticVersion {
+    return this.version.semanticVersion;
   }
 
   public addEntry(artifact: InternalArtifactSchema) {
@@ -80,8 +127,12 @@ export class Manifest {
     return this.entries;
   }
 
-  public getArtifact(artifactId: string): InternalArtifactSchema {
-    return this.entries[artifactId].getArtifact();
+  public getEntry(artifactId: string): ManifestEntry | undefined {
+    return this.entries[artifactId];
+  }
+
+  public getArtifact(artifactId: string): InternalArtifactSchema | undefined {
+    return this.getEntry(artifactId)?.getArtifact();
   }
 
   public diff(manifest: Manifest): ManifestDiff[] {
@@ -104,8 +155,8 @@ export class Manifest {
 
   public toEndpointFormat(): ManifestSchema {
     const manifestObj: ManifestSchema = {
-      manifest_version: this.version ?? 'v0',
-      schema_version: this.schemaVersion,
+      manifest_version: this.getSemanticVersion(),
+      schema_version: this.getSchemaVersion(),
       artifacts: {},
     };
 
@@ -123,8 +174,9 @@ export class Manifest {
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      created: this.created.getTime(),
-      ids: Object.keys(this.entries),
+      ids: Object.keys(this.getEntries()),
+      schemaVersion: this.getSchemaVersion(),
+      semanticVersion: this.getSemanticVersion(),
     };
   }
 }

@@ -19,9 +19,10 @@ export interface AlertingExamplePublicSetupDeps {
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
     alerts.registerNavigation(
-      'consumer-noop',
+      'alerting_fixture',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
@@ -49,8 +50,8 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     });
 
     core.application.register({
-      id: 'consumer-noop',
-      title: 'No Op App',
+      id: 'alerting_fixture',
+      title: 'Alerting Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

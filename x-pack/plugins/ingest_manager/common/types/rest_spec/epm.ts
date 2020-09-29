@@ -12,13 +12,20 @@ import {
   PackageInfo,
 } from '../models/epm';
 
+export interface GetCategoriesRequest {
+  query: {
+    experimental?: boolean;
+  };
+}
+
 export interface GetCategoriesResponse {
   response: CategorySummaryList;
-  success: boolean;
 }
+
 export interface GetPackagesRequest {
   query: {
     category?: string;
+    experimental?: boolean;
   };
 }
 
@@ -31,12 +38,10 @@ export interface GetPackagesResponse {
       >
     >
   >;
-  success: boolean;
 }
 
 export interface GetLimitedPackagesResponse {
   response: string[];
-  success: boolean;
 }
 
 export interface GetFileRequest {
@@ -54,7 +59,6 @@ export interface GetInfoRequest {
 
 export interface GetInfoResponse {
   response: PackageInfo;
-  success: boolean;
 }
 
 export interface InstallPackageRequest {
@@ -65,7 +69,34 @@ export interface InstallPackageRequest {
 
 export interface InstallPackageResponse {
   response: AssetReference[];
-  success: boolean;
+}
+
+export interface IBulkInstallPackageHTTPError {
+  name: string;
+  statusCode: number;
+  error: string | Error;
+}
+
+export interface BulkInstallPackageInfo {
+  name: string;
+  newVersion: string;
+  // this will be null if no package was present before the upgrade (aka it was an install)
+  oldVersion: string | null;
+  assets: AssetReference[];
+}
+
+export interface BulkInstallPackagesResponse {
+  response: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+}
+
+export interface BulkInstallPackagesRequest {
+  body: {
+    packages: string[];
+  };
+}
+
+export interface MessageResponse {
+  response: string;
 }
 
 export interface DeletePackageRequest {
@@ -76,5 +107,4 @@ export interface DeletePackageRequest {
 
 export interface DeletePackageResponse {
   response: AssetReference[];
-  success: boolean;
 }

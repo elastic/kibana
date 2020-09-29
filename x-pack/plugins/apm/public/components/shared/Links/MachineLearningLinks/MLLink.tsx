@@ -6,11 +6,11 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import url from 'url';
+import { useLocation } from 'react-router-dom';
 import rison, { RisonValue } from 'rison-node';
-import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import url from 'url';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
 
 interface MlRisonData {
   ml?: {
@@ -39,7 +39,9 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
 
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`,
+    hash: `${path}?_g=${rison.encode(
+      risonQuery as RisonValue
+    )}&mlManagement=${rison.encode({ groupIds: ['apm'] })}`,
   });
 
   return (

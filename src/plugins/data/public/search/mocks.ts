@@ -19,28 +19,23 @@
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { ISearchSetup, ISearchStart } from './types';
-import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
+import { searchSourceMock, createSearchSourceMock } from '../../common/search/search_source/mocks';
 
-export * from './search_source/mocks';
+export * from '../../common/search/search_source/mocks';
 
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
+    __enhance: jest.fn(),
   };
 }
 
 function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
-    setInterceptor: jest.fn(),
     search: jest.fn(),
+    showError: jest.fn(),
     searchSource: searchSourceMock,
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
   };
 }
 

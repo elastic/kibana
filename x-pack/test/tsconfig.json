@@ -1,6 +1,8 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // overhead is too significant
+    "incremental": false,
     "types": [
       "mocha",
       "node",
@@ -13,5 +15,8 @@
   ],
   "exclude": [
     "../typings/jest.d.ts"
+  ],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" }
   ]
 }

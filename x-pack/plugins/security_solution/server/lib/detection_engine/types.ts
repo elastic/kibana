@@ -9,6 +9,7 @@ import {
   Description,
   NoteOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   FalsePositives,
   From,
   Immutable,
@@ -35,10 +36,17 @@ import {
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
+  Type,
+  EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
+import {
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+} from '../../../common/detection_engine/schemas/types/threat_mapping';
+
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
-import { RuleType } from '../../../common/detection_engine/types';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
 
 export type PartialFilter = Partial<Filter>;
@@ -49,6 +57,7 @@ export interface RuleTypeParams {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;
@@ -71,9 +80,14 @@ export interface RuleTypeParams {
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  threatFilters: PartialFilter[] | undefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
-  type: RuleType;
+  type: Type;
   references: References;
   version: Version;
   exceptionsList: ListArrayOrUndefined;

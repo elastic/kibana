@@ -7,34 +7,7 @@
 .lnsInnerIndexPatternDataPanel__header {
   display: flex;
   align-items: center;
-  height: $euiSize * 3;
-  margin-top: -$euiSizeS;
-}
-
-.lnsInnerIndexPatternDataPanel__triggerButton {
-  @include euiTitle('xs');
-  line-height: $euiSizeXXL;
-}
-
-/**
- * 1. Don't cut off the shadow of the field items
- */
-
-.lnsInnerIndexPatternDataPanel__listWrapper {
-  @include euiOverflowShadow;
-  @include euiScrollBar;
-  margin-left: -$euiSize; /* 1 */
-  position: relative;
-  flex-grow: 1;
-  overflow: auto;
-}
-
-.lnsInnerIndexPatternDataPanel__list {
-  padding-top: $euiSizeS;
-  position: absolute;
-  top: 0;
-  left: $euiSize; /* 1 */
-  right: $euiSizeXS; /* 1 */
+  margin-bottom: $euiSizeS;
 }
 
 .lnsInnerIndexPatternDataPanel__fieldItems {

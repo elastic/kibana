@@ -130,7 +130,7 @@ describe('#callAsInternalUser', () => {
     expect(mockEsClientInstance.security.authenticate).toHaveBeenLastCalledWith(mockParams);
   });
 
-  test('does not wrap errors if `wrap401Errors` is not set', async () => {
+  test('does not wrap errors if `wrap401Errors` is set to `false`', async () => {
     const mockError = { message: 'some error' };
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
@@ -146,7 +146,7 @@ describe('#callAsInternalUser', () => {
     ).rejects.toBe(mockAuthenticationError);
   });
 
-  test('wraps only 401 errors by default or when `wrap401Errors` is set', async () => {
+  test('wraps 401 errors when `wrap401Errors` is set to `true` or unspecified', async () => {
     const mockError = { message: 'some error' };
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
@@ -349,6 +349,22 @@ describe('#asScoped', () => {
     );
   });
 
+  test('passes x-opaque-id header with request id', () => {
+    clusterClient.asScoped(
+      httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'alpha', requestUuid: 'ignore-this-id' },
+      })
+    );
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { 'x-opaque-id': 'alpha' },
+      expect.any(Object)
+    );
+  });
+
   test('both scoped and internal API caller fail if cluster client is closed', async () => {
     clusterClient.asScoped(
       httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
@@ -482,7 +498,7 @@ describe('#asScoped', () => {
       expect(MockScopedClusterClient).toHaveBeenCalledWith(
         expect.any(Function),
         expect.any(Function),
-        {},
+        expect.objectContaining({ 'x-opaque-id': expect.any(String) }),
         auditor
       );
     });

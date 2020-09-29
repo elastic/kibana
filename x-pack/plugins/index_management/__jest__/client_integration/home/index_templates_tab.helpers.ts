@@ -12,7 +12,7 @@ import {
   TestBedConfig,
   findTestSubject,
 } from '../../../../../test_utils';
-import { TemplateList } from '../../../public/application/sections/home/template_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';
 
@@ -40,10 +40,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
    * User Actions
    */
-  const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
-    const tabs = ['summary', 'settings', 'mappings', 'aliases'];
+  const selectDetailsTab = async (
+    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
+  ) => {
+    const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
 
-    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+    testBed.component.update();
   };
 
   const clickReloadButton = () => {
@@ -95,9 +100,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'composable' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['composable', 'system'];
+    const views = ['managed', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {

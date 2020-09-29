@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import moment from 'moment';
 
 import {
@@ -27,7 +26,7 @@ describe('ReindexActions', () => {
 
   beforeEach(() => {
     client = {
-      errors: null,
+      errors: SavedObjectsErrorHelpers,
       create: jest.fn(unimplemented('create')),
       bulkCreate: jest.fn(unimplemented('bulkCreate')),
       delete: jest.fn(unimplemented('delete')),
@@ -306,7 +305,7 @@ describe('ReindexActions', () => {
       describe(`IndexConsumerType.${typeKey}`, () => {
         it('creates the lock doc if it does not exist and executes callback', async () => {
           expect.assertions(3);
-          client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
+          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
           client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
             Promise.resolve({
               type,

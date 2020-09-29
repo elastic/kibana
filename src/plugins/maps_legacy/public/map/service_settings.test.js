@@ -49,11 +49,7 @@ describe('service_settings (FKA tile_map test)', function () {
   };
 
   const defaultTilemapConfig = {
-    deprecated: {
-      config: {
-        options: {},
-      },
-    },
+    options: {},
   };
 
   function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}) {
@@ -98,6 +94,9 @@ describe('service_settings (FKA tile_map test)', function () {
       expect(attrs.url.includes('{x}')).toEqual(true);
       expect(attrs.url.includes('{y}')).toEqual(true);
       expect(attrs.url.includes('{z}')).toEqual(true);
+      expect(attrs.attribution).toEqual(
+        '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&lt;iframe id=\'iframe\' style=\'position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;\' src=\'http://256.256.256.256\'&gt;&lt;/iframe&gt;</a>'
+      );
 
       const urlObject = url.parse(attrs.url, true);
       expect(urlObject.hostname).toEqual('tiles.foobar');
@@ -157,13 +156,8 @@ describe('service_settings (FKA tile_map test)', function () {
         serviceSettings = makeServiceSettings(
           {},
           {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
-            },
+            url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            options: { minZoom: 0, maxZoom: 20 },
           }
         );
 
@@ -182,7 +176,7 @@ describe('service_settings (FKA tile_map test)', function () {
             minZoom: 0,
             maxZoom: 10,
             attribution:
-              '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+              '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">&lt;iframe id=\'iframe\' style=\'position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;\' src=\'http://256.256.256.256\'&gt;&lt;/iframe&gt;</a>',
             subdomains: [],
           },
         ];
@@ -248,13 +242,8 @@ describe('service_settings (FKA tile_map test)', function () {
             includeElasticMapsService: false,
           },
           {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
-            },
+            url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            options: { minZoom: 0, maxZoom: 20 },
           }
         );
         const tilemapServices = await serviceSettings.getTMSServices();
@@ -276,7 +265,6 @@ describe('service_settings (FKA tile_map test)', function () {
         serviceSettings = makeServiceSettings({
           includeElasticMapsService: false,
         });
-        // mapConfig.includeElasticMapsService = false;
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [];
         expect(tilemapServices).toEqual(expected);
@@ -289,7 +277,7 @@ describe('service_settings (FKA tile_map test)', function () {
       const serviceSettings = makeServiceSettings();
       serviceSettings.setQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
-      expect(fileLayers.length).toEqual(18);
+      expect(fileLayers.length).toEqual(19);
       const assertions = fileLayers.map(async function (fileLayer) {
         expect(fileLayer.origin).toEqual(ORIGIN.EMS);
         const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
@@ -342,6 +330,17 @@ describe('service_settings (FKA tile_map test)', function () {
       const fileLayers = await serviceSettings.getFileLayers();
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
       expect(hotlink).toEqual('?locale=en#file/world_countries'); //url host undefined becuase emsLandingPageUrl is set at kibana-load
+    });
+
+    it('should sanitize EMS attribution', async () => {
+      const serviceSettings = makeServiceSettings();
+      const fileLayers = await serviceSettings.getFileLayers();
+      const fileLayer = fileLayers.find((layer) => {
+        return layer.id === 'world_countries_with_compromised_attribution';
+      });
+      expect(fileLayer.attribution).toEqual(
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">Elastic Maps Service</a>'
+      );
     });
   });
 });

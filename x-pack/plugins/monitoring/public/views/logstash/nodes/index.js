@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -11,7 +12,11 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { Listing } from '../../../components/logstash/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { CODE_PATH_LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  CODE_PATH_LOGSTASH,
+  LOGSTASH_SYSTEM_ID,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+} from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
   template,
@@ -26,12 +31,23 @@ uiRoutes.when('/logstash/nodes', {
   controller: class LsNodesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       super({
-        title: 'Logstash - Nodes',
+        title: i18n.translate('xpack.monitoring.logstash.nodes.routeTitle', {
+          defaultMessage: 'Logstash - Nodes',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.logstash.nodes.pageTitle', {
+          defaultMessage: 'Logstash nodes',
+        }),
         storageKey: 'logstash.nodes',
         getPageData,
         reactNodeId: 'monitoringLogstashNodesApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+          },
+        },
       });
 
       $scope.$watch(
@@ -49,6 +65,7 @@ uiRoutes.when('/logstash/nodes', {
                     data={data.nodes}
                     setupMode={setupMode}
                     stats={data.clusterStatus}
+                    alerts={this.alerts}
                     sorting={this.sorting}
                     pagination={this.pagination}
                     onTableChange={this.onTableChange}

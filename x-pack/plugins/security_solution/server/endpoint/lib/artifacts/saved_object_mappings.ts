@@ -45,7 +45,6 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     body: {
       type: 'binary',
-      index: false,
     },
   },
 };
@@ -56,7 +55,13 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
       index: false,
     },
-    // array of doc ids
+    schemaVersion: {
+      type: 'keyword',
+    },
+    semanticVersion: {
+      type: 'keyword',
+      index: false,
+    },
     ids: {
       type: 'keyword',
       index: false,
@@ -66,14 +71,14 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const exceptionsArtifactType: SavedObjectsType = {
   name: exceptionsArtifactSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: exceptionsArtifactSavedObjectMappings,
 };
 
 export const manifestType: SavedObjectsType = {
   name: manifestSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: manifestSavedObjectMappings,
 };

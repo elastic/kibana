@@ -7,7 +7,10 @@
 import { AbstractVectorSource } from '../vector_source';
 import { IVectorSource } from '../vector_source';
 import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import {
+  DynamicStylePropertyOptions,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
@@ -25,7 +28,7 @@ export interface IESSource extends IVectorSource {
   loadStylePropsMeta(
     layerName: string,
     style: VectorStyle,
-    dynamicStyleProps: IDynamicStyleProperty[],
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
     searchFilters: VectorSourceRequestMeta
   ): Promise<unknown>;
@@ -45,8 +48,21 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   loadStylePropsMeta(
     layerName: string,
     style: VectorStyle,
-    dynamicStyleProps: IDynamicStyleProperty[],
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
     searchFilters: VectorSourceRequestMeta
   ): Promise<unknown>;
+  _runEsQuery: ({
+    requestId,
+    requestName,
+    requestDescription,
+    searchSource,
+    registerCancelCallback,
+  }: {
+    requestId: string;
+    requestName: string;
+    requestDescription: string;
+    searchSource: ISearchSource;
+    registerCancelCallback: () => void;
+  }) => Promise<unknown>;
 }

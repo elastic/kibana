@@ -22,7 +22,7 @@ export const SecureSpaceMessage = (props: SecureSpaceMessageProps) => {
   return (
     <Fragment>
       <EuiHorizontalRule />
-      <EuiText className="eui-textCenter">
+      <EuiText>
         <p>
           <FormattedMessage
             id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
@@ -30,6 +30,7 @@ export const SecureSpaceMessage = (props: SecureSpaceMessageProps) => {
             values={{
               rolesLink: (
                 <EuiLink
+                  data-test-subj="rolesManagementPage"
                   href={props.getUrlForApp('management', { path: 'security/roles' })}
                   aria-label={rolesLinkTextAriaLabel}
                 >

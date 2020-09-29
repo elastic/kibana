@@ -18,7 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller } from 'kibana/server';
+import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -83,14 +83,16 @@ export class CollectorSet {
       );
     }
 
-    const collectorTypesNotReady: string[] = [];
-    let allReady = true;
-    for (const collector of collectorSet.collectors.values()) {
-      if (!(await collector.isReady())) {
-        allReady = false;
-        collectorTypesNotReady.push(collector.type);
-      }
-    }
+    const collectorTypesNotReady = (
+      await Promise.all(
+        [...collectorSet.collectors.values()].map(async (collector) => {
+          if (!(await collector.isReady())) {
+            return collector.type;
+          }
+        })
+      )
+    ).filter((collectorType): collectorType is string => !!collectorType);
+    const allReady = collectorTypesNotReady.length === 0;
 
     if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
       const nowTimestamp = +new Date();
@@ -115,25 +117,32 @@ export class CollectorSet {
     return allReady;
   };
 
+  // all collections eventually pass through bulkFetch.
+  // the shape of the response is different when using the new ES client as is the error handling.
+  // We'll handle the refactor for using the new client in a follow up PR.
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient,
     collectors: Map<string, Collector<any, any>> = this.collectors
   ) => {
-    const responses = [];
-    for (const collector of collectors.values()) {
-      this.logger.debug(`Fetching data from ${collector.type} collector`);
-      try {
-        responses.push({
-          type: collector.type,
-          result: await collector.fetch(callCluster),
-        });
-      } catch (err) {
-        this.logger.warn(err);
-        this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
-      }
-    }
+    const responses = await Promise.all(
+      [...collectors.values()].map(async (collector) => {
+        this.logger.debug(`Fetching data from ${collector.type} collector`);
+        try {
+          return {
+            type: collector.type,
+            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the response appropriately.
+          };
+        } catch (err) {
+          this.logger.warn(err);
+          this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
+        }
+      })
+    );
 
-    return responses;
+    return responses.filter(
+      (response): response is { type: string; result: unknown } => typeof response !== 'undefined'
+    );
   };
 
   /*
@@ -144,9 +153,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
+  public bulkFetchUsage = async (callCluster: LegacyAPICaller, esClient: ElasticsearchClient) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors.collectors);
+    return await this.bulkFetch(callCluster, esClient, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

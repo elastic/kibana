@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnableAlertComponent renders without errors for valid props 1`] = `
+<div
+  class="euiPopover euiPopover--anchorDownCenter"
+>
+  <div
+    class="euiPopover__anchor"
+  >
+    <div
+      class="euiSwitch euiSwitch--compressed"
+    >
+      <button
+        aria-checked="false"
+        aria-label="Enable status alert"
+        class="euiSwitch__button"
+        data-test-subj="uptimeDisplayDefineConnector"
+        id="defineAlertSettingsSwitch"
+        role="switch"
+        type="button"
+      >
+        <span
+          class="euiSwitch__body"
+        >
+          <span
+            class="euiSwitch__thumb"
+          />
+          <span
+            class="euiSwitch__track"
+          />
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`EnableAlertComponent shallow renders without errors for valid props 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [MockFunction],
+      "getState": [MockFunction],
+      "replaceReducer": [MockFunction],
+      "subscribe": [MockFunction],
+    }
+  }
+>
+  <Router
+    history={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <EnableMonitorAlert
+      monitorId="testMonitor"
+      monitorName="My website"
+    />
+  </Router>
+</Provider>
+`;

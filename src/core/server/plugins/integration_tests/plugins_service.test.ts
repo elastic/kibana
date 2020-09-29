@@ -17,23 +17,26 @@
  * under the License.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
 
 import { PluginsService } from '../plugins_service';
 import { ConfigPath, ConfigService, Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 import { BehaviorSubject, from } from 'rxjs';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
 import { Plugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
+  const environmentSetup = environmentServiceMock.createSetupContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -43,6 +46,7 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
+      requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
       configPath = [path],
@@ -53,6 +57,7 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
+      requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
       configPath?: ConfigPath;
@@ -68,6 +73,7 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
         requiredPlugins,
+        requiredBundles,
         optionalPlugins,
         server,
         ui,
@@ -88,7 +94,7 @@ describe('PluginsService', () => {
       },
     };
 
-    const env = Env.createDefault(getEnvOptions());
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = new BehaviorSubject<Record<string, any>>({
       plugins: {
         initialize: true,
@@ -155,7 +161,7 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover();
+    await pluginsService.discover({ environment: environmentSetup });
 
     const setupDeps = coreMock.createInternalSetup();
     await pluginsService.setup(setupDeps);

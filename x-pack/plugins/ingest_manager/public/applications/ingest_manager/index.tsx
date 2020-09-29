@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { CoreStart, AppMountParameters } from 'src/core/public';
-import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
+import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import {
   IngestManagerSetupDeps,
   IngestManagerConfigType,
@@ -21,10 +21,17 @@ import {
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
-import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
-import { DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
+import { IngestManagerOverview, EPMApp, AgentPolicyApp, FleetApp, DataStreamApp } from './sections';
+import {
+  DepsContext,
+  ConfigContext,
+  useConfig,
+  useCore,
+  sendSetup,
+  sendGetPermissionsCheck,
+  licenseService,
+} from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
-import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
 import './index.scss';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -59,7 +66,7 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
-    const { epm, fleet } = useConfig();
+    const { fleet } = useConfig();
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -94,7 +101,6 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
           setPermissionsError('REQUEST_ERROR');
         }
       })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isPermissionsLoading || permissionsError) {
@@ -186,14 +192,14 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
             <Router {...rest}>
               <PackageInstallProvider notifications={notifications}>
                 <Switch>
-                  <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
+                  <Route path={PAGE_ROUTING_PATHS.integrations}>
                     <DefaultLayout section="epm">
                       <EPMApp />
                     </DefaultLayout>
-                  </ProtectedRoute>
-                  <Route path={PAGE_ROUTING_PATHS.configurations}>
-                    <DefaultLayout section="agent_config">
-                      <AgentConfigApp />
+                  </Route>
+                  <Route path={PAGE_ROUTING_PATHS.policies}>
+                    <DefaultLayout section="agent_policy">
+                      <AgentPolicyApp />
                     </DefaultLayout>
                   </Route>
                   <Route path={PAGE_ROUTING_PATHS.data_streams}>
@@ -260,7 +266,6 @@ export function renderApp(
   startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
 ) {
-  setHttpClient(coreStart.http);
   ReactDOM.render(
     <IngestManagerApp
       basepath={appBasePath}
@@ -281,4 +286,5 @@ export function renderApp(
 export const teardownIngestManager = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
+  licenseService.stop();
 };

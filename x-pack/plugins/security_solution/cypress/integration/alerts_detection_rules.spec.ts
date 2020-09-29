@@ -26,7 +26,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Alerts detection rules', () => {
   before(() => {
@@ -38,11 +38,12 @@ describe('Alerts detection rules', () => {
   });
 
   it('Sorts by activated rules', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+
     cy.get(RULE_NAME)
       .eq(FIFTH_RULE)
       .invoke('text')
@@ -56,7 +57,6 @@ describe('Alerts detection rules', () => {
             activateRule(SEVENTH_RULE);
             waitForRuleToBeActivated();
             sortByActivatedRules();
-
             cy.get(RULE_NAME)
               .eq(FIRST_RULE)
               .invoke('text')
@@ -70,7 +70,6 @@ describe('Alerts detection rules', () => {
                     cy.wrap(expectedRulesNames).should('include', seventhRuleName);
                   });
               });
-
             cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
             cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });

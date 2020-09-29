@@ -32,11 +32,17 @@ import 'angular-sanitize';
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setQueryService } from './services';
-import { setKibanaLegacy } from './services';
+import {
+  setCoreService,
+  setFormatService,
+  setQueryService,
+  setKibanaLegacy,
+  setShareService,
+} from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { SharePluginStart } from '../../share/public';
 
 export interface TileMapConfigType {
   tilemap: any;
@@ -48,6 +54,7 @@ interface TileMapVisualizationDependencies {
   getZoomPrecision: any;
   getPrecision: any;
   BaseMapsVisualization: any;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
@@ -61,6 +68,7 @@ export interface TileMapPluginSetupDependencies {
 export interface TileMapPluginStartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  share: SharePluginStart;
 }
 
 export interface TileMapPluginSetup {
@@ -81,12 +89,13 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision } = mapsLegacy;
+    const { getZoomPrecision, getPrecision, getServiceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
       uiSettings: core.uiSettings,
+      getServiceSettings,
     };
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
@@ -99,10 +108,12 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     };
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: TileMapPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
-    setQueryService(data.query);
-    setKibanaLegacy(kibanaLegacy);
+  public start(core: CoreStart, plugins: TileMapPluginStartDependencies) {
+    setFormatService(plugins.data.fieldFormats);
+    setQueryService(plugins.data.query);
+    setKibanaLegacy(plugins.kibanaLegacy);
+    setShareService(plugins.share);
+    setCoreService(core);
     return {};
   }
 }

@@ -6,6 +6,8 @@
 
 import dateMath, { Unit } from '@elastic/datemath';
 
+const JS_MAX_DATE = 8640000000000000;
+
 export function isValidDatemath(value: string): boolean {
   const parsedValue = dateMath.parse(value);
   return !!(parsedValue && parsedValue.isValid());
@@ -136,18 +138,24 @@ function extendRelativeDatemath(
   // if `diffAmount` is not an integer after normalization, express the difference in the original unit
   const shouldKeepDiffUnit = diffAmount % 1 !== 0;
 
-  return {
-    value: `now${operator}${normalizedAmount}${normalizedUnit}`,
-    diffUnit: shouldKeepDiffUnit ? unit : newUnit,
-    diffAmount: shouldKeepDiffUnit ? Math.abs(newAmount - parsedAmount) : diffAmount,
-  };
+  const nextValue = `now${operator}${normalizedAmount}${normalizedUnit}`;
+
+  if (isDateInRange(nextValue)) {
+    return {
+      value: nextValue,
+      diffUnit: shouldKeepDiffUnit ? unit : newUnit,
+      diffAmount: shouldKeepDiffUnit ? Math.abs(newAmount - parsedAmount) : diffAmount,
+    };
+  } else {
+    return undefined;
+  }
 }
 
 function extendAbsoluteDatemath(
   value: string,
   direction: 'before' | 'after',
   oppositeEdge: string
-): DatemathExtension {
+): DatemathExtension | undefined {
   const valueTimestamp = datemathToEpochMillis(value)!;
   const oppositeEdgeTimestamp = datemathToEpochMillis(oppositeEdge)!;
   const actualTimestampDiff = Math.abs(valueTimestamp - oppositeEdgeTimestamp);
@@ -159,11 +167,15 @@ function extendAbsoluteDatemath(
       ? valueTimestamp - normalizedTimestampDiff
       : valueTimestamp + normalizedTimestampDiff;
 
-  return {
-    value: new Date(newValue).toISOString(),
-    diffUnit: normalizedDiff.unit,
-    diffAmount: normalizedDiff.amount,
-  };
+  if (isDateInRange(newValue)) {
+    return {
+      value: new Date(newValue).toISOString(),
+      diffUnit: normalizedDiff.unit,
+      diffAmount: normalizedDiff.amount,
+    };
+  } else {
+    return undefined;
+  }
 }
 
 const CONVERSION_RATIOS: Record<string, Array<[Unit, number]>> = {
@@ -264,4 +276,13 @@ export function normalizeDate(amount: number, unit: Unit): { amount: number; uni
 
   // Cannot go one one unit above. Return as it is
   return { amount, unit };
+}
+
+function isDateInRange(date: string | number): boolean {
+  try {
+    const epoch = typeof date === 'string' ? datemathToEpochMillis(date) ?? -1 : date;
+    return epoch >= 0 && epoch <= JS_MAX_DATE;
+  } catch {
+    return false;
+  }
 }

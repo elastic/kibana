@@ -8,7 +8,6 @@ import { ExploreDataContextMenuAction } from './explore_data_context_menu_action
 import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
-import { EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
@@ -28,7 +27,7 @@ afterEach(() => {
   i18nTranslateSpy.mockClear();
 });
 
-const setup = () => {
+const setup = ({ dashboardOnlyMode = false }: { dashboardOnlyMode?: boolean } = {}) => {
   type UrlGenerator = UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
   const core = coreMock.createStart();
@@ -37,16 +36,14 @@ const setup = () => {
     createUrl: jest.fn(() => Promise.resolve('/xyz/app/discover/foo#bar')),
   } as unknown) as UrlGenerator;
 
-  const filtersAndTimeRangeFromContext = jest.fn((async () => ({
-    filters: [],
-  })) as EmbeddableStart['filtersAndTimeRangeFromContext']);
-
   const plugins: PluginDeps = {
     discover: {
       urlGenerator,
     },
-    embeddable: {
-      filtersAndTimeRangeFromContext,
+    kibanaLegacy: {
+      dashboardConfig: {
+        getHideWriteControls: () => dashboardOnlyMode,
+      },
     },
   };
 
@@ -143,6 +140,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable does not have index patterns', async () => {
       const { action, output, context } = setup();
+      // @ts-expect-error
       delete output.indexPatterns;
 
       const isCompatible = await action.isCompatible(context);
@@ -162,6 +160,26 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if dashboard is in edit mode', async () => {
       const { action, input, context } = setup();
       input.viewMode = ViewMode.EDIT;
+
+      const isCompatible = await action.isCompatible(context);
+
+      expect(isCompatible).toBe(false);
+    });
+
+    test('return false for dashboard_only mode', async () => {
+      const { action, context } = setup({ dashboardOnlyMode: true });
+      const isCompatible = await action.isCompatible(context);
+
+      expect(isCompatible).toBe(false);
+    });
+
+    test('returns false if Discover app is disabled', async () => {
+      const { action, context, core } = setup();
+
+      core.application.capabilities = { ...core.application.capabilities };
+      (core.application.capabilities as any).discover = {
+        show: false,
+      };
 
       const isCompatible = await action.isCompatible(context);
 

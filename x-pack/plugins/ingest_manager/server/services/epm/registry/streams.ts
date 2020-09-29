@@ -11,7 +11,8 @@ export function bufferToStream(buffer: Buffer): PassThrough {
   return stream;
 }
 
-export function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
+export function streamToString(stream: NodeJS.ReadableStream | Buffer): Promise<string> {
+  if (stream instanceof Buffer) return Promise.resolve(stream.toString());
   return new Promise((resolve, reject) => {
     const body: string[] = [];
     stream.on('data', (chunk: string) => body.push(chunk));

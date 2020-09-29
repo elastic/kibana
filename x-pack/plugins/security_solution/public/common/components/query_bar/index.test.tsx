@@ -6,33 +6,16 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-
+import { waitFor } from '@testing-library/react';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
-import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('QueryBar ', () => {
-  // We are doing that because we need to wrapped this component with redux
-  // and redux does not like to be updated and since we need to update our
-  // child component (BODY) and we do not want to scare anyone with this error
-  // we are hiding it!!!
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
   const mockOnChangeQuery = jest.fn();
   const mockOnSubmitQuery = jest.fn();
   const mockOnSavedQuery = jest.fn();
@@ -187,13 +170,9 @@ describe('QueryBar ', () => {
 
   describe('state', () => {
     test('clears draftQuery when filterQueryDraft has been cleared', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -214,27 +193,26 @@ describe('QueryBar ', () => {
         />
       );
 
-      const queryInput = wrapper.find(QueryBar).find('input[data-test-subj="queryInput"]');
+      let queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
       queryInput.simulate('change', { target: { value: 'host.name:*' } });
 
-      expect(queryInput.html()).toContain('value="host.name:*"');
+      wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
+      expect(queryInput.props().children).toBe('host.name:*');
 
       wrapper.setProps({ filterQueryDraft: null });
       wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
 
-      expect(queryInput.html()).toContain('value=""');
+      expect(queryInput.props().children).toBe('');
     });
   });
 
   describe('#onQueryChange', () => {
     test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -258,7 +236,7 @@ describe('QueryBar ', () => {
       const onSubmitQueryRef = searchBarProps.onQuerySubmit;
       const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
-      const queryInput = wrapper.find(QueryBar).find('input[data-test-subj="queryInput"]');
+      const queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
       queryInput.simulate('change', { target: { value: 'hello: world' } });
       wrapper.update();
 
@@ -378,25 +356,10 @@ describe('QueryBar ', () => {
   });
 
   describe('SavedQueryManagementComponent state', () => {
-    test('popover should hidden when "Save current query" button was clicked', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
+    test('popover should hidden when "Save current query" button was clicked', async () => {
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider
-            services={{
-              data: {
-                query: {
-                  savedQueries: {
-                    findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
-                    getAllSavedQueries: jest.fn().mockResolvedValue([]),
-                  },
-                },
-              },
-            }}
-          >
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -418,21 +381,24 @@ describe('QueryBar ', () => {
           onSavedQuery={mockOnSavedQuery}
         />
       );
+      await waitFor(() => {
+        const isSavedQueryPopoverOpen = () =>
+          wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
 
-      const isSavedQueryPopoverOpen = () =>
-        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+        expect(isSavedQueryPopoverOpen()).toBeFalsy();
 
-      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        wrapper
+          .find('button[data-test-subj="saved-query-management-popover-button"]')
+          .simulate('click');
 
-      wrapper
-        .find('button[data-test-subj="saved-query-management-popover-button"]')
-        .simulate('click');
+        expect(isSavedQueryPopoverOpen()).toBeTruthy();
 
-      expect(isSavedQueryPopoverOpen()).toBeTruthy();
+        wrapper
+          .find('button[data-test-subj="saved-query-management-save-button"]')
+          .simulate('click');
 
-      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
-
-      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        expect(isSavedQueryPopoverOpen()).toBeFalsy();
+      });
     });
   });
 });

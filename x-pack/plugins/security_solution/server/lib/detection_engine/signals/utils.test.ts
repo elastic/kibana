@@ -9,32 +9,44 @@ import sinon from 'sinon';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
-import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 import {
   generateId,
   parseInterval,
-  parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
+  getGapMaxCatchupRatio,
   errorAggregator,
   getListsClient,
-  hasLargeValueList,
   getSignalTimeTuples,
   getExceptions,
+  wrapBuildingBlocks,
+  generateSignalId,
+  createErrorsFromShard,
+  createSearchAfterReturnTypeFromResponse,
+  createSearchAfterReturnType,
+  mergeReturns,
+  createTotalHitsFromSearchResult,
 } from './utils';
-import { BulkResponseErrorAggregation } from './types';
+import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
   mockLogger,
+  sampleSignalHit,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+  sampleDocSearchResultsNoSortIdNoHits,
+  repeatedSearchResultsWithSortId,
 } from './__mocks__/es_results';
+import { ShardError } from '../../types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -357,6 +369,14 @@ describe('utils', () => {
       expect(aggregated).toEqual(expected);
     });
 
+    test('it should aggregate with an empty create object', () => {
+      const empty = sampleBulkResponse();
+      empty.items = [{}];
+      const aggregated = errorAggregator(empty, []);
+      const expected: BulkResponseErrorAggregation = {};
+      expect(aggregated).toEqual(expected);
+    });
+
     test('it should aggregate with an empty object when given a valid bulk response with no errors', () => {
       const validResponse = sampleBulkResponse();
       const aggregated = errorAggregator(validResponse, []);
@@ -559,7 +579,7 @@ describe('utils', () => {
     });
 
     test('it successfully returns list and exceptions list client', async () => {
-      const { listClient, exceptionsClient } = await getListsClient({
+      const { listClient, exceptionsClient } = getListsClient({
         services: alertServices,
         savedObjectClient: alertServices.savedObjectsClient,
         updatedByUser: 'some_user',
@@ -570,67 +590,8 @@ describe('utils', () => {
       expect(listClient).toBeDefined();
       expect(exceptionsClient).toBeDefined();
     });
-
-    test('it throws if "lists" is undefined', async () => {
-      await expect(() =>
-        getListsClient({
-          services: alertServices,
-          savedObjectClient: alertServices.savedObjectsClient,
-          updatedByUser: 'some_user',
-          spaceId: '',
-          lists: undefined,
-        })
-      ).rejects.toThrowError('lists plugin unavailable during rule execution');
-    });
   });
 
-  describe('#hasLargeValueList', () => {
-    test('it returns false if empty array', () => {
-      const hasLists = hasLargeValueList([]);
-
-      expect(hasLists).toBeFalsy();
-    });
-
-    test('it returns true if item of type EntryList exists', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'list',
-          operator: 'included',
-          list: { id: 'some id', type: 'ip' },
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeTruthy();
-    });
-
-    test('it returns false if item of type EntryList does not exist', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'match',
-          operator: 'included',
-          value: 'Elastic, N.V.',
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeFalsy();
-    });
-  });
   describe('getSignalTimeTuples', () => {
     test('should return a single tuple if no gap', () => {
       const someTuples = getSignalTimeTuples({
@@ -716,46 +677,79 @@ describe('utils', () => {
     });
   });
 
+  describe('getMaxCatchupRatio', () => {
+    test('should return null if rule has never run before', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: null,
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+
+    test('should should have non-null values when gap is present', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toEqual(0.2);
+      expect(ratio).toEqual(0.2);
+      expect(gapDiffInUnits).toEqual(10);
+    });
+
+    // when a rule runs sooner than expected we don't
+    // consider that a gap as that is a very rare circumstance
+    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+  });
+
   describe('#getExceptions', () => {
     test('it successfully returns array of exception list items', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListsItem: jest.fn().mockResolvedValue({
+            data: [getExceptionListItemSchemaMock()],
+            page: 1,
+            per_page: 10000,
+            total: 1,
+          }),
+        } as unknown) as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
         client,
         lists: getListArrayMock(),
       });
 
-      expect(client.getExceptionList).toHaveBeenNthCalledWith(1, {
-        id: 'some_uuid',
-        listId: undefined,
-        namespaceType: 'single',
+      expect(client.findExceptionListsItem).toHaveBeenCalledWith({
+        listId: ['list_id_single', 'endpoint_list'],
+        namespaceType: ['single', 'agnostic'],
+        page: 1,
+        perPage: 10000,
+        filter: [],
+        sortOrder: undefined,
+        sortField: undefined,
       });
-      expect(client.getExceptionList).toHaveBeenNthCalledWith(2, {
-        id: 'some_uuid',
-        listId: undefined,
-        namespaceType: 'agnostic',
-      });
-      expect(exceptions).toEqual([
-        getExceptionListItemSchemaMock(),
-        getExceptionListItemSchemaMock(),
-      ]);
-    });
-
-    test('it throws if "client" is undefined', async () => {
-      await expect(() =>
-        getExceptions({
-          client: undefined,
-          lists: getListArrayMock(),
-        })
-      ).rejects.toThrowError('lists plugin unavailable during rule execution');
-    });
-
-    test('it returns empty array if no "lists" is undefined', async () => {
-      const exceptions = await getExceptions({
-        client: listMock.getExceptionListClient(),
-        lists: undefined,
-      });
-
-      expect(exceptions).toEqual([]);
+      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
     test('it throws if "getExceptionListClient" fails', async () => {
@@ -773,11 +767,11 @@ describe('utils', () => {
       ).rejects.toThrowError('unable to fetch exception list items');
     });
 
-    test('it throws if "findExceptionListItem" fails', async () => {
+    test('it throws if "findExceptionListsItem" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         (({
-          findExceptionListItem: jest.fn().mockRejectedValue(err),
+          findExceptionListsItem: jest.fn().mockRejectedValue(err),
         } as unknown) as ExceptionListClient);
 
       await expect(() =>
@@ -788,32 +782,342 @@ describe('utils', () => {
       ).rejects.toThrowError('unable to fetch exception list items');
     });
 
-    test('it returns empty array if "getExceptionList" returns null', async () => {
+    test('it returns empty array if "findExceptionListsItem" returns null', async () => {
       listMock.getExceptionListClient = () =>
         (({
-          getExceptionList: jest.fn().mockResolvedValue(null),
+          findExceptionListsItem: jest.fn().mockResolvedValue(null),
         } as unknown) as ExceptionListClient);
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
-        lists: undefined,
+        lists: [],
       });
 
       expect(exceptions).toEqual([]);
     });
+  });
 
-    test('it returns empty array if "findExceptionListItem" returns null', async () => {
-      listMock.getExceptionListClient = () =>
-        (({
-          findExceptionListItem: jest.fn().mockResolvedValue(null),
-        } as unknown) as ExceptionListClient);
-
-      const exceptions = await getExceptions({
-        client: listMock.getExceptionListClient(),
-        lists: undefined,
+  describe('wrapBuildingBlocks', () => {
+    it('should generate a unique id for each building block', () => {
+      const wrappedBlocks = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockIds: string[] = [];
+      wrappedBlocks.forEach((block) => {
+        expect(blockIds.includes(block._id)).toEqual(false);
+        blockIds.push(block._id);
       });
+    });
 
-      expect(exceptions).toEqual([]);
+    it('should generate different ids for identical documents in different sequences', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockId = wrappedBlockSequence1[0]._id;
+      wrappedBlockSequence2.forEach((block) => {
+        expect(block._id).not.toEqual(blockId);
+      });
+    });
+
+    it('should generate the same ids when given the same sequence twice', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      wrappedBlockSequence1.forEach((block, idx) => {
+        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
+      });
+    });
+  });
+
+  describe('generateSignalId', () => {
+    it('generates a unique signal id for same signal with different rule id', () => {
+      const signalId1 = generateSignalId(sampleSignalHit().signal);
+      const modifiedSignal = sampleSignalHit();
+      modifiedSignal.signal.rule.id = 'some other rule id';
+      const signalIdModified = generateSignalId(modifiedSignal.signal);
+      expect(signalId1).not.toEqual(signalIdModified);
+    });
+  });
+
+  describe('createErrorsFromShard', () => {
+    test('empty errors will return an empty array', () => {
+      const createdErrors = createErrorsFromShard({ errors: [] });
+      expect(createdErrors).toEqual([]);
+    });
+
+    test('single error will return single converted array of a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: some reason, type: some type, caused by: some reason',
+      ]);
+    });
+
+    test('two errors will return two converted arrays to a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+        {
+          shard: 2,
+          index: 'index-345',
+          node: 'node-345',
+          reason: {
+            type: 'some type 2',
+            reason: 'some reason 2',
+            index_uuid: 'uuid-345',
+            index: 'index-345',
+            caused_by: {
+              type: 'some type 2',
+              reason: 'some reason 2',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: some reason, type: some type, caused by: some reason',
+        'reason: some reason 2, type: some type 2, caused by: some reason 2',
+      ]);
+    });
+  });
+
+  describe('createSearchAfterReturnTypeFromResponse', () => {
+    test('empty results will return successful type', () => {
+      const searchResult = sampleEmptyDocSearchResults();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('multiple results will return successful type with expected success', () => {
+      const searchResult = sampleDocSearchResultsWithSortId();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('result with error will create success: false within the result set', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 1;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if failed is 2 or more', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: true within the result set if failed is 0', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 0;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(true);
+    });
+  });
+
+  describe('createSearchAfterReturnType', () => {
+    test('createSearchAfterReturnType will return full object when nothing is passed', () => {
+      const searchAfterReturnType = createSearchAfterReturnType();
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override all values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override select values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+  });
+
+  describe('mergeReturns', () => {
+    test('it merges a default "prev" and "next" correctly ', () => {
+      const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(merged).toEqual(expected);
+    });
+
+    test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
+      const { success } = mergeReturns([
+        createSearchAfterReturnType({ success: false }),
+        createSearchAfterReturnType(),
+      ]);
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search in with two default search results where "next" "success" is false correctly', () => {
+      const { success } = mergeReturns([
+        createSearchAfterReturnType(),
+        createSearchAfterReturnType({ success: false }),
+      ]);
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
+      const { lastLookBackDate } = mergeReturns([
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
+        }),
+      ]);
+      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
+      const { lastLookBackDate } = mergeReturns([
+        createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        createSearchAfterReturnType({
+          lastLookBackDate: undefined,
+        }),
+      ]);
+      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where values from "next" and "prev" are computed together', () => {
+      const merged = mergeReturns([
+        createSearchAfterReturnType({
+          bulkCreateTimes: ['123'],
+          createdSignalsCount: 3,
+          errors: ['error 1', 'error 2'],
+          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
+          searchAfterTimes: ['123'],
+          success: true,
+        }),
+        createSearchAfterReturnType({
+          bulkCreateTimes: ['456'],
+          createdSignalsCount: 2,
+          errors: ['error 3'],
+          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+          searchAfterTimes: ['567'],
+          success: true,
+        }),
+      ]);
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        createdSignalsCount: 5, // Adds the 3 and 2 together
+        errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
+        searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
+        success: true, // Defaults to success true is all of it was successful
+      };
+      expect(merged).toEqual(expected);
+    });
+  });
+
+  describe('createTotalHitsFromSearchResult', () => {
+    test('it should return 0 for empty results', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: sampleEmptyDocSearchResults(),
+      });
+      expect(result).toEqual(0);
+    });
+
+    test('it should return 4 for 4 result sets', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
+      });
+      expect(result).toEqual(4);
     });
   });
 });

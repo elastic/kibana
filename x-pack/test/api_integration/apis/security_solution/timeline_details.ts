@@ -7,9 +7,12 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
+// @ts-expect-error
 import { timelineDetailsQuery } from '../../../../plugins/security_solution/public/timelines/containers/details/index.gql_query';
 import {
+  // @ts-expect-error
   DetailItem,
+  // @ts-expect-error
   GetTimelineDetailsQuery,
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -314,6 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
             indexName: INDEX_NAME,
             eventId: ID,
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
           },
         })
         .then((resp) => {

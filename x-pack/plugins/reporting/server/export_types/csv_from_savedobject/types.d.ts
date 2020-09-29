@@ -4,27 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, ScheduledTaskParams, TimeRangeParams } from '../../types';
+import { TimeRangeParams } from '../common';
 
 export interface FakeRequest {
-  headers: Record<string, unknown>;
+  headers: Record<string, string>;
 }
 
-export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {
+export interface JobParamsPanelCsvPost {
+  timerange?: TimeRangeParams;
   state?: any;
+}
+
+export interface SearchPanel {
+  indexPatternSavedObjectId: string;
+  attributes: SavedSearchObjectAttributes;
+  timerange?: TimeRangeParams;
+}
+
+export interface JobPayloadPanelCsv extends JobParamsPanelCsv {
+  panel: SearchPanel;
 }
 
 export interface JobParamsPanelCsv {
   savedObjectType: string;
   savedObjectId: string;
-  isImmediate: boolean;
-  panel?: SearchPanel;
-  post?: JobParamsPostPayloadPanelCsv;
+  post?: JobParamsPanelCsvPost;
   visType?: string;
-}
-
-export interface ScheduledTaskParamsPanelCsv extends ScheduledTaskParams<JobParamsPanelCsv> {
-  jobParams: JobParamsPanelCsv;
 }
 
 export interface SavedObjectServiceError {
@@ -99,20 +104,6 @@ export interface SavedObject {
   references: SavedObjectReference[];
 }
 
-/* This object is passed to different helpers in different parts of the code
-   - packages/kbn-es-query/src/es_query/build_es_query
-   The structure has redundant parts and json-parsed / json-unparsed versions of the same data
- */
-export interface IndexPatternSavedObject {
-  title: string;
-  timeFieldName: string;
-  fields: any[];
-  attributes: {
-    fieldFormatMap: string;
-    fields: string;
-  };
-}
-
 export interface VisPanel {
   indexPatternSavedObjectId?: string;
   savedSearchObjectId?: string;
@@ -120,10 +111,9 @@ export interface VisPanel {
   timerange: TimeRangeParams;
 }
 
-export interface SearchPanel {
-  indexPatternSavedObjectId: string;
-  attributes: SavedSearchObjectAttributes;
-  timerange: TimeRangeParams;
+export interface DocValueFields {
+  field: string;
+  format: string;
 }
 
 export interface SearchSourceQuery {

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionParamsProps } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
@@ -14,6 +16,8 @@ export const IndexParamsFields = ({
   index,
   editAction,
   messageVariables,
+  docLinks,
+  errors,
 }: ActionParamsProps<IndexActionParams>) => {
   const { documents } = actionParams;
 
@@ -21,16 +25,19 @@ export const IndexParamsFields = ({
     try {
       const documentsJSON = JSON.parse(updatedDocuments);
       editAction('documents', [documentsJSON], index);
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      // set document as empty to turn on the validation for non empty valid JSON object
+      editAction('documents', [{}], index);
+    }
   };
 
   return (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'documents'}
+      data-test-subj="documentToIndex"
       inputTargetValue={
-        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : ''
+        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
       }
       label={i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
@@ -44,7 +51,27 @@ export const IndexParamsFields = ({
           defaultMessage: 'Code editor',
         }
       )}
+      errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
+      helpText={
+        <EuiLink
+          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
+            defaultMessage="Index document example."
+          />
+        </EuiLink>
+      }
+      onBlur={() => {
+        if (
+          !(documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined)
+        ) {
+          // set document as empty to turn on the validation for non empty valid JSON object
+          onDocumentsChange('{}');
+        }
+      }}
     />
   );
 };

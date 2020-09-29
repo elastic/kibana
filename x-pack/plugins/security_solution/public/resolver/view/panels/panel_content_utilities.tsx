@@ -4,11 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
-import { useResolverTheme } from '../assets';
+
+/**
+ * Text to use in place of an undefined timestamp value
+ */
+
+export const noTimestampRetrievedText = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved',
+  {
+    defaultMessage: 'No timestamp retrieved',
+  }
+);
 
 /**
  * A bold version of EuiCode to display certain titles with
@@ -20,76 +32,41 @@ export const BoldCode = styled(EuiCode)`
 `;
 
 /**
- * The two query parameters we read/write on to control which view the table presents:
+ * A component that renders an element with breaking opportunities (`<wbr>`s)
+ * spliced into text children at word boundaries.
  */
-export interface CrumbInfo {
-  readonly crumbId: string;
-  readonly crumbEvent: string;
-}
+export const GeneratedText = React.memo(function ({ children }) {
+  return <>{processedValue()}</>;
 
-const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
-  &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: ${(props) => props.background};
-    color: ${(props) => props.text};
-    padding: 1em;
-    border-radius: 5px;
+  function processedValue() {
+    return React.Children.map(children, (child) => {
+      if (typeof child === 'string') {
+        const valueSplitByWordBoundaries = child.split(/\b/);
+
+        if (valueSplitByWordBoundaries.length < 2) {
+          return valueSplitByWordBoundaries[0];
+        }
+
+        return [
+          valueSplitByWordBoundaries[0],
+          ...valueSplitByWordBoundaries
+            .splice(1)
+            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value) {
+              return [...generatedTextMemo, value, <wbr />];
+            }, []),
+        ];
+      } else {
+        return child;
+      }
+    });
   }
-
-  & .euiBreadcrumbSeparator {
-    background: ${(props) => props.text};
-  }
-`;
-
-/**
- * Breadcrumb menu with adjustments per direction from UX team
- */
-export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
-  breadcrumbs,
-  truncate,
-}: {
-  breadcrumbs: Breadcrumb[];
-  truncate?: boolean;
-}) {
-  const {
-    colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
-  } = useResolverTheme();
-  return (
-    <ThemedBreadcrumbs
-      background={resolverBreadcrumbBackground}
-      text={resolverEdgeText}
-      breadcrumbs={breadcrumbs}
-      truncate={truncate}
-    />
-  );
 });
 
 /**
- * Long formatter (to second) for DateTime
+ * A component to keep time representations in blocks so they don't wrap
+ * and look bad.
  */
-export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-});
-
-const invalidDateText = i18n.translate(
-  'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',
-  {
-    defaultMessage: 'Invalid Date',
-  }
-);
-/**
- * @param {ConstructorParameters<typeof Date>[0]} timestamp To be passed through Date->Intl.DateTimeFormat
- * @returns {string} A nicely formatted string for a date
- */
-export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
-  const date = new Date(timestamp);
-  if (isFinite(date.getTime())) {
-    return formatter.format(date);
-  } else {
-    return invalidDateText;
-  }
-}
+export const StyledTime = memo(styled('time')`
+  display: inline-block;
+  text-align: start;
+`);

@@ -32,6 +32,7 @@ export const mockStorage = new StubBrowserStorage();
 const mockHashedItemStore = new HashedItemStore(mockStorage);
 jest.mock('./', () => {
   return {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     HashedItemStore: require('./hashed_item_store').HashedItemStore,
     hashedItemStore: mockHashedItemStore,
   };

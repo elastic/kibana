@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('@kbn/plugin-helpers').babelRegister();
+require('../../src/setup_node_env');
 require('../dev-tools/api_debug').apiDebug();

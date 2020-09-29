@@ -7,7 +7,6 @@ import { Settings } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;
-  success: boolean;
 }
 
 export interface PutSettingsRequest {
@@ -16,5 +15,4 @@ export interface PutSettingsRequest {
 
 export interface PutSettingsResponse {
   item: Settings;
-  success: boolean;
 }

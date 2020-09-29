@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 
-import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
-import { ResolverState } from '../../types';
+import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
-import { StartServices } from '../../../types';
-import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../../common/constants';
 import { ResolverAction } from '../actions';
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -23,7 +18,7 @@ import { ResolverAction } from '../actions';
  * This is a factory because it is stateful and keeps that state in closure.
  */
 export function ResolverTreeFetcher(
-  context: KibanaReactContextValue<StartServices>,
+  dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let lastRequestAbortController: AbortController | undefined;
@@ -33,59 +28,50 @@ export function ResolverTreeFetcher(
   // if the entityID changes while
   return async () => {
     const state = api.getState();
-    const databaseDocumentIDToFetch = selectors.databaseDocumentIDToFetch(state);
+    const databaseParameters = selectors.treeParametersToFetch(state);
 
-    if (selectors.databaseDocumentIDToAbort(state) && lastRequestAbortController) {
+    if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
-    } else if (databaseDocumentIDToFetch !== null) {
+    } else if (databaseParameters !== null) {
       lastRequestAbortController = new AbortController();
       let result: ResolverTree | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch({
         type: 'appRequestedResolverData',
-        payload: databaseDocumentIDToFetch,
+        payload: databaseParameters,
       });
       try {
-        const indices: string[] = context.services.uiSettings.get(defaultIndexKey);
-        const matchingEntities: ResolverEntityIndex = await context.services.http.get(
-          '/api/endpoint/resolver/entity',
-          {
-            signal: lastRequestAbortController.signal,
-            query: {
-              _id: databaseDocumentIDToFetch,
-              indices,
-            },
-          }
-        );
+        const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
+          _id: databaseParameters.databaseDocumentID,
+          indices: databaseParameters.indices ?? [],
+          signal: lastRequestAbortController.signal,
+        });
         if (matchingEntities.length < 1) {
           // If no entity_id could be found for the _id, bail out with a failure.
           api.dispatch({
             type: 'serverFailedToReturnResolverData',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
           return;
         }
         const entityIDToFetch = matchingEntities[0].entity_id;
-        result = await context.services.http.get(`/api/endpoint/resolver/${entityIDToFetch}`, {
-          signal: lastRequestAbortController.signal,
-          query: {
-            children: 5,
-            ancestors: 5,
-          },
-        });
+        result = await dataAccessLayer.resolverTree(
+          entityIDToFetch,
+          lastRequestAbortController.signal
+        );
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
           api.dispatch({
             type: 'appAbortedResolverDataRequest',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
         } else {
           api.dispatch({
             type: 'serverFailedToReturnResolverData',
-            payload: databaseDocumentIDToFetch,
+            payload: databaseParameters,
           });
         }
       }
@@ -94,7 +80,7 @@ export function ResolverTreeFetcher(
           type: 'serverReturnedResolverData',
           payload: {
             result,
-            databaseDocumentID: databaseDocumentIDToFetch,
+            parameters: databaseParameters,
           },
         });
       }

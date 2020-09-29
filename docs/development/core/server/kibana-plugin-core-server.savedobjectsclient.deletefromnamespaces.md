@@ -9,7 +9,7 @@ Removes namespaces from a SavedObject
 <b>Signature:</b>
 
 ```typescript
-deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
+deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
 ```
 
 ## Parameters
@@ -23,5 +23,5 @@ deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: S
 
 <b>Returns:</b>
 
-`Promise<{}>`
+`Promise<SavedObjectsDeleteFromNamespacesResponse>`
 

@@ -15,11 +15,7 @@ interface Props {
   parentType: 'trace' | 'transaction';
 }
 
-const DurationSummaryItem = ({
-  duration,
-  totalDuration,
-  parentType,
-}: Props) => {
+function DurationSummaryItem({ duration, totalDuration, parentType }: Props) {
   const calculatedTotalDuration =
     totalDuration === undefined ? duration : totalDuration;
 
@@ -41,6 +37,6 @@ const DurationSummaryItem = ({
       </EuiText>
     </>
   );
-};
+}
 
 export { DurationSummaryItem };

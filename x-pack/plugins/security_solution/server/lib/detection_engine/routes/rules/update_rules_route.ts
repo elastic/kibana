@@ -10,6 +10,7 @@ import {
   updateRulesSchema,
   UpdateRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/update_rules_schema';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -51,6 +52,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -78,6 +80,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         to,
         type,
         threat,
+        threshold,
         throttle,
         timestamp_override: timestampOverride,
         references,
@@ -86,13 +89,10 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         exceptions_list: exceptionsList,
       } = request.body;
       try {
-        const query =
-          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && languageOrUndefined == null
-            ? 'kuery'
-            : languageOrUndefined;
+          !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -118,6 +118,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           query,
@@ -146,6 +147,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           to,
           type,
           threat,
+          threshold,
           timestampOverride,
           references,
           note,

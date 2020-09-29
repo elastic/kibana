@@ -7,8 +7,7 @@
 import { existsSync } from 'fs';
 import { resolve as resolvePath } from 'path';
 import { BrowserDownload, chromium } from '../';
-import { BROWSER_TYPE } from '../../../common/constants';
-import { LevelLogger } from '../../lib';
+import { GenericLevelLogger } from '../../lib/level_logger';
 import { md5 } from './checksum';
 import { clean } from './clean';
 import { download } from './download';
@@ -17,19 +16,9 @@ import { asyncMap } from './util';
 /**
  * Check for the downloaded archive of each requested browser type and
  * download them if they are missing or their checksum is invalid
- * @param  {String} browserType
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(browserType = BROWSER_TYPE, logger: LevelLogger) {
-  await ensureDownloaded([chromium], logger);
-}
-
-/**
- * Check for the downloaded archive of each requested browser type and
- * download them if they are missing or their checksum is invalid*
- * @return {Promise<undefined>}
- */
-export async function ensureAllBrowsersDownloaded(logger: LevelLogger) {
+export async function ensureBrowserDownloaded(logger: GenericLevelLogger) {
   await ensureDownloaded([chromium], logger);
 }
 
@@ -40,7 +29,7 @@ export async function ensureAllBrowsersDownloaded(logger: LevelLogger) {
  * @param  {BrowserSpec} browsers
  * @return {Promise<undefined>}
  */
-async function ensureDownloaded(browsers: BrowserDownload[], logger: LevelLogger) {
+async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLevelLogger) {
   await asyncMap(browsers, async (browser) => {
     const { archivesPath } = browser.paths;
 

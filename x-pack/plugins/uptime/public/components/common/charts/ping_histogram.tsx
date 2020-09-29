@@ -13,10 +13,11 @@ import {
   timeFormatter,
   BrushEndListener,
 } from '@elastic/charts';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import numeral from '@elastic/numeral';
 import moment from 'moment';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
@@ -144,6 +145,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
               defaultMessage: 'Ping Y Axis',
             })}
             position="left"
+            tickFormat={(d) => numeral(d).format('0')}
+            labelFormat={(d) => numeral(d).format('0a')}
             title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
               defaultMessage: 'Pings',
               description:
@@ -173,14 +176,15 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h2>
+      <EuiTitle size="s">
+        <h3>
           <FormattedMessage
             id="xpack.uptime.snapshot.pingsOverTimeTitle"
             defaultMessage="Pings over time"
           />
-        </h2>
+        </h3>
       </EuiTitle>
+      <EuiSpacer size="m" />
       {content}
     </>
   );

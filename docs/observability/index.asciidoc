@@ -1,0 +1,24 @@
+[chapter]
+[role="xpack"]
+[[observability]]
+= Observability
+
+Observability enables you to add and monitor your logs, system
+metrics, uptime data, and application traces, as a single stack. 
+
+With *Observability*, you have:
+
+* A central place to add and configure your data sources.
+* A variety of charts displaying analytics relating to each data source.
+* *View in app* options to drill down and analyze data in the Logs, Metrics, Uptime, and APM apps.
+* An alerts chart to keep you informed of any issues that you may need to resolve quickly.
+
+[role="screenshot"]
+image::observability/images/observability-overview.png[Observability Overview in {kib}]
+
+[float]
+== Get started
+
+{kib} provides step-by-step instructions to help you add and configure your data
+sources. The {observability-guide}/index.html[Observability Guide] is a good source for more detailed information
+and instructions.

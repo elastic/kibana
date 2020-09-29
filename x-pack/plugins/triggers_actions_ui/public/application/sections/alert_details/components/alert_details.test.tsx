@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
 import { coreMock } from 'src/core/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+
 const mockes = coreMock.createSetup();
 
 jest.mock('../../../app_context', () => ({
@@ -27,11 +29,6 @@ jest.mock('../../../app_context', () => ({
     http: jest.fn(),
     capabilities: {
       get: jest.fn(() => ({})),
-      securitySolution: {
-        'alerting:show': true,
-        'alerting:save': true,
-        'alerting:delete': true,
-      },
     },
     actionTypeRegistry: jest.fn(),
     alertTypeRegistry: {
@@ -66,7 +63,9 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
+  hasAllPrivilege: jest.fn(() => true),
   hasSaveAlertsCapability: jest.fn(() => true),
+  hasExecuteActionsCapability: jest.fn(() => true),
 }));
 
 const mockAlertApis = {
@@ -75,6 +74,10 @@ const mockAlertApis = {
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
   requestRefresh: jest.fn(),
+};
+
+const authorizedConsumers = {
+  [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
 
 // const AlertDetails = withBulkAlertOperations(RawAlertDetails);
@@ -87,9 +90,10 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     expect(
@@ -125,9 +129,10 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     expect(
@@ -154,9 +159,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
 
       const actionTypes: ActionType[] = [
@@ -207,9 +213,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
       const actionTypes: ActionType[] = [
         {
@@ -265,9 +272,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
 
       expect(
@@ -284,9 +292,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
 
       expect(
@@ -312,9 +321,10 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -339,9 +349,10 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -366,9 +377,10 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const disableAlert = jest.fn();
@@ -402,9 +414,10 @@ describe('disable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableAlert = jest.fn();
@@ -441,9 +454,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -469,9 +483,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -497,9 +512,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const muteAlert = jest.fn();
@@ -534,9 +550,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const unmuteAlert = jest.fn();
@@ -571,9 +588,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -590,6 +608,136 @@ describe('mute button', () => {
   });
 });
 
+describe('edit button', () => {
+  const actionTypes: ActionType[] = [
+    {
+      id: '.server-log',
+      name: 'Server log',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+    },
+  ];
+
+  it('should render an edit button when alert and actions are editable', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+
+  it('should not render an edit button when alert editable but actions arent', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeFalsy();
+  });
+
+  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
@@ -597,7 +745,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     name: `alert-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
-    consumer: 'consumer',
+    consumer: ALERTS_FEATURE_ID,
     schedule: { interval: '1m' },
     actions: [],
     params: {},

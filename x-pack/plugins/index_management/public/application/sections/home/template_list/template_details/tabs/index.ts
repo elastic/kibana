@@ -5,3 +5,4 @@
  */
 
 export { TabSummary } from './tab_summary';
+export { TabPreview } from './tab_preview';

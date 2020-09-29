@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiCallOut,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { SectionLoading, TabSettings, TabAliases, TabMappings } from '../shared_imports';
@@ -26,17 +27,23 @@ import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
 import { attemptToDecodeURI } from '../lib';
 
-interface Props {
+export interface Props {
   componentTemplateName: string;
   onClose: () => void;
-  showFooter?: boolean;
   actions?: ManageAction[];
+  showSummaryCallToAction?: boolean;
 }
 
-export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
+export const defaultFlyoutProps = {
+  'data-test-subj': 'componentTemplateDetails',
+  'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
+};
+
+export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Props> = ({
   componentTemplateName,
   onClose,
   actions,
+  showSummaryCallToAction,
 }) => {
   const { api } = useComponentTemplatesContext();
 
@@ -81,7 +88,12 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
     } = componentTemplateDetails;
 
     const tabToComponentMap: Record<TabType, React.ReactNode> = {
-      summary: <TabSummary componentTemplateDetails={componentTemplateDetails} />,
+      summary: (
+        <TabSummary
+          componentTemplateDetails={componentTemplateDetails}
+          showCallToAction={showSummaryCallToAction}
+        />
+      ),
       settings: <TabSettings settings={settings} />,
       mappings: <TabMappings mappings={mappings} />,
       aliases: <TabAliases aliases={aliases} />,
@@ -101,19 +113,29 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      data-test-subj="componentTemplateDetails"
-      aria-labelledby="componentTemplateDetailsFlyoutTitle"
-      size="m"
-      maxWidth={500}
-    >
+    <>
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id="componentTemplateDetailsFlyoutTitle" data-test-subj="title">
-            {decodedComponentTemplateName}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h2 id="componentTemplateDetailsFlyoutTitle" data-test-subj="title">
+                {decodedComponentTemplateName}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          {componentTemplateDetails?._kbnMeta.isManaged ? (
+            <EuiFlexItem grow={false}>
+              {' '}
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateDetails.managedBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
@@ -148,6 +170,6 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}
-    </EuiFlyout>
+    </>
   );
 };

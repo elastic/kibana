@@ -24,84 +24,90 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../urls/ml_conditional_links';
 
-describe('ml conditional links', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/78512
+// FLAKY: https://github.com/elastic/kibana/issues/78511
+// FLAKY: https://github.com/elastic/kibana/issues/78510
+// FLAKY: https://github.com/elastic/kibana/issues/78509
+// FLAKY: https://github.com/elastic/kibana/issues/78508
+// FLAKY: https://github.com/elastic/kibana/issues/78507
+// FLAKY: https://github.com/elastic/kibana/issues/78506
+// FLAKY: https://github.com/elastic/kibana/issues/78505
+// FLAKY: https://github.com/elastic/kibana/issues/78504
+// FLAKY: https://github.com/elastic/kibana/issues/78503
+// FLAKY: https://github.com/elastic/kibana/issues/78502
+// FLAKY: https://github.com/elastic/kibana/issues/78501
+// FLAKY: https://github.com/elastic/kibana/issues/78500
+describe.skip('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(process.name: "conhost.exe" or process.name: "sc.exe")'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
   });
 
   it('sets the KQL from a multiple IPs with a null for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpNullKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2"))'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should(
+        'eq',
+        '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2"))'
+      );
   });
 
   it('sets the KQL from a multiple IPs with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2")) and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should(
+        'eq',
+        '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2")) and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
+      );
   });
 
   it('sets the KQL from a $ip$ with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(process.name: "conhost.exe" or process.name: "sc.exe")'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
   });
 
   it('sets the KQL from a single host name with a value for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostSingleHostKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(process.name: "conhost.exe" or process.name: "sc.exe")'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
   });
 
   it('sets the KQL from a multiple host names with null for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostNullKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(host.name: "siem-windows" or host.name: "siem-suricata")'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should('eq', '(host.name: "siem-windows" or host.name: "siem-suricata")');
   });
 
   it('sets the KQL from a multiple host names with a value for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(host.name: "siem-windows" or host.name: "siem-suricata") and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should(
+        'eq',
+        '(host.name: "siem-windows" or host.name: "siem-suricata") and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
+      );
   });
 
   it('sets the KQL from a undefined/null host name but with a value for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostVariableHostKqlQuery);
-    cy.get(KQL_INPUT).should(
-      'have.attr',
-      'value',
-      '(process.name: "conhost.exe" or process.name: "sc.exe")'
-    );
+    cy.get(KQL_INPUT)
+      .invoke('text')
+      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
   });
 
   it('redirects from a single IP with a null for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/ip/127.0.0.1/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      'app/security/network/ip/127.0.0.1/source?timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -109,7 +115,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/ip/127.0.0.1/source?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      '/app/security/network/ip/127.0.0.1/source?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -117,7 +123,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpNullKqlQuery);
     cy.url().should(
       'include',
-      'app/security/network/flows?query=(language:kuery,query:%27((source.ip:%20%22127.0.0.1%22%20or%20destination.ip:%20%22127.0.0.1%22)%20or%20(source.ip:%20%22127.0.0.2%22%20or%20destination.ip:%20%22127.0.0.2%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999))'
+      'app/security/network/flows?query=(language:kuery,query:%27((source.ip:%20%22127.0.0.1%22%20or%20destination.ip:%20%22127.0.0.1%22)%20or%20(source.ip:%20%22127.0.0.2%22%20or%20destination.ip:%20%22127.0.0.2%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -125,7 +131,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/flows?query=(language:kuery,query:%27((source.ip:%20%22127.0.0.1%22%20or%20destination.ip:%20%22127.0.0.1%22)%20or%20(source.ip:%20%22127.0.0.2%22%20or%20destination.ip:%20%22127.0.0.2%22))%20and%20((process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      '/app/security/network/flows?query=(language:kuery,query:%27((source.ip:%20%22127.0.0.1%22%20or%20destination.ip:%20%22127.0.0.1%22)%20or%20(source.ip:%20%22127.0.0.2%22%20or%20destination.ip:%20%22127.0.0.2%22))%20and%20((process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -133,7 +139,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/flows?timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      '/app/security/network/flows?timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -141,7 +147,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/flows?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      '/app/security/network/flows?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -149,7 +155,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostSingleHostNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/siem-windows/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/siem-windows/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -157,7 +163,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostSingleHostKqlQueryVariable);
     cy.url().should(
       'include',
-      '/app/security/hosts/siem-windows/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/siem-windows/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -165,7 +171,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostSingleHostKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/siem-windows/anomalies?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/siem-windows/anomalies?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -173,7 +179,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(host.name:%20%22siem-windows%22%20or%20host.name:%20%22siem-suricata%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(host.name:%20%22siem-windows%22%20or%20host.name:%20%22siem-suricata%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -181,7 +187,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(host.name:%20%22siem-windows%22%20or%20host.name:%20%22siem-suricata%22)%20and%20((process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(host.name:%20%22siem-windows%22%20or%20host.name:%20%22siem-suricata%22)%20and%20((process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22))%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -189,7 +195,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostVariableHostNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 
@@ -197,7 +203,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPageWithoutDateRange(mlHostVariableHostKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:1559800800000,kind:absolute,to:1559887199999)),timeline:(linkTo:!(global),timerange:(from:1559800800000,kind:absolute,to:1559887199999)))'
+      '/app/security/hosts/anomalies?query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-06-06T06:00:00.000Z%27,kind:absolute,to:%272019-06-07T05:59:59.999Z%27)))&sourcerer=(default:!(%27auditbeat-*%27))'
     );
   });
 });

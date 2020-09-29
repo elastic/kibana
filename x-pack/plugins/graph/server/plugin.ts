@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
@@ -34,18 +35,20 @@ export class GraphPlugin implements Plugin {
     licenseState.start(licensing.license$);
     this.licenseState = licenseState;
     core.savedObjects.registerType(graphWorkspace);
+    licensing.featureUsage.register('Graph', 'platinum');
 
     if (home) {
       registerSampleData(home.sampleData, licenseState);
     }
 
     if (features) {
-      features.registerFeature({
+      features.registerKibanaFeature({
         id: 'graph',
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',
         }),
-        order: 1200,
+        order: 600,
+        category: DEFAULT_APP_CATEGORIES.kibana,
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
@@ -79,7 +82,10 @@ export class GraphPlugin implements Plugin {
     registerExploreRoute({ licenseState, router });
   }
 
-  public start() {}
+  public start(core: CoreStart, { licensing }: { licensing: LicensingPluginStart }) {
+    this.licenseState!.setNotifyUsage(licensing.featureUsage.notifyUsage);
+  }
+
   public stop() {
     if (this.licenseState) {
       this.licenseState.stop();

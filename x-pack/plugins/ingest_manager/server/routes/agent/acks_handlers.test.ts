@@ -88,7 +88,6 @@ describe('test acks handlers', () => {
     await postAgentAcksHandler(({} as unknown) as RequestHandlerContext, mockRequest, mockResponse);
     expect(mockResponse.ok.mock.calls[0][0]?.body as PostAgentAcksResponse).toEqual({
       action: 'acks',
-      success: true,
     });
   });
 });

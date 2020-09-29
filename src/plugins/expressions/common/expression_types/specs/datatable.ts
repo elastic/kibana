@@ -23,6 +23,13 @@ import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
 
+type State = string | number | boolean | null | undefined | SerializableState;
+
+/** @internal **/
+export interface SerializableState {
+  [key: string]: State | State[];
+}
+
 const name = 'datatable';
 
 /**
@@ -42,12 +49,21 @@ export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'nu
  */
 export type DatatableRow = Record<string, any>;
 
+export interface DatatableColumnMeta {
+  type: DatatableColumnType;
+  field?: string;
+  index?: string;
+  params?: SerializableState;
+  source?: string;
+  sourceParams?: SerializableState;
+}
 /**
  * This type represents the shape of a column in a `Datatable`.
  */
 export interface DatatableColumn {
+  id: string;
   name: string;
-  type: DatatableColumnType;
+  meta: DatatableColumnMeta;
 }
 
 /**
@@ -103,14 +119,16 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   from: {
     null: () => ({
       type: name,
+      meta: {},
       rows: [],
       columns: [],
     }),
     pointseries: (value: PointSeries) => ({
       type: name,
+      meta: {},
       rows: value.rows,
       columns: map(value.columns, (val: PointSeriesColumn, colName) => {
-        return { name: colName, type: val.type };
+        return { id: colName, name: colName, meta: { type: val.type } };
       }),
     }),
   },
@@ -127,13 +145,13 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     }),
     pointseries: (table: Datatable): PointSeries => {
       const validFields = ['x', 'y', 'color', 'size', 'text'];
-      const columns = table.columns.filter((column) => validFields.includes(column.name));
+      const columns = table.columns.filter((column) => validFields.includes(column.id));
       const rows = table.rows.map((row) => pick(row, validFields));
       return {
         type: 'pointseries',
         columns: columns.reduce<Record<string, PointSeries['columns']>>((acc, column) => {
           acc[column.name] = {
-            type: column.type,
+            type: column.meta.type,
             expression: column.name,
             role: 'dimension',
           };

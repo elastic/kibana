@@ -8,16 +8,13 @@ export {
   getAnalysisType,
   getDependentVar,
   getPredictionFieldName,
+  getDefaultTrainingFilterQuery,
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
   UpdateDataFrameAnalyticsConfig,
-  IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
-  ANALYSIS_CONFIG_TYPE,
   OUTLIER_ANALYSIS_METHOD,
   RegressionEvaluateResponse,
   getValuesFromResponse,
@@ -29,6 +26,7 @@ export {
   SEARCH_SIZE,
   defaultSearchQuery,
   SearchQuery,
+  ANALYSIS_CONFIG_TYPE,
 } from './analytics';
 
 export {
@@ -45,3 +43,6 @@ export { getIndexData } from './get_index_data';
 export { getIndexFields } from './get_index_fields';
 
 export { useResultsViewConfig } from './use_results_view_config';
+export { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+export { DataFrameAnalyticsId } from '../../../../common/types/data_frame_analytics';
+export { IndexName } from '../../../../common/types/data_frame_analytics';

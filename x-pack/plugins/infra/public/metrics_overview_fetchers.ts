@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { sum, isFinite, isNumber } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { MetricsFetchDataResponse, FetchDataParams } from '../../observability/public';
+import { isFinite, isNumber, sum } from 'lodash';
+import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
 import {
-  SnapshotRequest,
   SnapshotMetricInput,
   SnapshotNode,
   SnapshotNodeResponse,
+  SnapshotRequest,
 } from '../common/http_api/snapshot_api';
 import { SnapshotMetricType } from '../common/inventory_models/types';
 import { InfraClientCoreSetup } from './types';
@@ -77,22 +75,22 @@ export const combineNodeTimeseriesBy = (
 
 export const createMetricsFetchData = (
   getStartServices: InfraClientCoreSetup['getStartServices']
-) => async ({
-  startTime,
-  endTime,
-  bucketSize,
-}: FetchDataParams): Promise<MetricsFetchDataResponse> => {
+) => async ({ absoluteTime, bucketSize }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
+
+  const { start, end } = absoluteTime;
+
   const snapshotRequest: SnapshotRequest = {
     sourceId: 'default',
     metrics: ['cpu', 'memory', 'rx', 'tx'].map((type) => ({ type })) as SnapshotMetricInput[],
     groupBy: [],
     nodeType: 'host',
     includeTimeseries: true,
+    overrideCompositeSize: 5,
     timerange: {
-      from: moment(startTime).valueOf(),
-      to: moment(endTime).valueOf(),
+      from: start,
+      to: end,
       interval: bucketSize,
       forceInterval: true,
       ignoreLookback: true,
@@ -102,60 +100,35 @@ export const createMetricsFetchData = (
   const results = await http.post<SnapshotNodeResponse>('/api/metrics/snapshot', {
     body: JSON.stringify(snapshotRequest),
   });
-
-  const inboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.rxLabel', {
-    defaultMessage: 'Inbound traffic',
-  });
-
-  const outboundLabel = i18n.translate('xpack.infra.observabilityHomepage.metrics.txLabel', {
-    defaultMessage: 'Outbound traffic',
-  });
-
   return {
-    title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
-      defaultMessage: 'Metrics',
-    }),
-    appLink: '/app/metrics',
+    appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,
     stats: {
       hosts: {
         type: 'number',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.hostsLabel', {
-          defaultMessage: 'Hosts',
-        }),
         value: results.nodes.length,
       },
       cpu: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.cpuLabel', {
-          defaultMessage: 'CPU usage',
-        }),
         value: combineNodesBy('cpu', results.nodes, average),
       },
       memory: {
         type: 'percent',
-        label: i18n.translate('xpack.infra.observabilityHomepage.metrics.memoryLabel', {
-          defaultMessage: 'Memory usage',
-        }),
         value: combineNodesBy('memory', results.nodes, average),
       },
       inboundTraffic: {
         type: 'bytesPerSecond',
-        label: inboundLabel,
         value: combineNodesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
         type: 'bytesPerSecond',
-        label: outboundLabel,
         value: combineNodesBy('tx', results.nodes, average),
       },
     },
     series: {
       inboundTraffic: {
-        label: inboundLabel,
         coordinates: combineNodeTimeseriesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
-        label: outboundLabel,
         coordinates: combineNodeTimeseriesBy('tx', results.nodes, average),
       },
     },

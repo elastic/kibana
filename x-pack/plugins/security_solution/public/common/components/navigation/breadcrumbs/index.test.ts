@@ -36,6 +36,13 @@ const getMockObject = (
 ): RouteSpyState & TabNavigationProps => ({
   detailName,
   navTabs: {
+    case: {
+      disabled: false,
+      href: '/app/security/cases',
+      id: 'case',
+      name: 'Cases',
+      urlKey: 'case',
+    },
     hosts: {
       disabled: false,
       href: '/app/security/hosts',
@@ -80,24 +87,25 @@ const getMockObject = (
     global: {
       linkTo: ['timeline'],
       timerange: {
-        from: 1558048243696,
+        from: '2019-05-16T23:10:43.696Z',
         fromStr: 'now-24h',
         kind: 'relative',
-        to: 1558134643697,
+        to: '2019-05-17T23:10:43.697Z',
         toStr: 'now',
       },
     },
     timeline: {
       linkTo: ['global'],
       timerange: {
-        from: 1558048243696,
+        from: '2019-05-16T23:10:43.696Z',
         fromStr: 'now-24h',
         kind: 'relative',
-        to: 1558134643697,
+        to: '2019-05-17T23:10:43.697Z',
         toStr: 'now',
       },
     },
   },
+  sourcerer: {},
 });
 
 const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
@@ -123,7 +131,7 @@ describe('Navigation Breadcrumbs', () => {
         },
         {
           href:
-            'securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
           text: 'Hosts',
         },
         {
@@ -143,7 +151,7 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Network',
           href:
-            'securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'Flows',
@@ -162,7 +170,7 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Timelines',
           href:
-            'securitySolution:timelines?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:timelines?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
       ]);
     });
@@ -177,12 +185,12 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Hosts',
           href:
-            'securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'siem-kibana',
           href:
-            'securitySolution:hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts/siem-kibana?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         { text: 'Authentications', href: '' },
       ]);
@@ -198,11 +206,11 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Network',
           href:
-            'securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: ipv4,
-          href: `securitySolution:network/ip/${ipv4}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+          href: `securitySolution:network/ip/${ipv4}/source?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         { text: 'Flows', href: '' },
       ]);
@@ -218,13 +226,80 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Network',
           href:
-            'securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: ipv6,
-          href: `securitySolution:network/ip/${ipv6Encoded}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+          href: `securitySolution:network/ip/${ipv6Encoded}/source?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         { text: 'Flows', href: '' },
+      ]);
+    });
+
+    test('should return Alerts breadcrumbs when supplied detection pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('detections', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Detections',
+          href:
+            "securitySolution:detections?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Cases breadcrumbs when supplied case pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('case', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Case details breadcrumbs when supplied case details pathname', () => {
+      const sampleCase = {
+        id: 'my-case-id',
+        name: 'Case name',
+      };
+      const breadcrumbs = getBreadcrumbsForRoute(
+        {
+          ...getMockObject('case', `/${sampleCase.id}`, sampleCase.id),
+          state: { caseTitle: sampleCase.name },
+        },
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: sampleCase.name,
+          href: `securitySolution:case/${sampleCase.id}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+      ]);
+    });
+    test('should return Admin breadcrumbs when supplied admin pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('administration', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Administration',
+          href: 'securitySolution:administration',
+        },
       ]);
     });
   });
@@ -237,12 +312,12 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Hosts',
           href:
-            'securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'siem-kibana',
           href:
-            'securitySolution:hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts/siem-kibana?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         { text: 'Authentications', href: '' },
       ]);

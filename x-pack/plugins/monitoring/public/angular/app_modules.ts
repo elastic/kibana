@@ -18,12 +18,12 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../src/plugins/kibana_legacy/public';
-import { MonitoringPluginDependencies } from '../types';
+import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalState } from '../url_state';
 import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
 
 // @ts-ignore
-import { formatNumber, formatMetric } from '../lib/format_number';
+import { formatMetric, formatNumber } from '../lib/format_number';
 // @ts-ignore
 import { extractIp } from '../lib/extract_ip';
 // @ts-ignore
@@ -41,10 +41,6 @@ import { licenseProvider } from '../services/license';
 // @ts-ignore
 import { titleProvider } from '../services/title';
 // @ts-ignore
-import { monitoringBeatsBeatProvider } from '../directives/beats/beat';
-// @ts-ignore
-import { monitoringBeatsOverviewProvider } from '../directives/beats/overview';
-// @ts-ignore
 import { monitoringMlListingProvider } from '../directives/elasticsearch/ml_job_listing';
 // @ts-ignore
 import { monitoringMainProvider } from '../directives/main';
@@ -60,12 +56,12 @@ export const localAppModule = ({
   data: { query },
   navigation,
   externalConfig,
-}: MonitoringPluginDependencies) => {
+}: MonitoringStartPluginDependencies) => {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalStorage();
   createLocalConfigModule(core);
-  createLocalStateModule(query);
+  createLocalStateModule(query, core.notifications.toasts);
   createLocalTopNavModule(navigation);
   createHrefModule(core);
   createMonitoringAppServices();
@@ -90,12 +86,17 @@ export const localAppModule = ({
   return appModule;
 };
 
-function createMonitoringAppConfigConstants(keys: MonitoringPluginDependencies['externalConfig']) {
+function createMonitoringAppConfigConstants(
+  keys: MonitoringStartPluginDependencies['externalConfig']
+) {
   let constantsModule = angular.module('monitoring/constants', []);
   keys.map(([key, value]) => (constantsModule = constantsModule.constant(key as string, value)));
 }
 
-function createLocalStateModule(query: any) {
+function createLocalStateModule(
+  query: MonitoringStartPluginDependencies['data']['query'],
+  toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts']
+) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
     .service('globalState', function (
@@ -104,7 +105,7 @@ function createLocalStateModule(query: any) {
       $location: ng.ILocationService
     ) {
       function GlobalStateProvider(this: any) {
-        const state = new GlobalState(query, $rootScope, $location, this);
+        const state = new GlobalState(query, toasts, $rootScope, $location, this);
         const initialState: any = state.getState();
         for (const key in initialState) {
           if (!initialState.hasOwnProperty(key)) {
@@ -148,8 +149,6 @@ function createMonitoringAppServices() {
 function createMonitoringAppDirectives() {
   angular
     .module('monitoring/directives', [])
-    .directive('monitoringBeatsBeat', monitoringBeatsBeatProvider)
-    .directive('monitoringBeatsOverview', monitoringBeatsOverviewProvider)
     .directive('monitoringMlListing', monitoringMlListingProvider)
     .directive('monitoringMain', monitoringMainProvider);
 }
@@ -173,7 +172,7 @@ function createMonitoringAppFilters() {
     });
 }
 
-function createLocalConfigModule(core: MonitoringPluginDependencies['core']) {
+function createLocalConfigModule(core: MonitoringStartPluginDependencies['core']) {
   angular.module('monitoring/Config', []).provider('config', function () {
     return {
       $get: () => ({
@@ -201,7 +200,7 @@ function createLocalPrivateModule() {
   angular.module('monitoring/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule({ ui }: MonitoringPluginDependencies['navigation']) {
+function createLocalTopNavModule({ ui }: MonitoringStartPluginDependencies['navigation']) {
   angular
     .module('monitoring/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)

@@ -71,12 +71,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
-  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>(
-    undefined
-  );
-  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>(
-    undefined
-  );
+  const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
+  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
+    undefined | string
+  >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
@@ -121,6 +120,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
+    minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
     unsupportedFieldsError !== undefined;
 
@@ -209,17 +209,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
-      }
-
-      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+      } else if (
+        errorMessage.includes('status_exception') &&
+        errorMessage.includes('unsupported type')
+      ) {
         unsupportedFieldsErrorMessage = errorMessage;
-      }
-
-      if (
+      } else if (
         errorMessage.includes('status_exception') &&
         errorMessage.includes('Unable to estimate memory usage as no documents')
       ) {
@@ -231,6 +229,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             },
           })
         );
+      } else {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
+            {
+              defaultMessage: 'An error occurred fetching analysis fields data.',
+            }
+          ),
+          text: errorMessage,
+        });
       }
 
       const fallbackModelMemoryLimit =
@@ -397,39 +405,31 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               }
               isClearable={false}
               isInvalid={dependentVariable === ''}
-              data-test-subj="mlAnalyticsCreateJobWizardDependentVariableSelect"
+              data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+                loadingDepVarOptions ? ' loading' : ' loaded'
+              }`}
             />
           </EuiFormRow>
         </Fragment>
       )}
       <EuiFormRow
         fullWidth
-        isInvalid={requiredFieldsError !== undefined || unsupportedFieldsError !== undefined}
-        error={[
-          ...(requiredFieldsError !== undefined
-            ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-                  defaultMessage: 'Invalid. {message}',
-                  values: { message: requiredFieldsError },
-                }),
-              ]
-            : []),
-          ...(unsupportedFieldsError !== undefined
-            ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
-                  defaultMessage: 'Invalid. {message}',
-                  values: { message: unsupportedFieldsError },
-                }),
-              ]
-            : []),
-        ]}
+        isInvalid={requiredFieldsError !== undefined}
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
       >
         <Fragment />
       </EuiFormRow>
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
         tableItems={includesTableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />

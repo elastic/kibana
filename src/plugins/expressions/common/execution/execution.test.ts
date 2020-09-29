@@ -376,6 +376,38 @@ describe('Execution', () => {
         value: 5,
       });
     });
+
+    test('can use global variables', async () => {
+      const result = await run(
+        'add val={var foo}',
+        {
+          variables: {
+            foo: 3,
+          },
+        },
+        null
+      );
+
+      expect(result).toMatchObject({
+        type: 'num',
+        value: 3,
+      });
+    });
+
+    test('can modify global variables', async () => {
+      const result = await run(
+        'add val={var_set name=foo value=66 | var bar} | var foo',
+        {
+          variables: {
+            foo: 3,
+            bar: 25,
+          },
+        },
+        null
+      );
+
+      expect(result).toBe(66);
+    });
   });
 
   describe('when arguments are missing', () => {
@@ -459,7 +491,7 @@ describe('Execution', () => {
         await execution.result;
 
         for (const node of execution.state.get().ast.chain) {
-          expect(node.debug?.fn.name).toBe('add');
+          expect(node.debug?.fn).toBe('add');
         }
       });
 
@@ -635,7 +667,7 @@ describe('Execution', () => {
 
         expect(node2.debug).toMatchObject({
           success: false,
-          fn: expect.any(Object),
+          fn: 'throws',
           input: expect.any(Object),
           args: expect.any(Object),
           error: expect.any(Object),

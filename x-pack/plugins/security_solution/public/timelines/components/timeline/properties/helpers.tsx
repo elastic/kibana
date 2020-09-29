@@ -17,10 +17,10 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../../../../common/constants';
 import {
@@ -33,9 +33,9 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -119,22 +119,32 @@ Description.displayName = 'Description';
 
 interface NameProps {
   timelineId: string;
+  timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
 }
 
-export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) => (
-  <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-    <NameField
-      aria-label={i18n.TIMELINE_TITLE}
-      data-test-subj="timeline-title"
-      onChange={(e) => updateTitle({ id: timelineId, title: e.target.value })}
-      placeholder={i18n.UNTITLED_TIMELINE}
-      spellCheck={true}
-      value={title}
-    />
-  </EuiToolTip>
-));
+export const Name = React.memo<NameProps>(({ timelineId, timelineType, title, updateTitle }) => {
+  const handleChange = useCallback((e) => updateTitle({ id: timelineId, title: e.target.value }), [
+    timelineId,
+    updateTitle,
+  ]);
+
+  return (
+    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+      <NameField
+        aria-label={i18n.TIMELINE_TITLE}
+        data-test-subj="timeline-title"
+        onChange={handleChange}
+        placeholder={
+          timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
+        }
+        spellCheck={true}
+        value={title}
+      />
+    </EuiToolTip>
+  );
+});
 Name.displayName = 'Name';
 
 interface NewCaseProps {
@@ -149,7 +159,7 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useSelector((state: State) =>
+    const { savedObjectId } = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;
@@ -182,18 +192,28 @@ export const NewCase = React.memo<NewCaseProps>(
       timelineTitle,
     ]);
 
-    return (
-      <EuiButtonEmpty
-        data-test-subj="attach-timeline-case"
-        color={compact ? undefined : 'text'}
-        iconSide="left"
-        iconType="paperClip"
-        disabled={timelineStatus === TimelineStatus.draft}
-        onClick={handleClick}
-        size={compact ? 'xs' : undefined}
-      >
-        {buttonText}
-      </EuiButtonEmpty>
+    const button = useMemo(
+      () => (
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-case"
+          color={compact ? undefined : 'text'}
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+          size={compact ? 'xs' : undefined}
+        >
+          {buttonText}
+        </EuiButtonEmpty>
+      ),
+      [compact, timelineStatus, handleClick, buttonText]
+    );
+    return timelineStatus === TimelineStatus.draft ? (
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
     );
   }
 );
@@ -215,8 +235,8 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
       ? i18n.ATTACH_TO_EXISTING_CASE
       : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
 
-    return (
-      <>
+    const button = useMemo(
+      () => (
         <EuiButtonEmpty
           data-test-subj="attach-timeline-existing-case"
           color={compact ? undefined : 'text'}
@@ -228,7 +248,15 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
         >
           {buttonText}
         </EuiButtonEmpty>
-      </>
+      ),
+      [buttonText, handleClick, timelineStatus, compact]
+    );
+    return timelineStatus === TimelineStatus.draft ? (
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
     );
   }
 );
@@ -244,9 +272,6 @@ export interface NewTimelineProps {
 
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
@@ -254,7 +279,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     });
     const button = getButton({ outline, title });
 
-    return capabilitiesCanUserCRUD ? button : null;
+    return button;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
@@ -306,26 +331,23 @@ const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, tog
 LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
-  noteIds: string[];
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ noteIds, toggleShowNotes, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, timelineType }) => {
+  const isTemplate = timelineType === TimelineType.template;
 
-    return (
-      <EuiButtonIcon
-        aria-label={i18n.NOTES}
-        data-test-subj="timeline-notes-button-small"
-        iconType="editorComment"
-        onClick={() => toggleShowNotes()}
-        isDisabled={isTemplate}
-      />
-    );
-  }
-);
+  return (
+    <EuiButtonIcon
+      aria-label={i18n.NOTES}
+      data-test-subj="timeline-notes-button-small"
+      iconType="editorComment"
+      onClick={() => toggleShowNotes()}
+      isDisabled={isTemplate}
+    />
+  );
+});
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -350,15 +372,15 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
         {size === 'l' ? (
           <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton
-            noteIds={noteIds}
-            toggleShowNotes={toggleShowNotes}
-            timelineType={timelineType}
-          />
+          <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
+            <EuiModal
+              data-test-subj="notesModal"
+              maxWidth={NOTES_PANEL_WIDTH}
+              onClose={toggleShowNotes}
+            >
               <Notes
                 associateNote={associateNote}
                 getNewNoteId={getNewNoteId}

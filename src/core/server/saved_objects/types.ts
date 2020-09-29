@@ -18,13 +18,14 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
-import { PropertyValidators } from './validation';
 
 export {
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
@@ -32,16 +33,16 @@ export {
   SavedObjectsImportRetry,
 } from './import/types';
 
-import { LegacyConfig } from '../legacy';
-import { SavedObjectUnsanitizedDoc } from './serialization';
-import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 import { SavedObject } from '../../types';
+
+type KueryNode = any;
 
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
 } from '../../types';
@@ -63,7 +64,7 @@ export interface SavedObjectStatusMeta {
  *
  * @public
  */
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;
@@ -79,9 +80,23 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /**
+   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
+   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
+   */
+  rootSearchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string;
+  filter?: string | KueryNode;
+  namespaces?: string[];
+  /**
+   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
+   * object client wrapper.
+   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
+   * Any types that are not included in this map will be excluded entirely.
+   * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
+   */
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
 }
@@ -171,9 +186,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
  *  * agnostic: this type of saved object is global.
  *
- * Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the
- * {@link SavedObjectTypeRegistry | type registry}.
- *
  * @public
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
@@ -259,93 +271,4 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsLegacyMapping[];
-  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
-  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
-  savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyMapping {
-  pluginId: string;
-  properties: SavedObjectsTypeMappingDefinitions;
-}
-
-/**
- * @internal
- * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
- *             from new platform plugins
- */
-export interface SavedObjectsLegacyManagementDefinition {
-  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyManagementTypeDefinition {
-  isImportableAndExportable?: boolean;
-  defaultSearchField?: string;
-  icon?: string;
-  getTitle?: (savedObject: SavedObject<any>) => string;
-  getEditUrl?: (savedObject: SavedObject<any>) => string;
-  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyMigrationDefinitions {
-  [type: string]: SavedObjectLegacyMigrationMap;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectLegacyMigrationMap {
-  [version: string]: SavedObjectLegacyMigrationFn;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export type SavedObjectLegacyMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  log: SavedObjectsMigrationLogger
-) => SavedObjectUnsanitizedDoc;
-
-/**
- * @internal
- * @deprecated
- */
-interface SavedObjectsLegacyTypeSchema {
-  isNamespaceAgnostic?: boolean;
-  /** Cannot be used in conjunction with `isNamespaceAgnostic` */
-  multiNamespace?: boolean;
-  hidden?: boolean;
-  indexPattern?: ((config: LegacyConfig) => string) | string;
-  convertToAliasScript?: string;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacySchemaDefinitions {
-  [type: string]: SavedObjectsLegacyTypeSchema;
 }

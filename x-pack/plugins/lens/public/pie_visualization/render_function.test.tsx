@@ -12,6 +12,7 @@ import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -64,6 +65,13 @@ describe('PieVisualization component', () => {
         chartsThemeService,
       };
     }
+
+    test('it shows legend on correct side', () => {
+      const component = shallow(
+        <PieComponent args={{ ...args, legendPosition: 'top' }} {...getDefaultArgs()} />
+      );
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    });
 
     test('it shows legend for 2 groups using default legendDisplay', () => {
       const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
@@ -182,7 +190,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
-      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visPie');
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
   });
 });

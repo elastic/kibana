@@ -36,8 +36,14 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping-routing-field.html`;
   }
 
-  public getTemplatesDocumentationLink() {
-    return `${this.esDocsBase}/indices-templates.html`;
+  public getDataStreamsDocumentationLink() {
+    return `${this.esDocsBase}/data-streams.html`;
+  }
+
+  public getTemplatesDocumentationLink(isLegacy = false) {
+    return isLegacy
+      ? `${this.esDocsBase}/indices-templates-v1.html`
+      : `${this.esDocsBase}/indices-templates.html`;
   }
 
   public getIdxMgmtDocumentationLink() {
@@ -115,6 +121,10 @@ class DocumentationService {
 
   public getIgnoreMalformedLink() {
     return `${this.esDocsBase}/ignore-malformed.html`;
+  }
+
+  public getMetaLink() {
+    return `${this.esDocsBase}/mapping-field-meta.html`;
   }
 
   public getFormatLink() {

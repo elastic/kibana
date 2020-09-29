@@ -48,6 +48,7 @@ export function mockTelemetryService({
     banner: true,
     allowChangingOptInStatus: true,
     telemetryNotifyUserAboutOptInDefault: true,
+    userCanChangeSettings: true,
     ...configOverride,
   };
 

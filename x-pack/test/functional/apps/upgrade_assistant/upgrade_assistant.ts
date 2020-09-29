@@ -11,14 +11,22 @@ export default function upgradeAssistantFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['upgradeAssistant']);
+  const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
+  const security = getService('security');
+  const log = getService('log');
 
   describe('Upgrade Checkup', function () {
     this.tags('includeFirefox');
-    before(async () => await esArchiver.load('empty_kibana'));
+
+    before(async () => {
+      await esArchiver.load('empty_kibana');
+      await security.testUser.setRoles(['global_upgrade_assistant_role']);
+    });
+
     after(async () => {
       await PageObjects.upgradeAssistant.expectTelemetryHasFinish();
       await esArchiver.unload('empty_kibana');
+      await security.testUser.restoreDefaults();
     });
 
     it('allows user to navigate to upgrade checkup', async () => {
@@ -28,9 +36,17 @@ export default function upgradeAssistantFunctionalTests({
 
     it('allows user to toggle deprecation logging', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
+      log.debug('expect initial state to be ON');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
+      log.debug('Now toggle to off');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await PageObjects.common.sleep(2000);
+      log.debug('expect state to be OFF after toggle');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
+      await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await PageObjects.common.sleep(2000);
+      log.debug('expect state to be ON after toggle');
+      await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
     });
 
     it('allows user to open cluster tab', async () => {

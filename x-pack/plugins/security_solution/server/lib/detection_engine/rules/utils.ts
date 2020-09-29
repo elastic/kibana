@@ -29,6 +29,7 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
   AuthorOrUndefined,
@@ -38,6 +39,7 @@ import {
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
@@ -59,6 +61,7 @@ export interface UpdateProperties {
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -82,6 +85,7 @@ export interface UpdateProperties {
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

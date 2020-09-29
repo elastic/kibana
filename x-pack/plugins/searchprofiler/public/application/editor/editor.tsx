@@ -10,7 +10,9 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
-import { useUIAceKeyboardMode } from '../../../../../../src/plugins/es_ui_shared/public';
+import { ace } from '../../../../../../src/plugins/es_ui_shared/public';
+
+const { useUIAceKeyboardMode } = ace;
 
 type EditorShim = ReturnType<typeof createEditorShim>;
 
@@ -54,6 +56,12 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     setTextArea(licenseEnabled ? containerRef.current!.querySelector('textarea') : null);
 
     onEditorReady(createEditorShim(editorInstanceRef.current));
+
+    return () => {
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.destroy();
+      }
+    };
   }, [initialValue, onEditorReady, licenseEnabled]);
 
   return (

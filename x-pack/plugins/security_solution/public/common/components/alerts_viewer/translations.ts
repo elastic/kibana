@@ -16,7 +16,7 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
 export const TOTAL_COUNT_OF_ALERTS = i18n.translate(
   'xpack.securitySolution.alertsView.totalCountOfAlerts',
   {
-    defaultMessage: 'external alerts match the search criteria',
+    defaultMessage: 'external alerts',
   }
 );
 
@@ -30,7 +30,7 @@ export const ALERTS_TABLE_TITLE = i18n.translate(
 export const ALERTS_GRAPH_TITLE = i18n.translate(
   'xpack.securitySolution.alertsView.alertsGraphTitle',
   {
-    defaultMessage: 'External alert count',
+    defaultMessage: 'External alert trend',
   }
 );
 
