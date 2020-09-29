@@ -20,6 +20,7 @@
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { getInstalledPackages } from '../src/dev/npm';
+import { engines } from '../package';
 import { LICENSE_OVERRIDES } from '../src/dev/license_checker';
 
 import { isNull, isUndefined } from 'lodash';
@@ -64,6 +65,24 @@ export default function licensesCSVReport(grunt) {
         licenseOverrides: LICENSE_OVERRIDES,
         dev,
       });
+
+      packages.unshift(
+        {
+          name: 'Node.js',
+          version: engines.node,
+          repository: 'https://nodejs.org',
+          licenses: ['MIT'],
+        },
+        {
+          name: 'Red Hat Universal Base Image minimal',
+          verion: '8',
+          repository:
+            'https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8',
+          licenses: [
+            'Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf',
+          ],
+        }
+      );
 
       const csv = packages
         .map((pkg) => {
