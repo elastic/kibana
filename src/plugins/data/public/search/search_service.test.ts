@@ -52,6 +52,7 @@ describe('Search service', () => {
   describe('start()', () => {
     it('exposes proper contract', async () => {
       const start = searchService.start(mockCoreStart, {
+        fieldFormats: {},
         indexPatterns: {},
       } as any);
       expect(start).toHaveProperty('aggs');

@@ -17,23 +17,26 @@
  * under the License.
  */
 
-import { ISearchSetup, ISearchStart } from './types';
-import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { searchSourceMock } from './search_source/mocks';
+import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
+import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 
-export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
-  return {
-    aggs: searchAggsSetupMock(),
-    registerSearchStrategy: jest.fn(),
-    __enhance: jest.fn(),
-  };
-}
+export class SearchSourceService {
+  public setup() {}
 
-export function createSearchStartMock(): jest.Mocked<ISearchStart> {
-  return {
-    aggs: searchAggsStartMock(),
-    getSearchStrategy: jest.fn(),
-    search: jest.fn(),
-    searchSource: searchSourceMock.createStartContract(),
-  };
+  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+    return {
+      /**
+       * creates searchsource based on serialized search source fields
+       */
+      create: createSearchSource(indexPatterns, dependencies),
+      /**
+       * creates an enpty search source
+       */
+      createEmpty: () => {
+        return new SearchSource({}, dependencies);
+      },
+    };
+  }
+
+  public stop() {}
 }
