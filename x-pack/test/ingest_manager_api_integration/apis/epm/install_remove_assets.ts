@@ -92,14 +92,6 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(res.statusCode).equal(200);
       });
-      it('should have created the index for the transform', async function () {
-        // the  index is defined in the transform file
-        const res = await es.transport.request({
-          method: 'GET',
-          path: `/logs-all_assets.test_log_current-default`,
-        });
-        expect(res.statusCode).equal(200);
-      });
       it('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
           type: 'index-pattern',
@@ -269,19 +261,6 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(res.statusCode).equal(404);
       });
-      it('should have uninstalled the transforms', async function () {
-        const res = await es.transport.request(
-          {
-            method: 'GET',
-            path: `/logs-all_assets.test_log_current-default`,
-          },
-          {
-            ignore: [404],
-          }
-        );
-        expect(res.statusCode).equal(404);
-      });
-
       it('should have created the index for the transform', async function () {
         // the  index is defined in the transform file
         const res = await es.transport.request({
