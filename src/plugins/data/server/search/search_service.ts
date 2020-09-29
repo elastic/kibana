@@ -28,6 +28,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
+import { first } from 'rxjs/operators';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
@@ -47,6 +48,12 @@ import {
   IEsSearchResponse,
   ISearchOptions,
 } from '../../common';
+import {
+  getShardDelayBucketAgg,
+  SHARD_DELAY_AGG_NAME,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { ConfigSchema } from '../../config';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -73,7 +80,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
 
   constructor(
-    private initializerContext: PluginInitializerContext,
+    private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
   ) {}
 
@@ -105,13 +112,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
+    const aggs = this.aggsService.setup({ registerFunction });
+
+    this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise()
+      .then((value) => {
+        if (value.search.aggs.shardDelay.enabled) {
+          aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+          registerFunction(aggShardDelay);
+        }
+      });
+
     return {
       __enhance: (enhancements: SearchEnhancements) => {
         if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
           this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
       },
-      aggs: this.aggsService.setup({ registerFunction }),
+      aggs,
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
     };

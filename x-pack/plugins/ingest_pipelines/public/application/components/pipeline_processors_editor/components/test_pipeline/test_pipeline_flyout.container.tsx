@@ -12,10 +12,10 @@ import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { DeserializeResult } from '../../deserialize';
 import { Document } from '../../types';
+import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
-import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
-import { documentsSchema } from './test_pipeline_flyout_tabs/documents_schema';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
@@ -38,10 +38,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   processors,
 }) => {
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const {
     testPipelineData,
-    setCurrentTestPipelineData,
+    testPipelineDataDispatch,
     updateTestOutputPerProcessor,
   } = useTestPipelineContext();
 
@@ -50,7 +51,6 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   } = testPipelineData;
 
   const { form } = useForm<TestPipelineFlyoutForm>({
-    schema: documentsSchema,
     defaultValue: {
       documents: cachedDocuments || '',
     },
@@ -78,6 +78,10 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         pipeline: { ...serializedProcessors },
       });
 
+      if (!isMounted.current) {
+        return { isSuccessful: false };
+      }
+
       setIsRunningTest(false);
 
       if (error) {
@@ -86,7 +90,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         // reset the per-processor output
         // this is needed in the scenario where the pipeline has already executed,
         // but you modified the sample documents and there was an error on re-execution
-        setCurrentTestPipelineData({
+        testPipelineDataDispatch({
           type: 'updateOutputPerProcessor',
           payload: {
             isExecutingPipeline: false,
@@ -97,7 +101,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         return { isSuccessful: false };
       }
 
-      setCurrentTestPipelineData({
+      testPipelineDataDispatch({
         type: 'updateConfig',
         payload: {
           config: {
@@ -127,10 +131,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       return { isSuccessful: true };
     },
     [
+      isMounted,
       processors,
       services.api,
       services.notifications.toasts,
-      setCurrentTestPipelineData,
+      testPipelineDataDispatch,
       updateTestOutputPerProcessor,
     ]
   );
@@ -154,6 +159,12 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     }
   };
 
+  const resetTestOutput = () => {
+    testPipelineDataDispatch({
+      type: 'reset',
+    });
+  };
+
   useEffect(() => {
     if (cachedDocuments && activeTab === 'output') {
       handleTestPipeline({ documents: cachedDocuments, verbose: cachedVerbose }, true);
@@ -166,6 +177,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   return (
     <ViewComponent
       handleTestPipeline={handleTestPipeline}
+      resetTestOutput={resetTestOutput}
       isRunningTest={isRunningTest}
       cachedVerbose={cachedVerbose}
       cachedDocuments={cachedDocuments}

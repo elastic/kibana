@@ -16,11 +16,11 @@
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
-    "ml",
     "esUiShared",
     "discover",
     "kibanaUtils",
     "kibanaReact",
-    "savedObjects"
+    "savedObjects",
+    "ml"
   ]
 }
