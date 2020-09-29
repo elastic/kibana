@@ -6,4 +6,4 @@
 
 export * from './determine_allocation_type';
 
-export * from './determine_allocation_node_role';
+export * from './get_available_node_roles_for_phase';

@@ -22,16 +22,17 @@ export type AllocationNodeRole = NodeDataRole | 'none';
  * If no nodes can be identified for allocation (very special case) then
  * we return "none".
  */
-export const determineAllocationNodeRole = (
+export const getAvailableNodeRoleForPhase = (
   phase: PhaseWithAllocation,
   nodesByRoles: ListNodesRouteResponse['nodesByRoles']
 ): AllocationNodeRole => {
+  const preferredNodeRoles = phaseToNodePreferenceMap[phase];
+
   // The 'data' role covers all node roles, so if we have at least one node with the data role
   // we can allocate to our first preference.
   if (nodesByRoles.data?.length) {
-    return phaseToNodePreferenceMap[phase][0];
+    return preferredNodeRoles[0];
   }
 
-  const preferredNodeRoles = phaseToNodePreferenceMap[phase];
   return preferredNodeRoles.find((role) => Boolean(nodesByRoles[role]?.length)) ?? 'none';
 };

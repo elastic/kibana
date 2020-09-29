@@ -10,7 +10,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
-import { determineAllocationNodeRole } from '../../../../lib/data_tiers';
+import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
 import { isNodeRoleFirstPreference } from '../../../../lib/data_tiers/is_node_role_first_preference';
 
 import {
@@ -55,24 +55,26 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
           if (phaseData.dataTierAllocationType !== 'default') {
             return null;
           }
-          const allocationNodeRole = determineAllocationNodeRole(phase, nodesData.nodesByRoles);
+
+          const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesData.nodesByRoles);
           if (
-            allocationNodeRole === 'none' ||
-            !isNodeRoleFirstPreference(phase, allocationNodeRole)
+            allocationNodeRole !== 'none' &&
+            isNodeRoleFirstPreference(phase, allocationNodeRole)
           ) {
-            return <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />;
+            return null;
           }
-          return null;
+
+          return <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />;
         };
 
         const renderNodeAttributesWarning = () => {
           if (phaseData.dataTierAllocationType !== 'custom') {
             return null;
           }
-          if (!hasNodeAttrs) {
-            return <NoNodeAttributesWarning phase={phase} />;
+          if (hasNodeAttrs) {
+            return null;
           }
-          return null;
+          return <NoNodeAttributesWarning phase={phase} />;
         };
 
         return (

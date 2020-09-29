@@ -13,13 +13,13 @@ import { PhaseWithAllocation, NodeDataRole } from '../../../../../../common/type
 import { AllocationNodeRole } from '../../../../lib';
 
 const i18nTextsNodeRoleToDataTier: Record<NodeDataRole, string> = {
-  data_hot: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.hot', {
+  data_hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierHotLabel', {
     defaultMessage: 'hot',
   }),
-  data_warm: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.warm', {
+  data_warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierWarmLabel', {
     defaultMessage: 'warm',
   }),
-  data_cold: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.cold', {
+  data_cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierColdLabel', {
     defaultMessage: 'cold',
   }),
 };
