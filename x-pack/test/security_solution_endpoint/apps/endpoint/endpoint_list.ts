@@ -65,7 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  describe('endpoint list', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -86,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.exists('emptyPolicyTable');
       });
 
-      it.skip('finds data after load and polling', async () => {
+      it('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
@@ -94,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('when there is data,', () => {
+    describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
@@ -212,7 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('displays the correct table data for the kql queries', () => {
+    describe('displays the correct table data for the kql queries', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();

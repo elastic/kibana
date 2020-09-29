@@ -16,8 +16,11 @@ import {
   BulkResponse,
   BulkResponseErrorAggregation,
   isValidUnit,
+  SignalHit,
+  BaseSignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
+  Signal,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -211,6 +214,60 @@ export const generateId = (
   version: string,
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+
+// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
+export const generateSignalId = (signal: Signal) =>
+  createHash('sha256')
+    .update(
+      signal.parents
+        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        .concat(signal.rule.id)
+    )
+    .digest('hex');
+
+/**
+ * Generates unique doc ids for each building block signal within a sequence. The id of each building block
+ * depends on the parents of every building block, so that a signal which appears in multiple different sequences
+ * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
+ * @param buildingBlocks The full list of building blocks in the sequence.
+ */
+export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
+  const baseHashString = buildingBlocks.reduce(
+    (baseString, block) =>
+      baseString
+        .concat(
+          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        )
+        .concat(block.signal.rule.id),
+    ''
+  );
+  return buildingBlocks.map((block, idx) =>
+    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
+  );
+};
+
+export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+  const blockIds = generateBuildingBlockIds(buildingBlocks);
+  return buildingBlocks.map((block, idx) => {
+    return {
+      _id: blockIds[idx],
+      _index: index,
+      _source: {
+        ...block,
+      },
+    };
+  });
+};
+
+export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+  return {
+    _id: generateSignalId(signal.signal),
+    _index: index,
+    _source: {
+      ...signal,
+    },
+  };
+};
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
