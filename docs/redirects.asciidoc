@@ -112,3 +112,15 @@ This content has moved. See
 
 This content has moved. See
 {ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Connect to a remote cluster].
+
+[role="exclude",id="get-started"]
+== Get started
+
+This content has moved. See
+<<quick-start-guide, Quick start>>.
+
+[role="exclude",id="tutorial-define-index"]
+== Define your index patterns
+
+This content has moved. See
+<<quick-start-guide, Quick start>>.
