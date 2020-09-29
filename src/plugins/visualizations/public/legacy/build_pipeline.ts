@@ -70,6 +70,12 @@ interface BuildVisConfigFunction {
   [key: string]: buildVisConfigFunction;
 }
 
+export interface BuildPipelineParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
+}
+
 const vislibCharts: string[] = [
   'area',
   'gauge',
@@ -80,14 +86,7 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (
-  vis: Vis,
-  opts: {
-    timeRange?: any;
-    timefilter: TimefilterContract;
-  }
-): Schemas => {
-  const { timeRange, timefilter } = opts;
+export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelineParams): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
@@ -276,19 +275,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
-  tagcloud: (params, schemas) => {
-    const { scale, orientation, minFontSize, maxFontSize, showLabel } = params;
-    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
-    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
-    expr += prepareValue('scale', scale);
-    expr += prepareValue('orientation', orientation);
-    expr += prepareValue('minFontSize', minFontSize);
-    expr += prepareValue('maxFontSize', maxFontSize);
-    expr += prepareValue('showLabel', showLabel);
-    expr += prepareDimension('bucket', bucket);
-
-    return expr;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,
@@ -333,14 +319,6 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  tagcloud: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.metric = schemas.metric[0];
-    if (schemas.segment) {
-      visConfig.bucket = schemas.segment[0];
-    }
-    return visConfig;
-  },
   region_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
@@ -370,14 +348,7 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = async (
-  vis: any,
-  params: {
-    timefilter: TimefilterContract;
-    timeRange?: any;
-    abortSignal?: AbortSignal;
-  }
-) => {
+export const buildVislibDimensions = async (vis: any, params: BuildPipelineParams) => {
   const schemas = getSchemas(vis, {
     timeRange: params.timeRange,
     timefilter: params.timefilter,
@@ -416,14 +387,7 @@ export const buildVislibDimensions = async (
   return dimensions;
 };
 
-export const buildPipeline = async (
-  vis: Vis,
-  params: {
-    timefilter: TimefilterContract;
-    timeRange?: any;
-    abortSignal?: AbortSignal;
-  }
-) => {
+export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
@@ -455,10 +419,8 @@ export const buildPipeline = async (
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
-    const schemas = getSchemas(vis, {
-      timeRange: params.timeRange,
-      timefilter: params.timefilter,
-    });
+    const schemas = getSchemas(vis, params);
+
     if (buildPipelineVisFunction[vis.type.name]) {
       pipeline += buildPipelineVisFunction[vis.type.name](
         { title, ...vis.params },
