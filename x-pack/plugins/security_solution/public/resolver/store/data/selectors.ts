@@ -184,6 +184,27 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
 }
 
 /**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns the loading state of the current related event data for the `event_detail` view
+ */
+export function isCurrentRelatedEventLoading(state: DataState) {
+  return state.currentRelatedEvent.loading;
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns {(SafeResolverEvent | null)} the current related event data for the `event_detail` view
+ */
+export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
+  return state.currentRelatedEvent.data;
+}
+/**
  * Get an event (from memory) by its `event.id`.
  * @deprecated Use the API to find events by ID
  */

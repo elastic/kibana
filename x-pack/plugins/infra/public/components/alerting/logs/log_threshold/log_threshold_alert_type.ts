@@ -6,8 +6,8 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/types';
+import { AlertTypeModel } from '../../../../../../triggers_actions_ui/public/types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../../common/alerting/logs/log_threshold/types';
 import { validateExpression } from './validation';
 
 export function getAlertType(): AlertTypeModel {
@@ -22,7 +22,7 @@ export function getAlertType(): AlertTypeModel {
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}`,
+        defaultMessage: `\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}`,
       }
     ),
     requiresAppContext: false,
