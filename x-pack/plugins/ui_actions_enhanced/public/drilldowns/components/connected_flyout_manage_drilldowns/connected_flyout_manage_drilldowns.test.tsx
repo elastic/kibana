@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, wait } from '@testing-library/react';
+import { fireEvent, render, wait, cleanup } from '@testing-library/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   mockGetTriggerInfo,
