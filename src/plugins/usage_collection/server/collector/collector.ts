@@ -41,7 +41,7 @@ export type RecursiveMakeSchemaFrom<U> = U extends object
 // Using Required to enforce all optional keys in the object
 export type MakeSchemaFrom<Base> = {
   [Key in keyof Required<Base>]: Required<Base>[Key] extends Array<infer U>
-    ? RecursiveMakeSchemaFrom<U>
+    ? { type: 'array'; items: RecursiveMakeSchemaFrom<U> }
     : RecursiveMakeSchemaFrom<Required<Base>[Key]>;
 };
 

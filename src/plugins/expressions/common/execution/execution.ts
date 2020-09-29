@@ -235,7 +235,7 @@ export class Execution<
           const timeEnd: number = now();
           (link as ExpressionAstFunction).debug = {
             success: true,
-            fn,
+            fn: fn.name,
             input,
             args: resolvedArgs,
             output,
@@ -253,7 +253,7 @@ export class Execution<
         if (this.params.debug) {
           (link as ExpressionAstFunction).debug = {
             success: false,
-            fn,
+            fn: fn.name,
             input,
             args,
             error,
