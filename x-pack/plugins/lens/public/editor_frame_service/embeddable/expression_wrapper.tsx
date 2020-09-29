@@ -52,6 +52,7 @@ export function ExpressionWrapper({
             searchContext={searchContext}
             renderError={(error) => <div data-test-subj="expression-renderer-error">{error}</div>}
             onEvent={handleEvent}
+            debug={true}
           />
         </div>
       )}

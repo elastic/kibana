@@ -295,6 +295,7 @@ export class VisualizeEmbeddable
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      debug: true,
     });
 
     this.subscriptions.push(
@@ -376,6 +377,7 @@ export class VisualizeEmbeddable
       },
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
+      debug: true,
     };
     if (this.abortController) {
       this.abortController.abort();

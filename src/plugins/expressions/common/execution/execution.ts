@@ -237,8 +237,8 @@ export class Execution<
             success: true,
             fn: fn.name,
             input,
-            args: resolvedArgs,
-            output,
+            // args: resolvedArgs,
+            // output,
             duration: timeEnd - timeStart,
           };
         }

@@ -22,7 +22,7 @@ import { filter, map } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, ExpressionAstFunction } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
@@ -163,8 +163,48 @@ export class ExpressionLoader {
     if (this.execution !== prevDataHandler) {
       return;
     }
+    if (params.debug) {
+      this.displayTiming(this.execution.getAst());
+    }
     this.dataSubject.next(data);
   };
+
+  private forEachAst(
+    ast: ExpressionAstExpression,
+    cb: (fn: ExpressionAstFunction, depth: number) => void,
+    depth: number
+  ) {
+    ast.chain.forEach((f) => {
+      cb(f, depth);
+      Object.values(f.arguments).forEach((args) => {
+        args.forEach((arg) => {
+          if (typeof arg === 'object' && arg && arg.type === 'expression') {
+            this.forEachAst(arg, cb, depth + 1);
+          }
+        });
+      });
+    });
+  }
+
+  private displayTiming(ast: ExpressionAstExpression) {
+    const times: any[] = [];
+    this.forEachAst(
+      ast,
+      (fn: ExpressionAstFunction, depth) => {
+        times.push({
+          name: fn.debug?.fn,
+          duration_ms: fn.debug?.duration ?? 0,
+          depth,
+        });
+      },
+      0
+    );
+    console.table(times);
+    console.log(
+      'Total time',
+      times.reduce((prev, current) => prev + current.duration_ms, 0)
+    );
+  }
 
   private render(data: Data): void {
     this.renderHandler.render(data, this.params.uiState);

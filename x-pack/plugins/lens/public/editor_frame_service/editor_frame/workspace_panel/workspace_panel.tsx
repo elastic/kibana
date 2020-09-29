@@ -281,6 +281,7 @@ export function InnerWorkspacePanel({
           searchContext={context}
           reload$={autoRefreshFetch$}
           onEvent={onEvent}
+          debug={true}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">

@@ -20,7 +20,10 @@ export async function interpretAst(
   variables: Record<string, any>
 ): Promise<ExpressionValue> {
   const context = { variables };
-  return await expressionsService.getService().execute(ast, null, context).getData();
+  const executor = expressionsService.getService().execute(ast, null, context, { debug: true });
+  const finalData = await executor.getData();
+  displayTiming(executor.getAst());
+  return finalData;
 }
 
 /**
@@ -39,14 +42,17 @@ export async function runInterpreter(
   variables: Record<string, any>,
   options: Options = {}
 ): Promise<ExpressionValue> {
-  const context = { variables };
+  const context = { variables, debug: true };
 
   try {
-    const renderable = await expressionsService.getService().execute(ast, input, context).getData();
+    const executor = expressionsService.getService().execute(ast, input, context, { debug: true });
+    const renderable = await executor.getData();
+    displayTiming(executor.getAst());
 
     if (getType(renderable) === 'render') {
       return renderable;
     }
+    debugger;
 
     if (options.castToRender) {
       return runInterpreter(fromExpression('render'), renderable, variables, {
@@ -59,4 +65,37 @@ export async function runInterpreter(
     notifyService.getService().error(err);
     throw err;
   }
+}
+
+function forEachAst(ast, cb, depth) {
+  ast.chain.forEach((f) => {
+    cb(f, depth);
+    Object.values(f.arguments).forEach((args) => {
+      args.forEach((arg) => {
+        if (typeof arg === 'object' && arg && arg.type === 'expression') {
+          forEachAst(arg, cb, depth + 1);
+        }
+      });
+    });
+  });
+}
+
+function displayTiming(ast) {
+  const times = [];
+  forEachAst(
+    ast,
+    (fn, depth) => {
+      times.push({
+        name: fn.debug?.fn,
+        duration_ms: fn.debug?.duration ?? 0,
+        depth,
+      });
+    },
+    0
+  );
+  console.table(times);
+  console.log(
+    'Total time',
+    times.reduce((prev, current) => prev + current.duration_ms, 0)
+  );
 }
