@@ -17,7 +17,7 @@ import { useColors } from '../use_colors';
  */
 export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBreadcrumb[] }) {
   // Just tagging the last crumb with `data-test-subj` for testing
-  const crumbswithlastsubject: EuiBreadcrumb[] = useMemo(() => {
+  const crumbsWithLastSubject: EuiBreadcrumb[] = useMemo(() => {
     const lastcrumb = breadcrumbs.slice(-1).map((crumb) => {
       crumb['data-test-subj'] = 'resolver:breadcrumbs:last';
       return crumb;
@@ -41,7 +41,7 @@ export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBre
       <ThemedBreadcrumbs
         background={resolverBreadcrumbBackground}
         text={resolverEdgeText}
-        breadcrumbs={crumbswithlastsubject}
+        breadcrumbs={crumbsWithLastSubject}
         truncate={false}
       />
     </>
