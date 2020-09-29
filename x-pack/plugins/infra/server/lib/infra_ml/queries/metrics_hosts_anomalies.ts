@@ -86,6 +86,12 @@ export const metricsHostsAnomalyHitRT = rt.type({
       record_score: rt.number,
       typical: rt.array(rt.number),
       actual: rt.array(rt.number),
+      influencers: rt.array(
+        rt.type({
+          influencer_field_name: rt.string,
+          influencer_field_values: rt.array(rt.string),
+        })
+      ),
       'host.name': rt.array(rt.string),
       bucket_span: rt.number,
       timestamp: rt.number,

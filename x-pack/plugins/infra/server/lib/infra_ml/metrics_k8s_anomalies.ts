@@ -25,6 +25,7 @@ interface MappedAnomalyHit {
   actual: number;
   jobId: string;
   startTime: number;
+  influencers: string[];
   duration: number;
   categoryId?: string;
 }
@@ -131,7 +132,15 @@ export async function getMetricK8sAnomalies(
 }
 
 const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
-  const { id, anomalyScore, typical, actual, duration, startTime: anomalyStartTime } = anomaly;
+  const {
+    id,
+    anomalyScore,
+    typical,
+    actual,
+    duration,
+    influencers,
+    startTime: anomalyStartTime,
+  } = anomaly;
 
   return {
     id,
@@ -140,6 +149,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     actual,
     duration,
     startTime: anomalyStartTime,
+    influencers,
     type: 'metrics_k8s' as const,
     jobId,
   };
@@ -198,18 +208,25 @@ async function fetchMetricK8sAnomalies(
       record_score: anomalyScore,
       typical,
       actual,
-      // partition_field_value: dataset,
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
+      influencers,
     } = result._source;
 
+    const podInfluencers = influencers.filter(
+      (i) => i.influencer_field_name === 'kubernetes.pod.uid'
+    );
     return {
       id: result._id,
       anomalyScore,
       typical: typical[0],
       actual: actual[0],
       jobId: job_id,
+      influencers: podInfluencers.reduce(
+        (acc: string[], i) => [...acc, ...i.influencer_field_values],
+        []
+      ),
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,

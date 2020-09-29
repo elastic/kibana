@@ -26,7 +26,7 @@ interface MappedAnomalyHit {
   jobId: string;
   startTime: number;
   duration: number;
-  hostName: string[];
+  influencers: string[];
   categoryId?: string;
 }
 
@@ -142,7 +142,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     typical,
     actual,
     duration,
-    hostName,
+    influencers,
     startTime: anomalyStartTime,
   } = anomaly;
 
@@ -152,7 +152,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     typical,
     actual,
     duration,
-    hostName,
+    influencers,
     startTime: anomalyStartTime,
     type: 'metrics_hosts' as const,
     jobId,
@@ -222,11 +222,13 @@ async function fetchMetricsHostsAnomalies(
       record_score: anomalyScore,
       typical,
       actual,
+      influencers,
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
     } = result._source;
 
+    const hostInfluencers = influencers.filter((i) => i.influencer_field_name === 'host.name');
     return {
       id: result._id,
       anomalyScore,
@@ -234,7 +236,10 @@ async function fetchMetricsHostsAnomalies(
       typical: typical[0],
       actual: actual[0],
       jobId: job_id,
-      hostName: result._source['host.name'],
+      influencers: hostInfluencers.reduce(
+        (acc: string[], i) => [...acc, ...i.influencer_field_values],
+        []
+      ),
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,

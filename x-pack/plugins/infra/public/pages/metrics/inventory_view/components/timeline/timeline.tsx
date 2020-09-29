@@ -18,10 +18,12 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
-  LineAnnotation,
-  AnnotationDomainTypes,
-  LineAnnotationDatum,
+  RectAnnotation,
+  RectAnnotationDatum,
 } from '@elastic/charts';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
@@ -189,13 +191,17 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     );
   }
 
-  function generateAnnotationData(results: number[][]): LineAnnotationDatum[] {
-    return results.map((anomaly, index) => {
-      const [val, score] = anomaly;
+  function generateAnnotationData(results: Array<[number, string[]]>): RectAnnotationDatum[] {
+    return results.map((anomaly) => {
+      const [val, influencers] = anomaly;
       return {
-        dataValue: val,
-        details: `Score: ${score}`,
-        header: `Anomaly`,
+        coordinates: {
+          x0: val,
+          x1: moment(val).add(15, 'minutes').valueOf(),
+          y0: dataDomain?.min,
+          y1: dataDomain?.max,
+        },
+        details: influencers.join(','),
       };
     });
   }
@@ -203,28 +209,66 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   return (
     <TimelineContainer>
       <TimelineHeader>
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="xpack.infra.inventoryTimeline.header"
-              defaultMessage="Average {metricLabel}"
-              values={{ metricLabel }}
-            />
-          </strong>
-        </EuiText>
+        <EuiFlexItem grow={true}>
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="xpack.infra.inventoryTimeline.header"
+                defaultMessage="Average {metricLabel}"
+                values={{ metricLabel }}
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems={'center'}>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    color={getTimelineChartTheme(isDarkMode).crosshair.band.fill}
+                    type={'dot'}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size={'xs'}>
+                    <FormattedMessage
+                      id="xpack.infra.inventoryTimeline.header"
+                      defaultMessage="Average {metricLabel}"
+                      values={{ metricLabel }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
+                />
+                <EuiFlexItem>
+                  <EuiText size={'xs'}>
+                    <FormattedMessage
+                      id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
+                      defaultMessage="Anomaly detected"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </TimelineHeader>
       <TimelineChartContainer>
         <Chart>
           {anomalies && (
-            <LineAnnotation
+            <RectAnnotation
               id={'anomalies'}
-              domainType={AnnotationDomainTypes.XDomain}
               dataValues={generateAnnotationData(
-                anomalies.map((a) => [a.startTime, a.anomalyScore])
+                anomalies.map((a) => [a.startTime, a.influencers])
               )}
-              style={annotationStyle}
-              marker={<div style={{ background: 'red', padding: 5 }} />}
-              markerPosition={'bottom'}
+              style={{ fill: '#D36086' }}
             />
           )}
           <MetricExplorerSeriesChart

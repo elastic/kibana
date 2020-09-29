@@ -48,6 +48,8 @@ export const createMetricsK8sAnomaliesQuery = (
     'timestamp',
     'bucket_span',
     'by_field_value',
+    'influencers.influencer_field_name',
+    'influencers.influencer_field_values',
   ];
 
   const { querySortDirection, queryCursor } = parsePaginationCursor(sort, pagination);
@@ -83,7 +85,12 @@ export const metricsK8sAnomalyHitRT = rt.type({
       record_score: rt.number,
       typical: rt.array(rt.number),
       actual: rt.array(rt.number),
-      // partition_field_value: rt.string,
+      influencers: rt.array(
+        rt.type({
+          influencer_field_name: rt.string,
+          influencer_field_values: rt.array(rt.string),
+        })
+      ),
       bucket_span: rt.number,
       timestamp: rt.number,
     }),
