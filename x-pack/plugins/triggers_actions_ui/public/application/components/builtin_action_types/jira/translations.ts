@@ -141,7 +141,7 @@ export const ISSUES_API_ERROR = i18n.translate(
 
 export const GET_ISSUE_API_ERROR = (id: string) =>
   i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetFieldsMessage',
+    'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetIssueMessage',
     {
       defaultMessage: 'Unable to get issue with id {id}',
       values: { id },
