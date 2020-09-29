@@ -12,11 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Stack Management -Advanced Settings', () => {
-    before(async () => {
-      await PageObjects.settings.navigateTo();
-      await a11y.testAppSnapshot();
-    });
-
     // click on Management > Advanced settings
     it('click on advanced settings ', async () => {
       await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
@@ -34,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // clicking on the category dropdown
     it('adv settings - category -dropdown ', async () => {
-      // await testSubjects.click('settingsSearchBar');
+      await testSubjects.click('settingsSearchBar');
       await a11y.testAppSnapshot();
     });
 
