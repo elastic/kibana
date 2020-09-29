@@ -1,6 +1,6 @@
 # data
 
-The `data` plugin provides common services for solutions and application developers.
+The `data` plugin provides common data access services for solutions and application developers.
 
 ## Autocomplete
 
