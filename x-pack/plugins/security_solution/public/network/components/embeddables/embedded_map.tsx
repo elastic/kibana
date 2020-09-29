@@ -118,6 +118,9 @@ export const EmbeddedMapComponent = ({
         sourcererScope.selectedPatterns.includes(kip.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
+        if (newIndexPatterns.length === 0) {
+          setIsError(true);
+        }
         return newIndexPatterns;
       }
       return prevMapIndexPatterns;
@@ -143,7 +146,6 @@ export const EmbeddedMapComponent = ({
         if (isSubscribed) {
           if (mapIndexPatterns.length === 0) {
             setIsIndexError(true);
-            return;
           } else {
             setEmbeddable(embeddableObject);
             setIsIndexError(false);
@@ -156,7 +158,6 @@ export const EmbeddedMapComponent = ({
         }
       }
     }
-
     if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
       setupEmbeddable();
     }
@@ -237,10 +238,10 @@ export const EmbeddedMapComponent = ({
       </InPortal>
 
       <EmbeddableMap maintainRatio={!isIndexError}>
-        {embeddable != null && !isIndexError ? (
-          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
-        ) : isIndexError ? (
+        {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+        ) : embeddable != null ? (
+          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
         ) : (
           <Loader data-test-subj="loading-panel" overlay size="xl" />
         )}
