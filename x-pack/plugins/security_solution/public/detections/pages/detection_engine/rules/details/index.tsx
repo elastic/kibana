@@ -88,6 +88,7 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -345,6 +346,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     return null;
   }
 
+  const defaultRuleStackByOption: AlertsHistogramOption = {
+    text: 'event.category',
+    value: 'event.category',
+  };
+
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
@@ -480,6 +486,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     signalIndexName={signalIndexName}
                     setQuery={setQuery}
                     stackByOptions={alertsHistogramOptions}
+                    defaultStackByOption={defaultRuleStackByOption}
                     to={to}
                     updateDateRange={updateDateRangeCallback}
                   />

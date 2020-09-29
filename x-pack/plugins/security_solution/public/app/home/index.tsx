@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
+import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
@@ -20,18 +21,18 @@ import { useInitSourcerer, useSourcererScope } from '../../common/containers/sou
 import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
+import { useThrottledResizeObserver } from '../../common/components/utils';
 
-const SecuritySolutionAppWrapper = styled.div`
+const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
+  style: {
+    paddingTop: `${paddingTop}px`,
+  },
+}))<{ paddingTop: number }>`
+  overflow: auto;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
-`;
-SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
-
-const Main = styled.main`
-  overflow: auto;
-  flex: 1;
+  flex: 1 1 auto;
 `;
 
 Main.displayName = 'Main';
@@ -45,7 +46,7 @@ interface HomePageProps {
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { application } = useKibana().services;
   const subPluginId = useRef<string>('');
-
+  const { ref, height = 0 } = useThrottledResizeObserver(300);
   application.currentAppId$.subscribe((appId) => {
     subPluginId.current = appId ?? '';
   });
@@ -58,12 +59,18 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const [showTimeline] = useShowTimeline();
 
   const { browserFields, indexPattern, indicesExist } = useSourcererScope();
+  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
+  // this will run when a user navigates to the Security Solution app and when they navigate between
+  // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
+  // a background task solution can be built on the server side. Once a background task solution is available we
+  // can remove this.
+  useUpgradeEndpointPackage();
 
   return (
     <SecuritySolutionAppWrapper>
-      <HeaderGlobal />
+      <HeaderGlobal ref={ref} />
 
-      <Main data-test-subj="pageContainer">
+      <Main paddingTop={height} data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
