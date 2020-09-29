@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Kibana users page meets a11y validations', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
-      await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
@@ -28,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('', async () => {
+    it('a11y test for search user input box', async () => {
       await a11y.testAppSnapshot();
     });
   });
