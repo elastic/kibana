@@ -68,6 +68,7 @@ module.exports = function () {
       ],
     }),
 
+    // used by the test tasks
     //    runs the check_single_version_dependencies script to ensure the same dependencies across different package.json uses the same version
     checkSingleVersionDependencies: scriptWithGithubChecks({
       title: 'Check single version dependencies',
