@@ -112,7 +112,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 
 #### Default Search Strategy
 
-One benefit of using the low level search API, is partial response support in x-pack, allowing for better and more responsive user experience.
+One benefit of using the low level search API, is partial response support in X-Pack, allowing for a better and more responsive user experience.
 In OSS only the final result is returned. 
 
 ```.ts
