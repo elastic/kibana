@@ -6,11 +6,16 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import {
+  AgentSOAttributes,
+  PostAgentUpgradeResponse,
+  PostBulkAgentUpgradeResponse,
+} from '../../../common/types';
 import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -27,6 +32,18 @@ export const postAgentUpgradeHandler: RequestHandler<
       statusCode: 400,
       body: {
         message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+      },
+    });
+  }
+  const agent = await soClient.get<AgentSOAttributes>(
+    AGENT_SAVED_OBJECT_TYPE,
+    request.params.agentId
+  );
+  if (agent.attributes.unenrollment_started_at || agent.attributes.unenrolled_at) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `cannot upgrade an unenrolling or unenrolled agent`,
       },
     });
   }

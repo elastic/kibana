@@ -5,9 +5,11 @@
  */
 
 import expect from '@kbn/expect/expect.js';
+import semver from 'semver';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { setupIngest } from './services';
 import { skipIfNoDockerRegistry } from '../../../helpers';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../plugins/ingest_manager/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -18,6 +20,12 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet upgrade agent', () => {
     skipIfNoDockerRegistry(providerContext);
     setupIngest(providerContext);
+    const kibanaVersionAccessor = kibanaServer.version;
+    let kibanaVersion: any;
+    before(async () => {
+      await esArchiver.loadIfNeeded('fleet/agents');
+      kibanaVersion = await kibanaVersionAccessor.get();
+    });
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
     });
@@ -26,8 +34,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should respond 200 to upgrade agent and update the agent SO', async () => {
-      const kibanaVersionAccessor = kibanaServer.version;
-      const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
@@ -43,8 +49,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof res.body.item.upgrade_started_at).to.be('string');
     });
     it('should respond 200 to upgrade agent and update the agent SO without source_uri', async () => {
-      const kibanaVersionAccessor = kibanaServer.version;
-      const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
@@ -59,19 +63,47 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should respond 400 if trying to upgrade to a version that does not match installed kibana version', async () => {
+      const higherVersion = semver.inc(kibanaVersion, 'patch');
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          version: '8.0.1',
+          version: higherVersion,
           source_uri: 'http://path/to/download',
+        })
+        .expect(400);
+    });
+    it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          force: true,
+        });
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersion,
+        })
+        .expect(400);
+    });
+    it('should respond 400 if trying to upgrade an agent that is unenrolled', async () => {
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: { unenrolled_at: new Date().toISOString() },
+      });
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersion,
         })
         .expect(400);
     });
 
     it('should respond 200 to bulk upgrade agents and update the agent SOs', async () => {
-      const kibanaVersionAccessor = kibanaServer.version;
-      const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
         .post(`/api/ingest_manager/fleet/agents/bulk_upgrade`)
         .set('kbn-xsrf', 'xxx')
@@ -95,7 +127,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: 'fleet-agents.active: true',
-          version: '8.0.0',
+          version: kibanaVersion,
         })
         .expect(200);
       const [agent1data, agent2data] = await Promise.all([
@@ -106,20 +138,38 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
     });
 
-    it('should not upgrade an unenrolling agent', async () => {
+    it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           force: true,
         });
-      const kibanaVersionAccessor = kibanaServer.version;
-      const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
         .post(`/api/ingest_manager/fleet/agents/bulk_upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          agents: 'fleet-agents.active: true',
+          agents: ['agent1', 'agent2'],
+          version: kibanaVersion,
+        });
+      const [agent1data, agent2data] = await Promise.all([
+        supertest.get(`/api/ingest_manager/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/ingest_manager/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+      ]);
+      expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+      expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+    });
+    it('should not upgrade an unenrolled agent during bulk_upgrade', async () => {
+      kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: { unenrolled_at: new Date().toISOString() },
+      });
+      await supertest
+        .post(`/api/ingest_manager/fleet/agents/bulk_upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: ['agent1', 'agent2'],
           version: kibanaVersion,
         });
       const [agent1data, agent2data] = await Promise.all([

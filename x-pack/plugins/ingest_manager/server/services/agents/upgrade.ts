@@ -76,7 +76,7 @@ export async function sendUpgradeAgentsActions(
         version: string;
       }
 ) {
-  // Filter out agents not currently upgrading or agents currently unenrolling
+  // Filter out agents currently unenrolling, agents unenrolled
   const agents =
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
@@ -87,7 +87,7 @@ export async function sendUpgradeAgentsActions(
           })
         ).agents;
   const agentsToUpdate = agents.filter(
-    (agent) => !agent.upgrade_started_at || !agent.unenrollment_started_at
+    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
   );
   const now = new Date().toISOString();
   const data = {
