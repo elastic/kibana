@@ -37,13 +37,13 @@ import { PersistableStateDefinition } from '../../../kibana_utils/common';
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
  * register a function in `expressions` plugin.
  */
-export type ExpressionFunctionDefinition<
+export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> = PersistableStateDefinition<ExpressionAstFunction['arguments']> & {
+> extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.
    */
@@ -104,7 +104,7 @@ export type ExpressionFunctionDefinition<
      */
     types: AnyExpressionFunctionDefinition['inputTypes'];
   };
-};
+}
 
 /**
  * Type to capture every possible expression function definition.

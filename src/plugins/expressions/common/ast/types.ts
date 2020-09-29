@@ -26,7 +26,7 @@ export type ExpressionAstNode =
 
 export type ExpressionAstExpression = {
   type: 'expression';
-  chain: Array<Omit<ExpressionAstFunction, 'debug'>>;
+  chain: ExpressionAstFunction[];
 };
 
 export type ExpressionAstFunction = {
