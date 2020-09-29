@@ -21,4 +21,3 @@ export * from './application/formatters/metric_change_description';
 export * from './application/components/data_grid';
 export * from './application/data_frame_analytics/common';
 export * from './application/util/date_utils';
-export * from './ml_url_generator';

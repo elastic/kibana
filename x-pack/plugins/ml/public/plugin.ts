@@ -16,7 +16,11 @@ import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UrlGeneratorContract,
+} from 'src/plugins/share/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
@@ -34,6 +38,8 @@ import type { SecurityPluginSetup } from '../../security/public';
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 import { setDependencyCache } from './application/util/dependency_cache';
+import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
+import { registerUrlGenerator } from './ml_url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -114,7 +120,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerFeature,
         registerManagementSection,
         registerMlUiActions,
-        registerUrlGenerator,
         MlCardState,
       } = await import('./register_helper');
 
@@ -123,7 +128,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-
         const { capabilities } = coreStart.application;
 
         // register ML for the index pattern management no data screen.
