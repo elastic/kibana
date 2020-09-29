@@ -77,6 +77,13 @@ const tooltipContent = i18n.translate(
   }
 );
 
+const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureImportance) => {
+  return featureClass.classes.reduce(
+    (runningSum, fc) => runningSum + fc.importance.mean_magnitude,
+    0
+  );
+};
+
 export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
   totalFeatureImportance,
 }) => {
@@ -128,17 +135,25 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       if (totalFeatureImportance[0].classes.length > 2) {
         classificationType = 'multiclass_classification';
 
-        (totalFeatureImportance as ClassificationTotalFeatureImportance[]).forEach((feature) => {
-          feature.classes
-            .sort((a, b) => a.importance.mean_magnitude - b.importance.mean_magnitude)
-            .forEach((featureClass) => {
-              sortedData.push({
+        (totalFeatureImportance as ClassificationTotalFeatureImportance[])
+          .sort(
+            (prevFeature, currentFeature) =>
+              calculateTotalMeanImportance(currentFeature) -
+              calculateTotalMeanImportance(prevFeature)
+          )
+          .forEach((feature) => {
+            const sortedFeatureClass = feature.classes.sort(
+              (a, b) => b.importance.mean_magnitude - a.importance.mean_magnitude
+            );
+            sortedData.push(
+              ...sortedFeatureClass.map((featureClass) => ({
                 featureName: feature.feature_name,
                 meanImportance: featureClass.importance.mean_magnitude,
                 className: featureClass.class_name,
-              });
-            });
-        });
+              }))
+            );
+          });
+
         _barSeriesSpec = {
           xAccessor: 'featureName',
           yAccessors: ['meanImportance'],
@@ -151,16 +166,16 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     if (isRegressionTotalFeatureImportance(totalFeatureImportance[0])) {
       classificationType = 'regression';
 
-      sortedData = (totalFeatureImportance as RegressionTotalFeatureImportance[]).map(
-        (d: RegressionTotalFeatureImportance) => ({
+      sortedData = (totalFeatureImportance as RegressionTotalFeatureImportance[])
+        .map((d: RegressionTotalFeatureImportance) => ({
           featureName: d.feature_name,
           meanImportance: d.importance.mean_magnitude,
-        })
-      );
+        }))
+        .sort((a, b) => b.meanImportance - a.meanImportance);
     }
 
     // sort from largest importance at top to smallest importance at bottom
-    sortedData = sortedData.sort((a, b) => b.meanImportance - a.meanImportance);
+    // sortedData = sortedData.sort((a, b) => b.meanImportance - a.meanImportance);
 
     // only show legend if it's a multiclass
     const _showLegend = classificationType === 'multiclass_classification';
