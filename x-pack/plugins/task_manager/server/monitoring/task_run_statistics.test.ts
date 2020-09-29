@@ -11,7 +11,7 @@ import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { asTaskRunEvent, asTaskPollingCycleEvent } from '../task_events';
+import { asTaskRunEvent, asTaskPollingCycleEvent, TaskTiming } from '../task_events';
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../task_manager';
 import {
@@ -81,8 +81,15 @@ describe('Task Run Statistics', () => {
           resolve();
         });
 
+      const now = Date.now();
       for (const drift of runAtDrift) {
-        events.next(mockTaskRunEvent({ runAt: runAtMillisecondsAgo(drift) }));
+        const start = Math.floor(Math.random() * 1000);
+        events.next(
+          mockTaskRunEvent(
+            { runAt: runAtMillisecondsAgo(drift + start) },
+            { start: runAtMillisecondsAgo(start).getTime(), stop: now }
+          )
+        );
       }
     });
   });
@@ -168,9 +175,9 @@ function runAtMillisecondsAgo(ms: number): Date {
   return new Date(Date.now() - ms);
 }
 
-const mockTaskRunEvent = (overrides: Partial<ConcreteTaskInstance> = {}) => {
+const mockTaskRunEvent = (overrides: Partial<ConcreteTaskInstance> = {}, timing: TaskTiming) => {
   const task = mockTaskInstance(overrides);
-  return asTaskRunEvent(task.id, asOk(task));
+  return asTaskRunEvent(task.id, asOk(task), timing);
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({

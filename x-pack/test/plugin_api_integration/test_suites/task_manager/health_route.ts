@@ -26,6 +26,7 @@ interface MonitoringStats {
       timestamp: string;
       value: {
         drift: Record<string, object>;
+        duration: Record<string, Record<string, object>>;
         polling: {
           lastSuccessfulPoll: string;
           resultFrequency: Record<string, number>;
@@ -122,9 +123,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the task manager runtime stats', async () => {
+      await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '5s' },
+      });
+
       const {
         runtime: {
-          value: { drift, polling },
+          value: { drift, polling, duration },
         },
       } = (await getHealth()).stats;
 
@@ -135,6 +141,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(typeof drift.mean).to.eql('number');
       expect(typeof drift.median).to.eql('number');
+
+      expect(typeof duration.sampleTask.mean).to.eql('number');
+      expect(typeof duration.sampleTask.median).to.eql('number');
     });
   });
 }

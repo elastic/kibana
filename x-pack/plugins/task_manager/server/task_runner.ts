@@ -17,7 +17,14 @@ import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
-import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
+import {
+  TaskRun,
+  TaskMarkRunning,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  startTaskTimer,
+  TaskTiming,
+} from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
@@ -174,6 +181,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance,
     });
 
+    const stopTaskTimer = startTaskTimer();
     const apmTrans = apm.startTransaction(
       `taskManager run ${this.instance.taskType}`,
       'taskManager'
@@ -183,13 +191,16 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.task.run();
       const validatedResult = this.validateResult(result);
       if (apmTrans) apmTrans.end('success');
-      return this.processResult(validatedResult);
+      return this.processResult(validatedResult, stopTaskTimer());
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       if (apmTrans) apmTrans.end('error');
-      return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }));
+      return this.processResult(
+        asErr({ error: err, state: modifiedContext.taskInstance.state }),
+        stopTaskTimer()
+      );
     }
   }
 
@@ -384,7 +395,8 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private async processResult(
-    result: Result<SuccessfulRunResult, FailedRunResult>
+    result: Result<SuccessfulRunResult, FailedRunResult>,
+    taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     await eitherAsync(
       result,
@@ -394,11 +406,11 @@ export class TaskManagerRunner implements TaskRunner {
         } else {
           await this.processResultWhenDone();
         }
-        this.onTaskEvent(asTaskRunEvent(this.id, asOk(this.instance)));
+        this.onTaskEvent(asTaskRunEvent(this.id, asOk(this.instance), taskTiming));
       },
       async ({ error }: FailedRunResult) => {
         await this.processResultForRecurringTask(result);
-        this.onTaskEvent(asTaskRunEvent(this.id, asErr(error)));
+        this.onTaskEvent(asTaskRunEvent(this.id, asErr(error), taskTiming));
       }
     );
     return result;

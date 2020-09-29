@@ -20,8 +20,19 @@ export enum TaskEventType {
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
 }
 
+export interface TaskTiming {
+  start: number;
+  stop: number;
+}
+
+export function startTaskTimer(): () => TaskTiming {
+  const start = Date.now();
+  return () => ({ start, stop: Date.now() });
+}
+
 export interface TaskEvent<T, E> {
   id?: string;
+  timing?: TaskTiming;
   type: TaskEventType;
   event: Result<T, E>;
 }
@@ -33,52 +44,65 @@ export type TaskPollingCycle<T = string> = TaskEvent<FillPoolResult, PollingErro
 
 export function asTaskMarkRunningEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Error>
+  event: Result<ConcreteTaskInstance, Error>,
+  timing?: TaskTiming
 ): TaskMarkRunning {
   return {
     id,
     type: TaskEventType.TASK_MARK_RUNNING,
     event,
+    timing,
   };
 }
 
-export function asTaskRunEvent(id: string, event: Result<ConcreteTaskInstance, Error>): TaskRun {
+export function asTaskRunEvent(
+  id: string,
+  event: Result<ConcreteTaskInstance, Error>,
+  timing?: TaskTiming
+): TaskRun {
   return {
     id,
     type: TaskEventType.TASK_RUN,
     event,
+    timing,
   };
 }
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>
+  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>,
+  timing?: TaskTiming
 ): TaskClaim {
   return {
     id,
     type: TaskEventType.TASK_CLAIM,
     event,
+    timing,
   };
 }
 
 export function asTaskRunRequestEvent(
   id: string,
   // we only emit a TaskRunRequest event when it fails
-  event: Err<Error>
+  event: Err<Error>,
+  timing?: TaskTiming
 ): TaskRunRequest {
   return {
     id,
     type: TaskEventType.TASK_RUN_REQUEST,
     event,
+    timing,
   };
 }
 
 export function asTaskPollingCycleEvent<T = string>(
-  event: Result<FillPoolResult, PollingError<T>>
+  event: Result<FillPoolResult, PollingError<T>>,
+  timing?: TaskTiming
 ): TaskPollingCycle<T> {
   return {
     type: TaskEventType.TASK_POLLING_CYCLE,
     event,
+    timing,
   };
 }
 
