@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
@@ -25,9 +27,12 @@ import { HttpStart } from '../../http';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
+  showAsBar?: boolean;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
+  public static defaultProps = { showAsBar: false };
+
   private loadingCountSubscription?: Subscription;
 
   state = {
@@ -50,16 +55,35 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   }
 
   render() {
-    const className = classNames('kbnLoadingIndicator', this.state.visible ? null : 'hidden');
+    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
 
-    return (
-      <div className={className} data-test-subj={testSubj}>
-        <div className="kbnLoadingIndicator__bar essentialAnimation" />
-      </div>
+    const ariaHidden = this.state.visible ? false : true;
+
+    const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
+      defaultMessage: 'Loading content',
+    });
+
+    return !this.props.showAsBar ? (
+      <EuiLoadingSpinner
+        className={className}
+        data-test-subj={testSubj}
+        aria-hidden={ariaHidden}
+        aria-label={ariaLabel}
+      />
+    ) : (
+      <EuiProgress
+        className={className}
+        data-test-subj={testSubj}
+        aria-hidden={ariaHidden}
+        aria-label={ariaLabel}
+        position="fixed"
+        color="accent"
+        size="xs"
+      />
     );
   }
 }
