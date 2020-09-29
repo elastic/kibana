@@ -163,8 +163,6 @@ export function Header({
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="right" />
-
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
 
