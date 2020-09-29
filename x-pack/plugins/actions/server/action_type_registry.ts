@@ -136,10 +136,13 @@ export class ActionTypeRegistry {
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
-    this.licensing.featureUsage.register(
-      getActionTypeFeatureUsageName(actionType as ActionType),
-      actionType.minimumLicenseRequired
-    );
+    // No need to notify usage on basic action types
+    if (actionType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getActionTypeFeatureUsageName(actionType as ActionType),
+        actionType.minimumLicenseRequired
+      );
+    }
   }
 
   /**

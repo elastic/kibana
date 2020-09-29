@@ -78,7 +78,8 @@ export class LicenseState {
   }
 
   private notifyUsage(actionType: ActionType) {
-    if (this._notifyUsage) {
+    // No need to notify usage on basic action types
+    if (this._notifyUsage && actionType.minimumLicenseRequired !== 'basic') {
       this._notifyUsage(getActionTypeFeatureUsageName(actionType));
     }
   }

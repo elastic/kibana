@@ -53,7 +53,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      minimumLicenseRequired: 'basic',
+      minimumLicenseRequired: 'gold',
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -73,7 +73,7 @@ describe('register()', () => {
     `);
     expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
       'Connector: My action type',
-      'basic'
+      'gold'
     );
   });
 
@@ -128,6 +128,31 @@ describe('register()', () => {
     expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
+  });
+
+  test('registers gold+ action types to the licensing feature usage API', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'gold',
+      executor,
+    });
+    expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+      'Connector: My action type',
+      'gold'
+    );
+  });
+
+  test(`doesn't register basic action types to the licensing feature usage API`, () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
   });
 });
 

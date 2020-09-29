@@ -125,6 +125,18 @@ describe('isLicenseValidForActionType', () => {
     expect(mockNotifyUsage).not.toHaveBeenCalled();
   });
 
+  test('should not call notifyUsage on basic action types', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+    });
+    license.next(basicLicense);
+    licenseState.isLicenseValidForActionType({
+      ...fooActionType,
+      minimumLicenseRequired: 'basic',
+    });
+    expect(mockNotifyUsage).not.toHaveBeenCalled();
+  });
+
   test('should call notifyUsage when specified', () => {
     const goldLicense = licensingMock.createLicense({
       license: { status: 'active', type: 'gold' },
