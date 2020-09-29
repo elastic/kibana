@@ -95,7 +95,7 @@ Provides access to Elasticsearch using the high level `SearchSource` API or low 
 
 ### SearchSource
 
-The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query
+The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.
 
 ```.tsx
 
