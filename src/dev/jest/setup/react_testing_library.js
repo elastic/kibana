@@ -21,8 +21,9 @@ import '@testing-library/jest-dom';
 /**
  * PLEASE NOTE:
  * Importing '@testing-library/react' registers an `afterEach(cleanup)` side effect.
- * It has tricky code that flushes pending promises, that could lead to unpredictable test failures
+ * It has tricky code that flushes pending promises, that previously led to unpredictable test failures
  * https://github.com/elastic/kibana/issues/59469
+ * But since newer versions it has stabilised itself
  */
 import { configure } from '@testing-library/react';
 
