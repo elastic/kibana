@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { OverviewPage } from './overview_page';
+import React from 'react';
+
+export const EmbeddableSwimLaneContainer = React.lazy(
+  () => import('./embeddable_swim_lane_container')
+);
