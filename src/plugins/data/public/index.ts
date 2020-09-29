@@ -422,9 +422,9 @@ export {
   SearchBarProps,
   StatefulSearchBarProps,
   FilterBar,
+  IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
-  IndexPatternSelect,
 } from './ui';
 
 /**

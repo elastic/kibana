@@ -17,17 +17,22 @@
  * under the License.
  */
 
-export { SuggestionsComponent } from './typeahead';
+import React from 'react';
+import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import type { IndexPatternSelectProps } from './index_pattern_select';
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={1} />
+  </EuiDelayRender>
+);
+
+const LazyIndexPatternSelect = React.lazy(() => import('./index_pattern_select'));
+export const IndexPatternSelect = (props: IndexPatternSelectProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyIndexPatternSelect {...props} />
+  </React.Suspense>
+);
+
+export * from './create_index_pattern_select';
 export { IndexPatternSelectProps } from './index_pattern_select';
-export { FilterBar } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input/query_string_input';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
-
-// @internal
-export { ShardFailureOpenModalButton, ShardFailureRequest } from './shard_failure_modal';
-
-// @internal
-export { SavedQueryManagementComponent } from './saved_query_management';
-
-// @internal
-export { SaveQueryForm, SavedQueryMeta } from './saved_query_form';
