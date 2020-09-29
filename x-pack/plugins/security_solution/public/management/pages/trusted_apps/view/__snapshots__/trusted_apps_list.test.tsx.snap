@@ -3482,6 +3482,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
 <div>
   <div
     class="euiBasicTable"
+    data-test-subj="trustedAppsList"
   >
     <div>
       <div
