@@ -1755,6 +1755,55 @@ exports[`Header renders 1`] = `
                     }
                   }
                   href="/"
+                  loadingCount$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": 0,
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
                   navLinks$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -1849,58 +1898,6 @@ exports[`Header renders 1`] = `
                     }
                   }
                   navigateToApp={[MockFunction]}
-                />,
-                <LoadingIndicator
-                  loadingCount$={
-                    BehaviorSubject {
-                      "_isScalar": false,
-                      "_value": 0,
-                      "closed": false,
-                      "hasError": false,
-                      "isStopped": false,
-                      "observers": Array [
-                        Subscriber {
-                          "_parentOrParents": null,
-                          "_subscriptions": Array [
-                            SubjectSubscription {
-                              "_parentOrParents": [Circular],
-                              "_subscriptions": null,
-                              "closed": false,
-                              "subject": [Circular],
-                              "subscriber": [Circular],
-                            },
-                          ],
-                          "closed": false,
-                          "destination": SafeSubscriber {
-                            "_complete": undefined,
-                            "_context": [Circular],
-                            "_error": undefined,
-                            "_next": [Function],
-                            "_parentOrParents": null,
-                            "_parentSubscriber": [Circular],
-                            "_subscriptions": null,
-                            "closed": false,
-                            "destination": Object {
-                              "closed": true,
-                              "complete": [Function],
-                              "error": [Function],
-                              "next": [Function],
-                            },
-                            "isStopped": false,
-                            "syncErrorThrowable": false,
-                            "syncErrorThrown": false,
-                            "syncErrorValue": null,
-                          },
-                          "isStopped": false,
-                          "syncErrorThrowable": true,
-                          "syncErrorThrown": false,
-                          "syncErrorValue": null,
-                        },
-                      ],
-                      "thrownError": null,
-                    }
-                  }
-                  showAsBar={false}
                 />,
               ],
             },
@@ -2830,6 +2827,55 @@ exports[`Header renders 1`] = `
                       }
                     }
                     href="/"
+                    loadingCount$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": 0,
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2925,117 +2971,90 @@ exports[`Header renders 1`] = `
                     }
                     navigateToApp={[MockFunction]}
                   >
-                    <EuiHeaderLogo
+                    <a
                       aria-label="Go to home page"
+                      className="euiHeaderSectionItem__button chrHeaderLogo"
                       data-test-subj="logo"
                       href="/"
-                      iconType="logoElastic"
                       onClick={[Function]}
                     >
-                      <a
-                        aria-label="Go to home page"
-                        className="euiHeaderLogo"
-                        data-test-subj="logo"
-                        href="/"
-                        onClick={[Function]}
-                        rel="noreferrer"
+                      <LoadingIndicator
+                        loadingCount$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": 0,
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        showAsBar={false}
                       >
                         <EuiIcon
-                          aria-label="Elastic"
-                          className="euiHeaderLogo__icon"
+                          aria-label="Elastic Logo"
+                          className="chrHeaderLogo__cluster"
+                          data-test-subj="globalLoadingIndicator-hidden"
                           size="l"
                           type="logoElastic"
                         >
                           <div
-                            aria-label="Elastic"
-                            className="euiHeaderLogo__icon"
+                            aria-label="Elastic Logo"
+                            className="chrHeaderLogo__cluster"
                             data-euiicon-type="logoElastic"
+                            data-test-subj="globalLoadingIndicator-hidden"
                             size="l"
                           />
                         </EuiIcon>
-                        <span
-                          className="euiHeaderLogo__text"
-                        >
-                          Elastic
-                        </span>
-                      </a>
-                    </EuiHeaderLogo>
-                  </HeaderLogo>
-                </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="none"
-                key="1"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
-                  <LoadingIndicator
-                    loadingCount$={
-                      BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": 0,
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [
-                          Subscriber {
-                            "_parentOrParents": null,
-                            "_subscriptions": Array [
-                              SubjectSubscription {
-                                "_parentOrParents": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "subject": [Circular],
-                                "subscriber": [Circular],
-                              },
-                            ],
-                            "closed": false,
-                            "destination": SafeSubscriber {
-                              "_complete": undefined,
-                              "_context": [Circular],
-                              "_error": undefined,
-                              "_next": [Function],
-                              "_parentOrParents": null,
-                              "_parentSubscriber": [Circular],
-                              "_subscriptions": null,
-                              "closed": false,
-                              "destination": Object {
-                                "closed": true,
-                                "complete": [Function],
-                                "error": [Function],
-                                "next": [Function],
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": false,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                            "isStopped": false,
-                            "syncErrorThrowable": true,
-                            "syncErrorThrown": false,
-                            "syncErrorValue": null,
-                          },
-                        ],
-                        "thrownError": null,
-                      }
-                    }
-                    showAsBar={false}
-                  >
-                    <EuiLoadingSpinner
-                      aria-hidden={true}
-                      aria-label="Loading content"
-                      className="kbnLoadingIndicator-hidden"
-                      data-test-subj="globalLoadingIndicator-hidden"
-                    >
-                      <span
+                      </LoadingIndicator>
+                      <img
+                        alt="Elastic"
                         aria-hidden={true}
-                        aria-label="Loading content"
-                        className="euiLoadingSpinner euiLoadingSpinner--medium kbnLoadingIndicator-hidden"
-                        data-test-subj="globalLoadingIndicator-hidden"
+                        className="chrHeaderLogo__mark"
+                        height={18}
+                        src="test-file-stub"
                       />
-                    </EuiLoadingSpinner>
-                  </LoadingIndicator>
+                    </a>
+                  </HeaderLogo>
                 </div>
               </EuiHeaderSectionItem>
             </div>

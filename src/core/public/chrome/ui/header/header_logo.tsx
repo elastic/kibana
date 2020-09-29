@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { EuiHeaderLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
+import elasticMark from './elastic_mark.svg';
+import { HttpStart } from '../../../http';
+import { LoadingIndicator } from '../loading_indicator';
+import './header_logo.scss';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -90,23 +93,31 @@ interface Props {
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
+  loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
 }
 
-export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
+export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
 
   return (
-    <EuiHeaderLogo
-      data-test-subj="logo"
-      iconType="logoElastic"
+    <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
+      className="euiHeaderSectionItem__button chrHeaderLogo"
       href={href}
+      data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
     >
-      Elastic
-    </EuiHeaderLogo>
+      <LoadingIndicator loadingCount$={loadingCount$!} />
+      <img
+        src={elasticMark}
+        className="chrHeaderLogo__mark"
+        alt="Elastic"
+        aria-hidden
+        height={18}
+      />
+    </a>
   );
 }

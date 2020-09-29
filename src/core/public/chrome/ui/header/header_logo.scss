@@ -1,0 +1,12 @@
+.chrHeaderLogo {
+  height: $euiHeaderChildSize;
+  padding: 0 $euiSizeM;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.chrHeaderLogo__mark {
+  margin-left: $euiSizeS;
+}
