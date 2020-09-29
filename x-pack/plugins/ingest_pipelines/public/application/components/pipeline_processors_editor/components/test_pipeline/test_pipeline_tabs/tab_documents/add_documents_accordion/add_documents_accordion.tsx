@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
 
-import { useKibana } from '../../../../../../../shared_imports';
-import { useIsMounted } from '../../../../use_is_mounted';
+import { useKibana } from '../../../../../../../../shared_imports';
+import { useIsMounted } from '../../../../../use_is_mounted';
 import { AddDocumentForm } from '../add_document_form';
 
 import './add_documents_accordion.scss';
@@ -24,6 +24,12 @@ const i18nTexts = {
     'xpack.ingestPipelines.pipelineEditor.addDocumentsAccordion.addDocumentsButtonLabel',
     {
       defaultMessage: 'Add documents from index',
+    }
+  ),
+  addDocumentsDescription: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.addDocumentsAccordion.contentDescriptionText',
+    {
+      defaultMessage: 'Provide the index name and document ID of the indexed document to test.',
     }
   ),
 };
@@ -79,10 +85,7 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
       <div className="addDocumentsAccordion">
         <EuiText size="s" color="subdued">
           <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.pipelineEditor.addDocumentsAccordion.contentDescriptionText"
-              defaultMessage="Provide the index name and document ID of the indexed document to test."
-            />
+            {i18nTexts.addDocumentsDescription}
             {discoverLink && (
               <>
                 {' '}
