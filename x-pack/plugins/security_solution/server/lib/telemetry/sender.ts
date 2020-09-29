@@ -29,7 +29,7 @@ export type SearchTypes =
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
-  datastream?: {
+  data_stream?: {
     [key: string]: SearchTypes;
     dataset?: string;
   };
@@ -173,7 +173,7 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-debug'); // TODO: update
+    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-endpoint'); // TODO: update
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -207,7 +207,7 @@ export class TelemetryEventsSender {
   }
 
   private async sendEvents(events: unknown[], telemetryUrl: string, clusterUuid: string) {
-    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
+    this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
     const ndjson = transformDataToNdjson(events);
     // this.logger.debug(`NDJSON: ${ndjson}`);
 
