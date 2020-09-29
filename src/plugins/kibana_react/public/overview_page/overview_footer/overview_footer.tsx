@@ -70,9 +70,6 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
             title: i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
               defaultMessage: 'Landing page updated',
             }),
-            text: i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
-              defaultMessage: `To change to a different landing page, edit 'defaultRoute' in Advanced Settings.`,
-            }),
           });
         }}
         size="xs"
