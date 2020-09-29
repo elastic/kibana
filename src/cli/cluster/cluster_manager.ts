@@ -227,9 +227,6 @@ export class ClusterManager {
           fromRoot('src/legacy/server'),
           fromRoot('src/legacy/ui'),
           fromRoot('src/legacy/utils'),
-          fromRoot('x-pack/legacy/common'),
-          fromRoot('x-pack/legacy/plugins'),
-          fromRoot('x-pack/legacy/server'),
           fromRoot('config'),
           ...extraPaths,
         ].map((path) => resolve(path))
@@ -242,7 +239,6 @@ export class ClusterManager {
       /\.md$/,
       /debug\.log$/,
       ...pluginInternalDirsIgnore,
-      fromRoot('src/legacy/server/sass/__tmp__'),
       fromRoot('x-pack/plugins/reporting/chromium'),
       fromRoot('x-pack/plugins/security_solution/cypress'),
       fromRoot('x-pack/plugins/apm/e2e'),
@@ -253,7 +249,6 @@ export class ClusterManager {
       fromRoot('x-pack/plugins/lists/server/scripts'),
       fromRoot('x-pack/plugins/security_solution/scripts'),
       fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
-      'plugins/java_languageserver',
     ];
 
     this.watcher = chokidar.watch(watchPaths, {
