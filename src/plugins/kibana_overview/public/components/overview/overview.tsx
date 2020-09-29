@@ -211,7 +211,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     <EuiTitle size="s">
                       <h2 id="kbnOverviewMore__title">
                         <FormattedMessage
-                          id="kibana_overview.more.title"
+                          id="kibanaOverview.more.title"
                           defaultMessage="Do more with Elastic"
                         />
                       </h2>
