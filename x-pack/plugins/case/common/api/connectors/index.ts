@@ -5,28 +5,28 @@
  */
 import * as rt from 'io-ts';
 
-import { JiraFieldsRT } from './jira';
-import { ResilientFieldsRT } from './resilient';
-import { ServiceNowFieldsRT } from './servicenow';
+import { JiraSettingFieldsRT } from './jira';
+import { ResilientSettingFieldsRT } from './resilient';
+import { ServiceNowSettingFieldsRT } from './servicenow';
 
 export * from './jira';
 export * from './servicenow';
 export * from './resilient';
 
-const ConnectorJiraFields = rt.type({ type: rt.literal('.jira'), ...JiraFieldsRT.props });
+const ConnectorJiraFields = rt.type({ type: rt.literal('.jira'), ...JiraSettingFieldsRT.props });
 const ConnectorResillientFields = rt.type({
   type: rt.literal('.resillient'),
-  ...ResilientFieldsRT.props,
+  ...ResilientSettingFieldsRT.props,
 });
 const ConnectorServiceNowFields = rt.type({
   type: rt.literal('.serviceNow'),
-  ...ServiceNowFieldsRT.props,
+  ...ServiceNowSettingFieldsRT.props,
 });
 
-export const ConnectorTypesRt = rt.taggedUnion('type', [
+export const ConnectorFieldsRt = rt.taggedUnion('type', [
   ConnectorJiraFields,
   ConnectorResillientFields,
   ConnectorServiceNowFields,
 ]);
 
-export type ConnectorTypes = rt.TypeOf<typeof ConnectorTypesRt>;
+export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;

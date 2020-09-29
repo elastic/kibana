@@ -21,10 +21,9 @@ import { noop } from 'lodash/fp';
 
 import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector, CaseConnector } from '../../../../../case/common/api/cases';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
-import { AllSettingFields } from '../settings/types';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
@@ -33,17 +32,17 @@ import { Connector } from './connector';
 import * as i18n from './translations';
 
 interface EditConnectorProps {
+  caseFields: CaseConnector['fields'];
   connectors: ActionConnector[];
   disabled?: boolean;
   isLoading: boolean;
-  selectedConnector: string;
   onSubmit: (
     connectorId: string,
-    connectorFields: Record<string, AllSettingFields>,
+    connectorFields: CaseConnector['fields'],
     onSuccess: () => void,
     onError: () => void
   ) => void;
-  caseFields: Record<string, AllSettingFields>;
+  selectedConnector: string;
   userActions: CaseUserActions[];
 }
 
@@ -58,12 +57,12 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 
 export const EditConnector = React.memo(
   ({
+    caseFields,
     connectors,
     disabled = false,
     isLoading,
     onSubmit,
     selectedConnector,
-    caseFields,
     userActions,
   }: EditConnectorProps) => {
     const { form } = useForm({
@@ -82,7 +81,7 @@ export const EditConnector = React.memo(
 
     const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
     const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
-    const [fields, setFields] = useState<Record<string, AllSettingFields>>(caseFields);
+    const [fields, setFields] = useState<CaseConnector['fields']>(caseFields);
     const [editConnector, setEditConnector] = useState(false);
 
     const onChangeConnector = useCallback(
@@ -116,7 +115,7 @@ export const EditConnector = React.memo(
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
-      if (isValid && newData.connectorId) {
+      if (fields != null && isValid && newData.connectorId) {
         onSubmit(newData.connectorId, fields, noop, onError);
         setEditConnector(false);
       }

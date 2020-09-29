@@ -129,6 +129,7 @@ export interface ReturnUseCaseConfigure extends State {
 export const initialState: State = {
   closureType: 'close-by-user',
   connector: {
+    fields: null,
     id: 'none',
     name: 'none',
     type: '.none',
@@ -136,6 +137,7 @@ export const initialState: State = {
   currentConfiguration: {
     closureType: 'close-by-user',
     connector: {
+      fields: null,
       id: 'none',
       name: 'none',
       type: '.none',

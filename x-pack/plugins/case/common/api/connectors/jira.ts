@@ -10,5 +10,10 @@ export const JiraFieldsRT = rt.type({
   issueType: rt.string,
   priority: rt.union([rt.string, rt.null]),
 });
+export const JiraSettingFieldsRT = rt.type({
+  issueType: rt.string,
+  labels: rt.array(rt.string),
+  priority: rt.union([rt.string, rt.null]),
+});
 
 export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;

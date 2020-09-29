@@ -11,5 +11,10 @@ export const ServiceNowFieldsRT = rt.type({
   description: rt.union([rt.string, rt.null]),
   comments: rt.union([rt.array(rt.string), rt.null]),
 });
-
+export const ServiceNowSettingFieldsRT = rt.type({
+  impact: rt.string,
+  severity: rt.string,
+  urgency: rt.string,
+});
 export type ServiceNowFieldsType = rt.TypeOf<typeof ServiceNowFieldsRT>;
+export type ServiceNowSettingFields = rt.TypeOf<typeof ServiceNowSettingFieldsRT>;

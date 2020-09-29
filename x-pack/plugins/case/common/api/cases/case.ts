@@ -10,6 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
+import { ConnectorFieldsRt } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
@@ -20,7 +21,7 @@ const CaseConnectorRt = rt.type({
   id: rt.string,
   name: rt.string,
   type: rt.string,
-  fields: rt.UnknownRecord,
+  fields: rt.union([ConnectorFieldsRt, rt.null]),
 });
 
 const CaseBasicRt = rt.type({

@@ -12,4 +12,9 @@ export const ResilientFieldsRT = rt.type({
   comments: rt.union([rt.array(rt.string), rt.null]),
 });
 
+export const ResilientSettingFieldsRT = rt.type({
+  incidentTypes: rt.array(rt.number),
+  severityCode: rt.number,
+});
+
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;
