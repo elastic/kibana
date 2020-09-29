@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 import { JiraFieldsRT } from '../connectors/jira';
 import { ServiceNowFieldsRT } from '../connectors/servicenow';
 import { ResilientFieldsRT } from '../connectors/resilient';
-import { ConnectorFieldsRt } from '../connectors';
+import { ConnectorFieldsRt, ESConnectorFields } from '../connectors';
 
 /*
  * This types below are related to the service now configuration
@@ -71,7 +71,7 @@ const ConfigureCaseConnectorRt = rt.type({
   id: rt.string,
   name: rt.string,
   type: rt.string,
-  fields: rt.union([ConnectorFieldsRt, rt.null]),
+  fields: ConnectorFieldsRt,
 });
 
 const CasesConfigureBasicRt = rt.type({
@@ -112,7 +112,7 @@ export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesR
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
 
 export type ESCasesConfigureConnector = Omit<ConfigureCaseConnector, 'fields'> & {
-  fields: Array<{ key: string; value: unknown }>;
+  fields: ESConnectorFields;
 };
 
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {

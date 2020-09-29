@@ -5,28 +5,21 @@
  */
 import * as rt from 'io-ts';
 
-import { JiraSettingFieldsRT } from './jira';
-import { ResilientSettingFieldsRT } from './resilient';
-import { ServiceNowSettingFieldsRT } from './servicenow';
+import { JiraFieldsRT } from './jira';
+import { ResilientFieldsRT } from './resilient';
+import { ServiceNowFieldsRT } from './servicenow';
 
 export * from './jira';
 export * from './servicenow';
 export * from './resilient';
 
-const ConnectorJiraFields = rt.type({ type: rt.literal('.jira'), ...JiraSettingFieldsRT.props });
-const ConnectorResillientFields = rt.type({
-  type: rt.literal('.resillient'),
-  ...ResilientSettingFieldsRT.props,
-});
-const ConnectorServiceNowFields = rt.type({
-  type: rt.literal('.serviceNow'),
-  ...ServiceNowSettingFieldsRT.props,
-});
-
-export const ConnectorFieldsRt = rt.taggedUnion('type', [
-  ConnectorJiraFields,
-  ConnectorResillientFields,
-  ConnectorServiceNowFields,
+export const ConnectorFieldsRt = rt.union([
+  JiraFieldsRT,
+  ResilientFieldsRT,
+  ServiceNowFieldsRT,
+  rt.null,
 ]);
 
+// we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
+export type ESConnectorFields = Array<{ key: string; value: unknown }>;

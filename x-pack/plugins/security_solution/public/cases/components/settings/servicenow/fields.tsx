@@ -9,7 +9,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@el
 import { i18n } from '@kbn/i18n';
 
 import { SettingFieldsProps } from '../types';
-import { ServiceNowSettingFields } from './types';
+import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
 
 const selectOptions = [
   {
@@ -42,7 +42,7 @@ const selectOptions = [
 ];
 
 const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
-  ServiceNowSettingFields
+  ServiceNowFieldsType
 >> = ({ fields, connector, onChange }) => {
   const { severity, urgency, impact } = fields || {};
 

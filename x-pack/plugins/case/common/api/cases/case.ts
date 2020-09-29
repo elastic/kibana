@@ -10,7 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { ConnectorFieldsRt } from '../connectors';
+import { ConnectorFieldsRt, ESConnectorFields } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
@@ -21,7 +21,7 @@ const CaseConnectorRt = rt.type({
   id: rt.string,
   name: rt.string,
   type: rt.string,
-  fields: rt.union([ConnectorFieldsRt, rt.null]),
+  fields: ConnectorFieldsRt,
 });
 
 const CaseBasicRt = rt.type({
@@ -141,15 +141,15 @@ export const ServiceConnectorCommentParamsRt = rt.type({
 });
 
 export const ServiceConnectorCaseParamsRt = rt.type({
-  savedObjectId: rt.string,
+  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
   createdAt: rt.string,
   createdBy: ServiceConnectorUserParams,
+  description: rt.union([rt.string, rt.null]),
   externalId: rt.union([rt.string, rt.null]),
+  savedObjectId: rt.string,
   title: rt.string,
   updatedAt: rt.union([rt.string, rt.null]),
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-  description: rt.union([rt.string, rt.null]),
-  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
 });
 
 export const ServiceConnectorCaseResponseRt = rt.intersection([
@@ -188,7 +188,7 @@ export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
 
 export type ESCaseConnector = Omit<CaseConnector, 'fields'> & {
-  fields: Array<{ key: string; value: unknown }>;
+  fields: ESConnectorFields;
 };
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };

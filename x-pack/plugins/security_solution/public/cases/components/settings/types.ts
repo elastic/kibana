@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { ActionConnector, CaseConnector } from '../../../../../case/common/api';
+import { ActionConnector } from '../../../../../case/common/api';
 
+import { ConnectorFields } from '../../../../../case/common/api/connectors';
 export type CaseSettingsConnector = ActionConnector;
 
 export interface CaseSetting<UIProps = unknown> {
@@ -16,17 +17,15 @@ export interface CaseSetting<UIProps = unknown> {
   > | null;
 }
 
-export type AllSettingFields = CaseConnector['fields']; // JiraSettingFields | ResilientSettingFields | ServiceNowSettingFields;
-
 export interface CaseSettingsRegistry {
   has: (id: string) => boolean;
-  register: <UIProps extends AllSettingFields>(setting: CaseSetting<UIProps>) => void;
-  get: <UIProps extends AllSettingFields>(id: string) => CaseSetting<UIProps>;
+  register: <UIProps extends ConnectorFields>(setting: CaseSetting<UIProps>) => void;
+  get: <UIProps extends ConnectorFields>(id: string) => CaseSetting<UIProps>;
   list: () => CaseSetting[];
 }
 
 export interface SettingFieldsProps<TFields> {
-  fields?: TFields;
+  fields: TFields;
   connector: CaseSettingsConnector;
   onChange: (property: string, value: unknown) => void;
 }

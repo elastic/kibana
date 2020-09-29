@@ -53,7 +53,7 @@ describe('POST cases', () => {
       id: 'none',
       name: 'none',
       type: '.none',
-      fields: {},
+      fields: null,
     });
   });
 

@@ -65,7 +65,7 @@ describe('helpers', () => {
         id: 'none',
         name: 'none',
         type: '.none',
-        fields: {},
+        fields: null,
       });
     });
   });
@@ -76,7 +76,7 @@ describe('helpers', () => {
         id: '789',
         name: 'My connector 3',
         type: '.jira',
-        fields: {},
+        fields: null,
       });
     });
 
@@ -97,7 +97,7 @@ describe('helpers', () => {
         id: 'none',
         name: 'none',
         type: '.none',
-        fields: {},
+        fields: null,
       });
     });
   });

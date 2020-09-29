@@ -7,14 +7,8 @@
 import * as rt from 'io-ts';
 
 export const ResilientFieldsRT = rt.type({
-  name: rt.string,
-  description: rt.union([rt.string, rt.null]),
-  comments: rt.union([rt.array(rt.string), rt.null]),
-});
-
-export const ResilientSettingFieldsRT = rt.type({
-  incidentTypes: rt.array(rt.number),
-  severityCode: rt.number,
+  incidentTypes: rt.union([rt.array(rt.number), rt.null]),
+  severityCode: rt.union([rt.number, rt.null]),
 });
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;

@@ -7,11 +7,11 @@
 import { lazy } from 'react';
 
 import { CaseSetting } from '../types';
-import { ResilientSettingFields } from './types';
+import { ResilientFieldsType } from '../../../../../../case/common/api/connectors';
 
 export * from './types';
 
-export const getCaseSetting = (): CaseSetting<ResilientSettingFields> => {
+export const getCaseSetting = (): CaseSetting<ResilientFieldsType> => {
   return {
     id: '.resilient',
     caseSettingFieldsComponent: lazy(() => import('./fields')),

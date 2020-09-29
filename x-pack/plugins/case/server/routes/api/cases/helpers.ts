@@ -9,12 +9,13 @@ import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CasesConfigureAttributes,
   CaseConnector,
   ESCaseConnector,
   ESCaseAttributes,
   ESCasePatchRequest,
+  ESCasesConfigureAttributes,
 } from '../../../../common/api';
+import { ConnectorFields, ESConnectorFields } from '../../../../common/api/connectors';
 
 interface CompareArrays {
   addedItems: string[];
@@ -104,32 +105,35 @@ export const getCaseToUpdate = (
   );
 
 export const getConnectorFromConfiguration = (
-  caseConfigure: SavedObjectsFindResponse<CasesConfigureAttributes>
-): CaseConnector => ({
-  id:
-    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
-      ? caseConfigure.saved_objects[0].attributes.connector.id
-      : 'none',
-  name:
-    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
-      ? caseConfigure.saved_objects[0].attributes.connector.name
-      : 'none',
-  type:
-    caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
-      ? caseConfigure.saved_objects[0].attributes.connector.type
-      : '.none',
-  fields: {},
-});
+  caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes>
+): CaseConnector =>
+  caseConfigure.saved_objects.length > 0 && caseConfigure.saved_objects[0].attributes.connector
+    ? {
+        id: caseConfigure.saved_objects[0].attributes.connector.id,
+        name: caseConfigure.saved_objects[0].attributes.connector.name,
+        type: caseConfigure.saved_objects[0].attributes.connector.type,
+        fields: null,
+      }
+    : { id: 'none', name: 'none', type: '.none', fields: null };
 
 export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
   id: connector?.id ?? 'none',
   name: connector?.name ?? 'none',
   type: connector?.type ?? '.none',
   fields: connector?.fields
-    ? Object.keys(connector.fields).map((fieldKey) => ({
-        key: fieldKey,
-        value: connector.fields[fieldKey],
-      }))
+    ? Object.entries(connector.fields).reduce<ESConnectorFields>(
+        (acc, [key, value]) =>
+          value == null
+            ? acc
+            : [
+                ...acc,
+                {
+                  key,
+                  value,
+                },
+              ],
+        []
+      )
     : [],
 });
 
@@ -138,11 +142,13 @@ export const transformESConnectorToCaseConnector = (connector: ESCaseConnector):
   name: connector?.name ?? 'none',
   type: connector?.type ?? '.none',
   fields:
-    connector?.fields.reduce(
-      (fields, field) => ({
-        ...fields,
-        [field.key]: field.value,
-      }),
-      {}
-    ) ?? {},
+    connector.fields.length > 0
+      ? (connector.fields.reduce(
+          (fields, { key, value }) => ({
+            ...fields,
+            [key]: value,
+          }),
+          {}
+        ) as ConnectorFields)
+      : null,
 });

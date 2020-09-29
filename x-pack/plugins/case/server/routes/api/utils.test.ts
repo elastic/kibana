@@ -283,7 +283,7 @@ describe('Utils', () => {
           id: 'none',
           name: 'none',
           type: '.none',
-          fields: {},
+          fields: null,
         }
       );
       expect(res).toEqual({
@@ -297,7 +297,7 @@ describe('Utils', () => {
             id: 'none',
             name: 'none',
             type: '.none',
-            fields: {},
+            fields: null,
           }
         ),
         count_open_cases: 2,
@@ -314,7 +314,7 @@ describe('Utils', () => {
         id: 'none',
         name: 'none',
         type: '.none',
-        fields: {},
+        fields: null,
       });
 
       expect(res).toEqual([
@@ -326,7 +326,7 @@ describe('Utils', () => {
             id: 'none',
             name: 'none',
             type: '.none',
-            fields: {},
+            fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
@@ -358,7 +358,7 @@ describe('Utils', () => {
         id: 'none',
         name: 'none',
         type: '.none',
-        fields: {},
+        fields: null,
       });
 
       expect(res).toEqual([
@@ -370,7 +370,7 @@ describe('Utils', () => {
             id: 'none',
             name: 'none',
             type: '.none',
-            fields: {},
+            fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
@@ -409,7 +409,7 @@ describe('Utils', () => {
         id: 'none',
         name: 'none',
         type: '.none',
-        fields: {},
+        fields: null,
       });
 
       expect(res).toEqual([
@@ -421,7 +421,7 @@ describe('Utils', () => {
             id: 'none',
             name: 'none',
             type: '.none',
-            fields: {},
+            fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
@@ -458,7 +458,7 @@ describe('Utils', () => {
           id: 'none',
           name: 'none',
           type: '.none',
-          fields: {},
+          fields: null,
         },
       });
 
@@ -485,7 +485,7 @@ describe('Utils', () => {
           id: 'none',
           name: 'none',
           type: '.none',
-          fields: {},
+          fields: null,
         },
       });
 
@@ -513,7 +513,7 @@ describe('Utils', () => {
           id: 'none',
           name: 'none',
           type: '.none',
-          fields: {},
+          fields: null,
         },
       });
 

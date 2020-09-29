@@ -18,13 +18,15 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { SettingFieldsProps } from '../types';
-import { JiraSettingFields } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
 
-const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
-  JiraSettingFields
->> = ({ fields, connector, onChange }) => {
+const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<JiraFieldsType>> = ({
+  fields,
+  connector,
+  onChange,
+}) => {
   const { issueType, priority } = fields || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
@@ -152,7 +154,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
                     disabled={isLoadingIssueTypes || isLoadingFields}
                     data-test-subj="prioritySelect"
                     options={prioritiesSelectOptions}
-                    value={priority}
+                    value={priority ?? undefined}
                     hasNoInitialSelection
                     onChange={(e) => {
                       onChange('priority', e.target.value);

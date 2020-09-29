@@ -7,14 +7,8 @@
 import * as rt from 'io-ts';
 
 export const ServiceNowFieldsRT = rt.type({
-  short_description: rt.string,
-  description: rt.union([rt.string, rt.null]),
-  comments: rt.union([rt.array(rt.string), rt.null]),
-});
-export const ServiceNowSettingFieldsRT = rt.type({
-  impact: rt.string,
-  severity: rt.string,
-  urgency: rt.string,
+  impact: rt.union([rt.string, rt.null]),
+  severity: rt.union([rt.string, rt.null]),
+  urgency: rt.union([rt.string, rt.null]),
 });
 export type ServiceNowFieldsType = rt.TypeOf<typeof ServiceNowFieldsRT>;
-export type ServiceNowSettingFields = rt.TypeOf<typeof ServiceNowSettingFieldsRT>;

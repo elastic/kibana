@@ -36,9 +36,9 @@ import {
   getConnectorById,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { ActionConnector, CaseConnector } from '../../containers/types';
+import { ActionConnector } from '../../containers/types';
+import { ConnectorFields } from '../../../../../case/common/api/connectors';
 import * as i18n from './translations';
-import { AllSettingFields } from '../settings/types';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -80,7 +80,7 @@ export const Create = React.memo(() => {
     }))
   );
 
-  const [fields, setFields] = useState<CaseConnector['fields']>(null);
+  const [fields, setFields] = useState<ConnectorFields>(null);
 
   const { form } = useForm<FormProps>({
     defaultValue: initialCaseValue,

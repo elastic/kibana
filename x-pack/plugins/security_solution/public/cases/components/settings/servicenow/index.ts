@@ -7,11 +7,11 @@
 import { lazy } from 'react';
 
 import { CaseSetting } from '../types';
-import { ServiceNowSettingFields } from './types';
+import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
 
 export * from './types';
 
-export const getCaseSetting = (): CaseSetting<ServiceNowSettingFields> => {
+export const getCaseSetting = (): CaseSetting<ServiceNowFieldsType> => {
   return {
     id: '.servicenow',
     caseSettingFieldsComponent: lazy(() => import('./fields')),

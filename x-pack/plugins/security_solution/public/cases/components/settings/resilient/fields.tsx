@@ -16,15 +16,15 @@ import {
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { SettingFieldsProps } from '../types';
-import { ResilientSettingFields } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
+import { ResilientFieldsType } from '../../../../../../case/common/api/connectors';
 
 const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
-  ResilientSettingFields
+  ResilientFieldsType
 >> = ({ fields, connector, onChange }) => {
   const { incidentTypes, severityCode } = fields || {};
 
@@ -151,7 +151,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
           hasNoInitialSelection
           data-test-subj="severitySelect"
           options={severitySelectOptions}
-          value={severityCode}
+          value={severityCode ?? undefined}
           onChange={(e) => {
             onChange('severityCode', e.target.value);
           }}

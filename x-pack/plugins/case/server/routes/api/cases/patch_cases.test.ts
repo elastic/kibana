@@ -59,7 +59,7 @@ describe('PATCH cases', () => {
           id: 'none',
           name: 'none',
           type: '.none',
-          fields: {},
+          fields: null,
         },
         created_at: '2019-11-25T21:54:48.952Z',
         created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
