@@ -18,9 +18,15 @@
  */
 
 import execa from 'execa';
+import Path from 'path';
 import { run, ToolingLog } from '@kbn/dev-utils';
 
-export async function buildRefs(log: ToolingLog, projectPath: string) {
+export async function buildAllRefs(log: ToolingLog) {
+  await buildRefs(log, 'tsconfig.refs.json');
+  await buildRefs(log, Path.join('x-pack', 'tsconfig.refs.json'));
+}
+
+async function buildRefs(log: ToolingLog, projectPath: string) {
   try {
     log.debug(`Building TypeScript projects refs for ${projectPath}...`);
     await execa(require.resolve('typescript/bin/tsc'), ['-b', projectPath]);

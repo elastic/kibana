@@ -24,7 +24,7 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
-import { buildRefs } from './build_refs';
+import { buildAllRefs } from './build_refs';
 
 export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
@@ -80,8 +80,7 @@ export async function runTypeCheckCli() {
     process.exit();
   }
 
-  await buildRefs(log, 'tsconfig.refs.json');
-  await buildRefs(log, 'x-pack/tsconfig.refs.json');
+  await buildAllRefs(log);
 
   const tscArgs = [
     // composite project cannot be used with --noEmit
