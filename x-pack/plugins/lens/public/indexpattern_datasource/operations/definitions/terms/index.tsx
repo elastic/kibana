@@ -6,15 +6,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam } from '../../../state_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
-
-type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {

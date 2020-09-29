@@ -7,11 +7,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow } from 'enzyme';
-import { EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiRange } from '@elastic/eui';
 import { ValuesRangeInput } from './values_range_input';
 
 jest.mock('react-use', () => ({
-  useDebounce: (fn) => fn(),
+  useDebounce: (fn: () => void) => fn(),
 }));
 
 describe('ValuesRangeInput', () => {
@@ -26,7 +26,10 @@ describe('ValuesRangeInput', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
     act(() => {
-      instance.find(EuiRange).prop('onChange')!({ currentTarget: { value: '7' } });
+      instance.find(EuiRange).prop('onChange')!(
+        { currentTarget: { value: '7' } as React.ChangeEvent<HTMLInputElement> },
+        true
+      );
     });
     expect(instance.find(EuiRange).prop('value')).toEqual('7');
     // useDebounce runs on initialization and on change
@@ -38,7 +41,10 @@ describe('ValuesRangeInput', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
     act(() => {
-      instance.find(EuiRange).prop('onChange')!({ currentTarget: { value: '107' } });
+      instance.find(EuiRange).prop('onChange')!(
+        { currentTarget: { value: '107' } as React.ChangeEvent<HTMLInputElement> },
+        true
+      );
     });
     instance.update();
     expect(instance.find(EuiRange).prop('value')).toEqual('107');
