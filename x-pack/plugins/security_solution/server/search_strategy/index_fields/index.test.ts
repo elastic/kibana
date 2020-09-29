@@ -747,8 +747,8 @@ describe('Index Fields', () => {
   });
 
   describe('createFieldItem', () => {
-    test('Basic functionality', () => {
-      const item = createFieldItem(
+    test('Basic functionality', async () => {
+      const item = await createFieldItem(
         ['auditbeat'],
         {
           name: '_id',

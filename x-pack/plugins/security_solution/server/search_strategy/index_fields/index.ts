@@ -14,8 +14,6 @@ import {
   IndexFieldsStrategyRequest,
 } from '../../../common/search_strategy/index_fields';
 
-import { fieldsBeat } from '../../utils/beat_schema/fields';
-
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse
@@ -115,11 +113,13 @@ const missingFields: FieldDescriptor[] = [
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
  */
-export const createFieldItem = (
+export const createFieldItem = async (
   indexesAlias: string[],
   index: FieldDescriptor,
   indexesAliasIdx: number
-): IndexField => {
+): Promise<IndexField> => {
+  const { fieldsBeat } = await import('../../utils/beat_schema/fields');
+
   const alias = indexesAlias[indexesAliasIdx];
   const splitIndexName = index.name.split('.');
   const indexName =
@@ -154,26 +154,18 @@ export const formatFirstFields = async (
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(
-        responsesIndexFields.reduce(
-          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
-            missingFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
-            });
-            indexFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
-            });
-            return accumulator;
-          },
-          []
-        )
-      );
-    });
-  });
+  const result: IndexField[] = [];
+
+  for (const [indexesAliasIdx, indexFields] of responsesIndexFields.entries()) {
+    for (const index of missingFields) {
+      result.push(await createFieldItem(indexesAlias, index, indexesAliasIdx));
+    }
+    for (const index of indexFields) {
+      result.push(await createFieldItem(indexesAlias, index, indexesAliasIdx));
+    }
+  }
+
+  return result;
 };
 
 /**
