@@ -32,6 +32,7 @@ export async function getTransactionDistribution({
   transactionId,
   traceId,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   transactionName: string;
@@ -39,20 +40,23 @@ export async function getTransactionDistribution({
   transactionId: string;
   traceId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  searchAggregatedTransactions: boolean;
 }) {
-  const distributionMax = await getDistributionMax(
+  const distributionMax = await getDistributionMax({
     serviceName,
     transactionName,
     transactionType,
-    setup
-  );
+    setup,
+    searchAggregatedTransactions,
+  });
 
   if (distributionMax == null) {
     return { noHits: true, buckets: [], bucketSize: 0 };
   }
 
   const bucketSize = getBucketSize(distributionMax);
-  const { buckets, noHits } = await getBuckets(
+
+  const { buckets, noHits } = await getBuckets({
     serviceName,
     transactionName,
     transactionType,
@@ -60,8 +64,9 @@ export async function getTransactionDistribution({
     traceId,
     distributionMax,
     bucketSize,
-    setup
-  );
+    setup,
+    searchAggregatedTransactions,
+  });
 
   return {
     noHits,
