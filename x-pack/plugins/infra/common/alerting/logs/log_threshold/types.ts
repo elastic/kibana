@@ -5,10 +5,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { commonSearchSuccessResponseFieldsRT } from '../../utils/elasticsearch_runtime_types';
+import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
 
+const ThresholdTypeRT = rt.keyof({
+  count: null,
+  ratio: null,
+});
+
+export type ThresholdType = rt.TypeOf<typeof ThresholdTypeRT>;
+
+// Comparators //
 export enum Comparator {
   GT = 'more than',
   GT_OR_EQ = 'more than or equals',
@@ -82,6 +90,7 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+// Alert parameters //
 export enum AlertStates {
   OK,
   ALERT,
@@ -89,12 +98,12 @@ export enum AlertStates {
   ERROR,
 }
 
-const DocumentCountRT = rt.type({
+const ThresholdRT = rt.type({
   comparator: ComparatorRT,
   value: rt.number,
 });
 
-export type DocumentCount = rt.TypeOf<typeof DocumentCountRT>;
+export type Threshold = rt.TypeOf<typeof ThresholdRT>;
 
 export const CriterionRT = rt.type({
   field: rt.string,
@@ -104,6 +113,13 @@ export const CriterionRT = rt.type({
 
 export type Criterion = rt.TypeOf<typeof CriterionRT>;
 export const criteriaRT = rt.array(CriterionRT);
+export type Criteria = rt.TypeOf<typeof criteriaRT>;
+
+export const countCriteriaRT = criteriaRT;
+export type CountCriteria = rt.TypeOf<typeof countCriteriaRT>;
+
+export const ratioCriteriaRT = rt.tuple([criteriaRT, criteriaRT]);
+export type RatioCriteria = rt.TypeOf<typeof ratioCriteriaRT>;
 
 export const TimeUnitRT = rt.union([
   rt.literal('s'),
@@ -116,25 +132,73 @@ export type TimeUnit = rt.TypeOf<typeof TimeUnitRT>;
 export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
 
-export const LogDocumentCountAlertParamsRT = rt.intersection([
+const RequiredAlertParamsRT = rt.type({
+  // NOTE: "count" would be better named as "threshold", but this would require a
+  // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
+  count: ThresholdRT,
+  timeUnit: TimeUnitRT,
+  timeSize: timeSizeRT,
+});
+
+const OptionalAlertParamsRT = rt.partial({
+  groupBy: groupByRT,
+});
+
+export const alertParamsRT = rt.intersection([
   rt.type({
-    count: DocumentCountRT,
-    criteria: criteriaRT,
-    timeUnit: TimeUnitRT,
-    timeSize: timeSizeRT,
+    criteria: countCriteriaRT,
+    ...RequiredAlertParamsRT.props,
   }),
   rt.partial({
-    groupBy: groupByRT,
+    ...OptionalAlertParamsRT.props,
   }),
 ]);
 
-export type LogDocumentCountAlertParams = rt.TypeOf<typeof LogDocumentCountAlertParamsRT>;
+export type CountAlertParams = rt.TypeOf<typeof alertParamsRT>;
 
+export const ratioAlertParamsRT = rt.intersection([
+  rt.type({
+    criteria: ratioCriteriaRT,
+    ...RequiredAlertParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalAlertParamsRT.props,
+  }),
+]);
+
+export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
+
+export const AlertParamsRT = rt.union([alertParamsRT, ratioAlertParamsRT]);
+export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
+
+export const isRatioAlert = (criteria: AlertParams['criteria']): criteria is RatioCriteria => {
+  return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
+};
+
+export const isRatioAlertParams = (params: AlertParams): params is RatioAlertParams => {
+  return isRatioAlert(params.criteria);
+};
+
+export const getNumerator = (criteria: RatioCriteria): Criteria => {
+  return criteria[0];
+};
+
+export const getDenominator = (criteria: RatioCriteria): Criteria => {
+  return criteria[1];
+};
+
+export const hasGroupBy = (alertParams: AlertParams) => {
+  const { groupBy } = alertParams;
+  return groupBy && groupBy.length > 0 ? true : false;
+};
+
+// Chart previews //
 const chartPreviewHistogramBucket = rt.type({
   key: rt.number,
   doc_count: rt.number,
 });
 
+// ES query responses //
 export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.intersection([

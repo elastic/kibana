@@ -12,6 +12,10 @@ import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 
 const initialState: DataState = {
+  currentRelatedEvent: {
+    loading: false,
+    data: null,
+  },
   relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
 };
@@ -153,6 +157,33 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       // the action is stale, ignore it
       return state;
     }
+  } else if (action.type === 'appRequestedCurrentRelatedEventData') {
+    const nextState: DataState = {
+      ...state,
+      currentRelatedEvent: {
+        loading: true,
+        data: null,
+      },
+    };
+    return nextState;
+  } else if (action.type === 'serverReturnedCurrentRelatedEventData') {
+    const nextState: DataState = {
+      ...state,
+      currentRelatedEvent: {
+        loading: false,
+        data: action.payload,
+      },
+    };
+    return nextState;
+  } else if (action.type === 'serverFailedToReturnCurrentRelatedEventData') {
+    const nextState: DataState = {
+      ...state,
+      currentRelatedEvent: {
+        loading: false,
+        data: null,
+      },
+    };
+    return nextState;
   } else {
     return state;
   }
