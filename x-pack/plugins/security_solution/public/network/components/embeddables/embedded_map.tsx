@@ -128,13 +128,6 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     let isSubscribed = true;
     async function setupEmbeddable() {
-      // Ensure at least one `securitySolution:defaultIndex` kibana index pattern exists before creating embeddable
-
-      if (mapIndexPatterns.length === 0 && isSubscribed) {
-        setIsIndexError(true);
-        return;
-      }
-
       // Create & set Embeddable
       try {
         const embeddableObject = await createEmbeddable(
@@ -148,7 +141,14 @@ export const EmbeddedMapComponent = ({
           services.embeddable
         );
         if (isSubscribed) {
+          // Ensure at least one `securitySolution:defaultIndex` kibana index pattern exists before creating embeddable
+          if (mapIndexPatterns.length === 0) {
+            setIsIndexError(true);
+            return;
+          }
+
           setEmbeddable(embeddableObject);
+          setIsIndexError(false);
         }
       } catch (e) {
         if (isSubscribed) {
