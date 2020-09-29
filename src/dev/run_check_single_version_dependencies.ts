@@ -52,7 +52,7 @@ function checkPackages(
   }
 }
 
-run(async () => {
+run(async ({ log }) => {
   const packagePaths = await globby(['**/package.json'], { gitignore: true });
   const parsedDependencies: { [key: string]: Array<{ path: string; version: string }> } = {};
 
@@ -85,9 +85,10 @@ run(async () => {
     throw createFailError(
       dedent(`
 
-      Multiple versions for the same dependency were found declared across different
-      package.json files. Please consolidate those into the same version as declaring
-      different versions for the same dependency is not supported.
+      [single_version_dependencies] Multiple versions for the same dependency
+      were found declared across different package.json files. Please consolidate
+      those into the same version as declaring different versions for the
+      same dependency is not supported.
 
       If you have questions about this please reach out to the operations team.
 
@@ -97,4 +98,8 @@ run(async () => {
     `)
     );
   }
+
+  log.success(
+    '[single_version_dependencies] dependency versions are consistent across the entire project.'
+  );
 });
