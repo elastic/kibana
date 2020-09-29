@@ -14,7 +14,7 @@ import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
-import { WorkplaceSearchNav } from './components/layout/nav';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 
 import { SETUP_GUIDE_PATH } from './routes';
 
@@ -32,10 +32,14 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
+  const { renderHeaderActions } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
-    if (!hasInitialized) initializeAppData(props);
+    if (!hasInitialized) {
+      initializeAppData(props);
+      renderHeaderActions(WorkplaceSearchHeaderActions);
+    }
   }, [hasInitialized]);
 
   return (
