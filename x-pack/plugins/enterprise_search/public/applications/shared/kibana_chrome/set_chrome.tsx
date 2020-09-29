@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 import { EuiBreadcrumb } from '@elastic/eui';
 
-import { KibanaContext, IKibanaContext } from '../../index';
+import { KibanaLogic } from '../kibana';
+
 import {
   useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
@@ -41,7 +43,7 @@ type TBreadcrumbsProps = IBreadcrumbsProps | IRootBreadcrumbsProps;
 
 export const SetEnterpriseSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
-  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = isRoot ? [] : [text];
   const docTitle = enterpriseSearchTitle(title as TTitle | []);
@@ -59,7 +61,7 @@ export const SetEnterpriseSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, i
 
 export const SetAppSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
-  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = isRoot ? [] : [text];
   const docTitle = appSearchTitle(title as TTitle | []);
@@ -77,7 +79,7 @@ export const SetAppSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }
 
 export const SetWorkplaceSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
-  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = isRoot ? [] : [text];
   const docTitle = workplaceSearchTitle(title as TTitle | []);

@@ -28,21 +28,28 @@ const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_WEEK = ONE_DAY * 7;
+const ONE_MONTH = ONE_DAY * 30;
+
+const getDisplayInterval = (interval: string | undefined) => {
+  if (interval) {
+    const intervalInSeconds = getIntervalInSeconds(interval);
+    if (intervalInSeconds < 300) return '5m';
+  }
+  return interval;
+};
 
 const getTimeLengthFromInterval = (interval: string | undefined) => {
   if (interval) {
     const intervalInSeconds = getIntervalInSeconds(interval);
-    const multiplier =
-      intervalInSeconds < ONE_MINUTE
-        ? ONE_HOUR / intervalInSeconds
-        : intervalInSeconds < ONE_HOUR
-        ? 60
-        : intervalInSeconds < ONE_DAY
-        ? 7
-        : intervalInSeconds < ONE_WEEK
-        ? 30
-        : 1;
-    const timeLength = intervalInSeconds * multiplier;
+    // Get up to 288 datapoints based on interval
+    const timeLength =
+      intervalInSeconds <= ONE_MINUTE * 15
+        ? ONE_DAY
+        : intervalInSeconds <= ONE_MINUTE * 35
+        ? ONE_DAY * 3
+        : intervalInSeconds <= ONE_HOUR * 2.5
+        ? ONE_WEEK
+        : ONE_MONTH;
     return { timeLength, intervalInSeconds };
   } else {
     return { timeLength: 0, intervalInSeconds: 0 };
@@ -67,15 +74,19 @@ export function useTimeline(
     );
   };
 
-  const timeLengthResult = useMemo(() => getTimeLengthFromInterval(interval), [interval]);
+  const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
+
+  const timeLengthResult = useMemo(() => getTimeLengthFromInterval(displayInterval), [
+    displayInterval,
+  ]);
   const { timeLength, intervalInSeconds } = timeLengthResult;
 
   const timerange: InfraTimerangeInput = {
-    interval: interval ?? '',
+    interval: displayInterval ?? '',
     to: currentTime + intervalInSeconds * 1000,
     from: currentTime - timeLength * 1000,
-    lookbackSize: 0,
     ignoreLookback: true,
+    forceInterval: true,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(

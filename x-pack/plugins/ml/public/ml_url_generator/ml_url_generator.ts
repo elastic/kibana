@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/public';
-import {
+import type { CoreSetup } from 'kibana/public';
+import type {
   SharePluginSetup,
   UrlGeneratorsDefinition,
   UrlGeneratorState,
 } from '../../../../../src/plugins/share/public';
-import { MlStartDependencies } from '../plugin';
+import type { MlStartDependencies } from '../plugin';
 import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
-import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
+import type { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,

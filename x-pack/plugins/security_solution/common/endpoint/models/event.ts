@@ -104,11 +104,17 @@ export function timestampAsDateSafeVersion(event: TimestampFields): Date | undef
   }
 }
 
-export function eventTimestamp(event: ResolverEvent): string | undefined | number {
-  return event['@timestamp'];
+/**
+ * The @timestamp ECS field
+ */
+export function eventTimestamp(event: SafeResolverEvent): string | undefined | number {
+  return firstNonNullValue(event['@timestamp']);
 }
 
-export function eventName(event: ResolverEvent): string {
+/**
+ * Find the name of the related process.
+ */
+export function processName(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.process_name ? event.endgame.process_name : '';
   } else {
@@ -116,6 +122,58 @@ export function eventName(event: ResolverEvent): string {
   }
 }
 
+/**
+ * First non-null value in the `user.name` field.
+ */
+export function userName(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return undefined;
+  } else {
+    return firstNonNullValue(event.user?.name);
+  }
+}
+
+/**
+ * Returns the process event's parent PID
+ */
+export function parentPID(event: SafeResolverEvent): number | undefined {
+  return firstNonNullValue(
+    isLegacyEventSafeVersion(event) ? event.endgame.ppid : event.process?.parent?.pid
+  );
+}
+
+/**
+ * First non-null value for the `process.hash.md5` field.
+ */
+export function md5HashForProcess(event: SafeResolverEvent): string | undefined {
+  return firstNonNullValue(isLegacyEventSafeVersion(event) ? undefined : event.process?.hash?.md5);
+}
+
+/**
+ * First non-null value for the `event.process.args` field.
+ */
+export function argsForProcess(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    // There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return firstNonNullValue(event.process?.args);
+}
+
+/**
+ * First non-null value in the `user.name` field.
+ */
+export function userDomain(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return undefined;
+  } else {
+    return firstNonNullValue(event.user?.domain);
+  }
+}
+
+/**
+ * Find the name of the related process.
+ */
 export function processNameSafeVersion(event: SafeResolverEvent): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return firstNonNullValue(event.endgame.process_name);
@@ -124,11 +182,10 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
   }
 }
 
-export function eventId(event: ResolverEvent): number | undefined | string {
-  if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id;
-  }
-  return event.event.id;
+export function eventID(event: SafeResolverEvent): number | undefined | string {
+  return firstNonNullValue(
+    isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
+  );
 }
 
 /**
@@ -159,12 +216,18 @@ export function eventSequence(event: EventSequenceFields): number | undefined {
   return firstNonNullValue(event.event?.sequence);
 }
 
+/**
+ * The event.id ECS field.
+ */
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
   return firstNonNullValue(
     isLegacyEventSafeVersion(event) ? event.endgame?.serial_event_id : event.event?.id
   );
 }
 
+/**
+ * The event.entity_id field.
+ */
 export function entityId(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
@@ -204,6 +267,9 @@ export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   }
 }
 
+/**
+ * The process.parent.entity_id ECS field.
+ */
 export function parentEntityId(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
@@ -275,18 +341,14 @@ export function ancestryArray(event: AncestryArrayFields): string[] | undefined 
 /**
  * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
  */
-type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
+type AncestryFields = AncestryArrayFields & ParentEntityIDFields;
 
 /**
  * Returns an array of strings representing the ancestry for a process.
  *
  * @param event an ES document
  */
-export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
-  if (!event) {
-    return [];
-  }
-
+export function ancestry(event: AncestryFields): string[] {
   const ancestors = ancestryArray(event);
   if (ancestors) {
     return ancestors;
@@ -301,34 +363,12 @@ export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): s
 }
 
 /**
- * @param event The event to get the category for
- */
-export function primaryEventCategory(event: ResolverEvent): string | undefined {
-  if (isLegacyEvent(event)) {
-    const legacyFullType = event.endgame.event_type_full;
-    if (legacyFullType) {
-      return legacyFullType;
-    }
-  } else {
-    const eventCategories = event.event.category;
-    const category = typeof eventCategories === 'string' ? eventCategories : eventCategories[0];
-
-    return category;
-  }
-}
-
-/**
  * @param event The event to get the full ECS category for
  */
-export function allEventCategories(event: ResolverEvent): string | string[] | undefined {
-  if (isLegacyEvent(event)) {
-    const legacyFullType = event.endgame.event_type_full;
-    if (legacyFullType) {
-      return legacyFullType;
-    }
-  } else {
-    return event.event.category;
-  }
+export function eventCategory(event: SafeResolverEvent): string[] {
+  return values(
+    isLegacyEventSafeVersion(event) ? event.endgame.event_type_full : event.event?.category
+  );
 }
 
 /**
@@ -336,71 +376,19 @@ export function allEventCategories(event: ResolverEvent): string | string[] | un
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-event.html
  * @param event The ResolverEvent to get the ecs type for
  */
-export function ecsEventType(event: ResolverEvent): Array<string | undefined> {
-  if (isLegacyEvent(event)) {
-    return [event.endgame.event_subtype_full];
-  }
-  return typeof event.event.type === 'string' ? [event.event.type] : event.event.type;
+export function eventType(event: SafeResolverEvent): string[] {
+  return values(
+    isLegacyEventSafeVersion(event) ? event.endgame.event_subtype_full : event.event?.type
+  );
 }
 
 /**
- * #Descriptive Names For Related Events:
- *
- * The following section provides facilities for deriving **Descriptive Names** for ECS-compliant event data.
- * There are drawbacks to trying to do this: It *will* require ongoing maintenance. It presents temptations to overarticulate.
- * On balance, however, it seems that the benefit of giving the user some form of information they can recognize & scan outweighs the drawbacks.
+ * event.kind as an array.
  */
-type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
-/**
- * Based on the ECS category of the event, attempt to provide a more descriptive name
- * (e.g. the `event.registry.key` for `registry` or the `dns.question.name` for `dns`, etc.).
- * This function returns the data in the form of `{subject, descriptor}` where `subject` will
- * tend to be the more distinctive term (e.g. 137.213.212.7 for a network event) and the
- * `descriptor` can be used to present more useful/meaningful view (e.g. `inbound 137.213.212.7`
- * in the example above).
- * see: https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
- * @param event The ResolverEvent to get the descriptive name for
- * @returns { descriptiveName } An attempt at providing a readable name to the user
- */
-export function descriptiveName(event: ResolverEvent): { subject: string; descriptor?: string } {
-  if (isLegacyEvent(event)) {
-    return { subject: eventName(event) };
+export function eventKind(event: SafeResolverEvent): string[] {
+  if (isLegacyEventSafeVersion(event)) {
+    return [];
+  } else {
+    return values(event.event?.kind);
   }
-
-  // To be somewhat defensive, we'll check for the presence of these.
-  const partialEvent: DeepPartial<ResolverEvent> = event;
-
-  /**
-   * This list of attempts can be expanded/adjusted as the underlying model changes over time:
-   */
-
-  // Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
-
-  if (partialEvent.network?.forwarded_ip) {
-    return {
-      subject: String(partialEvent.network?.forwarded_ip),
-      descriptor: String(partialEvent.network?.direction),
-    };
-  }
-
-  if (partialEvent.file?.path) {
-    return {
-      subject: String(partialEvent.file?.path),
-    };
-  }
-
-  // Extended categories (per ECS 1.5):
-  const pathOrKey = partialEvent.registry?.path || partialEvent.registry?.key;
-  if (pathOrKey) {
-    return {
-      subject: String(pathOrKey),
-    };
-  }
-
-  if (partialEvent.dns?.question?.name) {
-    return { subject: String(partialEvent.dns?.question?.name) };
-  }
-
-  // Fall back on entityId if we can't fish a more descriptive name out.
-  return { subject: entityId(event) };
 }
