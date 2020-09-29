@@ -57,8 +57,8 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
-interface ServerReturnedRelatedEventsOfType {
-  readonly type: 'serverReturnedRelatedEventsOfType';
+interface ServerReturnedNodeEventsInCategory {
+  readonly type: 'serverReturnedNodeEventsInCategory';
   readonly payload: {
     /**
      * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
@@ -83,6 +83,6 @@ export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerReturnedRelatedEventData
-  | ServerReturnedRelatedEventsOfType
+  | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
   | AppAbortedResolverDataRequest;

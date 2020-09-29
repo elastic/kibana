@@ -238,7 +238,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
             )
           ).toYieldEqualTo(2);
-          // data-test-subj="resolver:panel:node-events-in-category:event-link"
         });
       });
     });

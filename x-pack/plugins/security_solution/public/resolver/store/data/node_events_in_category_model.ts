@@ -6,10 +6,15 @@
 import { PanelViewAndParameters, NodeEventsInCategoryState } from '../../types';
 
 /**
+ * `NodeEventsInCategoryState` is used to model an ordered collection of events that are all related to the same node and which all belong to a given category.
+ * The app requests these via the data access layer and aggregates the responses from multiple requests. When a different node or category is selected, or when a different panel entirely is selected, the state is cleared out.
+ */
+
+/**
  * True if `nodeEventsInCategory` contains data that is relevant to `panelViewAndParameters`.
  * This is used by the reducer to enforce that the nodeEventsInCategory state is always valid.
  */
-export function isValid(
+export function isRelevantToPanelViewAndParameters(
   nodeEventsInCategory: NodeEventsInCategoryState,
   panelViewAndParameters: PanelViewAndParameters
 ): boolean {

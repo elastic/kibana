@@ -238,6 +238,11 @@ export interface DataState {
    */
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
 
+  /**
+   * Used when the panelView is `nodeEventsInCategory`.
+   * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
+   * If new data is returned for the panel view, this may be updated.
+   */
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
 
   readonly tree?: {

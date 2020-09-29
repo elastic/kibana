@@ -43,7 +43,7 @@ export function RelatedEventsFetcher(
 
         if (result) {
           api.dispatch({
-            type: 'serverReturnedRelatedEventsOfType',
+            type: 'serverReturnedNodeEventsInCategory',
             payload: {
               events: result.events,
               eventCategory: newParams.panelParameters.eventCategory,

@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useCallback, Fragment } from 'react';
+import React, { memo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';

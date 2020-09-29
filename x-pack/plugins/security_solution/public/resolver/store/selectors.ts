@@ -331,6 +331,7 @@ export const totalRelatedEventCountForNode = composeSelectors(
 /**
  * Count of events with `category` related to `nodeID`.
  * Based on `ResolverNodeStats`
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
  */
 export const relatedEventCountOfTypeForNode = composeSelectors(
   dataStateSelector,
@@ -339,6 +340,7 @@ export const relatedEventCountOfTypeForNode = composeSelectors(
 
 /**
  * Events related to the panel node that are in the panel category.
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
  * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
  */
 export const nodeEventsInCategory = composeSelectors(
