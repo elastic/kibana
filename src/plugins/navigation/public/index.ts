@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
