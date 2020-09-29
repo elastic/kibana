@@ -179,8 +179,7 @@ describe('IndexPattern', () => {
       await indexPattern.addScriptedField(
         scriptedField.name,
         scriptedField.script,
-        scriptedField.type,
-        'lang'
+        scriptedField.type
       );
 
       const scriptedFields = indexPattern.getScriptedFields();
@@ -206,7 +205,7 @@ describe('IndexPattern', () => {
       const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
-        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
+        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
