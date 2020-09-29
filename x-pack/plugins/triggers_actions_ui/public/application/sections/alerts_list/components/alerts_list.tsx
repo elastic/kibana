@@ -19,6 +19,8 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiCallOut,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -428,6 +430,24 @@ export const AlertsList: React.FunctionComponent = () => {
           setAlertsState({ ...alertsState, isLoading });
         }}
       />
+      <EuiCallOut
+        color="danger"
+        size="s"
+        title={
+          <FormattedMessage
+            id="core.ui.overlays.banner.attentionTitle"
+            defaultMessage="There is 1 alert with an error."
+          />
+        }
+        iconType="alert"
+      >
+        <EuiButton type="primary" size="s" color="danger">
+          <FormattedMessage id="banner.closeButtonLabel" defaultMessage="View" />
+        </EuiButton>
+        <EuiButtonEmpty color="danger">
+          <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
+        </EuiButtonEmpty>
+      </EuiCallOut>
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (
         table
