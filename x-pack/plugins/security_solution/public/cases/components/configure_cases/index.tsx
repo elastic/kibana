@@ -117,7 +117,9 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
       const actionConnector = getConnectorById(id, connectors);
       const caseConnector =
-        actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
+        actionConnector != null
+          ? { ...normalizeActionConnector(actionConnector), fields: null }
+          : getNoneConnector();
 
       setConnector(caseConnector);
       persistCaseConfigure({

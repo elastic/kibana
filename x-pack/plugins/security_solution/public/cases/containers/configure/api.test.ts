@@ -77,7 +77,7 @@ describe('Case Configuration API', () => {
       await postCaseConfigure(caseConfigurationMock, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         body:
-          '{"connector_id":"123","connector_name":"My Connector","closure_type":"close-by-user"}',
+          '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"closure_type":"close-by-user"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -96,9 +96,16 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, body, method, signal', async () => {
-      await patchCaseConfigure({ connector_id: '456', version: 'WzHJ12' }, abortCtrl.signal);
+      await patchCaseConfigure(
+        {
+          connector: { id: '456', name: 'My Connector 2', type: '.test', fields: null },
+          version: 'WzHJ12',
+        },
+        abortCtrl.signal
+      );
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
-        body: '{"connector_id":"456","version":"WzHJ12"}',
+        body:
+          '{"connector":{"id":"456","name":"My Connector 2","type":".test","fields":null},"version":"WzHJ12"}',
         method: 'PATCH',
         signal: abortCtrl.signal,
       });
@@ -106,7 +113,10 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await patchCaseConfigure(
-        { connector_id: '456', version: 'WzHJ12' },
+        {
+          connector: { id: '456', name: 'My Connector 2', type: '.test', fields: null },
+          version: 'WzHJ12',
+        },
         abortCtrl.signal
       );
       expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
