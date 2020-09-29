@@ -16,7 +16,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
-import { MonitoringStats, RawMonitoringStats, summarizeMonitoringStats } from '../monitoring';
+import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
 
 export function healthRoute(
   router: IRouter,
