@@ -25,6 +25,7 @@ export const mockLocation = {
 };
 
 jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as object),
   useHistory: jest.fn(() => mockHistory),
   useLocation: jest.fn(() => mockLocation),
 }));
