@@ -59,7 +59,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<gs-get-data-into-kibana>>.
+This page has moved. Please see <<quick-start-guide>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
