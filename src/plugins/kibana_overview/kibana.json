@@ -3,6 +3,7 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "newsfeed", "home"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredPlugins": ["navigation", "data", "home"],
+  "optionalPlugins": ["newsfeed"],
+  "requiredBundles": ["kibanaReact", "newsfeed"]
 }

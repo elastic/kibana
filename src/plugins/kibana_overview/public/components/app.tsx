@@ -32,7 +32,7 @@ interface KibanaOverviewAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
-  newsfeed$: Observable<FetchResult | null | void>;
+  newsfeed$?: Observable<FetchResult | null | void>;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
 }
@@ -46,11 +46,13 @@ export const KibanaOverviewApp = ({
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
 
   useEffect(() => {
-    const subscription = newsfeed$.subscribe((res: FetchResult | void | null) => {
-      setNewsFetchResult(res);
-    });
+    if (newsfeed$) {
+      const subscription = newsfeed$.subscribe((res: FetchResult | void | null) => {
+        setNewsFetchResult(res);
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    }
   }, [newsfeed$]);
 
   return (

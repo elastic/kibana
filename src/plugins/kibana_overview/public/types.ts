@@ -36,5 +36,5 @@ export interface AppPluginStartDependencies {
   home: HomePublicPluginStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
-  newsfeed: NewsfeedPublicPluginStart;
+  newsfeed?: NewsfeedPublicPluginStart;
 }
