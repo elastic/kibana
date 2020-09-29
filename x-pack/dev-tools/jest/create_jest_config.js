@@ -27,6 +27,13 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
       '^(!!)?file-loader!': fileMockPath,
     },
+    modulePathIgnorePatterns: [
+      '/__fixtures__/',
+      '/target/',
+
+      // duplicate manual mock work-around https://github.com/facebook/jest/issues/2070
+      '/__mocks__/',
+    ],
     collectCoverageFrom: [
       'plugins/**/*.{js,mjs,jsx,ts,tsx}',
       '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',

@@ -76,7 +76,13 @@ export default {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
-  modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  modulePathIgnorePatterns: [
+    '/__fixtures__/',
+    '/target/',
+
+    // duplicate manual mock work-around https://github.com/facebook/jest/issues/2070
+    '/__mocks__/',
+  ],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
