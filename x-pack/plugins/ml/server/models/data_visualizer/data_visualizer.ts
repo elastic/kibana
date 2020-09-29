@@ -5,10 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import get from 'lodash/get';
-import each from 'lodash/each';
-import last from 'lodash/last';
-import find from 'lodash/find';
+import { get, each, last, find } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
