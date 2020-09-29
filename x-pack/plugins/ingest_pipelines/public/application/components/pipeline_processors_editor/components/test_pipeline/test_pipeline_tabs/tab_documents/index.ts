@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { OverviewPage } from './overview_page';
+export { DocumentsTab } from './tab_documents';
