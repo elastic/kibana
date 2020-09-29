@@ -1242,7 +1242,7 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async (done) => {
+    test('emits an event when a task is succesfully claimed by id', (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1297,14 +1297,14 @@ if (doc['task.runAt'].size()!=0) {
           },
         });
 
-      await store.claimAvailableTasks({
+      store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
-    test('emits an event when a task is succesfully by scheduling', async (done) => {
+    test('emits an event when a task is succesfully by scheduling', (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1359,14 +1359,14 @@ if (doc['task.runAt'].size()!=0) {
           },
         });
 
-      await store.claimAvailableTasks({
+      store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
-    test('emits an event when the store fails to claim a required task by id', async (done) => {
+    test('emits an event when the store fails to claim a required task by id', (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1423,14 +1423,14 @@ if (doc['task.runAt'].size()!=0) {
           },
         });
 
-      await store.claimAvailableTasks({
+      store.claimAvailableTasks({
         claimTasksById: ['already-running'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
-    test('emits an event when the store fails to find a task which was required by id', async (done) => {
+    test('emits an event when the store fails to find a task which was required by id', (done) => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1465,7 +1465,7 @@ if (doc['task.runAt'].size()!=0) {
           },
         });
 
-      await store.claimAvailableTasks({
+      store.claimAvailableTasks({
         claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,

@@ -4074,7 +4074,7 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
+    test('updating the alert should not wait for the rerun the task to complete', (done) => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
@@ -4086,31 +4086,33 @@ describe('update()', () => {
       taskManager.runNow.mockReset();
       taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
 
-      await alertsClient.update({
-        id: alertId,
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              params: {
-                foo: true,
-              },
+      alertsClient
+        .update({
+          id: alertId,
+          data: {
+            schedule: { interval: '10s' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
             },
-          ],
-        },
-      });
+            throttle: null,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+        .then(() => {
+          expect(taskManager.runNow).toHaveBeenCalled();
 
-      expect(taskManager.runNow).toHaveBeenCalled();
-
-      resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
+          resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
+        });
     });
 
     test('logs when the rerun of an alerts underlying task fails', async () => {

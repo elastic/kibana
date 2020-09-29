@@ -13,7 +13,7 @@ describe('ReadySignal', () => {
     readySignal = createReadySignal<number>();
   });
 
-  test('works as expected', async (done) => {
+  test('works as expected', async () => {
     let value = 41;
 
     timeoutSet(100, async () => {
@@ -27,7 +27,6 @@ describe('ReadySignal', () => {
 
       const innerValue = await readySignal.wait();
       expect(innerValue).toBe(42);
-      done();
     });
 
     value = await readySignal.wait();

@@ -92,7 +92,7 @@ describe('licensing plugin', () => {
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
-      it('observable receives updated licenses', async (done) => {
+      it('observable receives updated licenses', (done) => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
@@ -104,26 +104,26 @@ describe('licensing plugin', () => {
           Promise.resolve(licenseMock.createLicense({ license: { type: types.shift() } }))
         );
 
-        await plugin.setup(coreSetup);
-        const { refresh, license$ } = await plugin.start(coreStart);
-
-        let i = 0;
-        license$.subscribe((value) => {
-          i++;
-          if (i === 1) {
-            expect(value.type).toBe('basic');
-            refresh();
-          } else if (i === 2) {
-            expect(value.type).toBe('gold');
-            // since this is a synchronous subscription, we need to give the exhaustMap a chance
-            // to mark the subscription as complete before emitting another value on the Subject
-            process.nextTick(() => refresh());
-          } else if (i === 3) {
-            expect(value.type).toBe('platinum');
-            done();
-          } else {
-            throw new Error('unreachable');
-          }
+        plugin.setup(coreSetup);
+        plugin.start(coreStart).then(({ refresh, license$ }) => {
+          let i = 0;
+          license$.subscribe((value) => {
+            i++;
+            if (i === 1) {
+              expect(value.type).toBe('basic');
+              refresh();
+            } else if (i === 2) {
+              expect(value.type).toBe('gold');
+              // since this is a synchronous subscription, we need to give the exhaustMap a chance
+              // to mark the subscription as complete before emitting another value on the Subject
+              process.nextTick(() => refresh());
+            } else if (i === 3) {
+              expect(value.type).toBe('platinum');
+              done();
+            } else {
+              throw new Error('unreachable');
+            }
+          });
         });
       });
 
