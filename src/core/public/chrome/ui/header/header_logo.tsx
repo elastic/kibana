@@ -17,17 +17,16 @@
  * under the License.
  */
 
+import './header_logo.scss';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
-// @ts-expect-error TS doesn't like importing an SVG
-import elasticMark from './elastic_mark.svg';
+import { ElasticMark } from './elastic_mark';
 import { HttpStart } from '../../../http';
 import { LoadingIndicator } from '../loading_indicator';
-import './header_logo.scss';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -104,7 +103,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      className="euiHeaderSectionItem__button chrHeaderLogo"
+      className="euiHeaderLogo"
       href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
@@ -112,13 +111,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
       })}
     >
       <LoadingIndicator loadingCount$={loadingCount$!} />
-      <img
-        src={elasticMark}
-        className="chrHeaderLogo__mark"
-        alt="Elastic"
-        aria-hidden
-        height={18}
-      />
+      <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
     </a>
   );
 }
