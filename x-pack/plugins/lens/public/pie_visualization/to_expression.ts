@@ -37,6 +37,8 @@ function expressionHelper(
         type: 'function',
         function: 'lens_pie',
         arguments: {
+          title: [state.title || ''],
+          description: [state.description || ''],
           shape: [state.shape],
           hideLabels: [isPreview],
           groups: operations.map((o) => o.columnId),

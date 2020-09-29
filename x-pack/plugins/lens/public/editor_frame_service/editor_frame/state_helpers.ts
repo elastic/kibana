@@ -61,6 +61,8 @@ export async function persistedStateToExpression(
     state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
     visualizationType,
     references,
+    title,
+    description,
   } = doc;
   if (!visualizationType) return null;
   const visualization = visualizations[visualizationType!];
@@ -79,7 +81,7 @@ export async function persistedStateToExpression(
 
   return buildExpression({
     visualization,
-    visualizationState,
+    visualizationState: { ...(visualizationState as object), title, description },
     datasourceMap: datasources,
     datasourceStates,
     datasourceLayers,

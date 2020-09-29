@@ -5,11 +5,13 @@
  */
 
 export interface State {
+  title?: string;
+  description?: string;
   layerId: string;
   accessor?: string;
 }
 
 export interface MetricConfig extends State {
-  title: string;
+  metricTitle: string;
   mode: 'reduced' | 'full';
 }

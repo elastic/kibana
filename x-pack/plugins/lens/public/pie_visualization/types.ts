@@ -23,11 +23,15 @@ export type LayerState = SharedLayerState & {
 };
 
 export interface PieVisualizationState {
+  title?: string;
+  description?: string;
   shape: 'donut' | 'pie' | 'treemap';
   layers: LayerState[];
 }
 
 export type PieExpressionArgs = SharedLayerState & {
+  title?: string;
+  description?: string;
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
 };

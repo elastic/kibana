@@ -15,6 +15,8 @@ export interface LayerState {
 }
 
 export interface DatatableVisualizationState {
+  title: string;
+  description?: string;
   layers: LayerState[];
 }
 
@@ -211,6 +213,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           type: 'function',
           function: 'lens_datatable',
           arguments: {
+            title: [state.title || ''],
+            description: [state.description || ''],
             columns: [
               {
                 type: 'expression',

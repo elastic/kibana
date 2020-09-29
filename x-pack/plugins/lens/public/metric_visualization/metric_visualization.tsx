@@ -30,7 +30,9 @@ const toExpression = (
         type: 'function',
         function: 'lens_metric_chart',
         arguments: {
-          title: [(operation && operation.label) || ''],
+          title: [state.title || ''],
+          description: [state.description || ''],
+          metricTitle: [(operation && operation.label) || ''],
           accessor: [state.accessor],
           mode: [mode],
         },

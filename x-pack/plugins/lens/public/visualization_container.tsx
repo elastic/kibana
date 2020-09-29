@@ -12,6 +12,7 @@ import './visualization_container.scss';
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   isReady?: boolean;
   reportTitle?: string;
+  reportDescription?: string;
 }
 
 /**
@@ -21,6 +22,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 export function VisualizationContainer({
   isReady = true,
   reportTitle,
+  reportDescription,
   children,
   className,
   ...rest
@@ -31,6 +33,7 @@ export function VisualizationContainer({
       data-render-complete={isReady}
       className={classNames(className, 'lnsVisualizationContainer')}
       data-title={reportTitle}
+      data-description={reportDescription}
       {...rest}
     >
       {children}

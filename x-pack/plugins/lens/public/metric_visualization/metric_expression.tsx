@@ -41,6 +41,14 @@ export const metricChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'The chart title.',
     },
+    description: {
+      types: ['string'],
+      help: '',
+    },
+    metricTitle: {
+      types: ['string'],
+      help: 'The title of the metric shown.',
+    },
     accessor: {
       types: ['string'],
       help: 'The column whose value is being displayed',
@@ -96,12 +104,16 @@ export function MetricChart({
   args,
   formatFactory,
 }: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { title, accessor, mode } = args;
+  const { metricTitle, title, description, accessor, mode } = args;
   let value = '-';
   const firstTable = Object.values(data.tables)[0];
   if (!accessor) {
     return (
-      <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container" />
+      <VisualizationContainer
+        reportTitle={title}
+        reportDescription={description}
+        className="lnsMetricExpression__container"
+      />
     );
   }
 
@@ -117,14 +129,18 @@ export function MetricChart({
   }
 
   return (
-    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
+    <VisualizationContainer
+      reportTitle={title}
+      reportDescription={description}
+      className="lnsMetricExpression__container"
+    >
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
         </div>
         {mode === 'full' && (
           <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
-            {title}
+            {metricTitle}
           </div>
         )}
       </AutoScale>
