@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 import { ReactElement } from 'react';
-import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 import { Vis } from '../vis';
 
-export interface BaseVisTypeOptions {
+interface CommonBaseVisTypeOptions {
   name: string;
   title: string;
   description?: string;
@@ -33,7 +33,6 @@ export interface BaseVisTypeOptions {
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
   options?: Record<string, any>;
-  visualization: VisualizationControllerConstructor | undefined;
   visConfig?: Record<string, any>;
   editor?: any;
   editorConfig?: Record<string, any>;
@@ -44,12 +43,25 @@ export interface BaseVisTypeOptions {
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
-  toExpressionAst?: VisToExpressionAst;
   isDeprecated?: boolean;
   getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 }
 
-export class BaseVisType {
+interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
+  toExpressionAst: VisToExpressionAst<TVisParams>;
+  visualization?: undefined;
+}
+
+interface VisualizationBaseVisTypeOptions extends CommonBaseVisTypeOptions {
+  toExpressionAst?: undefined;
+  visualization: VisualizationControllerConstructor | undefined;
+}
+
+export type BaseVisTypeOptions<TVisParams = VisParams> =
+  | ExpressionBaseVisTypeOptions<TVisParams>
+  | VisualizationBaseVisTypeOptions;
+
+export class BaseVisType<TVisParams = VisParams> {
   name: string;
   title: string;
   description: string;
@@ -71,11 +83,11 @@ export class BaseVisType {
   setup?: unknown;
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
-  toExpressionAst?: VisToExpressionAst;
+  toExpressionAst?: VisToExpressionAst<TVisParams>;
   isDeprecated: boolean;
   getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 
-  constructor(opts: BaseVisTypeOptions) {
+  constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
       throw new Error('vis_type must define its icon or image');
     }
