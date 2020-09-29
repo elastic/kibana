@@ -10,19 +10,20 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { ConnectorFieldsRt, ESConnectorFields } from '../connectors';
+import { ConnectorTypeFieldsRt, ESConnectorFields } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
-const CaseConnectorRt = rt.type({
-  id: rt.string,
-  name: rt.string,
-  type: rt.string,
-  fields: ConnectorFieldsRt,
-});
+const CaseConnectorRt = rt.intersection([
+  rt.type({
+    id: rt.string,
+    name: rt.string,
+  }),
+  ConnectorTypeFieldsRt,
+]);
 
 const CaseBasicRt = rt.type({
   connector: CaseConnectorRt,

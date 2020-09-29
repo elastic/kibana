@@ -22,7 +22,7 @@ import { noop } from 'lodash/fp';
 import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
-import { ConnectorFields } from '../../../../../case/common/api/connectors';
+import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
@@ -33,13 +33,13 @@ import { Connector } from './connector';
 import * as i18n from './translations';
 
 interface EditConnectorProps {
-  caseFields: ConnectorFields;
+  caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
   disabled?: boolean;
   isLoading: boolean;
   onSubmit: (
     connectorId: string,
-    connectorFields: ConnectorFields,
+    connectorFields: ConnectorTypeFields['fields'],
     onSuccess: () => void,
     onError: () => void
   ) => void;
@@ -82,7 +82,7 @@ export const EditConnector = React.memo(
 
     const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
     const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
-    const [fields, setFields] = useState<ConnectorFields>(caseFields);
+    const [fields, setFields] = useState<ConnectorTypeFields['fields']>(caseFields);
     const [editConnector, setEditConnector] = useState(false);
 
     const onChangeConnector = useCallback(

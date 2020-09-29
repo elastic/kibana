@@ -7,7 +7,7 @@
 import React from 'react';
 import { ActionConnector } from '../../../../../case/common/api';
 
-import { ConnectorFields } from '../../../../../case/common/api/connectors';
+import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 export type CaseSettingsConnector = ActionConnector;
 
 export interface CaseSetting<UIProps = unknown> {
@@ -19,8 +19,8 @@ export interface CaseSetting<UIProps = unknown> {
 
 export interface CaseSettingsRegistry {
   has: (id: string) => boolean;
-  register: <UIProps extends ConnectorFields>(setting: CaseSetting<UIProps>) => void;
-  get: <UIProps extends ConnectorFields>(id: string) => CaseSetting<UIProps>;
+  register: <UIProps extends ConnectorTypeFields['fields']>(setting: CaseSetting<UIProps>) => void;
+  get: <UIProps extends ConnectorTypeFields['fields']>(id: string) => CaseSetting<UIProps>;
   list: () => CaseSetting[];
 }
 
