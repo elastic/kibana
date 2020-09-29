@@ -75,7 +75,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!boundaryType) {
     errors.boundaryType.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredTrackingEventText', {
+      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredBoundaryTypeText', {
         defaultMessage: 'Boundary type is required.',
       })
     );
