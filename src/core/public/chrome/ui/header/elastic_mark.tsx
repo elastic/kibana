@@ -18,7 +18,6 @@
  */
 
 import React, { HTMLAttributes } from 'react';
-import { CommonProps } from '@elastic/eui';
 
 export const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   <svg
