@@ -71,6 +71,7 @@ export class KibanaOverviewPlugin
         };
       })
     );
+
     // Register an application into the side navigation menu
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,

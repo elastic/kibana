@@ -19,7 +19,7 @@ exports[`ManageData render 1`] = `
       >
         <FormattedMessage
           defaultMessage="Manage your data"
-          id="kibana_overview.manageData.sectionTitle"
+          id="kibanaOverview.manageData.sectionTitle"
           values={Object {}}
         />
       </h2>

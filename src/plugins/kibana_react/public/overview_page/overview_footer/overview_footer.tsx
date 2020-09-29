@@ -66,11 +66,14 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
-          toasts.addSuccess(
-            i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
-              defaultMessage: 'The Kibana overview is now your landing page.',
-            })
-          );
+          toasts.addSuccess({
+            title: i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
+              defaultMessage: 'Landing page updated',
+            }),
+            text: i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
+              defaultMessage: `To change to a different landing page, edit 'defaultRoute' in Advanced Settings.`,
+            }),
+          });
         }}
         size="xs"
       >

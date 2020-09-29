@@ -48,7 +48,7 @@ export const ManageData: FC<Props> = ({ features }) => {
           <EuiTitle size="s">
             <h2 id="kbnOverviewDataManage__title">
               <FormattedMessage
-                id="kibana_overview.manageData.sectionTitle"
+                id="kibanaOverview.manageData.sectionTitle"
                 defaultMessage="Manage your data"
               />
             </h2>
