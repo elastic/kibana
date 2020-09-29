@@ -23,6 +23,7 @@ import {
   cacheSet,
   cacheDelete,
   getArchiveFilelist,
+  setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
@@ -159,6 +160,7 @@ export async function loadRegistryPackage(
   let paths = getArchiveFilelist(pkgName, pkgVersion);
   if (!paths || paths.length === 0) {
     paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    setArchiveFilelist(pkgName, pkgVersion, paths);
   }
 
   // TODO: cache this as well?
@@ -213,11 +215,11 @@ export async function ensureCachedArchiveInfo(
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
       await loadRegistryPackage(name, version);
+    } else {
+      throw new PackageCacheError(
+        `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
+      );
     }
-  } else {
-    throw new PackageCacheError(
-      `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
-    );
   }
 }
 
