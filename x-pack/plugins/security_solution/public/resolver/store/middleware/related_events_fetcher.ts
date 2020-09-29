@@ -29,9 +29,9 @@ export function RelatedEventsFetcher(
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 
-    // If the panel view params have changed and the current panel view is either `nodeEventsOfType` or `eventDetail`, then fetch the related events for that nodeID.
+    // If the panel view params have changed and the current panel view is either `nodeEventsInCategory` or `eventDetail`, then fetch the related events for that nodeID.
     if (!isEqual(newParams, oldParams)) {
-      if (newParams.panelView === 'nodeEventsOfType') {
+      if (newParams.panelView === 'nodeEventsInCategory') {
         const nodeID = newParams.panelParameters.nodeID;
 
         const result:

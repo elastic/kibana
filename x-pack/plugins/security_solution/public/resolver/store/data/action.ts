@@ -5,7 +5,6 @@
  */
 
 import {
-  ResolverPaginatedEvents,
   ResolverRelatedEvents,
   ResolverTree,
   SafeEndpointEvent,

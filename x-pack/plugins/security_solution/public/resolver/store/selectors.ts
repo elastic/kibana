@@ -131,11 +131,11 @@ export const relatedEventTotalCount: (
   dataSelectors.relatedEventTotalCount
 );
 
-export const relatedEventCountByType: (
+export const relatedEventCountByCategory: (
   state: ResolverState
-) => (nodeID: string, eventType: string) => number | undefined = composeSelectors(
+) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventCountByType
+  dataSelectors.relatedEventCountByCategory
 );
 
 /**

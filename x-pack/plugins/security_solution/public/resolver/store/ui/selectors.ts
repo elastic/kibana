@@ -9,7 +9,6 @@ import { encode } from 'rison-node';
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
-import { isPanelViewAndParameters } from '../../models/location_search';
 import { eventID } from '../../../../common/endpoint/models/event';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import { parameterName } from '../parameter_name';
@@ -92,7 +91,7 @@ export const relatedEventsRelativeHrefs: (
     if (categories !== undefined) {
       Object.keys(categories).map((category) => {
         const categoryPanelParams: PanelViewAndParameters = {
-          panelView: 'nodeEventsOfType',
+          panelView: 'nodeEventsInCategory',
           panelParameters: {
             nodeID,
             eventCategory: category,
@@ -125,7 +124,7 @@ export const relatedEventDetailHrefs: (
         panelView: 'eventDetail',
         panelParameters: {
           nodeID,
-          eventType: category,
+          eventCategory: category,
           eventID: entityID,
         },
       };

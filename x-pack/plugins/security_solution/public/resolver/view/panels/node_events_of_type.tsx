@@ -87,7 +87,7 @@ const NodeEventsListItem = memo(function ({
     panelView: 'eventDetail',
     panelParameters: {
       nodeID,
-      eventType,
+      eventCategory: eventType,
       eventID: String(eventModel.eventID(event)),
     },
   });

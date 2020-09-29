@@ -9,7 +9,7 @@ import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
-import * as nodeEventsOfTypeModel from './node_events_of_type_model';
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 
 const initialState: DataState = {
   relatedEvents: new Map(),
@@ -33,11 +33,11 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const panelViewAndParameters = selectors.panelViewAndParameters(nextState);
     return {
       ...nextState,
-      // Remove `nodeEventsOfType` if it is no longer relevant
-      nodeEventsOfType:
-        nextState.nodeEventsOfType &&
-        nodeEventsOfTypeModel.isValid(nextState.nodeEventsOfType, panelViewAndParameters)
-          ? nextState.nodeEventsOfType
+      // Remove `nodeEventsInCategory` if it is no longer relevant
+      nodeEventsInCategory:
+        nextState.nodeEventsInCategory &&
+        nodeEventsInCategoryModel.isValid(nextState.nodeEventsInCategory, panelViewAndParameters)
+          ? nextState.nodeEventsInCategory
           : undefined,
     };
   } else if (action.type === 'appRequestedResolverData') {
@@ -114,15 +114,20 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
     return nextState;
   } else if (action.type === 'serverReturnedRelatedEventsOfType') {
-    if (nodeEventsOfTypeModel.isValid(action.payload, selectors.panelViewAndParameters(state))) {
-      if (state.nodeEventsOfType) {
+    if (
+      nodeEventsInCategoryModel.isValid(action.payload, selectors.panelViewAndParameters(state))
+    ) {
+      if (state.nodeEventsInCategory) {
         // combine the new and old data.
-        const updated = nodeEventsOfTypeModel.updatedWith(state.nodeEventsOfType, action.payload);
+        const updated = nodeEventsInCategoryModel.updatedWith(
+          state.nodeEventsInCategory,
+          action.payload
+        );
         if (updated) {
           // There is no existing data, use the new data.
           const next: DataState = {
             ...state,
-            nodeEventsOfType: updated,
+            nodeEventsInCategory: updated,
           };
           return next;
         } else {
@@ -133,8 +138,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         // There is no existing data, use the new data.
         const next: DataState = {
           ...state,
-          nodeEventsOfType: action.payload,
+          nodeEventsInCategory: action.payload,
         };
+        return next;
       }
     } else {
       // the action is stale, ignore it

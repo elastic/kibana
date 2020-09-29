@@ -3,19 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PanelViewAndParameters, NodeEventsOfTypeState } from '../../types';
+import { PanelViewAndParameters, NodeEventsInCategoryState } from '../../types';
 
 /**
- * True if `nodeEventsOfType` contains data that is relevant to `panelViewAndParameters`.
+ * True if `nodeEventsInCategory` contains data that is relevant to `panelViewAndParameters`.
  */
 export function isValid(
-  nodeEventsOfType: NodeEventsOfTypeState,
+  nodeEventsInCategory: NodeEventsInCategoryState,
   panelViewAndParameters: PanelViewAndParameters
 ): boolean {
   return (
-    panelViewAndParameters.panelView === 'nodeEventsOfType' &&
-    panelViewAndParameters.panelParameters.nodeID === nodeEventsOfType.nodeID &&
-    panelViewAndParameters.panelParameters.eventCategory === nodeEventsOfType.eventCategory
+    panelViewAndParameters.panelView === 'nodeEventsInCategory' &&
+    panelViewAndParameters.panelParameters.nodeID === nodeEventsInCategory.nodeID &&
+    panelViewAndParameters.panelParameters.eventCategory === nodeEventsInCategory.eventCategory
   );
 }
 
@@ -24,9 +24,9 @@ export function isValid(
  * Returns undefined if `first` and `second` don't contain data form the same set.
  */
 export function updatedWith(
-  first: NodeEventsOfTypeState,
-  second: NodeEventsOfTypeState
-): NodeEventsOfTypeState | undefined {
+  first: NodeEventsInCategoryState,
+  second: NodeEventsInCategoryState
+): NodeEventsInCategoryState | undefined {
   if (first.nodeID === second.nodeID && first.eventCategory === second.eventCategory) {
     return {
       nodeID: first.nodeID,

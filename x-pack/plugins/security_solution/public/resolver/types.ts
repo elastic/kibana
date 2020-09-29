@@ -207,7 +207,10 @@ export interface TreeFetcherParameters {
   indices: string[];
 }
 
-interface NodeEventsOfTypeState {
+/**
+ * Used by the `data` concern to keep track of related events when showing the 'nodeEventsInCategory' panel.
+ */
+export interface NodeEventsInCategoryState {
   /**
    * The nodeID that `events` are related to.
    */
@@ -235,7 +238,7 @@ export interface DataState {
    */
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
 
-  readonly nodeEventsOfType?: NodeEventsOfTypeState;
+  readonly nodeEventsInCategory?: NodeEventsInCategoryState;
 
   readonly tree?: {
     /**
@@ -703,23 +706,23 @@ export type PanelViewAndParameters =
     }
   | {
       /**
-       * The panel will show an index view of the events related to a specific node. Only events with a specific type will be shown.
+       * The panel will show an index view of the events related to a specific node. Only events in a specific category will be shown.
        */
-      panelView: 'nodeEventsOfType';
+      panelView: 'nodeEventsInCategory';
       panelParameters: {
         /**
          * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
          */
         nodeID: string;
         /**
-         * A parameter used to filter the events. For example, events that don't contain `eventType` in their `event.category` field may be hidden.
+         * A parameter used to filter the events. For example, events that don't contain `eventCategory` in their `event.category` field may be hidden.
          */
         eventCategory: string;
       };
     }
   | {
       /**
-       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsOfType'.
+       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsInCategory'.
        */
       panelView: 'eventDetail';
       panelParameters: {
@@ -728,13 +731,13 @@ export type PanelViewAndParameters =
          */
         nodeID: string;
         /**
-         * A value used for the `nodeEventsOfType` view. Used to associate this view with a parent `nodeEventsOfType` view.
-         * e.g. The user views the `nodeEventsOfType` and follows a link to the `eventDetail` view. The `eventDetail` view can
-         * use `eventType` to populate breadcrumbs and allow the user to return to the previous filter.
+         * Used to associate this view (via breadcrumbs) with a parent `nodeEventsInCategory` view.
+         * e.g. The user views the `nodeEventsInCategory` panel and follows a link to the `eventDetail` view. The `eventDetail` view can
+         * use `eventCategory` to populate breadcrumbs and allow the user to return to the previous view.
          *
-         * This cannot be inferred from the event itself, as an event may have any number of 'eventType's.
+         * This cannot be inferred from the event itself, as an event may have any number of eventCategories.
          */
-        eventType: string;
+        eventCategory: string;
 
         /**
          * `event.id` that uniquely identifies the event to show.

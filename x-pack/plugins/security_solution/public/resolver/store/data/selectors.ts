@@ -266,15 +266,15 @@ export const relatedEventsByCategory: (
   }
 );
 
-export const relatedEventCountByType: (
+export const relatedEventCountByCategory: (
   state: DataState
-) => (nodeID: string, eventType: string) => number | undefined = createSelector(
+) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
   relatedEventsStats,
   (statsMap) => {
-    return (nodeID: string, eventType: string): number | undefined => {
+    return (nodeID: string, eventCategory: string): number | undefined => {
       const stats = statsMap(nodeID);
       if (stats) {
-        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventType);
+        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventCategory);
         if (typeof value === 'number' && Number.isFinite(value)) {
           return value;
         }
