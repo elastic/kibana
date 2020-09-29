@@ -502,6 +502,7 @@
     "core.status.redTitle": "红",
     "core.status.yellowTitle": "黄",
     "dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName": "最小化",
+    "dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName": "全屏",
     "dashboard.addExistingVisualizationLinkText": "将现有",
     "dashboard.addNewVisualizationText": "或新对象添加到此仪表板",
     "dashboard.addPanel.noMatchingObjectsMessage": "未找到任何匹配对象。",
