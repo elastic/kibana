@@ -56,6 +56,28 @@ interface AdvancedPolicySchemaType {
   last_supported_version: string;
 }
 
+const AdvancedPolicyForms = React.memo(() => {
+  return (
+    <>
+      {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
+        (advancedField, index) => {
+          const configPath = advancedField.key.split('.');
+          return (
+            <PolicyAdvanced
+              key={index}
+              configPath={configPath}
+              firstSupportedVersion={advancedField.first_supported_version}
+              lastSupportedVersion={advancedField.last_supported_version}
+            />
+          );
+        }
+      )}
+    </>
+  );
+});
+
+AdvancedPolicyForms.displayName = 'AdvancedPolicyForms';
+
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
@@ -79,22 +101,6 @@ export const PolicyDetails = React.memo(() => {
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
-
-  const AdvancedPolicyForms = () => {
-    return ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
-      (advancedField, index) => {
-        const configPath = advancedField.key.split('.');
-        return (
-          <PolicyAdvanced
-            key={index}
-            configPath={configPath}
-            firstSupportedVersion={advancedField.first_supported_version}
-            lastSupportedVersion={advancedField.last_supported_version}
-          />
-        );
-      }
-    );
-  };
 
   // Handle showing update statuses
   useEffect(() => {
