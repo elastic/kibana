@@ -10,7 +10,6 @@ import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { FULL_HEIGHT } from '../RumDashboard';
 
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();

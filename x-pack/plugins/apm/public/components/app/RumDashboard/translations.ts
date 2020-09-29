@@ -132,6 +132,9 @@ export const I18LABELS = {
       defaultMessage: 'Impacted page loads',
     }
   ),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
