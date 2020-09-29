@@ -23,6 +23,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
+// @ts-expect-error TS doesn't like importing an SVG
 import elasticMark from './elastic_mark.svg';
 import { HttpStart } from '../../../http';
 import { LoadingIndicator } from '../loading_indicator';
