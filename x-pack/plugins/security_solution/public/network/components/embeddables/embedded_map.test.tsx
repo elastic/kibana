@@ -38,6 +38,6 @@ describe('EmbeddedMapComponent', () => {
         />
       </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmbeddedMapComponent')).toMatchSnapshot();
   });
 });
