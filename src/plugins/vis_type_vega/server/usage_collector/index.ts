@@ -17,24 +17,16 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { getUsageCollector } from './get_usage_collector';
+import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypeVegaPlugin } from './plugin';
+export function registerVegaUsageCollector(
+  collectorSet: UsageCollectionSetup,
+  config: ConfigObservable,
+  dependencies: Pick<VisTypeVegaPluginSetupDependencies, 'home'>
+) {
+  const collector = collectorSet.makeUsageCollector(getUsageCollector(config, dependencies));
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    enableExternalUrls: true,
-  },
-  schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
-    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
-  ],
-};
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VisTypeVegaPlugin(initializerContext);
+  collectorSet.registerCollector(collector);
 }
-
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
