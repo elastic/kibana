@@ -3,50 +3,35 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set } from '@elastic/safer-lodash-set';
 import { fetchMissingData } from './fetch_missing_data';
 
 function getResponse(
   index: string,
-  uuidKey: 'es_uuids' | 'kibana_uuids' | 'logstash_uuids' | 'beats.beats_uuids' | 'apms.apm_uuids',
-  clusters: Array<{
-    clusterUuid: string;
-    products: Array<{
-      uuid: string;
-      timestamp: number;
-      nameSource: any;
-    }>;
+  products: Array<{
+    uuid: string;
+    timestamp: number;
+    nameSource: any;
   }>
 ) {
   return {
-    key: index,
-    clusters: {
-      buckets: clusters.map((cluster) => {
-        const result = {
-          key: cluster.clusterUuid,
-        };
-        set(result, uuidKey, {
-          buckets: cluster.products.map((product) => {
-            return {
-              key: product.uuid,
-              most_recent: {
-                value: product.timestamp,
+    buckets: products.map((product) => {
+      return {
+        key: product.uuid,
+        most_recent: {
+          value: product.timestamp,
+        },
+        document: {
+          hits: {
+            hits: [
+              {
+                _index: index,
+                _source: product.nameSource,
               },
-              document: {
-                hits: {
-                  hits: [
-                    {
-                      _source: product.nameSource,
-                    },
-                  ],
-                },
-              },
-            };
-          }),
-        });
-        return result;
-      }),
-    },
+            ],
+          },
+        },
+      };
+    }),
   };
 }
 
@@ -67,116 +52,87 @@ describe('fetchMissingData', () => {
     callCluster = jest.fn().mockImplementation((...args) => {
       return {
         aggregations: {
-          index: {
-            buckets: [
-              getResponse(
-                '.monitoring-es-*',
-                'es_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'nodeUuid1',
-                      nameSource: {
-                        source_node: {
-                          name: 'nodeName1',
+          clusters: {
+            buckets: clusters.map((cluster) => ({
+              key: cluster.clusterUuid,
+              es_uuids: getResponse('.monitoring-es-*', [
+                {
+                  uuid: 'nodeUuid1',
+                  nameSource: {
+                    source_node: {
+                      name: 'nodeName1',
+                    },
+                  },
+                  timestamp: 9,
+                },
+                {
+                  uuid: 'nodeUuid2',
+                  nameSource: {
+                    source_node: {
+                      name: 'nodeName2',
+                    },
+                  },
+                  timestamp: 2,
+                },
+              ]),
+              kibana_uuids: getResponse('.monitoring-kibana-*', [
+                {
+                  uuid: 'kibanaUuid1',
+                  nameSource: {
+                    kibana_stats: {
+                      kibana: {
+                        name: 'kibanaName1',
+                      },
+                    },
+                  },
+                  timestamp: 4,
+                },
+              ]),
+              logstash_uuids: getResponse('.monitoring-logstash-*', [
+                {
+                  uuid: 'logstashUuid1',
+                  nameSource: {
+                    logstash_stats: {
+                      logstash: {
+                        host: 'logstashName1',
+                      },
+                    },
+                  },
+                  timestamp: 2,
+                },
+              ]),
+              beats: {
+                beats_uuids: getResponse('.monitoring-beats-*', [
+                  {
+                    uuid: 'beatUuid1',
+                    nameSource: {
+                      beats_stats: {
+                        beat: {
+                          name: 'beatName1',
                         },
                       },
-                      timestamp: 9,
                     },
-                    {
-                      uuid: 'nodeUuid2',
-                      nameSource: {
-                        source_node: {
-                          name: 'nodeName2',
+                    timestamp: 0,
+                  },
+                ]),
+              },
+              apms: {
+                apm_uuids: getResponse('.monitoring-beats-*', [
+                  {
+                    uuid: 'apmUuid1',
+                    nameSource: {
+                      beats_stats: {
+                        beat: {
+                          name: 'apmName1',
+                          type: 'apm-server',
                         },
                       },
-                      timestamp: 2,
                     },
-                  ],
-                }))
-              ),
-              getResponse(
-                '.monitoring-kibana-*',
-                'kibana_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'kibanaUuid1',
-                      nameSource: {
-                        kibana_stats: {
-                          kibana: {
-                            name: 'kibanaName1',
-                          },
-                        },
-                      },
-                      timestamp: 4,
-                    },
-                  ],
-                }))
-              ),
-              getResponse(
-                '.monitoring-logstash-*',
-                'logstash_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'logstashUuid1',
-                      nameSource: {
-                        logstash_stats: {
-                          logstash: {
-                            host: 'logstashName1',
-                          },
-                        },
-                      },
-                      timestamp: 2,
-                    },
-                  ],
-                }))
-              ),
-              getResponse(
-                '.monitoring-beats-*',
-                'beats.beats_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'beatUuid1',
-                      nameSource: {
-                        beats_stats: {
-                          beat: {
-                            name: 'beatName1',
-                          },
-                        },
-                      },
-                      timestamp: 0,
-                    },
-                  ],
-                }))
-              ),
-              getResponse(
-                '.monitoring-beats-*',
-                'apms.apm_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'apmUuid1',
-                      nameSource: {
-                        beats_stats: {
-                          beat: {
-                            name: 'apmName1',
-                          },
-                        },
-                      },
-                      timestamp: 1,
-                    },
-                  ],
-                }))
-              ),
-            ],
+                    timestamp: 1,
+                  },
+                ]),
+              },
+            })),
           },
         },
       };
@@ -245,27 +201,21 @@ describe('fetchMissingData', () => {
     callCluster = jest.fn().mockImplementation((...args) => {
       return {
         aggregations: {
-          index: {
-            buckets: [
-              getResponse(
-                'Monitoring:.monitoring-es-*',
-                'es_uuids',
-                clusters.map((cluster) => ({
-                  clusterUuid: cluster.clusterUuid,
-                  products: [
-                    {
-                      uuid: 'nodeUuid1',
-                      nameSource: {
-                        source_node: {
-                          name: 'nodeName1',
-                        },
-                      },
-                      timestamp: 9,
+          clusters: {
+            buckets: clusters.map((cluster) => ({
+              key: cluster.clusterUuid,
+              es_uuids: getResponse('Monitoring:.monitoring-es-*', [
+                {
+                  uuid: 'nodeUuid1',
+                  nameSource: {
+                    source_node: {
+                      name: 'nodeName1',
                     },
-                  ],
-                }))
-              ),
-            ],
+                  },
+                  timestamp: 9,
+                },
+              ]),
+            })),
           },
         },
       };

@@ -13,13 +13,6 @@ import {
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../../common/constants';
 
-interface IndexBucketESResponse {
-  key: string;
-  clusters: {
-    buckets: ClusterBucketESResponse[];
-  };
-}
-
 interface ClusterBucketESResponse {
   key: string;
   kibana_uuids?: UuidResponse;
@@ -50,6 +43,7 @@ interface UuidBucketESResponse {
 }
 
 interface TopHitESResponse {
+  _index: string;
   _source: {
     source_node?: {
       name: string;
@@ -67,36 +61,18 @@ interface TopHitESResponse {
     beats_stats?: {
       beat: {
         name: string;
+        type: string;
       };
     };
   };
 }
 
-function findNonEmptyBucket(bucket: ClusterBucketESResponse): UuidResponse {
-  if (bucket.beats && bucket.beats.beats_uuids.buckets.length > 0) {
-    return bucket.beats.beats_uuids;
-  }
-  if (bucket.apms && bucket.apms.apm_uuids.buckets.length > 0) {
-    return bucket.apms.apm_uuids;
-  }
-  if (bucket.kibana_uuids && bucket.kibana_uuids.buckets.length > 0) {
-    return bucket.kibana_uuids;
-  }
-  if (bucket.logstash_uuids && bucket.logstash_uuids.buckets.length > 0) {
-    return bucket.logstash_uuids;
-  }
-  if (bucket.es_uuids && bucket.es_uuids.buckets.length > 0) {
-    return bucket.es_uuids;
-  }
-  return { buckets: [] };
-}
-
-function getStackProductFromIndex(index: string, bucket: ClusterBucketESResponse) {
+function getStackProductFromIndex(index: string, beatType: string) {
   if (index.includes('-kibana-')) {
     return KIBANA_SYSTEM_ID;
   }
   if (index.includes('-beats-')) {
-    if (bucket.apms && bucket.apms.apm_uuids.buckets.length > 0) {
+    if (beatType === 'apm-server') {
       return APM_SYSTEM_ID;
     }
     return BEATS_SYSTEM_ID;
@@ -126,6 +102,7 @@ export async function fetchMissingData(
     'kibana_stats.kibana.name',
     'logstash_stats.logstash.host',
     'beats_stats.beat.name',
+    'beat_stats.beat.type',
   ];
   const subAggs = {
     most_recent: {
@@ -144,7 +121,7 @@ export async function fetchMissingData(
           },
         ],
         _source: {
-          includes: nameFields,
+          includes: ['_index', ...nameFields],
         },
       },
     },
@@ -152,7 +129,7 @@ export async function fetchMissingData(
 
   const params = {
     index,
-    filterPath: ['aggregations.index.buckets'],
+    filterPath: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -176,80 +153,72 @@ export async function fetchMissingData(
         },
       },
       aggs: {
-        index: {
+        clusters: {
           terms: {
-            field: '_index',
+            field: 'cluster_uuid',
             size,
           },
           aggs: {
-            clusters: {
+            es_uuids: {
               terms: {
-                field: 'cluster_uuid',
+                field: 'node_stats.node_id',
                 size,
               },
+              aggs: subAggs,
+            },
+            kibana_uuids: {
+              terms: {
+                field: 'kibana_stats.kibana.uuid',
+                size,
+              },
+              aggs: subAggs,
+            },
+            beats: {
+              filter: {
+                bool: {
+                  must_not: {
+                    term: {
+                      'beats_stats.beat.type': 'apm-server',
+                    },
+                  },
+                },
+              },
               aggs: {
-                es_uuids: {
+                beats_uuids: {
                   terms: {
-                    field: 'node_stats.node_id',
-                    size,
-                  },
-                  aggs: subAggs,
-                },
-                kibana_uuids: {
-                  terms: {
-                    field: 'kibana_stats.kibana.uuid',
-                    size,
-                  },
-                  aggs: subAggs,
-                },
-                beats: {
-                  filter: {
-                    bool: {
-                      must_not: {
-                        term: {
-                          'beats_stats.beat.type': 'apm-server',
-                        },
-                      },
-                    },
-                  },
-                  aggs: {
-                    beats_uuids: {
-                      terms: {
-                        field: 'beats_stats.beat.uuid',
-                        size,
-                      },
-                      aggs: subAggs,
-                    },
-                  },
-                },
-                apms: {
-                  filter: {
-                    bool: {
-                      must: {
-                        term: {
-                          'beats_stats.beat.type': 'apm-server',
-                        },
-                      },
-                    },
-                  },
-                  aggs: {
-                    apm_uuids: {
-                      terms: {
-                        field: 'beats_stats.beat.uuid',
-                        size,
-                      },
-                      aggs: subAggs,
-                    },
-                  },
-                },
-                logstash_uuids: {
-                  terms: {
-                    field: 'logstash_stats.logstash.uuid',
+                    field: 'beats_stats.beat.uuid',
                     size,
                   },
                   aggs: subAggs,
                 },
               },
+            },
+            apms: {
+              filter: {
+                bool: {
+                  must: {
+                    term: {
+                      'beats_stats.beat.type': 'apm-server',
+                    },
+                  },
+                },
+              },
+              aggs: {
+                apm_uuids: {
+                  terms: {
+                    field: 'beats_stats.beat.uuid',
+                    size,
+                  },
+                  aggs: subAggs,
+                },
+              },
+            },
+            logstash_uuids: {
+              terms: {
+                field: 'logstash_stats.logstash.uuid',
+                size,
+              },
+              aggs: subAggs,
             },
           },
         },
@@ -258,36 +227,50 @@ export async function fetchMissingData(
   };
 
   const response = await callCluster('search', params);
-  const indexBuckets = get(response, 'aggregations.index.buckets', []) as IndexBucketESResponse[];
-  const missingData: AlertMissingData[] = [];
-  for (const indexBucket of indexBuckets) {
-    const clusterBuckets = indexBucket.clusters.buckets;
-    for (const clusterBucket of clusterBuckets) {
-      const clusterUuid = clusterBucket.key;
-      const uuidBuckets = findNonEmptyBucket(clusterBucket).buckets;
-      for (const uuidBucket of uuidBuckets) {
-        const stackProductUuid = uuidBucket.key;
-        const stackProduct = getStackProductFromIndex(indexBucket.key, clusterBucket);
-        const differenceInMs = nowInMS - uuidBucket.most_recent.value;
-        let stackProductName = stackProductUuid;
-        for (const nameField of nameFields) {
-          stackProductName = get(uuidBucket, `document.hits.hits[0]._source.${nameField}`);
-          if (stackProductName) {
-            break;
-          }
-        }
+  const clusterBuckets = get(
+    response,
+    'aggregations.clusters.buckets',
+    []
+  ) as ClusterBucketESResponse[];
+  const uniqueList: { [id: string]: AlertMissingData } = {};
+  for (const clusterBucket of clusterBuckets) {
+    const clusterUuid = clusterBucket.key;
 
-        missingData.push({
-          stackProduct,
-          stackProductUuid,
-          stackProductName,
-          clusterUuid,
-          gapDuration: differenceInMs,
-          ccs: indexBucket.key.includes(':') ? indexBucket.key.split(':')[0] : null,
-        });
+    const uuidBuckets = [
+      ...(clusterBucket.es_uuids?.buckets || []),
+      ...(clusterBucket.kibana_uuids?.buckets || []),
+      ...(clusterBucket.logstash_uuids?.buckets || []),
+      ...(clusterBucket.beats?.beats_uuids.buckets || []),
+      ...(clusterBucket.apms?.apm_uuids.buckets || []),
+    ];
+
+    for (const uuidBucket of uuidBuckets) {
+      const stackProductUuid = uuidBucket.key;
+      const indexName = get(uuidBucket, `document.hits.hits[0]._index`);
+      const stackProduct = getStackProductFromIndex(
+        indexName,
+        get(uuidBucket, `document.hits.hits[0]._source.beats_stats.beat.type`)
+      );
+      const differenceInMs = nowInMS - uuidBucket.most_recent.value;
+      let stackProductName = stackProductUuid;
+      for (const nameField of nameFields) {
+        stackProductName = get(uuidBucket, `document.hits.hits[0]._source.${nameField}`);
+        if (stackProductName) {
+          break;
+        }
       }
+
+      uniqueList[`${clusterUuid}${stackProduct}${stackProductUuid}`] = {
+        stackProduct,
+        stackProductUuid,
+        stackProductName,
+        clusterUuid,
+        gapDuration: differenceInMs,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+      };
     }
   }
 
+  const missingData = Object.values(uniqueList);
   return missingData;
 }
