@@ -7,23 +7,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { IndexPatternColumn } from '../../indexpattern';
-import { updateColumnParam } from '../../state_helpers';
-import { DataType } from '../../../types';
-import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPatternColumn } from '../../../indexpattern';
+import { updateColumnParam } from '../../../state_helpers';
+import { DataType } from '../../../../types';
+import { OperationDefinition } from '../index';
+import { FieldBasedIndexPatternColumn } from '../column_types';
+import { ValuesRangeInput } from './values_range_input';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
-
-// Add ticks to EuiRange component props
-const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
-  PropType<typeof EuiRange> & {
-    ticks?: Array<{
-      label: string;
-      value: number;
-    }>;
-  }
->;
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -141,8 +132,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   },
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const SEPARATOR = '$$$';
-    const MIN_NUMBER_OF_VALUES = 1;
-    const MAX_NUMBER_OF_VALUES = 100;
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
         return orderBy.type;
@@ -184,24 +173,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           display="columnCompressed"
           fullWidth
         >
-          <FixedEuiRange
-            min={MIN_NUMBER_OF_VALUES}
-            max={MAX_NUMBER_OF_VALUES}
-            step={1}
+          <ValuesRangeInput
             value={currentColumn.params.size}
-            showInput
-            showLabels
-            compressed
-            onChange={(
-              e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-            ) => {
-              let value = Number((e.target as HTMLInputElement).value);
-              if (value > MAX_NUMBER_OF_VALUES) {
-                value = MAX_NUMBER_OF_VALUES;
-              } else if (value < MIN_NUMBER_OF_VALUES) {
-                value = MIN_NUMBER_OF_VALUES;
-              }
-
+            onChange={(value) => {
               setState(
                 updateColumnParam({
                   state,
@@ -212,9 +186,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 })
               );
             }}
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-              defaultMessage: 'Number of values',
-            })}
           />
         </EuiFormRow>
         <EuiFormRow
