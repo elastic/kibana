@@ -40,6 +40,12 @@ For a comparison of the Elastic subscription levels,
 see https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
+[NOTE]
+==============================================
+Not all dashboard panel types support drilldowns.
+Refer to a specific drilldown action type sub-section to learn about panel types support.
+==============================================
+
 [float]
 [[code-drilldowns]]
 === Code drilldowns

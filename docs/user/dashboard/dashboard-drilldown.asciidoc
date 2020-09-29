@@ -74,3 +74,25 @@ image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to an
 +
 You are navigated to your destination dashboard. Verify that the search query, filters,
 and time range are carried over.
+
+[float]
+[[dashboard-drilldown-supported-panels]]
+==== Supported panels
+
+Following panels support dashboard drilldown:  
+
+* Lens
+* Maps
+* Visualize
+** Area
+** Data table
+** Heat Map
+** Horizontal Bar
+** Line
+** Pie
+** TSVB
+** Tag Cloud
+** Timelion
+** Vega
+** Vertical Bar
+
