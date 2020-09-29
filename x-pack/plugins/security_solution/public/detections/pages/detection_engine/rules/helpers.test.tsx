@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import {
   GetStepsData,
   getDefineStepsData,
@@ -31,6 +31,8 @@ import {
 } from './types';
 
 describe('rule helpers', () => {
+  // @ts-ignore
+  moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
       const {
