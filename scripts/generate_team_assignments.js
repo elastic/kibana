@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/code_coverage/ingest_coverage/team_assignment').uploadTeamAssignmentJson();
+require('../src/dev/code_coverage/ingest_coverage/team_assignment').generateTeamAssignments();
