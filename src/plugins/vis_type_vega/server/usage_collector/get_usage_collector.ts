@@ -52,7 +52,7 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
           const visState = JSON.parse(savedObject.attributes?.visState);
 
           if (isVegaType(visState)) {
-            titles.push(savedObject.attributes.title);
+            titles.push(visState.title);
           }
         }
       } catch (e) {
@@ -69,10 +69,6 @@ const getStats = async (
   index: string,
   { home }: UsageCollectorDependencies
 ) => {
-  // we want to exclude the Vega Sample Data visualizations from the stats
-  // in order to have more accurate results
-  const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
-
   const searchParams = {
     size: 10000,
     index,
@@ -82,18 +78,6 @@ const getStats = async (
       query: {
         bool: {
           filter: { term: { type: 'visualization' } },
-          must_not: excludedFromStatsVisualizations.length
-            ? {
-                bool: {
-                  should: excludedFromStatsVisualizations.map((title) => ({
-                    match_phrase: {
-                      'visualization.title': title,
-                    },
-                  })),
-                  minimum_should_match: 1,
-                },
-              }
-            : undefined,
         },
       },
     },
@@ -106,12 +90,16 @@ const getStats = async (
     return;
   }
 
+  // we want to exclude the Vega Sample Data visualizations from the stats
+  // in order to have more accurate results
+  const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
+
   const finalTelemetry = esResponse.hits.hits.reduce(
     (telemetry, hit) => {
       const visualization = hit._source?.visualization;
       const visState = JSON.parse(visualization?.visState ?? '{}');
 
-      if (isVegaType(visState))
+      if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title))
         try {
           const spec = parse(visState.params.spec, { legacyRoot: false });
 

@@ -18,9 +18,13 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-import { VisTypeVegaPluginSetup, VisTypeVegaPluginStart } from './types';
 import { registerVegaUsageCollector } from './usage_collector';
-import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from './types';
+import {
+  ConfigObservable,
+  VisTypeVegaPluginSetupDependencies,
+  VisTypeVegaPluginSetup,
+  VisTypeVegaPluginStart,
+} from './types';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly config: ConfigObservable;

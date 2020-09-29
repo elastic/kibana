@@ -86,9 +86,9 @@ describe('Vega visualization usage collector', () => {
               {
                 type: 'visualization',
                 attributes: {
-                  title: 'sample vega visualization',
                   visState: JSON.stringify({
                     type: 'vega',
+                    title: 'sample vega visualization',
                     params: {
                       spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
                     },
@@ -142,10 +142,10 @@ describe('Vega visualization usage collector', () => {
         _id: 'visualization:sampledata-123',
         _source: {
           type: 'visualization',
-          title: '[Logs] Visitors Map',
           visualization: {
             visState: JSON.stringify({
               type: 'vega',
+              title: 'sample vega visualization',
               params: {
                 spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
               },
@@ -155,27 +155,9 @@ describe('Vega visualization usage collector', () => {
       },
     ]);
 
-    await usageCollector.fetch(callCluster);
+    const result = await usageCollector.fetch(callCluster);
 
-    expect(callCluster).toHaveBeenCalledWith('search', {
-      body: {
-        query: {
-          bool: {
-            filter: { term: { type: 'visualization' } },
-            must_not: {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ match_phrase: { 'visualization.title': 'sample vega visualization' } }],
-              },
-            },
-          },
-        },
-      },
-      filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
-      ignoreUnavailable: true,
-      index: '',
-      size: 10000,
-    });
+    expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
