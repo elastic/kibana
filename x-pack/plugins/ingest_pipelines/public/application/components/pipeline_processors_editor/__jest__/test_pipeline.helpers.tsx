@@ -179,6 +179,41 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
+    clickDocumentsDropdown() {
+      act(() => {
+        find('documentsDropdown.documentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    clickEditDocumentsButton() {
+      act(() => {
+        find('editDocumentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    clickClearAllButton() {
+      act(() => {
+        find('clearAllDocumentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    async clickConfirmResetButton() {
+      const modal = document.body.querySelector(
+        '[data-test-subj="resetDocumentsConfirmationModal"]'
+      );
+      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+        '[data-test-subj="confirmModalConfirmButton"]'
+      );
+
+      await act(async () => {
+        confirmButton!.click();
+      });
+      component.update();
+    },
+
     async clickProcessor(processorSelector: string) {
       await act(async () => {
         find(`${processorSelector}.manageItemButton`).simulate('click');
@@ -230,6 +265,7 @@ type TestSubject =
   | 'addDocumentsButton'
   | 'testPipelineFlyout'
   | 'documentsDropdown'
+  | 'documentsDropdown.documentsButton'
   | 'outputTab'
   | 'documentsEditor'
   | 'runPipelineButton'
@@ -248,6 +284,8 @@ type TestSubject =
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'
+  | 'editDocumentsButton'
+  | 'clearAllDocumentsButton'
   | 'addDocumentsAccordion'
   | 'addDocumentButton'
   | 'addDocumentError'
