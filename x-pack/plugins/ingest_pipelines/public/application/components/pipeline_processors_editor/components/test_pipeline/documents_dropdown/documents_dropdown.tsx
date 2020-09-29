@@ -8,13 +8,10 @@ import React, { FunctionComponent, useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
+  EuiPopoverFooter,
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { Document } from '../../../types';
@@ -117,26 +114,19 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
         )}
       </EuiSelectable>
 
-      <EuiHorizontalRule margin="xs" />
-
-      <EuiSpacer size="s" />
-
-      <EuiFlexGroup justifyContent="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            onClick={() => {
-              openFlyout('documents');
-              setShowPopover(false);
-            }}
-            data-test-subj="editDocumentsButton"
-          >
-            {i18nTexts.addDocumentsButtonLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+      <EuiPopoverFooter>
+        <EuiButton
+          size="s"
+          fullWidth
+          onClick={() => {
+            openFlyout('documents');
+            setShowPopover(false);
+          }}
+          data-test-subj="editDocumentsButton"
+        >
+          {i18nTexts.addDocumentsButtonLabel}
+        </EuiButton>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
