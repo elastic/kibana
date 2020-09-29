@@ -20,12 +20,8 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'home', 'timePicker']);
-  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'discover', 'home']);
   const a11y = getService('a11y');
-  const kibanaServer = getService('kibanaServer');
-  const inspector = getService('inspector');
-  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
