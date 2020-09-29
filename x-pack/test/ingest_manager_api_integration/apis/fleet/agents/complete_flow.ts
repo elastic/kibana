@@ -15,6 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
 
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
@@ -74,6 +75,11 @@ export default function (providerContext: FtrProviderContext) {
           events: [],
         })
         .expect(200);
+      
+      
+      log.info(`Kibana version: ${kibanaVersion}`);
+      log.info(`Enrollment response: ${enrollmentResponse}`);
+      log.info(`Checkin response: ${checkinApiResponse}`);
 
       expect(checkinApiResponse.actions).length(1);
       expect(checkinApiResponse.actions[0].type).be('POLICY_CHANGE');
