@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { cloneDeep, isEqual, take, remove } from 'lodash';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {
-  return _.isEqual(oldItem, newItem);
+  return isEqual(oldItem, newItem);
 };
 
 interface PersistedLogOptions<T = any> {
@@ -53,7 +53,7 @@ export class PersistedLog<T = any> {
     this.storage = storage;
     this.items = this.storage.get(this.name) || [];
     if (this.maxLength !== undefined && !isNaN(this.maxLength)) {
-      this.items = _.take(this.items, this.maxLength);
+      this.items = take(this.items, this.maxLength);
     }
   }
 
@@ -64,7 +64,7 @@ export class PersistedLog<T = any> {
 
     // remove any matching items from the stack if option is set
     if (this.filterDuplicates) {
-      _.remove(this.items, (item) => {
+      remove(this.items, (item) => {
         return this.isDuplicate(item, val);
       });
     }
@@ -73,7 +73,7 @@ export class PersistedLog<T = any> {
 
     // if maxLength is set, truncate the stack
     if (this.maxLength && !isNaN(this.maxLength)) {
-      this.items = _.take(this.items, this.maxLength);
+      this.items = take(this.items, this.maxLength);
     }
 
     // persist the stack
@@ -83,7 +83,7 @@ export class PersistedLog<T = any> {
   }
 
   public get() {
-    return _.cloneDeep(this.items);
+    return cloneDeep(this.items);
   }
 
   public get$() {

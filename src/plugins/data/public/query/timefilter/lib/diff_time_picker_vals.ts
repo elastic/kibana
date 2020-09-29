@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
+import { isObject, isEqual } from 'lodash';
 import { RefreshInterval } from '../../../../common';
 import { InputTimeRange } from '../types';
 
@@ -27,7 +26,7 @@ const valueOf = function (o: any) {
 };
 
 export function areRefreshIntervalsDifferent(rangeA: RefreshInterval, rangeB: RefreshInterval) {
-  if (_.isObject(rangeA) && _.isObject(rangeB)) {
+  if (isObject(rangeA) && isObject(rangeB)) {
     if (
       valueOf(rangeA.value) !== valueOf(rangeB.value) ||
       valueOf(rangeA.pause) !== valueOf(rangeB.pause)
@@ -35,14 +34,14 @@ export function areRefreshIntervalsDifferent(rangeA: RefreshInterval, rangeB: Re
       return true;
     }
   } else {
-    return !_.isEqual(rangeA, rangeB);
+    return !isEqual(rangeA, rangeB);
   }
 
   return false;
 }
 
 export function areTimeRangesDifferent(rangeA: InputTimeRange, rangeB: InputTimeRange) {
-  if (rangeA && rangeB && _.isObject(rangeA) && _.isObject(rangeB)) {
+  if (rangeA && rangeB && isObject(rangeA) && isObject(rangeB)) {
     if (
       valueOf(rangeA.to) !== valueOf(rangeB.to) ||
       valueOf(rangeA.from) !== valueOf(rangeB.from)
@@ -50,7 +49,7 @@ export function areTimeRangesDifferent(rangeA: InputTimeRange, rangeB: InputTime
       return true;
     }
   } else {
-    return !_.isEqual(rangeA, rangeB);
+    return !isEqual(rangeA, rangeB);
   }
 
   return false;

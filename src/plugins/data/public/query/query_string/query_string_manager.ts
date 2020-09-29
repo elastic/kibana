@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';

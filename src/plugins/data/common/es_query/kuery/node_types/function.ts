@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isUndefined } from 'lodash';
 
 import { functions } from '../functions';
 import { IIndexPattern, KueryNode } from '../../..';
@@ -25,7 +25,7 @@ import { FunctionName, FunctionTypeBuildNode } from './types';
 
 export function buildNode(functionName: FunctionName, ...args: any[]) {
   const kueryFunction = functions[functionName];
-  if (_.isUndefined(kueryFunction)) {
+  if (isUndefined(kueryFunction)) {
     throw new Error(`Unknown function "${functionName}"`);
   }
 
@@ -43,7 +43,7 @@ export function buildNodeWithArgumentNodes(
   functionName: FunctionName,
   args: any[]
 ): FunctionTypeBuildNode {
-  if (_.isUndefined(functions[functionName])) {
+  if (isUndefined(functions[functionName])) {
     throw new Error(`Unknown function "${functionName}"`);
   }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { forOwn } from 'lodash';
 import { IndexPattern } from './index_pattern';
 import { FieldFormatsContentType } from '../../../common';
 
@@ -64,7 +64,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     const cache: Record<string, any> = {};
     formattedCache.set(hit, cache);
 
-    _.forOwn(indexPattern.flattenHit(hit), function (val: any, fieldName?: string) {
+    forOwn(indexPattern.flattenHit(hit), function (val: any, fieldName?: string) {
       // sync the formatted and partial cache
       if (!fieldName) {
         return;

@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { pick, map, snakeCase } from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: any) {
-  params = _.pick(params, 'topLeft', 'bottomRight');
+  params = pick(params, 'topLeft', 'bottomRight');
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
-  const args = _.map(params, (value: LatLon, key: string) => {
+  const args = map(params, (value: LatLon, key: string) => {
     const latLon = `${value.lat}, ${value.lon}`;
     return nodeTypes.namedArg.buildNode(key, latLon);
   });
@@ -51,7 +51,7 @@ export function toElasticsearchQuery(
   const field = fieldList.find((fld: IFieldType) => fld.name === fieldName);
 
   const queryParams = args.reduce((acc: any, arg: any) => {
-    const snakeArgName = _.snakeCase(arg.name);
+    const snakeArgName = snakeCase(arg.name);
     return {
       ...acc,
       [snakeArgName]: ast.toElasticsearchQuery(arg),

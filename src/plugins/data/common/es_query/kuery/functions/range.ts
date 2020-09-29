@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { pick, get, map, mapValues } from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
@@ -27,13 +27,13 @@ import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
-  const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
+  const paramsToMap = pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
   const fieldNameArg =
     typeof fieldName === 'string'
       ? ast.fromLiteralExpression(fieldName)
       : nodeTypes.literal.buildNode(fieldName);
 
-  const args = _.map(paramsToMap, (value: number | string, key: string) => {
+  const args = map(paramsToMap, (value: number | string, key: string) => {
     return nodeTypes.namedArg.buildNode(key, value);
   });
 
@@ -56,7 +56,7 @@ export function toElasticsearchQuery(
   );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
-  const queryParams = _.mapValues(namedArgs, (arg: KueryNode) => {
+  const queryParams = mapValues(namedArgs, (arg: KueryNode) => {
     return ast.toElasticsearchQuery(arg);
   });
 
@@ -79,7 +79,7 @@ export function toElasticsearchQuery(
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
         !(fullFieldNameArg.type === 'wildcard') ||
-        !_.get(field, 'subType.nested') ||
+        !get(field, 'subType.nested') ||
         context!.nested
       ) {
         return query;

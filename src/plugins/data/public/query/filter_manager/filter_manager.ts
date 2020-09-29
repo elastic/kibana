@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { each, map, cloneDeep, find, assignIn, partition, isEqual, findIndex } from 'lodash';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
@@ -54,8 +54,8 @@ export class FilterManager {
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
     const cleanedAppFilters: Filter[] = [];
-    _.each(appFilters, function (filter, i) {
-      const match = _.find(globalFilters, function (globalFilter) {
+    each(appFilters, function (filter, i) {
+      const match = find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
@@ -65,7 +65,7 @@ export class FilterManager {
       }
 
       // matching filter in globalState, update global and don't add from appState
-      _.assignIn(match.meta, filter.meta);
+      assignIn(match.meta, filter.meta);
     });
 
     return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
@@ -76,7 +76,7 @@ export class FilterManager {
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
+    const [globalFilters, appFilters] = partition(filters, isFilterPinned);
     return {
       globalFilters,
       appFilters,
@@ -101,7 +101,7 @@ export class FilterManager {
   /* Getters */
 
   public getFilters() {
-    return _.cloneDeep(this.filters);
+    return cloneDeep(this.filters);
   }
 
   public getAppFilters() {
@@ -204,12 +204,12 @@ export class FilterManager {
   }
 
   public removeFilter(filter: Filter) {
-    const filterIndex = _.findIndex(this.filters, (item) => {
-      return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
+    const filterIndex = findIndex(this.filters, (item) => {
+      return isEqual(item.meta, filter.meta) && isEqual(item.query, filter.query);
     });
 
     if (filterIndex >= 0) {
-      const newFilters = _.cloneDeep(this.filters);
+      const newFilters = cloneDeep(this.filters);
       newFilters.splice(filterIndex, 1);
       this.handleStateUpdate(newFilters);
     }
@@ -224,7 +224,7 @@ export class FilterManager {
     store: FilterStateStore,
     shouldOverrideStore = false
   ) {
-    _.map(filters, (filter: Filter) => {
+    map(filters, (filter: Filter) => {
       // Override status only for filters that didn't have state in the first place.
       // or if shouldOverrideStore is explicitly true
       if (shouldOverrideStore || filter.$state === undefined) {

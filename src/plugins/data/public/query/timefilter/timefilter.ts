@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { clone, cloneDeep } from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
@@ -119,7 +119,7 @@ export class Timefilter {
   };
 
   public getRefreshInterval = () => {
-    return _.clone(this._refreshInterval);
+    return clone(this._refreshInterval);
   };
 
   /**
@@ -215,11 +215,11 @@ export class Timefilter {
   };
 
   public getTimeDefaults(): TimeRange {
-    return _.cloneDeep(this.timeDefaults);
+    return cloneDeep(this.timeDefaults);
   }
 
   public getRefreshIntervalDefaults(): RefreshInterval {
-    return _.cloneDeep(this.refreshIntervalDefaults);
+    return cloneDeep(this.refreshIntervalDefaults);
   }
 
   private getForceNow = () => {

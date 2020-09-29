@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { cloneDeep, each, map } from 'lodash';
 import sinon from 'sinon';
 
 import { Subscription } from 'rxjs';
@@ -169,7 +169,7 @@ describe('filter_manager', () => {
         next: fetchStub,
       });
 
-      const f2 = _.cloneDeep(f1);
+      const f2 = cloneDeep(f1);
       f2.meta.negate = true;
       filterManager.setFilters([f2]);
 
@@ -180,12 +180,12 @@ describe('filter_manager', () => {
 
     test('should merge multiple conflicting app filters', async function () {
       filterManager.addFilters(readyFilters, true);
-      const appFilter1 = _.cloneDeep(readyFilters[1]);
+      const appFilter1 = cloneDeep(readyFilters[1]);
       appFilter1.meta.negate = true;
       appFilter1.$state = {
         store: FilterStateStore.APP_STATE,
       };
-      const appFilter2 = _.cloneDeep(readyFilters[2]);
+      const appFilter2 = cloneDeep(readyFilters[2]);
       appFilter2.meta.negate = true;
       appFilter2.$state = {
         store: FilterStateStore.APP_STATE,
@@ -207,8 +207,8 @@ describe('filter_manager', () => {
     test('should set app filters and merge them with duplicate global filters', async function () {
       const [filter, ...otherFilters] = readyFilters;
       filterManager.addFilters(otherFilters, true);
-      const appFilter1 = _.cloneDeep(readyFilters[1]);
-      const appFilter2 = _.cloneDeep(readyFilters[2]);
+      const appFilter1 = cloneDeep(readyFilters[1]);
+      const appFilter2 = cloneDeep(readyFilters[2]);
 
       filterManager.setAppFilters([filter, appFilter1, appFilter2]);
 
@@ -221,8 +221,8 @@ describe('filter_manager', () => {
 
     test('should set global filters and remove any duplicated app filters', async function () {
       filterManager.addFilters(readyFilters, false);
-      const globalFilter1 = _.cloneDeep(readyFilters[1]);
-      const globalFilter2 = _.cloneDeep(readyFilters[2]);
+      const globalFilter1 = cloneDeep(readyFilters[1]);
+      const globalFilter2 = cloneDeep(readyFilters[2]);
 
       filterManager.setGlobalFilters([globalFilter1, globalFilter2]);
 
@@ -423,20 +423,20 @@ describe('filter_manager', () => {
 
     test('should skip appStateStub filters that match globalStateStub filters', async function () {
       filterManager.addFilters(readyFilters, true);
-      const appFilter = _.cloneDeep(readyFilters[1]);
+      const appFilter = cloneDeep(readyFilters[1]);
       filterManager.addFilters(appFilter, false);
 
       // global filters should be listed first
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.each(res, function (filter) {
+      each(res, function (filter) {
         expect(filter.$state && filter.$state.store).toBe(FilterStateStore.GLOBAL_STATE);
       });
     });
 
     test('should allow overwriting a positive filter by a negated one', async function () {
       // Add negate: false version of the filter
-      const filter = _.cloneDeep(readyFilters[0]);
+      const filter = cloneDeep(readyFilters[0]);
       filter.meta.negate = false;
 
       filterManager.addFilters(filter);
@@ -444,7 +444,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()[0]).toEqual(filter);
 
       // Add negate: true version of the same filter
-      const negatedFilter = _.cloneDeep(readyFilters[0]);
+      const negatedFilter = cloneDeep(readyFilters[0]);
       negatedFilter.meta.negate = true;
 
       filterManager.addFilters(negatedFilter);
@@ -455,7 +455,7 @@ describe('filter_manager', () => {
 
     test('should allow overwriting a negated filter by a positive one', async function () {
       // Add negate: true version of the same filter
-      const negatedFilter = _.cloneDeep(readyFilters[0]);
+      const negatedFilter = cloneDeep(readyFilters[0]);
       negatedFilter.meta.negate = true;
 
       filterManager.addFilters(negatedFilter);
@@ -465,7 +465,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()[0]).toEqual(negatedFilter);
 
       // Add negate: false version of the filter
-      const filter = _.cloneDeep(readyFilters[0]);
+      const filter = cloneDeep(readyFilters[0]);
       filter.meta.negate = false;
 
       filterManager.addFilters(filter);
@@ -495,7 +495,7 @@ describe('filter_manager', () => {
 
   describe('filter reconciliation', function () {
     test('should de-dupe app filters being added', async function () {
-      const newFilter = _.cloneDeep(readyFilters[1]);
+      const newFilter = cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, false);
       expect(filterManager.getFilters()).toHaveLength(3);
 
@@ -504,7 +504,7 @@ describe('filter_manager', () => {
     });
 
     test('should de-dupe global filters being added', async function () {
-      const newFilter = _.cloneDeep(readyFilters[1]);
+      const newFilter = cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, true);
       expect(filterManager.getFilters()).toHaveLength(3);
 
@@ -514,7 +514,7 @@ describe('filter_manager', () => {
 
     test('should de-dupe global filters being set', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      const f2 = _.cloneDeep(f1);
+      const f2 = cloneDeep(f1);
       filterManager.setFilters([f1, f2]);
       expect(filterManager.getAppFilters()).toHaveLength(0);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
@@ -523,7 +523,7 @@ describe('filter_manager', () => {
 
     test('should de-dupe app filters being set', async () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      const f2 = _.cloneDeep(f1);
+      const f2 = cloneDeep(f1);
       filterManager.setFilters([f1, f2]);
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
@@ -534,7 +534,7 @@ describe('filter_manager', () => {
       const idx = 1;
       filterManager.addFilters(readyFilters, true);
 
-      const appFilter = _.cloneDeep(readyFilters[idx]);
+      const appFilter = cloneDeep(readyFilters[idx]);
       appFilter.meta.negate = true;
       appFilter.$state = {
         store: FilterStateStore.APP_STATE,
@@ -542,7 +542,7 @@ describe('filter_manager', () => {
       filterManager.addFilters(appFilter);
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.each(res, function (filter, i) {
+      each(res, function (filter, i) {
         expect(filter.$state && filter.$state.store).toBe('globalState');
         // make sure global filter actually mutated
         expect(filter.meta.negate).toBe(i === idx);
@@ -551,7 +551,7 @@ describe('filter_manager', () => {
 
     test('should merge conflicting app filters', async function () {
       filterManager.addFilters(readyFilters, true);
-      const appFilter = _.cloneDeep(readyFilters[1]);
+      const appFilter = cloneDeep(readyFilters[1]);
       appFilter.meta.negate = true;
       appFilter.$state = {
         store: FilterStateStore.APP_STATE,
@@ -570,8 +570,8 @@ describe('filter_manager', () => {
 
     test('should enable disabled filters - global state', async function () {
       // test adding to globalStateStub
-      const disabledFilters = _.map(readyFilters, function (filter) {
-        const f = _.cloneDeep(filter);
+      const disabledFilters = map(readyFilters, function (filter) {
+        const f = cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });
@@ -589,8 +589,8 @@ describe('filter_manager', () => {
 
     test('should enable disabled filters - app state', async function () {
       // test adding to appStateStub
-      const disabledFilters = _.map(readyFilters, function (filter) {
-        const f = _.cloneDeep(filter);
+      const disabledFilters = map(readyFilters, function (filter) {
+        const f = cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });
@@ -701,12 +701,12 @@ describe('filter_manager', () => {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
 
-      filterManager.removeFilter(_.cloneDeep(readyFilters[0]));
+      filterManager.removeFilter(cloneDeep(readyFilters[0]));
 
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
 
-      filterManager.removeFilter(_.cloneDeep(readyFilters[2]));
+      filterManager.removeFilter(cloneDeep(readyFilters[2]));
       expect(filterManager.getAppFilters()).toHaveLength(0);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
     });
@@ -715,7 +715,7 @@ describe('filter_manager', () => {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
 
-      const missedFilter = _.cloneDeep(readyFilters[0]);
+      const missedFilter = cloneDeep(readyFilters[0]);
       missedFilter.meta.negate = !readyFilters[0].meta.negate;
 
       filterManager.removeFilter(missedFilter);

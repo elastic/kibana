@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 
 /**
  * Take userInput from the user and make it into a query object
@@ -28,11 +28,11 @@ import _ from 'lodash';
 export function fromUser(userInput: object | string) {
   const matchAll = '';
 
-  if (_.isEmpty(userInput)) {
+  if (isEmpty(userInput)) {
     return '';
   }
 
-  if (_.isObject(userInput)) {
+  if (isObject(userInput)) {
     return userInput;
   }
 

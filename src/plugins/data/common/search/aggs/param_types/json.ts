@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { keys, times, isPlainObject, union, transform } from 'lodash';
 
 import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
@@ -46,25 +46,25 @@ export class JsonParamType extends BaseParamType {
 
         function filteredCombine(srcA: any, srcB: any) {
           function mergeObjs(a: any, b: any) {
-            return _(a)
-              .keys()
-              .union(_.keys(b))
-              .transform(function (dest: any, key) {
+            return transform(
+              union(keys(a), keys(b)),
+              function (dest: any, key: any) {
                 const val = compare(a[key], b[key]);
                 if (val !== undefined) dest[key] = val;
-              }, {})
-              .value();
+              },
+              {}
+            );
           }
 
           function mergeArrays(a: any, b: any): any {
             // attempt to merge each value
-            return _.times(Math.max(a.length, b.length), function (i) {
+            return times(Math.max(a.length, b.length), function (i) {
               return compare(a[i], b[i]);
             });
           }
 
           function compare(a: any, b: any) {
-            if (_.isPlainObject(a) && _.isPlainObject(b)) return mergeObjs(a, b);
+            if (isPlainObject(a) && isPlainObject(b)) return mergeObjs(a, b);
             if (Array.isArray(a) && Array.isArray(b)) return mergeArrays(a, b);
             if (b === null) return undefined;
             if (b !== undefined) return b;

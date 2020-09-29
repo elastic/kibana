@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { each, find, isObject } from 'lodash';
 import {
   IFieldType,
   IIndexPattern,
@@ -39,7 +39,7 @@ function getExistingFilter(
   value: any
 ): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  return _.find(appFilters, function (filter) {
+  return find(appFilters, function (filter) {
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
@@ -83,7 +83,7 @@ export function generateFilters(
   index: string
 ): Filter[] {
   values = Array.isArray(values) ? values : [values];
-  const fieldObj = (_.isObject(field)
+  const fieldObj = (isObject(field)
     ? field
     : {
         name: field,
@@ -95,7 +95,7 @@ export function generateFilters(
   const negate = operation === '-';
   let filter;
 
-  _.each(values, function (value) {
+  each(values, function (value) {
     const existing = getExistingFilter(appFilters, fieldName, value);
 
     if (existing) {

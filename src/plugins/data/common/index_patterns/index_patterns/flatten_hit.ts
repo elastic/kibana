@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { forOwn, each, isPlainObject, first, includes, partial } from 'lodash';
 import { IndexPattern } from './index_pattern';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
@@ -30,15 +30,15 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
   const fields = indexPattern.fields.getByName;
   (function flatten(obj, keyPrefix = '') {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
-    _.forOwn(obj, function (val, key) {
+    forOwn(obj, function (val, key) {
       key = keyPrefix + key;
 
       if (deep) {
         const field = fields(key);
         const isNestedField = field && field.type === 'nested';
-        const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
+        const isArrayOfObjects = Array.isArray(val) && isPlainObject(first(val));
         if (isArrayOfObjects && !isNestedField) {
-          _.each(val, (v) => flatten(v, key));
+          each(val, (v) => flatten(v, key));
           return;
         }
       } else if (flat[key] !== void 0) {
@@ -47,7 +47,7 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
 
       const field = fields(key);
       const hasValidMapping = field && field.type !== 'conflict';
-      const isValue = !_.isPlainObject(val);
+      const isValue = !isPlainObject(val);
 
       if (hasValidMapping || isValue) {
         if (!flat[key]) {
@@ -70,14 +70,14 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
 function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<string, any>) {
   return function (flattened: Record<string, any>) {
     // assign the meta fields
-    _.each(metaFields, function (meta) {
+    each(metaFields, function (meta) {
       if (meta === '_source') return;
       flattened[meta] = hit[meta];
     });
 
     // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key: any) {
-      if (key[0] === '_' && !_.includes(metaFields, key)) return;
+    forOwn(hit.fields, function (val, key: any) {
+      if (key[0] === '_' && !includes(metaFields, key)) return;
       // Flatten an array with 0 or 1 elements to a single value.
       if (Array.isArray(val) && val.length <= 1) {
         flattened[key] = val[0];
@@ -119,7 +119,7 @@ export function flattenHitWrapper(
  *
  * @public
  */
-export function createFlattenHitWrapper() {
+export function createFlattenHitWrapper(indexPattern: any, metaFields: any) {
   const cache = new WeakMap();
-  return _.partial(flattenHitWrapper, _, _, cache);
+  return partial(flattenHitWrapper, indexPattern, metaFields, cache);
 }

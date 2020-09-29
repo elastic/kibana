@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isFunction, isObject, cloneDeep, get, forOwn, hasIn, transform } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
 
@@ -153,7 +153,7 @@ export class AggConfig {
       if (val == null) {
         if (aggParam.default == null) return;
 
-        if (!_.isFunction(aggParam.default)) {
+        if (!isFunction(aggParam.default)) {
           val = aggParam.default;
         } else {
           val = aggParam.default(this);
@@ -162,11 +162,11 @@ export class AggConfig {
       }
 
       if (aggParam.deserialize) {
-        const isTyped = _.isFunction(aggParam.valueType);
+        const isTyped = isFunction(aggParam.valueType);
 
         const isType = isTyped && val instanceof aggParam.valueType;
-        const isObject = !isTyped && _.isObject(val);
-        const isDeserialized = isType || isObject;
+        const valueIsObject = !isTyped && isObject(val);
+        const isDeserialized = isType || valueIsObject;
 
         if (!isDeserialized) {
           val = aggParam.deserialize(val, this);
@@ -176,12 +176,12 @@ export class AggConfig {
         return;
       }
 
-      to[aggParam.name] = _.cloneDeep(val);
+      to[aggParam.name] = cloneDeep(val);
     });
   }
 
   getParam(key: string): any {
-    return _.get(this.params, key);
+    return get(this.params, key);
   }
 
   write(aggs?: IAggConfigs) {
@@ -189,7 +189,7 @@ export class AggConfig {
   }
 
   isFilterable() {
-    return _.isFunction(this.type.createFilter);
+    return isFunction(this.type.createFilter);
   }
 
   createFilter(key: string, params = {}) {
@@ -271,7 +271,7 @@ export class AggConfig {
   serialize(): AggConfigSerialized {
     const params = this.params;
 
-    const outParams = _.transform(
+    const outParams = transform(
       this.getAggParams(),
       (out: any, aggParam) => {
         let val = params[aggParam.name];
@@ -282,7 +282,7 @@ export class AggConfig {
         if (val == null) return;
 
         // to prevent accidental leaking, we will clone all complex values
-        out[aggParam.name] = _.cloneDeep(val);
+        out[aggParam.name] = cloneDeep(val);
       },
       {}
     );
@@ -367,7 +367,7 @@ export class AggConfig {
   }
 
   getAggParams() {
-    return [...(_.hasIn(this, 'type.params') ? this.type.params : [])];
+    return [...(hasIn(this, 'type.params') ? this.type.params : [])];
   }
 
   getRequestAggs() {
@@ -440,13 +440,13 @@ export class AggConfig {
 
   public set type(type) {
     if (this.__typeDecorations) {
-      _.forOwn(this.__typeDecorations, (prop, name: string | undefined) => {
+      forOwn(this.__typeDecorations, (prop, name: string | undefined) => {
         // @ts-ignore
         delete this[name];
       });
     }
 
-    if (type && _.isFunction(type.decorateAggConfig)) {
+    if (type && isFunction(type.decorateAggConfig)) {
       this.__typeDecorations = type.decorateAggConfig();
       Object.defineProperties(this, this.__typeDecorations);
     }

@@ -19,7 +19,7 @@
 
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import _ from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
@@ -77,13 +77,13 @@ export const connectToQueryState = <S extends QueryState>(
   // but maybe maybe this should be a configurable option?
   const initialState: QueryState = { ...stateContainer.get() };
   let initialDirty = false;
-  if (syncConfig.time && !_.isEqual(initialState.time, timefilter.getTime())) {
+  if (syncConfig.time && !isEqual(initialState.time, timefilter.getTime())) {
     initialState.time = timefilter.getTime();
     initialDirty = true;
   }
   if (
     syncConfig.refreshInterval &&
-    !_.isEqual(initialState.refreshInterval, timefilter.getRefreshInterval())
+    !isEqual(initialState.refreshInterval, timefilter.getRefreshInterval())
   ) {
     initialState.refreshInterval = timefilter.getRefreshInterval();
     initialDirty = true;
@@ -173,22 +173,22 @@ export const connectToQueryState = <S extends QueryState>(
       // and state in state container is frozen
       if (syncConfig.time) {
         const time = validateTimeRange(state.time) ? state.time : timefilter.getTimeDefaults();
-        if (!_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time!));
+        if (!isEqual(time, timefilter.getTime())) {
+          timefilter.setTime(cloneDeep(time!));
         }
       }
 
       if (syncConfig.refreshInterval) {
         const refreshInterval = state.refreshInterval || timefilter.getRefreshIntervalDefaults();
-        if (!_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
-          timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+        if (!isEqual(refreshInterval, timefilter.getRefreshInterval())) {
+          timefilter.setRefreshInterval(cloneDeep(refreshInterval));
         }
       }
 
       if (syncConfig.query) {
         const curQuery = state.query || queryString.getQuery();
-        if (!_.isEqual(curQuery, queryString.getQuery())) {
-          queryString.setQuery(_.cloneDeep(curQuery));
+        if (!isEqual(curQuery, queryString.getQuery())) {
+          queryString.setQuery(cloneDeep(curQuery));
         }
       }
 
@@ -196,7 +196,7 @@ export const connectToQueryState = <S extends QueryState>(
         const filters = state.filters || [];
         if (syncConfig.filters === true) {
           if (!compareFilters(filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
-            filterManager.setFilters(_.cloneDeep(filters));
+            filterManager.setFilters(cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
           if (
@@ -205,7 +205,7 @@ export const connectToQueryState = <S extends QueryState>(
               state: false,
             })
           ) {
-            filterManager.setAppFilters(_.cloneDeep(filters));
+            filterManager.setAppFilters(cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
           if (
@@ -214,7 +214,7 @@ export const connectToQueryState = <S extends QueryState>(
               state: false,
             })
           ) {
-            filterManager.setGlobalFilters(_.cloneDeep(filters));
+            filterManager.setGlobalFilters(cloneDeep(filters));
           }
         }
       }

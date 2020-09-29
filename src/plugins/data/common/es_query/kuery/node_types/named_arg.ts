@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 import { NamedArgTypeBuildNode } from './types';
@@ -25,7 +25,7 @@ import { JsonObject } from '../../../../../kibana_utils/common';
 
 export function buildNode(name: string, value: any): NamedArgTypeBuildNode {
   const argumentNode =
-    _.get(value, 'type') === 'literal' ? value : nodeTypes.literal.buildNode(value);
+    get(value, 'type') === 'literal' ? value : nodeTypes.literal.buildNode(value);
   return {
     type: 'namedArg',
     name,

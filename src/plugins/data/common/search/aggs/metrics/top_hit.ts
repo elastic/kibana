@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { max, min, sum, flatten, get, compact, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -143,13 +143,13 @@ export const getTopHitMetricAgg = () => {
               defaultMessage: 'Concatenate',
             }),
             isCompatible(aggConfig: IMetricAggConfig) {
-              return _.get(aggConfig.params, 'field.filterFieldTypes', '*') === '*';
+              return get(aggConfig.params, 'field.filterFieldTypes', '*') === '*';
             },
             disabled: true,
             value: 'concat',
           },
         ],
-        write: _.noop,
+        write: noop,
       },
       {
         name: 'size',
@@ -167,7 +167,7 @@ export const getTopHitMetricAgg = () => {
         default(agg: IMetricAggConfig) {
           return agg.getIndexPattern().timeFieldName;
         },
-        write: _.noop, // prevent default write, it is handled below
+        write: noop, // prevent default write, it is handled below
       },
       {
         name: 'sortOrder',
@@ -217,13 +217,13 @@ export const getTopHitMetricAgg = () => {
       },
     ],
     getValue(agg, bucket) {
-      const hits: any[] = _.get(bucket, `${agg.id}.hits.hits`);
+      const hits: any[] = get(bucket, `${agg.id}.hits.hits`);
       if (!hits || !hits.length) {
         return null;
       }
       const path = agg.getParam('field').name;
 
-      let values = _.flatten(
+      let values = flatten(
         hits.map((hit) =>
           path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path]
         )
@@ -234,7 +234,7 @@ export const getTopHitMetricAgg = () => {
       }
 
       if (Array.isArray(values)) {
-        if (!_.compact(values).length) {
+        if (!compact(values).length) {
           return null;
         }
 
@@ -242,13 +242,13 @@ export const getTopHitMetricAgg = () => {
 
         switch (aggregate.value) {
           case 'max':
-            return _.max(values);
+            return max(values);
           case 'min':
-            return _.min(values);
+            return min(values);
           case 'sum':
-            return _.sum(values);
+            return sum(values);
           case 'average':
-            return _.sum(values) / values.length;
+            return sum(values) / values.length;
         }
       }
       return values;

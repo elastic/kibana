@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get, each, find, isEqual, sortBy } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
@@ -37,7 +37,7 @@ function removeParentAggs(obj: any) {
 
 function parseParentAggs(dslLvlCursor: any, dsl: any) {
   if (dsl.parentAggs) {
-    _.each(dsl.parentAggs, (agg, key) => {
+    each(dsl.parentAggs, (agg, key) => {
       dslLvlCursor[key as string] = agg;
       parseParentAggs(dslLvlCursor, agg);
     });
@@ -90,12 +90,12 @@ export class AggConfigs {
     this.timeRange = timeRange;
 
     const updateAggTimeRange = (agg: AggConfig) => {
-      _.each(agg.params, (param) => {
+      each(agg.params, (param) => {
         if (param instanceof AggConfig) {
           updateAggTimeRange(param);
         }
       });
-      if (_.get(agg, 'type.name') === 'date_histogram') {
+      if (get(agg, 'type.name') === 'date_histogram') {
         agg.params.timeRange = timeRange;
       }
     };
@@ -151,7 +151,7 @@ export class AggConfigs {
       return false;
     }
     for (let i = 0; i < this.aggs.length; i += 1) {
-      if (!_.isEqual(aggConfigs[i].toJSON(), this.aggs[i].toJSON())) {
+      if (!isEqual(aggConfigs[i].toJSON(), this.aggs[i].toJSON())) {
         return false;
       }
     }
@@ -257,7 +257,7 @@ export class AggConfigs {
         return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
       }, [] as AggConfig[]);
     // move metrics to the end
-    return _.sortBy(aggregations, (agg: AggConfig) =>
+    return sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
     );
   }
@@ -293,11 +293,11 @@ export class AggConfigs {
    */
   getResponseAggById(id: string): AggConfig | undefined {
     id = String(id);
-    const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
+    const reqAgg = find(this.getRequestAggs(), function (agg: AggConfig) {
       return id.substr(0, String(agg.id).length) === agg.id;
     });
     if (!reqAgg) return;
-    return _.find(reqAgg.getResponseAggs(), { id });
+    return find(reqAgg.getResponseAggs(), { id });
   }
 
   onSearchRequestStart(searchSource: ISearchSource, options?: ISearchOptions) {
