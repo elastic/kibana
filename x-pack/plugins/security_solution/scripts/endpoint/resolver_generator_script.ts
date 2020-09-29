@@ -19,7 +19,7 @@ import {
   PostIngestSetupResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 
-class KbnClientWithApiKeySupport extends KbnClient {
+export class KbnClientWithApiKeySupport extends KbnClient {
   private kibanaUrlNoAuth: string;
   constructor(log: ToolingLog, kibanaConfig: KibanaConfig) {
     super(log, kibanaConfig);
@@ -31,6 +31,9 @@ class KbnClientWithApiKeySupport extends KbnClient {
         ? matches[1] + matches[3].replace('/', '')
         : kibanaUrl.replace('/', '');
   }
+  /**
+   * The fleet api to enroll and agent requires an api key when you mke the request, however KbnClient currently does not support sending an api key with the request. This function allows you to send an api key with a request.
+   */
   requestWithApiKey(path: string, init?: RequestInit | undefined): Promise<Response> {
     return (fetch(
       `${this.kibanaUrlNoAuth}${path}`,

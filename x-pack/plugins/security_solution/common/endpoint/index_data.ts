@@ -32,12 +32,11 @@ import {
 } from '../../../ingest_manager/common';
 import { factory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
+import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/resolver_generator_script';
 
 export async function indexHostsAndAlerts(
   client: Client,
-  kbnClient: KbnClient & {
-    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
-  },
+  kbnClient: KbnClientWithApiKeySupport,
   seed: string,
   numHosts: number,
   numDocs: number,
@@ -85,9 +84,7 @@ function delay(ms: number) {
 async function indexHostDocs(
   numDocs: number,
   client: Client,
-  kbnClient: KbnClient & {
-    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
-  },
+  kbnClient: KbnClientWithApiKeySupport,
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>,
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
@@ -273,9 +270,7 @@ const getEndpointPackageInfo = async (
 };
 
 const fleetEnrollAgentForHost = async (
-  kbnClient: KbnClient & {
-    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
-  },
+  kbnClient: KbnClientWithApiKeySupport,
   endpointHost: HostMetadata,
   agentPolicyId: string
 ): Promise<undefined | PostAgentEnrollResponse['item']> => {
@@ -321,16 +316,32 @@ const fleetEnrollAgentForHost = async (
     return;
   }
 
+  const kibanaVersion = await kbnClient.fetchKibanaVersion().number;
   // Enroll an agent for the Host
   const body: PostAgentEnrollRequest['body'] = {
     type: 'PERMANENT',
     metadata: {
       local: {
-        host: endpointHost.host,
         elastic: {
           agent: {
             version: '8.0.0',
           },
+        },
+        host: {
+          architecture: 'x86_64',
+          hostname: endpointHost.host,
+          name: endpointHost.host,
+          id: '1c032ec0-3a94-4d54-9ad2-c5610c0eaba4',
+          ip: ['fe80::703b:b9e6:887d:7f5/64', '10.0.2.15/24', '::1/128', '127.0.0.1/8'],
+          mac: ['08:00:27:d8:c5:c0'],
+        },
+        os: {
+          family: 'windows',
+          kernel: '10.0.19041.388 (WinBuild.160101.0800)',
+          platform: 'windows',
+          version: '10.0',
+          name: 'Windows 10 Pro',
+          full: 'Windows 10 Pro(10.0)',
         },
       },
       user_provided: {
