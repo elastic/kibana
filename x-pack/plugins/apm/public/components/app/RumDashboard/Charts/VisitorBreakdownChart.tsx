@@ -49,7 +49,7 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper loading={loading} height="245px" maxWidth="430px">
+    <ChartWrapper loading={loading} height="calc(100% - 72px)" maxWidth="430px">
       <StyleChart>
         <Chart>
           <Settings
@@ -59,7 +59,9 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
           />
           <Partition
             id="spec_1"
-            data={options || []}
+            data={
+              options?.length > 0 ? options : [{ count: 1, name: 'No data.' }]
+            }
             valueAccessor={(d: Datum) => d.count as number}
             valueGetter="percent"
             percentFormatter={(d: number) =>

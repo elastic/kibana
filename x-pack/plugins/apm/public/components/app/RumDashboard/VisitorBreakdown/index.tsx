@@ -10,6 +10,7 @@ import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { FULL_HEIGHT } from '../RumDashboard';
 
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -42,7 +43,7 @@ export function VisitorBreakdown() {
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ height: 'calc(100% - 32px)' }}>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.browser}</h4>
