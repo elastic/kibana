@@ -64,8 +64,10 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     }
   }, [fetchScreenshot, intersection, screenshot, stepIndex]);
 
-  let content: JSX.Element | null;
-  if (screenshot) {
+  let content: JSX.Element | null = null;
+  if (isLoading === true) {
+    content = <EuiLoadingSpinner size="xl" />;
+  } else if (screenshot) {
     const screenshotSrc = `data:image/jpeg;base64,${screenshot}`;
     content = (
       <>
@@ -169,10 +171,6 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  } else if (isLoading === true) {
-    content = <EuiLoadingSpinner size="xl" />;
-  } else {
-    content = null;
   }
   return (
     <div
