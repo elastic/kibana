@@ -129,7 +129,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         complete: () => {},
       });
     },
-    250,
+    350,
     [searchValue]
   );
 
