@@ -142,7 +142,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const SEPARATOR = '$$$';
     const MIN_NUMBER_OF_VALUES = 1;
-    const MAX_NUMBER_OF_VALUES = 20;
+    const MAX_NUMBER_OF_VALUES = 100;
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
         return orderBy.type;

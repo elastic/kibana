@@ -550,7 +550,7 @@ describe('terms', () => {
       instance.find(EuiRange).prop('onChange')!(
         {
           target: {
-            value: '27',
+            value: '127',
           },
         } as React.ChangeEvent<HTMLInputElement>,
         true
@@ -566,7 +566,7 @@ describe('terms', () => {
                 ...state.layers.first.columns.col1,
                 params: {
                   ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
-                  size: 20,
+                  size: 100,
                 },
               },
             },
