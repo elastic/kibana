@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { IEsSearchRequest } from '..';
+import { IKibanaSearchRequest } from '..';
 
 export interface ISessionService {
   get: () => string | undefined;
   restore: (sessionId: string) => void;
   start: () => void;
   clear: () => void;
-  trackSearch: (request: IEsSearchRequest, sessionId: string | undefined) => void;
+  trackSearch: (request: IKibanaSearchRequest, sessionId: string | undefined) => void;
   trackSearchId: (
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     sessionId: string | undefined,
     searchId: string
   ) => void;
-  trackSearchComplete: (request: IEsSearchRequest, sessionId?: string) => void;
-  trackSearchError: (request: IEsSearchRequest, sessionId?: string) => void;
+  trackSearchComplete: (request: IKibanaSearchRequest, sessionId?: string) => void;
+  trackSearchError: (request: IKibanaSearchRequest, sessionId?: string) => void;
 }

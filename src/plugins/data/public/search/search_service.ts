@@ -89,6 +89,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      session: this.sessionService,
     };
   }
 

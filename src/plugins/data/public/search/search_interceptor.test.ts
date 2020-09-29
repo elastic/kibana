@@ -23,6 +23,7 @@ import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 import { SearchTimeoutError, PainlessError } from './errors';
+import { searchServiceMock } from './mocks';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -33,11 +34,13 @@ jest.useFakeTimers();
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    const searchMock = searchServiceMock.createStartContract();
     searchInterceptor = new SearchInterceptor({
       toasts: mockCoreSetup.notifications.toasts,
       startServices: mockCoreSetup.getStartServices(),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      session: searchMock.session,
     });
   });
 

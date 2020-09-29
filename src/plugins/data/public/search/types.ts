@@ -42,6 +42,11 @@ export interface ISearchSetup {
   aggs: AggsSetup;
   usageCollector?: SearchUsageCollector;
   /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
    * @internal
    */
   __enhance: (enhancements: SearchEnhancements) => void;

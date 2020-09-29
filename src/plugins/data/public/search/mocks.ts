@@ -23,10 +23,26 @@ import { searchSourceMock, createSearchSourceMock } from '../../common/search/se
 
 export * from '../../common/search/search_source/mocks';
 
+function getSessionService() {
+  return {
+    session: {
+      clear: jest.fn(),
+      restore: jest.fn(),
+      start: jest.fn(),
+      get: jest.fn(),
+      trackSearch: jest.fn(),
+      trackSearchId: jest.fn(),
+      trackSearchComplete: jest.fn(),
+      trackSearchError: jest.fn(),
+    },
+  };
+}
+
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     __enhance: jest.fn(),
+    ...getSessionService(),
   };
 }
 
@@ -34,14 +50,9 @@ function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
-    session: {
-      clear: jest.fn(),
-      restore: jest.fn(),
-      start: jest.fn(),
-      get: jest.fn(),
-    },
     showError: jest.fn(),
     searchSource: searchSourceMock,
+    ...getSessionService(),
   };
 }
 
