@@ -42,15 +42,12 @@ export interface Setup {
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
+  uiFiltersES: ESFilter[];
 }
 
 export interface SetupTimeRange {
   start: number;
   end: number;
-}
-
-export interface SetupUIFilters {
-  uiFiltersES: ESFilter[];
 }
 
 interface SetupRequestParams {
@@ -65,10 +62,7 @@ interface SetupRequestParams {
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: string } } ? { start: number } : {}) &
-  (TParams extends { query: { end: string } } ? { end: number } : {}) &
-  (TParams extends { query: { uiFilters: string } }
-    ? { uiFiltersES: ESFilter[] }
-    : {});
+  (TParams extends { query: { end: string } } ? { end: number } : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
@@ -84,8 +78,6 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     }),
     context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
   ]);
-
-  const uiFiltersES = decodeUiFilters(query.uiFilters);
 
   const coreSetupRequest = {
     indices,
@@ -108,12 +100,12 @@ export async function setupRequest<TParams extends SetupRequestParams>(
           )
         : undefined,
     config,
+    uiFiltersES: decodeUiFilters(query.uiFilters),
   };
 
   return {
     ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
     ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
-    ...('uiFilters' in query ? { uiFiltersES } : {}),
     ...coreSetupRequest,
   } as InferSetup<TParams>;
 }

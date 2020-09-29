@@ -6,11 +6,7 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLS_FIELD,
   FCP_FIELD,
@@ -24,7 +20,7 @@ export async function getWebCoreVitals({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({

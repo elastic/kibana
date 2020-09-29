@@ -5,18 +5,14 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 
 export async function getUrlSearch({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({

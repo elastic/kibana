@@ -6,11 +6,7 @@
 
 import { isEmpty } from 'lodash';
 import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
@@ -22,7 +18,7 @@ export async function getServices({
   searchAggregatedTransactions,
   mlAnomaliesEnvironment,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   mlAnomaliesEnvironment?: string;
 }) {

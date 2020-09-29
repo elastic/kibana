@@ -5,11 +5,7 @@
  */
 
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
 import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
@@ -38,7 +34,7 @@ export async function getTransactionDistribution({
   transactionType: string;
   transactionId: string;
   traceId: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const distributionMax = await getDistributionMax(
     serviceName,

@@ -6,11 +6,7 @@
 
 import { Logger } from 'kibana/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
 import { getApmTimeseriesData } from './get_timeseries_data';
 import { ApmTimeSeriesResponse } from './get_timeseries_data/transform';
@@ -27,7 +23,7 @@ export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
   uiFilters?: UIFilters;

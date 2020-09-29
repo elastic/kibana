@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupUIFilters,
-  SetupTimeRange,
-} from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
@@ -18,7 +14,7 @@ export function getServicesProjection({
   setup,
   searchAggregatedTransactions,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES } = setup;

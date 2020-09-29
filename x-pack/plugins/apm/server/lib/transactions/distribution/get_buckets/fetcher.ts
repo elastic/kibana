@@ -15,11 +15,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 export async function bucketFetcher(
   serviceName: string,
@@ -29,7 +25,7 @@ export async function bucketFetcher(
   traceId: string,
   distributionMax: number,
   bucketSize: number,
-  setup: Setup & SetupTimeRange & SetupUIFilters
+  setup: Setup & SetupTimeRange
 ) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
 

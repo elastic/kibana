@@ -9,7 +9,6 @@ import { omit } from 'lodash';
 import {
   setupRequest,
   Setup,
-  SetupUIFilters,
   SetupTimeRange,
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
@@ -273,6 +272,6 @@ type GetProjection<
   context,
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupUIFilters & SetupTimeRange;
+  setup: Setup & SetupTimeRange;
   context: APMRequestHandlerContext;
 }) => Promise<TProjection> | TProjection;

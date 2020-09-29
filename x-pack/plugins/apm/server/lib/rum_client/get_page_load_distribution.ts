@@ -7,11 +7,7 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export const MICRO_TO_SEC = 1000000;
 
@@ -42,7 +38,7 @@ export async function getPageLoadDistribution({
   maxPercentile,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   minPercentile?: string;
   maxPercentile?: string;
   urlQuery?: string;
@@ -121,7 +117,7 @@ const getPercentilesDistribution = async ({
   minDuration,
   maxDuration,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   minDuration: number;
   maxDuration: number;
 }) => {

@@ -12,11 +12,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
@@ -29,7 +25,7 @@ export async function getErrorGroup({
 }: {
   serviceName: string;
   groupId: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
 

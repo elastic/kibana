@@ -14,11 +14,7 @@ import {
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -36,7 +32,7 @@ export function timeseriesFetcher({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: (Setup & SetupTimeRange) | (Setup & SetupTimeRange & SetupUIFilters);
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
   const { start, end, apmEventClient } = setup;
@@ -48,7 +44,7 @@ export function timeseriesFetcher({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...('uiFiltersES' in setup ? setup.uiFiltersES : []),
+    ...setup.uiFiltersES,
   ];
 
   if (transactionName) {
