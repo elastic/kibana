@@ -346,7 +346,7 @@
     "angular-route": "^1.8.0",
     "angular-sortable-view": "^0.0.17",
     "archiver": "^3.1.1",
-    "axe-core": "^3.4.1",
+    "axe-core": "^4.0.2",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.5.1",
     "babel-plugin-istanbul": "^6.0.0",
