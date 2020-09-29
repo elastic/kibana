@@ -41,6 +41,7 @@ export interface TelemetryEvent {
       [key: string]: SearchTypes;
     };
   };
+  license?: ESLicense;
 }
 
 export class TelemetryEventsSender {
@@ -139,12 +140,15 @@ export class TelemetryEventsSender {
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
+      const licenseInfo = await this.fetchLicenseInfo();
+
       const toSend: TelemetryEvent[] = cloneDeep(this.queue);
       this.queue = [];
 
       toSend.forEach((event) => {
         event.cluster_uuid = clusterInfo.cluster_uuid;
         event.cluster_name = clusterInfo.cluster_name;
+        this.copyLicenseFields(event, licenseInfo);
       });
 
       await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid);
@@ -170,6 +174,36 @@ export class TelemetryEventsSender {
       throw Error("Couldn't get telemetry URL");
     }
     return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-debug'); // TODO: update
+  }
+
+  private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
+    if (!this.core) {
+      return undefined;
+    }
+    try {
+      const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+      const ret = await getLicense(callCluster, true);
+      return ret.license;
+    } catch (err) {
+      this.logger.warn(`Error retrieving license: ${err}`);
+      return undefined;
+    }
+  }
+
+  private copyLicenseFields(event: TelemetryEvent, lic: ESLicense | undefined) {
+    if (lic) {
+      event.license = {
+        uid: lic.uid,
+        status: lic.status,
+        type: lic.type,
+      };
+      if (lic.issued_to) {
+        event.license.issued_to = lic.issued_to;
+      }
+      if (lic.issuer) {
+        event.license.issuer = lic.issuer;
+      }
+    }
   }
 
   private async sendEvents(events: unknown[], telemetryUrl: string, clusterUuid: string) {
@@ -305,6 +339,33 @@ export interface ESClusterInfo {
  *
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  */
-export function getClusterInfo(callCluster: LegacyAPICaller) {
+function getClusterInfo(callCluster: LegacyAPICaller) {
   return callCluster<ESClusterInfo>('info');
+}
+
+// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
+export interface ESLicense {
+  status: string;
+  uid: string;
+  type: string;
+  issue_date?: string;
+  issue_date_in_millis?: number;
+  expiry_date?: string;
+  expirty_date_in_millis?: number;
+  max_nodes?: number;
+  issued_to?: string;
+  issuer?: string;
+  start_date_in_millis?: number;
+}
+
+function getLicense(callCluster: LegacyAPICaller, local: boolean) {
+  return callCluster<{ license: ESLicense }>('transport.request', {
+    method: 'GET',
+    path: '/_license',
+    query: {
+      local,
+      // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
+      accept_enterprise: 'true',
+    },
+  });
 }
