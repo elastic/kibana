@@ -35,12 +35,12 @@ import { useFormattedDate } from './use_formatted_date';
 export const EventDetail = memo(function EventDetail({
   nodeID,
   eventID,
-  eventType,
+  eventCategory: eventType,
 }: {
   nodeID: string;
   eventID: string;
   /** The event type to show in the breadcrumbs */
-  eventType: string;
+  eventCategory: string;
 }) {
   const event = useSelector((state: ResolverState) =>
     selectors.eventByID(state)({ nodeID, eventID })
@@ -193,7 +193,7 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountByType(state)(nodeID, breadcrumbEventCategory)
+    selectors.relatedEventCountByCategory(state)(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
     selectors.relatedEventTotalCount(state)(nodeID)
@@ -212,9 +212,9 @@ function EventDetailBreadcrumbs({
     panelParameters: { nodeID },
   });
 
-  const nodeEventsOfTypeLinkNavProps = useLinkProps({
-    panelView: 'nodeEventsOfType',
-    panelParameters: { nodeID, eventType: breadcrumbEventCategory },
+  const nodeEventsInCategoryLinkNavProps = useLinkProps({
+    panelView: 'nodeEventsInCategory',
+    panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
   const breadcrumbs = useMemo(() => {
     return [
@@ -249,7 +249,7 @@ function EventDetailBreadcrumbs({
             defaultMessage="{count} {category}"
           />
         ),
-        ...nodeEventsOfTypeLinkNavProps,
+        ...nodeEventsInCategoryLinkNavProps,
       },
       {
         text: <DescriptiveName event={event} />,
@@ -264,7 +264,7 @@ function EventDetailBreadcrumbs({
     nodeName,
     relatedEventCount,
     nodesLinkNavProps,
-    nodeEventsOfTypeLinkNavProps,
+    nodeEventsInCategoryLinkNavProps,
   ]);
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }

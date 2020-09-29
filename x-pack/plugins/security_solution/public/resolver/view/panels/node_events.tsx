@@ -173,10 +173,10 @@ const NodeEventsLink = memo(
     children: React.ReactNode;
   }) => {
     const props = useLinkProps({
-      panelView: 'nodeEventsOfType',
+      panelView: 'nodeEventsInCategory',
       panelParameters: {
         nodeID,
-        eventType,
+        eventCategory: eventType,
       },
     });
     return (

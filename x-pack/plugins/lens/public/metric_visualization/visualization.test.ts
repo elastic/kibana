@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { metricVisualization } from './metric_visualization';
+import { metricVisualization } from './visualization';
 import { State } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { generateId } from '../id_generator';
