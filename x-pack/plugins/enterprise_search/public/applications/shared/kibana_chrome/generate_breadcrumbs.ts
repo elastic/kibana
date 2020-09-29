@@ -5,7 +5,6 @@
  */
 
 import { useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
 import { EuiBreadcrumb } from '@elastic/eui';
 
 import { KibanaLogic } from '../../shared/kibana';
@@ -33,20 +32,17 @@ interface IBreadcrumb {
 export type TBreadcrumbs = IBreadcrumb[];
 
 export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
-  const history = useHistory();
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { navigateToUrl, history } = useValues(KibanaLogic);
 
   return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
     const breadcrumb = { text } as EuiBreadcrumb;
 
     if (path) {
-      const href = createHref(path, history, { shouldNotCreateHref });
-
-      breadcrumb.href = href;
+      breadcrumb.href = createHref(path, history, { shouldNotCreateHref });
       breadcrumb.onClick = (event) => {
         if (letBrowserHandleEvent(event)) return;
         event.preventDefault();
-        navigateToUrl(href);
+        navigateToUrl(path, { shouldNotCreateHref });
       };
     }
 

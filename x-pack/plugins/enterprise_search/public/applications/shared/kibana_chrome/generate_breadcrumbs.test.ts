@@ -5,7 +5,6 @@
  */
 
 import '../../__mocks__/kea.mock';
-import '../../__mocks__/react_router_history.mock';
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
 jest.mock('../react_router_helpers', () => ({
@@ -53,21 +52,23 @@ describe('useBreadcrumbs', () => {
 
   it('prevents default navigation and uses React Router history on click', () => {
     const breadcrumb = useBreadcrumbs([{ text: '', path: '/test' }])[0] as any;
+
+    expect(breadcrumb.href).toEqual('/app/enterprise_search/test');
+    expect(mockHistory.createHref).toHaveBeenCalled();
+
     const event = { preventDefault: jest.fn() };
     breadcrumb.onClick(event);
 
-    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test');
-    expect(mockHistory.createHref).toHaveBeenCalled();
     expect(event.preventDefault).toHaveBeenCalled();
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
   });
 
   it('does not call createHref if shouldNotCreateHref is passed', () => {
     const breadcrumb = useBreadcrumbs([
       { text: '', path: '/test', shouldNotCreateHref: true },
     ])[0] as any;
-    breadcrumb.onClick({ preventDefault: () => null });
 
-    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test');
+    expect(breadcrumb.href).toEqual('/test');
     expect(mockHistory.createHref).not.toHaveBeenCalled();
   });
 
