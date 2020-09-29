@@ -20,6 +20,6 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   }
   const kibanaVersionParsed = semver.parse(kibanaVersion);
   const agentVersionParsed = semver.parse(agentVersion);
-  if (!agentVersionParsed || !kibanaVersionParsed) throw new Error('version cannot be parsed');
+  if (!agentVersionParsed || !kibanaVersionParsed) return false;
   return semver.lt(agentVersionParsed, kibanaVersionParsed);
 }
