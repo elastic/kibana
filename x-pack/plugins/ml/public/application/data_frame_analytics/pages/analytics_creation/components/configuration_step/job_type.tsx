@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
@@ -53,28 +52,18 @@ const jobDetails: JobDetails = {
 export const JobType: FC<Props> = ({ type, setFormState }) => {
   const [selectedCard, setSelectedCard] = useState<any>({});
 
-  const onJobSelect = (jobType: DataFrameAnalysisConfigType) => {
-    setFormState({
-      previousJobType: type,
-      jobType,
-      includes: [],
-      requiredFieldsError: undefined,
-    });
-  };
-
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" data-test-subj="mlAnalyticsCreateJobWizardJobTypeSelect">
         {Object.keys(jobDetails).map((jobType) => (
-          <EuiFlexItem
-            key={jobType}
-            grow={false}
-            data-test-subj="mlAnalyticsCreateJobWizardJobTypeSelect"
-          >
+          <EuiFlexItem key={jobType} grow={false}>
             <EuiCard
               icon={<EuiIcon size="xl" type={jobDetails[jobType].icon} />}
               title={jobDetails[jobType].title}
               description={jobDetails[jobType].helpText}
+              data-test-subj={`mlAnalyticsCreation-${jobType}-option${
+                type === jobType ? ' selectedJobType' : ''
+              }`}
               selectable={{
                 onClick: () => {
                   // Only allow one job selected at a time and don't allow deselection
@@ -82,7 +71,12 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
                     return;
                   }
 
-                  onJobSelect(jobType as DataFrameAnalysisConfigType);
+                  setFormState({
+                    previousJobType: type,
+                    jobType,
+                    includes: [],
+                    requiredFieldsError: undefined,
+                  });
                   setSelectedCard({ [jobType]: !selectedCard[jobType] });
                 },
                 isSelected: selectedCard[jobType] === true || type === jobType,
