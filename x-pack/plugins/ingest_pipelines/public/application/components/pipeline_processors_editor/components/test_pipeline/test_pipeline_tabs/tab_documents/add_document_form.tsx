@@ -25,9 +25,9 @@ import {
   TextField,
   fieldValidators,
   FieldConfig,
-} from '../../../../../../shared_imports';
-import { useIsMounted } from '../../../use_is_mounted';
-import { Document } from '../../../types';
+} from '../../../../../../../shared_imports';
+import { useIsMounted } from '../../../../use_is_mounted';
+import { Document } from '../../../../types';
 
 const UseField = getUseField({ component: Field });
 
