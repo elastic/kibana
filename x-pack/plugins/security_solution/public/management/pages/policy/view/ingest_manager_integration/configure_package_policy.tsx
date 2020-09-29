@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiButton,
   EuiContextMenuItem,
+  EuiContextMenuPanelProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -148,6 +149,31 @@ const EditFlowMessage = memo<{
     );
   }, []);
 
+  const actionItems = useMemo<EuiContextMenuPanelProps['items']>(() => {
+    return [
+      <EuiContextMenuItem
+        key="policyDetails"
+        onClick={handleSecurityPolicyAction}
+        data-test-subj="securityPolicy"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionSecurityPolicy"
+          defaultMessage="Edit Security Policy"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="trustedApps"
+        onClick={handleTrustedAppsAction}
+        data-test-subj="trustedAppsAction"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionTrustedApps"
+          defaultMessage="View Trusted Applications"
+        />
+      </EuiContextMenuItem>,
+    ];
+  }, [handleSecurityPolicyAction, handleTrustedAppsAction]);
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -164,30 +190,7 @@ const EditFlowMessage = memo<{
           anchorPosition="downRight"
           panelPaddingSize="s"
         >
-          <EuiContextMenuPanel
-            items={[
-              <EuiContextMenuItem
-                key="policyDetails"
-                onClick={handleSecurityPolicyAction}
-                data-test-subj="editLinkToPolicyDetails"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionSecurityPolicy"
-                  defaultMessage="Edit Security Policy"
-                />
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="trustedApps"
-                onClick={handleTrustedAppsAction}
-                data-test-subj="trustedAppsAction"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionTrustedApps"
-                  defaultMessage="View Trusted Applications"
-                />
-              </EuiContextMenuItem>,
-            ]}
-          />
+          <EuiContextMenuPanel data-test-subj="endpointActionsMenuPanel" items={actionItems} />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>

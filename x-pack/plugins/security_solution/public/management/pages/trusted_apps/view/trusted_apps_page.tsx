@@ -21,7 +21,7 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 
 export const TrustedAppsPage = memo(() => {
   const history = useHistory();
-  const { state: routeState } = useLocation<TrustedAppsListPageRouteState>();
+  const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const urlParams = useTrustedAppsSelector(getListUrlSearchParams);
   const showAddFlout = useTrustedAppsSelector(getListCurrentShowValue) === 'create';
   const handleAddButtonClick = useCallback(() => {
@@ -38,7 +38,7 @@ export const TrustedAppsPage = memo(() => {
   }, [history, urlParams]);
 
   const backButton = useMemo(() => {
-    if (routeState.onBackButtonNavigateTo) {
+    if (routeState && routeState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...routeState} />;
     }
     return null;
@@ -63,6 +63,7 @@ export const TrustedAppsPage = memo(() => {
 
   return (
     <AdministrationListPage
+      data-test-subj="trustedAppsListPage"
       beta={true}
       title={
         <FormattedMessage
@@ -120,6 +121,7 @@ const BackToExternalAppButton = memo<TrustedAppsListPageRouteState>(
         href={backButtonUrl!}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}
+        data-test-subj="backToOrigin"
       >
         {backButtonLabel || (
           <FormattedMessage
