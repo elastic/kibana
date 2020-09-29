@@ -56,11 +56,8 @@ export function getQueryParameterActions(filterManager, indexPatterns) {
     );
     filterManager.addFilters(newFilters);
     if (indexPatterns) {
-      try {
-        const indexPattern = await indexPatterns.get(indexPatternId);
-        await popularizeField(indexPattern, field.name, indexPatterns);
-        // eslint-disable-next-line no-empty
-      } catch {}
+      const indexPattern = await indexPatterns.get(indexPatternId);
+      await popularizeField(indexPattern, field.name, indexPatterns);
     }
   };
 
