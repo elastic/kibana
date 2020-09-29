@@ -224,12 +224,15 @@ describe('get_local_stats', () => {
 
   describe('getLocalStats', () => {
     it('returns expected object with kibana data', async () => {
-      const callCluster = jest.fn();
       const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
+
+      const scopedClients = {
+        callCluster: jest.fn(),
+        esClient: mockGetLocalStats(clusterInfo, clusterStats),
+      };
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
+        { scopedClients, usageCollection, start: '', end: '' },
         context
       );
       const result = response[0];
@@ -244,12 +247,14 @@ describe('get_local_stats', () => {
     });
 
     it('returns an empty array when no cluster uuid is provided', async () => {
-      const callCluster = jest.fn();
       const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
+      const scopedClients = {
+        callCluster: jest.fn(),
+        esClient: mockGetLocalStats(clusterInfo, clusterStats),
+      };
       const response = await getLocalStats(
         [],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
+        { scopedClients, usageCollection, start: '', end: '' },
         context
       );
       expect(response).toBeDefined();
