@@ -61,3 +61,7 @@ export function buildKueryForOfflineAgents() {
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
   }s AND not (${buildKueryForErrorAgents()})`;
 }
+
+export function buildKueryForUpgradingAgents() {
+  return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
+}
