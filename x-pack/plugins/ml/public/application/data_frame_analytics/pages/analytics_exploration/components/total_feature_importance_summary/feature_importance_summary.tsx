@@ -35,7 +35,8 @@ import {
   isRegressionTotalFeatureImportance,
   RegressionTotalFeatureImportance,
   ClassificationTotalFeatureImportance,
-} from '../../../../../../../common/types/inference';
+} from '../../../../../../../common/types/feature_importance';
+
 import { useMlKibana } from '../../../../../contexts/kibana';
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -210,7 +211,6 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         </EuiFlexGroup>
       </div>
       <Chart
-        className="story-chart"
         size={{
           width: '100%',
           height: chartHeight,

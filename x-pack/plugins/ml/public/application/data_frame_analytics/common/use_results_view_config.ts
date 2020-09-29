@@ -15,13 +15,17 @@ import { ml } from '../../services/ml_api_service';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 import { useMlContext } from '../../contexts/ml';
 
-import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig, getAnalysisType } from '../common';
+import { DataFrameAnalyticsConfig } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
 import { useInferenceApiService } from '../../services/ml_api_service/inference';
-import { TotalFeatureImportance } from '../../../../common/types/inference';
+import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
 import { getToastNotificationService } from '../../services/toast_notification_service';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../common/util/analytics_utils';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
@@ -64,11 +68,10 @@ export const useResultsViewConfig = (jobId: string) => {
           analyticsConfigs.data_frame_analytics.length > 0
         ) {
           const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
-          const analysisType = getAnalysisType(jobConfigUpdate.analysis);
           // don't fetch the total feature importance if it's outlier_detection
           if (
-            analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
-            analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION
+            isClassificationAnalysis(jobConfigUpdate.analysis) ||
+            isRegressionAnalysis(jobConfigUpdate.analysis)
           ) {
             try {
               const inferenceModels = await inferenceApiService.getInferenceModel(`${jobId}*`, {
