@@ -189,15 +189,13 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
 
-          if (eventsTelemetry !== undefined) {
-            sendAlertTelemetryEvents(
-              logger,
-              eventsTelemetry,
-              filteredEvents,
-              ruleParams,
-              buildRuleMessage
-            );
-          }
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            filteredEvents,
+            ruleParams,
+            buildRuleMessage
+          );
         }
 
         // we are guaranteed to have searchResult hits at this point

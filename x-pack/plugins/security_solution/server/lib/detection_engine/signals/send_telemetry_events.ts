@@ -27,11 +27,15 @@ export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEve
 
 export function sendAlertTelemetryEvents(
   logger: Logger,
-  eventsTelemetry: TelemetryEventsSender,
+  eventsTelemetry: TelemetryEventsSender | undefined,
   filteredEvents: SignalSearchResponse,
   ruleParams: RuleTypeParams,
   buildRuleMessage: BuildRuleMessage
 ) {
+  if (eventsTelemetry === undefined) {
+    return;
+  }
+
   const sources = selectEvents(filteredEvents);
 
   try {
