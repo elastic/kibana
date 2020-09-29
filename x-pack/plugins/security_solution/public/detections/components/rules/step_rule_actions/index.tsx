@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';

@@ -985,6 +985,7 @@ export const mockSignalIndex: AlertsIndex = {
 export const mockUserPrivilege: Privilege = {
   username: 'elastic',
   has_all_requested: false,
+  can_read_actions: true,
   cluster: {
     monitor_ml: true,
     manage_ccr: true,
