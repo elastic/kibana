@@ -40,12 +40,16 @@ export const AGENT_NAMES: AgentName[] = [
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export const RUM_AGENTS = ['js-base', 'rum-js', 'opentelemetry/webjs'];
+export const RUM_AGENT_NAMES: AgentName[] = [
+  'js-base',
+  'rum-js',
+  'opentelemetry/webjs',
+];
 
 export function isRumAgentName(
   agentName?: string
 ): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
-  return RUM_AGENTS.includes(agentName!);
+  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
 export function isJavaAgentName(

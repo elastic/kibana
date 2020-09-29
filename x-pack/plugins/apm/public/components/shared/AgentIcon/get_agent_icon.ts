@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RUM_AGENTS } from '../../../../common/agent_name';
+import {
+  OPEN_TELEMETRY_AGENT_NAMES,
+  RUM_AGENT_NAMES,
+} from '../../../../common/agent_name';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import dotNetIcon from './icons/dot-net.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
@@ -34,7 +38,7 @@ export function getAgentIconKey(agentName: string) {
   const lowercasedAgentName = agentName.toLowerCase();
 
   // RUM agent names
-  if ([...RUM_AGENTS].includes(lowercasedAgentName)) {
+  if (RUM_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
     return 'rum';
   }
 
@@ -44,13 +48,13 @@ export function getAgentIconKey(agentName: string) {
     ''
   );
 
-  // OpenTelemetry-only agents
-  if (['cpp', 'erlang', 'otlp'].includes(agentNameWithoutPrefix)) {
-    return 'opentelemetry';
-  }
-
   if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
     return agentNameWithoutPrefix;
+  }
+
+  // OpenTelemetry-only agents
+  if (OPEN_TELEMETRY_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
+    return 'opentelemetry';
   }
 }
 
