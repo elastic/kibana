@@ -14,7 +14,6 @@
     "plugins/apm/scripts/**/*"
   ],
   "compilerOptions": {
-    "outDir": ".",
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
