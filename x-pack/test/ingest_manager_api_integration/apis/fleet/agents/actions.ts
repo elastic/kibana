@@ -26,13 +26,13 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
           },
         })
         .expect(200);
 
-      expect(apiResponse.item.type).to.eql('CONFIG_CHANGE');
+      expect(apiResponse.item.type).to.eql('POLICY_CHANGE');
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
     });
 
@@ -58,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },
