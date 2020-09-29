@@ -5,8 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  // Temporarily skip until new package changes are available
-  // under a new docker tag
+  // TODO: Temporarily skip until new package changes are
+  // available under a new docker tag
   describe.skip('Ingest Manager Endpoints', function () {
     this.tags('ciGroup7');
     // Ingest Manager setup
