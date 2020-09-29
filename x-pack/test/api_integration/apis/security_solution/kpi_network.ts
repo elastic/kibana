@@ -201,13 +201,13 @@ export default function ({ getService }: FtrProviderContext) {
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
-        networkEvents: 1333,
+        networkEvents: 665,
         uniqueFlowId: 124,
         uniqueSourcePrivateIps: null,
         uniqueSourcePrivateIpsHistogram: null,
         uniqueDestinationPrivateIps: null,
         uniqueDestinationPrivateIpsHistogram: null,
-        dnsQueries: 44,
+        dnsQueries: 0,
         tlsHandshakes: 1,
       };
 
@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(kpiNetwork.uniqueFlowId).to.eql(expectedResult.uniqueFlowId);
       });
 
-      it.skip('Make sure that we get KpiNetwork DNS data', async () => {
+      it('Make sure that we get KpiNetwork DNS data', async () => {
         const { body: kpiNetwork } = await supertest
           .post('/internal/search/securitySolutionSearchStrategy/networkKpiDnsQuery')
           .set('kbn-xsrf', 'true')
@@ -251,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(kpiNetwork.dnsQueries).to.eql(expectedResult.dnsQueries);
       });
 
-      it.skip('Make sure that we get KpiNetwork networkEvents data', async () => {
+      it('Make sure that we get KpiNetwork networkEvents data', async () => {
         const { body: kpiNetwork } = await supertest
           .post('/internal/search/securitySolutionSearchStrategy/networkKpiNetworkEventsQuery')
           .set('kbn-xsrf', 'true')
