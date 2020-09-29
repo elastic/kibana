@@ -93,7 +93,7 @@ export class FieldParamType extends BaseParamType {
                 'Saved field "{fieldParameter}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
               values: {
                 fieldParameter: fieldName,
-                aggType: aggConfig?.type?.name,
+                aggType: aggConfig?.type?.title,
               },
             }
           )
