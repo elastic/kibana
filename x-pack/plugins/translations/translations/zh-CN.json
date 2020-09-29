@@ -10684,7 +10684,6 @@
     "xpack.ml.dataframe.analytics.create.jobIdInvalidMaxLengthErrorMessage": "作业 ID 的长度不得超过 {maxLength, plural, one {# 个字符} other {# 个字符}}。",
     "xpack.ml.dataframe.analytics.create.jobIdLabel": "作业 ID",
     "xpack.ml.dataframe.analytics.create.jobIdPlaceholder": "作业 ID",
-    "xpack.ml.dataframe.analytics.create.jobTypeLabel": "作业类型",
     "xpack.ml.dataframe.analytics.create.lambdaHelpText": "在训练数据集上防止过度拟合的正则化参数。必须为非负值。",
     "xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel": "在训练数据集上防止过度拟合的正则化参数。",
     "xpack.ml.dataframe.analytics.create.lambdaLabel": "Lambda",

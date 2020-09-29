@@ -10678,7 +10678,6 @@
     "xpack.ml.dataframe.analytics.create.jobIdInvalidMaxLengthErrorMessage": "ジョブ ID は {maxLength, plural, one {# 文字} other {# 文字}} 以内でなければなりません。",
     "xpack.ml.dataframe.analytics.create.jobIdLabel": "ジョブID",
     "xpack.ml.dataframe.analytics.create.jobIdPlaceholder": "ジョブID",
-    "xpack.ml.dataframe.analytics.create.jobTypeLabel": "ジョブタイプ",
     "xpack.ml.dataframe.analytics.create.lambdaHelpText": "学習データセットの過剰適合を防止するための正則化パラメーター。非負の値でなければなりません。",
     "xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel": "学習データセットの過剰適合を防止するための正則化パラメーター。",
     "xpack.ml.dataframe.analytics.create.lambdaLabel": "ラムダ",
