@@ -27,7 +27,7 @@ describe('ValuesRangeInput', () => {
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
     act(() => {
       instance.find(EuiRange).prop('onChange')!(
-        { currentTarget: { value: '7' } as React.ChangeEvent<HTMLInputElement> },
+        { currentTarget: { value: '7' } } as React.ChangeEvent<HTMLInputElement>,
         true
       );
     });
@@ -42,7 +42,7 @@ describe('ValuesRangeInput', () => {
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
     act(() => {
       instance.find(EuiRange).prop('onChange')!(
-        { currentTarget: { value: '107' } as React.ChangeEvent<HTMLInputElement> },
+        { currentTarget: { value: '107' } } as React.ChangeEvent<HTMLInputElement>,
         true
       );
     });

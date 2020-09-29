@@ -33,10 +33,11 @@ export const ValuesRangeInput = ({
   const [inputValue, setInputValue] = useState(String(value));
   useDebounce(
     () => {
-      const inputNumber = Number(inputValue);
-      if (inputNumber >= MIN_NUMBER_OF_VALUES && inputNumber <= MAX_NUMBER_OF_VALUES) {
-        onChange(inputNumber);
+      if (inputValue === '') {
+        return;
       }
+      const inputNumber = Number(inputValue);
+      onChange(Math.min(MAX_NUMBER_OF_VALUES, Math.max(inputNumber, MIN_NUMBER_OF_VALUES)));
     },
     256,
     [inputValue]
