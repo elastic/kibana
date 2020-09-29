@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(sourceStatus.indicesExist).to.eql(['auditbeat-*']);
     });
 
-    it.skip('should find indexes as being available when they exist', async () => {
+    it('should find indexes as being available when they exist', async () => {
       const { body: sourceStatus } = await supertest
         .post('/internal/search/securitySolutionIndexFields/')
         .set('kbn-xsrf', 'true')
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*', 'winlogbeat-*']);
+      expect(sourceStatus.indicesExist).to.eql(['auditbeat-*']);
     });
 
     it('should not find indexes as existing when there is an empty array of them', async () => {
