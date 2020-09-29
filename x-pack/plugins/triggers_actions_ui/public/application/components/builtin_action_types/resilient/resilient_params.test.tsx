@@ -11,10 +11,10 @@ import { DocLinksStart } from 'kibana/public';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
-jest.mock('../../../app_context', () => {
+jest.mock('../../../context/actions_connectors_context', () => {
   const post = jest.fn();
   return {
-    useAppDependencies: jest.fn(() => ({ http: { post } })),
+    useActionsConnectorsContext: jest.fn(() => ({ http: { post } })),
   };
 });
 

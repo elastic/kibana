@@ -11,10 +11,10 @@ import { DocLinksStart } from 'kibana/public';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 
-jest.mock('../../../app_context', () => {
+jest.mock('../../../context/actions_connectors_context', () => {
   const post = jest.fn();
   return {
-    useAppDependencies: jest.fn(() => ({ http: { post } })),
+    useActionsConnectorsContext: jest.fn(() => ({ http: { post } })),
   };
 });
 
