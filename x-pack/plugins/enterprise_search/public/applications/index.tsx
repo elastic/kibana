@@ -54,9 +54,7 @@ export const renderApp = (
     errorConnecting,
     readOnlyMode: initialData.readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic({
-    history: params.history,
-  });
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
