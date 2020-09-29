@@ -639,7 +639,7 @@ Object {
   "body": Object {
     "aggs": Object {
       "stats": Object {
-        "extended_stats": Object {
+        "max": Object {
           "field": "transaction.duration.us",
         },
       },
