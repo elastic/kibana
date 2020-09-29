@@ -22,7 +22,9 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHideFor,
   EuiIcon,
+  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -117,12 +119,19 @@ export function Header({
               },
               {
                 ...(observables.navControlsCenter$ && {
-                  items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </EuiShowFor>,
+                  ],
                 }),
                 borders: 'none',
               },
               {
                 items: [
+                  <EuiHideFor sizes={['m', 'l', 'xl']}>
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHideFor>,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
