@@ -10,6 +10,7 @@ import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
+import { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {
@@ -74,7 +75,10 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     : {};
 }
 
-export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClusterClient) =>
+export const getPartitionFieldsValuesFactory = (
+  { asInternalUser }: IScopedClusterClient,
+  mlClient: MlClient
+) =>
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
    * @param jobId - Job ID
@@ -90,7 +94,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
     earliestMs: number,
     latestMs: number
   ) {
-    const { body: jobsResponse } = await asInternalUser.ml.getJobs({ job_id: jobId });
+    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }

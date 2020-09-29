@@ -33,11 +33,11 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
-        const { body } = await client.asInternalUser.ml.getTrainedModels<InferenceConfigResponse>({
+        const { body } = await mlClient.getTrainedModels<InferenceConfigResponse>({
           size: 1000,
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
@@ -84,10 +84,10 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await client.asInternalUser.ml.getTrainedModelsStats({
+        const { body } = await mlClient.getTrainedModelsStats({
           ...(modelId ? { model_id: modelId } : {}),
         });
         return response.ok({
@@ -146,10 +146,10 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await client.asInternalUser.ml.deleteTrainedModel({
+        const { body } = await mlClient.deleteTrainedModel({
           model_id: modelId,
         });
         return response.ok({

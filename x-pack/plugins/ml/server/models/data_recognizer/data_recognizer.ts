@@ -14,6 +14,8 @@ import { merge } from 'lodash';
 import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
+import type { JobsInSpaces } from '../../saved_objects';
 import {
   KibanaObjects,
   KibanaObjectConfig,
@@ -104,13 +106,19 @@ interface SaveResults {
 }
 
 export class DataRecognizer {
-  private _asCurrentUser: IScopedClusterClient['asCurrentUser'];
-  private _asInternalUser: IScopedClusterClient['asInternalUser'];
   private _client: IScopedClusterClient;
+  private _mlClient: MlClient;
+  private _savedObjectsClient: SavedObjectsClientContract;
+
   private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
   private _indexPatternId: string | undefined = undefined;
+
+  private _jobsService: ReturnType<typeof jobServiceProvider>;
+  private _resultsService: ReturnType<typeof resultsServiceProvider>;
+  private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
+
   /**
    * List of the module jobs that require model memory estimation
    */
@@ -118,13 +126,18 @@ export class DataRecognizer {
 
   constructor(
     mlClusterClient: IScopedClusterClient,
-    private savedObjectsClient: SavedObjectsClientContract,
+    mlClient: MlClient,
+    jobsInSpaces: JobsInSpaces,
+    savedObjectsClient: SavedObjectsClientContract,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
-    this._asCurrentUser = mlClusterClient.asCurrentUser;
-    this._asInternalUser = mlClusterClient.asInternalUser;
+    this._mlClient = mlClient;
+    this._savedObjectsClient = savedObjectsClient;
     this._authorizationHeader = getAuthorizationHeader(request);
+    this._jobsService = jobServiceProvider(mlClusterClient, mlClient, jobsInSpaces);
+    this._resultsService = resultsServiceProvider(mlClusterClient, mlClient);
+    this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
   }
 
   // list all directories under the given directory
@@ -246,7 +259,7 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const { body } = await this._client.asCurrentUser.search({
       index,
       rest_total_hits_as_int: true,
       size,
@@ -511,8 +524,7 @@ export class DataRecognizer {
       // Add a wildcard at the front of each of the job IDs in the module,
       // as a prefix may have been supplied when creating the jobs in the module.
       const jobIds = module.jobs.map((job) => `*${job.id}`);
-      const { jobsExist } = jobServiceProvider(this._client);
-      const jobInfo = await jobsExist(jobIds);
+      const jobInfo = await this._jobsService.jobsExist(jobIds);
 
       // Check if the value for any of the jobs is false.
       const doJobsExist = Object.values(jobInfo).includes(false) === false;
@@ -520,14 +532,15 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const { body } = await this._asInternalUser.ml.getJobStats<MlJobsStatsResponse>({
+        const { body } = await this._mlClient.getJobStats<MlJobsStatsResponse>({
           job_id: jobIds.join(),
         });
         const jobStatsJobs: JobStat[] = [];
         if (body.jobs && body.jobs.length > 0) {
           const foundJobIds = body.jobs.map((job) => job.job_id);
-          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this._client);
-          const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob(foundJobIds);
+          const latestBucketTimestampsByJob = await this._resultsService.getLatestBucketTimestampByJob(
+            foundJobIds
+          );
 
           body.jobs.forEach((job) => {
             const jobStat = {
@@ -553,7 +566,7 @@ export class DataRecognizer {
   }
 
   async loadIndexPatterns() {
-    return await this.savedObjectsClient.find<IndexPatternAttributes>({
+    return await this._savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       perPage: 1000,
     });
@@ -664,7 +677,7 @@ export class DataRecognizer {
   // find all existing savedObjects for a given type
   loadExistingSavedObjects(type: string) {
     // TODO: define saved object type
-    return this.savedObjectsClient.find<any>({ type, perPage: 1000 });
+    return this._savedObjectsClient.find<any>({ type, perPage: 1000 });
   }
 
   // save the savedObjects if they do not exist already
@@ -674,7 +687,7 @@ export class DataRecognizer {
       .filter((o) => o.exists === false)
       .map((o) => o.savedObject!);
     if (filteredSavedObjects.length) {
-      results = await this.savedObjectsClient.bulkCreate(
+      results = await this._savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map((doc) => ({
@@ -705,7 +718,7 @@ export class DataRecognizer {
   }
 
   async saveJob(job: ModuleJob) {
-    return this._asInternalUser.ml.putJob({ job_id: job.id, body: job.config });
+    return this._mlClient.putJob({ job_id: job.id, body: job.config });
   }
 
   // save the datafeeds.
@@ -725,7 +738,7 @@ export class DataRecognizer {
   }
 
   async saveDatafeed(datafeed: ModuleDataFeed) {
-    return this._asInternalUser.ml.putDatafeed(
+    return this._mlClient.putDatafeed(
       {
         datafeed_id: datafeed.id,
         body: datafeed.config,
@@ -754,7 +767,7 @@ export class DataRecognizer {
     const result = { started: false } as DatafeedResponse;
     let opened = false;
     try {
-      const { body } = await this._asInternalUser.ml.openJob({
+      const { body } = await this._mlClient.openJob({
         job_id: datafeed.config.job_id,
       });
       opened = body.opened;
@@ -778,7 +791,7 @@ export class DataRecognizer {
           duration.end = (end as unknown) as string;
         }
 
-        await this._asInternalUser.ml.startDatafeed({
+        await this._mlClient.startDatafeed({
           datafeed_id: datafeed.id,
           ...duration,
         });
@@ -1018,8 +1031,6 @@ export class DataRecognizer {
 
     if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
       try {
-        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this._client);
-
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
           .time_field;
@@ -1051,7 +1062,7 @@ export class DataRecognizer {
             latestMs = timeFieldRange.end;
           }
 
-          const { modelMemoryLimit } = await calculateModelMemoryLimit(
+          const { modelMemoryLimit } = await this._calculateModelMemoryLimit(
             job.config.analysis_config,
             this._indexPatternName,
             query,
@@ -1073,7 +1084,7 @@ export class DataRecognizer {
 
     const {
       body: { limits },
-    } = await this._asInternalUser.ml.info<MlInfoResponse>();
+    } = await this._mlClient.info<MlInfoResponse>();
     const maxMml = limits.max_model_memory_limit;
 
     if (!maxMml) {

@@ -14,12 +14,15 @@ import {
 import { filterJobIdsFactory } from '../../saved_objects/filter';
 import { MlLicense } from '../../../common/license';
 
+import { MlClient, getMlClient } from '../ml_client';
+
 type Handler = (handlerParams: {
   client: IScopedClusterClient;
   request: KibanaRequest<any, any, any, any>;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
   jobsInSpaces: ReturnType<typeof filterJobIdsFactory>;
+  mlClient: MlClient;
 }) => ReturnType<RequestHandler>;
 
 export class MlServerLicense extends MlLicense {
@@ -49,6 +52,7 @@ function guard(check: () => boolean, handler: Handler) {
       response,
       context,
       jobsInSpaces,
+      mlClient: getMlClient(context),
     });
   };
 }

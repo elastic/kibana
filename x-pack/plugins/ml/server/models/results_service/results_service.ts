@@ -21,6 +21,7 @@ import {
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
 import { MlJobsResponse } from '../job_service/jobs';
+import { MlClient } from '../../lib/ml_client';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -38,7 +39,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(client: IScopedClusterClient) {
+export function resultsServiceProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
@@ -483,7 +484,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     };
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
+    const { body } = await mlClient.getJobs<MlJobsResponse>({
       job_id: jobIds.join(),
     });
 
@@ -592,7 +593,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(client),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(client, mlClient),
     getCategorizerStats,
     getCategoryStoppedPartitions,
   };

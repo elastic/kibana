@@ -50,9 +50,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { forceStartDatafeeds } = jobServiceProvider(client, jobsInSpaces);
+        const { forceStartDatafeeds } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { datafeedIds, start, end } = request.body;
         const resp = await forceStartDatafeeds(datafeedIds, start, end);
 
@@ -84,9 +84,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { stopDatafeeds } = jobServiceProvider(client, jobsInSpaces);
+        const { stopDatafeeds } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { datafeedIds } = request.body;
         const resp = await stopDatafeeds(datafeedIds);
 
@@ -118,9 +118,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { deleteJobs } = jobServiceProvider(client, jobsInSpaces);
+        const { deleteJobs } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobIds } = request.body;
         const resp = await deleteJobs(jobIds);
 
@@ -152,9 +152,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCloseJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { closeJobs } = jobServiceProvider(client, jobsInSpaces);
+        const { closeJobs } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobIds } = request.body;
         const resp = await closeJobs(jobIds);
 
@@ -186,9 +186,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCloseJob', 'access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { forceStopAndCloseJob } = jobServiceProvider(client, jobsInSpaces);
+        const { forceStopAndCloseJob } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobId } = request.body;
         const resp = await forceStopAndCloseJob(jobId);
 
@@ -225,9 +225,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { jobsSummary } = jobServiceProvider(client, jobsInSpaces);
+        const { jobsSummary } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -259,9 +259,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, response, jobsInSpaces }) => {
       try {
-        const { jobsWithTimerange } = jobServiceProvider(client, jobsInSpaces);
+        const { jobsWithTimerange } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await jobsWithTimerange();
 
         return response.ok({
@@ -292,9 +292,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { createFullJobsList } = jobServiceProvider(client, jobsInSpaces);
+        const { createFullJobsList } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);
 
@@ -322,9 +322,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, response, jobsInSpaces }) => {
       try {
-        const { getAllGroups } = jobServiceProvider(client, jobsInSpaces);
+        const { getAllGroups } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await getAllGroups();
 
         return response.ok({
@@ -355,9 +355,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canUpdateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { updateGroups } = jobServiceProvider(client, jobsInSpaces);
+        const { updateGroups } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobs } = request.body;
         const resp = await updateGroups(jobs);
 
@@ -385,9 +385,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, response, jobsInSpaces }) => {
       try {
-        const { deletingJobTasks } = jobServiceProvider(client, jobsInSpaces);
+        const { deletingJobTasks } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await deletingJobTasks();
 
         return response.ok({
@@ -418,9 +418,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { jobsExist } = jobServiceProvider(client, jobsInSpaces);
+        const { jobsExist } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobIds } = request.body;
         const resp = await jobsExist(jobIds);
 
@@ -451,21 +451,23 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces, context }) => {
-      try {
-        const { indexPattern } = request.params;
-        const isRollup = request.query.rollup === 'true';
-        const savedObjectsClient = context.core.savedObjects.client;
-        const { newJobCaps } = jobServiceProvider(client, jobsInSpaces);
-        const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, context, jobsInSpaces }) => {
+        try {
+          const { indexPattern } = request.params;
+          const isRollup = request.query.rollup === 'true';
+          const savedObjectsClient = context.core.savedObjects.client;
+          const { newJobCaps } = jobServiceProvider(client, mlClient, jobsInSpaces);
+          const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
 
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -487,7 +489,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
         const {
           indexPatternTitle,
@@ -501,7 +503,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldValue,
         } = request.body;
 
-        const { newJobLineChart } = jobServiceProvider(client, jobsInSpaces);
+        const { newJobLineChart } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await newJobLineChart(
           indexPatternTitle,
           timeField,
@@ -542,7 +544,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
         const {
           indexPatternTitle,
@@ -555,7 +557,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldName,
         } = request.body;
 
-        const { newJobPopulationChart } = jobServiceProvider(client, jobsInSpaces);
+        const { newJobPopulationChart } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await newJobPopulationChart(
           indexPatternTitle,
           timeField,
@@ -591,9 +593,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, response, jobsInSpaces }) => {
       try {
-        const { getAllJobAndGroupIds } = jobServiceProvider(client, jobsInSpaces);
+        const { getAllJobAndGroupIds } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const resp = await getAllJobAndGroupIds();
 
         return response.ok({
@@ -624,9 +626,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { getLookBackProgress } = jobServiceProvider(client, jobsInSpaces);
+        const { getLookBackProgress } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobId, start, end } = request.body;
         const resp = await getLookBackProgress(jobId, start, end);
 
@@ -658,7 +660,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
         const { validateCategoryExamples } = categorizationExamplesProvider(client);
         const {
@@ -711,9 +713,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { topCategories } = jobServiceProvider(client, jobsInSpaces);
+        const { topCategories } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const { jobId, count } = request.body;
         const resp = await topCategories(jobId, count);
 
@@ -745,9 +747,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob', 'access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { revertModelSnapshot } = jobServiceProvider(client, jobsInSpaces);
+        const { revertModelSnapshot } = jobServiceProvider(client, mlClient, jobsInSpaces);
         const {
           jobId,
           snapshotId,

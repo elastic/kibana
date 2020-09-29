@@ -5,9 +5,11 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
+import { MlClient } from '../../lib/ml_client';
 
 export function jobAuditMessagesProvider(
-  client: IScopedClusterClient
+  client: IScopedClusterClient,
+  mlClient: MlClient
 ): {
   getJobAuditMessages: (jobId?: string, from?: string) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;

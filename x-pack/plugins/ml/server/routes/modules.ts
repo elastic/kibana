@@ -17,24 +17,30 @@ import {
   setupModuleBodySchema,
 } from './schemas/modules';
 import { RouteInitialization } from '../types';
+import type { MlClient } from '../lib/ml_client';
+import type { JobsInSpaces } from '../saved_objects';
 
 function recognize(
   client: IScopedClusterClient,
+  mlClient: MlClient,
+  jobsInSpaces: JobsInSpaces,
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   indexPatternTitle: string
 ) {
-  const dr = new DataRecognizer(client, savedObjectsClient, request);
+  const dr = new DataRecognizer(client, mlClient, jobsInSpaces, savedObjectsClient, request);
   return dr.findMatches(indexPatternTitle);
 }
 
 function getModule(
   client: IScopedClusterClient,
+  mlClient: MlClient,
+  jobsInSpaces: JobsInSpaces,
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(client, savedObjectsClient, request);
+  const dr = new DataRecognizer(client, mlClient, jobsInSpaces, savedObjectsClient, request);
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -44,6 +50,8 @@ function getModule(
 
 function setup(
   client: IScopedClusterClient,
+  mlClient: MlClient,
+  jobsInSpaces: JobsInSpaces,
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   moduleId: string,
@@ -59,7 +67,7 @@ function setup(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-  const dr = new DataRecognizer(client, savedObjectsClient, request);
+  const dr = new DataRecognizer(client, mlClient, jobsInSpaces, savedObjectsClient, request);
   return dr.setup(
     moduleId,
     prefix,
@@ -78,11 +86,13 @@ function setup(
 
 function dataRecognizerJobsExist(
   client: IScopedClusterClient,
+  mlClient: MlClient,
+  jobsInSpaces: JobsInSpaces,
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(client, savedObjectsClient, request);
+  const dr = new DataRecognizer(client, mlClient, jobsInSpaces, savedObjectsClient, request);
   return dr.dataRecognizerJobsExist(moduleId);
 }
 
@@ -127,21 +137,25 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
-      try {
-        const { indexPatternTitle } = request.params;
-        const results = await recognize(
-          client,
-          context.core.savedObjects.client,
-          request,
-          indexPatternTitle
-        );
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, jobsInSpaces, request, response, context }) => {
+        try {
+          const { indexPatternTitle } = request.params;
+          const results = await recognize(
+            client,
+            mlClient,
+            jobsInSpaces,
+            context.core.savedObjects.client,
+            request,
+            indexPatternTitle
+          );
 
-        return response.ok({ body: results });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({ body: results });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -262,26 +276,30 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
-      try {
-        let { moduleId } = request.params;
-        if (moduleId === '') {
-          // if the endpoint is called with a trailing /
-          // the moduleId will be an empty string.
-          moduleId = undefined;
-        }
-        const results = await getModule(
-          client,
-          context.core.savedObjects.client,
-          request,
-          moduleId
-        );
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, jobsInSpaces, request, response, context }) => {
+        try {
+          let { moduleId } = request.params;
+          if (moduleId === '') {
+            // if the endpoint is called with a trailing /
+            // the moduleId will be an empty string.
+            moduleId = undefined;
+          }
+          const results = await getModule(
+            client,
+            mlClient,
+            jobsInSpaces,
+            context.core.savedObjects.client,
+            request,
+            moduleId
+          );
 
-        return response.ok({ body: results });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({ body: results });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -435,47 +453,51 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
-      try {
-        const { moduleId } = request.params;
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, jobsInSpaces, request, response, context }) => {
+        try {
+          const { moduleId } = request.params;
 
-        const {
-          prefix,
-          groups,
-          indexPatternName,
-          query,
-          useDedicatedIndex,
-          startDatafeed,
-          start,
-          end,
-          jobOverrides,
-          datafeedOverrides,
-          estimateModelMemory,
-        } = request.body as TypeOf<typeof setupModuleBodySchema>;
+          const {
+            prefix,
+            groups,
+            indexPatternName,
+            query,
+            useDedicatedIndex,
+            startDatafeed,
+            start,
+            end,
+            jobOverrides,
+            datafeedOverrides,
+            estimateModelMemory,
+          } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
-        const result = await setup(
-          client,
-          context.core.savedObjects.client,
-          request,
-          moduleId,
-          prefix,
-          groups,
-          indexPatternName,
-          query,
-          useDedicatedIndex,
-          startDatafeed,
-          start,
-          end,
-          jobOverrides,
-          datafeedOverrides,
-          estimateModelMemory
-        );
+          const result = await setup(
+            client,
+            mlClient,
+            jobsInSpaces,
+            context.core.savedObjects.client,
+            request,
+            moduleId,
+            prefix,
+            groups,
+            indexPatternName,
+            query,
+            useDedicatedIndex,
+            startDatafeed,
+            start,
+            end,
+            jobOverrides,
+            datafeedOverrides,
+            estimateModelMemory
+          );
 
-        return response.ok({ body: result });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -540,20 +562,24 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
-      try {
-        const { moduleId } = request.params;
-        const result = await dataRecognizerJobsExist(
-          client,
-          context.core.savedObjects.client,
-          request,
-          moduleId
-        );
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, jobsInSpaces, request, response, context }) => {
+        try {
+          const { moduleId } = request.params;
+          const result = await dataRecognizerJobsExist(
+            client,
+            mlClient,
+            jobsInSpaces,
+            context.core.savedObjects.client,
+            request,
+            moduleId
+          );
 
-        return response.ok({ body: result });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 }

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { JobsInSpaces } from '../../saved_objects';
+import { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
@@ -27,10 +27,7 @@ interface Results {
   };
 }
 
-export function datafeedsProvider(
-  { asInternalUser }: IScopedClusterClient,
-  jobsInSpaces: JobsInSpaces
-) {
+export function datafeedsProvider(mlClient: MlClient, jobsInSpaces: JobsInSpaces) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
@@ -88,7 +85,7 @@ export function datafeedsProvider(
   async function openJob(jobId: string) {
     let opened = false;
     try {
-      const { body } = await asInternalUser.ml.openJob({ job_id: jobId });
+      const { body } = await mlClient.openJob({ job_id: jobId });
       opened = body.opened;
     } catch (error) {
       if (error.statusCode === 409) {
@@ -101,7 +98,7 @@ export function datafeedsProvider(
   }
 
   async function startDatafeed(datafeedId: string, start?: number, end?: number) {
-    return asInternalUser.ml.startDatafeed({
+    return mlClient.startDatafeed({
       datafeed_id: datafeedId,
       start: (start as unknown) as string,
       end: (end as unknown) as string,
@@ -113,7 +110,7 @@ export function datafeedsProvider(
 
     for (const datafeedId of datafeedIds) {
       try {
-        const { body } = await asInternalUser.ml.stopDatafeed<{
+        const { body } = await mlClient.stopDatafeed<{
           started: boolean;
         }>({
           datafeed_id: datafeedId,
@@ -135,23 +132,23 @@ export function datafeedsProvider(
   }
 
   async function forceDeleteDatafeed(datafeedId: string) {
-    const { body } = await asInternalUser.ml.deleteDatafeed({
+    const { body } = await mlClient.deleteDatafeed<{ acknowledged: boolean }>({
       datafeed_id: datafeedId,
       force: true,
     });
+    try {
+      await jobsInSpaces.deleteDatafeed(datafeedId);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('error removing datafeed id from job saved object');
+    }
     return body;
   }
 
   async function getDatafeedIdsByJobId() {
-    let {
+    const {
       body: { datafeeds },
-    } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
-
-    datafeeds = await jobsInSpaces.filterJobsForSpace<Datafeed>(
-      'anomaly-detector',
-      datafeeds,
-      'job_id'
-    );
+    } = await mlClient.getDatafeeds<MlDatafeedsResponse>();
 
     return datafeeds.reduce((acc, cur) => {
       acc[cur.job_id] = cur.datafeed_id;
@@ -162,15 +159,9 @@ export function datafeedsProvider(
   async function getJobIdsByDatafeedId() {
     const {
       body: { datafeeds },
-    } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
+    } = await mlClient.getDatafeeds<MlDatafeedsResponse>();
 
-    const filteredDatafeeds = await jobsInSpaces.filterJobsForSpace<Datafeed>(
-      'anomaly-detector',
-      datafeeds,
-      'job_id'
-    );
-
-    return filteredDatafeeds.reduce((acc, cur) => {
+    return datafeeds.reduce((acc, cur) => {
       acc[cur.datafeed_id] = cur.job_id;
       return acc;
     }, {} as { [id: string]: string });

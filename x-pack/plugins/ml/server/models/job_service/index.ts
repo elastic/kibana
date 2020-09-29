@@ -11,16 +11,21 @@ import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
-import { JobsInSpaces } from '../../saved_objects';
+import type { JobsInSpaces } from '../../saved_objects';
+import type { MlClient } from '../../lib/ml_client';
 
-export function jobServiceProvider(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
+export function jobServiceProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  jobsInSpaces: JobsInSpaces
+) {
   return {
-    ...datafeedsProvider(client),
-    ...jobsProvider(client, jobsInSpaces),
-    ...groupsProvider(client),
+    ...datafeedsProvider(mlClient, jobsInSpaces),
+    ...jobsProvider(client, mlClient, jobsInSpaces),
+    ...groupsProvider(mlClient),
     ...newJobCapsProvider(client),
     ...newJobChartsProvider(client),
     ...topCategoriesProvider(client),
-    ...modelSnapshotProvider(client),
+    ...modelSnapshotProvider(mlClient, jobsInSpaces),
   };
 }
