@@ -27,6 +27,8 @@ Example usage from the [PipelineFormFields](../pipeline_form/pipeline_form_field
 </ProcessorsEditorContextProvider>
 ```
 
+The editor has a dependency on `KibanaContextProvider`, which is defined in the main app's `index.tsx` file. Note that the editor also relies on imports from `public/shared_imports.ts` and `common/types.ts`.
+
 ### ProcessorsEditorContextProvider
 This component manages state for the processors, as well as state for the test pipeline functionality.
 
