@@ -15,7 +15,7 @@ export interface LayerState {
 }
 
 export interface DatatableVisualizationState {
-  title: string;
+  title?: string;
   description?: string;
   layers: LayerState[];
 }
