@@ -14,7 +14,6 @@ interface Props {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
-  sourceUri: string;
   version: string;
 }
 
@@ -22,24 +21,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
   agentCount,
-  sourceUri,
   version,
 }) => {
   const { notifications } = useCore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
-
   async function onSubmit() {
     try {
       setIsSubmitting(true);
       const { error } = isSingleAgent
         ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
-            source_uri: sourceUri,
             version,
           })
         : await sendPostBulkAgentUpgrade({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            source_uri: sourceUri,
             version,
           });
       if (error) {
@@ -114,14 +109,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               defaultMessage='This action will upgrade the selected agent running on "{hostName}" to version {version}. This action cannot be undone. Are you sure you wish to continue?'
               values={{
                 hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-                version: 'test version',
+                version,
               }}
             />
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.upgradeAgents.upgradeMultipleDescription"
-              defaultMessage="This action will upgrade multiple agents to version {version}.This action cannot be undone. Are you sure you wish to continue?"
-              values={{ version: 'test version' }}
+              defaultMessage="This action will upgrade multiple agents to version {version}. This action cannot be undone. Are you sure you wish to continue?"
+              values={{ version }}
             />
           )}
         </p>
