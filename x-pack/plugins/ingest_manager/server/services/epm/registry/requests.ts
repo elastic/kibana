@@ -83,10 +83,10 @@ function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
 }
 
-export function getFetchOptions(targetUrl: string): RequestInit | {} {
+export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const proxyUrl = getProxyForUrl(targetUrl);
   if (!proxyUrl) {
-    return {};
+    return undefined;
   }
 
   const logger = appContextService.getLogger();
