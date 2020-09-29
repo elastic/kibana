@@ -37,7 +37,7 @@ export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypes?: ActionType[];
-  onTestConnector: (connector: ActionConnector) => void;
+  onTestConnector?: (connector: ActionConnector) => void;
 }
 
 export const ConnectorAddFlyout = ({
@@ -264,26 +264,28 @@ export const ConnectorAddFlyout = ({
             <EuiFlexGroup justifyContent="spaceBetween">
               {canSave && actionTypeModel && actionType ? (
                 <Fragment>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="secondary"
-                      data-test-subj="saveAndTestNewActionButton"
-                      type="submit"
-                      isDisabled={hasErrors}
-                      isLoading={isSaving}
-                      onClick={async () => {
-                        const savedConnector = await onSaveClicked();
-                        if (savedConnector) {
-                          onTestConnector(savedConnector);
-                        }
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                        defaultMessage="Save & Test"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {onTestConnector && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="secondary"
+                        data-test-subj="saveAndTestNewActionButton"
+                        type="submit"
+                        isDisabled={hasErrors}
+                        isLoading={isSaving}
+                        onClick={async () => {
+                          const savedConnector = await onSaveClicked();
+                          if (savedConnector) {
+                            onTestConnector(savedConnector);
+                          }
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                          defaultMessage="Save & Test"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
