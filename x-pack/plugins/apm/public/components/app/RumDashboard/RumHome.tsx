@@ -22,7 +22,7 @@ export function RumHome() {
       <CsmSharedContextProvider>
         <RumHeader>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <EuiTitle size="l">
                 <h1>{UX_LABEL}</h1>
               </EuiTitle>
