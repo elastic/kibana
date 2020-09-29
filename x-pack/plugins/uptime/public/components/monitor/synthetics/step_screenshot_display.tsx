@@ -20,9 +20,9 @@ import { useIntersection } from 'react-use';
 import { UptimeThemeContext } from '../../../contexts';
 
 interface StepScreenshotDisplayProps {
-  isLoading: boolean;
-  screenshot: string;
-  stepIndex: number;
+  isLoading?: boolean;
+  screenshot?: string;
+  stepIndex?: number;
   fetchScreenshot: (stepIndex: number) => void;
   stepName?: string;
 }
@@ -54,12 +54,17 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   });
 
   useEffect(() => {
-    if (screenshot === undefined && intersection && intersection.isIntersecting) {
+    if (
+      screenshot === undefined &&
+      stepIndex !== undefined &&
+      intersection &&
+      intersection.isIntersecting
+    ) {
       fetchScreenshot(stepIndex);
     }
   }, [fetchScreenshot, intersection, screenshot, stepIndex]);
 
-  let content: JSX.Element;
+  let content: JSX.Element | null;
   if (screenshot) {
     const screenshotSrc = `data:image/jpeg;base64,${screenshot}`;
     content = (
@@ -161,7 +166,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  } else if (isLoading) {
+  } else if (isLoading === true) {
     content = <EuiLoadingSpinner size="xl" />;
   } else {
     content = null;

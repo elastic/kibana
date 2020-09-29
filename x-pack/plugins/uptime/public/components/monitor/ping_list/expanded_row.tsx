@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore formatNumber
 import { formatNumber } from '@elastic/eui/lib/services/format';
 import {
   EuiCallOut,

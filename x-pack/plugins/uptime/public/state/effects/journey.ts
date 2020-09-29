@@ -14,6 +14,7 @@ import {
   getStepScreenshot,
   FetchStepScreenshot,
   getStepScreenshotSuccess,
+  getStepScreenshotFail,
 } from '../actions/journey';
 import { fetchJourneySteps, fetchStepScreenshot } from '../api/journey';
 
@@ -30,18 +31,25 @@ export function* fetchJourneyStepsEffect() {
 
 export function* fetchStepScreenshotEffect() {
   yield takeEvery(getStepScreenshot, function* (action: Action<FetchStepScreenshot>) {
+    const commonPayload = {
+      checkGroup: action.payload.checkGroup,
+      stepIndex: action.payload.stepIndex,
+    };
     try {
       const response = yield call(fetchStepScreenshot, action.payload);
       yield put(
         getStepScreenshotSuccess({
+          ...commonPayload,
           screenshot: response,
-          checkGroup: action.payload.checkGroup,
-          stepIndex: action.payload.stepIndex,
         })
       );
-    } catch (err) {
-      // TODO: add call to fail action
-      console.error(err);
+    } catch (error) {
+      yield put(
+        getStepScreenshotFail({
+          ...commonPayload,
+          error,
+        })
+      );
     }
   });
 }

@@ -33,7 +33,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
                 defaultMessage="{stepNumber}. {stepName}"
                 values={{
                   stepNumber: index + 1,
-                  stepName: step.synthetics?.step.name,
+                  stepName: step.synthetics?.step?.name,
                 }}
               />
             </strong>
@@ -41,16 +41,16 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
         </div>
         <EuiSpacer size="s" />
         <div>
-          <StatusBadge status={step.synthetics.payload.status} />
+          <StatusBadge status={step.synthetics?.payload?.status} />
         </div>
         <EuiSpacer />
         <div>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <StepScreenshotDisplay
-                isLoading={step.synthetics.screenshotLoading}
-                screenshot={step.synthetics.blob}
-                stepIndex={step.synthetics.step.index}
+                isLoading={step.synthetics?.screenshotLoading}
+                screenshot={step.synthetics?.blob}
+                stepIndex={step.synthetics?.step?.index}
                 stepName={step.synthetics?.step?.name}
                 fetchScreenshot={fetchScreenshot}
               />

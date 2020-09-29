@@ -11,10 +11,10 @@ import { UptimeAppColors } from '../../../apps/uptime_app';
 import { UptimeThemeContext } from '../../../contexts';
 
 interface StatusBadgeProps {
-  status: string;
+  status?: string;
 }
 
-export function colorFromStatus(status: string, color: UptimeAppColors) {
+export function colorFromStatus(color: UptimeAppColors, status?: string) {
   switch (status) {
     case 'succeeded':
       return color.success;
@@ -25,7 +25,7 @@ export function colorFromStatus(status: string, color: UptimeAppColors) {
   }
 }
 
-export function textFromStatus(status: string) {
+export function textFromStatus(status?: string) {
   switch (status) {
     case 'succeeded':
       return i18n.translate('xpack.uptime.synthetics.statusBadge.succeededMessage', {
@@ -47,6 +47,6 @@ export function textFromStatus(status: string) {
 export const StatusBadge: FC<StatusBadgeProps> = ({ status }) => {
   const theme = useContext(UptimeThemeContext);
   return (
-    <EuiBadge color={colorFromStatus(status, theme.colors)}>{textFromStatus(status)}</EuiBadge>
+    <EuiBadge color={colorFromStatus(theme.colors, status)}>{textFromStatus(status)}</EuiBadge>
   );
 };

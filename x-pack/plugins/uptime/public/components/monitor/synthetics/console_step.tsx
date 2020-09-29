@@ -18,11 +18,11 @@ export const ConsoleStep: FC<ConsoleStepProps> = ({ step }) => {
     colors: { danger },
   } = useContext(UptimeThemeContext);
 
-  let typeColor: string | null;
+  let typeColor: string | undefined;
   if (step.synthetics?.type === 'stderr') {
     typeColor = danger;
   } else {
-    typeColor = null;
+    typeColor = undefined;
   }
 
   return (

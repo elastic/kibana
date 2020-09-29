@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
 interface EmptyStepStateProps {
-  checkGroup: string;
+  checkGroup?: string;
 }
 
 export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
@@ -31,13 +31,15 @@ export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
             defaultMessage="There are no steps associated with the run of this journey."
           />
         </p>
-        <p>
-          <FormattedMessage
-            id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
-            defaultMessage="The journey's check group is {codeBlock}."
-            values={{ codeBlock: <code>{checkGroup}</code> }}
-          />
-        </p>
+        {!!checkGroup && (
+          <p>
+            <FormattedMessage
+              id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
+              defaultMessage="The journey's check group is {codeBlock}."
+              values={{ codeBlock: <code>{checkGroup}</code> }}
+            />
+          </p>
+        )}
         <p>
           <FormattedMessage
             id="xpack.uptime.synthetics.emptyJourney.message.footer"

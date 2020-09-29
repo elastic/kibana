@@ -48,12 +48,12 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
 
 type ComponentProps = ScriptExpandedRowProps & {
   fetchScreenshot: (stepIndex: number) => void;
-  journey: JourneyState;
+  journey?: JourneyState;
 };
 
 const someStepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
 const someStepConsole = (step: Ping) =>
-  ['stderr', 'cmd/status'].indexOf(step.synthetics?.type) !== -1;
+  ['stderr', 'cmd/status'].indexOf(step.synthetics?.type ?? '') !== -1;
 
 export const ScriptExpandedRowComponent: FC<ComponentProps> = ({
   checkGroup,

@@ -94,8 +94,12 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
     [String(getStepScreenshot)]: (state: JourneyState[], action: Action<FetchStepScreenshot>) =>
       state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.synthetics.screenshotLoading = true;
+        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
+        if (!step) return j;
+        step.synthetics = {
+          ...step.synthetics,
+          screenshotLoading: true,
+        };
         return j;
       }),
 
@@ -105,9 +109,13 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
     ) =>
       state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.synthetics.blob = action.payload.screenshot;
-        step.synthetics.screenshotLoading = false;
+        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
+        if (!step) return j;
+        step.synthetics = {
+          ...step.synthetics,
+          blob: action.payload.screenshot,
+          screenshotLoading: false,
+        };
         return j;
       }),
 
@@ -117,10 +125,14 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
     ) =>
       state.map((j) => {
         if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
-        step.synthetics.screenshotLoading = false;
+        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
+        if (!step) return j;
+        step.synthetics = { ...step?.synthetics, screenshotLoading: false };
         // TODO: error handle
-        return j;
+        return {
+          ...j,
+          error: action.payload.error,
+        };
       }),
   },
   initialState
