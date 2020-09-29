@@ -12,7 +12,7 @@ import {
 
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   executeTimelineKQL,
   openTimelineInspectButton,
@@ -21,7 +21,8 @@ import {
 
 import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 
-describe('Inspect', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/78496
+describe.skip('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
@@ -58,7 +59,7 @@ describe('Inspect', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
       loginAndWaitForPage(HOSTS_URL);
-      openTimeline();
+      openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
       openTimelineSettings();
       openTimelineInspectButton();

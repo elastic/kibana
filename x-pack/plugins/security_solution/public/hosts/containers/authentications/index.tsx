@@ -6,12 +6,14 @@
 
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
   HostAuthenticationsRequestOptions,
@@ -23,7 +25,8 @@ import {
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel, State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -52,6 +55,7 @@ interface UseAuthentications {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   startDate: string;
   type: hostsModel.HostsType;
   skip: boolean;
@@ -61,24 +65,23 @@ export const useAuthentications = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   startDate,
   type,
   skip,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const { activePage, limit } = useSelector(
-    (state: State) => getAuthenticationsSelector(state, type),
-    shallowEqual
+  const { activePage, limit } = useShallowEqualSelector((state) =>
+    getAuthenticationsSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] = useState<
     HostAuthenticationsRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.authentications,
     filterQuery: createFilter(filterQuery),
@@ -136,7 +139,7 @@ export const useAuthentications = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setAuthenticationsResponse((prevResponse) => ({
@@ -149,7 +152,7 @@ export const useAuthentications = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -182,7 +185,7 @@ export const useAuthentications = ({
     setAuthenticationsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -197,7 +200,7 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, skip, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

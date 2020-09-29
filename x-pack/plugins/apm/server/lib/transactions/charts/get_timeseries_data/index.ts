@@ -18,6 +18,7 @@ export async function getApmTimeseriesData(options: {
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end } = options.setup;
   const { bucketSize } = getBucketSize(start, end);

@@ -27,7 +27,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   getActionsClientWithRequest: (
     request: KibanaRequest,
-    executionSource?: ActionExecutionSource<unknown>
+    authorizationContext?: ActionExecutionSource<unknown>
   ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;

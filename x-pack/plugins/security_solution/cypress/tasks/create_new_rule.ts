@@ -28,6 +28,8 @@ import {
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
   INVESTIGATION_NOTES_TEXTAREA,
+  LOOK_BACK_INTERVAL,
+  LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
@@ -36,13 +38,17 @@ import {
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
+  REFRESH_BUTTON,
   RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
+  RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
+  RUNS_EVERY_INTERVAL,
+  RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
   SCHEDULE_EDIT_TAB,
   SEVERITY_DROPDOWN,
@@ -55,7 +61,7 @@ import {
   EQL_TYPE,
   EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
-import { TIMELINE } from '../screens/timeline';
+import { TIMELINE } from '../screens/timelines';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -190,6 +196,13 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
+export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
+  cy.get(RUNS_EVERY_INTERVAL).clear().type(rule.runsEvery.interval);
+  cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
+  cy.get(LOOK_BACK_INTERVAL).clear().type(rule.lookBack.interval);
+  cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+};
+
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
@@ -249,6 +262,14 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const waitForTheRuleToBeExecuted = async () => {
+  let status = '';
+  while (status !== 'succeeded') {
+    cy.get(REFRESH_BUTTON).click();
+    status = await cy.get(RULE_STATUS).invoke('text').promisify();
+  }
 };
 
 export const selectEqlRuleType = () => {

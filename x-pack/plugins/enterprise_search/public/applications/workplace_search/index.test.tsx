@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../__mocks__/shallow_usecontext.mock';
+import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/kea.mock';
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
+import { Layout } from '../shared/layout';
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
@@ -20,14 +21,14 @@ import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured
 
 describe('WorkplaceSearch', () => {
   it('renders WorkplaceSearchUnconfigured when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<WorkplaceSearch />);
 
     expect(wrapper.find(WorkplaceSearchUnconfigured)).toHaveLength(1);
   });
 
   it('renders WorkplaceSearchConfigured when config.host set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
     const wrapper = shallow(<WorkplaceSearch />);
 
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
@@ -53,6 +54,7 @@ describe('WorkplaceSearchConfigured', () => {
   it('renders with layout', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(Overview)).toHaveLength(1);
   });
 
@@ -60,9 +62,9 @@ describe('WorkplaceSearchConfigured', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
 
-    shallow(<WorkplaceSearchConfigured readOnlyMode={true} />);
+    shallow(<WorkplaceSearchConfigured isFederatedAuth={true} />);
 
-    expect(initializeAppData).toHaveBeenCalledWith({ readOnlyMode: true });
+    expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
   });
 
   it('does not re-initialize app data', () => {
@@ -81,5 +83,13 @@ describe('WorkplaceSearchConfigured', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
     expect(wrapper.find(ErrorState)).toHaveLength(2);
+  });
+
+  it('passes readOnlyMode state', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ readOnlyMode: true }));
+
+    const wrapper = shallow(<WorkplaceSearchConfigured />);
+
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
   });
 });

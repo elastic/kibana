@@ -5,6 +5,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -39,7 +41,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.userAgentForm.regexFileFieldHelpText',
       {
         defaultMessage:
-          'A filename containing the regular expressions for parsing the user agent string.',
+          'File containing the regular expressions used to parse the user agent string.',
       }
     ),
   },
@@ -51,13 +53,23 @@ export const UserAgent: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.userAgentForm.fieldNameHelpText',
-          { defaultMessage: 'The field containing the user agent string.' }
+          { defaultMessage: 'Field containing the user agent string.' }
         )}
       />
 
       <UseField config={fieldsConfig.regex_file} component={Field} path="fields.regex_file" />
 
-      <TargetField />
+      <TargetField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.userAgentForm.targetFieldHelpText"
+            defaultMessage="Output field. Defaults to {defaultField}."
+            values={{
+              defaultField: <EuiCode inline>{'user_agent'}</EuiCode>,
+            }}
+          />
+        }
+      />
 
       <PropertiesField
         helpText={i18n.translate(

@@ -28,6 +28,7 @@ import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create();
 
@@ -93,6 +94,7 @@ describe('createPluginInitializerContext', () => {
         startupTimeout: duration(5, 's'),
       },
       path: { data: fromRoot('data') },
+      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(10485760) },
     });
   });
 
