@@ -46,12 +46,12 @@ const BaseRangeEditor = ({
   );
 
   const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-    defaultMessage: 'Granularity',
+    defaultMessage: 'Intervals granularity',
   });
   const granularityLabelDescription = i18n.translate(
     'xpack.lens.indexPattern.ranges.granularityDescription',
     {
-      defaultMessage: 'Dynamically build fixed-size intervals based on a numeric field.',
+      defaultMessage: 'Divides the field into evenly spaced intervals.',
     }
   );
   const decreaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.decreaseButtonLabel', {
