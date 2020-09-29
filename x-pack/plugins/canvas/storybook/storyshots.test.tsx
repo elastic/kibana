@@ -104,9 +104,10 @@ if (!fs.existsSync(cssDir)) {
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
-initStoryshots({
-  configPath: path.resolve(__dirname, './../storybook'),
-  test: multiSnapshotWithOptions({}),
-  // Don't snapshot tests that start with 'redux'
-  storyNameRegex: /^((?!.*?redux).)*$/,
-});
+// Commenting this out until after #75357 is merged and Jest gets updated.
+// initStoryshots({
+//   configPath: path.resolve(__dirname, './../storybook'),
+//   test: multiSnapshotWithOptions({}),
+//   // Don't snapshot tests that start with 'redux'
+//   storyNameRegex: /^((?!.*?redux).)*$/,
+// });
