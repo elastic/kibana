@@ -162,7 +162,9 @@ export class LensPlugin {
     this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
     // unregisters the Visualize action and registers the lens one
-    startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
+    if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
+      startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
+    }
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
