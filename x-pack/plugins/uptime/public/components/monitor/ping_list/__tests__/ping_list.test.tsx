@@ -278,7 +278,6 @@ describe('PingList component', () => {
       // TODO: expand for all cases
       it('returns true for suitejourney monitors', () => {
         const ping = pings[0];
-        // @ts-ignore summary documents may contain synthetics fields
         ping.monitor.type = 'suitejourney';
         expect(rowShouldExpand(ping)).toBe(true);
       });
