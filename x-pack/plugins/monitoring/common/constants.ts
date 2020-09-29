@@ -273,3 +273,10 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
+
+/**
+ * The saved object type for various monitoring data
+ */
+export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
+
+export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
