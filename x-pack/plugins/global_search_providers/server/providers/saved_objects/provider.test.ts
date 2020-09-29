@@ -133,7 +133,7 @@ describe('savedObjectsResultProvider', () => {
     const results = await provider.find('', defaultOption, context).pipe(toArray()).toPromise();
 
     expect(context.core.savedObjects.client.find).not.toHaveBeenCalled();
-    expect(results).toEqual([]);
+    expect(results).toEqual([[]]);
   });
 
   it('converts the saved objects to results', async () => {
