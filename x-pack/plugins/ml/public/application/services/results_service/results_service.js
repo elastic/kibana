@@ -1229,7 +1229,7 @@ export function resultsServiceProvider(mlApiServices) {
             // Because of the sampling, results of metricFunctions which use sum or count
             // can be significantly skewed. Taking into account totalHits we calculate a
             // a factor to normalize results for these metricFunctions.
-            const totalHits = get(resp, ['hits', 'total', 'value'], 0);
+            const totalHits = resp.hits.total.value;
             const successfulShards = get(resp, ['_shards', 'successful'], 0);
 
             let normalizeFactor = 1;

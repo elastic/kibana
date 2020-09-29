@@ -632,7 +632,7 @@ export class DataVisualizer {
       body: searchBody,
     });
     const aggregations = body.aggregations;
-    const totalCount = get(body, ['hits', 'total', 'value'], 0);
+    const totalCount = body.hits.total.value;
     const stats = {
       totalCount,
       aggregatableExistsFields: [] as FieldData[],
