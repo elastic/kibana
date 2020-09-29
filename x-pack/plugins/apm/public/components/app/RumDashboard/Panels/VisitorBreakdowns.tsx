@@ -9,10 +9,16 @@ import { EuiPanel, EuiResizableContainer } from '@elastic/eui';
 import { VisitorBreakdown } from '../VisitorBreakdown';
 import { VisitorBreakdownMap } from '../VisitorBreakdownMap';
 import { FULL_HEIGHT } from '../RumDashboard';
+import { usBreakPoints } from '../hooks/useBreakPoints';
 
 export function VisitorBreakdownsPanel() {
+  const { isLarge } = usBreakPoints();
+
   return (
-    <EuiResizableContainer style={FULL_HEIGHT}>
+    <EuiResizableContainer
+      style={FULL_HEIGHT}
+      direction={isLarge ? 'vertical' : 'horizontal'}
+    >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
           <EuiResizablePanel initialSize={50} minSize="20%">

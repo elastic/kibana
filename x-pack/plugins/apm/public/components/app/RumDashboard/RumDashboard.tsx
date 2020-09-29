@@ -19,12 +19,15 @@ import { UXMetrics } from './UXMetrics';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
+import { usBreakPoints } from './hooks/useBreakPoints';
 
 export const FULL_HEIGHT = { height: '100%' };
 
 export function RumDashboard() {
+  const { isLarge, isSmall } = usBreakPoints();
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">
       <EuiFlexItem>
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -42,7 +45,10 @@ export function RumDashboard() {
         <UXMetrics />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiResizableContainer style={{ height: '850px' }} direction="vertical">
+        <EuiResizableContainer
+          style={{ height: isLarge ? '1400px' : '850px' }}
+          direction="vertical"
+        >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel initialSize={40} minSize="40%">

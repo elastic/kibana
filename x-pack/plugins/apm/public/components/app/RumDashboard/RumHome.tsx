@@ -17,19 +17,17 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 
 export function RumHome() {
   return (
-    <div>
-      <CsmSharedContextProvider>
-        <RumHeader>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>{UX_LABEL}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </RumHeader>
-        <RumOverview />
-      </CsmSharedContextProvider>
-    </div>
+    <CsmSharedContextProvider>
+      <RumHeader>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>{UX_LABEL}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </RumHeader>
+      <RumOverview />
+    </CsmSharedContextProvider>
   );
 }
