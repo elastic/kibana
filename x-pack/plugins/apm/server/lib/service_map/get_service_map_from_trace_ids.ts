@@ -38,7 +38,7 @@ export function getConnections({
         }
 
         if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-          return node['span.type'] !== 'external' && !node[SERVICE_ENVIRONMENT];
+          return !node[SERVICE_ENVIRONMENT];
         }
 
         return node[SERVICE_ENVIRONMENT] === environment;
