@@ -10,6 +10,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'error',
@@ -17,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'security',
     'spaceSelector',
-    'lens',
     'header',
   ]);
 
@@ -42,11 +42,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.expectFieldListItemVisualize('bytes');
     });
 
-    it('visualizes field to Lens and saves it', async () => {
+    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
       await PageObjects.discover.findFieldByName('bytes');
       await PageObjects.discover.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.save('VisualizeFieldVis');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      expect(dimensions).to.have.length(2);
+      expect(await dimensions[1].getVisibleText()).to.be('Average of bytes');
     });
 
     it('should preserve app filters in lens', async () => {
