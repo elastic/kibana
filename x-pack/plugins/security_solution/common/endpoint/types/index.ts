@@ -277,6 +277,15 @@ export interface SafeResolverRelatedEvents {
 }
 
 /**
+ * Response structure for the events route.
+ * `nextEvent` will be set to null when at the time of querying there were no more results to retrieve from ES.
+ */
+export interface ResolverPaginatedEvents {
+  events: SafeResolverEvent[];
+  nextEvent: string | null;
+}
+
+/**
  * Response structure for the alerts route.
  */
 export interface ResolverRelatedAlerts {
