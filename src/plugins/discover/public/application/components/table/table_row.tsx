@@ -69,10 +69,8 @@ export function DocViewTableRow({
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       <td className="kbnDocViewer__field">
         <FieldName
-          className="kbnDocViewer__fieldContent"
           fieldName={field}
           fieldType={fieldType}
-          fieldIconProps={{ fill: 'none', color: 'gray' }}
           scripted={Boolean(fieldMapping?.scripted)}
         />
       </td>
