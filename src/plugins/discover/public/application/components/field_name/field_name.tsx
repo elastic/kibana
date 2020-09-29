@@ -31,6 +31,7 @@ interface Props {
   useShortDots?: boolean;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
+  className?: string;
 }
 
 export function FieldName({
@@ -38,13 +39,14 @@ export function FieldName({
   fieldType,
   useShortDots,
   fieldIconProps,
+  className,
   scripted = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName = useShortDots ? shortenDottedString(fieldName) : fieldName;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>

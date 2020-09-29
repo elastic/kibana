@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import rison from 'rison-node';
 // import { EuiResizableContainer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import {
   EuiBadge,
@@ -30,13 +31,13 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiButtonIcon,
+  EuiTitle,
 } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
 import { DiscoverSidebarMobile } from './sidebar';
-// import { DiscoverMobileFlyout } from './sidebar';
 import { getServices } from '../../kibana_services';
 
 // @ts-ignore
@@ -97,7 +98,7 @@ export function Discover({
   if (isFlyoutVisible) {
     flyout = (
       <EuiFlyout
-        className="visible-xs visible-sm"
+        className="eui-showFor--xs eui-showFor--s"
         onClose={() => setIsFlyoutVisible(false)}
         aria-labelledby="flyoutTitle"
       >
@@ -107,7 +108,13 @@ export function Discover({
               <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <h2 id="flyoutTitle">Field list</h2>
+              <EuiTitle size="s">
+                <h2 id="flyoutTitle">
+                  {i18n.translate('discover.fieldList.flyoutHeading', {
+                    defaultMessage: 'Field list',
+                  })}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
