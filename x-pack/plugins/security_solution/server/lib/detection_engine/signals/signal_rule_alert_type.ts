@@ -257,6 +257,7 @@ export const signalRulesAlertType = ({
             enabled,
             refresh,
             tags,
+            buildRuleMessage,
           });
           // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
           const shardFailures =
@@ -295,6 +296,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            buildRuleMessage,
           });
 
           const {
@@ -323,6 +325,7 @@ export const signalRulesAlertType = ({
             enabled,
             refresh,
             tags,
+            buildRuleMessage,
           });
           result = mergeReturns([
             result,
