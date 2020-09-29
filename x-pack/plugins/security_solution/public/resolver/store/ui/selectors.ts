@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decode, encode } from 'rison-node';
+import { encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
-import { isPanelViewAndParameters } from '../../models/location_search';
-import { eventID } from '../../../../common/endpoint/models/event';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
+import { parameterName } from '../parameter_name';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -42,21 +41,10 @@ export const panelViewAndParameters = createSelector(
   (state: ResolverUIState) => state.locationSearch,
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
-    if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
-      // Equivalent to `null`
-      return defaultParameters();
-    }
-    const urlSearchParams = new URLSearchParams(locationSearch);
-    const value = urlSearchParams.get(parameterName(resolverComponentInstanceID));
-    if (value === null) {
-      // Equivalent to `null`
-      return defaultParameters();
-    }
-    const decodedValue: unknown = decode(value);
-    if (isPanelViewAndParameters(decodedValue)) {
-      return decodedValue;
-    }
-    return defaultParameters();
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
   }
 );
 
@@ -88,7 +76,7 @@ export const relativeHref: (
 
 /**
  * Returns a map of ecs category name to urls for use in panel navigation.
- * @deprecated
+ * @deprecated use `useLinkProps`
  */
 export const relatedEventsRelativeHrefs: (
   state: ResolverUIState
@@ -101,10 +89,10 @@ export const relatedEventsRelativeHrefs: (
     if (categories !== undefined) {
       Object.keys(categories).map((category) => {
         const categoryPanelParams: PanelViewAndParameters = {
-          panelView: 'nodeEventsOfType',
+          panelView: 'nodeEventsInCategory',
           panelParameters: {
             nodeID,
-            eventType: category,
+            eventCategory: category,
           },
         };
         hrefsByCategory.set(category, relativeHref(categoryPanelParams));
@@ -114,50 +102,3 @@ export const relatedEventsRelativeHrefs: (
     return hrefsByCategory;
   };
 });
-
-/**
- * Returns a map of event entity ids to urls for use in navigation.
- * @deprecated
- */
-export const relatedEventDetailHrefs: (
-  state: ResolverUIState
-) => (
-  category: string,
-  nodeID: string,
-  events: SafeResolverEvent[]
-) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
-  return (category: string, nodeID: string, events: SafeResolverEvent[]) => {
-    const hrefsByEntityID = new Map<string, string | undefined>();
-    events.map((event) => {
-      const entityID = String(eventID(event));
-      const eventDetailPanelParams: PanelViewAndParameters = {
-        panelView: 'eventDetail',
-        panelParameters: {
-          nodeID,
-          eventType: category,
-          eventID: entityID,
-        },
-      };
-      hrefsByEntityID.set(entityID, relativeHref(eventDetailPanelParams));
-      return event;
-    });
-    return hrefsByEntityID;
-  };
-});
-
-/**
- * The parameter name that we use to read/write state to the query string
- */
-export function parameterName(resolverComponentInstanceID: string): string {
-  return `resolver-${resolverComponentInstanceID}`;
-}
-/**
- * The default parameters to use when no (valid) location search is available.
- */
-export function defaultParameters(): PanelViewAndParameters {
-  // Note, this really should be a selector. it needs to know about the state of the app so it can select
-  // the origin event.
-  return {
-    panelView: 'nodes',
-  };
-}

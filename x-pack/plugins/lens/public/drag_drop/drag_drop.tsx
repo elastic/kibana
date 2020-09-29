@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './drag_drop.scss';
+
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext } from './providers';

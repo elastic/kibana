@@ -108,7 +108,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
           onClose={this.onCloseModal}
           className="visNewVisDialog"
           aria-label={visNewVisDialogAriaLabel}
-          role="menu"
         >
           <TypeSelection
             showExperimental={this.isLabsEnabled}
