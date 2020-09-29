@@ -22,6 +22,7 @@ import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -89,6 +90,46 @@ export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
       params: sampleRuleAlertParams(),
     },
     references: [],
+  };
+};
+
+export const expectedRule = (): RulesSchema => {
+  return {
+    actions: [],
+    author: ['Elastic'],
+    building_block_type: 'default',
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    rule_id: 'rule-1',
+    false_positives: [],
+    max_signals: 10000,
+    risk_score: 50,
+    risk_score_mapping: [],
+    output_index: '.siem-signals',
+    description: 'Detecting root and admin users',
+    from: 'now-6m',
+    immutable: false,
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    interval: '5m',
+    language: 'kuery',
+    license: 'Elastic License',
+    name: 'rule-name',
+    query: 'user.name: root or user.name: admin',
+    references: ['http://google.com'],
+    severity: 'high',
+    severity_mapping: [],
+    tags: ['some fake tag 1', 'some fake tag 2'],
+    threat: [],
+    type: 'query',
+    to: 'now',
+    note: '',
+    enabled: true,
+    created_by: 'sample user',
+    updated_by: 'sample user',
+    version: 1,
+    updated_at: '2020-03-27T22:55:59.577Z',
+    created_at: '2020-03-27T22:55:59.577Z',
+    throttle: 'no_actions',
+    exceptions_list: getListArrayMock(),
   };
 };
 

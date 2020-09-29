@@ -13,7 +13,7 @@ import {
   BaseSignalHit,
   SignalSource,
 } from './types';
-import { buildRule, buildRuleWithoutOverrides } from './build_rule';
+import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -149,7 +149,7 @@ export const buildSignalFromEvent = (
   event: BaseSignalHit,
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
-  const rule = buildRuleWithoutOverrides(ruleSO);
+  const rule = buildRuleWithOverrides(ruleSO, event._source);
   const signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
