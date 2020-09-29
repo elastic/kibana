@@ -10,7 +10,7 @@ It is wired into the `TopNavMenu` component, but can be used independently.
 
 ### Fetch Query Suggestions
 
-The `getQuerySuggestions` helps to construct a query. 
+The `getQuerySuggestions` function helps to construct a query. 
 KQL suggestion functions are registered in X-Pack, so this API does not return results in OSS.
 
 ```.ts
