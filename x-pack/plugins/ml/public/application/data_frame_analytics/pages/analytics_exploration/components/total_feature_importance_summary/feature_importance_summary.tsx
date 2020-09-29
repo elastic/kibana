@@ -196,7 +196,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                 <span>
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-                    defaultMessage="Overall feature importance"
+                    defaultMessage="Total feature importance"
                   />
                 </span>
               </EuiTitle>
