@@ -49,7 +49,7 @@ interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
-export function createTableRowDirective($compile: ng.ICompileService, $httpParamSerializer: any) {
+export function createTableRowDirective($compile: ng.ICompileService) {
   const cellTemplate = template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = template(noWhiteSpace(truncateByHeightTemplateHtml));
 
@@ -119,21 +119,17 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         )}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
-        const hash = $httpParamSerializer({
-          _g: encodeURI(
-            rison.encode({
-              filters: globalFilters || [],
-            })
-          ),
-          _a: encodeURI(
-            rison.encode({
-              columns: $scope.columns,
-              filters: (appFilters || []).map(esFilters.disableFilter),
-            })
-          ),
-        });
 
-        return `${path}?${hash}`;
+        return `${path}?_g=${encodeURI(
+          rison.encode({
+            filters: globalFilters || [],
+          })
+        )}&_a=${encodeURI(
+          rison.encode({
+            columns: $scope.columns,
+            filters: (appFilters || []).map(esFilters.disableFilter),
+          })
+        )}`;
       };
 
       // create a tr element that lists the value for each *column*
