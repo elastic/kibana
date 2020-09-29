@@ -86,8 +86,7 @@ export class TelemetryCollectionManagerPlugin
     const {
       title,
       priority,
-      esCluster,
-      esClientGetter,
+      collectionClients,
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
@@ -104,10 +103,10 @@ export class TelemetryCollectionManagerPlugin
       if (!statsGetter) {
         throw Error('Stats getter method not set.');
       }
-      if (!esCluster) {
+      if (!collectionClients.esCluster) {
         throw Error('esCluster name must be set for the getCluster method.');
       }
-      if (!esClientGetter) {
+      if (!collectionClients.esClientGetter) {
         throw Error('esClientGetter method not set.');
       }
       if (!clusterDetailsGetter) {
@@ -121,9 +120,8 @@ export class TelemetryCollectionManagerPlugin
         licenseGetter,
         statsGetter,
         clusterDetailsGetter,
-        esCluster,
+        collectionClients,
         title,
-        esClientGetter,
       });
       this.usageGetterMethodPriority = priority;
     }
@@ -137,14 +135,17 @@ export class TelemetryCollectionManagerPlugin
   ): StatsCollectionConfig {
     const { start, end, request } = config;
 
-    const callCluster = config.unencrypted
-      ? collection.esCluster.asScoped(request).callAsCurrentUser
-      : collection.esCluster.callAsInternalUser;
-    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    const esClient = config.unencrypted
-      ? collectionEsClient.asScoped(config.request).asCurrentUser
-      : collectionEsClient.asInternalUser;
-    return { callCluster, start, end, usageCollection, esClient };
+    const scopedClients = {
+      callCluster: config.unencrypted
+        ? collection.collectionClients.esCluster?.asScoped(request).callAsCurrentUser
+        : collection.collectionClients.esCluster?.callAsInternalUser,
+      // Scope the new elasticsearch Client appropriately and pass to the stats collection config
+      esClient: config.unencrypted
+        ? collectionEsClient.asScoped(config.request).asCurrentUser
+        : collectionEsClient.asInternalUser,
+    };
+
+    return { usageCollection, scopedClients, start, end };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -153,7 +154,7 @@ export class TelemetryCollectionManagerPlugin
     }
     for (const collection of this.collections) {
       // first fetch the client and make sure it's not undefined.
-      const collectionEsClient = collection.esClientGetter();
+      const collectionEsClient = collection.collectionClients.esClientGetter();
       if (collectionEsClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
@@ -208,7 +209,7 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
-      const collectionEsClient = collection.esClientGetter();
+      const collectionEsClient = collection.collectionClients.esClientGetter();
       if (collectionEsClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,

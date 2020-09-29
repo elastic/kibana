@@ -104,11 +104,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
-    registerCollection(
-      telemetryCollectionManager,
-      elasticsearch.legacy.client,
-      () => this.elasticsearchClient
-    );
+    const collectionClients = {
+      esCluster: elasticsearch.legacy.client,
+      esClientGetter: () => this.elasticsearchClient,
+    };
+    registerCollection(telemetryCollectionManager, collectionClients);
     const router = http.createRouter();
 
     registerRoutes({

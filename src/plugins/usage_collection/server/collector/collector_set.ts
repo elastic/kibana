@@ -18,7 +18,9 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { Logger } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedCollectionClients } from 'src/plugins/telemetry_collection_manager/server/types';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -121,8 +123,7 @@ export class CollectorSet {
   // the shape of the response is different when using the new ES client as is the error handling.
   // We'll handle the refactor for using the new client in a follow up PR.
   public bulkFetch = async (
-    callCluster: LegacyAPICaller,
-    esClient: ElasticsearchClient,
+    scopedClients: ScopedCollectionClients,
     collectors: Map<string, Collector<any, any>> = this.collectors
   ) => {
     const responses = await Promise.all(
@@ -131,7 +132,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the response appropriately.
+            result: await collector.fetch(scopedClients), // This is a breaking change
           };
         } catch (err) {
           this.logger.warn(err);
@@ -153,9 +154,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller, esClient: ElasticsearchClient) => {
+  public bulkFetchUsage = async (scopedClients: ScopedCollectionClients) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, esClient, usageCollectors.collectors);
+    return await this.bulkFetch(scopedClients, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

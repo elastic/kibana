@@ -69,12 +69,16 @@ export interface ClusterDetails {
   clusterUuid: string;
 }
 
+export interface ScopedCollectionClients {
+  /** @depricated use esClient instead */
+  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
+}
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
-  callCluster: LegacyAPICaller;
+  scopedClients: ScopedCollectionClients;
   start: string | number;
   end: string | number;
-  esClient: ElasticsearchClient;
 }
 
 export interface BasicStatsPayload {
@@ -137,14 +141,18 @@ export interface CollectionConfig<
 > {
   title: string;
   priority: number;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
+  collectionClients: CollectionClients;
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
   customContext?: CustomContext;
 }
 
+export interface CollectionClients {
+  /** @deprecated use esClientGetter instead */
+  esCluster: ILegacyClusterClient;
+  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check}
+}
 export interface Collection<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload
@@ -153,7 +161,6 @@ export interface Collection<
   statsGetter: StatsGetter<CustomContext, T>;
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
+  collectionClients: CollectionClients;
   title: string;
 }

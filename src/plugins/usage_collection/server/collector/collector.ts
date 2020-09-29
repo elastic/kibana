@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { Logger } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedCollectionClients } from 'src/plugins/telemetry_collection_manager/server/types';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
@@ -49,7 +51,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   schema?: MakeSchemaFrom<T>;
-  fetch: (callCluster: LegacyAPICaller, esClient?: ElasticsearchClient) => Promise<T> | T;
+  fetch: (scopedClients: ScopedCollectionClients) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

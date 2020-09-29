@@ -38,4 +38,6 @@ export {
   ClusterDetails,
   ClusterDetailsGetter,
   LicenseGetter,
+  ScopedCollectionClients,
+  CollectionClients,
 } from './types';

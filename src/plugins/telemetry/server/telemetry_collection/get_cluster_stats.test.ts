@@ -21,12 +21,6 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterStats } from './get_cluster_stats';
 import { TIMEOUT } from './constants';
 
-export function mockGetClusterStats(clusterStats: any) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.cluster.stats.mockResolvedValue(clusterStats);
-  return esClient;
-}
-
 describe('get_cluster_stats', () => {
   it('uses the esClient to get the response from the `cluster.stats` API', async () => {
     const response = Promise.resolve({ body: { cluster_uuid: '1234' } });

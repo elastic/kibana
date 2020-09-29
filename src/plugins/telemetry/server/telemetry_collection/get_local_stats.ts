@@ -71,15 +71,15 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
   context // StatsCollectionContext contains logger and version (string)
 ) => {
-  const { callCluster, usageCollection, esClient } = config;
-
+  const { scopedClients, usageCollection } = config;
+  const { esClient } = scopedClients;
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
       const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, callCluster, esClient),
+        getKibana(usageCollection, scopedClients),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

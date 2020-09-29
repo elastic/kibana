@@ -45,12 +45,13 @@ import { getLocalLicense } from './get_local_license';
 
 export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
-  esCluster: ILegacyClusterClient,
-  esClientGetter: () => IClusterClient | undefined
+  collectionClients: {
+    esCluster: ILegacyClusterClient;
+    esClientGetter: () => IClusterClient | undefined;
+  }
 ) {
   telemetryCollectionManager.setCollection({
-    esCluster,
-    esClientGetter,
+    collectionClients,
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,
