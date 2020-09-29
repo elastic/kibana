@@ -14,15 +14,7 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  * AGENT_NAMES array.
  */
 
-export const AGENT_NAMES: AgentName[] = [
-  'dotnet',
-  'go',
-  'java',
-  'js-base',
-  'nodejs',
-  'python',
-  'ruby',
-  'rum-js',
+export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'otlp',
   'opentelemetry/cpp',
   'opentelemetry/dotnet',
@@ -36,11 +28,23 @@ export const AGENT_NAMES: AgentName[] = [
   'opentelemetry/webjs',
 ];
 
-export const RUM_AGENTS = ['js-base', 'rum-js'];
+export const AGENT_NAMES: AgentName[] = [
+  'dotnet',
+  'go',
+  'java',
+  'js-base',
+  'nodejs',
+  'python',
+  'ruby',
+  'rum-js',
+  ...OPEN_TELEMETRY_AGENT_NAMES,
+];
+
+export const RUM_AGENTS = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
 export function isRumAgentName(
   agentName?: string
-): agentName is 'js-base' | 'rum-js' {
+): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
   return RUM_AGENTS.includes(agentName!);
 }
 
@@ -48,36 +52,4 @@ export function isJavaAgentName(
   agentName: string | undefined
 ): agentName is 'java' {
   return agentName === 'java';
-}
-
-/**
- * "Normalizes" and agent name by:
- *
- * * Converting to lowercase
- * * Converting "rum-js" to "js-base"
- * * Converting OpenTelemetry agent names to "our" agent names
- *
- * This helps dealing with some older agent versions
- */
-export function getNormalizedAgentName(agentName?: string) {
-  let newName = agentName && agentName.toLowerCase();
-
-  if (isRumAgentName(newName) || newName === 'opentelemetry/webjs') {
-    newName = 'js-base';
-  }
-
-  if (newName?.startsWith('opentelemetry/')) {
-    newName = newName?.replace('opentelemetry/', '');
-  }
-
-  // OpenTelemetry implementations that do not report their agent name can be
-  // reported as "otlp"
-  //
-  // OpenTelemetry alse supports Erlang and C++ but we don't so just use the
-  // OpenTelemetry icon for those.
-  if (newName === 'cpp' || newName === 'erlang' || newName === 'otlp') {
-    newName = 'opentelemetry/unknown';
-  }
-
-  return newName;
 }
