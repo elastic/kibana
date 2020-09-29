@@ -78,7 +78,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
 
   renderReact(data, cluster) {
     // All data needs to originate in this view, and get passed as a prop to the components, for statelessness
-    const { clusterStatus, metrics, shardActivity, logs } = data;
+    const { clusterStatus, metrics, shardActivity, logs } = data || {};
     const shardActivityData = shardActivity && this.filterShardActivityData(shardActivity); // no filter on data = null
     const component = (
       <ElasticsearchOverview

@@ -8,25 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
 
-interface ICredential {
-  id: string;
-  key: string;
-  name: string;
-  type: string;
-  access_all_engines: boolean;
-}
-interface ICredentialsResponse {
-  results: ICredential[];
-  meta?: {
-    page?: {
-      current: number;
-      total_results: number;
-      total_pages: number;
-      size: number;
-    };
-  };
-}
-
 export function registerCredentialsRoutes({
   router,
   enterpriseSearchRequestHandler,
@@ -42,9 +23,30 @@ export function registerCredentialsRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/credentials/collection',
-      hasValidData: (body?: ICredentialsResponse) => {
-        return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
-      },
     })
+  );
+  router.get(
+    {
+      path: '/api/app_search/credentials/details',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/credentials/details',
+    })
+  );
+  router.delete(
+    {
+      path: '/api/app_search/credentials/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/as/credentials/${request.params.name}`,
+      })(context, request, response);
+    }
   );
 }
