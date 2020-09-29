@@ -20,7 +20,20 @@ import {
   bucketSpan,
   partitionField,
 } from '../../../../../common/infra_ml';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
 
+type JobType = 'hosts_memory_usage' | 'hosts_network_in' | 'hosts_network_out';
 const moduleId = 'metrics_ui_hosts';
 const moduleName = i18n.translate('xpack.infra.ml.metricsModuleName', {
   defaultMessage: 'Metrics anomanly detection',
@@ -57,20 +70,66 @@ const setUpModule = async (
   pField?: string
 ) => {
   const indexNamePattern = indices.join(',');
-  const jobIds = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
-  const jobOverrides = jobIds.map((id) => ({
-    job_id: id,
-    data_description: {
-      time_field: timestampField,
-    },
-    custom_settings: {
-      metrics_source_config: {
-        indexPattern: indexNamePattern,
-        timestampField,
-        bucketSpan,
+  const jobIds: JobType[] = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
+
+  const jobOverrides = jobIds.map((id) => {
+    const { job: defaultJobConfig } = getDefaultJobConfigs(id);
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const analysis_config = {
+      ...defaultJobConfig.analysis_config,
+    };
+
+    if (pField) {
+      analysis_config.detectors[0].partition_field_name = pField;
+      if (analysis_config.influencers.indexOf(pField) === -1) {
+        analysis_config.influencers.push(pField);
+      }
+    }
+
+    return {
+      job_id: id,
+      data_description: {
+        time_field: timestampField,
       },
-    },
-  }));
+      analysis_config,
+      custom_settings: {
+        metrics_source_config: {
+          indexPattern: indexNamePattern,
+          timestampField,
+          bucketSpan,
+        },
+      },
+    };
+  });
+
+  const datafeedOverrides = jobIds.map((id) => {
+    const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+
+    if (!pField || id === 'hosts_memory_usage') {
+      // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
+      return defaultDatafeedConfig;
+    }
+
+    // If we have a partition field, we need to change the aggregation to do a terms agg at the top level
+    const aggregations = {
+      [pField]: {
+        terms: {
+          field: pField,
+        },
+        aggregations: {
+          ...defaultDatafeedConfig.aggregations,
+        },
+      },
+    };
+
+    // console.log(JSON.stringify(aggregations, null, 2))
+    return {
+      ...defaultDatafeedConfig,
+      job_id: id,
+      aggregations,
+    };
+  });
 
   return callSetupMlModuleAPI(
     moduleId,
@@ -80,8 +139,28 @@ const setUpModule = async (
     sourceId,
     indexNamePattern,
     jobOverrides,
-    []
+    datafeedOverrides
   );
+};
+
+const getDefaultJobConfigs = (jobId: JobType) => {
+  switch (jobId) {
+    case 'hosts_memory_usage':
+      return {
+        datafeed: MemoryDatafeed,
+        job: MemoryJob,
+      };
+    case 'hosts_network_in':
+      return {
+        datafeed: NetworkInDatafeed,
+        job: NetworkInJob,
+      };
+    case 'hosts_network_out':
+      return {
+        datafeed: NetworkOutDatafeed,
+        job: NetworkOutJob,
+      };
+  }
 };
 
 const cleanUpModule = async (spaceId: string, sourceId: string) => {
