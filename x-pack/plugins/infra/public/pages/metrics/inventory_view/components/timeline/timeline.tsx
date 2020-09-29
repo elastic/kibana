@@ -303,21 +303,6 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   );
 };
 
-const annotationStyle = {
-  line: {
-    strokeWidth: 3,
-    stroke: '#f00',
-    opacity: 0,
-  },
-  details: {
-    fontSize: 12,
-    fontFamily: 'Arial',
-    fontStyle: 'bold',
-    fill: 'gray',
-    padding: 0,
-  },
-};
-
 const TimelineContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
   border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
