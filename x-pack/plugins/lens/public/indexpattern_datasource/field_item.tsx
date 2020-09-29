@@ -512,7 +512,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} className="eui-textTruncate">
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued">
                   {Math.round((otherCount / props.sampledValues!) * 100)}%
                 </EuiText>
               </EuiFlexItem>
