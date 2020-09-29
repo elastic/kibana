@@ -1,5 +1,29 @@
 {
   "properties": {
+    "actions": {
+      "properties": {
+        "count_total": {
+          "type": "long"
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "canvas": {
       "properties": {
         "workpads": {

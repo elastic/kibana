@@ -16,6 +16,13 @@ export function createActionsUsageCollector(
   return usageCollection.makeUsageCollector<ActionsUsage>({
     type: 'actions',
     isReady: () => true,
+    schema: {
+      count_total: { type: 'long' },
+      count_active_total: { type: 'long' },
+      // TODO: Find out all the possible values for DYNAMIC_KEY or reformat into an array
+      count_by_type: { DYNAMIC_KEY: { type: 'long' } },
+      count_active_by_type: { DYNAMIC_KEY: { type: 'long' } },
+    },
     fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
