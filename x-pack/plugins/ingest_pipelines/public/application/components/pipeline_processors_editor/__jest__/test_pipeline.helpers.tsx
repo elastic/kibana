@@ -94,6 +94,11 @@ const appServices = {
   notifications: notificationServiceMock.createSetupContract(),
   history,
   uiSettings: {},
+  urlGenerators: {
+    getUrlGenerator: jest.fn().mockReturnValue({
+      createUrl: jest.fn(),
+    }),
+  },
 };
 
 const testBedSetup = registerTestBed<TestSubject>(
@@ -180,6 +185,20 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
       component.update();
     },
+
+    async toggleDocumentsAccordion() {
+      await act(async () => {
+        find('addDocumentsAccordion').simulate('click');
+      });
+      component.update();
+    },
+
+    async clickAddDocumentButton() {
+      await act(async () => {
+        find('addDocumentButton').simulate('click');
+      });
+      component.update();
+    },
   };
 };
 
@@ -229,4 +248,8 @@ type TestSubject =
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'
+  | 'addDocumentsAccordion'
+  | 'addDocumentButton'
+  | 'addDocumentError'
+  | 'addDocumentSuccess'
   | string;
