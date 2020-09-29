@@ -16,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { flatten, groupBy } from 'lodash';
+import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
@@ -179,30 +179,25 @@ export function ChartSwitch(props: Props) {
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const visualizationTypeGroups = useMemo(
+  const visualizationTypes = useMemo(
     () =>
       flyoutOpen &&
-      groupBy(
-        flatten(
-          Object.values(props.visualizationMap).map((v) =>
-            v.visualizationTypes.map((t) => ({
-              visualizationId: v.id,
-              ...t,
-              icon: t.icon,
-            }))
-          )
+      flatten(
+        Object.values(props.visualizationMap).map((v) =>
+          v.visualizationTypes.map((t) => ({
+            visualizationId: v.id,
+            ...t,
+            icon: t.icon,
+          }))
         )
-          .filter(
-            (visualizationType) =>
-              visualizationType.shortLabel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              visualizationType.sectionLabel.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((visualizationType) => ({
-            ...visualizationType,
-            selection: getSelection(visualizationType.visualizationId, visualizationType.id),
-          })),
-        'sectionLabel'
-      ),
+      )
+        .filter((visualizationType) =>
+          visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .map((visualizationType) => ({
+          ...visualizationType,
+          selection: getSelection(visualizationType.visualizationId, visualizationType.id),
+        })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
@@ -241,9 +236,11 @@ export function ChartSwitch(props: Props) {
               defaultMessage: 'Chart type',
             })}
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFieldSearch
               compressed
+              fullWidth={false}
+              className="lnsChartSwitch__search"
               value={searchTerm}
               data-test-subj="lnsChartSwitchSearch"
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -251,53 +248,42 @@ export function ChartSwitch(props: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div>
-        {Object.entries(visualizationTypeGroups || {}).map(([section, visualizationTypes]) => (
-          <section aria-label={section} key={section} className="lnsChartSwitch__chartSection">
-            <EuiKeyPadMenu>
-              {visualizationTypes.map((v) => (
-                <EuiKeyPadMenuItem
-                  key={`${v.visualizationId}:${v.id}`}
-                  label={<span data-test-subj="visTypeTitle">{v.shortLabel}</span>}
-                  role="menuitem"
-                  data-test-subj={`lnsChartSwitchPopover_${v.id}`}
-                  onClick={() => commitSelection(v.selection)}
-                  betaBadgeLabel={
-                    v.selection.dataLoss !== 'nothing'
-                      ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                          defaultMessage: 'Data loss',
-                        })
-                      : undefined
-                  }
-                  betaBadgeTooltipContent={
-                    v.selection.dataLoss !== 'nothing'
-                      ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                          defaultMessage:
-                            'Switching to this chart will lose some of the configuration',
-                        })
-                      : undefined
-                  }
-                  betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
-                >
-                  <EuiIcon
-                    className="lnsChartSwitch__chartIcon"
-                    type={v.icon || 'empty'}
-                    size="l"
-                  />
-                </EuiKeyPadMenuItem>
-              ))}
-            </EuiKeyPadMenu>
-          </section>
+      <EuiKeyPadMenu>
+        {(visualizationTypes || []).map((v) => (
+          <EuiKeyPadMenuItem
+            key={`${v.visualizationId}:${v.id}`}
+            label={<span data-test-subj="visTypeTitle">{v.label}</span>}
+            role="menuitem"
+            data-test-subj={`lnsChartSwitchPopover_${v.id}`}
+            onClick={() => commitSelection(v.selection)}
+            betaBadgeLabel={
+              v.selection.dataLoss !== 'nothing'
+                ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                    defaultMessage: 'Data loss',
+                  })
+                : undefined
+            }
+            betaBadgeTooltipContent={
+              v.selection.dataLoss !== 'nothing'
+                ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                    defaultMessage: 'Switching to this chart will lose some of the configuration',
+                  })
+                : undefined
+            }
+            betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
+          >
+            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
+          </EuiKeyPadMenuItem>
         ))}
-        {searchTerm && Object.keys(visualizationTypeGroups).length === 0 && (
-          <EuiCallOut
-            size="s"
-            title={i18n.translate('xpack.lens.chartSwitch.noResults', {
-              defaultMessage: 'No chart types found, please change search.',
-            })}
-          />
-        )}
-      </div>
+      </EuiKeyPadMenu>
+      {searchTerm && (visualizationTypes || []).length === 0 && (
+        <EuiCallOut
+          size="s"
+          title={i18n.translate('xpack.lens.chartSwitch.noResults', {
+            defaultMessage: 'No chart types found, please change search.',
+          })}
+        />
+      )}
     </EuiPopover>
   );
 

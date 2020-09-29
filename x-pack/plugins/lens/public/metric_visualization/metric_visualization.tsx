@@ -49,12 +49,6 @@ export const metricVisualization: Visualization<State> = {
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
-      shortLabel: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
-      }),
-      sectionLabel: i18n.translate('xpack.lens.metric.sectionLabel', {
-        defaultMessage: 'Text',
-      }),
     },
   ],
 
