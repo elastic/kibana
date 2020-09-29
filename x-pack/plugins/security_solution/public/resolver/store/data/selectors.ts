@@ -639,7 +639,7 @@ export const panelViewAndParameters = createSelector(
 
 /**
  * Events related to the panel node that are in the panel category.
- * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been requested or if data failed to load.
  */
 export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
