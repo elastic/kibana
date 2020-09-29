@@ -526,9 +526,9 @@ export const defaultEndpointExceptionItems = (
       listType,
       listId,
       ruleName,
-      filePath: (file && file.path && file.path[0]) ?? '',
-      sha256Hash: (file && file.hash && file.hash.sha256 && file.hash.sha256[0]) ?? '',
-      eventCode: (alertEvent && alertEvent.code && alertEvent.code[0]) ?? '',
+      filePath: file && file.path ? file.path[0] : '',
+      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
+      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
       codeSignature,
     })
   );

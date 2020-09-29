@@ -97,10 +97,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     }
 
     const eventModules = getOr([], 'signal.original_event.module', ecsRowData);
-    const eventModule = eventModules[0];
     const kinds = getOr([], 'signal.original_event.kind', ecsRowData);
-    const kind = kinds[0];
-    return eventModule === 'endpoint' && kind === 'alert';
+
+    return eventModules.includes('endpoint') && kinds.includes('alert');
   }, [ecsRowData]);
 
   const closeAddExceptionModal = useCallback((): void => {
