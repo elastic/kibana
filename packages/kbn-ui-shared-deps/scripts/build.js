@@ -25,13 +25,14 @@ const webpack = require('webpack');
 const Stats = require('webpack/lib/Stats');
 const del = require('del');
 
-const { distDir } = require('../index');
 const { getWebpackConfig } = require('../webpack.config');
+
+const DIST_DIR = Path.resolve(__dirname, '../target');
 
 run(
   async ({ log, flags }) => {
     log.info('cleaning previous build output');
-    await del(Path.resolve(__dirname, '../target'));
+    await del(DIST_DIR);
 
     const compiler = webpack(
       getWebpackConfig({
@@ -51,19 +52,19 @@ run(
             {
               group: '@kbn/ui-shared-deps asset size',
               id: 'kbn-ui-shared-deps.js',
-              value: Fs.statSync(Path.resolve(distDir, 'kbn-ui-shared-deps.js')).size,
+              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.js')).size,
             },
             {
               group: '@kbn/ui-shared-deps asset size',
               id: 'kbn-ui-shared-deps.@elastic.js',
-              value: Fs.statSync(Path.resolve(distDir, 'kbn-ui-shared-deps.@elastic.js')).size,
+              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.@elastic.js')).size,
             },
             {
               group: '@kbn/ui-shared-deps asset size',
               id: 'css',
               value:
-                Fs.statSync(Path.resolve(distDir, 'kbn-ui-shared-deps.css')).size +
-                Fs.statSync(Path.resolve(distDir, 'kbn-ui-shared-deps.v7.light.css')).size,
+                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.css')).size +
+                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.v7.light.css')).size,
             },
           ];
 
