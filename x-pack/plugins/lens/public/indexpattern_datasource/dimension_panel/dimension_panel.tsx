@@ -20,7 +20,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor } from './popover_editor';
+import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -46,8 +46,9 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
   dateRange: DateRange;
 };
 
-export interface OperationFieldSupportMatrix {
+export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, OperationType[]>>;
+  operationWithoutField: OperationType[];
   fieldByOperation: Partial<Record<OperationType, string[]>>;
 }
 
@@ -58,7 +59,7 @@ type Props = Pick<
 
 // TODO: This code has historically been memoized, as a potentially performance
 // sensitive task. If we can add memoization without breaking the behavior, we should.
-const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatrix => {
+const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
   const layerId = props.layerId;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
@@ -67,37 +68,43 @@ const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatr
   ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
   const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+  const supportedOperationsWithoutField: OperationType[] = [];
   const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
     operations.forEach((operation) => {
-      if (supportedOperationsByField[operation.field]) {
-        supportedOperationsByField[operation.field]!.push(operation.operationType);
-      } else {
-        supportedOperationsByField[operation.field] = [operation.operationType];
-      }
+      if (operation.type === 'field') {
+        if (supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field]!.push(operation.operationType);
+        } else {
+          supportedOperationsByField[operation.field] = [operation.operationType];
+        }
 
-      if (supportedFieldsByOperation[operation.operationType]) {
-        supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-      } else {
-        supportedFieldsByOperation[operation.operationType] = [operation.field];
+        if (supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+        } else {
+          supportedFieldsByOperation[operation.operationType] = [operation.field];
+        }
+      } else if (operation.type === 'none') {
+        supportedOperationsWithoutField.push(operation.operationType);
       }
     });
   });
   return {
     operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+    operationWithoutField: _.uniq(supportedOperationsWithoutField),
     fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
   };
 };
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const { dragging } = props.dragDropContext;
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedField(dragging)) {
@@ -119,11 +126,11 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
 }
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
@@ -167,8 +174,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return false;
   }
 
-  const operationsForNewField =
-    operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+  const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
   const layerId = props.layerId;
   const selectedColumn: IndexPatternColumn | null =
@@ -239,9 +245,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     <EuiLink
       id={columnId}
       className="lnsLayerPanel__triggerLink"
-      onClick={() => {
-        props.togglePopover();
-      }}
+      onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
       aria-label={i18n.translate('xpack.lens.configure.editConfig', {
         defaultMessage: 'Edit configuration',
@@ -261,17 +265,17 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
   return (
-    <PopoverEditor
+    <DimensionEditor
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
-      operationFieldSupportMatrix={operationFieldSupportMatrix}
+      operationSupportMatrix={operationSupportMatrix}
     />
   );
 };

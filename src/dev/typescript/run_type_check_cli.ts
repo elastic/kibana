@@ -98,7 +98,7 @@ export async function runTypeCheckCli() {
   }
 
   execInProjects(log, projects, process.execPath, (project) => [
-    '--max-old-space-size=4096',
+    '--max-old-space-size=5120',
     require.resolve('typescript/bin/tsc'),
     ...['--project', project.tsConfigPath],
     ...tscArgs,

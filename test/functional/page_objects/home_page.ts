@@ -43,6 +43,14 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       return !(await testSubjects.exists(`addSampleDataSet${id}`));
     }
 
+    async getVisibileSolutions() {
+      const solutionPanels = await testSubjects.findAll('~homSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+    }
+
     async addSampleDataSet(id: string) {
       const isInstalled = await this.isSampleDataSetInstalled(id);
       if (!isInstalled) {

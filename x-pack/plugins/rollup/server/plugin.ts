@@ -17,17 +17,16 @@ import {
   ILegacyCustomClusterClient,
   Plugin,
   Logger,
-  KibanaRequest,
   PluginInitializerContext,
   ILegacyScopedClusterClient,
-  LegacyAPICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
+import { ReqFacade } from '../../../../src/plugins/vis_type_timeseries/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies, CallWithRequestFactoryShim } from './types';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
@@ -132,19 +131,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (visTypeTimeseries) {
-      // TODO: When vis_type_timeseries is fully migrated to the NP, it shouldn't require this shim.
-      const callWithRequestFactoryShim = (
-        elasticsearchServiceShim: CallWithRequestFactoryShim,
-        request: KibanaRequest
-      ): LegacyAPICaller => {
-        return async (...args: Parameters<LegacyAPICaller>) => {
-          this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-          return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
-        };
+      const getRollupService = async (request: ReqFacade) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return this.rollupEsClient.asScoped(request);
       };
-
       const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
+      registerRollupSearchStrategy(addSearchStrategy, getRollupService);
     }
 
     if (usageCollection) {

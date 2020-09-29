@@ -29,8 +29,10 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
-      from: 'May 14, 2020 @ 11:05:13.590',
-      to: 'May 14, 2020 @ 11:20:13.590',
+      timeRange: {
+        from: 'May 14, 2020 @ 11:05:13.590',
+        to: 'May 14, 2020 @ 11:20:13.590',
+      },
       stateInterval: 's',
       options: [
         {
@@ -47,9 +49,11 @@ describe('timechart header', function () {
         },
       ],
       onChangeInterval: jest.fn(),
-      showScaledInfo: undefined,
-      bucketIntervalDescription: 'second',
-      bucketIntervalScale: undefined,
+      bucketInterval: {
+        scaled: undefined,
+        description: 'second',
+        scale: undefined,
+      },
     };
   });
 
@@ -58,8 +62,8 @@ describe('timechart header', function () {
     expect(component.find(EuiIconTip).length).toBe(0);
   });
 
-  it('TimechartHeader renders an info text by providing the showScaledInfo property', () => {
-    props.showScaledInfo = true;
+  it('TimechartHeader renders an info when bucketInterval.scale is set to true', () => {
+    props.bucketInterval!.scaled = true;
     component = mountWithIntl(<TimechartHeader {...props} />);
     expect(component.find(EuiIconTip).length).toBe(1);
   });

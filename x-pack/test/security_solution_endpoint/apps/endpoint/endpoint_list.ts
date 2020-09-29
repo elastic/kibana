@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
-  deleteMetadataCurrentStream,
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
@@ -22,12 +21,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Hostname',
       'Agent Status',
-      'Integration',
-      'Configuration Status',
+      'Integration Policy',
+      'Policy Status',
       'Operating System',
       'IP Address',
       'Version',
       'Last Active',
+      'Actions',
     ],
     [
       'rezzani-7.example.com',
@@ -38,6 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'cadmann-4.example.com',
@@ -48,6 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'thurlow-9.example.com',
@@ -58,23 +60,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.46.229.234',
       '6.0.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
   ];
 
-  describe('endpoint list', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when initially navigating to page', () => {
       before(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
@@ -83,8 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 100000);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -92,12 +94,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await sleep(100000);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
@@ -156,13 +158,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
-
-        // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
-          await (await testSubjects.find('hostnameCellLink')).click();
-          await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
-          await testSubjects.existOrFail('fleetAgentListTable');
-        });
       });
 
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
@@ -184,8 +179,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'OS',
             'Last Seen',
             'Alerts',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'IP Address',
             'Hostname',
             'Sensor Version',
@@ -217,12 +212,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('for the kql query: na, table shows an empty list', async () => {
@@ -232,12 +226,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
             'Last Active',
+            'Actions',
           ],
           ['No items found'],
         ];
@@ -262,12 +257,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
             'Last Active',
+            'Actions',
           ],
           [
             'cadmann-4.example.com',
@@ -278,6 +274,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '10.192.213.130, 10.70.28.129',
             '6.6.1',
             'Jan 24, 2020 @ 16:06:09.541',
+            '',
           ],
           [
             'thurlow-9.example.com',
@@ -288,6 +285,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '10.46.229.234',
             '6.0.0',
             'Jan 24, 2020 @ 16:06:09.541',
+            '',
           ],
         ];
 
@@ -297,18 +295,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
-      });
-    });
-
-    describe.skip('when there is no data,', () => {
-      before(async () => {
-        // clear out the data and reload the page
-        await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
-        await pageObjects.endpoint.navigateToEndpointList();
-      });
-      it('displays empty Policy Table page.', async () => {
-        await testSubjects.existOrFail('emptyPolicyTable');
       });
     });
   });

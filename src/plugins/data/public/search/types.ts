@@ -17,38 +17,20 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
 import { ISearchInterceptor } from './search_interceptor';
-import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ISearchOptions,
-} from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
-
-export type ISearchGeneric = <
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
->(
-  request: SearchStrategyRequest,
-  options?: ISearchOptions
-) => Observable<SearchStrategyResponse>;
+export { ISearchStartSearchSource };
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
 }
+
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
@@ -62,21 +44,6 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
-/**
- * high level search service
- * @public
- */
-export interface ISearchStartSearchSource {
-  /**
-   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
-   * @param fields
-   */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-  /**
-   * creates empty {@link SearchSource}
-   */
-  createEmpty: () => ISearchSource;
-}
 /**
  * search service
  * @public
@@ -93,6 +60,8 @@ export interface ISearchStart {
    * {@link ISearchGeneric}
    */
   search: ISearchGeneric;
+
+  showError: (e: Error) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

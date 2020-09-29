@@ -19,6 +19,7 @@ interface Props {
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {
@@ -76,6 +77,7 @@ export const LoadMapAndRender = class extends React.Component<Props, State> {
       <MapsAppView
         savedMap={savedMap}
         onAppLeave={this.props.onAppLeave}
+        setHeaderActionMenu={this.props.setHeaderActionMenu}
         stateTransfer={this.props.stateTransfer}
         originatingApp={this.props.originatingApp}
       />

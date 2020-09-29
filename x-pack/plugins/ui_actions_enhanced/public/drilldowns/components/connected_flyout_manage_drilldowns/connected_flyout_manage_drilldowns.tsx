@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import intersection from 'lodash/intersection';
+import { intersection } from 'lodash';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -25,6 +25,7 @@ import {
 } from './i18n';
 import {
   ActionFactory,
+  BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
   SerializedAction,
@@ -127,7 +128,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object,
+        actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
         selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };

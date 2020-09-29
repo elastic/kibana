@@ -41,7 +41,7 @@ pipeline {
         // Filter when to run based on the below reasons:
         //  - On a PRs when:
         //    - There are changes related to the APM UI project
-        //      - only when the owners of those changes are members of the apm-ui team (new filter)
+        //      - only when the owners of those changes are members of the given GitHub teams
         //  - On merges to branches when:
         //    - There are changes related to the APM UI project
         //  - FORCE parameter is set to true.
@@ -51,7 +51,7 @@ pipeline {
             apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
           }
           if (isPR()) {
-            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: 'apm-ui')
+            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
             setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
           } else {
             setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)

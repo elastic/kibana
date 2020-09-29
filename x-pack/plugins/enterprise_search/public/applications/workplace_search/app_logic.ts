@@ -21,7 +21,11 @@ export interface IAppActions {
   initializeAppData(props: IInitialAppData): IInitialAppData;
 }
 
+const emptyOrg = {} as IOrganization;
+const emptyAccount = {} as IAccount;
+
 export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  path: ['enterprise_search', 'workplace_search', 'app_logic'],
   actions: {
     initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
       workplaceSearch,
@@ -42,15 +46,15 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
       },
     ],
     organization: [
-      {} as IOrganization,
+      emptyOrg,
       {
-        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.organization,
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.organization || emptyOrg,
       },
     ],
     account: [
-      {} as IAccount,
+      emptyAccount,
       {
-        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.account,
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.account || emptyAccount,
       },
     ],
   },

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { withTimeout } from '@kbn/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -28,7 +29,6 @@ import {
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
-import { withTimeout } from '../../utils';
 
 const Sec = 1000;
 /** @internal */

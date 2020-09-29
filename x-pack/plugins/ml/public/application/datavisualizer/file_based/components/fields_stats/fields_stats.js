@@ -50,14 +50,14 @@ function createFields(results) {
     timestamp_field: timestampField,
   } = results;
 
-  if (mappings && fieldStats) {
+  if (mappings && mappings.properties && fieldStats) {
     const fieldNames = getFieldNames(results);
 
     return fieldNames.map((name) => {
       if (fieldStats[name] !== undefined) {
         const field = { name };
         const f = fieldStats[name];
-        const m = mappings[name];
+        const m = mappings.properties[name];
 
         // sometimes the timestamp field is not in the mappings, and so our
         // collection of fields will be missing a time field with a type of date
@@ -93,7 +93,7 @@ function createFields(results) {
         // this could be the message field for a semi-structured log file or a
         // field which the endpoint has not been able to work out any information for
         const type =
-          mappings[name] && mappings[name].type === ML_JOB_FIELD_TYPES.TEXT
+          mappings.properties[name] && mappings.properties[name].type === ML_JOB_FIELD_TYPES.TEXT
             ? ML_JOB_FIELD_TYPES.TEXT
             : ML_JOB_FIELD_TYPES.UNKNOWN;
 

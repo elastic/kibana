@@ -117,7 +117,7 @@ declare module '../../share/public' {
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
-interface DashboardFeatureFlagConfig {
+export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }
 
@@ -310,7 +310,7 @@ export class DashboardPlugin
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
       order: 2500,
-      euiIconType: 'dashboardApp',
+      euiIconType: 'logoKibana',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -352,6 +352,7 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
           scopedHistory: () => this.currentHistory!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
           restorePreviousUrl,
         };

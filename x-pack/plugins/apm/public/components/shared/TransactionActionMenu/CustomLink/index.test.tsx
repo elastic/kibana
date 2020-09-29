@@ -6,6 +6,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { CustomLink } from '.';
 import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
@@ -17,7 +18,11 @@ import {
 } from '../../../../utils/testHelpers';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
 }
 
 describe('Custom links', () => {

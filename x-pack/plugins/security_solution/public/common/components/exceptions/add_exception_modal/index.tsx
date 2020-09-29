@@ -29,7 +29,7 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -46,28 +46,21 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
-  getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { ExceptionsBuilderExceptionItem } from '../types';
+import { useFetchIndex } from '../../../containers/source';
 
-export interface AddExceptionModalBaseProps {
+export interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
-}
-
-export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
+  alertData?: Ecs;
+  alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   onRuleChange?: () => void;
-  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -121,14 +114,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    memoSignalIndexName
   );
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const onError = useCallback(
     (error: Error): void => {
@@ -218,12 +210,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
+    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
       return defaultEndpointExceptionItems(
         exceptionListType,
         ruleExceptionList.list_id,
         ruleName,
-        alertData.nonEcsData
+        alertData
       );
     } else {
       return [];
@@ -275,15 +267,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const retrieveAlertOsTypes = useCallback((): string[] => {
     const osDefaults = ['windows', 'macos'];
-    if (alertData) {
-      const osTypes = getMappedNonEcsValue({
-        data: alertData.nonEcsData,
-        fieldName: 'host.os.family',
-      });
-      if (osTypes.length === 0) {
-        return osDefaults;
+    if (alertData != null) {
+      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
+      if (osTypes != null && osTypes.length > 0) {
+        return osTypes;
       }
-      return osTypes;
+      return osDefaults;
     }
     return osDefaults;
   }, [alertData]);
@@ -304,14 +293,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback((): void => {
-    if (addOrUpdateExceptionItems !== null) {
-      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+    if (addOrUpdateExceptionItems != null) {
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
-        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+        shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
     addOrUpdateExceptionItems,
+    ruleId,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,

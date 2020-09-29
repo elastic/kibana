@@ -57,7 +57,7 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     type: string,
     attributes: A,
     savedObjectId?: string
-  ) => Promise<{ id: string }>;
+  ) => Promise<{ id?: string } | { error: Error }>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
@@ -124,7 +124,10 @@ export class AttributeService<
           newAttributes,
           savedObjectId
         );
-        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        if ('id' in savedItem) {
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        }
+        return { ...originalInput } as RefType;
       }
 
       if (savedObjectId) {
@@ -153,12 +156,8 @@ export class AttributeService<
   };
 
   public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return embeddable.getRoot() &&
-      (embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput
-      ? ((embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput as
-          | ValType
-          | RefType)
-      : (embeddable.getInput() as ValType | RefType);
+    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
+      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
   }
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
@@ -201,14 +200,20 @@ export class AttributeService<
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
-          resolve(wrappedInput);
+
+          // Remove unneeded attributes from the original input.
+          delete (input as { [ATTRIBUTE_SERVICE_KEY]?: SavedObjectAttributes })[
+            ATTRIBUTE_SERVICE_KEY
+          ];
+
+          // Combine input and wrapped input to preserve any passed in explicit Input.
+          resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject(error);
           return { error };
         }
       };
-
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
         this.showSaveModal(
           <SavedObjectSaveModal

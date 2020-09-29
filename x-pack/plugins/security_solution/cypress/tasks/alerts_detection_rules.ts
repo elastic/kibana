@@ -24,6 +24,7 @@ import {
   SORT_RULES_BTN,
   THREE_HUNDRED_ROWS,
   EXPORT_ACTION_BTN,
+  EDIT_RULE_ACTION_BTN,
 } from '../screens/alerts_detection_rules';
 
 export const activateRule = (rulePosition: number) => {
@@ -33,6 +34,11 @@ export const activateRule = (rulePosition: number) => {
 export const changeToThreeHundredRowsPerPage = () => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
   cy.get(THREE_HUNDRED_ROWS).click();
+};
+
+export const editFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(EDIT_RULE_ACTION_BTN).click();
 };
 
 export const deleteFirstRule = () => {

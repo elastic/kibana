@@ -11,6 +11,17 @@ export const getCaseUrl = (search: string | null) => `${appendSearch(search ?? u
 export const getCaseDetailsUrl = ({ id, search }: { id: string; search?: string | null }) =>
   `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
 
+export const getCaseDetailsUrlWithCommentId = ({
+  id,
+  commentId,
+  search,
+}: {
+  id: string;
+  commentId: string;
+  search?: string | null;
+}) =>
+  `/${encodeURIComponent(id)}/${encodeURIComponent(commentId)}${appendSearch(search ?? undefined)}`;
+
 export const getCreateCaseUrl = (search?: string | null) =>
   `/create${appendSearch(search ?? undefined)}`;
 

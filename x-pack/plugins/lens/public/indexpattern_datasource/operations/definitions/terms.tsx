@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { DataType } from '../../../types';
@@ -48,12 +48,13 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   };
 }
 
-export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
+export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top values',
   }),
   priority: 3, // Higher than any metric
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
@@ -95,23 +96,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => ({
-    id: columnId,
-    enabled: true,
-    type: 'terms',
-    schema: 'segment',
-    params: {
-      field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-      order: column.params.orderDirection,
-      size: column.params.size,
-      otherBucket: false,
-      otherBucketLabel: 'Other',
-      missingBucket: false,
-      missingBucketLabel: 'Missing',
-    },
-  }),
+  toEsAggsConfig: (column, columnId, _indexPattern) => {
+    return {
+      id: columnId,
+      enabled: true,
+      type: 'terms',
+      schema: 'segment',
+      params: {
+        field: column.sourceField,
+        orderBy:
+          column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        order: column.params.orderDirection,
+        size: column.params.size,
+        otherBucket: false,
+        otherBucketLabel: 'Other',
+        missingBucket: false,
+        missingBucketLabel: 'Missing',
+      },
+    };
+  },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
@@ -171,12 +174,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       }),
     });
     return (
-      <EuiForm>
+      <>
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.size', {
             defaultMessage: 'Number of values',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <FixedEuiRange
             min={1}
@@ -209,6 +213,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order by',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed
@@ -236,6 +241,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order direction',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed
@@ -271,7 +277,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             })}
           />
         </EuiFormRow>
-      </EuiForm>
+      </>
     );
   },
 };

@@ -85,7 +85,7 @@ export class UptimePlugin
 
     core.application.register({
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
+      euiIconType: 'logoObservability',
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,

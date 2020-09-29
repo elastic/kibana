@@ -15,12 +15,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
-import { useLocation } from '../../../../../hooks/useLocation';
 import { useTheme } from '../../../../../hooks/useTheme';
 import { px, units } from '../../../../../style/variables';
 import {

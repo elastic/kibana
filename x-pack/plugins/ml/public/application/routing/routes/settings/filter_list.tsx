@@ -10,7 +10,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -26,27 +25,27 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
 
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const filterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const filterListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/filter_lists',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    {
-      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
-        defaultMessage: 'Filter lists',
-      }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists', navigateToPath),
-    },
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
   ],
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { redirectToMlAccessDeniedPage } = deps;
+
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,
   });
 

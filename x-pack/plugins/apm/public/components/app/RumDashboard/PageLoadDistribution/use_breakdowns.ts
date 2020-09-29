@@ -17,7 +17,7 @@ interface Props {
 export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const { min: minP, max: maxP } = percentileRange ?? {};
 
@@ -32,6 +32,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
               end,
               breakdown: value,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
               ...(minP && maxP
                 ? {
                     minPercentile: String(minP),
@@ -43,6 +44,6 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
         });
       }
     },
-    [end, start, uiFilters, field, value, minP, maxP]
+    [end, start, uiFilters, field, value, minP, maxP, searchTerm]
   );
 };
