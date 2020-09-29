@@ -7,6 +7,7 @@
 import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+import { EuiButtonGroupIdToSelectedMap } from '@elastic/eui/src/components/button/button_group/button_group';
 
 import { i18n } from '@kbn/i18n';
 
@@ -53,7 +54,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     query: '',
     language: SEARCH_QUERY_LANGUAGE.KUERY,
   });
-  const [idToSelectedMap, setIdToSelectedMap] = useState<Dictionary<any>>({});
+  const [idToSelectedMap, setIdToSelectedMap] = useState<EuiButtonGroupIdToSelectedMap>({});
 
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
@@ -171,7 +172,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                   }
                 )}
                 name="analyticsQueryBarFilterButtons"
-                data-test-subj="mlAnalyticsQueryBarFilterButtons"
+                data-test-subj="mlDFAnalyticsExplorationQueryBarFilterButtons"
                 options={filters.options}
                 type="multi"
                 idToSelectedMap={idToSelectedMap}
