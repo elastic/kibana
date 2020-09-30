@@ -11,7 +11,10 @@ import {
   Plugin,
   IClusterClient,
 } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  TelemetryCollectionManagerPluginSetup,
+  CollectionClients,
+} from 'src/plugins/telemetry_collection_manager/server';
 import { getClusterUuids, getLocalLicense } from '../../../../src/plugins/telemetry/server';
 import { getStatsWithXpack } from './telemetry_collection';
 
@@ -24,9 +27,12 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
-    telemetryCollectionManager.setCollection({
+    const collectionClients: CollectionClients = {
       esCluster: core.elasticsearch.legacy.client,
       esClientGetter: () => this.elasticsearchClient,
+    };
+    telemetryCollectionManager.setCollection({
+      collectionClients,
       title: 'local_xpack',
       priority: 1,
       statsGetter: getStatsWithXpack,

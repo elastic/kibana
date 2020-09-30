@@ -65,8 +65,8 @@ async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
   return license;
 }
 
-export const getLocalLicense: LicenseGetter = async (clustersDetails, { esClient }) => {
-  const license = await getLicenseFromLocalOrMaster(esClient);
+export const getLocalLicense: LicenseGetter = async (clustersDetails, { scopedClients }) => {
+  const license = await getLicenseFromLocalOrMaster(scopedClients.esClient);
   // It should be called only with 1 cluster element in the clustersDetails array, but doing reduce just in case.
   return clustersDetails.reduce((acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }), {});
 };

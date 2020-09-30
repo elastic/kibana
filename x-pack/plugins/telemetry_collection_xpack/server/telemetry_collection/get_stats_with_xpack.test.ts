@@ -76,13 +76,17 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         },
       }
     );
+    const scopedClients = {
+      callCluster: jest.fn(),
+      esClient,
+    };
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
     const stats = await getStatsWithXpack(
       [{ clusterUuid: '1234' }],
       {
-        esClient,
+        scopedClients,
         usageCollection,
       } as any,
       context
@@ -121,13 +125,17 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         },
       }
     );
+    const scopedClients = {
+      callCluster: jest.fn(),
+      esClient,
+    };
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
     const stats = await getStatsWithXpack(
       [{ clusterUuid: '1234' }],
       {
-        esClient,
+        scopedClients,
         usageCollection,
       } as any,
       context

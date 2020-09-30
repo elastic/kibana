@@ -17,9 +17,9 @@ export const getStatsWithXpack: StatsGetter<{}, TelemetryAggregatedStats> = asyn
   config,
   context
 ) {
-  const { esClient } = config;
+  const { scopedClients } = config;
   const clustersLocalStats = await getLocalStats(clustersDetails, config, context);
-  const xpack = await getXPackUsage(esClient).catch(() => undefined); // We want to still report something (and do not lose the license) even when this method fails.
+  const xpack = await getXPackUsage(scopedClients.esClient).catch(() => undefined); // We want to still report something (and do not lose the license) even when this method fails.
 
   return clustersLocalStats.map((localStats) => {
     if (xpack) {
