@@ -13,6 +13,7 @@ describe('#buildFieldsTermAggregation', () => {
     const fields: readonly string[] = [
       'host.architecture',
       'host.id',
+      'host.ip',
       'host.name',
       'host.os.family',
       'host.os.name',
@@ -37,6 +38,23 @@ describe('#buildFieldsTermAggregation', () => {
       host_id: {
         terms: {
           field: 'host.id',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+      host_ip: {
+        terms: {
+          field: 'host.ip',
+          missing: '\u0000\u0000\u0000\u0000',
           size: 10,
           order: {
             timestamp: 'desc',
