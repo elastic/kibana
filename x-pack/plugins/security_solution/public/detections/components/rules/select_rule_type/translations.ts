@@ -71,7 +71,7 @@ export const THREAT_MATCH_TYPE_TITLE = i18n.translate(
 );
 
 export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchDescription',
   {
     defaultMessage: 'Upload value lists to write rules around a list of known bad attributes',
   }
