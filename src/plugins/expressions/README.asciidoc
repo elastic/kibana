@@ -38,7 +38,7 @@ filters
 [/source]
 
 [role="screenshot"]
-image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png
+image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png[]
 
 === API documentation
 
