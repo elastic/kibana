@@ -26,13 +26,21 @@ describe('Resolver: panel loading and resolution states', () => {
     panelView: 'eventDetail',
   });
 
-  const queryStringWithEventCategorySelected = urlSearch(resolverComponentInstanceID, {
+  const queryStringWithEventsInCategorySelected = urlSearch(resolverComponentInstanceID, {
     panelParameters: {
       nodeID: 'origin',
       eventCategory: 'registry',
     },
     panelView: 'nodeEventsInCategory',
   });
+
+  const queryStringWithNodeDetailSelected = urlSearch(resolverComponentInstanceID, {
+    panelParameters: {
+      nodeID: 'origin',
+    },
+    panelView: 'nodeDetail',
+  });
+
   describe('When analyzing a tree with no ancestors and two children with related events on the origin', () => {
     describe('when navigating to the event detail panel', () => {
       let resumeRequest: (pausableRequest: ['event']) => void;
@@ -142,7 +150,7 @@ describe('Resolver: panel loading and resolution states', () => {
         });
 
         memoryHistory.push({
-          search: queryStringWithEventCategorySelected,
+          search: queryStringWithEventsInCategorySelected,
         });
       });
 
@@ -168,6 +176,97 @@ describe('Resolver: panel loading and resolution states', () => {
             resolverPanelEventsInCategory: simulator.testSubject(
               'resolver:panel:events-in-category'
             ).length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelLoading: 0,
+          resolverPanelEventsInCategory: 1,
+        });
+      });
+    });
+
+    describe('when the server fails to return event data on the events in category panel', () => {
+      beforeEach(() => {
+        const {
+          metadata: { databaseDocumentID },
+          dataAccessLayer,
+        } = emptifyMock(noAncestorsTwoChildrenWithRelatedEventsOnOrigin(), [
+          'eventsWithEntityIDAndCategory',
+        ]);
+        memoryHistory = createMemoryHistory();
+        simulator = new Simulator({
+          dataAccessLayer,
+          databaseDocumentID,
+          history: memoryHistory,
+          resolverComponentInstanceID,
+          indices: [],
+        });
+        memoryHistory.push({
+          search: queryStringWithEventsInCategorySelected,
+        });
+      });
+
+      it('should display an error state in the panel', async () => {
+        await expect(
+          simulator.map(() => ({
+            resolverPanelError: simulator.testSubject('resolver:panel:error').length,
+            resolverPanelEventsInCategory: simulator.testSubject(
+              'resolver:panel:events-in-category'
+            ).length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelError: 1,
+          resolverPanelEventsInCategory: 0,
+        });
+      });
+    });
+
+    describe('when navigating to the node detail panel', () => {
+      let resumeRequest: (pausableRequest: ['entities']) => void;
+      beforeEach(() => {
+        const {
+          metadata: { databaseDocumentID },
+          dataAccessLayer,
+          pause,
+          resume,
+        } = pausifyMock(noAncestorsTwoChildrenWithRelatedEventsOnOrigin());
+
+        resumeRequest = resume;
+        memoryHistory = createMemoryHistory();
+        pause(['entities']);
+
+        simulator = new Simulator({
+          dataAccessLayer,
+          databaseDocumentID,
+          history: memoryHistory,
+          resolverComponentInstanceID,
+          indices: [],
+        });
+
+        memoryHistory.push({
+          search: queryStringWithNodeDetailSelected,
+        });
+      });
+
+      it('should display a loading state in the panel', async () => {
+        await expect(
+          simulator.map(() => ({
+            resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
+            resolverPanelEventsInCategory: simulator.testSubject('resolver:panel:node-detail')
+              .length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelLoading: 1,
+          resolverPanelEventsInCategory: 0,
+        });
+      });
+
+      it('should successfully load the events in category panel', async () => {
+        await resumeRequest(['entities']);
+        await expect(
+          simulator.map(() => ({
+            resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
+            resolverPanelEventsInCategory: simulator.testSubject('resolver:panel:node-detail')
+              .length,
           }))
         ).toYieldEqualTo({
           resolverPanelLoading: 0,

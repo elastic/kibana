@@ -22,6 +22,14 @@ import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
+import { PanelContentError } from './panel_content_error';
+
+const eventsInCategoryRequestError = i18n.translate(
+  'xpack.securitySolution.resolver.panel.eventsInCategory.requestError',
+  {
+    defaultMessage: 'Events could not be found',
+  }
+);
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -50,7 +58,7 @@ export const NodeEventsInCategory = memo(function ({
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
-      ) : (
+      ) : events?.length > 0 ? (
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
           <NodeEventsInCategoryBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
@@ -61,6 +69,10 @@ export const NodeEventsInCategory = memo(function ({
           />
           <EuiSpacer size="l" />
           <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
+        </StyledPanel>
+      ) : (
+        <StyledPanel>
+          <PanelContentError translatedErrorMessage={eventsInCategoryRequestError} />
         </StyledPanel>
       )}
     </>
