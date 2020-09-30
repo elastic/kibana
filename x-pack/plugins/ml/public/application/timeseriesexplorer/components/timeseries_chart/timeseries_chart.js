@@ -12,10 +12,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import isEqual from 'lodash/isEqual';
-import reduce from 'lodash/reduce';
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';

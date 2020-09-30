@@ -88,6 +88,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
+          ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
           ['process.executable', 'executable'],
           ['process.pid', '0'],
           ['user.name', 'user.name'],
@@ -128,6 +129,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
         ['user.name', 'user.name'],
@@ -168,6 +170,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
         ['process.executable', 'executable'],
         ['process.pid', '0'],
         ['user.name', 'user.name'],
@@ -216,6 +219,25 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           linkText: 'registry',
           // EUI's Table adds the column name to the value.
           typeText: 'Count2',
+        });
+      });
+      describe('and when the user clicks the registry events link', () => {
+        beforeEach(async () => {
+          const link = await simulator().resolve('resolver:panel:node-events:event-type-link');
+          const first = link?.first();
+          expect(first).toBeTruthy();
+
+          if (first) {
+            first.simulate('click', { button: 0 });
+          }
+        });
+        it('should show links to two events', async () => {
+          await expect(
+            simulator().map(
+              () =>
+                simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
+            )
+          ).toYieldEqualTo(2);
         });
       });
     });

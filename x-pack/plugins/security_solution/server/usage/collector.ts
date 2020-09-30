@@ -59,10 +59,13 @@ export const registerCollector: RegisterCollector = ({
         total_installed: { type: 'long' },
         active_within_last_24_hours: { type: 'long' },
         os: {
-          full_name: { type: 'keyword' },
-          platform: { type: 'keyword' },
-          version: { type: 'keyword' },
-          count: { type: 'long' },
+          type: 'array',
+          items: {
+            full_name: { type: 'keyword' },
+            platform: { type: 'keyword' },
+            version: { type: 'keyword' },
+            count: { type: 'long' },
+          },
         },
         policies: {
           malware: {
