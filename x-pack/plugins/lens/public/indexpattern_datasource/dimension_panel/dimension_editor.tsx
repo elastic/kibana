@@ -40,19 +40,6 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
-function asOperationOptions(operationTypes: OperationType[], compatibleWithCurrentField: boolean) {
-  return [...operationTypes]
-    .sort((opType1, opType2) => {
-      return operationPanels[opType1].displayName.localeCompare(
-        operationPanels[opType2].displayName
-      );
-    })
-    .map((operationType) => ({
-      operationType,
-      compatibleWithCurrentField,
-    }));
-}
-
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const [inputValue, setInputValue] = useState(value);
 
@@ -98,7 +85,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern,
     hideGrouping,
   } = props;
-  const { operationByField, fieldByOperation } = operationSupportMatrix;
+  const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
   const [
     incompatibleSelectedOperationType,
     setInvalidOperationType,
@@ -117,30 +104,35 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return fields;
   }, [currentIndexPattern]);
 
-  function getOperationTypes() {
-    const possibleOperationTypes = Object.keys(fieldByOperation) as OperationType[];
-    const validOperationTypes: OperationType[] = [];
+  const possibleOperations = useMemo(() => {
+    return Object.values(operationDefinitionMap)
+      .sort((op1, op2) => {
+        return op1.displayName.localeCompare(op2.displayName);
+      })
+      .map((def) => def.type)
+      .filter(
+        (type) => fieldByOperation[type]?.length || operationWithoutField.indexOf(type) !== -1
+      );
+  }, [fieldByOperation, operationWithoutField]);
 
-    if (!selectedColumn) {
-      validOperationTypes.push(...(Object.keys(fieldByOperation) as OperationType[]));
-    } else if (hasField(selectedColumn) && operationByField[selectedColumn.sourceField]) {
-      validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
-    }
+  // Operations are compatible if they match inputs. They are always compatible in
+  // the empty state. Field-based operations are not compatible with field-less operations.
+  const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
+    const definition = operationDefinitionMap[operationType];
 
-    return _.uniqBy(
-      [
-        ...asOperationOptions(validOperationTypes, true),
-        ...asOperationOptions(possibleOperationTypes, false),
-        ...asOperationOptions(
-          operationSupportMatrix.operationWithoutField,
-          !selectedColumn || !hasField(selectedColumn)
-        ),
-      ],
-      'operationType'
-    );
-  }
+    return {
+      operationType,
+      compatibleWithCurrentField:
+        !selectedColumn ||
+        (selectedColumn &&
+          hasField(selectedColumn) &&
+          definition.input === 'field' &&
+          fieldByOperation[operationType]?.indexOf(selectedColumn.sourceField) !== -1) ||
+        (selectedColumn && !hasField(selectedColumn) && definition.input !== 'field'),
+    };
+  });
 
-  const sideNavItems: EuiListGroupItemProps[] = getOperationTypes().map(
+  const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField }) => {
       const isActive = Boolean(
         incompatibleSelectedOperationType === operationType ||
