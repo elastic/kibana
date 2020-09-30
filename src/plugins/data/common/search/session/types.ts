@@ -19,8 +19,23 @@
 
 import { IKibanaSearchRequest } from '..';
 
+export enum SessionStatus {
+  New,
+  Running,
+  Completed,
+  Timeout,
+}
+
+export enum SearchStatus {
+  Running,
+  Done,
+  Error,
+}
+
 export interface ISessionService {
-  get: () => string | undefined;
+  getSessionId: () => string | undefined;
+  getSessionTimeoutNotified: () => boolean;
+  setSessionTimeoutNotified: () => void;
   restore: (sessionId: string) => void;
   start: () => void;
   clear: () => void;
@@ -31,5 +46,5 @@ export interface ISessionService {
     searchId: string
   ) => void;
   trackSearchComplete: (request: IKibanaSearchRequest, sessionId?: string) => void;
-  trackSearchError: (request: IKibanaSearchRequest, sessionId?: string) => void;
+  trackSearchError: (request: IKibanaSearchRequest, sessionId?: string, e?: Error) => void;
 }

@@ -106,7 +106,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         }
         this.deps.session.trackSearchError(request, options?.sessionId);
-        return throwError(this.handleSearchError(e, request, timeoutSignal, options?.abortSignal));
+        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);

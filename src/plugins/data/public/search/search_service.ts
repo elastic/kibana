@@ -75,7 +75,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.sessionService = new SessionService();
     /**
-     * A global object that intercepts all searches and provides convenience methods for SearchSourceServicecancelling
+     * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({

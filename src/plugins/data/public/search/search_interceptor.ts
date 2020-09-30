@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, trimEnd, debounce } from 'lodash';
+import { get, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { tap, catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
@@ -88,16 +88,17 @@ export class SearchInterceptor {
     e: any,
     request: IKibanaSearchRequest,
     timeoutSignal: AbortSignal,
-    appAbortSignal?: AbortSignal
+    options?: ISearchOptions
   ): Error {
     if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
       // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
-      this.showTimeoutError(err);
+      // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
+      this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (appAbortSignal?.aborted) {
+    } else if (options?.abortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
     } else if (isPainlessError(e)) {
@@ -175,16 +176,16 @@ export class SearchInterceptor {
    * error notification per session.
    * @internal
    */
-  private showTimeoutError = debounce(
-    (e: SearchTimeoutError) => {
+  private showTimeoutError = (e: SearchTimeoutError, sessionId?: string) => {
+    if (!sessionId || !this.deps.session.getSessionTimeoutNotified()) {
+      this.deps.session.setSessionTimeoutNotified();
+
       this.deps.toasts.addDanger({
         title: 'Timed out',
         text: toMountPoint(e.getErrorMessage(this.application)),
       });
-    },
-    30000,
-    { leading: true, trailing: false }
-  );
+    }
+  };
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
@@ -210,18 +211,22 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      this.deps.session.trackSearch(request, options?.sessionId);
+      if (options?.sessionId) {
+        this.deps.session.trackSearch(request, options?.sessionId);
+      }
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         tap({
           next: (r) => {
-            this.deps.session.trackSearchComplete(request, options?.sessionId);
+            if (options?.sessionId) {
+              this.deps.session.trackSearchComplete(request, options?.sessionId);
+            }
           },
         }),
-        catchError((e: any) => {
-          this.deps.session.trackSearchError(request, options?.sessionId);
-          return throwError(
-            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
-          );
+        catchError((e: Error) => {
+          if (options?.sessionId) {
+            this.deps.session.trackSearchError(request, options?.sessionId, e);
+          }
+          return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);

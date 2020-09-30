@@ -102,7 +102,6 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  // search: ISearchGeneric;
   session?: ISessionService;
   search: (request: IEsSearchRequest, options: ISearchOptions) => Promise<IEsSearchResponse>;
 }
@@ -313,13 +312,9 @@ export class SearchSource {
       getConfig,
     });
 
-    return search(
-      { params, indexType: searchRequest.indexType },
-      {
-        ...options,
-        sessionId: this.dependencies.session?.get(),
-      }
-    ).then(({ rawResponse }) => onResponse(searchRequest, rawResponse));
+    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
+      onResponse(searchRequest, rawResponse)
+    );
   }
 
   /**
