@@ -132,14 +132,15 @@
 }
 
 .dscFieldSearch__toggleButton {
-  width: calc(100% - #{$euiSizeS});
-  color: $euiColorPrimary;
-  padding-left: $euiSizeXS;
-  margin-left: $euiSizeXS;
+  // width: calc(100% - #{$euiSizeS});
+  // color: $euiColorPrimary;
+  // padding-left: $euiSizeXS;
+  // margin-left: $euiSizeXS;
+  // borde
 }
 
 .dscFieldSearch__filterWrapper {
-  flex-grow: 0;
+  width: 100%;
 }
 
 .dscFieldSearch__formWrapper {
