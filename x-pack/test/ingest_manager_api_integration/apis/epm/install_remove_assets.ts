@@ -42,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resPolicy.statusCode).equal(200);
       });
-      it('should have installed the index templates', async function () {
+      it.skip('should have installed the index templates', async function () {
         const resLogsTemplate = await es.transport.request({
           method: 'GET',
           path: `/_index_template/${logsTemplateName}`,
@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resMetricsTemplate.statusCode).equal(200);
       });
-      it('should have installed the pipelines', async function () {
+      it.skip('should have installed the pipelines', async function () {
         const res = await es.transport.request({
           method: 'GET',
           path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
@@ -84,14 +84,14 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSettings.statusCode).equal(200);
       });
-      it('should have installed the transform components', async function () {
+      it.skip('should have installed the transform components', async function () {
         const res = await es.transport.request({
           method: 'GET',
           path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
       });
-      it('should have installed the kibana assets', async function () {
+      it.skip('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
           type: 'index-pattern',
           id: 'logs-*',
@@ -123,7 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
-      it('should have created the correct saved object', async function () {
+      it.skip('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
           id: 'all_assets',
