@@ -32,10 +32,12 @@ const appServices = {
   history,
 };
 
-export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) => (
-  <KibanaContextProvider services={appServices}>
-    <ProcessorsEditorContextProvider {...props}>
-      <PipelineProcessorsEditor onLoadJson={jest.fn()} />
-    </ProcessorsEditorContextProvider>
-  </KibanaContextProvider>
-);
+export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) => {
+  return (
+    <KibanaContextProvider services={appServices}>
+      <ProcessorsEditorContextProvider {...props}>
+        <PipelineProcessorsEditor onLoadJson={jest.fn()} />
+      </ProcessorsEditorContextProvider>
+    </KibanaContextProvider>
+  );
+};
