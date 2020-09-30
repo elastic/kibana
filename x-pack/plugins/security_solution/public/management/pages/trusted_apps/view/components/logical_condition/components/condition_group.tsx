@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import styled from 'styled-components';
 import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoint/types';
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
@@ -37,9 +37,11 @@ export const ConditionGroup = memo<ConditionGroupProps>(
     return (
       <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
         {entries.length > 1 && (
-          <AndBadgeFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
-            <AndOrBadge type={'and'} includeAntennas={true} />
-          </AndBadgeFlexItem>
+          <EuiHideFor sizes={['xs', 's']}>
+            <AndBadgeFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
+              <AndOrBadge type={'and'} includeAntennas={true} />
+            </AndBadgeFlexItem>
+          </EuiHideFor>
         )}
         <EuiFlexItem grow={1} data-test-subj={getTestId('entries')}>
           {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (

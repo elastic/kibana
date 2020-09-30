@@ -130,6 +130,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         alignItems="center"
         direction="row"
         data-test-subj={dataTestSubj}
+        responsive={false}
       >
         <EuiFlexItem grow={2}>
           <ConditionEntryCell
