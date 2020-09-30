@@ -1,17 +1,17 @@
 # data
 
-The `data` plugin provides common data access services for solutions and application developers.
+The data plugin provides common data access services, such as `search` and `query`, for solutions and application developers.
 
 ## Autocomplete
 
-The autocomplete service can provide suggestions for field names and field values.
+The autocomplete service provides suggestions for field names and values.
 
-It is pre-wired into the `TopNavMenu` component, but can be used independently.
+It is wired into the `TopNavMenu` component, but can be used independently.
 
 ### Fetch Query Suggestions
 
-The `getQuerySuggestions` helps to construct a query. 
-KQL suggestion functions are registered in x-pack, so this API won't return results in OSS.
+The `getQuerySuggestions` function helps to construct a query. 
+KQL suggestion functions are registered in X-Pack, so this API does not return results in OSS.
 
 ```.ts
 
@@ -26,8 +26,8 @@ KQL suggestion functions are registered in x-pack, so this API won't return resu
 
 ### Fetch Value Suggestions
 
-The `getValueSuggestions` returns suggestions for possible field values.
-This is helpful when you want to provide a user with options to choose from, for example when constructing a filter. 
+The `getValueSuggestions` function returns suggestions for field values.
+This is helpful when you want to provide a user with options, for example when constructing a filter. 
 
 ```.ts
 
@@ -50,17 +50,17 @@ Coming soon.
 
 ## Query
 
-The query service is responsible for managing the configuration of a search query (`QueryState`): filters, timerange and query string, as well as other settings such as the auto refresh behavior and saved queries.
+The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
 
 It contains sub-services for each of those configurations:
  - `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
- - `data.query.timefilter` - Responsible for the time range filter as well as the auto refresh behavior settings.
+ - `data.query.timefilter` - Responsible for the time range filter and the auto refresh behavior settings.
  - `data.query.queryString` - Responsible for the query string and query language settings.
- - `data.query.savedQueries` - This sub-service is responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and re-used by other applications.
+ - `data.query.savedQueries` - Responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and used by other applications.
 
  Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
 
- A simple use case would be:
+ A simple use case is:
 
  ```.ts
  function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
@@ -95,7 +95,7 @@ Provides access to Elasticsearch using the high level `SearchSource` API or low 
 
 ### SearchSource
 
-The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query
+The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.
 
 ```.tsx
 
@@ -112,7 +112,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 
 #### Default Search Strategy
 
-One benefit of using the low level search API, is partial response support in x-pack, allowing for better and more responsive user experience.
+One benefit of using the low level search API, is partial response support in X-Pack, allowing for a better and more responsive user experience.
 In OSS only the final result is returned. 
 
 ```.ts
