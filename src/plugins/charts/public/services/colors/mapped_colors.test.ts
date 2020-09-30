@@ -20,8 +20,6 @@
 import _ from 'lodash';
 import Color from 'color';
 
-import d3 from 'd3';
-
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from './seed_colors';
