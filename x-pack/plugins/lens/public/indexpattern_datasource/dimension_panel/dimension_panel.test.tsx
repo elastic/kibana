@@ -25,6 +25,7 @@ import { IndexPatternPrivateState } from '../types';
 import { IndexPatternColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
+import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -814,7 +815,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: {
                     ...defaultProps.state.layers.first.columns.col1,
                     sourceField: 'nonexistent',
-                  },
+                  } as DateHistogramIndexPatternColumn,
                 },
               },
             },
@@ -824,7 +825,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
         {
-          label: 'Invalid field nonexistent',
+          label: 'nonexistent',
           value: { type: 'field', field: 'nonexistent' },
         },
       ]);

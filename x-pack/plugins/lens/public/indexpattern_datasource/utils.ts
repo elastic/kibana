@@ -47,10 +47,13 @@ export function hasInvalidReference(state: IndexPatternPrivateState) {
   return Object.values(state.layers).some((layer) => {
     return layer.columnOrder.some((columnId) => {
       const column = layer.columns[columnId];
-      return fieldIsInvalid(
-        column.sourceField,
-        column.operationType,
-        state.indexPatterns[layer.indexPatternId]
+      return (
+        hasField(column) &&
+        fieldIsInvalid(
+          column.sourceField,
+          column.operationType,
+          state.indexPatterns[layer.indexPatternId]
+        )
       );
     });
   });
@@ -61,13 +64,15 @@ export function fieldIsInvalid(
   operationType: OperationType | undefined,
   indexPattern: IndexPattern
 ) {
+  const operationDefinition = operationType && operationDefinitionMap[operationType];
   return Boolean(
     sourceField &&
-      operationType &&
+      operationDefinition &&
       !indexPattern.fields.some(
         (field) =>
           field.name === sourceField &&
-          operationDefinitionMap[operationType].getPossibleOperationForField(field) !== undefined
+          operationDefinition.input === 'field' &&
+          operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
 }

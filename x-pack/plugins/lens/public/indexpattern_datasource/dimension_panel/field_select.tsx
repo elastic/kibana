@@ -173,16 +173,13 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType || fieldIsInvalid)}
       selectedOptions={
         ((selectedColumnOperationType && selectedColumnSourceField
           ? [
               {
                 label: fieldIsInvalid
-                  ? i18n.translate('xpack.lens.indexPattern.invalidField', {
-                      defaultMessage: 'Invalid field {field}',
-                      values: { field: selectedColumnSourceField },
-                    })
+                  ? selectedColumnSourceField
                   : fieldMap[selectedColumnSourceField]?.displayName,
                 value: { type: 'field', field: selectedColumnSourceField },
               },

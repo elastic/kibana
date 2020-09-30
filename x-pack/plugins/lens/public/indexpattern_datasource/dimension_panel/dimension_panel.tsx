@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -237,14 +237,12 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
 
+  const selectedColumnSourceField =
+    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
   const currentFieldIsInvalid = useMemo(
     () =>
-      fieldIsInvalid(
-        selectedColumn?.sourceField,
-        selectedColumn?.operationType,
-        currentIndexPattern
-      ),
-    [selectedColumn?.sourceField, selectedColumn?.operationType, currentIndexPattern]
+      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
+    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
   );
 
   const { columnId, uniqueLabel } = props;
@@ -255,12 +253,18 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   if (currentFieldIsInvalid) {
     return (
       <EuiToolTip
-        content={i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-          defaultMessage: "The field {field} can't be used. Please adjust the configuration.",
-          values: {
-            field: selectedColumn.sourceField,
-          },
-        })}
+        content={
+          <p>
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+              defaultMessage: 'Invalid configuration.',
+            })}
+            <br />
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+              defaultMessage: 'Click for more details.',
+            })}
+          </p>
+        }
+        anchorClassName="lnsLayerPanel__anchor"
       >
         <EuiLink
           color="danger"
@@ -275,10 +279,12 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
             defaultMessage: 'Edit configuration',
           })}
         >
-          <EuiIcon type="alert" />
-          {i18n.translate('xpack.lens.configure.invalidConfig', {
-            defaultMessage: 'Configuration is invalid',
-          })}
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="alert" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>{selectedColumn.label}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiLink>
       </EuiToolTip>
     );
