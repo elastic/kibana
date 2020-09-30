@@ -184,42 +184,6 @@ describe('Resolver: panel loading and resolution states', () => {
       });
     });
 
-    describe('when the server fails to return event data on the events in category panel', () => {
-      beforeEach(() => {
-        const {
-          metadata: { databaseDocumentID },
-          dataAccessLayer,
-        } = emptifyMock(noAncestorsTwoChildrenWithRelatedEventsOnOrigin(), [
-          'eventsWithEntityIDAndCategory',
-        ]);
-        memoryHistory = createMemoryHistory();
-        simulator = new Simulator({
-          dataAccessLayer,
-          databaseDocumentID,
-          history: memoryHistory,
-          resolverComponentInstanceID,
-          indices: [],
-        });
-        memoryHistory.push({
-          search: queryStringWithEventsInCategorySelected,
-        });
-      });
-
-      it('should display an error state in the panel', async () => {
-        await expect(
-          simulator.map(() => ({
-            resolverPanelError: simulator.testSubject('resolver:panel:error').length,
-            resolverPanelEventsInCategory: simulator.testSubject(
-              'resolver:panel:events-in-category'
-            ).length,
-          }))
-        ).toYieldEqualTo({
-          resolverPanelError: 1,
-          resolverPanelEventsInCategory: 0,
-        });
-      });
-    });
-
     describe('when navigating to the node detail panel', () => {
       let resumeRequest: (pausableRequest: ['entities']) => void;
       beforeEach(() => {
