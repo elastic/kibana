@@ -75,7 +75,7 @@ export default function licensesCSVReport(grunt) {
         },
         {
           name: 'Red Hat Universal Base Image minimal',
-          verion: '8',
+          version: '8',
           repository:
             'https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8',
           licenses: [
