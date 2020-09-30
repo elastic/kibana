@@ -44,12 +44,14 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
       </EuiFlexItem>
 
       <EuiFlexItem className="homDataAdd__actions" grow={false}>
-        <EuiButtonEmpty iconType="visTable" href="#/tutorial_directory/sampleData" size="xs">
-          <FormattedMessage
-            id="home.addData.sampleDataButtonLabel"
-            defaultMessage="Try our sample data"
-          />
-        </EuiButtonEmpty>
+        <div>
+          <EuiButtonEmpty iconType="visTable" href="#/tutorial_directory/sampleData" size="xs">
+            <FormattedMessage
+              id="home.addData.sampleDataButtonLabel"
+              defaultMessage="Try our sample data"
+            />
+          </EuiButtonEmpty>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
 

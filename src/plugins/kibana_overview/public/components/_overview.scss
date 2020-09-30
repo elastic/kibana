@@ -53,14 +53,8 @@ $kbnOverviewPageWidth: 1200px;
   // Ensure card heights are stretched equally when wrapped with this element
   .kbnRedirectCrossAppLinks {
     display: flex;
-    flex: 1;
-    flex-direction: column;
+    height: 100%;
   }
-}
-
-// Prevent children from rendering as flex items
-.kbnOverviewGettingStarted__content {
-  display: block;
 }
 
 .kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
@@ -137,9 +131,6 @@ $kbnOverviewPageWidth: 1200px;
 }
 
 .kbnOverviewDataAdd__actions {
-  // Prevent children from rendering as flex items
-  display: block;
-
   // Accounting for no `flush="both"` prop on EuiButtonEmpty
   .euiButtonEmpty__content {
     padding-left: 0;
