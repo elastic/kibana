@@ -12,7 +12,6 @@ import {
   FlowTarget,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
-import {} from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
