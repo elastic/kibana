@@ -12,7 +12,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { AutocompleteFieldMatchComponent } from './field_value_match';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
 jest.mock('./hooks/use_field_value_autocomplete');

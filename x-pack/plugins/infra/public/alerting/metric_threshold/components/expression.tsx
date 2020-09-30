@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   Comparator,
   Aggregators,
@@ -52,6 +51,7 @@ interface Props {
   alertParams: AlertParams;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   alertInterval: string;
+  alertThrottle: string;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
@@ -66,7 +66,14 @@ const defaultExpression = {
 export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertsContext,
+    alertInterval,
+    alertThrottle,
+  } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -400,8 +407,9 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <AlertPreview
         alertInterval={alertInterval}
+        alertThrottle={alertThrottle}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
+        alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
         showNoDataResults={alertParams.alertOnNoData}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}

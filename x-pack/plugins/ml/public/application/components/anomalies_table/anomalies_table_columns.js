@@ -7,7 +7,9 @@
 import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -251,7 +253,7 @@ export function getColumns(
       sortable: false,
       truncateText: true,
       render: (item) => {
-        const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
+        const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
             className="mlAnomalyCategoryExamples__link"

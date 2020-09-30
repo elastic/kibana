@@ -23,7 +23,6 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export interface IEmsFileSource extends IVectorSource {
   getEmsFieldLabel(emsFieldName: string): Promise<string>;
-  createField({ fieldName }: { fieldName: string }): IField;
 }
 
 export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
@@ -168,7 +167,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return this._tooltipFields.length > 0;
   }
 
-  async filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: unknown): Promise<ITooltipProperty[]> {
     const promises = this._tooltipFields.map((field) => {
       // @ts-ignore
       const value = properties[field.getName()];

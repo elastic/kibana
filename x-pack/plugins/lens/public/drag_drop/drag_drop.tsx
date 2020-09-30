@@ -50,6 +50,11 @@ interface BaseProps {
   droppable?: boolean;
 
   /**
+   * Additional class names to apply when another element is over the drop target
+   */
+  getAdditionalClassesOnEnter?: () => string;
+
+  /**
    * The optional test subject associated with this DOM element.
    */
   'data-test-subj'?: string;
@@ -97,6 +102,12 @@ export const DragDrop = (props: Props) => {
       {...props}
       dragging={droppable ? dragging : undefined}
       isDragging={!!(draggable && value === dragging)}
+      isNotDroppable={
+        // If the configuration has provided a droppable flag, but this particular item is not
+        // droppable, then it should be less prominent. Ignores items that are both
+        // draggable and drop targets
+        droppable === false && Boolean(dragging) && value !== dragging
+      }
       setDragging={setDragging}
     />
   );
@@ -107,9 +118,13 @@ const DragDropInner = React.memo(function DragDropInner(
     dragging: unknown;
     setDragging: (dragging: unknown) => void;
     isDragging: boolean;
+    isNotDroppable: boolean;
   }
 ) {
-  const [state, setState] = useState({ isActive: false });
+  const [state, setState] = useState({
+    isActive: false,
+    dragEnterClassNames: '',
+  });
   const {
     className,
     onDrop,
@@ -120,13 +135,20 @@ const DragDropInner = React.memo(function DragDropInner(
     dragging,
     setDragging,
     isDragging,
+    isNotDroppable,
   } = props;
 
-  const classes = classNames('lnsDragDrop', className, {
-    'lnsDragDrop-isDropTarget': droppable,
-    'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
-    'lnsDragDrop-isDragging': isDragging,
-  });
+  const classes = classNames(
+    'lnsDragDrop',
+    className,
+    {
+      'lnsDragDrop-isDropTarget': droppable,
+      'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
+      'lnsDragDrop-isDragging': isDragging,
+      'lnsDragDrop-isNotDroppable': isNotDroppable,
+    },
+    state.dragEnterClassNames
+  );
 
   const dragStart = (e: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -159,19 +181,25 @@ const DragDropInner = React.memo(function DragDropInner(
 
     // An optimization to prevent a bunch of React churn.
     if (!state.isActive) {
-      setState({ ...state, isActive: true });
+      setState({
+        ...state,
+        isActive: true,
+        dragEnterClassNames: props.getAdditionalClassesOnEnter
+          ? props.getAdditionalClassesOnEnter()
+          : '',
+      });
     }
   };
 
   const dragLeave = () => {
-    setState({ ...state, isActive: false });
+    setState({ ...state, isActive: false, dragEnterClassNames: '' });
   };
 
   const drop = (e: DroppableEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setState({ ...state, isActive: false });
+    setState({ ...state, isActive: false, dragEnterClassNames: '' });
     setDragging(undefined);
 
     if (onDrop && droppable) {

@@ -12,8 +12,8 @@ sequenceDiagram
   Note right of SavedObjects: encrypted SO here
   end
 
-  alt If configuration updated since last checkin
-    Fleet API->>SavedObjects: getAgentConfiguration(configId)
+  alt If policy updated since last checkin
+    Fleet API->>SavedObjects: getAgentPolicy(agentPolicyId)
 
     opt If there is not API Key for default output
       Fleet API->>Elasticsearch: createAgentESApiKey()
@@ -34,4 +34,4 @@ sequenceDiagram
   end
 
 
-  Fleet API->>Agent: actions|agent config
+  Fleet API->>Agent: actions|agent policy

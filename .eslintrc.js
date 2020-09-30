@@ -17,9 +17,6 @@
  * under the License.
  */
 
-const { readdirSync } = require('fs');
-const { resolve } = require('path');
-
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -95,12 +92,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/es_ui_shared/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
@@ -126,26 +117,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/index_management/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
-      files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -302,10 +274,7 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: [
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
-                ],
+                target: ['(src|x-pack)/plugins/*/server/**/*'],
                 from: ['(src|x-pack)/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },
@@ -316,7 +285,7 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                 ],
@@ -333,6 +302,8 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
+                  '!src/core/server/utils', // ts alias
+                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -345,14 +316,11 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
                   '!(x-pack/)?test/**/*',
-                  // next folder contains legacy browser tests which can't be migrated to jest
-                  // which import np files
-                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -366,14 +334,6 @@ module.exports = {
                 target: [
                   '(src|x-pack)/plugins/**/*',
                   '!(src|x-pack)/plugins/**/server/**/*',
-
-                  'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/**/server/**/*',
-                  '!src/legacy/core_plugins/**/index.{js,mjs,ts,tsx}',
-
-                  'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/**/server/**/*',
-                  '!x-pack/legacy/plugins/**/index.{js,mjs,ts,tsx}',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',
@@ -396,17 +356,12 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: [
-                  'plugins/**/*',
-                  'src/plugins/**/*',
-                  'src/legacy/core_plugins/**/*',
-                  'src/legacy/ui/**/*',
-                ],
+                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['ui/**/*', 'uiExports/**/*'],
+                from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
@@ -414,12 +369,6 @@ module.exports = {
                 target: [
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
                   'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                  'src/legacy/core_plugins/**/public/np_ready/**/*',
-                  'src/legacy/core_plugins/vis_type_*/public/**/*',
-                  '!src/legacy/core_plugins/vis_type_*/public/legacy*',
-                  'src/legacy/core_plugins/**/server/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -463,29 +412,20 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': ['plugins'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
-              (acc, name) => {
-                if (!name.startsWith('_')) {
-                  acc[name] = `x-pack/legacy/plugins/${name}`;
-                }
-                return acc;
-              },
-              {}
-            ),
+            pluginMap: {},
           },
         },
       },
@@ -524,7 +464,7 @@ module.exports = {
         'packages/kbn-interpreter/tasks/**/*.js',
         'packages/kbn-interpreter/src/plugin/**/*.js',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
@@ -611,8 +551,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*.js',
-        'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
@@ -794,16 +732,6 @@ module.exports = {
     },
 
     /**
-     * GIS overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/maps/**/*.js'],
-      rules: {
-        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
-      },
-    },
-
-    /**
      * ML overrides
      */
     {
@@ -841,7 +769,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -887,7 +815,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -1118,7 +1046,7 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
-        'x-pack/{,legacy/}plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1267,10 +1195,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: [
-        'src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1302,6 +1227,21 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
       },
     },
   ],

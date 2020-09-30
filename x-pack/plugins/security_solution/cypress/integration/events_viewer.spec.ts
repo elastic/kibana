@@ -46,7 +46,8 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', () => {
+// https://github.com/elastic/kibana/issues/70757
+describe.skip('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
@@ -153,7 +154,7 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
@@ -171,6 +172,7 @@ describe('Events Viewer', () => {
       const expectedOrderAfterDragAndDrop =
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
+      cy.scrollTo('bottom');
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 1 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);

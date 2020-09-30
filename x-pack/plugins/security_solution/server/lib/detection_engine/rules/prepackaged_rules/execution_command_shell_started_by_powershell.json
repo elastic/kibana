@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from PowerShell.exe.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -51,5 +52,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

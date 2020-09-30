@@ -4,7 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import each from 'lodash/each';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import find from 'lodash/find';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import filter from 'lodash/filter';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,7 +37,7 @@ function getMetricData(
   entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
-  interval: string
+  intervalMs: number
 ): Observable<ModelPlotOutput> {
   if (
     isModelPlotChartableForDetector(job, detectorIndex) &&
@@ -35,8 +46,8 @@ function getMetricData(
     // Extract the partition, by, over fields on which to filter.
     const criteriaFields = [];
     const detector = job.analysis_config.detectors[detectorIndex];
-    if (_.has(detector, 'partition_field_name')) {
-      const partitionEntity: any = _.find(entityFields, {
+    if (detector.partition_field_name !== undefined) {
+      const partitionEntity: any = find(entityFields, {
         fieldName: detector.partition_field_name,
       });
       if (partitionEntity !== undefined) {
@@ -47,8 +58,8 @@ function getMetricData(
       }
     }
 
-    if (_.has(detector, 'over_field_name')) {
-      const overEntity: any = _.find(entityFields, { fieldName: detector.over_field_name });
+    if (detector.over_field_name !== undefined) {
+      const overEntity: any = find(entityFields, { fieldName: detector.over_field_name });
       if (overEntity !== undefined) {
         criteriaFields.push(
           { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
@@ -57,8 +68,8 @@ function getMetricData(
       }
     }
 
-    if (_.has(detector, 'by_field_name')) {
-      const byEntity: any = _.find(entityFields, { fieldName: detector.by_field_name });
+    if (detector.by_field_name !== undefined) {
+      const byEntity: any = find(entityFields, { fieldName: detector.by_field_name });
       if (byEntity !== undefined) {
         criteriaFields.push(
           { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
@@ -73,7 +84,7 @@ function getMetricData(
       criteriaFields,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     );
   } else {
     const obj: ModelPlotOutput = {
@@ -93,11 +104,11 @@ function getMetricData(
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        interval
+        intervalMs
       )
       .pipe(
         map((resp) => {
-          _.each(resp.results, (value, time) => {
+          each(resp.results, (value, time) => {
             // @ts-ignore
             obj.results[time] = {
               actual: value,
@@ -134,7 +145,7 @@ function getChartDetails(
     }
     obj.results.functionLabel = functionLabel;
 
-    const blankEntityFields = _.filter(entityFields, (entity) => {
+    const blankEntityFields = filter(entityFields, (entity) => {
       return entity.fieldValue === null;
     });
 
@@ -145,7 +156,7 @@ function getChartDetails(
       obj.results.entityData.entities = entityFields;
       resolve(obj);
     } else {
-      const entityFieldNames: string[] = _.map(blankEntityFields, 'fieldName');
+      const entityFieldNames: string[] = blankEntityFields.map((f) => f.fieldName);
       ml.getCardinalityOfFields({
         index: chartConfig.datafeedConfig.indices,
         fieldNames: entityFieldNames,
@@ -155,12 +166,12 @@ function getChartDetails(
         latestMs,
       })
         .then((results: any) => {
-          _.each(blankEntityFields, (field) => {
+          each(blankEntityFields, (field) => {
             // results will not contain keys for non-aggregatable fields,
             // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({
               fieldName: field.fieldName,
-              cardinality: _.get(results, field.fieldName, 0),
+              cardinality: get(results, field.fieldName, 0),
             });
           });
 

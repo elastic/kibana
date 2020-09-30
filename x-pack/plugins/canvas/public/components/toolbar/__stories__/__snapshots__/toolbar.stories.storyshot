@@ -19,11 +19,10 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           type="button"
         >
           <span
-            className="euiButtonEmpty__content"
+            className="euiButtonContent euiButtonEmpty__content"
           >
             <div
-              aria-hidden="true"
-              className="euiButtonEmpty__icon"
+              className="euiButtonContent__icon"
               data-euiicon-type="grid"
               size="m"
             />
@@ -65,7 +64,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           type="button"
         >
           <span
-            className="euiButtonEmpty__content"
+            className="euiButtonContent euiButtonEmpty__content"
           >
             <span
               className="euiButtonEmpty__text"
@@ -106,11 +105,10 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           type="button"
         >
           <span
-            className="euiButtonEmpty__content"
+            className="euiButtonContent euiButtonEmpty__content"
           >
             <div
-              aria-hidden="true"
-              className="euiButtonEmpty__icon"
+              className="euiButtonContent__icon"
               data-euiicon-type="editorCodeBlock"
               size="m"
             />
@@ -146,11 +144,10 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           type="button"
         >
           <span
-            className="euiButtonEmpty__content"
+            className="euiButtonContent euiButtonEmpty__content"
           >
             <div
-              aria-hidden="true"
-              className="euiButtonEmpty__icon"
+              className="euiButtonContent__icon"
               data-euiicon-type="grid"
               size="m"
             />
@@ -192,7 +189,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           type="button"
         >
           <span
-            className="euiButtonEmpty__content"
+            className="euiButtonContent euiButtonEmpty__content"
           >
             <span
               className="euiButtonEmpty__text"

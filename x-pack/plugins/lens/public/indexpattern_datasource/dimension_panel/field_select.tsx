@@ -8,7 +8,13 @@ import './field_select.scss';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
@@ -25,7 +31,7 @@ export interface FieldChoice {
   operationType?: OperationType;
 }
 
-export interface FieldSelectProps {
+export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   currentIndexPattern: IndexPattern;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
@@ -47,6 +53,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationFieldSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
@@ -74,7 +81,7 @@ export function FieldSelect({
     function fieldNamesToOptions(items: string[]) {
       return items
         .map((field) => ({
-          label: field,
+          label: fieldMap[field].displayName,
           value: {
             type: 'field',
             field,
@@ -100,14 +107,17 @@ export function FieldSelect({
           label,
           value,
           className: classNames({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--incompatible': !compatible,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--nonExistant': !exists,
           }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
         }));
     }
 
-    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
+    const [metaFields, nonMetaFields] = _.partition(normalFields, (field) => fieldMap[field].meta);
+    const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
       fieldsArr.length > 0 && {
@@ -129,18 +139,26 @@ export function FieldSelect({
       })
     );
 
+    const metaFieldsOptions = constructFieldsOptions(
+      metaFields,
+      i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
+        defaultMessage: 'Meta fields',
+      })
+    );
+
     return [
       ...fieldNamesToOptions(specialFields),
       availableFieldsOptions,
       emptyFieldsOptions,
+      metaFieldsOptions,
     ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
-    selectedColumnSourceField,
-    operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
+    operationByField,
+    existingFields,
   ]);
 
   return (
@@ -153,13 +171,13 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType)}
       selectedOptions={
         ((selectedColumnOperationType
           ? selectedColumnSourceField
             ? [
                 {
-                  label: selectedColumnSourceField,
+                  label: fieldMap[selectedColumnSourceField].displayName,
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]
@@ -179,7 +197,7 @@ export function FieldSelect({
       }}
       renderOption={(option, searchValue) => {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={null}>
               <LensFieldIcon
                 type={((option.value as unknown) as { dataType: DataType }).dataType}
@@ -192,6 +210,7 @@ export function FieldSelect({
           </EuiFlexGroup>
         );
       }}
+      {...rest}
     />
   );
 }

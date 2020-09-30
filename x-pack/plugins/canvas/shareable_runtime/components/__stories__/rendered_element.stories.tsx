@@ -7,7 +7,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../test/context_example';
 
-// @ts-expect-error
 import { image } from '../../../canvas_plugin_src/renderers/image';
 import { sharedWorkpads } from '../../test';
 import { RenderedElement, RenderedElementComponent } from '../rendered_element';

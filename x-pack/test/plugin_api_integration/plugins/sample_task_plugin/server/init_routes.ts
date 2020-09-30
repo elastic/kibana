@@ -223,6 +223,21 @@ export function initRoutes(
     }
   );
 
+  router.get(
+    {
+      path: `/api/ensure_tasks_index_refreshed`,
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      await ensureIndexIsRefreshed();
+      return res.ok({ body: {} });
+    }
+  );
+
   router.delete(
     {
       path: `/api/sample_tasks`,

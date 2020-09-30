@@ -9,7 +9,9 @@
  */
 
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
 
 import React, { Component } from 'react';
 
@@ -70,7 +72,7 @@ class AnomaliesTable extends Component {
     } else {
       const examples =
         item.entityName === 'mlcategory'
-          ? _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
+          ? get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
           : undefined;
       let definition = undefined;
 

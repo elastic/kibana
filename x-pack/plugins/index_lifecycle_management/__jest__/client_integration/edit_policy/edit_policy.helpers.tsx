@@ -13,7 +13,6 @@ import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
 
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
-import { indexLifecycleManagementStore } from '../../../public/application/store';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -35,7 +34,6 @@ jest.mock('@elastic/eui', () => {
 });
 
 const testBedConfig: TestBedConfig = {
-  store: () => indexLifecycleManagementStore(),
   memoryRouter: {
     initialEntries: [`/policies/edit/${POLICY_NAME}`],
     componentRoutePath: `/policies/edit/:policyName`,

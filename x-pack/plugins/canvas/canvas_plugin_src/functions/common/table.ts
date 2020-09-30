@@ -15,11 +15,13 @@ interface Arguments {
   showHeader: boolean;
 }
 
+export type Return = { datatable: Datatable } & Arguments;
+
 export function table(): ExpressionFunctionDefinition<
   'table',
   Datatable,
   Arguments,
-  Render<Arguments>
+  Render<Return>
 > {
   const { help, args: argHelp } = getFunctionHelp().table;
 

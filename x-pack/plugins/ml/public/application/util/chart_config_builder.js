@@ -9,7 +9,9 @@
  * in the source metric data.
  */
 
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
@@ -44,15 +46,16 @@ export function buildConfigFromDetector(job, detectorIndex) {
     // aggregations/<agg_name>/aggregations/<summaryCountFieldName>/cardinality/field
     // or aggs/<agg_name>/aggs/<summaryCountFieldName>/cardinality/field
     let cardinalityField = undefined;
-    const topAgg = _.get(job.datafeed_config, 'aggregations') || _.get(job.datafeed_config, 'aggs');
-    if (topAgg !== undefined && _.values(topAgg).length > 0) {
+    const topAgg = get(job.datafeed_config, 'aggregations') || get(job.datafeed_config, 'aggs');
+    if (topAgg !== undefined && Object.values(topAgg).length > 0) {
       cardinalityField =
-        _.get(_.values(topAgg)[0], [
+        get(Object.values(topAgg)[0], [
           'aggregations',
           summaryCountFieldName,
           'cardinality',
           'field',
-        ]) || _.get(_.values(topAgg)[0], ['aggs', summaryCountFieldName, 'cardinality', 'field']);
+        ]) ||
+        get(Object.values(topAgg)[0], ['aggs', summaryCountFieldName, 'cardinality', 'field']);
     }
 
     if (detector.function === 'non_zero_count' && cardinalityField !== undefined) {

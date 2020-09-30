@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServiceMock } from 'src/core/public/mocks';
-
 /**
  * A set of default Kibana context values to use across component tests.
  * @see enterprise_search/public/index.tsx for the KibanaContext definition/import
  */
 export const mockKibanaContext = {
-  http: httpServiceMock.createSetupContract(),
+  navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
-  enterpriseSearchUrl: 'http://localhost:3002',
+  setDocTitle: jest.fn(),
+  config: { host: 'http://localhost:3002' },
 };

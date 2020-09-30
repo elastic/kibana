@@ -32,8 +32,8 @@ import {
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { UuidServiceSetup } from './uuid';
-import { InternalMetricsServiceStart } from './metrics';
+import { InternalEnvironmentServiceSetup } from './environment';
+import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
@@ -49,11 +49,12 @@ export interface InternalCoreSetup {
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  uuid: UuidServiceSetup;
+  environment: InternalEnvironmentServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
   auditTrail: AuditTrailSetup;
   logging: InternalLoggingServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**

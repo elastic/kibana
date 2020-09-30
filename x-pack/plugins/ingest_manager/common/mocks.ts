@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewPackageConfig, PackageConfig } from './types/models/package_config';
+import { NewPackagePolicy, PackagePolicy } from './types';
 
-export const createNewPackageConfigMock = (): NewPackageConfig => {
+export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
     name: 'endpoint-1',
     description: '',
     namespace: 'default',
     enabled: true,
-    config_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+    policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
     output_id: '',
     package: {
       name: 'endpoint',
@@ -23,10 +23,10 @@ export const createNewPackageConfigMock = (): NewPackageConfig => {
   };
 };
 
-export const createPackageConfigMock = (): PackageConfig => {
-  const newPackageConfig = createNewPackageConfigMock();
+export const createPackagePolicyMock = (): PackagePolicy => {
+  const newPackagePolicy = createNewPackagePolicyMock();
   return {
-    ...newPackageConfig,
+    ...newPackagePolicy,
     id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
     version: 'abcd',
     revision: 1,

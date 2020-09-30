@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { shallow } from 'enzyme';
 
-jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;
@@ -15,7 +13,7 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './__tests__/test_util';
@@ -35,7 +33,7 @@ const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mock
     field,
     mockVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     }
   );
 };

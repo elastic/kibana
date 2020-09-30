@@ -10,20 +10,19 @@ import { useDispatch } from 'react-redux';
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
-import { hostsModel } from '../../store';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
+const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -42,34 +41,32 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'event.action';
 
-export const histogramConfigs: MatrixHisrogramConfigs = {
+export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
-  histogramType: HistogramType.events,
+  histogramType: MatrixHistogramType.events,
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const EventsQueryTabBody = ({
+const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexNames,
   pageFilters,
   setQuery,
   startDate,
-}: HostsComponentsQueryProps) => {
-  const { initializeTimeline } = useManageTimeline();
+}) => {
   const dispatch = useDispatch();
+  const { initializeTimeline } = useManageTimeline();
   const { globalFullScreen } = useFullScreen();
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
-      timelineRowActions: () => [
-        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
-      ],
     });
   }, [dispatch, initializeTimeline]);
 
@@ -84,14 +81,13 @@ export const EventsQueryTabBody = ({
   return (
     <>
       {!globalFullScreen && (
-        <MatrixHistogramContainer
+        <MatrixHistogram
           endDate={endDate}
           filterQuery={filterQuery}
           setQuery={setQuery}
-          sourceId="default"
           startDate={startDate}
-          type={hostsModel.HostsType.page}
           id={EVENTS_HISTOGRAM_ID}
+          indexNames={indexNames}
           {...histogramConfigs}
         />
       )}
@@ -99,11 +95,16 @@ export const EventsQueryTabBody = ({
         defaultModel={eventsDefaultModel}
         end={endDate}
         id={TimelineId.hostsPageEvents}
+        scopeId={SourcererScopeName.default}
         start={startDate}
         pageFilters={pageFilters}
       />
     </>
   );
 };
+
+EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
+
+export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';

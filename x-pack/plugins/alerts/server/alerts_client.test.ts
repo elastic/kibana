@@ -7,24 +7,33 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
+import { nodeTypes } from '../../../../src/plugins/data/common';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
 import { TaskStatus } from '../../task_manager/server';
-import { IntervalSchedule } from './types';
+import { IntervalSchedule, RawAlert } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../actions/server';
+import { eventLogClientMock } from '../../event_log/server/mocks';
+import { QueryEventsBySavedObjectResult } from '../../event_log/server';
+import { SavedObject } from 'kibana/server';
+import { EventsFactory } from './lib/alert_instance_summary_from_event_log.test';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+const eventLogClient = eventLogClientMock.create();
+
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
+const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
@@ -39,6 +48,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
+  getEventLogClient: jest.fn(),
+  kibanaVersion,
 };
 
 beforeEach(() => {
@@ -91,16 +102,32 @@ beforeEach(() => {
     async executor() {},
     producer: 'alerts',
   }));
+  alertsClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 });
 
-const mockedDate = new Date('2019-02-12T21:01:22.479Z');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockedDateString = '2019-02-12T21:01:22.479Z';
+const mockedDate = new Date(mockedDateString);
+const DateOriginal = Date;
+
+// A version of date that responds to `new Date(null|undefined)` and `Date.now()`
+// by returning a fixed date, otherwise should be same as Date.
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 (global as any).Date = class Date {
-  constructor() {
-    return mockedDate;
+  constructor(...args: unknown[]) {
+    // sometimes the ctor has no args, sometimes has a single `null` arg
+    if (args[0] == null) {
+      // @ts-ignore
+      return mockedDate;
+    } else {
+      // @ts-ignore
+      return new DateOriginal(...args);
+    }
   }
   static now() {
     return mockedDate.getTime();
+  }
+  static parse(string: string) {
+    return DateOriginal.parse(string);
   }
 };
 
@@ -193,7 +220,7 @@ describe('create()', () => {
         params: {},
         ownerId: null,
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -243,27 +270,33 @@ describe('create()', () => {
 
   test('creates an alert', async () => {
     const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: '2019-02-12T21:01:22.479Z',
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
+      attributes: createdAttributes,
       references: [
         {
           name: 'action_0',
@@ -285,11 +318,11 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
-        actions: [],
+        ...createdAttributes,
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -315,8 +348,14 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
         "id": "1",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
         "params": Object {
           "bar": true,
         },
@@ -324,7 +363,12 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -349,6 +393,9 @@ describe('create()', () => {
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -401,10 +448,10 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "scheduledTaskId": "task-123",
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "scheduledTaskId": "task-123",
+      }
+    `);
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -501,7 +548,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -627,6 +674,70 @@ describe('create()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
+  });
+
+  test('should trim alert name when creating API key', async () => {
+    const data = getMockData({ name: ' my alert name ' });
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actions: [],
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        name: ' my alert name ',
+        alertTypeId: '123',
+        schedule: { interval: 10000 },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    await alertsClient.create({ data });
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
   });
 
   test('should validate params', async () => {
@@ -871,7 +982,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -910,6 +1021,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
@@ -984,7 +1098,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1023,6 +1137,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
@@ -1074,6 +1191,16 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     alertsClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+      },
     });
     taskManager.schedule.mockResolvedValue({
       id: 'task-123',
@@ -1133,6 +1260,17 @@ describe('enable()', () => {
   });
 
   test('enables an alert', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+      },
+    });
+
     await alertsClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -1148,6 +1286,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -1214,7 +1355,7 @@ describe('enable()', () => {
     await alertsClient.enable({ id: '1' });
     expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
@@ -1233,6 +1374,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -1278,6 +1422,7 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the first time', async () => {
+    unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1290,6 +1435,7 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the second time', async () => {
+    unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
@@ -1354,6 +1500,8 @@ describe('disable()', () => {
       ...existingAlert.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
+    version: '123',
+    references: [],
   };
 
   beforeEach(() => {
@@ -1395,10 +1543,13 @@ describe('disable()', () => {
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        scheduledTaskId: null,
         apiKey: null,
         apiKeyOwner: null,
-        enabled: false,
-        scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
           {
@@ -1435,10 +1586,13 @@ describe('disable()', () => {
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        scheduledTaskId: null,
         apiKey: null,
         apiKeyOwner: null,
-        enabled: false,
-        scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
           {
@@ -1627,6 +1781,7 @@ describe('unmuteAll()', () => {
         muteAll: true,
       },
       references: [],
+      version: '123',
     });
 
     await alertsClient.unmuteAll({ id: '1' });
@@ -1717,7 +1872,9 @@ describe('muteInstance()', () => {
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
-      { version: '123' }
+      {
+        version: '123',
+      }
     );
   });
 
@@ -1738,7 +1895,7 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('skips muting when alert is muted', async () => {
@@ -1759,7 +1916,7 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('authorization', () => {
@@ -1871,7 +2028,7 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('skips unmuting when alert is muted', async () => {
@@ -1892,7 +2049,7 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('authorization', () => {
@@ -2295,6 +2452,239 @@ describe('getAlertState()', () => {
   });
 });
 
+const AlertInstanceSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
+  page: 1,
+  per_page: 10000,
+  total: 0,
+  data: [],
+};
+
+const AlertInstanceSummaryIntervalSeconds = 1;
+
+const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
+  id: '1',
+  type: 'alert',
+  attributes: {
+    enabled: true,
+    name: 'alert-name',
+    tags: ['tag-1', 'tag-2'],
+    alertTypeId: '123',
+    consumer: 'alert-consumer',
+    schedule: { interval: `${AlertInstanceSummaryIntervalSeconds}s` },
+    actions: [],
+    params: {},
+    createdBy: null,
+    updatedBy: null,
+    createdAt: mockedDateString,
+    apiKey: null,
+    apiKeyOwner: null,
+    throttle: null,
+    muteAll: false,
+    mutedInstanceIds: [],
+  },
+  references: [],
+};
+
+function getAlertInstanceSummarySavedObject(
+  attributes: Partial<RawAlert> = {}
+): SavedObject<RawAlert> {
+  return {
+    ...BaseAlertInstanceSummarySavedObject,
+    attributes: { ...BaseAlertInstanceSummarySavedObject.attributes, ...attributes },
+  };
+}
+
+describe('getAlertInstanceSummary()', () => {
+  let alertsClient: AlertsClient;
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+  });
+
+  test('runs as expected with some event log data', async () => {
+    const alertSO = getAlertInstanceSummarySavedObject({
+      mutedInstanceIds: ['instance-muted-no-activity'],
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
+
+    const eventsFactory = new EventsFactory(mockedDateString);
+    const events = eventsFactory
+      .addExecute()
+      .addNewInstance('instance-currently-active')
+      .addNewInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active')
+      .addActiveInstance('instance-previously-active')
+      .advanceTime(10000)
+      .addExecute()
+      .addResolvedInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active')
+      .getEvents();
+    const eventsResult = {
+      ...AlertInstanceSummaryFindEventsResult,
+      total: events.length,
+      data: events,
+    };
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(eventsResult);
+
+    const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
+
+    const result = await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "alertTypeId": "123",
+        "consumer": "alert-consumer",
+        "enabled": true,
+        "errorMessages": Array [],
+        "id": "1",
+        "instances": Object {
+          "instance-currently-active": Object {
+            "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "muted": false,
+            "status": "Active",
+          },
+          "instance-muted-no-activity": Object {
+            "activeStartDate": undefined,
+            "muted": true,
+            "status": "OK",
+          },
+          "instance-previously-active": Object {
+            "activeStartDate": undefined,
+            "muted": false,
+            "status": "OK",
+          },
+        },
+        "lastRun": "2019-02-12T21:01:32.479Z",
+        "muteAll": false,
+        "name": "alert-name",
+        "status": "Active",
+        "statusEndDate": "2019-02-12T21:01:22.479Z",
+        "statusStartDate": "2019-02-12T21:00:22.479Z",
+        "tags": Array [
+          "tag-1",
+          "tag-2",
+        ],
+        "throttle": null,
+      }
+    `);
+  });
+
+  // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
+  // is just the result from the `alertInstanceSummaryFromEventLog()`, which itself
+  // has a complete set of tests.  These tests just make sure the data gets
+  // sent into `getAlertInstanceSummary()` as appropriate.
+
+  test('calls saved objects and event log client with default params', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    await alertsClient.getAlertInstanceSummary({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alert",
+        "1",
+        Object {
+          "end": "2019-02-12T21:01:22.479Z",
+          "page": 1,
+          "per_page": 10000,
+          "sort_order": "desc",
+          "start": "2019-02-12T21:00:22.479Z",
+        },
+      ]
+    `);
+    // calculate the expected start/end date for one test
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+    expect(end).toBe(mockedDateString);
+
+    const startMillis = Date.parse(start!);
+    const endMillis = Date.parse(end!);
+    const expectedDuration = 60 * AlertInstanceSummaryIntervalSeconds * 1000;
+    expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
+    expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
+  });
+
+  test('calls event log client with start date', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = new Date(
+      Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
+    ).toISOString();
+    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": "2019-02-12T21:00:22.479Z",
+      }
+    `);
+  });
+
+  test('calls event log client with relative start date', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = '2m';
+    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": "2019-02-12T20:59:22.479Z",
+      }
+    `);
+  });
+
+  test('invalid start date throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = 'ain"t no way this will get parsed as a date';
+    expect(
+      alertsClient.getAlertInstanceSummary({ id: '1', dateStart })
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
+    );
+  });
+
+  test('saved object get throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+      `[Error: OMG!]`
+    );
+  });
+
+  test('findEvents throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockRejectedValueOnce(new Error('OMG 2!'));
+
+    // error eaten but logged
+    await alertsClient.getAlertInstanceSummary({ id: '1' });
+  });
+});
+
 describe('find()', () => {
   const listedTypes = new Set([
     {
@@ -2402,6 +2792,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
+          "filter": undefined,
           "type": "alert",
         },
       ]
@@ -2410,9 +2801,11 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
+      const filter = esKuery.fromKueryExpression(
+        '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+      );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter:
-          '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
+        filter,
         ensureAlertTypeIsAuthorized() {},
         logSuccessfulAuthorization() {},
       });
@@ -2421,8 +2814,8 @@ describe('find()', () => {
       await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
-      expect(options.filter).toMatchInlineSnapshot(
-        `"someTerm and ((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
+      expect(options.filter).toEqual(
+        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
@@ -2439,7 +2832,6 @@ describe('find()', () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
       const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter: '',
         ensureAlertTypeIsAuthorized,
         logSuccessfulAuthorization,
       });
@@ -2660,9 +3052,13 @@ describe('update()', () => {
     type: 'alert',
     attributes: {
       enabled: true,
+      tags: ['foo'],
       alertTypeId: 'myType',
+      schedule: { interval: '10s' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
+      params: {},
+      throttle: null,
       actions: [
         {
           group: 'default',
@@ -2691,7 +3087,7 @@ describe('update()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     alertTypeRegistry.get.mockReturnValue({
-      id: '123',
+      id: 'myType',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
@@ -2701,7 +3097,7 @@ describe('update()', () => {
   });
 
   test('updates given parameters', async () => {
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2838,11 +3234,10 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -2875,6 +3270,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -2890,8 +3288,10 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
+        "id": "1",
+        "overwrite": true,
         "references": Array [
           Object {
             "id": "1",
@@ -2932,7 +3332,7 @@ describe('update()', () => {
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3011,11 +3411,10 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -3032,6 +3431,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3047,18 +3449,20 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "references": Array [
-                                                    Object {
-                                                      "id": "1",
-                                                      "name": "action_0",
-                                                      "type": "action",
-                                                    },
-                                                  ],
-                                                  "version": "123",
-                                                }
-                                `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
   });
 
   it(`doesn't call the createAPIKey function when alert is disabled`, async () => {
@@ -3082,7 +3486,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3162,11 +3566,10 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -3183,6 +3586,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": false,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3198,18 +3604,20 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "references": Array [
-                                                    Object {
-                                                      "id": "1",
-                                                      "name": "action_0",
-                                                      "type": "action",
-                                                    },
-                                                  ],
-                                                  "version": "123",
-                                                }
-                                `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
   });
 
   it('should validate params', async () => {
@@ -3253,6 +3661,64 @@ describe('update()', () => {
     );
   });
 
+  it('should trim alert name in the API key name', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actions: [],
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        name: ' my alert name ',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        apiKey: null,
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await alertsClient.update({
+      id: '1',
+      data: {
+        ...existingAlert.attributes,
+        name: ' my alert name ',
+      },
+    });
+
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+  });
+
   it('swallows error when invalidate API key throws', async () => {
     alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -3268,7 +3734,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3347,7 +3813,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3501,7 +3967,7 @@ describe('update()', () => {
         params: {},
         ownerId: null,
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: alertId,
         type: 'alert',
         attributes: {
@@ -3673,7 +4139,7 @@ describe('update()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -3810,6 +4276,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );
@@ -3846,6 +4315,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );

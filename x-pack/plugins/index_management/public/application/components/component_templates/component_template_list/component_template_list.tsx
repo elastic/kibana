@@ -42,7 +42,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   } = useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
-  const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
+  const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
@@ -170,7 +170,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
         <ComponentTable
           componentTemplates={data}
-          onReloadClick={sendRequest}
+          onReloadClick={resendRequest}
           onDeleteClick={setComponentTemplatesToDelete}
           onEditClick={goToEditComponentTemplate}
           onCloneClick={goToCloneComponentTemplate}
@@ -181,7 +181,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   } else if (data && data.length === 0) {
     content = <EmptyPrompt history={history} />;
   } else if (error) {
-    content = <LoadError onReloadClick={sendRequest} />;
+    content = <LoadError onReloadClick={resendRequest} />;
   }
 
   return (
@@ -194,7 +194,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedComponentTemplates) {
               // refetch the component templates
-              sendRequest();
+              resendRequest();
               // go back to list view (if deleted from details flyout)
               goToComponentTemplateList();
             }

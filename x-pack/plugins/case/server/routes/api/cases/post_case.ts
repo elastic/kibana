@@ -38,6 +38,7 @@ export function initPostCaseApi({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const myCaseConfigure = await caseConfigureService.find({ client });

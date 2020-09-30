@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { PolicyList } from './index';
+import '../../../../common/mock/match_media.ts';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { setPolicyListApiMockImplementation } from '../store/policy_list/test_mock_utils';
 
@@ -51,7 +52,7 @@ describe.skip('when on the policies page', () => {
         middlewareSpy
           .waitForAction('serverReturnedPolicyListData')
           .then((action) => (firstPolicyID = action.payload.policyItems[0].id)),
-        // middlewareSpy.waitForAction('serverReturnedAgentConfigListData'),
+        // middlewareSpy.waitForAction('serverReturnedAgentPolicyListData'),
       ]);
       return renderResult;
     };

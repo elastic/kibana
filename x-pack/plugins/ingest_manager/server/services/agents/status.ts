@@ -21,9 +21,9 @@ export async function getAgentStatusById(
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
-export async function getAgentStatusForConfig(
+export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
-  configId?: string
+  agentPolicyId?: string
 ) {
   const [all, online, error, offline] = await Promise.all(
     [
@@ -36,17 +36,17 @@ export async function getAgentStatusForConfig(
         showInactive: false,
         perPage: 0,
         page: 1,
-        kuery: configId
+        kuery: agentPolicyId
           ? kuery
-            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}")`
-            : `${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}"`
+            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}")`
+            : `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"`
           : kuery,
       })
     )
   );
 
   return {
-    events: await getEventsCount(soClient, configId),
+    events: await getEventsCount(soClient, agentPolicyId),
     total: all.total,
     online: online.total,
     error: error.total,
@@ -55,11 +55,11 @@ export async function getAgentStatusForConfig(
   };
 }
 
-async function getEventsCount(soClient: SavedObjectsClientContract, configId?: string) {
+async function getEventsCount(soClient: SavedObjectsClientContract, agentPolicyId?: string) {
   const { total } = await soClient.find({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    searchFields: ['config_id'],
-    search: configId,
+    searchFields: ['policy_id'],
+    search: agentPolicyId,
     perPage: 0,
     page: 1,
     sortField: 'timestamp',

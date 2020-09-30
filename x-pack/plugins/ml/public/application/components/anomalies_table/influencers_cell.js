@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import each from 'lodash/each';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -148,7 +150,7 @@ export class InfluencersCell extends Component {
 
     const influencers = [];
     recordInfluencers.forEach((influencer) => {
-      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
+      each(influencer, (influencerFieldValue, influencerFieldName) => {
         influencers.push({
           influencerFieldName,
           influencerFieldValue,

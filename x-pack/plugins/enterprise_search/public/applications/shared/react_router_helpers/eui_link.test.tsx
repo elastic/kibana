@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../__mocks__/shallow_usecontext.mock';
+import '../../__mocks__/react_router_history.mock';
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiLink, EuiButton } from '@elastic/eui';
 
-import '../../__mocks__/react_router_history.mock';
-import { mockHistory } from '../../__mocks__';
+import { mockKibanaContext, mockHistory } from '../../__mocks__';
 
 import { EuiReactRouterLink, EuiReactRouterButton } from './eui_link';
 
@@ -43,8 +45,16 @@ describe('EUI & React Router Component Helpers', () => {
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/enterprise_search/foo/bar');
+    expect(link.prop('href')).toEqual('/app/enterprise_search/foo/bar');
     expect(mockHistory.createHref).toHaveBeenCalled();
+  });
+
+  it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
+    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" shouldNotCreateHref />);
+    const link = wrapper.find(EuiLink);
+
+    expect(link.prop('href')).toEqual('/foo/bar');
+    expect(mockHistory.createHref).not.toHaveBeenCalled();
   });
 
   describe('onClick', () => {
@@ -59,7 +69,7 @@ describe('EUI & React Router Component Helpers', () => {
       wrapper.find(EuiLink).simulate('click', simulatedEvent);
 
       expect(simulatedEvent.preventDefault).toHaveBeenCalled();
-      expect(mockHistory.push).toHaveBeenCalled();
+      expect(mockKibanaContext.navigateToUrl).toHaveBeenCalled();
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
@@ -71,7 +81,16 @@ describe('EUI & React Router Component Helpers', () => {
       };
       wrapper.find(EuiLink).simulate('click', simulatedEvent);
 
-      expect(mockHistory.push).not.toHaveBeenCalled();
+      expect(mockKibanaContext.navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('calls inherited onClick actions in addition to default navigation', () => {
+      const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
+      const wrapper = mount(<EuiReactRouterLink to="/narnia" onClick={customOnClick} />);
+
+      wrapper.find(EuiLink).simulate('click', { shiftKey: true });
+
+      expect(customOnClick).toHaveBeenCalled();
     });
   });
 });

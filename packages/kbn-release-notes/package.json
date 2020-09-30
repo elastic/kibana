@@ -8,6 +8,7 @@
     "kbn:watch": "tsc --watch"
   },
   "dependencies": {
+    "@kbn/utils": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "axios": "^0.19.2",
     "cheerio": "0.22.0",
@@ -18,6 +19,6 @@
   },
   "devDependencies": {
     "markdown-it": "^10.0.0",
-    "typescript": "3.9.5"
+    "typescript": "4.0.2"
   }
 }

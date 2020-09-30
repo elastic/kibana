@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CanvasWorkpad, CanvasElement, CanvasPage } from '../../types';
+import { CanvasWorkpad, CanvasElement, CanvasPage, CanvasVariable } from '../../types';
 
 const BaseWorkpad: CanvasWorkpad = {
   '@created': '2019-02-08T18:35:23.029Z',
@@ -50,6 +50,12 @@ const BaseElement: CanvasElement = {
   filter: '',
 };
 
+const BaseVariable: CanvasVariable = {
+  name: 'my-var',
+  value: 'Hello World',
+  type: 'string',
+};
+
 export const workpads: CanvasWorkpad[] = [
   {
     ...BaseWorkpad,
@@ -71,6 +77,11 @@ export const workpads: CanvasWorkpad[] = [
         ],
       },
     ],
+    variables: [
+      {
+        ...BaseVariable,
+      },
+    ],
   },
   {
     ...BaseWorkpad,
@@ -80,6 +91,11 @@ export const workpads: CanvasWorkpad[] = [
         elements: [
           { ...BaseElement, expression: 'filters | demodata | markdown "hello" | render' },
         ],
+      },
+    ],
+    variables: [
+      {
+        ...BaseVariable,
       },
     ],
   },
@@ -102,6 +118,11 @@ export const workpads: CanvasWorkpad[] = [
       },
       { ...BasePage, elements: [{ ...BaseElement, expression: 'image | render' }] },
       { ...BasePage, elements: [{ ...BaseElement, expression: 'image | render' }] },
+    ],
+    variables: [
+      {
+        ...BaseVariable,
+      },
     ],
   },
   {
@@ -136,6 +157,11 @@ export const workpads: CanvasWorkpad[] = [
         ],
       },
     ],
+    variables: [
+      {
+        ...BaseVariable,
+      },
+    ],
   },
   {
     ...BaseWorkpad,
@@ -164,6 +190,17 @@ export const workpads: CanvasWorkpad[] = [
           { ...BaseElement, expression: 'demodata | render as=debug' },
           { ...BaseElement, expression: 'shape "square" | render' },
         ],
+      },
+    ],
+    variables: [
+      {
+        ...BaseVariable,
+      },
+      {
+        ...BaseVariable,
+      },
+      {
+        ...BaseVariable,
       },
     ],
   },

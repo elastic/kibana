@@ -29,6 +29,7 @@ import {
   AnnotationDomainTypes,
   LineAnnotation,
   TooltipType,
+  StackMode,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -67,7 +68,6 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
-  enableHistogramMode,
 }) => {
   const chartRef = useRef();
   const updateCursor = (_, cursor) => {
@@ -181,6 +181,7 @@ export const TimeSeries = ({
         ) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+          const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
@@ -197,11 +198,11 @@ export const TimeSeries = ({
                 bars={bars}
                 color={finalColor}
                 stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
+                stackMode={isPercentage ? StackMode.Percentage : undefined}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
+                enableHistogramMode={isStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
@@ -222,12 +223,12 @@ export const TimeSeries = ({
                 lines={lines}
                 color={finalColor}
                 stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
+                stackMode={isPercentage ? StackMode.Percentage : undefined}
                 points={points}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
+                enableHistogramMode={isStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
@@ -248,8 +249,10 @@ export const TimeSeries = ({
           position={position}
           domain={domain}
           hide={hide}
-          showGridLines={showGrid}
-          gridLineStyle={GRID_LINE_CONFIG}
+          gridLine={{
+            ...GRID_LINE_CONFIG,
+            visible: showGrid,
+          }}
           tickFormat={tickFormatter}
         />
       ))}
@@ -259,8 +262,10 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
-        showGridLines={showGrid}
-        gridLineStyle={GRID_LINE_CONFIG}
+        gridLine={{
+          ...GRID_LINE_CONFIG,
+          visible: showGrid,
+        }}
       />
     </Chart>
   );
@@ -283,5 +288,4 @@ TimeSeries.propTypes = {
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
-  enableHistogramMode: PropTypes.bool.isRequired,
 };

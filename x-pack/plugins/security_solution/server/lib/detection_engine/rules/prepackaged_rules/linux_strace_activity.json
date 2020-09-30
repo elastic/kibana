@@ -6,6 +6,7 @@
   "false_positives": [
     "Strace is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or SREs engaged in debugging or system call tracing."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -25,5 +26,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

@@ -23,6 +23,6 @@ export function createCpuUsageAlertType(): AlertTypeModel {
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: false,
+    requiresAppContext: true,
   };
 }

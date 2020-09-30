@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import each from 'lodash/each';
 
 import { ml } from './ml_api_service';
 
@@ -16,8 +18,8 @@ export function getFieldTypeFromMapping(index, fieldName) {
       ml.getFieldCaps({ index, fields: [fieldName] })
         .then((resp) => {
           let fieldType = '';
-          _.each(resp.fields, (field) => {
-            _.each(field, (type) => {
+          each(resp.fields, (field) => {
+            each(field, (type) => {
               if (fieldType === '') {
                 fieldType = type.type;
               }

@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
+import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -79,7 +80,7 @@ export class TooltipControl extends React.Component {
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
         const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        //This keeps track of first properties (assuming these will be identical for features in different tiles
+        //This keeps track of first properties (assuming these will be identical for features in different tiles)
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
@@ -175,7 +176,10 @@ export class TooltipControl extends React.Component {
         y: mbLngLatPoint.y + PADDING,
       },
     ];
-    return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
+    return this.props.mbMap.queryRenderedFeatures(mbBbox, {
+      layers: mbLayerIds,
+      filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
+    });
   }
 
   render() {
@@ -195,6 +199,8 @@ export class TooltipControl extends React.Component {
           mbMap={this.props.mbMap}
           layerList={this.props.layerList}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           renderTooltipContent={this.props.renderTooltipContent}
           geoFields={this.props.geoFields}
           features={features}

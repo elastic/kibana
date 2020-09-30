@@ -22,3 +22,5 @@ export enum ANOMALY_THRESHOLD {
 }
 
 export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
+export const JOB_ID = 'job_id';
+export const PARTITION_FIELD_VALUE = 'partition_field_value';

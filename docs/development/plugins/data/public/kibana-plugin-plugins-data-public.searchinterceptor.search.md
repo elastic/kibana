@@ -4,12 +4,12 @@
 
 ## SearchInterceptor.search() method
 
-Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when `cancelPending` is called, when the request times out, or when the original `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
+Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when `cancelPending` is called, when the request times out, or when the original `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
 
 <b>Signature:</b>
 
 ```typescript
-search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
+search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
 ```
 
 ## Parameters
@@ -21,5 +21,5 @@ search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearc
 
 <b>Returns:</b>
 
-`Observable<IEsSearchResponse>`
+`Observable<IKibanaSearchResponse>`
 

@@ -16,21 +16,25 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -46,6 +50,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -57,6 +62,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -68,6 +74,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -79,6 +86,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: '_source',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -92,6 +100,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -108,6 +117,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -127,6 +137,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -216,6 +227,34 @@ describe('getOperationTypesForField', () => {
         Array [
           Object {
             "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": true,
+              "scale": "interval",
+            },
+            "operations": Array [
+              Object {
+                "field": "timestamp",
+                "operationType": "date_histogram",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": true,
+              "scale": "interval",
+            },
+            "operations": Array [
+              Object {
+                "field": "bytes",
+                "operationType": "range",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
               "dataType": "number",
               "isBucketed": true,
               "scale": "ordinal",
@@ -238,20 +277,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "terms",
-                "type": "field",
-              },
-            ],
-          },
-          Object {
-            "operationMetaData": Object {
-              "dataType": "date",
-              "isBucketed": true,
-              "scale": "interval",
-            },
-            "operations": Array [
-              Object {
-                "field": "timestamp",
-                "operationType": "date_histogram",
                 "type": "field",
               },
             ],

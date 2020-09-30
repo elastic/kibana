@@ -26,6 +26,11 @@ const MyBeautifulLine = styled(EuiFlexItem)`
   }
 `;
 
+const MyOverflowContainer = styled(EuiFlexItem)`
+  overflow: hidden;
+  width: 100%;
+`;
+
 interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionId: string;
@@ -98,13 +103,13 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
               exceptionItemIndex={exceptionItemIndex}
             />
           )}
-          <EuiFlexItem grow={6}>
+          <MyOverflowContainer grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => (
                 <EuiFlexItem key={`${exceptionId}-${index}`} grow={1}>
                   <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
                     {item.nested === 'child' && <MyBeautifulLine grow={false} />}
-                    <EuiFlexItem grow={1}>
+                    <MyOverflowContainer grow={1}>
                       <BuilderEntryItem
                         entry={item}
                         indexPattern={indexPattern}
@@ -115,7 +120,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                         onChange={handleEntryChange}
                         onlyShowListOperators={onlyShowListOperators}
                       />
-                    </EuiFlexItem>
+                    </MyOverflowContainer>
                     <BuilderEntryDeleteButtonComponent
                       entries={exceptionItem.entries}
                       isOnlyItem={isOnlyItem}
@@ -128,7 +133,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-          </EuiFlexItem>
+          </MyOverflowContainer>
         </EuiFlexGroup>
       </EuiFlexItem>
     );

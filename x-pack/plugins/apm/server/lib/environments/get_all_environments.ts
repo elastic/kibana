@@ -11,14 +11,17 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getAllEnvironments({
   serviceName,
   setup,
+  searchAggregatedTransactions,
   includeMissing = false,
 }: {
   serviceName?: string;
   setup: Setup;
+  searchAggregatedTransactions: boolean;
   includeMissing?: boolean;
 }) {
   const { apmEventClient } = setup;
@@ -31,12 +34,17 @@ export async function getAllEnvironments({
   const params = {
     apm: {
       events: [
-        ProcessorEvent.transaction,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
     },
     body: {
+      // use timeout + min_doc_count to return as early as possible
+      // if filter is not defined to prevent timeouts
+      ...(!serviceName ? { timeout: '1ms' } : {}),
       size: 0,
       query: {
         bool: {
@@ -48,7 +56,8 @@ export async function getAllEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             size: 100,
-            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED : undefined,
+            ...(!serviceName ? { min_doc_count: 0 } : {}),
+            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
           },
         },
       },
@@ -56,6 +65,7 @@ export async function getAllEnvironments({
   };
 
   const resp = await apmEventClient.search(params);
+
   const environments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string

@@ -6,8 +6,8 @@
 
 import { AnyAction } from 'redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
-import { ReactElement } from 'react';
+import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { IndexPattern } from 'src/plugins/data/public';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -29,7 +29,7 @@ interface LazyLoadedMapModules {
     renderTooltipContent?: RenderToolTipContent,
     eventHandlers?: EventHandlers
   ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
-  getIndexPatternService: () => IndexPatternsService;
+  getIndexPatternService: () => IndexPatternsContract;
   getHttp: () => any;
   getMapsCapabilities: () => any;
   createMapStore: () => MapStore;
@@ -40,7 +40,7 @@ interface LazyLoadedMapModules {
     initialLayers?: LayerDescriptor[]
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
-  renderApp: (context: unknown, params: unknown) => ReactElement<any>;
+  renderApp: (context: AppMountContext, params: AppMountParameters) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
@@ -57,7 +57,6 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
 
   loadModulesPromise = new Promise(async (resolve) => {
     const {
-      // @ts-expect-error
       getMapsSavedObjectLoader,
       getQueryableUniqueIndexPatternIds,
       MapEmbeddable,
@@ -68,7 +67,6 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
-      // @ts-expect-error
       renderApp,
       createSecurityLayerDescriptors,
       registerLayerWizard,

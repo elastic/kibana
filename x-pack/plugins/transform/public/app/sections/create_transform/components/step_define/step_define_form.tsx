@@ -22,6 +22,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+
 import { DataGrid } from '../../../../../shared_imports';
 
 import {
@@ -30,10 +33,8 @@ import {
 } from '../../../../common/data_grid';
 
 import {
-  getPreviewRequestBody,
-  PivotAggDict,
+  getPreviewTransformRequestBody,
   PivotAggsConfigDict,
-  PivotGroupByDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PivotAggsConfig,
@@ -87,7 +88,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     toastNotifications,
   };
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     pivotQuery,
     pivotGroupByArr,

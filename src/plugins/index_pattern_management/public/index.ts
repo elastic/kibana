@@ -41,3 +41,5 @@ export {
   IndexPatternCreationOption,
   IndexPatternListConfig,
 } from './service';
+
+export { MlCardState } from './types';

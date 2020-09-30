@@ -38,7 +38,7 @@ import {
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**
@@ -226,6 +226,7 @@ export const filterExceptionItems = (
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchema => {
+  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     created_at,
     created_by,
@@ -233,6 +234,7 @@ export const formatExceptionItemForUpdate = (
     tie_breaker_id,
     updated_at,
     updated_by,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...fieldsToUpdate
   } = exceptionItem;
   return {

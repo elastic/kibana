@@ -85,6 +85,9 @@ export const getFormActions = (testBed: TestBed) => {
           value: type,
         },
       ]);
+    });
+
+    await act(async () => {
       find('createFieldForm.addButton').simulate('click');
     });
 

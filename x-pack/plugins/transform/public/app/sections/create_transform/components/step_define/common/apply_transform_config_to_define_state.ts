@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import isEqual from 'lodash/isEqual';
+
+import { Dictionary } from '../../../../../../../common/types/common';
+import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
+import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 
 import {
   matchAllQuery,
@@ -12,13 +18,11 @@ import {
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
-  TransformPivotConfig,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
-import { Dictionary } from '../../../../../../../common/types/common';
 
 import { StepDefineExposedState } from './types';
-import { getAggConfigFromEsAgg, PivotSupportedAggs } from '../../../../../common/pivot_aggs';
+import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,

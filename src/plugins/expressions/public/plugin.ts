@@ -17,75 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionExecutor } from './types';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
-  ExpressionRendererRegistry,
-  FunctionsRegistry,
-  serializeProvider,
-  TypesRegistry,
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
   ExecutionContext,
 } from '../common';
-import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
-import {
-  setCoreStart,
-  setInterpreter,
-  setRenderersRegistry,
-  setNotifications,
-  setExpressionsService,
-} from './services';
+import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { render, ExpressionRenderHandler } from './render';
 
-export interface ExpressionsSetupDeps {
-  bfetch: BfetchPublicSetup;
-}
-
-export interface ExpressionsStartDeps {
-  bfetch: BfetchPublicStart;
-}
-
-export interface ExpressionsSetup extends ExpressionsServiceSetup {
-  /**
-   * @todo Get rid of these `__LEGACY` APIs.
-   *
-   * `__LEGACY` APIs are used by Canvas. It should be possible to stop
-   * using all of them (except `loadLegacyServerFunctionWrappers`) and use
-   * Kibana Platform plugin contracts instead.
-   */
-  __LEGACY: {
-    /**
-     * Use `registerType` and `getTypes` instead.
-     */
-    types: TypesRegistry;
-
-    /**
-     * Use `registerFunction` and `getFunctions` instead.
-     */
-    functions: FunctionsRegistry;
-
-    /**
-     * Use `registerRenderer` and `getRenderers`, and `getRenderer` instead.
-     */
-    renderers: ExpressionRendererRegistry;
-
-    /**
-     * Use `run` function instead.
-     */
-    getExecutor: () => ExpressionExecutor;
-
-    /**
-     * This function is used by Canvas to load server-side function and create
-     * browser-side "wrapper" for each one. This function can be removed once
-     * we enable expressions on server-side: https://github.com/elastic/kibana/issues/46906
-     */
-    loadLegacyServerFunctionWrappers: () => Promise<void>;
-  };
-}
+export type ExpressionsSetup = ExpressionsServiceSetup;
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
   ExpressionLoader: typeof ExpressionLoader;
@@ -95,9 +39,7 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   render: typeof render;
 }
 
-export class ExpressionsPublicPlugin
-  implements
-    Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
+export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
   private readonly expressions: ExpressionsService = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
@@ -116,68 +58,21 @@ export class ExpressionsPublicPlugin
     });
   }
 
-  public setup(core: CoreSetup, { bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
+  public setup(core: CoreSetup): ExpressionsSetup {
     this.configureExecutor(core);
 
     const { expressions } = this;
-    const { executor, renderers } = expressions;
+    const { renderers } = expressions;
 
     setRenderersRegistry(renderers);
-    setExpressionsService(this.expressions);
+    setExpressionsService(expressions);
 
-    const expressionsSetup = expressions.setup();
-
-    // This is legacy. Should go away when we get rid of __LEGACY.
-    const getExecutor = (): ExpressionExecutor => {
-      return { interpreter: { interpretAst: expressionsSetup.run } };
-    };
-
-    setInterpreter(getExecutor().interpreter);
-
-    let cached: Promise<void> | null = null;
-    const loadLegacyServerFunctionWrappers = async () => {
-      if (!cached) {
-        cached = (async () => {
-          const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
-          const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fns` });
-          const { serialize } = serializeProvider(executor.getTypes());
-
-          // For every sever-side function, register a client-side
-          // function that matches its definition, but which simply
-          // calls the server-side function endpoint.
-          Object.keys(serverFunctionList).forEach((functionName) => {
-            if (expressionsSetup.getFunction(functionName)) {
-              return;
-            }
-            const fn = () => ({
-              ...serverFunctionList[functionName],
-              fn: (input: any, args: any) => {
-                return batchedFunction({ functionName, args, context: serialize(input) });
-              },
-            });
-            expressionsSetup.registerFunction(fn);
-          });
-        })();
-      }
-      return cached;
-    };
-
-    const setup: ExpressionsSetup = {
-      ...expressionsSetup,
-      __LEGACY: {
-        types: executor.types,
-        functions: executor.functions,
-        renderers,
-        getExecutor,
-        loadLegacyServerFunctionWrappers,
-      },
-    };
+    const setup = expressions.setup();
 
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart, { bfetch }: ExpressionsStartDeps): ExpressionsStart {
-    setCoreStart(core);
+  public start(core: CoreStart): ExpressionsStart {
     setNotifications(core.notifications);
 
     const { expressions } = this;

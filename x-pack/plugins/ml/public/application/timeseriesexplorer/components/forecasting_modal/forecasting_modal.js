@@ -9,7 +9,9 @@
  */
 
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
 
 import React, { Component } from 'react';
 
@@ -250,8 +252,8 @@ export class ForecastingModalUI extends Component {
         .getForecastRequestStats(this.props.job, forecastId)
         .then((resp) => {
           // Get the progress (stats value is between 0 and 1).
-          const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
-          const status = _.get(resp, ['stats', 'forecast_status']);
+          const progress = get(resp, ['stats', 'forecast_progress'], previousProgress);
+          const status = get(resp, ['stats', 'forecast_status']);
 
           // The requests for forecast stats can get routed to different shards,
           // and if these operate at different speeds there is a chance that a
@@ -263,7 +265,7 @@ export class ForecastingModalUI extends Component {
           }
 
           // Display any messages returned in the request stats.
-          let messages = _.get(resp, ['stats', 'forecast_messages'], []);
+          let messages = get(resp, ['stats', 'forecast_messages'], []);
           messages = messages.map((message) => ({ message, status: MESSAGE_LEVEL.WARNING }));
           this.setState({ messages });
 

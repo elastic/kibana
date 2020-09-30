@@ -8,18 +8,13 @@ import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
-import {
-  dashboardFactory,
-  urlFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../components/action_wizard/test_data';
+import { mockActionFactories } from '../../../components/action_wizard/test_data';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { mockDynamicActionManager } from './test_data';
-import { ActionFactory } from '../../../dynamic_actions';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  actionFactories: mockActionFactories,
   storage: new Storage(new StubBrowserStorage()),
   toastService: {
     addError: (...args: any[]) => {
@@ -29,10 +24,25 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
       alert(JSON.stringify(args));
     },
   } as any,
+  getTrigger: (triggerId) => ({
+    id: triggerId,
+  }),
 });
 
-storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
-  <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />
-  </EuiFlyout>
-));
+storiesOf('components/FlyoutManageDrilldowns', module)
+  .add('default (3 triggers)', () => (
+    <EuiFlyout onClose={() => {}}>
+      <FlyoutManageDrilldowns
+        dynamicActionManager={mockDynamicActionManager}
+        supportedTriggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
+      />
+    </EuiFlyout>
+  ))
+  .add('Only filter is supported', () => (
+    <EuiFlyout onClose={() => {}}>
+      <FlyoutManageDrilldowns
+        dynamicActionManager={mockDynamicActionManager}
+        supportedTriggers={['FILTER_TRIGGER']}
+      />
+    </EuiFlyout>
+  ));

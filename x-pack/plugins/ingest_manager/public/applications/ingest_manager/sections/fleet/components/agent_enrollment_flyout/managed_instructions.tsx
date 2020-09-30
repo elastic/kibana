@@ -9,7 +9,7 @@ import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
+import { AgentPolicy } from '../../../../types';
 import {
   useGetOneEnrollmentAPIKey,
   useCore,
@@ -18,13 +18,13 @@ import {
   useFleetStatus,
 } from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
-import { DownloadStep, AgentConfigSelectionStep } from './steps';
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
 interface Props {
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -34,13 +34,16 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
   const settings = useGetSettings();
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
-  const kibanaUrl =
-    settings.data?.item?.kibana_url ?? `${window.location.origin}${core.http.basePath.get()}`;
+  const kibanaUrlsSettings = settings.data?.item?.kibana_urls;
+  const kibanaUrl = kibanaUrlsSettings
+    ? kibanaUrlsSettings[0]
+    : `${window.location.origin}${core.http.basePath.get()}`;
+
   const kibanaCASha256 = settings.data?.item?.kibana_ca_sha256;
 
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentConfigSelectionStep({ agentConfigs, setSelectedAPIKeyId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedAPIKeyId }),
     {
       title: i18n.translate('xpack.ingestManager.agentEnrollment.stepEnrollAndRunAgentTitle', {
         defaultMessage: 'Enroll and start the Elastic Agent',
@@ -60,7 +63,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.managedDescription"
-          defaultMessage="Whether you need one agent or thousands, Fleet makes it easy to centrally manage and deploy updates to your agents. Follow the instructions below to download and enroll an Elastic Agent with Fleet."
+          defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -72,13 +75,13 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
         <>
           <FormattedMessage
             id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
-            defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
+            defaultMessage="Before enrolling agents, {link}."
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.goToFleetButton"
-                    defaultMessage="Go to Fleet."
+                    id="xpack.ingestManager.agentEnrollment.setUpFleetLink"
+                    defaultMessage="set up Fleet"
                   />
                 </EuiLink>
               ),
@@ -88,4 +91,4 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
       )}
     </>
   );
-};
+});

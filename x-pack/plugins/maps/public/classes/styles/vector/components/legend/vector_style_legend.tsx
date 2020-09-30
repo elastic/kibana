@@ -11,7 +11,7 @@ interface Props {
   isLinesOnly: boolean;
   isPointsOnly: boolean;
   styles: Array<IStyleProperty<any>>;
-  symbolId: string;
+  symbolId?: string;
 }
 
 export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }: Props) {
@@ -31,5 +31,5 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId 
     );
   }
 
-  return legendRows;
+  return <>{legendRows}</>;
 }

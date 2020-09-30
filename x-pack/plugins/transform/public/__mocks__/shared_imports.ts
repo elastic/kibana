@@ -15,7 +15,6 @@ export const useRequest = jest.fn(() => ({
 
 // just passing through the reimports
 export {
-  getErrorMessage,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
@@ -24,7 +23,6 @@ export {
   DataGrid,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
   INDEX_STATUS,

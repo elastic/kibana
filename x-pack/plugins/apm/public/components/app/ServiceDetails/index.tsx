@@ -5,40 +5,38 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { AlertIntegrations } from './AlertIntegrations';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { ApmHeader } from '../../shared/ApmHeader';
+import { AlertIntegrations } from './AlertIntegrations';
+import { ServiceDetailTabs } from './ServiceDetailTabs';
 
-interface Props {
+interface Props extends RouteComponentProps<{ serviceName: string }> {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
 }
 
-export function ServiceDetails({ tab }: Props) {
+export function ServiceDetails({ match, tab }: Props) {
   const plugin = useApmPluginContext();
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
-
-  const canReadAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:show'
-  ];
-  const canSaveAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:save'
-  ];
+  const { serviceName } = match.params;
+  const capabilities = plugin.core.application.capabilities;
+  const canReadAlerts = !!capabilities.apm['alerting:show'];
+  const canSaveAlerts = !!capabilities.apm['alerting:save'];
   const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-
-  const { core } = useApmPluginContext();
+  const isMlPluginEnabled = 'ml' in plugin.plugins;
+  const canReadAnomalies = !!(
+    isMlPluginEnabled &&
+    capabilities.ml.canAccessML &&
+    capabilities.ml.canGetJobs
+  );
 
   const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
     defaultMessage: 'Add data',
@@ -58,12 +56,15 @@ export function ServiceDetails({ tab }: Props) {
               <AlertIntegrations
                 canReadAlerts={canReadAlerts}
                 canSaveAlerts={canSaveAlerts}
+                canReadAnomalies={canReadAnomalies}
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+              href={plugin.core.http.basePath.prepend(
+                '/app/home#/tutorial/apm'
+              )}
               size="s"
               color="primary"
               iconType="plusInCircle"
@@ -74,7 +75,7 @@ export function ServiceDetails({ tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs tab={tab} />
+      <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
   );
 }

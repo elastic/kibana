@@ -60,3 +60,6 @@ apm.tsconfig.json
 # release notes script output
 report.csv
 report.asciidoc
+
+# TS incremental build cache
+*.tsbuildinfo

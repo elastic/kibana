@@ -15,6 +15,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
 } from '../../../../src/core/server';
+import { ActionTypeExecutorResult } from '../common';
+export { ActionTypeExecutorResult } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -47,7 +49,7 @@ export interface ActionsPlugin {
 
 export interface ActionsConfigType {
   enabled: boolean;
-  whitelistedHosts: string[];
+  allowedHosts: string[];
   enabledActionTypes: string[];
 }
 
@@ -58,6 +60,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -79,16 +82,6 @@ export interface FindActionResult extends ActionResult {
   referencedByCount: number;
 }
 
-// the result returned from an action type executor function
-export interface ActionTypeExecutorResult<Data> {
-  actionId: string;
-  status: 'ok' | 'error';
-  message?: string;
-  serviceMessage?: string;
-  data?: Data;
-  retry?: null | boolean | Date;
-}
-
 // signature of the action type executor function
 export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
@@ -99,8 +92,8 @@ interface ValidatorType<Type> {
 }
 
 export interface ActionValidationService {
-  isWhitelistedHostname(hostname: string): boolean;
-  isWhitelistedUri(uri: string): boolean;
+  isHostnameAllowed(hostname: string): boolean;
+  isUriAllowed(uri: string): boolean;
 }
 
 export interface ActionType<
@@ -139,4 +132,10 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+
+export interface ProxySettings {
+  proxyUrl: string;
+  proxyHeaders?: Record<string, string>;
+  proxyRejectUnauthorizedCertificates: boolean;
 }

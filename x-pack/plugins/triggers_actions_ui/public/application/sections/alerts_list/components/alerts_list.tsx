@@ -152,6 +152,10 @@ export const AlertsList: React.FunctionComponent = () => {
           data: alertsResponse.data,
           totalItemCount: alertsResponse.total,
         });
+
+        if (!alertsResponse.data?.length && page.index > 0) {
+          setPage({ ...page, index: 0 });
+        }
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -399,26 +403,17 @@ export const AlertsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
-        onDeleted={(deleted: string[]) => {
-          if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
-            const updatedAlerts = alertsState.data.filter(
-              (alert) => alert.id && !alertsToDelete.includes(alert.id)
-            );
-            setAlertsState({
-              isLoading: false,
-              data: updatedAlerts,
-              totalItemCount: alertsState.totalItemCount - deleted.length,
-            });
-            setSelectedIds([]);
-          }
+        onDeleted={async (deleted: string[]) => {
           setAlertsToDelete([]);
+          setSelectedIds([]);
+          await loadAlertsData();
         }}
         onErrors={async () => {
           // Refresh the alerts from the server, some alerts may have beend deleted
           await loadAlertsData();
           setAlertsToDelete([]);
         }}
-        onCancel={async () => {
+        onCancel={() => {
           setAlertsToDelete([]);
         }}
         apiDeleteCall={deleteAlerts}
@@ -429,6 +424,9 @@ export const AlertsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
           defaultMessage: 'alerts',
         })}
+        setIsLoadingState={(isLoading: boolean) => {
+          setAlertsState({ ...alertsState, isLoading });
+        }}
       />
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (

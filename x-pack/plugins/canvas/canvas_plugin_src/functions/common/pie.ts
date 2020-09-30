@@ -39,9 +39,9 @@ interface PieOptions {
   colors: string[];
   legend: {
     show: boolean;
-    backgroundOpacity: number;
-    labelBoxBorderColor: string;
-    position: Legend;
+    backgroundOpacity?: number;
+    labelBoxBorderColor?: string;
+    position?: Legend;
   };
   grid: {
     show: boolean;
@@ -57,7 +57,7 @@ interface PieData {
   color?: string;
 }
 
-interface Pie {
+export interface Pie {
   font: Style;
   data: PieData[];
   options: PieOptions;

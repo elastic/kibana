@@ -27,6 +27,7 @@ export {
 } from './plugin';
 export {
   FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
   FeatureCatalogueCategory,
   Environment,
   TutorialVariables,

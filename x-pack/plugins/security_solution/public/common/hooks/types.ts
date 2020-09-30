@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SimpleSavedObject } from '../../../../../../src/core/public';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

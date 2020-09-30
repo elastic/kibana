@@ -17,7 +17,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
+  const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
     expectSpaceSelector?: boolean;

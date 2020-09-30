@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import './_index.scss';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
@@ -19,8 +20,10 @@ import { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share'> & MlStartDependencies;
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
+  MlStartDependencies;
 
 interface AppProps {
   coreStart: CoreStart;
@@ -48,11 +51,21 @@ export interface MlServicesContext {
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+  const redirectToMlAccessDeniedPage = async () => {
+    const accessDeniedPageUrl = await deps.share.urlGenerators
+      .getUrlGenerator(ML_APP_URL_GENERATOR)
+      .createUrl({
+        page: ML_PAGES.ACCESS_DENIED,
+      });
+    await coreStart.application.navigateToUrl(accessDeniedPageUrl);
+  };
+
   const pageDeps = {
     history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    redirectToMlAccessDeniedPage,
   };
   const services = {
     appName: 'ML',

@@ -87,7 +87,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing, indexManagement, remoteClusters }: Dependencies
+    { features, licensing, indexManagement, remoteClusters }: Dependencies
   ) {
     this.config$
       .pipe(first())
@@ -123,6 +123,19 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: 'cross_cluster_replication',
+      management: {
+        data: ['cross_cluster_replication'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage', 'manage_ccr'],
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
       this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));

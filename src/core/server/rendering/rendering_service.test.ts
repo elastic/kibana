@@ -43,16 +43,9 @@ const INJECTED_METADATA = {
       version: expect.any(String),
     },
   },
-  legacyMetadata: {
-    branch: expect.any(String),
-    buildNum: expect.any(Number),
-    buildSha: expect.any(String),
-    version: expect.any(String),
-  },
 };
 
 const { createKibanaRequest, createRawRequest } = httpServerMock;
-const legacyApp = { getId: () => 'legacy' };
 
 describe('RenderingService', () => {
   let service: RenderingService;
@@ -73,13 +66,6 @@ describe('RenderingService', () => {
           registered: { name: 'title' },
         });
         render = (await service.setup(mockRenderingSetupDeps)).render;
-        await service.start({
-          legacy: {
-            legacyInternals: {
-              getVars: () => ({}),
-            },
-          },
-        } as any);
       });
 
       it('renders "core" page', async () => {
@@ -121,62 +107,6 @@ describe('RenderingService', () => {
 
       it('renders "core" from legacy request', async () => {
         const content = await render(createRawRequest(), uiSettings);
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" page', async () => {
-        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" page for blank basepath', async () => {
-        mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
-
-        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with custom vars', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          vars: {
-            fake: '__TEST_TOKEN__',
-          },
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with excluded user settings', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          includeUserSettings: false,
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with excluded user settings and custom vars', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          includeUserSettings: false,
-          vars: {
-            fake: '__TEST_TOKEN__',
-          },
-        });
         const dom = load(content);
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 

@@ -13,8 +13,9 @@ import {
   expectResponses,
   getUrlPrefix,
   getTestTitle,
+  getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 export interface CreateTestDefinition extends TestDefinition {
   request: { type: string; id: string };
@@ -33,7 +34,7 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 const NEW_SINGLE_NAMESPACE_OBJ = Object.freeze({ type: 'dashboard', id: '' });
 const NEW_MULTI_NAMESPACE_OBJ = Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' });
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
-export const TEST_CASES = Object.freeze({
+export const TEST_CASES: Record<string, CreateTestCase> = Object.freeze({
   ...CASES,
   NEW_SINGLE_NAMESPACE_OBJ,
   NEW_MULTI_NAMESPACE_OBJ,
@@ -44,7 +45,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   const expectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody = (
     testCase: CreateTestCase,
-    spaceId = SPACES.DEFAULT.spaceId
+    user?: TestUser
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     if (testCase.failure === 403) {
       await expectForbidden(testCase.type)(response);
@@ -54,7 +55,8 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       await expectResponses.permitted(object, testCase);
       if (!testCase.failure) {
         expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-        await expectResponses.successCreated(es, spaceId, object.type, object.id);
+        const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+        expect(object.namespaces).to.eql(redactedNamespaces);
       }
     }
   };
@@ -64,6 +66,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     overwrite: boolean,
     options?: {
       spaceId?: string;
+      user?: TestUser;
       responseBodyOverride?: ExpectResponseBody;
     }
   ): CreateTestDefinition[] => {
@@ -76,7 +79,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 200,
       request: createRequest(x),
-      responseBody: options?.responseBodyOverride || expectResponseBody(x, options?.spaceId),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x, options?.user),
       overwrite,
     }));
   };

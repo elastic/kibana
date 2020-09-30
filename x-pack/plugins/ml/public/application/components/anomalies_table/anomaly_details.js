@@ -11,7 +11,12 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import get from 'lodash/get';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import pick from 'lodash/pick';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -63,16 +68,12 @@ function getDetailsItems(anomaly, examples, filter) {
     }
   } else {
     causes = sourceCauses.map((cause) => {
-      const simplified = _.pick(cause, 'typical', 'actual', 'probability');
+      const simplified = pick(cause, 'typical', 'actual', 'probability');
       // Get the 'entity field name/value' to display in the cause -
       // For by and over, use by_field_name/value (over_field_name/value are in the top level fields)
       // For just an 'over' field - the over_field_name/value appear in both top level and cause.
-      simplified.entityName = _.has(cause, 'by_field_name')
-        ? cause.by_field_name
-        : cause.over_field_name;
-      simplified.entityValue = _.has(cause, 'by_field_value')
-        ? cause.by_field_value
-        : cause.over_field_value;
+      simplified.entityName = cause.by_field_name ? cause.by_field_name : cause.over_field_name;
+      simplified.entityValue = cause.by_field_value ? cause.by_field_value : cause.over_field_value;
       return simplified;
     });
   }
@@ -471,7 +472,7 @@ export class AnomalyDetails extends Component {
 
   renderDetails() {
     const detailItems = getDetailsItems(this.props.anomaly, this.props.examples, this.props.filter);
-    const isInterimResult = _.get(this.props.anomaly, 'source.is_interim', false);
+    const isInterimResult = get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>
         <EuiText size="xs">

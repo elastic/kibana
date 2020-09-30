@@ -16,6 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+}));
+
 import supertest from 'supertest';
 
 import { HttpService } from '../http_service';
@@ -286,6 +291,42 @@ describe('KibanaRequest', () => {
           .end();
         setTimeout(() => incomingRequest.abort(), 50);
       });
+    });
+  });
+
+  describe('request id', () => {
+    it('accepts x-opaque-id header case-insensitively', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({ body: { requestId: req.id } });
+      });
+      await server.start();
+
+      const st = supertest(innerServer.listener);
+
+      const resp1 = await st.get('/').set({ 'x-opaque-id': 'alpha' }).expect(200);
+      expect(resp1.body).toEqual({ requestId: 'alpha' });
+      const resp2 = await st.get('/').set({ 'X-Opaque-Id': 'beta' }).expect(200);
+      expect(resp2.body).toEqual({ requestId: 'beta' });
+      const resp3 = await st.get('/').set({ 'X-OPAQUE-ID': 'gamma' }).expect(200);
+      expect(resp3.body).toEqual({ requestId: 'gamma' });
+    });
+  });
+
+  describe('request uuid', () => {
+    it('generates a UUID', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({ body: { requestUuid: req.uuid } });
+      });
+      await server.start();
+
+      const st = supertest(innerServer.listener);
+
+      const resp1 = await st.get('/').expect(200);
+      expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 });

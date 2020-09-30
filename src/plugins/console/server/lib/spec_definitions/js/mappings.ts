@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 import { SpecDefinitionsService } from '../../../services';
 
 import { BOOLEAN } from './shared';
 
-/* eslint-disable @typescript-eslint/camelcase */
 export const mappings = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('put_mapping', {
     priority: 10, // collides with put doc by id
@@ -160,9 +157,10 @@ export const mappings = (specService: SpecDefinitionsService) => {
 
           // dates
           format: {
-            __one_of: _.flatten([
-              _.map(
-                [
+            // outer array required to for an array of string values
+            __one_of: [
+              [
+                ...[
                   'date',
                   'date_time',
                   'date_time_no_millis',
@@ -176,46 +174,49 @@ export const mappings = (specService: SpecDefinitionsService) => {
                   'week_date',
                   'week_date_time',
                   'week_date_time_no_millis',
-                ],
-                function (s) {
+                ].flatMap(function (s) {
                   return ['basic_' + s, 'strict_' + s];
-                }
-              ),
-              [
-                'date',
-                'date_hour',
-                'date_hour_minute',
-                'date_hour_minute_second',
-                'date_hour_minute_second_fraction',
-                'date_hour_minute_second_millis',
-                'date_optional_time',
-                'date_time',
-                'date_time_no_millis',
-                'hour',
-                'hour_minute',
-                'hour_minute_second',
-                'hour_minute_second_fraction',
-                'hour_minute_second_millis',
-                'ordinal_date',
-                'ordinal_date_time',
-                'ordinal_date_time_no_millis',
-                'time',
-                'time_no_millis',
-                't_time',
-                't_time_no_millis',
-                'week_date',
-                'week_date_time',
-                'weekDateTimeNoMillis',
-                'week_year',
-                'weekyearWeek',
-                'weekyearWeekDay',
-                'year',
-                'year_month',
-                'year_month_day',
-                'epoch_millis',
-                'epoch_second',
-              ],
-            ]),
+                }),
+                ...[
+                  'date',
+                  'date_hour',
+                  'date_hour_minute',
+                  'date_hour_minute_second',
+                  'date_hour_minute_second_fraction',
+                  'date_hour_minute_second_millis',
+                  'date_optional_time',
+                  'date_time',
+                  'date_time_no_millis',
+                  'hour',
+                  'hour_minute',
+                  'hour_minute_second',
+                  'hour_minute_second_fraction',
+                  'hour_minute_second_millis',
+                  'ordinal_date',
+                  'ordinal_date_time',
+                  'ordinal_date_time_no_millis',
+                  'time',
+                  'time_no_millis',
+                  't_time',
+                  't_time_no_millis',
+                  'week_date',
+                  'week_date_time',
+                  'weekDateTimeNoMillis',
+                  'weekyear',
+                  'strict_weekyear',
+                  'weekyear_week',
+                  'strict_weekyear_week',
+                  'strict_date_optional_time_nanos',
+                  'weekyear_week_day',
+                  'strict_weekyear_week_day',
+                  'year',
+                  'year_month',
+                  'year_month_day',
+                  'epoch_millis',
+                  'epoch_second',
+                ],
+              ].sort(),
+            ],
           },
 
           fielddata: {

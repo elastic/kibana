@@ -22,8 +22,9 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { IAggType, IndexPattern } from 'src/plugins/data/public';
+
+import { DocLinksStart } from '../../../../core/public';
 import { useKibana } from '../../../kibana_react/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
@@ -52,7 +53,7 @@ function DefaultEditorAggSelect({
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
   const [isDirty, setIsDirty] = useState(false);
-  const { services } = useKibana();
+  const { services } = useKibana<{ docLinks: DocLinksStart }>();
   const selectedOptions: ComboBoxGroupedOptions<IAggType> = value
     ? [{ label: value.title, target: value }]
     : [];
@@ -71,6 +72,7 @@ function DefaultEditorAggSelect({
 
   let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
+    // @ts-expect-error
     aggHelpLink = services.docLinks.links.aggs[value.name];
   }
 
@@ -157,6 +159,7 @@ function DefaultEditorAggSelect({
         isClearable={false}
         isInvalid={showValidation ? !isValid : false}
         fullWidth={true}
+        sortMatchesBy="startsWith"
         compressed
       />
     </EuiFormRow>

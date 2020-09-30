@@ -1,16 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | testing custom expressions"`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | test"`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' font={font size=12} openLinksInNewTab=true "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with percentage mode should have percentage format 1`] = `"metricvis percentageMode=true metric={visdimension 0 format='percent' } "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function without buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
 
@@ -39,7 +31,5 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles undefined markdown function 1`] = `"markdownvis '' font={font size=12} openLinksInNewTab=true "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;

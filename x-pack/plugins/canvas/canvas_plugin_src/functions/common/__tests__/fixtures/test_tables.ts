@@ -16,24 +16,29 @@ const testTable: Datatable = {
   type: 'datatable',
   columns: [
     {
+      id: 'name',
       name: 'name',
-      type: 'string',
+      meta: { type: 'string' },
     },
     {
+      id: 'time',
       name: 'time',
-      type: 'date',
+      meta: { type: 'date' },
     },
     {
+      id: 'price',
       name: 'price',
-      type: 'number',
+      meta: { type: 'number' },
     },
     {
+      id: 'quantity',
       name: 'quantity',
-      type: 'number',
+      meta: { type: 'number' },
     },
     {
+      id: 'in_stock',
       name: 'in_stock',
-      type: 'boolean',
+      meta: { type: 'boolean' },
     },
   ],
   rows: [
@@ -107,24 +112,29 @@ const stringTable: Datatable = {
   type: 'datatable',
   columns: [
     {
+      id: 'name',
       name: 'name',
-      type: 'string',
+      meta: { type: 'string' },
     },
     {
+      id: 'time',
       name: 'time',
-      type: 'string',
+      meta: { type: 'string' },
     },
     {
+      id: 'price',
       name: 'price',
-      type: 'string',
+      meta: { type: 'string' },
     },
     {
+      id: 'quantity',
       name: 'quantity',
-      type: 'string',
+      meta: { type: 'string' },
     },
     {
+      id: 'in_stock',
       name: 'in_stock',
-      type: 'string',
+      meta: { type: 'string' },
     },
   ],
   rows: [

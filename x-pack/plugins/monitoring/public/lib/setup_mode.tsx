@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
@@ -110,7 +111,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
         text,
       });
     });
-    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+    return toggleSetupMode(false);
   }
   notifySetupModeDataChange();
 
@@ -160,7 +161,7 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
-  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  setSetupModeMenuItem();
   notifySetupModeDataChange();
 
   if (inSetupMode) {
@@ -179,8 +180,17 @@ export const setSetupModeMenuItem = () => {
   const globalState = angularState.injector.get('globalState');
   const enabled = !globalState.inSetupMode;
 
+  const services = {
+    usageCollection: Legacy.shims.usageCollection,
+  };
+  const I18nContext = Legacy.shims.I18nContext;
+
   render(
-    <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
+    <KibanaContextProvider services={services}>
+      <I18nContext>
+        <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+      </I18nContext>
+    </KibanaContextProvider>,
     document.getElementById('setupModeNav')
   );
 };

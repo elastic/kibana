@@ -6,8 +6,8 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { IIndexPattern } from 'src/plugins/data/public';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import {
   Direction,
   HostFields,
@@ -17,7 +17,6 @@ import {
   HostsSortField,
   OsFields,
 } from '../../../graphql/types';
-import { assertUnreachable } from '../../../common/lib/helpers';
 import { State } from '../../../common/store';
 import {
   Columns,
@@ -36,7 +35,6 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -77,7 +75,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     direction,
     fakeTotalCount,
     id,
-    indexPattern,
     isInspect,
     limit,
     loading,

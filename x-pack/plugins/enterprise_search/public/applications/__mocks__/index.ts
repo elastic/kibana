@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { mockHistory } from './react_router_history.mock';
+export { mockHistory, mockLocation } from './react_router_history.mock';
 export { mockKibanaContext } from './kibana_context.mock';
-export { mockLicenseContext } from './license_context.mock';
+export { mockLicensingValues } from './licensing_logic.mock';
+export { mockHttpValues } from './http_logic.mock';
+export { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+export { mockAllValues, mockAllActions, setMockValues } from './kea.mock';
+
 export {
   mountWithContext,
   mountWithKibanaContext,

@@ -1,0 +1,288 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionsSection only renders a spacer if no solutions are available 1`] = `
+<Fragment>
+  <section
+    aria-labelledby="homSolutions__title"
+    className="homSolutions"
+  >
+    <EuiScreenReaderOnly>
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="homSolutions__title"
+        >
+          <FormattedMessage
+            defaultMessage="Pick your solution"
+            id="home.solutionsSection.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiScreenReaderOnly>
+    <EuiFlexGroup
+      className="homSolutions__content"
+      justifyContent="spaceAround"
+    />
+  </section>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+</Fragment>
+`;
+
+exports[`SolutionsSection renders a single solution 1`] = `
+<Fragment>
+  <section
+    aria-labelledby="homSolutions__title"
+    className="homSolutions"
+  >
+    <EuiScreenReaderOnly>
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="homSolutions__title"
+        >
+          <FormattedMessage
+            defaultMessage="Pick your solution"
+            id="home.solutionsSection.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiScreenReaderOnly>
+    <EuiFlexGroup
+      className="homSolutions__content"
+      justifyContent="spaceAround"
+    >
+      <SolutionPanel
+        addBasePath={[Function]}
+        solution={
+          Object {
+            "descriptions": Array [
+              "Analyze data in dashboards",
+            ],
+            "icon": "logoKibana",
+            "id": "kibana",
+            "order": 1,
+            "path": "kibana_landing_page",
+            "subtitle": "Visualize & analyze",
+            "title": "Kibana",
+          }
+        }
+      />
+    </EuiFlexGroup>
+  </section>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+</Fragment>
+`;
+
+exports[`SolutionsSection renders multiple solutions in a single column when Kibana apps are not enabled 1`] = `
+<Fragment>
+  <section
+    aria-labelledby="homSolutions__title"
+    className="homSolutions"
+  >
+    <EuiScreenReaderOnly>
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="homSolutions__title"
+        >
+          <FormattedMessage
+            defaultMessage="Pick your solution"
+            id="home.solutionsSection.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiScreenReaderOnly>
+    <EuiFlexGroup
+      className="homSolutions__content"
+      justifyContent="spaceAround"
+    >
+      <EuiFlexItem
+        className="homSolutions__group homSolutions__group--multiple"
+        grow={1}
+      >
+        <EuiFlexGroup
+          direction="column"
+        >
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-2"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-2",
+                "order": 2,
+                "path": "path-to-solution-two",
+                "subtitle": "Subtitle for solution two",
+                "title": "Solution two",
+              }
+            }
+          />
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-3"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-3",
+                "order": 3,
+                "path": "path-to-solution-three",
+                "subtitle": "Subtitle for solution three",
+                "title": "Solution three",
+              }
+            }
+          />
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-4"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-4",
+                "order": 4,
+                "path": "path-to-solution-four",
+                "subtitle": "Subtitle for solution four",
+                "title": "Solution four",
+              }
+            }
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </section>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+</Fragment>
+`;
+
+exports[`SolutionsSection renders multiple solutions in two columns with Kibana in its own column 1`] = `
+<Fragment>
+  <section
+    aria-labelledby="homSolutions__title"
+    className="homSolutions"
+  >
+    <EuiScreenReaderOnly>
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="homSolutions__title"
+        >
+          <FormattedMessage
+            defaultMessage="Pick your solution"
+            id="home.solutionsSection.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiScreenReaderOnly>
+    <EuiFlexGroup
+      className="homSolutions__content"
+      justifyContent="spaceAround"
+    >
+      <EuiFlexItem
+        className="homSolutions__group homSolutions__group--multiple"
+        grow={1}
+      >
+        <EuiFlexGroup
+          direction="column"
+        >
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-2"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-2",
+                "order": 2,
+                "path": "path-to-solution-two",
+                "subtitle": "Subtitle for solution two",
+                "title": "Solution two",
+              }
+            }
+          />
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-3"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-3",
+                "order": 3,
+                "path": "path-to-solution-three",
+                "subtitle": "Subtitle for solution three",
+                "title": "Solution three",
+              }
+            }
+          />
+          <SolutionPanel
+            addBasePath={[Function]}
+            key="solution-4"
+            solution={
+              Object {
+                "descriptions": Array [
+                  "Example use case",
+                ],
+                "icon": "empty",
+                "id": "solution-4",
+                "order": 4,
+                "path": "path-to-solution-four",
+                "subtitle": "Subtitle for solution four",
+                "title": "Solution four",
+              }
+            }
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <SolutionPanel
+        addBasePath={[Function]}
+        solution={
+          Object {
+            "descriptions": Array [
+              "Analyze data in dashboards",
+            ],
+            "icon": "logoKibana",
+            "id": "kibana",
+            "order": 1,
+            "path": "kibana_landing_page",
+            "subtitle": "Visualize & analyze",
+            "title": "Kibana",
+          }
+        }
+      />
+    </EuiFlexGroup>
+  </section>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+</Fragment>
+`;

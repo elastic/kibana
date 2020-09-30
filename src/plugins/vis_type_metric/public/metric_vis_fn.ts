@@ -46,19 +46,21 @@ interface Arguments {
   bucket: any; // these aren't typed yet
 }
 
-interface RenderValue {
+export interface MetricVisRenderValue {
   visType: typeof visType;
   visData: Input;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
   params: any;
 }
 
-export const createMetricVisFn = (): ExpressionFunctionDefinition<
+export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'metricVis',
   Input,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<MetricVisRenderValue>
+>;
+
+export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
   name: 'metricVis',
   type: 'render',
   inputTypes: ['kibana_datatable'],
@@ -175,7 +177,7 @@ export const createMetricVisFn = (): ExpressionFunctionDefinition<
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'metric_vis',
       value: {
         visData: input,
         visType,

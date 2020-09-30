@@ -5,7 +5,6 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import './index.scss';
 import {
   MlPlugin,
   MlPluginSetup,

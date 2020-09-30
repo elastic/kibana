@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { TimelineNonEcsData } from '../../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';

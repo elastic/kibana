@@ -90,6 +90,7 @@ export interface ILayer {
   supportsLabelsOnTop: () => boolean;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
+  isFittable(): Promise<boolean>;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -231,6 +232,10 @@ export class AbstractLayer implements ILayer {
 
   async supportsFitToBounds(): Promise<boolean> {
     return await this.getSource().supportsFitToBounds();
+  }
+
+  async isFittable(): Promise<boolean> {
+    return (await this.supportsFitToBounds()) && this.isVisible();
   }
 
   async getDisplayName(source?: ISource): Promise<string> {
@@ -418,7 +423,7 @@ export class AbstractLayer implements ILayer {
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange });
+    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {

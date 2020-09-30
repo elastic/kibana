@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
@@ -83,12 +83,12 @@ export const useResultsViewConfig = (jobId: string) => {
               setIsLoadingJobConfig(false);
             }
           } catch (e) {
-            setJobCapsServiceErrorMessage(getErrorMessage(e));
+            setJobCapsServiceErrorMessage(extractErrorMessage(e));
             setIsLoadingJobConfig(false);
           }
         }
       } catch (e) {
-        setJobConfigErrorMessage(getErrorMessage(e));
+        setJobConfigErrorMessage(extractErrorMessage(e));
         setIsLoadingJobConfig(false);
       }
     })();

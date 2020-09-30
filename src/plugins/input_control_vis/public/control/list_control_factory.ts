@@ -190,7 +190,9 @@ export class ListControl extends Control<PhraseFilterManager> {
       return;
     }
 
-    this.partialResults = resp.terminated_early || resp.timed_out;
+    // TODO: terminated_early is missing from response definition.
+    // https://github.com/elastic/elasticsearch-js/issues/1289
+    this.partialResults = (resp as any).terminated_early || resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';
@@ -216,7 +218,7 @@ export async function listControlFactory(
   // dynamic options are only allowed on String fields but the setting defaults to true so it could
   // be enabled for non-string fields (since UI input is hidden for non-string fields).
   // If field is not string, then disable dynamic options.
-  const field = indexPattern.fields.find(({ name }) => name === controlParams.fieldName);
+  const field = indexPattern.fields.getAll().find(({ name }) => name === controlParams.fieldName);
   if (field && field.type !== 'string') {
     controlParams.options.dynamicOptions = false;
   }

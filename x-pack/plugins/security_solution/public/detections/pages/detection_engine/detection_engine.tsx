@@ -13,7 +13,6 @@ import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useWithSource } from '../../../common/containers/source';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
@@ -30,7 +29,7 @@ import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_
 import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
-import { useUserInfo } from '../../components/user_info';
+import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
@@ -46,6 +45,8 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -55,15 +56,17 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const { globalFullScreen } = useFullScreen();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated: isUserAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    signalIndexName,
-    hasIndexWrite,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated: isUserAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      signalIndexName,
+      hasIndexWrite,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -115,10 +118,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     [setShowBuildingBlockAlerts]
   );
 
-  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
-    signalIndexName,
-  ]);
-  const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
+  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
@@ -200,7 +200,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              signalsIndex={signalIndexName ?? ''}
               to={to}
             />
           </WrapperPage>

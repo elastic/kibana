@@ -30,6 +30,7 @@ chrome.navControls.registerLeft({
 
 |  Method | Description |
 |  --- | --- |
-|  [registerLeft(navControl)](./kibana-plugin-core-public.chromenavcontrols.registerleft.md) | Register a nav control to be presented on the left side of the chrome header. |
-|  [registerRight(navControl)](./kibana-plugin-core-public.chromenavcontrols.registerright.md) | Register a nav control to be presented on the right side of the chrome header. |
+|  [registerCenter(navControl)](./kibana-plugin-core-public.chromenavcontrols.registercenter.md) | Register a nav control to be presented on the top-center side of the chrome header. |
+|  [registerLeft(navControl)](./kibana-plugin-core-public.chromenavcontrols.registerleft.md) | Register a nav control to be presented on the bottom-left side of the chrome header. |
+|  [registerRight(navControl)](./kibana-plugin-core-public.chromenavcontrols.registerright.md) | Register a nav control to be presented on the top-right side of the chrome header. |
 
