@@ -59,7 +59,7 @@ describe('AlertingBuiltins Plugin', () => {
           "actionGroups": Array [
             Object {
               "id": "tracking threshold met",
-              "name": "Tracking threshold Met",
+              "name": "Tracking threshold met",
             },
           ],
           "id": ".geo-threshold",

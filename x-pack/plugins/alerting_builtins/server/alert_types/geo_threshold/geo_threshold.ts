@@ -227,19 +227,28 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
 
     // Create alert instances
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
+      const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || '';
+      const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || '';
       services
-        .alertInstanceFactory(
-          `${entityName}-${shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId}`
-        )
+        .alertInstanceFactory(`${entityName}-${toBoundaryName || currLocation.shapeId}`)
         .scheduleActions(ActionGroupId, {
-          crossingEventTimeStamp: currLocation.date,
-          currentLocation: currLocation.location,
-          currentBoundaryId: currLocation.shapeId,
-          previousLocation: prevLocation.location,
-          previousBoundaryId: prevLocation.shapeId,
-          crossingLine: [prevLocation.location, currLocation.location],
-          crossingDocumentId: currLocation.docId,
+          entityId: entityName,
           timeOfDetection: currIntervalEndTime,
+          crossingLine: [prevLocation.location, currLocation.location],
+
+          toEntityLocation: currLocation.location,
+          toEntityDateTime: currLocation.date,
+          toEntityDocumentId: currLocation.docId,
+
+          toBoundaryId: currLocation.shapeId,
+          toBoundaryName,
+
+          fromEntityLocation: prevLocation.location,
+          fromEntityDateTime: prevLocation.date,
+          fromEntityDocumentId: prevLocation.docId,
+
+          fromBoundaryId: prevLocation.shapeId,
+          fromBoundaryName,
         });
     });
 

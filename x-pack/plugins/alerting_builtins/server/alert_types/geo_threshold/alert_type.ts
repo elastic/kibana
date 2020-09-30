@@ -20,15 +20,22 @@ export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
 export const ActionGroupId = 'tracking threshold met';
 
-const actionVariableContextCrossingEventTimeStampLabel = i18n.translate(
+const actionVariableContextToEntityDateTimeLabel = i18n.translate(
   'xpack.alertingBuiltins.geoThreshold.actionVariableContextEnteredTimeStampLabel',
   {
-    defaultMessage: `The time the entity's crossing was recorded to arrive at its current location`,
+    defaultMessage: `The time the entity was detected in the current boundary`,
   }
 );
 
-const actionVariableContextCurrentLocationLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextCurrentLocationLabel',
+const actionVariableContextFromEntityDateTimeLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextEnteredTimeStampLabel',
+  {
+    defaultMessage: `The last time the entity was recorded in the previous boundary`,
+  }
+);
+
+const actionVariableContextToEntityLocationLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToEntityLocationLabel',
   {
     defaultMessage: 'The most recently captured location of the entity',
   }
@@ -37,33 +44,55 @@ const actionVariableContextCurrentLocationLabel = i18n.translate(
 const actionVariableContextCrossingLineLabel = i18n.translate(
   'xpack.alertingBuiltins.geoThreshold.actionVariableContextCrossingLineLabel',
   {
-    defaultMessage: 'Line between the two locations that were used to determine the crossing event',
+    defaultMessage:
+      'GeoJSON line connecting the two locations that were used to determine the crossing event',
   }
 );
 
-const actionVariableContextPreviousLocationLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextPreviousLocationLabel',
+const actionVariableContextFromEntityLocationLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityLocationLabel',
   {
     defaultMessage: 'The previously captured location of the entity',
   }
 );
 
-const actionVariableContextCurrentBoundaryIdLabel = i18n.translate(
+const actionVariableContextToBoundaryIdLabel = i18n.translate(
   'xpack.alertingBuiltins.geoThreshold.actionVariableContextCurrentBoundaryIdLabel',
   {
     defaultMessage: 'The current boundary id containing the entity (if any)',
   }
 );
 
-const actionVariableContextPreviousBoundaryIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextPreviousBoundaryIdLabel',
+const actionVariableContextToBoundaryNameLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToBoundaryNameLabel',
+  {
+    defaultMessage: 'The boundary (if any) the entity has crossed into and is currently located',
+  }
+);
+
+const actionVariableContextFromBoundaryNameLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromBoundaryNameLabel',
+  {
+    defaultMessage: 'The boundary (if any) the entity has crossed from and was previously located',
+  }
+);
+
+const actionVariableContextFromBoundaryIdLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromBoundaryIdLabel',
   {
     defaultMessage: 'The previous boundary id containing the entity (if any)',
   }
 );
 
-const actionVariableContextCrossingDocumentIdLabel = i18n.translate(
+const actionVariableContextToEntityDocumentIdLabel = i18n.translate(
   'xpack.alertingBuiltins.geoThreshold.actionVariableContextCrossingDocumentIdLabel',
+  {
+    defaultMessage: 'The id of the crossing entity document',
+  }
+);
+
+const actionVariableContextFromEntityDocumentIdLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityDocumentIdLabel',
   {
     defaultMessage: 'The id of the crossing entity document',
   }
@@ -76,19 +105,40 @@ const actionVariableContextTimeOfDetectionLabel = i18n.translate(
   }
 );
 
+const actionVariableContextEntityIdLabel = i18n.translate(
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextEntityIdLabel',
+  {
+    defaultMessage: 'The entity ID of the document that triggered the alert',
+  }
+);
+
 const actionVariables = {
   context: [
-    {
-      name: 'crossingEventTimeStamp',
-      description: actionVariableContextCrossingEventTimeStampLabel,
-    },
-    { name: 'currentLocation', description: actionVariableContextCurrentLocationLabel },
-    { name: 'currentBoundaryId', description: actionVariableContextCurrentBoundaryIdLabel },
-    { name: 'previousLocation', description: actionVariableContextPreviousLocationLabel },
-    { name: 'previousBoundaryId', description: actionVariableContextPreviousBoundaryIdLabel },
-    { name: 'crossingLine', description: actionVariableContextCrossingLineLabel },
-    { name: 'crossingDocumentId', description: actionVariableContextCrossingDocumentIdLabel },
+    // Alert-specific data
+    { name: 'entityId', description: actionVariableContextEntityIdLabel },
     { name: 'timeOfDetection', description: actionVariableContextTimeOfDetectionLabel },
+    { name: 'crossingLine', description: actionVariableContextCrossingLineLabel },
+
+    // Corresponds to a specific document in the entity-index
+    { name: 'toEntityLocation', description: actionVariableContextToEntityLocationLabel },
+    {
+      name: 'toEntityDateTime',
+      description: actionVariableContextToEntityDateTimeLabel,
+    },
+    { name: 'toEntityDocumentId', description: actionVariableContextToEntityDocumentIdLabel },
+
+    //  Corresponds to a specific document in the boundary-index
+    { name: 'toBoundaryId', description: actionVariableContextToBoundaryIdLabel },
+    { name: 'toBoundaryName', description: actionVariableContextToBoundaryNameLabel },
+
+    // Corresponds to a specific document in the entity-index (from)
+    { name: 'fromEntityLocation', description: actionVariableContextFromEntityLocationLabel },
+    { name: 'fromEntityDateTime', description: actionVariableContextFromEntityDateTimeLabel },
+    { name: 'fromEntityDocumentId', description: actionVariableContextFromEntityDocumentIdLabel },
+
+    // Corresponds to a specific document in the boundary-index (from)
+    { name: 'fromBoundaryId', description: actionVariableContextFromBoundaryIdLabel },
+    { name: 'fromBoundaryName', description: actionVariableContextFromBoundaryNameLabel },
   ],
 };
 
