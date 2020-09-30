@@ -43,7 +43,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     },
   };
   const result = await callES('search', params);
-  if (result.hits.hits.length < 1) {
+  if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
     return null;
   }
   return result.hits.hits.map(({ _source }: any) => _source?.synthetics?.blob ?? null)[0];

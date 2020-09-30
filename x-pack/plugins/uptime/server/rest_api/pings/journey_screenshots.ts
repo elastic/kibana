@@ -26,12 +26,15 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
+    if (result === null) {
+      return response.notFound({
+        body: 'Screenshot was not found',
+      });
+    }
     return response.ok({
-      body: result,
+      body: Buffer.from(result, 'base64'),
       headers: {
-        // these images should be cached aggressively to prevent
-        // costly repeat network requests
-        'cache-control': 'max-age=600000000',
+        'content-type': 'image/png',
       },
     });
   },
