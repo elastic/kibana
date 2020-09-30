@@ -124,7 +124,9 @@ export function getVariableValue(node: ts.Node, program: ts.Program): string | R
   }
 
   throw Error(
-    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`
+    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind} [${
+      ts.SyntaxKind[node.kind]
+    }]`
   );
 }
 
