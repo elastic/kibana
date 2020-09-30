@@ -65,6 +65,7 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
+import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import {
   esFilters,
   indexPatterns as indexPatternsUtils,
@@ -283,16 +284,13 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.setIndexPattern = async (id) => {
     const nextIndexPattern = await indexPatterns.get(id);
     if (nextIndexPattern) {
-      const nextColumns = $scope.state.columns.filter((column) =>
-        nextIndexPattern.fields.getByName(column)
+      const nextAppState = getSwitchIndexPatternAppState(
+        nextIndexPattern,
+        $scope.indexPattern,
+        $scope.state.columns,
+        $scope.state.sort
       );
-      const nextSort = getSortArray($scope.state.sort, nextIndexPattern);
-      const nextState = {
-        index: id,
-        columns: nextColumns.length ? nextColumns : ['_source'],
-        sort: nextSort,
-      };
-      await replaceUrlAppState(nextState);
+      await replaceUrlAppState(nextAppState);
       $route.reload();
     }
   };
