@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isNumber, isFinite } from 'lodash';
-import { ValidationResult } from '../../../../../triggers_actions_ui/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Criteria,
@@ -14,7 +14,7 @@ import {
   isRatioAlert,
   getNumerator,
   getDenominator,
-} from '../../../../common/alerting/logs/log_threshold/types';
+} from '../../../common/alerting/logs/log_threshold/types';
 
 export interface CriterionErrors {
   [id: string]: {
