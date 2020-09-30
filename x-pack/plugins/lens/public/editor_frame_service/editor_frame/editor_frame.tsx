@@ -22,6 +22,7 @@ import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/pu
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
+import { applyVisualizeFieldSuggestions } from './suggestion_helpers';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -185,6 +186,22 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [allLoaded, activeVisualization, state.visualization.state]
   );
+
+  // Get suggestions for visualize field when all datasources are ready
+  useEffect(() => {
+    if (allLoaded && props.initialContext && !props.doc) {
+      applyVisualizeFieldSuggestions({
+        datasourceMap: props.datasourceMap,
+        datasourceStates: state.datasourceStates,
+        visualizationMap: props.visualizationMap,
+        activeVisualizationId: state.visualization.activeId,
+        visualizationState: state.visualization.state,
+        visualizeTriggerFieldContext: props.initialContext,
+        dispatch,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allLoaded]);
 
   // The frame needs to call onChange every time its internal state changes
   useEffect(

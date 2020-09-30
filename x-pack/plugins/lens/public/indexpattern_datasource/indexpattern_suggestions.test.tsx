@@ -1087,34 +1087,9 @@ describe('IndexPattern Data Source suggestions', () => {
         };
       }
 
-      it('should return an empty array', () => {
-        const suggestions = getDatasourceSuggestionsForVisualizeField(
-          stateWithoutLayer(),
-          '1',
-          'source'
-        );
-
-        expect(suggestions).toEqual([]);
-      });
-    });
-    describe('with a previous empty layer', () => {
-      function stateWithEmptyLayer() {
-        const state = testInitialState();
-        return {
-          ...state,
-          layers: {
-            previousLayer: {
-              indexPatternId: '1',
-              columns: {},
-              columnOrder: [],
-            },
-          },
-        };
-      }
-
       it('should return an empty array if the field does not exist', () => {
         const suggestions = getDatasourceSuggestionsForVisualizeField(
-          stateWithEmptyLayer(),
+          stateWithoutLayer(),
           '1',
           'field_not_exist'
         );
@@ -1124,7 +1099,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('should apply a bucketed aggregation for a string field', () => {
         const suggestions = getDatasourceSuggestionsForVisualizeField(
-          stateWithEmptyLayer(),
+          stateWithoutLayer(),
           '1',
           'source'
         );
@@ -1133,15 +1108,15 @@ describe('IndexPattern Data Source suggestions', () => {
           expect.objectContaining({
             state: expect.objectContaining({
               layers: {
-                previousLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'id2'],
+                id1: expect.objectContaining({
+                  columnOrder: ['id2', 'id3'],
                   columns: {
-                    id1: expect.objectContaining({
+                    id2: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
                       params: expect.objectContaining({ size: 5 }),
                     }),
-                    id2: expect.objectContaining({
+                    id3: expect.objectContaining({
                       operationType: 'count',
                     }),
                   },
@@ -1154,81 +1129,13 @@ describe('IndexPattern Data Source suggestions', () => {
               isMultiRow: true,
               columns: [
                 expect.objectContaining({
-                  columnId: 'id1',
-                }),
-                expect.objectContaining({
                   columnId: 'id2',
                 }),
-              ],
-              layerId: 'previousLayer',
-            },
-          })
-        );
-      });
-    });
-
-    describe('finding the layer that is using the current index pattern', () => {
-      function stateWithCurrentIndexPattern(): IndexPatternPrivateState {
-        const state = testInitialState();
-
-        return {
-          ...state,
-          currentIndexPatternId: '1',
-          layers: {
-            previousLayer: {
-              indexPatternId: '1',
-              columns: {},
-              columnOrder: [],
-            },
-            currentLayer: {
-              indexPatternId: '2',
-              columns: {},
-              columnOrder: [],
-            },
-          },
-        };
-      }
-
-      it('suggests on the layer that matches by indexPatternId', () => {
-        const initialState = stateWithCurrentIndexPattern();
-        const suggestions = getDatasourceSuggestionsForVisualizeField(
-          initialState,
-          '2',
-          'timestamp'
-        );
-
-        expect(suggestions).toContainEqual(
-          expect.objectContaining({
-            state: expect.objectContaining({
-              layers: {
-                previousLayer: initialState.layers.previousLayer,
-                currentLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'id2'],
-                  columns: {
-                    id1: expect.objectContaining({
-                      operationType: 'date_histogram',
-                      sourceField: 'timestamp',
-                    }),
-                    id2: expect.objectContaining({
-                      operationType: 'count',
-                    }),
-                  },
-                }),
-              },
-            }),
-            table: {
-              changeType: 'initial',
-              label: undefined,
-              isMultiRow: true,
-              columns: [
                 expect.objectContaining({
-                  columnId: 'id1',
-                }),
-                expect.objectContaining({
-                  columnId: 'id2',
+                  columnId: 'id3',
                 }),
               ],
-              layerId: 'currentLayer',
+              layerId: 'id1',
             },
           })
         );

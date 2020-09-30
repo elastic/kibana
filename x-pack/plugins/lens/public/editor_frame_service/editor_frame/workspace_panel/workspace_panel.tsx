@@ -110,7 +110,6 @@ export function InnerWorkspacePanel({
   const [localState, setLocalState] = useState({
     expressionBuildError: undefined as string | undefined,
     expandError: false,
-    visualizeTriggerSuggestionsLoaded: false,
   });
 
   const activeVisualization = activeVisualizationId
@@ -195,23 +194,6 @@ export function InnerWorkspacePanel({
     }
   }, [expression, localState.expressionBuildError]);
 
-  if (visualizeTriggerFieldContext && !localState.visualizeTriggerSuggestionsLoaded && !title) {
-    const suggestions = getSuggestions({
-      datasourceMap,
-      datasourceStates,
-      visualizationMap,
-      activeVisualizationId,
-      visualizationState,
-      visualizeTriggerFieldContext,
-    });
-    if (suggestions.length) {
-      const selectedSuggestion =
-        suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-      switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
-      setLocalState((s) => ({ ...s, visualizeTriggerSuggestionsLoaded: true }));
-    }
-  }
-
   function onDrop() {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
@@ -274,7 +256,9 @@ export function InnerWorkspacePanel({
   }
 
   function renderVisualization() {
-    if (expression === null) {
+    // we don't want to render the emptyWorkspace on visualizing field from Discover
+    // as it is specific for the drag and drop functionality and can confuse the users
+    if (expression === null && !visualizeTriggerFieldContext) {
       return renderEmptyWorkspace();
     }
 

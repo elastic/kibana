@@ -114,6 +114,45 @@ export function getSuggestions({
   ).sort((a, b) => b.score - a.score);
 }
 
+export function applyVisualizeFieldSuggestions({
+  datasourceMap,
+  datasourceStates,
+  visualizationMap,
+  activeVisualizationId,
+  visualizationState,
+  visualizeTriggerFieldContext,
+  dispatch,
+}: {
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationId: string | null;
+  subVisualizationId?: string;
+  visualizationState: unknown;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  dispatch: (action: Action) => void;
+}): void {
+  const suggestions = getSuggestions({
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    activeVisualizationId,
+    visualizationState,
+    visualizeTriggerFieldContext,
+  });
+  if (suggestions.length) {
+    const selectedSuggestion =
+      suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+    switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
+  }
+}
+
 /**
  * Queries a single visualization extensions for a single datasource suggestion and
  * creates an array of complete suggestions containing both the target datasource

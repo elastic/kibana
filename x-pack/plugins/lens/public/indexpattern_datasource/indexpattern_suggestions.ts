@@ -129,9 +129,11 @@ export function getDatasourceSuggestionsForVisualizeField(
   const indexPattern = state.indexPatterns[indexPatternId];
   const field = indexPattern.fields.find((fld) => fld.name === fieldName);
 
-  if (layerIds.length === 0 || !field) return [];
-  const layerId = layerIds[0];
-  return getEmptyLayerSuggestionsForField(state, layerId, indexPatternId, field);
+  if (layerIds.length !== 0 || !field) return [];
+  const newId = generateId();
+  return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+    getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+  );
 }
 
 function getBucketOperation(field: IndexPatternField) {
