@@ -253,7 +253,9 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           _geoField && setAlertParams('boundaryGeoField', _geoField)
         }
         setBoundaryNameField={(_boundaryNameField: string | undefined) =>
-          _boundaryNameField && setAlertParams('boundaryNameField', _boundaryNameField)
+          _boundaryNameField
+            ? setAlertParams('boundaryNameField', _boundaryNameField)
+            : setAlertParams('boundaryNameField', '')
         }
         boundaryNameField={boundaryNameField}
       />

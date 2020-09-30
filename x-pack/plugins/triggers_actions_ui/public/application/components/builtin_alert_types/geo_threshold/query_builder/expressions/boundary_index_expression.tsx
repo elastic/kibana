@@ -41,6 +41,10 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const { dataUi, dataIndexPatterns, http } = alertsContext;
   const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
+  const nothingSelected: IFieldType = {
+    name: '_nothing selected',
+    type: 'string',
+  };
 
   const indexPopover = (
     <Fragment>
@@ -93,13 +97,19 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
             defaultMessage: 'Select boundary name',
           })}
           value={boundaryNameField || null}
-          onChange={setBoundaryNameField}
-          fields={boundaryIndexPattern.fields.filter(
-            (field: IFieldType) =>
-              BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
-              !field.name.startsWith('_') &&
-              !field.name.endsWith('keyword')
-          )}
+          onChange={(name) => {
+            setBoundaryNameField(name === nothingSelected.name ? undefined : name);
+          }}
+          fields={[
+            ...boundaryIndexPattern.fields.filter((field: IFieldType) => {
+              return (
+                BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
+                !field.name.startsWith('_') &&
+                !field.name.endsWith('keyword')
+              );
+            }),
+            nothingSelected,
+          ]}
         />
       </EuiFormRow>
     </Fragment>
