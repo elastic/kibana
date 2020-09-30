@@ -6,9 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Store, Action } from 'redux';
+
+/** These plugins are shared across Kibana and do not substantially contribute to the initial bundle size. */
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-
 import {
   AppMountParameters,
   CoreSetup,
@@ -19,7 +20,9 @@ import {
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
+/** common/lib/telemetry is 32 KiB and loaded initially */
 import { initTelemetry } from './common/lib/telemetry';
+/** common/lib/kibana/services is 2 KiB and loaded initially */
 import { KibanaServices } from './common/lib/kibana/services';
 import {
   PluginSetup,
@@ -29,6 +32,8 @@ import {
   StartServices,
   AppObservableLibs,
 } from './types';
+
+/** These are < 2 KiB */
 import {
   APP_ID,
   APP_ICON_SOLUTION,
@@ -42,10 +47,13 @@ import {
   APP_PATH,
   DEFAULT_INDEX_KEY,
 } from '../common/constants';
+
+/** This pulls in about 7 KiB. Can we register a promise instead of the actual component? */
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
+/** This pulls in a ton. Definitely import this async. */
 import { State, createStore, createInitialState } from './common/store';
-import { SecurityPageName } from './app/types';
+import { RenderAppProps, SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -60,6 +68,7 @@ import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
+import { AppFrontendLibs } from './common/lib/lib';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -357,7 +366,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {};
   }
 
-  private async downloadAssets() {
+  private async downloadAssets(): Promise<{
+    composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
+    renderApp: (props: RenderAppProps) => () => void;
+  }> {
     const [{ renderApp }, { composeLibs }] = await Promise.all([
       import(/* webpackChunkName: "app" */ './app'),
       import(/* webpackChunkName: "kibana_compose" */ './common/lib/compose/kibana_compose'),
