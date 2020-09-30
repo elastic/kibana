@@ -58,6 +58,10 @@ describe('EndpointList store concerns', () => {
         patternsError: undefined,
         isAutoRefreshEnabled: true,
         autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+        agentsWithEndpointsTotal: 0,
+        endpointsTotal: 0,
+        agentsWithEndpointsTotalError: undefined,
+        endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
       });
     });

@@ -19,6 +19,10 @@ export function getApmTelemetryMapping() {
     ignore_above: 1024,
   };
 
+  const float = {
+    type: 'float',
+  };
+
   const long = {
     type: 'long',
   };
@@ -78,7 +82,7 @@ export function getApmTelemetryMapping() {
     properties: {
       expected_metric_document_count: long,
       transaction_count: long,
-      ratio: long,
+      ratio: float,
     },
   };
 
