@@ -54,7 +54,9 @@ import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/i
 /** This pulls in a ton. Definitely import this async. */
 import { State, createStore, createInitialState } from './common/store';
 import { RenderAppProps, SecurityPageName } from './app/types';
+/** 6 KiB */
 import { manageOldSiemRoutes } from './helpers';
+/** 1 KiB */
 import {
   OVERVIEW,
   HOSTS,
@@ -64,10 +66,12 @@ import {
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
+/** negligible */
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
+/** Just types. 0 */
 import { AppFrontendLibs } from './common/lib/lib';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
