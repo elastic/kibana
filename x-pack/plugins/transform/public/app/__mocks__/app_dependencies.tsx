@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useContext } from 'react';
+
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+
+import { MlSharedContext } from './shared_context';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -26,7 +30,8 @@ const appDependencies = {
 };
 
 export const useAppDependencies = () => {
-  return appDependencies;
+  const ml = useContext(MlSharedContext);
+  return { ...appDependencies, ml };
 };
 
 export const useToastNotifications = () => {
