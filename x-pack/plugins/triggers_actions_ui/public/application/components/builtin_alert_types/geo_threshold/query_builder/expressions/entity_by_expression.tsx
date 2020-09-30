@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { IErrorObject } from '../../../../../../types';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
@@ -28,6 +29,30 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   isInvalid,
 }) => {
   const ENTITY_TYPES = ['string', 'number', 'ip'];
+
+  const usePrevious = <T extends unknown>(value: T): T | undefined => {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  };
+
+  const oldIndexFields = usePrevious(indexFields);
+  const fields = useRef({
+    indexFields: [],
+  });
+  useEffect(() => {
+    if (!_.isEqual(oldIndexFields, indexFields)) {
+      fields.current.indexFields = indexFields.filter(
+        (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
+      );
+      if (fields.current.indexFields.length) {
+        setAlertParamsEntity(fields.current.indexFields[0].name);
+      }
+    }
+  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity]);
+
   const indexPopover = (
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>
       <SingleFieldSelect
@@ -39,9 +64,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
         )}
         value={entity}
         onChange={(_entity) => _entity && setAlertParamsEntity(_entity)}
-        fields={indexFields.filter(
-          (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
-        )}
+        fields={fields.current.indexFields}
       />
     </EuiFormRow>
   );
