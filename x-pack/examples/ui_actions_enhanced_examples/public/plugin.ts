@@ -135,7 +135,7 @@ export class UiActionsEnhancedExamplesPlugin
     developerExamples.register({
       appId: 'ui_actions_enhanced-explorer',
       title: 'UI Actions Enhanced',
-      description: '',
+      description: 'Examples of how to use drilldowns.',
       links: [
         {
           label: 'README',
