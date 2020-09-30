@@ -77,8 +77,9 @@ export class AttributeService<
   }
 
   private async defaultUnwrapMethod(input: RefType): Promise<SavedObjectAttributes> {
-    return new Promise<SavedObjectAttributes>(() => {
-      return { ...input };
+    return new Promise<SavedObjectAttributes>((resolve) => {
+      // @ts-ignore
+      return resolve({ ...input });
     });
   }
 

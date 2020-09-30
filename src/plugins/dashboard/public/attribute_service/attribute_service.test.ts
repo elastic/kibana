@@ -52,15 +52,15 @@ describe('attributeService', () => {
       return { ...attributes };
     });
   };
-
+  const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
+    return new Promise(() => {
+      return true;
+    });
+  };
   const options = {
     saveMethod: defaultSaveMethod,
     unwrapMethod: defaultUnwrapMethod,
-    checkForDuplicateTitle: (props: OnSaveProps) => {
-      return new Promise(() => {
-        return true;
-      });
-    },
+    checkForDuplicateTitle: defaultCheckForDuplicateTitle,
   };
 
   beforeEach(() => {
@@ -111,53 +111,32 @@ describe('attributeService', () => {
   });
 
   describe('unwrapping attributes', () => {
-    it('can unwrap all default attributes when given reference type input', async () => {
-      const core = coreMock.createStart();
-      core.savedObjects.client.get = jest.fn().mockResolvedValueOnce({
-        attributes,
+    it('does not throw error when given reference type input with no unwrap method', async () => {
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
+        saveMethod: defaultSaveMethod,
+        checkForDuplicateTitle: jest.fn(),
       });
-      const attributeService = mockAttributeService<TestAttributes>(
-        defaultTestType,
-        {
-          saveMethod: defaultSaveMethod,
-          unwrapMethod: (savedObjectId) => {
-            return new Promise(() => {
-              return { ...attributes };
-            });
-          },
-          checkForDuplicateTitle: jest.fn(),
-        },
-        core
-      );
-      expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual(attributes);
+      expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual(byReferenceInput);
     });
 
     it('returns attributes when when given value type input', async () => {
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, options);
-      expect(await attributeService.unwrapAttributes(byValueInput)).toEqual(attributes, options);
+      expect(await attributeService.unwrapAttributes(byValueInput)).toEqual(attributes);
     });
 
     it('runs attributes through a custom unwrap method', async () => {
-      const core = coreMock.createStart();
-      core.savedObjects.client.get = jest.fn().mockResolvedValueOnce({
-        attributes,
-      });
-      const attributeService = mockAttributeService<TestAttributes>(
-        defaultTestType,
-        {
-          saveMethod: defaultSaveMethod,
-          unwrapMethod: (savedObjectId) => {
-            return new Promise(() => {
-              return {
-                ...attributes,
-                testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
-              };
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
+        saveMethod: defaultSaveMethod,
+        unwrapMethod: (savedObjectId) => {
+          return new Promise((resolve) => {
+            return resolve({
+              ...attributes,
+              testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
             });
-          },
-          checkForDuplicateTitle: jest.fn(),
+          });
         },
-        core
-      );
+        checkForDuplicateTitle: jest.fn(),
+      });
       expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual({
         ...attributes,
         testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
@@ -177,7 +156,11 @@ describe('attributeService', () => {
       saveMethod.mockReturnValueOnce({});
       const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
-        { saveMethod, unwrapMethod: defaultUnwrapMethod },
+        {
+          saveMethod,
+          unwrapMethod: defaultUnwrapMethod,
+          checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+        },
         core
       );
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
@@ -191,6 +174,7 @@ describe('attributeService', () => {
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         saveMethod,
         unwrapMethod: defaultUnwrapMethod,
+        checkForDuplicateTitle: defaultCheckForDuplicateTitle,
       });
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
         byReferenceInput
@@ -207,7 +191,7 @@ describe('attributeService', () => {
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         saveMethod,
         unwrapMethod: defaultUnwrapMethod,
-        checkForDuplicateTitle: jest.fn(),
+        checkForDuplicateTitle: defaultCheckForDuplicateTitle,
       });
       expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
         savedObjectId: '678',
