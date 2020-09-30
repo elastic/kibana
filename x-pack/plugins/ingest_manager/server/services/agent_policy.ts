@@ -479,7 +479,7 @@ class AgentPolicyService {
             },
           }),
     };
-
+    console.log('getFullAgentPolicy', id, fullAgentPolicy);
     // only add settings if not in standalone
     if (!standalone) {
       let settings;
@@ -489,6 +489,7 @@ class AgentPolicyService {
         throw new Error('Default settings is not setup');
       }
       if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
+      console.log({ settings });
       fullAgentPolicy.fleet = {
         kibana: {
           hosts: settings.kibana_urls,

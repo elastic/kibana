@@ -20,10 +20,11 @@ import {
   EuiFormRow,
   EuiRadioGroup,
   EuiComboBox,
+  EuiCodeEditor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
+import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
 
@@ -69,10 +70,18 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
   });
 
+  const additionalYamlConfigInput = useInput(undefined, (value) => {
+    console.log('validate yaml', value);
+    return undefined;
+  });
   return {
     isLoading,
     onSubmit: async () => {
-      if (!kibanaUrlsInput.validate() || !elasticsearchUrlInput.validate()) {
+      if (
+        !kibanaUrlsInput.validate() ||
+        !elasticsearchUrlInput.validate() ||
+        !elasticsearchUrlInput.validate()
+      ) {
         return;
       }
 
@@ -89,6 +98,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }
         const settingsResponse = await sendPutSettings({
           kibana_urls: kibanaUrlsInput.value,
+          additional_yaml_config: additionalYamlConfigInput.value,
         });
         if (settingsResponse.error) {
           throw settingsResponse.error;
@@ -110,6 +120,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     inputs: {
       kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
+      additionalYamlConfig: additionalYamlConfigInput,
     },
   };
 }
@@ -131,6 +142,9 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (settings) {
       inputs.kibanaUrls.setValue(settings.kibana_urls);
+      if (settings.additional_yaml_config) {
+        inputs.additionalYamlConfig.setValue(settings.additional_yaml_config);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -245,6 +259,30 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           {...inputs.elasticsearchUrl.formRowProps}
         >
           <EuiComboBox noSuggestions {...inputs.elasticsearchUrl.props} />
+        </EuiFormRow>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow>
+        <EuiFormRow
+          {...inputs.additionalYamlConfig.formRowProps}
+          label={i18n.translate('xpack.ingestManager.settings.additionalYamlConfig', {
+            defaultMessage: 'Additional YAML Configuration',
+          })}
+          fullWidth={true}
+        >
+          <EuiCodeEditor
+            width="100%"
+            mode="yaml"
+            theme="textmate"
+            setOptions={{
+              minLines: 10,
+              maxLines: 30,
+              tabSize: 2,
+              showGutter: false,
+            }}
+            {...inputs.additionalYamlConfig.props}
+            onChange={inputs.additionalYamlConfig.setValue}
+          />
         </EuiFormRow>
       </EuiFormRow>
     </EuiForm>
