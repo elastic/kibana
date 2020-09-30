@@ -21,6 +21,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
+import { render } from '@testing-library/react';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
@@ -73,19 +74,31 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
-      <TelemetryManagementSection
-        telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
-        showAppliesSettingMessage={false}
-        enableSaving={true}
-        toasts={coreStart.notifications.toasts}
-      />
+    const component = render(
+      <React.Suspense fallback={<span>Fallback</span>}>
+        <TelemetryManagementSection
+          telemetryService={telemetryService}
+          onQueryMatchChange={onQueryMatchChange}
+          showAppliesSettingMessage={false}
+          enableSaving={true}
+          toasts={coreStart.notifications.toasts}
+        />
+      </React.Suspense>
     );
+
     try {
-      expect(
-        component.setProps({ ...component.props(), query: { text: 'asssdasdsad' } })
-      ).toMatchSnapshot();
+      component.rerender(
+        <React.Suspense fallback={<span>Fallback</span>}>
+          <TelemetryManagementSection
+            query={{ text: 'asdasdasd' }}
+            telemetryService={telemetryService}
+            onQueryMatchChange={onQueryMatchChange}
+            showAppliesSettingMessage={false}
+            enableSaving={true}
+            toasts={coreStart.notifications.toasts}
+          />
+        </React.Suspense>
+      );
       expect(onQueryMatchChange).toHaveBeenCalledWith(false);
       expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
     } finally {
