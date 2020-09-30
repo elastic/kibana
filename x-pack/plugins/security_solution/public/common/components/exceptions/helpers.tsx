@@ -38,7 +38,8 @@ import {
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { Ecs } from '../../../../common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**
@@ -226,6 +227,7 @@ export const filterExceptionItems = (
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchema => {
+  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     created_at,
     created_by,
@@ -233,6 +235,7 @@ export const formatExceptionItemForUpdate = (
     tie_breaker_id,
     updated_at,
     updated_by,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...fieldsToUpdate
   } = exceptionItem;
   return {
@@ -336,20 +339,33 @@ export const enrichExceptionItemsWithOS = (
 };
 
 /**
- * Returns the value for the given fieldname within TimelineNonEcsData if it exists
+ * Returns given exceptionItems with all hash-related entries lowercased
  */
-export const getMappedNonEcsValue = ({
-  data,
-  fieldName,
-}: {
-  data: TimelineNonEcsData[];
-  fieldName: string;
-}): string[] => {
-  const item = data.find((d) => d.field === fieldName);
-  if (item != null && item.value != null) {
-    return item.value;
-  }
-  return [];
+export const lowercaseHashValues = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item) => {
+    const newEntries = item.entries.map((itemEntry) => {
+      if (itemEntry.field.includes('.hash')) {
+        if (itemEntry.type === 'match') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.toLowerCase(),
+          };
+        } else if (itemEntry.type === 'match_any') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.map((val) => val.toLowerCase()),
+          };
+        }
+      }
+      return itemEntry;
+    });
+    return {
+      ...item,
+      entries: newEntries,
+    };
+  });
 };
 
 export const entryHasListType = (
@@ -363,6 +379,105 @@ export const entryHasListType = (
     }
   }
   return false;
+};
+
+/**
+ * Returns the value for `file.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getCodeSignatureValue = (
+  alertData: Ecs
+): Array<{ subjectName: string; trusted: string }> => {
+  const { file } = alertData;
+  const codeSignature = file && file.Ext && file.Ext.code_signature;
+
+  // Pre 7.10 file.Ext.code_signature was mistakenly populated as
+  // a single object with subject_name and trusted.
+  if (Array.isArray(codeSignature) && codeSignature.length > 0) {
+    return codeSignature.map((signature) => ({
+      subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
+      trusted: (signature.trusted && signature.trusted[0]) ?? '',
+    }));
+  } else {
+    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+      ? codeSignature
+      : undefined;
+    const subjectName: string | undefined =
+      signature && signature.subject_name && signature.subject_name[0];
+    const trusted: string | undefined = signature && signature.trusted && signature.trusted[0];
+
+    return [
+      {
+        subjectName: subjectName ?? '',
+        trusted: trusted ?? '',
+      },
+    ];
+  }
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedItem = ({
+  listType,
+  listId,
+  ruleName,
+  codeSignature,
+  filePath,
+  sha256Hash,
+  eventCode,
+  listNamespace = 'agnostic',
+}: {
+  listType: ExceptionListType;
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string };
+  filePath: string;
+  sha256Hash: string;
+  eventCode: string;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listType, listId, namespaceType: listNamespace, ruleName }),
+    entries: [
+      {
+        field: 'file.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.trusted : '',
+          },
+        ],
+      },
+      {
+        field: 'file.path.text',
+        operator: 'included',
+        type: 'match',
+        value: filePath ?? '',
+      },
+      {
+        field: 'file.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: sha256Hash ?? '',
+      },
+      {
+        field: 'event.code',
+        operator: 'included',
+        type: 'match',
+        value: eventCode ?? '',
+      },
+    ],
+  };
 };
 
 /**
@@ -402,62 +517,19 @@ export const defaultEndpointExceptionItems = (
   listType: ExceptionListType,
   listId: string,
   ruleName: string,
-  alertData: TimelineNonEcsData[]
+  alertEcsData: Ecs
 ): ExceptionsBuilderExceptionItem[] => {
-  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' });
-  const [signatureSigner] = getMappedNonEcsValue({
-    data: alertData,
-    fieldName: 'file.Ext.code_signature.subject_name',
-  });
-  const [signatureTrusted] = getMappedNonEcsValue({
-    data: alertData,
-    fieldName: 'file.Ext.code_signature.trusted',
-  });
-  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' });
-  const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
-  const namespaceType = 'agnostic';
+  const { file, event: alertEvent } = alertEcsData;
 
-  return [
-    {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
-      entries: [
-        {
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          entries: [
-            {
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: signatureSigner ?? '',
-            },
-            {
-              field: 'trusted',
-              operator: 'included',
-              type: 'match',
-              value: signatureTrusted ?? '',
-            },
-          ],
-        },
-        {
-          field: 'file.path.text',
-          operator: 'included',
-          type: 'match',
-          value: filePath ?? '',
-        },
-        {
-          field: 'file.hash.sha1',
-          operator: 'included',
-          type: 'match',
-          value: sha1Hash ?? '',
-        },
-        {
-          field: 'event.code',
-          operator: 'included',
-          type: 'match',
-          value: eventCode ?? '',
-        },
-      ],
-    },
-  ];
+  return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
+    getPrepopulatedItem({
+      listType,
+      listId,
+      ruleName,
+      filePath: file && file.path ? file.path[0] : '',
+      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
+      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
+      codeSignature,
+    })
+  );
 };

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
 import querystring from 'querystring';
+import { useLocation } from 'react-router-dom';
 import rison from 'rison-node';
-import { useLocation } from '../../../../hooks/useLocation';
+import url from 'url';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { getTimepickerRisonData } from '../rison_helpers';
 
@@ -22,12 +22,14 @@ export function useTimeSeriesExplorerHref({
 }) {
   const { core } = useApmPluginContext();
   const location = useLocation();
+  const { time, refreshInterval } = getTimepickerRisonData(location.search);
 
   const search = querystring.stringify(
     {
       _g: rison.encode({
         ml: { jobIds: [jobId] },
-        ...getTimepickerRisonData(location.search),
+        time,
+        refreshInterval,
       }),
       ...(serviceName && transactionType
         ? {

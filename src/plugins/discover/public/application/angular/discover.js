@@ -27,20 +27,25 @@ import { i18n } from '@kbn/i18n';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
+import {
+  esFilters,
+  indexPatterns as indexPatternsUtils,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+} from '../../../../data/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
+import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
-
-import indexTemplate from './discover.html';
+import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
-import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getHeaderActionMenuMounter,
   getUrlTracker,
   unhashUrl,
   subscribeWithScope,
@@ -65,13 +70,8 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
-import {
-  esFilters,
-  indexPatterns as indexPatternsUtils,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-  search,
-} from '../../../../data/public';
+import { popularizeField } from '../helpers/popularize_field';
+
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -114,7 +114,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: indexTemplate,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -220,6 +220,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
+    toasts: core.notifications.toasts,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -306,17 +307,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-
-  $scope.$watch(
-    () => uiCapabilities.discover.saveQuery,
-    (newCapability) => {
-      $scope.showSaveQuery = newCapability;
-    }
-  );
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -512,8 +505,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     ]);
   }
 
-  $scope.screenTitle = savedSearch.title;
-
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -609,6 +600,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    fixedScroll: createFixedScroll($scope, $timeout),
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -768,6 +762,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
@@ -792,18 +787,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
 
-        const fetchError = getPainlessError(error);
+        $scope.fetchStatus = fetchStatuses.NO_RESULTS;
+        $scope.rows = [];
 
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
-            }),
-            toastMessage: error.shortMessage || error.body?.message,
-          });
-        }
+        data.search.showError(error);
       });
   };
 
@@ -865,9 +852,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         tabifiedData,
         getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
-      if ($scope.vis.data.aggs.aggs[1]) {
-        $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
-      }
       $scope.updateTime();
     }
 
@@ -969,7 +953,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
-    $scope.indexPattern.popularizeField(field, 1);
+    const { indexPattern } = $scope;
+
+    popularizeField(indexPattern, field.name, indexPatterns);
     const newFilters = esFilters.generateFilters(
       filterManager,
       field,
@@ -982,7 +968,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.addColumn = function addColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
@@ -990,7 +977,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.removeColumn = function removeColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]

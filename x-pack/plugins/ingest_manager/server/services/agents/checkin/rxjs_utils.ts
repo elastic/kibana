@@ -5,6 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { concatMap, delay } from 'rxjs/operators';
 
 export class AbortError extends Error {}
 
@@ -43,47 +44,37 @@ export const toPromiseAbortable = <T>(
     }
   });
 
-export function createSubscriberConcurrencyLimiter(maxConcurrency: number) {
-  let observers: Array<[Rx.Subscriber<any>, any]> = [];
-  let activeObservers: Array<Rx.Subscriber<any>> = [];
+export function createRateLimiter(
+  ratelimitIntervalMs: number,
+  ratelimitRequestPerInterval: number,
+  maxDelay: number,
+  scheduler = Rx.asyncScheduler
+) {
+  let intervalEnd = 0;
+  let countInCurrentInterval = 0;
 
-  function processNext() {
-    if (activeObservers.length >= maxConcurrency) {
-      return;
-    }
-    const observerValuePair = observers.shift();
+  function createRateLimitOperator<T>(): Rx.OperatorFunction<T, T> {
+    return Rx.pipe(
+      concatMap(function rateLimit(value: T) {
+        const now = scheduler.now();
+        if (intervalEnd <= now) {
+          countInCurrentInterval = 1;
+          intervalEnd = now + ratelimitIntervalMs;
+          return Rx.of(value);
+        } else if (intervalEnd >= now + maxDelay) {
+          // re-rate limit in the future to avoid to schedule too far in the future as some observer can unsubscribe
+          return Rx.of(value).pipe(delay(maxDelay, scheduler), createRateLimitOperator<T>());
+        } else {
+          if (++countInCurrentInterval > ratelimitRequestPerInterval) {
+            countInCurrentInterval = 1;
+            intervalEnd += ratelimitIntervalMs;
+          }
 
-    if (!observerValuePair) {
-      return;
-    }
-
-    const [observer, value] = observerValuePair;
-    activeObservers.push(observer);
-    observer.next(value);
+          const wait = intervalEnd - ratelimitIntervalMs - now;
+          return wait > 0 ? Rx.of(value).pipe(delay(wait, scheduler)) : Rx.of(value);
+        }
+      })
+    );
   }
-
-  return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
-    return (observable) =>
-      new Rx.Observable<T>((observer) => {
-        const subscription = observable.subscribe({
-          next(value) {
-            observers = [...observers, [observer, value]];
-            processNext();
-          },
-          error(err) {
-            observer.error(err);
-          },
-          complete() {
-            observer.complete();
-          },
-        });
-
-        return () => {
-          activeObservers = activeObservers.filter((o) => o !== observer);
-          observers = observers.filter((o) => o[0] !== observer);
-          subscription.unsubscribe();
-          processNext();
-        };
-      });
-  };
+  return createRateLimitOperator;
 }

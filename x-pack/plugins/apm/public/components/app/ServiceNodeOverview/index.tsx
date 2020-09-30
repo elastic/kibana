@@ -13,18 +13,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { asPercent } from '../../../../common/utils/formatters';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
 import { useFetcher } from '../../../hooks/useFetcher';
-import {
-  asDynamicBytes,
-  asInteger,
-  asPercent,
-} from '../../../utils/formatters';
+import { asDynamicBytes, asInteger } from '../../../utils/formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
 
@@ -36,9 +33,13 @@ const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
 `;
 
-function ServiceNodeOverview() {
+interface ServiceNodeOverviewProps {
+  serviceName: string;
+}
+
+function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   const { uiFilters, urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
@@ -46,14 +47,14 @@ function ServiceNodeOverview() {
       params: {
         serviceName,
       },
-      projection: PROJECTION.SERVICE_NODES,
+      projection: Projection.serviceNodes,
     }),
     [serviceName]
   );
 
   const { data: items = [] } = useFetcher(
     (callApmApi) => {
-      if (!serviceName || !start || !end) {
+      if (!start || !end) {
         return undefined;
       }
       return callApmApi({
@@ -72,10 +73,6 @@ function ServiceNodeOverview() {
     },
     [serviceName, start, end, uiFilters]
   );
-
-  if (!serviceName) {
-    return null;
-  }
 
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {

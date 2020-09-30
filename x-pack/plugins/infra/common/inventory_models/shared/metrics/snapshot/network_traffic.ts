@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const networkTraffic = (id: string, field: string): SnapshotModel => {
+export const networkTraffic = (id: string, field: string): MetricsUIAggregation => {
   return {
     [`${id}_max`]: { max: { field } },
     [`${id}_deriv`]: {

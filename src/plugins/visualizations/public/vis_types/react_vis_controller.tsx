@@ -33,13 +33,7 @@ export interface ReactVisComponentProps<TData, TParams> {
 }
 
 export class ReactVisController implements VisualizationController {
-  private el: HTMLElement;
-  private vis: ExprVis;
-
-  constructor(element: HTMLElement, vis: ExprVis) {
-    this.el = element;
-    this.vis = vis;
-  }
+  constructor(private element: HTMLElement, private vis: ExprVis) {}
 
   public render(visData: any, visParams: any): Promise<void> {
     const I18nContext = getI18n().Context;
@@ -61,12 +55,12 @@ export class ReactVisController implements VisualizationController {
             renderComplete={resolve}
           />
         </I18nContext>,
-        this.el
+        this.element
       );
     });
   }
 
   public destroy() {
-    unmountComponentAtNode(this.el);
+    unmountComponentAtNode(this.element);
   }
 }

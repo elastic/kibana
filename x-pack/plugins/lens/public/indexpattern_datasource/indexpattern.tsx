@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -19,7 +19,12 @@ import {
   DatasourceLayerPanelProps,
   PublicAPIProps,
 } from '../types';
-import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
+import {
+  loadInitialState,
+  changeIndexPattern,
+  changeLayerIndexPattern,
+  extractReferences,
+} from './loader';
 import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
@@ -99,6 +104,8 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
+export * from './rename_columns';
+
 export function getIndexPatternDatasource({
   core,
   storage,
@@ -119,21 +126,28 @@ export function getIndexPatternDatasource({
       }),
     });
 
+  const indexPatternsService = data.indexPatterns;
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: 'indexpattern',
 
-    async initialize(state?: IndexPatternPersistedState) {
+    async initialize(
+      persistedState?: IndexPatternPersistedState,
+      references?: SavedObjectReference[]
+    ) {
       return loadInitialState({
-        state,
+        persistedState,
+        references,
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
+        indexPatternsService,
       });
     },
 
-    getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
-      return { currentIndexPatternId, layers };
+    getPersistableState(state: IndexPatternPrivateState) {
+      return extractReferences(state);
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
@@ -180,19 +194,6 @@ export function getIndexPatternDatasource({
 
     toExpression,
 
-    getMetaData(state: IndexPatternPrivateState) {
-      return {
-        filterableIndexPatterns: _.uniq(
-          Object.values(state.layers)
-            .map((layer) => layer.indexPatternId)
-            .map((indexPatternId) => ({
-              id: indexPatternId,
-              title: state.indexPatterns[indexPatternId].title,
-            }))
-        ),
-      };
-    },
-
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
@@ -209,9 +210,9 @@ export function getIndexPatternDatasource({
                 id,
                 state,
                 setState,
-                savedObjectsClient,
                 onError: onIndexPatternLoadError,
                 storage,
+                indexPatternsService,
               });
             }}
             data={data}
@@ -264,6 +265,7 @@ export function getIndexPatternDatasource({
               data,
               savedObjects: core.savedObjects,
               docLinks: core.docLinks,
+              http: core.http,
             }}
           >
             <IndexPatternDimensionEditor
@@ -289,7 +291,6 @@ export function getIndexPatternDatasource({
         <LayerPanel
           onChangeIndexPattern={(indexPatternId) => {
             changeLayerIndexPattern({
-              savedObjectsClient,
               indexPatternId,
               setState: props.setState,
               state: props.state,
@@ -297,6 +298,7 @@ export function getIndexPatternDatasource({
               onError: onIndexPatternLoadError,
               replaceIfPossible: true,
               storage,
+              indexPatternsService,
             });
           }}
           {...props}

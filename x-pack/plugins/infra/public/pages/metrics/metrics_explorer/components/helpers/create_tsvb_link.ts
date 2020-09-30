@@ -7,7 +7,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
-import { colorTransformer, MetricsExplorerColor } from '../../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -22,6 +22,14 @@ import { InfraFormatterType } from '../../../../../lib/lib';
 import { SourceQuery } from '../../../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 import { LinkDescriptor } from '../../../../../hooks/use_link_props';
+
+/*
+ We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to 
+ `metrics-*,metricbeat-*`. There is a bug in TSVB when there is an empty index in the pattern
+ the field dropdowns are not populated correctly. This index pattern is a temporary fix.
+ See: https://github.com/elastic/kibana/issues/73987 
+*/
+const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === 'rate') {
@@ -83,9 +91,7 @@ const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
     label: createMetricLabel(metric),
     axis_position: 'right',
     chart_type: 'line',
-    color:
-      (metric.color && colorTransformer(metric.color)) ||
-      colorTransformer(MetricsExplorerColor.color0),
+    color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
     fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
     formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
     value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
@@ -128,6 +134,13 @@ export const createFilterFromOptions = (
   return { language: 'kuery', query: filters.join(' and ') };
 };
 
+const createTSVBIndexPattern = (alias: string) => {
+  if (alias.split(',').length > 1) {
+    return TSVB_WORKAROUND_INDEX_PATTERN;
+  }
+  return alias;
+};
+
 export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
@@ -135,6 +148,9 @@ export const createTSVBLink = (
   timeRange: MetricsExplorerTimeOptions,
   chartOptions: MetricsExplorerChartOptions
 ): LinkDescriptor => {
+  const tsvbIndexPattern = createTSVBIndexPattern(
+    (source && source.metricAlias) || TSVB_WORKAROUND_INDEX_PATTERN
+  );
   const appState = {
     filters: [],
     linked: false,
@@ -147,8 +163,8 @@ export const createTSVBLink = (
         axis_position: 'left',
         axis_scale: 'normal',
         id: uuid.v1(),
-        default_index_pattern: (source && source.metricAlias) || 'metricbeat-*',
-        index_pattern: (source && source.metricAlias) || 'metricbeat-*',
+        default_index_pattern: tsvbIndexPattern,
+        index_pattern: tsvbIndexPattern,
         interval: 'auto',
         series: options.metrics.map(mapMetricToSeries(chartOptions)),
         show_grid: 1,

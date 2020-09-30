@@ -24,6 +24,13 @@ interface BuildSeverityFromMappingReturn {
   severityMeta: Meta; // TODO: Stricter types
 }
 
+const severitySortMapping = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
 export const buildSeverityFromMapping = ({
   doc,
   severity,
@@ -31,10 +38,24 @@ export const buildSeverityFromMapping = ({
 }: BuildSeverityFromMappingProps): BuildSeverityFromMappingReturn => {
   if (severityMapping != null && severityMapping.length > 0) {
     let severityMatch: SeverityMappingItem | undefined;
-    severityMapping.forEach((mapping) => {
-      // TODO: Expand by verifying fieldType from index via  doc._index
-      const mappedValue = get(mapping.field, doc._source);
-      if (mapping.value === mappedValue) {
+
+    // Sort the SeverityMapping from low to high, so last match (highest severity) is used
+    const severityMappingSorted = severityMapping.sort(
+      (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
+    );
+
+    severityMappingSorted.forEach((mapping) => {
+      const docValue = get(mapping.field, doc._source);
+      // TODO: Expand by verifying fieldType from index via doc._index
+      // Till then, explicit parsing of event.severity (long) to number. If not ECS, this could be
+      // another datatype, but until we can lookup datatype we must assume number for the Elastic
+      // Endpoint Security rule to function correctly
+      let parsedMappingValue: string | number = mapping.value;
+      if (mapping.field === 'event.severity') {
+        parsedMappingValue = Math.floor(Number(parsedMappingValue));
+      }
+
+      if (parsedMappingValue === docValue) {
         severityMatch = { ...mapping };
       }
     });

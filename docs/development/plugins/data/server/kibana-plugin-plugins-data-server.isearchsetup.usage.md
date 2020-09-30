@@ -9,5 +9,5 @@ Used internally for telemetry
 <b>Signature:</b>
 
 ```typescript
-usage: SearchUsage;
+usage?: SearchUsage;
 ```

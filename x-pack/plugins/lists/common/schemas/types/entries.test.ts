@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyMock } from './entry_match_any.mock';
@@ -20,7 +20,7 @@ import { entriesArray, entriesArrayOrUndefined, entry } from './entries';
 describe('Entries', () => {
   describe('entry', () => {
     test('it should validate a match entry', () => {
-      const payload = { ...getEntryMatchMock() };
+      const payload = getEntryMatchMock();
       const decoded = entry.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -29,7 +29,7 @@ describe('Entries', () => {
     });
 
     test('it should validate a match_any entry', () => {
-      const payload = { ...getEntryMatchAnyMock() };
+      const payload = getEntryMatchAnyMock();
       const decoded = entry.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -38,7 +38,7 @@ describe('Entries', () => {
     });
 
     test('it should validate a exists entry', () => {
-      const payload = { ...getEntryExistsMock() };
+      const payload = getEntryExistsMock();
       const decoded = entry.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -47,7 +47,7 @@ describe('Entries', () => {
     });
 
     test('it should validate a list entry', () => {
-      const payload = { ...getEntryListMock() };
+      const payload = getEntryListMock();
       const decoded = entry.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -55,8 +55,8 @@ describe('Entries', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should NOT validate a nested entry', () => {
-      const payload = { ...getEntryNestedMock() };
+    test('it should FAIL validation of nested entry', () => {
+      const payload = getEntryNestedMock();
       const decoded = entry.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -64,14 +64,7 @@ describe('Entries', () => {
         'Invalid value "undefined" supplied to "operator"',
         'Invalid value "nested" supplied to "type"',
         'Invalid value "undefined" supplied to "value"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
-        'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "list"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -79,7 +72,7 @@ describe('Entries', () => {
 
   describe('entriesArray', () => {
     test('it should validate an array with match entry', () => {
-      const payload = [{ ...getEntryMatchMock() }];
+      const payload = [getEntryMatchMock()];
       const decoded = entriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -88,7 +81,7 @@ describe('Entries', () => {
     });
 
     test('it should validate an array with match_any entry', () => {
-      const payload = [{ ...getEntryMatchAnyMock() }];
+      const payload = [getEntryMatchAnyMock()];
       const decoded = entriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -97,7 +90,7 @@ describe('Entries', () => {
     });
 
     test('it should validate an array with exists entry', () => {
-      const payload = [{ ...getEntryExistsMock() }];
+      const payload = [getEntryExistsMock()];
       const decoded = entriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -106,7 +99,7 @@ describe('Entries', () => {
     });
 
     test('it should validate an array with list entry', () => {
-      const payload = [{ ...getEntryListMock() }];
+      const payload = [getEntryListMock()];
       const decoded = entriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -115,7 +108,7 @@ describe('Entries', () => {
     });
 
     test('it should validate an array with nested entry', () => {
-      const payload = [{ ...getEntryNestedMock() }];
+      const payload = [getEntryNestedMock()];
       const decoded = entriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -144,7 +137,7 @@ describe('Entries', () => {
     });
 
     test('it should validate an array with nested entry', () => {
-      const payload = [{ ...getEntryNestedMock() }];
+      const payload = [getEntryNestedMock()];
       const decoded = entriesArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 

@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cloneDeep } from 'lodash/fp';
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { mockEcsData } from '../../../common/mock/mock_ecs';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
@@ -20,31 +18,40 @@ import {
   replaceTemplateFieldFromMatchFilters,
   reformatDataProviderWithNewValue,
 } from './helpers';
+import { mockTimelineDetails } from '../../../common/mock';
 
 describe('helpers', () => {
-  let mockEcsDataClone = cloneDeep(mockEcsData);
-  beforeEach(() => {
-    mockEcsDataClone = cloneDeep(mockEcsData);
-  });
   describe('getStringOrStringArray', () => {
     test('it should correctly return a string array', () => {
-      const value = getStringArray('x', {
-        x: 'The nickname of the developer we all :heart:',
-      });
+      const value = getStringArray('x', [
+        {
+          field: 'x',
+          values: ['The nickname of the developer we all :heart:'],
+          originalValue: 'The nickname of the developer we all :heart:',
+        },
+      ]);
       expect(value).toEqual(['The nickname of the developer we all :heart:']);
     });
 
     test('it should correctly return a string array with a single element', () => {
-      const value = getStringArray('x', {
-        x: ['The nickname of the developer we all :heart:'],
-      });
+      const value = getStringArray('x', [
+        {
+          field: 'x',
+          values: ['The nickname of the developer we all :heart:'],
+          originalValue: 'The nickname of the developer we all :heart:',
+        },
+      ]);
       expect(value).toEqual(['The nickname of the developer we all :heart:']);
     });
 
     test('it should correctly return a string array with two elements of strings', () => {
-      const value = getStringArray('x', {
-        x: ['The nickname of the developer we all :heart:', 'We are all made of stars'],
-      });
+      const value = getStringArray('x', [
+        {
+          field: 'x',
+          values: ['The nickname of the developer we all :heart:', 'We are all made of stars'],
+          originalValue: 'The nickname of the developer we all :heart:',
+        },
+      ]);
       expect(value).toEqual([
         'The nickname of the developer we all :heart:',
         'We are all made of stars',
@@ -52,22 +59,40 @@ describe('helpers', () => {
     });
 
     test('it should correctly return a string array with deep elements', () => {
-      const value = getStringArray('x.y.z', {
-        x: { y: { z: 'zed' } },
-      });
+      const value = getStringArray('x.y.z', [
+        {
+          field: 'x.y.z',
+          values: ['zed'],
+          originalValue: 'zed',
+        },
+      ]);
       expect(value).toEqual(['zed']);
     });
 
     test('it should correctly return a string array with a non-existent value', () => {
-      const value = getStringArray('non.existent', {
-        x: { y: { z: 'zed' } },
-      });
+      const value = getStringArray('non.existent', [
+        {
+          field: 'x.y.z',
+          values: ['zed'],
+          originalValue: 'zed',
+        },
+      ]);
       expect(value).toEqual([]);
     });
 
     test('it should trace an error if the value is not a string', () => {
       const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
-      const value = getStringArray('a', { a: 5 }, mockConsole);
+      const value = getStringArray(
+        'a',
+        [
+          {
+            field: 'a',
+            values: (5 as unknown) as string[],
+            originalValue: 'zed',
+          },
+        ],
+        mockConsole
+      );
       expect(value).toEqual([]);
       expect(
         mockConsole.trace
@@ -77,13 +102,23 @@ describe('helpers', () => {
         'when trying to access field:',
         'a',
         'from data object of:',
-        { a: 5 }
+        [{ field: 'a', originalValue: 'zed', values: 5 }]
       );
     });
 
     test('it should trace an error if the value is an array of mixed values', () => {
       const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
-      const value = getStringArray('a', { a: ['hi', 5] }, mockConsole);
+      const value = getStringArray(
+        'a',
+        [
+          {
+            field: 'a',
+            values: (['hi', 5] as unknown) as string[],
+            originalValue: 'zed',
+          },
+        ],
+        mockConsole
+      );
       expect(value).toEqual([]);
       expect(
         mockConsole.trace
@@ -93,7 +128,7 @@ describe('helpers', () => {
         'when trying to access field:',
         'a',
         'from data object of:',
-        { a: ['hi', 5] }
+        [{ field: 'a', originalValue: 'zed', values: ['hi', 5] }]
       );
     });
   });
@@ -103,7 +138,7 @@ describe('helpers', () => {
       test('given an empty query string this returns an empty query string', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('');
@@ -112,7 +147,7 @@ describe('helpers', () => {
       test('given a query string with spaces this returns an empty query string', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '    ',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('');
@@ -121,17 +156,21 @@ describe('helpers', () => {
       test('it should replace a query with a template value such as apache from a mock template', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: placeholdertext',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('host.name: apache');
       });
 
       test('it should replace a template field with an ECS value that is not an array', () => {
-        mockEcsDataClone[0].host!.name = ('apache' as unknown) as string[]; // very unsafe cast for this test case
+        const dupTimelineDetails = [...mockTimelineDetails];
+        dupTimelineDetails[0] = {
+          ...dupTimelineDetails[0],
+          values: ('apache' as unknown) as string[],
+        }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
-          mockEcsDataClone[0],
+          dupTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('host.name: *');
@@ -140,7 +179,7 @@ describe('helpers', () => {
       test('it should NOT replace a query with a template value that is not part of the template fields array', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'user.id: placeholdertext',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('user.id: placeholdertext');
@@ -151,7 +190,7 @@ describe('helpers', () => {
       test('given an empty query string this returns an empty query string', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual('');
@@ -160,7 +199,7 @@ describe('helpers', () => {
       test('given a query string with spaces this returns an empty query string', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '    ',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual('');
@@ -169,17 +208,21 @@ describe('helpers', () => {
       test('it should NOT replace a query with a template value such as apache from a mock template', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: placeholdertext',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual('host.name: placeholdertext');
       });
 
       test('it should NOT replace a template field with an ECS value that is not an array', () => {
-        mockEcsDataClone[0].host!.name = ('apache' as unknown) as string[]; // very unsafe cast for this test case
+        const dupTimelineDetails = [...mockTimelineDetails];
+        dupTimelineDetails[0] = {
+          ...dupTimelineDetails[0],
+          values: ('apache' as unknown) as string[],
+        }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
-          mockEcsDataClone[0],
+          dupTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('host.name: *');
@@ -188,7 +231,7 @@ describe('helpers', () => {
       test('it should NOT replace a query with a template value that is not part of the template fields array', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'user.id: placeholdertext',
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual('user.id: placeholdertext');
@@ -198,7 +241,7 @@ describe('helpers', () => {
 
   describe('replaceTemplateFieldFromMatchFilters', () => {
     test('given an empty query filter this will return an empty filter', () => {
-      const replacement = replaceTemplateFieldFromMatchFilters([], mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromMatchFilters([], mockTimelineDetails);
       expect(replacement).toEqual([]);
     });
 
@@ -216,7 +259,7 @@ describe('helpers', () => {
           query: { match_phrase: { 'host.name': 'Braden' } },
         },
       ];
-      const replacement = replaceTemplateFieldFromMatchFilters(filters, mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromMatchFilters(filters, mockTimelineDetails);
       const expected: Filter[] = [
         {
           meta: {
@@ -247,7 +290,7 @@ describe('helpers', () => {
           query: { match_phrase: { 'user.id': 'Evan' } },
         },
       ];
-      const replacement = replaceTemplateFieldFromMatchFilters(filters, mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromMatchFilters(filters, mockTimelineDetails);
       const expected: Filter[] = [
         {
           meta: {
@@ -275,7 +318,7 @@ describe('helpers', () => {
         mockDataProvider.queryMatch.value = 'Braden';
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual({
@@ -297,7 +340,11 @@ describe('helpers', () => {
       });
 
       test('it should replace a query with a template value such as apache from a mock data provider using a string in the data provider', () => {
-        mockEcsDataClone[0].host!.name = ('apache' as unknown) as string[]; // very unsafe cast for this test case
+        const dupTimelineDetails = [...mockTimelineDetails];
+        dupTimelineDetails[0] = {
+          ...dupTimelineDetails[0],
+          values: ('apache' as unknown) as string[],
+        }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';
         mockDataProvider.id = 'Braden';
@@ -305,7 +352,7 @@ describe('helpers', () => {
         mockDataProvider.queryMatch.value = 'Braden';
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          dupTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual({
@@ -334,7 +381,7 @@ describe('helpers', () => {
         mockDataProvider.queryMatch.value = 'Rebecca';
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.default
         );
         expect(replacement).toEqual({
@@ -366,7 +413,7 @@ describe('helpers', () => {
         mockDataProvider.type = DataProviderType.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual({
@@ -396,7 +443,7 @@ describe('helpers', () => {
         mockDataProvider.type = DataProviderType.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual({
@@ -418,7 +465,11 @@ describe('helpers', () => {
       });
 
       test('it should replace a query with a template value such as apache from a mock data provider using a string in the data provider', () => {
-        mockEcsDataClone[0].host!.name = ('apache' as unknown) as string[]; // very unsafe cast for this test case
+        const dupTimelineDetails = [...mockTimelineDetails];
+        dupTimelineDetails[0] = {
+          ...dupTimelineDetails[0],
+          values: ('apache' as unknown) as string[],
+        }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';
         mockDataProvider.id = 'Braden';
@@ -427,7 +478,7 @@ describe('helpers', () => {
         mockDataProvider.type = DataProviderType.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          dupTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual({
@@ -457,7 +508,7 @@ describe('helpers', () => {
         mockDataProvider.type = DataProviderType.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
-          mockEcsDataClone[0],
+          mockTimelineDetails,
           TimelineType.template
         );
         expect(replacement).toEqual({

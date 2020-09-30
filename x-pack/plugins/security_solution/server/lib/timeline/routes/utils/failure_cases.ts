@@ -37,6 +37,7 @@ export const NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE =
   'You cannot convert a Timeline template to a timeline, or a timeline to a Timeline template.';
 export const UPDAT_TIMELINE_VIA_IMPORT_NOT_ALLOWED_ERROR_MESSAGE =
   'You cannot update a timeline via imports. Use the UI to modify existing timelines.';
+export const DEFAULT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,

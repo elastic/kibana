@@ -133,16 +133,17 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+  FieldDescriptor,
 } from './index_patterns';
 
 export {
-  IIndexPattern,
   IFieldType,
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  IndexPattern,
 } from '../common';
 
 /**
@@ -150,6 +151,16 @@ export {
  */
 
 import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
@@ -159,32 +170,84 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
 
-export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  ParsedInterval,
+  // search
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+} from '../common';
 
 export {
   ISearchStrategy,
-  ISearchOptions,
   ISearchSetup,
   ISearchStart,
+  toSnakeCase,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
+  shimHitsTotal,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace
 export const search = {
   aggs: {
+    CidrMask,
     dateHistogramInterval,
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
     Ipv4Address,
+    isNumberType,
+    isStringType,
+    isType,
     isValidEsInterval,
     isValidInterval,
+    parentPipelineType,
     parseEsInterval,
     parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
     toAbsoluteDates,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /**
@@ -224,6 +287,9 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };
+
+export type { IndexPatternsService } from './index_patterns';

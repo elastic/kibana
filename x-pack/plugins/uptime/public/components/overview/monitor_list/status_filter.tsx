@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilterGroup, EuiTextColor } from '@elastic/eui';
+import { EuiFilterGroup } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -28,13 +28,9 @@ export const StatusFilter: React.FC = () => {
         isActive={statusFilter === ''}
       />
       <FilterStatusButton
-        content={
-          <EuiTextColor color={statusFilter === 'up' ? 'secondary' : undefined}>
-            {i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-              defaultMessage: 'Up',
-            })}
-          </EuiTextColor>
-        }
+        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
+          defaultMessage: 'Up',
+        })}
         dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
@@ -47,7 +43,6 @@ export const StatusFilter: React.FC = () => {
         dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}
-        color={'danger'}
         isActive={statusFilter === 'down'}
       />
     </EuiFilterGroup>

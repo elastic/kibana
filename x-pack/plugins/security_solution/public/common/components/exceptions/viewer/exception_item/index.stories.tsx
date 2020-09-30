@@ -17,7 +17,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ExceptionItem', module)
+storiesOf('Components/ExceptionItem', module)
   .add('with os', () => {
     const payload = getExceptionListItemSchemaMock();
     payload.description = '';
@@ -118,6 +118,7 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with loadingItemIds', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { id, namespace_type, ...rest } = getExceptionListItemSchemaMock();
 
     return (

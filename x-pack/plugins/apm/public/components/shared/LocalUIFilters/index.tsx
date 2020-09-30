@@ -13,14 +13,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 interface Props {
-  projection: PROJECTION;
+  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;

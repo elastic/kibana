@@ -6,27 +6,29 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn & {
-  operationType: 'count';
-};
+export type CountIndexPatternColumn = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: 'count';
+  };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
+  input: 'field',
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: field.name,
+      label: field.displayName,
       sourceField: field.name,
     };
   },
@@ -49,7 +51,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       scale: 'ratio',
       sourceField: field.name,
       params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
+        previousColumn?.dataType === 'number' &&
+        previousColumn.params &&
+        'format' in previousColumn.params
+          ? previousColumn.params
+          : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../src/plugins/data/public';
 
-export type ActionContext = ChartActionContext;
+export type ActionContext = ApplyGlobalFilterActionContext;
 
-export interface Config {
+export type Config = {
   /**
    * Whether to use a user selected index pattern, stored in `indexPatternId` field.
    */
@@ -30,6 +30,6 @@ export interface Config {
    * Whether to carry over source dashboard time range.
    */
   carryTimeRange: boolean;
-}
+};
 
 export type CollectConfigProps = CollectConfigPropsBase<Config>;

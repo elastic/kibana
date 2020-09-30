@@ -16,16 +16,19 @@ import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 interface ServiceMetricsProps {
   agentName: string;
+  serviceName: string;
 }
 
-export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
+export function ServiceMetrics({
+  agentName,
+  serviceName,
+}: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { serviceName, serviceNodeName } = urlParams;
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
@@ -34,12 +37,11 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
       filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
         serviceName,
-        serviceNodeName,
       },
-      projection: PROJECTION.METRICS,
+      projection: Projection.metrics,
       showCount: false,
     }),
-    [serviceName, serviceNodeName]
+    [serviceName]
   );
 
   return (

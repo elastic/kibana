@@ -56,34 +56,16 @@ xpack.security.encryptionKey: "something_at_least_32_characters"
 For more information, see <<security-settings-kb,Security settings in {kib}>>.
 --
 
-. Optional: Set a timeout to expire idle sessions. By default, a session stays
-active until the browser is closed. To define a sliding session expiration, set
-the `xpack.security.session.idleTimeout` property in the `kibana.yml`
-configuration file. The idle timeout is formatted as a duration of
-`<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y'). For example, set
-the idle timeout to expire idle sessions after 10 minutes:
+. Configure {kib}'s session expiration settings. Set both the idle timeout and lifespan settings:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.session.idleTimeout: "10m"
+xpack.security.session.idleTimeout: "1h"
+xpack.security.session.lifespan: "30d"
 --------------------------------------------------------------------------------
---
 
-. Optional: Change the maximum session duration or "lifespan" -- also known as
-the "absolute timeout". By default, a session stays active until the browser is
-closed. If an idle timeout is defined, a session can still be extended
-indefinitely. To define a maximum session lifespan, set the
-`xpack.security.session.lifespan` property in the `kibana.yml` configuration
-file. The lifespan is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]`
-(e.g. '70ms', '5s', '3d', '1Y'). For example, set the lifespan to expire
-sessions after 8 hours:
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.session.lifespan: "8h"
---------------------------------------------------------------------------------
+For more information, see <<xpack-security-session-management, Session management in {kib}>>.
 --
 
 . Optional: <<configuring-tls,Configure {kib} to encrypt communications>>.
@@ -146,3 +128,4 @@ include::securing-communications/index.asciidoc[]
 include::securing-communications/elasticsearch-mutual-tls.asciidoc[]
 include::audit-logging.asciidoc[]
 include::access-agreement.asciidoc[]
+include::session-management.asciidoc[]

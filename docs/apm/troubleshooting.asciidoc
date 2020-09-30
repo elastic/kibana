@@ -49,7 +49,7 @@ GET /_template/apm-{version}
 *Using Logstash, Kafka, etc.*
 If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
 then the index template will not be set up automatically. Instead, you'll need to
-{apm-server-ref}/_manually_loading_template_configuration.html[load the template manually].
+{apm-server-ref}/apm-server-template.html[load the template manually].
 
 *Using a custom index names*
 This problem can also occur if you've customized the index name that you write APM data to.

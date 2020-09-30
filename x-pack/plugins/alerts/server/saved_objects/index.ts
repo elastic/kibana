@@ -6,7 +6,25 @@
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
+import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+
+export { partiallyUpdateAlert } from './partially_update_alert';
+
+export const AlertAttributesExcludedFromAAD = [
+  'scheduledTaskId',
+  'muteAll',
+  'mutedInstanceIds',
+  'updatedBy',
+];
+
+// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
+// type which is a subset of RawAlert with just attributes excluded from AAD
+export type AlertAttributesExcludedFromAADType =
+  | 'scheduledTaskId'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'updatedBy';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -16,6 +34,7 @@ export function setupSavedObjects(
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
+    migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
   });
 

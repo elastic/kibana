@@ -25,6 +25,7 @@ uiRoutes.when('/overview', {
       return routeInit({ codePaths: CODE_PATHS });
     },
   },
+  controllerAs: 'monitoringClusterOverview',
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const monitoringClusters = $injector.get('monitoringClusters');
@@ -34,6 +35,9 @@ uiRoutes.when('/overview', {
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
           defaultMessage: 'Overview',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.cluster.overview.pageTitle', {
+          defaultMessage: 'Cluster overview',
         }),
         defaultData: {},
         getPageData: async () => {
@@ -50,7 +54,10 @@ uiRoutes.when('/overview', {
         alerts: {
           shouldFetch: true,
         },
+        telemetryPageViewTitle: 'cluster_overview',
       });
+
+      this.init = () => this.renderReact(null);
 
       $scope.$watch(
         () => this.data,

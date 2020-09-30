@@ -256,7 +256,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
       const classes = classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--expanded': expandPanel,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (

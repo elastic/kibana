@@ -4,42 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
-import { createSubscriberConcurrencyLimiter } from './rxjs_utils';
+import { TestScheduler } from 'rxjs/testing';
+import { createRateLimiter } from './rxjs_utils';
 
-function createSpyObserver(o: Rx.Observable<any>): [Rx.Subscription, jest.Mock] {
-  const spy = jest.fn();
-  const observer = o.subscribe(spy);
-  return [observer, spy];
-}
+describe('createRateLimiter', () => {
+  it('should rate limit correctly with 1 request per 10ms', async () => {
+    const scheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
 
-describe('createSubscriberConcurrencyLimiter', () => {
-  it('should not publish to more than n concurrent subscriber', async () => {
-    const subject = new Rx.Subject<any>();
-    const sharedObservable = subject.pipe(share());
-
-    const limiter = createSubscriberConcurrencyLimiter(2);
-
-    const [observer1, spy1] = createSpyObserver(sharedObservable.pipe(limiter()));
-    const [observer2, spy2] = createSpyObserver(sharedObservable.pipe(limiter()));
-    const [observer3, spy3] = createSpyObserver(sharedObservable.pipe(limiter()));
-    const [observer4, spy4] = createSpyObserver(sharedObservable.pipe(limiter()));
-    subject.next('test1');
-
-    expect(spy1).toBeCalled();
-    expect(spy2).toBeCalled();
-    expect(spy3).not.toBeCalled();
-    expect(spy4).not.toBeCalled();
-
-    observer1.unsubscribe();
-    expect(spy3).toBeCalled();
-    expect(spy4).not.toBeCalled();
-
-    observer2.unsubscribe();
-    expect(spy4).toBeCalled();
-
-    observer3.unsubscribe();
-    observer4.unsubscribe();
+    scheduler.run(({ expectObservable, cold }) => {
+      const source = cold('a-b-c-d-e-f|');
+      const rateLimiter = createRateLimiter(10, 1, 2, scheduler);
+      const obs = source.pipe(rateLimiter());
+      const results = 'a 9ms b 9ms c 9ms d 9ms e 9ms (f|)';
+      expectObservable(obs).toBe(results);
+    });
   });
 });

@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 
 import '../../../../common/mock/match_media';
 import { RulesPage } from './index';
-import { useUserInfo } from '../../../components/user_info';
+import { useUserData } from '../../../components/user_info';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 
 jest.mock('react-router-dom', () => {
@@ -30,7 +30,7 @@ jest.mock('../../../containers/detection_engine/rules');
 
 describe('RulesPage', () => {
   beforeAll(() => {
-    (useUserInfo as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([{}]);
     (usePrePackagedRules as jest.Mock).mockReturnValue({});
   });
   it('renders correctly', () => {

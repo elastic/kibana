@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
+import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
 import React, { useEffect } from 'react';
 import { PercentileRange } from './index';
 import { useBreakdowns } from './use_breakdowns';
@@ -41,8 +41,10 @@ export function BreakdownSeries({
           name={name}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
+          curve={CurveType.CURVE_CATMULL_ROM}
           data={seriesData ?? []}
-          curve={CurveType.CURVE_NATURAL}
+          lineSeriesStyle={{ point: { visible: false } }}
+          fit={Fit.Linear}
         />
       ))}
     </>

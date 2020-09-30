@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-visualizable?: boolean;
+get visualizable(): boolean;
 ```

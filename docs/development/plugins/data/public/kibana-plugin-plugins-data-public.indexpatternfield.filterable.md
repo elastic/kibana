@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-filterable?: boolean;
+get filterable(): boolean;
 ```

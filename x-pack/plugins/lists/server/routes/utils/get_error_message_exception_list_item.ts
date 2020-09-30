@@ -12,10 +12,10 @@ export const getErrorMessageExceptionListItem = ({
   itemId: string | undefined;
 }): string => {
   if (id != null) {
-    return `Exception list item id: "${id}" does not exist`;
+    return `exception list item id: "${id}" does not exist`;
   } else if (itemId != null) {
-    return `Exception list item list_id: "${itemId}" does not exist`;
+    return `exception list item item_id: "${itemId}" does not exist`;
   } else {
-    return 'Exception list item does not exist';
+    return 'exception list item does not exist';
   }
 };

@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '../repo_root';
+import { REPO_ROOT } from '@kbn/utils';
 
-export function createAbsolutePathSerializer(rootPath: string = REPO_ROOT) {
+export function createAbsolutePathSerializer(
+  rootPath: string = REPO_ROOT,
+  replacement = '<absolute path>'
+) {
   return {
     test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),
-    serialize: (value: string) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+    serialize: (value: string) => value.replace(rootPath, replacement).replace(/\\/g, '/'),
   };
 }

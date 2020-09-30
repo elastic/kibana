@@ -32,12 +32,20 @@
 
 Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
   cy.on('window:before:load', (win) => {
-    // @ts-ignore no null, this is a temp hack see issue above
     win.fetch = null;
   });
   cy.server();
   cy.fixture(dataFileName).as(`${dataFileName}JSON`);
   cy.route('POST', 'api/solutions/security/graphql', `@${dataFileName}JSON`);
+});
+
+Cypress.Commands.add('stubSearchStrategyApi', function (dataFileName) {
+  cy.on('window:before:load', (win) => {
+    win.fetch = null;
+  });
+  cy.server();
+  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
+  cy.route('POST', 'internal/search/securitySolutionSearchStrategy', `@${dataFileName}JSON`);
 });
 
 Cypress.Commands.add(
@@ -46,15 +54,14 @@ Cypress.Commands.add(
     prevSubject: 'element',
   },
   (input, fileName, fileType = 'text/plain') => {
-    cy.fixture(fileName)
-      .then((content) => Cypress.Blob.base64StringToBlob(content, fileType))
-      .then((blob) => {
-        const testFile = new File([blob], fileName, { type: fileType });
-        const dataTransfer = new DataTransfer();
+    cy.fixture(fileName).then((content) => {
+      const blob = Cypress.Blob.base64StringToBlob(content, fileType);
+      const testFile = new File([blob], fileName, { type: fileType });
+      const dataTransfer = new DataTransfer();
 
-        dataTransfer.items.add(testFile);
-        input[0].files = dataTransfer.files;
-        return input;
-      });
+      dataTransfer.items.add(testFile);
+      input[0].files = dataTransfer.files;
+      return input;
+    });
   }
 );

@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -29,6 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
       await esArchiver.unload('reporting/ecommerce_kibana');
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
     });
 
     describe('Print PDF button', () => {
@@ -62,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url);
 
-        expect(res.statusCode).to.equal(200);
-        expect(res.headers['content-type']).to.equal('application/pdf');
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('application/pdf');
       });
     });
   });

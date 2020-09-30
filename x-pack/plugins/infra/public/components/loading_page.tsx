@@ -11,16 +11,20 @@ import {
   EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { FlexPage } from './page';
 
 interface LoadingPageProps {
-  message?: string | JSX.Element;
+  message?: ReactNode;
+  'data-test-subj'?: string;
 }
 
-export const LoadingPage = ({ message }: LoadingPageProps) => (
-  <FlexPage>
+export const LoadingPage = ({
+  message,
+  'data-test-subj': dataTestSubj = 'loadingPage',
+}: LoadingPageProps) => (
+  <FlexPage data-test-subj={dataTestSubj}>
     <EuiPageBody>
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
         <EuiFlexGroup alignItems="center">

@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-getTimeField(): Field | undefined;
+getTimeField(): IndexPatternField | undefined;
 ```
 <b>Returns:</b>
 
-`Field | undefined`
+`IndexPatternField | undefined`
 

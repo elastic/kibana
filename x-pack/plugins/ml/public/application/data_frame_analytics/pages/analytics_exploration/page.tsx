@@ -26,12 +26,14 @@ import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
-import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 export const Page: FC<{
   jobId: string;
-  analysisType: ANALYSIS_CONFIG_TYPE;
-}> = ({ jobId, analysisType }) => (
+  analysisType: DataFrameAnalysisConfigType;
+  defaultIsTraining?: boolean;
+}> = ({ jobId, analysisType, defaultIsTraining }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
@@ -69,10 +71,10 @@ export const Page: FC<{
             <OutlierExploration jobId={jobId} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobId} />
+            <RegressionExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationExploration jobId={jobId} />
+            <ClassificationExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

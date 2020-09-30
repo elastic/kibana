@@ -4,6 +4,12 @@
 
 ## LegacyScopedClusterClient class
 
+> Warning: This API is now obsolete.
+> 
+> Use [scoped cluster client](./kibana-plugin-core-server.iscopedclusterclient.md)<!-- -->.
+> 
+
+Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead.
 
 <b>Signature:</b>
 

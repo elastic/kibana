@@ -34,7 +34,7 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
       defaultMessage:
-        'To show or hide labels, use {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Alternatively, provide a string to display as a label.',
+        'To show or hide the label, use {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Alternatively, provide a string to display as a label.',
       values: {
         BOOLEAN_TRUE,
         BOOLEAN_FALSE,

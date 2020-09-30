@@ -5,24 +5,25 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import { listData } from './selectors';
-import { mockHostResultList } from './mock_host_result_list';
-import { HostAction } from './action';
-import { hostListReducer } from './reducer';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
+import { EndpointAction } from './action';
+import { endpointListReducer } from './reducer';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
-describe('HostList store concerns', () => {
-  let store: Store<HostState>;
-  let dispatch: Dispatch<HostAction>;
+describe('EndpointList store concerns', () => {
+  let store: Store<EndpointState>;
+  let dispatch: Dispatch<EndpointAction>;
   const createTestStore = () => {
-    store = createStore(hostListReducer);
+    store = createStore(endpointListReducer);
     dispatch = store.dispatch;
   };
 
   const loadDataToStore = () => {
     dispatch({
-      type: 'serverReturnedHostList',
-      payload: mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
+      type: 'serverReturnedEndpointList',
+      payload: mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
     });
   };
 
@@ -51,17 +52,28 @@ describe('HostList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
+        agentPolicies: {},
+        endpointsExist: true,
+        patterns: [],
+        patternsError: undefined,
+        isAutoRefreshEnabled: true,
+        autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+        agentsWithEndpointsTotal: 0,
+        endpointsTotal: 0,
+        agentsWithEndpointsTotalError: undefined,
+        endpointsTotalError: undefined,
+        queryStrategyVersion: undefined,
       });
     });
 
-    test('it handles `serverReturnedHostList', () => {
-      const payload = mockHostResultList({
+    test('it handles `serverReturnedEndpointList', () => {
+      const payload = mockEndpointResultList({
         request_page_size: 1,
         request_page_index: 1,
         total: 10,
       });
       dispatch({
-        type: 'serverReturnedHostList',
+        type: 'serverReturnedEndpointList',
         payload,
       });
 
@@ -79,7 +91,7 @@ describe('HostList store concerns', () => {
       loadDataToStore();
     });
 
-    test('it selects `hostListData`', () => {
+    test('it selects `endpointListData`', () => {
       const currentState = store.getState();
       expect(listData(currentState)).toEqual(currentState.hosts);
     });

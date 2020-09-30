@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import * as plotUtils from './plotUtils';
 import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 

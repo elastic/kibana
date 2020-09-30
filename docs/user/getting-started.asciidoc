@@ -1,19 +1,19 @@
-[[getting-started]]
+[[get-started]]
 = Get started
 
 [partintro]
 --
 
-Ready to try out {kib} and see what it can do? To quickest way to get started with {kib} is to set up on Cloud, then add a sample data set that helps you get a handle on the full range of {kib} features.
+Ready to try out {kib} and see what it can do? The quickest way to get started with {kib} is to set up on Cloud, then add a sample data set to explore the full range of {kib} features.
 
 [float]
-[[cloud-set-up]]
+[[set-up-on-cloud]]
 == Set up on cloud
 
 include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
-[[get-data-in]]
+[[gs-get-data-into-kibana]]
 == Get data into {kib}
 
 The easiest way to get data into {kib} is to add a sample data set.
@@ -42,12 +42,11 @@ NOTE: The timestamps in the sample data sets are relative to when they are insta
 If you uninstall and reinstall a data set, the timestamps change to reflect the most recent installation.
 
 [float]
-[[getting-started-next-steps]]
 == Next steps
 
-* To get a hands-on experience creating visualizations, follow the <<tutorial-sample-data, add sample data>> tutorial.
+* To get a hands-on experience creating visualizations, follow the <<explore-kibana-using-sample-data, add sample data>> tutorial.
 
-* If you're ready to load an actual data set and build a dashboard, follow the <<tutorial-build-dashboard, build your own dashboard>> tutorial.
+* If you're ready to load an actual data set and build a dashboard, follow the <<create-your-own-dashboard, Create your own dashboard>> tutorial.
 
 --
 
@@ -60,5 +59,3 @@ include::{kib-repo-dir}/getting-started/tutorial-define-index.asciidoc[]
 include::{kib-repo-dir}/getting-started/tutorial-discovering.asciidoc[]
 
 include::{kib-repo-dir}/getting-started/tutorial-visualizing.asciidoc[]
-
-include::{kib-repo-dir}/getting-started/tutorial-dashboard.asciidoc[]

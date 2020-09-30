@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/server';
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+} from '../../../../common/constants';
 import { ReportingConfig } from '../../../';
 import { LevelLogger } from '../../../lib';
 
@@ -38,8 +42,8 @@ export const getUiSettings = async (
 
   // Separator, QuoteValues
   const [separator, quoteValues] = await Promise.all([
-    client.get('csv:separator'),
-    client.get('csv:quoteValues'),
+    client.get(UI_SETTINGS_CSV_SEPARATOR),
+    client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
   ]);
 
   return {

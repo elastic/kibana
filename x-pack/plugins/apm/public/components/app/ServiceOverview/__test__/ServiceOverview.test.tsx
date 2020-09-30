@@ -4,43 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactChild, FunctionComponent } from 'react';
 import { render, wait, waitForElement } from '@testing-library/react';
+import { CoreStart } from 'kibana/public';
+import { merge } from 'lodash';
+import React, { FunctionComponent, ReactChild } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { ServiceOverview } from '..';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
 } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
+import * as urlParamsHooks from '../../../../hooks/useUrlParams';
+import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
 
-jest.mock('ui/new_platform');
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
+
+const addWarning = jest.fn();
+const httpGet = jest.fn();
 
 function wrapper({ children }: { children: ReactChild }) {
+  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+    core: {
+      http: {
+        get: httpGet,
+      },
+      notifications: {
+        toasts: {
+          addWarning,
+        },
+      },
+    },
+  }) as unknown) as ApmPluginContextValue;
+
   return (
-    <MockApmPluginContextWrapper
-      value={
-        ({
-          ...mockApmPluginContextValue,
-          core: {
-            ...mockApmPluginContextValue.core,
-            http: { ...mockApmPluginContextValue.core.http, get: httpGet },
-            notifications: {
-              ...mockApmPluginContextValue.core.notifications,
-              toasts: {
-                ...mockApmPluginContextValue.core.notifications.toasts,
-                addWarning,
-              },
-            },
-          },
-        } as unknown) as ApmPluginContextValue
-      }
-    >
-      {children}
-    </MockApmPluginContextWrapper>
+    <MemoryRouter>
+      <EuiThemeProvider>
+        <KibanaReactContext.Provider>
+          <MockApmPluginContextWrapper value={mockPluginContext}>
+            {children}
+          </MockApmPluginContextWrapper>
+        </KibanaReactContext.Provider>
+      </EuiThemeProvider>
+    </MemoryRouter>
   );
 }
 
@@ -50,12 +64,9 @@ function renderServiceOverview() {
   });
 }
 
-const addWarning = jest.fn();
-const httpGet = jest.fn();
-
 describe('Service Overview -> View', () => {
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
 
     // mock urlParams
@@ -74,6 +85,17 @@ describe('Service Overview -> View', () => {
       clearValues: () => null,
       status: FETCH_STATUS.SUCCESS,
     });
+
+    jest
+      .spyOn(useAnomalyDetectionJobs, 'useAnomalyDetectionJobs')
+      .mockReturnValue({
+        status: FETCH_STATUS.SUCCESS,
+        data: {
+          jobs: [],
+          hasLegacyJobs: false,
+        },
+        refetch: () => undefined,
+      });
   });
 
   afterEach(() => {
@@ -93,6 +115,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 200,
           avgResponseTime: 300,
           environments: ['test', 'dev'],
+          healthStatus: ServiceHealthStatus.warning,
         },
         {
           serviceName: 'My Go Service',
@@ -101,6 +124,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 500,
           avgResponseTime: 600,
           environments: [],
+          severity: ServiceHealthStatus.healthy,
         },
       ],
     });
@@ -187,6 +211,59 @@ describe('Service Overview -> View', () => {
       await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when ML data is not found', () => {
+    it('does not render the health column', async () => {
+      httpGet.mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: [
+          {
+            serviceName: 'My Python Service',
+            agentName: 'python',
+            transactionsPerMinute: 100,
+            errorsPerMinute: 200,
+            avgResponseTime: 300,
+            environments: ['test', 'dev'],
+          },
+        ],
+      });
+
+      const { queryByText } = renderServiceOverview();
+
+      // wait for requests to be made
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+
+      expect(queryByText('Health')).toBeNull();
+    });
+  });
+
+  describe('when ML data is found', () => {
+    it('renders the health column', async () => {
+      httpGet.mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: [
+          {
+            serviceName: 'My Python Service',
+            agentName: 'python',
+            transactionsPerMinute: 100,
+            errorsPerMinute: 200,
+            avgResponseTime: 300,
+            environments: ['test', 'dev'],
+            healthStatus: ServiceHealthStatus.warning,
+          },
+        ],
+      });
+
+      const { queryAllByText } = renderServiceOverview();
+
+      // wait for requests to be made
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+
+      expect(queryAllByText('Health').length).toBeGreaterThan(1);
     });
   });
 });

@@ -32,10 +32,6 @@ import { AdvancedSettingsComponent } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: mockConfig(),
-}));
-
 jest.mock('./components/field', () => ({
   Field: () => {
     return 'field';

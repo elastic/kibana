@@ -20,14 +20,16 @@ import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { Vis } from '../../visualizations/public';
+import { BaseVisTypeOptions, Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { TableOptions, createTableVisualizationComponent } from './components';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
-export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
+export function getTableVisTypeDefinition(
+  core: CoreSetup,
+  context: PluginInitializerContext
+): BaseVisTypeOptions {
   return {
-    type: 'table',
     name: 'table',
     title: i18n.translate('visTypeTable.tableVisTitle', {
       defaultMessage: 'Data Table',

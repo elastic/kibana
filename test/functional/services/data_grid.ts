@@ -20,11 +20,38 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
+interface TabbedGridData {
+  columns: string[];
+  rows: string[][];
+}
+
 export function DataGridProvider({ getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   class DataGrid {
+    async getDataGridTableData(): Promise<TabbedGridData> {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+
+      const columns = $('.euiDataGridHeaderCell__content')
+        .toArray()
+        .map((cell) => $(cell).text());
+      const rows = $.findTestSubjects('dataGridRow')
+        .toArray()
+        .map((row) =>
+          $(row)
+            .find('.euiDataGridRowCell__truncate')
+            .toArray()
+            .map((cell) => $(cell).text())
+        );
+
+      return {
+        columns,
+        rows,
+      };
+    }
+
     /**
      * Converts the data grid data into nested array
      * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]

@@ -38,7 +38,6 @@ export const setTimelineEndDate = (date: string) => {
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
-    // @ts-ignore
     if (Cypress.dom.isAttached($el)) {
       cy.wrap($el).click({ force: true });
     }
@@ -55,7 +54,6 @@ export const setTimelineStartDate = (date: string) => {
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
-    // @ts-ignore
     if (Cypress.dom.isAttached($el)) {
       cy.wrap($el).click({ force: true });
     }

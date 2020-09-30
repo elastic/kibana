@@ -24,6 +24,10 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
+  lowercaseHashValues,
+  getPrepopulatedItem,
+  getCodeSignatureValue,
+  defaultEndpointExceptionItems,
 } from './helpers';
 import { EmptyEntry } from './types';
 import {
@@ -364,7 +368,7 @@ describe('Exception helpers', () => {
       const mockEmptyException: EntryNested = {
         field: '',
         type: OperatorTypeEnum.NESTED,
-        entries: [{ ...getEntryMatchMock() }],
+        entries: [getEntryMatchMock()],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -661,6 +665,253 @@ describe('Exception helpers', () => {
       ];
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#lowercaseHashValues', () => {
+    test('it should return an empty array with an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([]);
+    });
+
+    test('it should return all list items with entry hashes lowercased', () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'DDDFFF' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'DDDFFF'] },
+          ] as EntriesArray,
+        },
+      ];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'dddfff' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'dddfff'] },
+          ] as EntriesArray,
+        },
+      ]);
+    });
+  });
+
+  describe('getPrepopulatedItem', () => {
+    test('it returns prepopulated items', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: { subjectName: '', trusted: '' },
+        filePath: '',
+        sha256Hash: '',
+        eventCode: '',
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: '' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+      ]);
+    });
+
+    test('it returns prepopulated items with values', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
+        filePath: 'some-file-path',
+        sha256Hash: 'some-hash',
+        eventCode: 'some-event-code',
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'someSubjectName',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: 'some-file-path' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+      ]);
+    });
+  });
+
+  describe('getCodeSignatureValue', () => {
+    test('it works when file.Ext.code_signature is an object', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: {
+              subject_name: ['some_subject'],
+              trusted: ['false'],
+            },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+    });
+
+    test('it works when file.Ext.code_signature is nested type', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        { subjectName: 'some_subject', trusted: 'false' },
+        {
+          subjectName: 'some_subject_2',
+          trusted: 'true',
+        },
+      ]);
+    });
+
+    test('it returns default when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: { subject_name: [], trusted: [] },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+  });
+
+  describe('defaultEndpointExceptionItems', () => {
+    test('it should return pre-populated items', () => {
+      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', {
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
+          path: ['some file path'],
+          hash: {
+            sha256: ['some hash'],
+          },
+        },
+        event: {
+          code: ['some event code'],
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
+      expect(defaultItems[1].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
     });
   });
 });

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -17,7 +16,6 @@ import {
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { HttpService } from '../../../../../../src/core/public/http';
 
 import {
@@ -46,6 +44,11 @@ const appServices = {
   api: apiService,
   notifications: notificationServiceMock.createSetupContract(),
   history,
+  urlGenerators: {
+    getUrlGenerator: jest.fn().mockReturnValue({
+      createUrl: jest.fn(),
+    }),
+  },
 };
 
 export const setupEnvironment = () => {

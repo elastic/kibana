@@ -8,16 +8,16 @@ import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/com
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import {
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
+import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
-
+import {
+  DataFrameAnalyticsConfig,
+  DataFrameAnalyticsId,
+  DataFrameAnalysisConfigType,
+} from '../../../../../../../common/types/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
   classification = '100mb',
 }
@@ -29,7 +29,7 @@ export const UNSET_CONFIG_ITEM = '--';
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = ANALYSIS_CONFIG_TYPE | undefined;
+export type AnalyticsJobType = DataFrameAnalysisConfigType | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -44,6 +44,7 @@ export interface FormMessage {
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
+  disableSwitchToForm: boolean;
   form: {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
@@ -97,6 +98,7 @@ export interface State {
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
+  hasSwitchedToEditor: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
   isValid: boolean;
@@ -110,6 +112,7 @@ export interface State {
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
+  disableSwitchToForm: false,
   form: {
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
@@ -131,7 +134,7 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    jobConfigQuery: { match_all: {} },
+    jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
@@ -167,6 +170,7 @@ export const getInitialState = (): State => ({
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
+  hasSwitchedToEditor: false,
   isJobCreated: false,
   isJobStarted: false,
   isValid: false,
@@ -283,10 +287,11 @@ function toCamelCase(property: string): string {
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
  */
-export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+export function getFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
+  isClone: boolean = true
 ): Partial<State['form']> {
-  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
+  const jobType = getAnalysisType(analyticsJobConfig.analysis) as DataFrameAnalysisConfigType;
 
   const resultState: Partial<State['form']> = {
     jobType,
@@ -299,6 +304,10 @@ export function getCloneFormStateFromJobConfig(
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
+
+  if (isClone === false) {
+    resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
+  }
 
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 

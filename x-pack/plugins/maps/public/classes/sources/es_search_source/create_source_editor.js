@@ -19,6 +19,8 @@ import {
   getTermsFields,
   getGeoTileAggNotSupportedReason,
   supportsGeoTileAgg,
+  supportsMvt,
+  getMvtDisabledReason,
 } from '../../../index_pattern_util';
 
 function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
@@ -147,6 +149,7 @@ export class CreateSourceEditor extends Component {
       return null;
     }
 
+    const mvtSupported = supportsMvt(this.state.indexPattern, this.state.geoFieldName);
     return (
       <Fragment>
         <EuiSpacer size="m" />
@@ -159,6 +162,8 @@ export class CreateSourceEditor extends Component {
             this.state.indexPattern,
             this.state.geoFieldName
           )}
+          supportsMvt={mvtSupported}
+          mvtDisabledReason={mvtSupported ? null : getMvtDisabledReason()}
           clusteringDisabledReason={
             this.state.indexPattern
               ? getGeoTileAggNotSupportedReason(

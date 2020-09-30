@@ -8,6 +8,7 @@ import { DocLinksStart } from 'src/core/public';
 
 export type Links = ReturnType<typeof getLinks>;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const getLinks = ({ DOC_LINK_VERSION, ELASTIC_WEBSITE_URL }: DocLinksStart) =>
   Object.freeze({
     painlessExecuteAPI: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,

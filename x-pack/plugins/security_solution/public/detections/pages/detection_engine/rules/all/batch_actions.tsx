@@ -17,6 +17,7 @@ import {
 import { ActionToaster, displayWarningToast } from '../../../../../common/components/toasters';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import * as detectionI18n from '../../translations';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 
 interface GetBatchItems {
   closePopover: () => void;
@@ -62,7 +63,7 @@ export const getBatchItems = ({
         );
 
         const deactivatedIdsNoML = deactivatedIds.filter(
-          (id) => rules.find((r) => r.id === id)?.type !== 'machine_learning' ?? false
+          (id) => !isMlRule(rules.find((r) => r.id === id)?.type)
         );
 
         const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;

@@ -18,7 +18,7 @@
  */
 
 export { run } from './cli';
-export { buildProductionProjects, prepareExternalProjectDependencies } from './production';
+export { buildProductionProjects } from './production';
 export { getProjects } from './utils/projects';
 export { Project } from './utils/project';
 export { copyWorkspacePackages } from './utils/workspaces';

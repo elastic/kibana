@@ -22,7 +22,6 @@ const minWidthPixels = 550; // do not allow the flyout to shrink below this widt
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 interface FlyoutPaneComponentProps {
   children: React.ReactNode;
-  flyoutHeight: number;
   onClose: () => void;
   timelineId: string;
   width: number;

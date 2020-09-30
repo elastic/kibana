@@ -4,25 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  TRANSACTION_REQUEST,
+  TRANSACTION_PAGE_LOAD,
+} from '../../../common/transaction_types';
 import { UIFilters } from '../../../typings/ui_filters';
 import {
-  TRANSACTION_TYPE,
+  SERVICE_NAME,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
+  METRIC_CGROUP_MEMORY_USAGE_BYTES,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 import {
-  TRANSACTION_REQUEST,
-  TRANSACTION_PAGE_LOAD,
-} from '../../../common/transaction_types';
+  percentCgroupMemoryUsedScript,
+  percentSystemMemoryUsedScript,
+} from '../metrics/by_agent/shared/memory';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { getErrorRate } from '../transaction_groups/get_error_rate';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
@@ -30,11 +37,13 @@ interface Options {
   setup: Setup & SetupTimeRange;
   environment?: string;
   serviceName: string;
+  searchAggregatedTransactions: boolean;
 }
 
 interface TaskParameters {
   environment?: string;
   filter: ESFilter[];
+  searchAggregatedTransactions: boolean;
   minutes: number;
   serviceName?: string;
   setup: Setup;
@@ -43,6 +52,7 @@ interface TaskParameters {
 export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
+  searchAggregatedTransactions,
   uiFilters,
 }: Options & { serviceName: string; uiFilters: UIFilters }) {
   const { start, end } = setup;
@@ -57,6 +67,7 @@ export async function getServiceMapServiceNodeInfo({
   const taskParams = {
     environment: uiFilters.environment,
     filter,
+    searchAggregatedTransactions,
     minutes,
     serviceName,
     setup,
@@ -85,10 +96,12 @@ async function getErrorStats({
   setup,
   serviceName,
   environment,
+  searchAggregatedTransactions,
 }: {
   setup: Options['setup'];
   serviceName: string;
   environment?: string;
+  searchAggregatedTransactions: boolean;
 }) {
   const setupWithBlankUiFilters = {
     ...setup,
@@ -97,6 +110,7 @@ async function getErrorStats({
   const { noHits, average } = await getErrorRate({
     setup: setupWithBlankUiFilters,
     serviceName,
+    searchAggregatedTransactions,
   });
   return { avgErrorRate: noHits ? null : average };
 }
@@ -105,21 +119,30 @@ async function getTransactionStats({
   setup,
   filter,
   minutes,
+  searchAggregatedTransactions,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
 }> {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             ...filter,
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
             {
               terms: {
                 [TRANSACTION_TYPE]: [
@@ -132,14 +155,31 @@ async function getTransactionStats({
         },
       },
       track_total_hits: true,
-      aggs: { duration: { avg: { field: TRANSACTION_DURATION } } },
+      aggs: {
+        duration: {
+          avg: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          },
+        },
+        count: {
+          value_count: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          },
+        },
+      },
     },
   };
-  const response = await client.search(params);
-  const docCount = response.hits.total.value;
+  const response = await apmEventClient.search(params);
+
+  const totalRequests = response.aggregations?.count.value ?? 0;
+
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
+    avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
   };
 }
 
@@ -147,18 +187,17 @@ async function getCpuStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
+  const response = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: filter.concat([
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
-            { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
-          ]),
+          filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
         },
       },
       aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
@@ -172,24 +211,51 @@ async function getMemoryStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
-  const { client, indices } = setup;
-  const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
-    body: {
-      query: {
-        bool: {
-          filter: filter.concat([
-            { term: { [PROCESSOR_EVENT]: 'metric' } },
-            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          ]),
+  const { apmEventClient } = setup;
+
+  const getAvgMemoryUsage = async ({
+    additionalFilters,
+    script,
+  }: {
+    additionalFilters: ESFilter[];
+    script: typeof percentCgroupMemoryUsedScript;
+  }) => {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [...filter, ...additionalFilters],
+          },
+        },
+        aggs: {
+          avgMemoryUsage: { avg: { script } },
         },
       },
-      aggs: { avgMemoryUsage: { avg: { script: percentMemoryUsedScript } } },
-    },
+    });
+
+    return response.aggregations?.avgMemoryUsage.value ?? null;
+  };
+
+  let avgMemoryUsage = await getAvgMemoryUsage({
+    additionalFilters: [
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+    ],
+    script: percentCgroupMemoryUsedScript,
   });
 
-  return {
-    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value ?? null,
-  };
+  if (!avgMemoryUsage) {
+    avgMemoryUsage = await getAvgMemoryUsage({
+      additionalFilters: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+      script: percentSystemMemoryUsedScript,
+    });
+  }
+
+  return { avgMemoryUsage };
 }

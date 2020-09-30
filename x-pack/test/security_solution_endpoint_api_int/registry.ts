@@ -57,7 +57,7 @@ export function createEndpointDockerConfig(
   });
 }
 
-export function getRegistryUrl(): string | undefined {
+export function getRegistryUrlFromTestEnv(): string | undefined {
   let registryUrl: string | undefined;
   if (dockerRegistryPort !== undefined) {
     registryUrl = `--xpack.ingestManager.registryUrl=http://localhost:${dockerRegistryPort}`;
@@ -68,10 +68,10 @@ export function getRegistryUrl(): string | undefined {
 }
 
 export function getRegistryUrlAsArray(): string[] {
-  const registryUrl: string | undefined = getRegistryUrl();
+  const registryUrl: string | undefined = getRegistryUrlFromTestEnv();
   return registryUrl !== undefined ? [registryUrl] : [];
 }
 
 export function isRegistryEnabled() {
-  return getRegistryUrl() !== undefined;
+  return getRegistryUrlFromTestEnv() !== undefined;
 }

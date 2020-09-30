@@ -9,7 +9,6 @@ import {
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';

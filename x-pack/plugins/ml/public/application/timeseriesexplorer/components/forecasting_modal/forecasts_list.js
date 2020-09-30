@@ -65,7 +65,7 @@ function getColumns(viewForecast) {
         return (
           <EuiButtonIcon
             onClick={() => viewForecast(forecast.forecast_id)}
-            iconType="stats"
+            iconType="visLine"
             aria-label={viewForecastAriaLabel}
           />
         );
