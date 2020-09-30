@@ -32,7 +32,7 @@ interface ManagementSectionWrapperProps {
 
 export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
   private unmount?: Unmount;
-  private mountElementRef = createRef<HTMLElement>();
+  private mountElementRef = createRef<HTMLDivElement>();
 
   componentDidMount() {
     const { setBreadcrumbs, app, onAppMounted, history } = this.props;
@@ -64,6 +64,6 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
   }
 
   render() {
-    return <main ref={this.mountElementRef} />;
+    return <div ref={this.mountElementRef} />;
   }
 }

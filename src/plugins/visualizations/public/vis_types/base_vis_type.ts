@@ -18,9 +18,11 @@
  */
 
 import _ from 'lodash';
-import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { ReactElement } from 'react';
+import { VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
+import { Vis } from '../vis';
 
 interface CommonBaseVisTypeOptions {
   name: string;
@@ -41,10 +43,12 @@ interface CommonBaseVisTypeOptions {
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
+  isDeprecated?: boolean;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<{}>;
 }
 
-interface ExpressionBaseVisTypeOptions extends CommonBaseVisTypeOptions {
-  toExpressionAst: VisToExpressionAst;
+interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
+  toExpressionAst: VisToExpressionAst<TVisParams>;
   visualization?: undefined;
 }
 
@@ -53,9 +57,11 @@ interface VisualizationBaseVisTypeOptions extends CommonBaseVisTypeOptions {
   visualization: VisualizationControllerConstructor | undefined;
 }
 
-export type BaseVisTypeOptions = ExpressionBaseVisTypeOptions | VisualizationBaseVisTypeOptions;
+export type BaseVisTypeOptions<TVisParams = VisParams> =
+  | ExpressionBaseVisTypeOptions<TVisParams>
+  | VisualizationBaseVisTypeOptions;
 
-export class BaseVisType {
+export class BaseVisType<TVisParams = VisParams> {
   name: string;
   title: string;
   description: string;
@@ -77,9 +83,10 @@ export class BaseVisType {
   setup?: unknown;
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
-  toExpressionAst?: VisToExpressionAst;
+  toExpressionAst?: VisToExpressionAst<TVisParams>;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<{}>;
 
-  constructor(opts: BaseVisTypeOptions) {
+  constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
       throw new Error('vis_type must define its icon or image');
     }
@@ -115,6 +122,7 @@ export class BaseVisType {
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
+    this.getDeprecationMessage = opts.getDeprecationMessage;
   }
 
   public get schemas() {
