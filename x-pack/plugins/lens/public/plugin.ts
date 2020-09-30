@@ -40,7 +40,6 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
 
-import './index.scss';
 import { getLensAttributeService, LensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
@@ -132,7 +131,7 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const { mountApp } = await import('./app_plugin/mounter');
+        const { mountApp } = await import('./async_services');
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,

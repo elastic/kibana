@@ -22,7 +22,6 @@ import {
   EditorFrameStart,
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
-import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -47,9 +46,11 @@ export interface EditorFrameStartPlugins {
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
-  definitions: Array<T | Promise<T>>
+  definitions: Array<T | (() => Promise<T>)>
 ) {
-  const resolvedDefinitions = await Promise.all(definitions);
+  const resolvedDefinitions = await Promise.all(
+    definitions.map((definition) => (typeof definition === 'function' ? definition() : definition))
+  );
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
@@ -61,8 +62,8 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 export class EditorFrameService {
   constructor() {}
 
-  private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
-  private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
+  private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
+  private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
 
   /**
    * This method takes a Lens saved object as returned from the persistence helper,
@@ -124,7 +125,7 @@ export class EditorFrameService {
       ]);
 
       return {
-        mount: (
+        mount: async (
           element,
           {
             doc,
@@ -141,6 +142,8 @@ export class EditorFrameService {
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
+
+          const { EditorFrame } = await import('../async_services');
 
           render(
             <I18nProvider>
