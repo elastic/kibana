@@ -246,6 +246,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     signalIndexName,
   ]);
 
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null && maybeRule.query != null) {
+      return maybeRule.type === 'eql' && maybeRule.query.startsWith('sequence');
+    }
+    return false;
+  }, [maybeRule]);
+
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -265,6 +272,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilderComponent

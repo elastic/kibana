@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -353,6 +354,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilderComponent
