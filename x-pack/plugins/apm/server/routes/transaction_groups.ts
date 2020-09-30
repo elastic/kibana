@@ -137,6 +137,10 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
       traceId = '',
     } = context.params.query;
 
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return getTransactionDistribution({
       serviceName,
       transactionType,
@@ -144,6 +148,7 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
       transactionId,
       traceId,
       setup,
+      searchAggregatedTransactions,
     });
   },
 }));

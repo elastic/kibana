@@ -4,26 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
-export async function getDistributionMax(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  setup: Setup & SetupTimeRange
-) {
+export async function getDistributionMax({
+  serviceName,
+  transactionName,
+  transactionType,
+  setup,
+  searchAggregatedTransactions,
+}: {
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -48,8 +61,10 @@ export async function getDistributionMax(
       },
       aggs: {
         stats: {
-          extended_stats: {
-            field: TRANSACTION_DURATION,
+          max: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
           },
         },
       },
@@ -57,5 +72,5 @@ export async function getDistributionMax(
   };
 
   const resp = await apmEventClient.search(params);
-  return resp.aggregations ? resp.aggregations.stats.max : null;
+  return resp.aggregations?.stats.value ?? null;
 }
