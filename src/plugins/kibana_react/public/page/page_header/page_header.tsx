@@ -38,10 +38,10 @@ interface Props {
   overlap?: boolean;
   showDevToolsLink?: boolean;
   showManagementLink?: boolean;
-  title: JSX.Element;
+  title: JSX.Element | string;
 }
 
-export const OverviewHeader: FC<Props> = ({
+export const PageHeader: FC<Props> = ({
   hideToolbar,
   iconType,
   overlap,
@@ -60,11 +60,9 @@ export const OverviewHeader: FC<Props> = ({
 
   return (
     <header
-      className={`kbnOverviewHeader ${
-        overlap ? 'kbnOverviewHeader--hasOverlap' : 'kbnOverviewHeader--noOverlap'
-      }`}
+      className={`pageHeader ${overlap ? 'pageHeader--hasOverlap' : 'pageHeader--noOverlap'}`}
     >
-      <div className="kbnOverviewHeader__inner">
+      <div className="pageHeader__inner">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -76,7 +74,7 @@ export const OverviewHeader: FC<Props> = ({
 
               <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h1 id="kbnOverviewHeader__title">{title}</h1>
+                  <h1 id="pageHeader__title">{title}</h1>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -84,16 +82,16 @@ export const OverviewHeader: FC<Props> = ({
 
           {!hideToolbar && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
-                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+              <EuiFlexGroup className="pageHeader__actions" responsive={false} wrap>
+                <EuiFlexItem className="pageHeader__actionItem" grow={false}>
                   <RedirectAppLinks application={application}>
                     <EuiButtonEmpty
-                      className="kbnOverviewHeader__actionButton"
+                      className="pageHeader__actionButton"
                       flush="left"
                       href={'/app/home#/tutorial_directory'}
                       iconType="indexOpen"
                     >
-                      {i18n.translate('kibana-react.overviewHeader.addDataButtonLabel', {
+                      {i18n.translate('kibana-react.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
                     </EuiButtonEmpty>
@@ -101,15 +99,15 @@ export const OverviewHeader: FC<Props> = ({
                 </EuiFlexItem>
 
                 {showManagementLink && isManagementEnabled ? (
-                  <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                  <EuiFlexItem className="pageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
-                        className="kbnOverviewHeader__actionButton"
+                        className="pageHeader__actionButton"
                         flush="left"
                         iconType="gear"
                         href={'/app/management'}
                       >
-                        {i18n.translate('kibana-react.overviewHeader.stackManagementButtonLabel', {
+                        {i18n.translate('kibana-react.pageHeader.stackManagementButtonLabel', {
                           defaultMessage: 'Manage',
                         })}
                       </EuiButtonEmpty>
@@ -118,15 +116,15 @@ export const OverviewHeader: FC<Props> = ({
                 ) : null}
 
                 {showDevToolsLink && isDevToolsEnabled ? (
-                  <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                  <EuiFlexItem className="pageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
-                        className="kbnOverviewHeader__actionButton"
+                        className="pageHeader__actionButton"
                         flush="left"
                         iconType="wrench"
                         href={'/app/dev_tools#/console'}
                       >
-                        {i18n.translate('kibana-react.overviewHeader.devToolsButtonLabel', {
+                        {i18n.translate('kibana-react.pageHeader.devToolsButtonLabel', {
                           defaultMessage: 'Dev tools',
                         })}
                       </EuiButtonEmpty>

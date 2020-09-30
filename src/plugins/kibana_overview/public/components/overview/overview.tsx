@@ -35,7 +35,7 @@ import {
   RedirectAppLinks,
   useKibana,
   PageFooter,
-  OverviewHeader,
+  PageHeader,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
 import {
@@ -127,8 +127,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   return (
-    <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
-      <OverviewHeader
+    <main aria-labelledby="pageHeader__title" className="kbnOverviewWrapper">
+      <PageHeader
         hideToolbar={isNewKibanaInstance}
         iconType="logoKibana"
         title={<FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />}

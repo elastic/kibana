@@ -17,22 +17,4 @@
  * under the License.
  */
 
-.kbnOverviewHeader {
-  background-color: $euiPageBackgroundColor;
-  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
-}
-
-.kbnOverviewHeader__inner {
-  margin: 0 auto;
-  max-width: 1200px;
-  padding: $euiSizeXL $euiSize;
-
-  .kbnOverviewHeader--hasOverlap & {
-    padding-bottom: $euiSizeXL + $euiSizeL;
-  }
-}
-
-// Accounting for no `flush="both"` prop on EuiButtonEmpty
-.kbnOverviewHeader__actionButton {
-  margin-right: 0;
-}
+export * from './page_header';

@@ -87,7 +87,7 @@ export const PageFooter: FC<Props> = ({ path }) => {
 
   return (
     <footer className="pageFooter">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
         </EuiFlexItem>

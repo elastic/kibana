@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PageFooter, OverviewHeader } from '../../../../../../src/plugins/kibana_react/public';
+import { PageFooter, PageHeader } from '../../../../../../src/plugins/kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
@@ -128,12 +128,8 @@ export class Home extends Component {
     }
 
     return (
-      <main
-        aria-labelledby="kbnOverviewHeader__title"
-        className="homWrapper"
-        data-test-subj="homeApp"
-      >
-        <OverviewHeader
+      <main aria-labelledby="pageHeader__title" className="homWrapper" data-test-subj="homeApp">
+        <PageHeader
           overlap={solutions.length}
           showDevToolsLink
           showManagementLink

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { OverviewHeader } from './overview_header';
+import { PageHeader } from './page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
@@ -32,11 +32,11 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
 
 afterAll(() => jest.clearAllMocks());
 
-const mockTitle = <h1>Page Title</h1>;
+const mockTitle = 'Page Title';
 
-describe('OverviewHeader', () => {
+describe('PageHeader', () => {
   test('render', () => {
-    const component = shallowWithIntl(<OverviewHeader title={mockTitle} />);
+    const component = shallowWithIntl(<PageHeader title={mockTitle} />);
     expect(component).toMatchSnapshot();
   });
 });
