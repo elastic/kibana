@@ -24,7 +24,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
@@ -127,29 +126,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const mainApps = ['dashboard', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
-  const pageTitle = (
-    <EuiFlexGroup gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="xxl" type="logoKibana" />
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiTitle size="m">
-          <h1 id="kbnOverviewHeader__title">
-            <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
-      <header className="kbnOverviewHeader">
-        <div className="kbnOverviewHeader__inner">
-          {isNewKibanaInstance ? pageTitle : <OverviewHeader title={pageTitle} />}
-        </div>
-      </header>
+      <OverviewHeader
+        hideToolbar={isNewKibanaInstance}
+        iconType="logoKibana"
+        title={<FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />}
+      />
 
       <div className="kbnOverviewContent">
         {isNewKibanaInstance ? (

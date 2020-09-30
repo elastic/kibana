@@ -17,26 +17,22 @@
  * under the License.
  */
 
-.homWrapper {
-  background-color: $euiColorEmptyShade;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
+.kbnOverviewHeader {
+  background-color: $euiPageBackgroundColor;
+  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
-.homContent {
+.kbnOverviewHeader__inner {
   margin: 0 auto;
   max-width: 1200px;
   padding: $euiSizeXL $euiSize;
-  width: 100%;
+
+  .kbnOverviewHeader--hasOverlap & {
+    padding-bottom: $euiSizeXL + $euiSizeL;
+  }
 }
 
-.homData--expanded {
-  flex-direction: column;
-
-  &,
-  & > * {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.kbnOverviewHeader__actionButton {
+  margin-right: 0;
 }
