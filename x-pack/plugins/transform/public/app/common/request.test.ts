@@ -191,8 +191,8 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformSettingsRequestBody() with all settings', () => {
-    const transformDetailsState: StepDetailsExposedState = {
+  test('getCreateTransformSettingsRequestBody() with multiple settings', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: 400,
       transformSettingsMaxPageSearchSize: 100,
     };
@@ -207,8 +207,8 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformSettingsRequestBody() with individual settings', () => {
-    const transformDetailsState: StepDetailsExposedState = {
+  test('getCreateTransformSettingsRequestBody() with one setting', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: 400,
     };
 

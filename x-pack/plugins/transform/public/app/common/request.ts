@@ -131,7 +131,7 @@ export function getPreviewTransformRequestBody(
 }
 
 export const getCreateTransformSettingsRequestBody = (
-  transformDetailsState: StepDetailsExposedState
+  transformDetailsState: Partial<StepDetailsExposedState>
 ): { settings: PutTransformsRequestSchema['settings'] } => {
   // have to use Record<> here because typeof schema is readonly
   const tempSettings = {} as Record<string, number | null | undefined>;
