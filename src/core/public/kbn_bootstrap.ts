@@ -17,14 +17,6 @@
  * under the License.
  */
 
-/**
- * This is the entry point used to boot the frontend when serving a application
- * that lives in the Kibana Platform.
- *
- * Any changes to this file should be kept in sync with
- * src/legacy/ui/ui_bundles/app_entry_template.js
- */
-
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
