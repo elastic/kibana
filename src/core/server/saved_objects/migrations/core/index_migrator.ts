@@ -51,6 +51,8 @@ export class IndexMigrator {
 
       pollInterval: context.pollInterval,
 
+      setStatus: context.setStatus,
+
       async isMigrated() {
         return !(await requiresMigration(context));
       },
@@ -70,7 +72,6 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiresMigration(context: Context): Promise<boolean> {
-  return true;
   const { client, alias, documentMigrator, dest, log } = context;
 
   // Have all of our known migrations been run against the index?

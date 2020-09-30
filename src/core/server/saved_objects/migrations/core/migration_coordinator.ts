@@ -35,11 +35,16 @@
  */
 
 import _ from 'lodash';
+import { KibanaMigratorStatus } from '../kibana';
 import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
-export type MigrationStatus = 'waiting' | 'running' | 'completed';
+export type MigrationStatus =
+  | 'waiting_to_start'
+  | 'waiting_for_other_nodes'
+  | 'running'
+  | 'completed';
 
 export type MigrationResult =
   | { status: 'skipped' }
@@ -54,6 +59,7 @@ export type MigrationResult =
 interface Opts {
   runMigration: () => Promise<MigrationResult>;
   isMigrated: () => Promise<boolean>;
+  setStatus: (status: KibanaMigratorStatus) => void;
   log: SavedObjectsMigrationLogger;
   pollInterval?: number;
 }
@@ -75,7 +81,9 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
   try {
     return await opts.runMigration();
   } catch (error) {
-    if (handleIndexExists(error, opts.log)) {
+    const waitingIndex = handleIndexExists(error, opts.log);
+    if (waitingIndex) {
+      opts.setStatus({ status: 'waiting_for_other_nodes', waitingIndex });
       await waitForMigration(opts.isMigrated, opts.pollInterval);
       return { status: 'skipped' };
     }
@@ -92,7 +100,7 @@ function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
   const isIndexExistsError =
     _.get(error, 'body.error.type') === 'resource_already_exists_exception';
   if (!isIndexExistsError) {
-    return false;
+    return null;
   }
 
   const index = _.get(error, 'body.error.index');
@@ -104,7 +112,7 @@ function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
       `restarting Kibana.`
   );
 
-  return true;
+  return index;
 }
 
 /**

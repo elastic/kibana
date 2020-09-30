@@ -36,6 +36,7 @@ import { buildActiveMappings } from './build_active_mappings';
 import { VersionedTransformer } from './document_migrator';
 import * as Index from './elastic_index';
 import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
+import { KibanaMigratorStatus } from '../kibana';
 
 export interface MigrationOpts {
   batchSize: number;
@@ -44,6 +45,7 @@ export interface MigrationOpts {
   client: MigrationEsClient;
   index: string;
   log: Logger;
+  setStatus: (status: KibanaMigratorStatus) => void;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
@@ -66,6 +68,7 @@ export interface Context {
   dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
   log: SavedObjectsMigrationLogger;
+  setStatus: (status: KibanaMigratorStatus) => void;
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
@@ -79,7 +82,7 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { log, client } = opts;
+  const { log, client, setStatus } = opts;
   const alias = opts.index;
   const source = createSourceContext(await Index.fetchInfo(client, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
@@ -90,6 +93,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     source,
     dest,
     log: new MigrationLogger(log),
+    setStatus,
     batchSize: opts.batchSize,
     documentMigrator: opts.documentMigrator,
     pollInterval: opts.pollInterval,

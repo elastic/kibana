@@ -106,7 +106,7 @@ const serviceStatusToHttpComponent = (
   since: string
 ): StatusComponentHttp => ({
   id: serviceName,
-  message: status.summary,
+  message: [status.summary, status.detail].filter((s) => !!s).join(' '),
   since,
   ...serviceStatusAttrs(status),
 });
