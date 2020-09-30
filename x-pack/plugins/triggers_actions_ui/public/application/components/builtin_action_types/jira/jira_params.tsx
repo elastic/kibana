@@ -13,7 +13,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 
-import { useAppDependencies } from '../../../app_context';
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
@@ -28,6 +27,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   errors,
   messageVariables,
   actionConnector,
+  http,
+  toastNotifications,
 }) => {
   const { title, description, comments, issueType, priority, labels, savedObjectId } =
     actionParams.subActionParams || {};
@@ -35,7 +36,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
-  const { http, toastNotifications } = useAppDependencies();
 
   useEffect(() => {
     setFirstLoad(true);
