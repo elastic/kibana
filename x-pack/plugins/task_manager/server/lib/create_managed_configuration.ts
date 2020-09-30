@@ -9,7 +9,7 @@ import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'r
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Logger } from '../types';
 
-const FLUSH_MARKER: string = 'FLUSH';
+const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 
 // When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
