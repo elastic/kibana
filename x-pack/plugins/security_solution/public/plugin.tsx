@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { Store, Action } from 'redux';
 
-/** These plugins are shared across Kibana and do not substantially contribute to the initial bundle size. */
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import {
@@ -20,9 +19,7 @@ import {
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-/** common/lib/telemetry is 32 KiB and loaded initially */
 import { initTelemetry } from './common/lib/telemetry';
-/** common/lib/kibana/services is 2 KiB and loaded initially */
 import { KibanaServices } from './common/lib/kibana/services';
 import {
   PluginSetup,
@@ -33,7 +30,6 @@ import {
   AppObservableLibs,
 } from './types';
 
-/** These are < 2 KiB */
 import {
   APP_ID,
   APP_ICON_SOLUTION,
@@ -48,14 +44,11 @@ import {
   DEFAULT_INDEX_KEY,
 } from '../common/constants';
 
-/** This pulls in about 7 KiB. Can we register a promise instead of the actual component? */
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
 import { State } from './common/store';
 import { RenderAppProps, SecurityPageName } from './app/types';
-/** 6 KiB */
 import { manageOldSiemRoutes } from './helpers';
-/** 1 KiB */
 import {
   OVERVIEW,
   HOSTS,
@@ -65,12 +58,10 @@ import {
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
-/** negligible */
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
-/** Just types. 0 */
 import { AppFrontendLibs } from './common/lib/lib';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -345,6 +336,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     return {
       resolver: async () => {
+        /**
+         * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+         * See https://webpack.js.org/api/module-methods/#magic-comments
+         */
         const { resolverPluginSetup } = await import(
           /* webpackChunkName: "resolver" */ './resolver'
         );
@@ -373,6 +368,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
     renderApp: (props: RenderAppProps) => () => void;
   }> {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
     const { renderApp, composeLibs } = await import(
       /* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'
     );
@@ -392,6 +391,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overviewSubPlugin,
       timelinesSubPlugin,
       managementSubPlugin,
+      /**
+       * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+       * See https://webpack.js.org/api/module-methods/#magic-comments
+       */
     } = await import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies');
 
     return {
@@ -431,6 +434,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }
         )
         .toPromise(),
+
+      /**
+       * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+       * See https://webpack.js.org/api/module-methods/#magic-comments
+       */
       import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'),
     ]);
 
