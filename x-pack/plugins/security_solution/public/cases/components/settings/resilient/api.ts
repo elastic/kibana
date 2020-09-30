@@ -10,15 +10,13 @@ import { ResilientIncidentTypes, ResilientSeverity } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 
-export async function getIncidentTypes({
-  http,
-  signal,
-  connectorId,
-}: {
+export interface Props {
   http: HttpSetup;
   signal: AbortSignal;
   connectorId: string;
-}) {
+}
+
+export async function getIncidentTypes({ http, signal, connectorId }: Props) {
   return http.post<ActionTypeExecutorResult<ResilientIncidentTypes>>(
     `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
     {
@@ -30,15 +28,7 @@ export async function getIncidentTypes({
   );
 }
 
-export async function getSeverity({
-  http,
-  signal,
-  connectorId,
-}: {
-  http: HttpSetup;
-  signal: AbortSignal;
-  connectorId: string;
-}) {
+export async function getSeverity({ http, signal, connectorId }: Props) {
   return http.post<ActionTypeExecutorResult<ResilientSeverity>>(
     `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
     {
