@@ -150,11 +150,10 @@ describe('KibanaVersionMismatchAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        action:
-          '[View instances](http://localhost:5601/app/monitoring#kibana/instances?_g=(cluster_uuid:abc123))',
+        action: '[View instances](kibana/instances)',
         actionPlain: 'Verify you have the same version across all instances.',
         internalFullMessage:
-          'Kibana version mismatch alert is firing for testCluster. Kibana is running [8.0.0, 7.2.1]. [View instances](http://localhost:5601/app/monitoring#kibana/instances?_g=(cluster_uuid:abc123))',
+          'Kibana version mismatch alert is firing for testCluster. Kibana is running [8.0.0, 7.2.1]. [View instances](kibana/instances)',
         internalShortMessage:
           'Kibana version mismatch alert is firing for testCluster. Verify you have the same version across all instances.',
         versionList: '[8.0.0, 7.2.1]',

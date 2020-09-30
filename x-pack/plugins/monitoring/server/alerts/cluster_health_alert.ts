@@ -180,14 +180,8 @@ export class ClusterHealthAlert extends BaseAlert {
           : i18n.translate('xpack.monitoring.alerts.clusterHealth.action.warning', {
               defaultMessage: `Allocate missing replica shards.`,
             });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/indices?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${actionText}](${url})`;
+
+      const action = `[${actionText}](elasticsearch/indices)`;
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.clusterHealth.firing.internalShortMessage',

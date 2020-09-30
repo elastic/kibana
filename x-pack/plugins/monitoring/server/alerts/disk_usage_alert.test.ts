@@ -142,9 +142,9 @@ describe('DiskUsageAlert', () => {
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](elasticsearch/nodes)`,
         internalShortMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify disk usage levels across affected nodes.',
         clusterName,
         count,
@@ -179,9 +179,9 @@ describe('DiskUsageAlert', () => {
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+        internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](elasticsearch/nodes)`,
         internalShortMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify disk usage levels across affected nodes.',
         clusterName,
         count,
@@ -209,7 +209,7 @@ describe('DiskUsageAlert', () => {
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
         internalShortMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify disk usage levels across affected nodes.',
         clusterName,
         count,

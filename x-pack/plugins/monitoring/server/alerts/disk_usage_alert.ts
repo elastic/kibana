@@ -212,7 +212,6 @@ export class DiskUsageAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const ccs = alertStates.find((state) => state.ccs)?.ccs;
     const firingNodes = alertStates.filter(
       (alertState) => alertState.ui.isFiring
     ) as AlertDiskUsageState[];
@@ -225,14 +224,8 @@ export class DiskUsageAlert extends BaseAlert {
       const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
         defaultMessage: 'View nodes',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (ccs) {
-        globalState.push(`ccs:${ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${fullActionText}](${url})`;
+
+      const action = `[${fullActionText}](elasticsearch/nodes)`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.diskUsage.firing.internalShortMessage',
         {

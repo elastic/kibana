@@ -67,7 +67,7 @@ export const createLink = (
   linkURL: string,
   type: AlertMessageTokenType = AlertMessageTokenType.DocLink
 ) => {
-  const link = type === AlertMessageTokenType.DocLink ? { url: linkURL } : { partialUrl: linkURL };
+  const link = type === AlertMessageTokenType.DocLink ? { partialUrl: linkURL } : { url: linkURL };
   return {
     text: linkText,
     tokens: [

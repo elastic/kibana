@@ -230,13 +230,6 @@ export class CpuUsageAlert extends BaseAlert {
       return;
     }
 
-    const ccs = instanceState.alertStates.reduce((accum: string, state): string => {
-      if (state.ccs) {
-        return state.ccs;
-      }
-      return accum;
-    }, '');
-
     const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
       .length;
     const firingNodes = instanceState.alertStates
@@ -253,14 +246,7 @@ export class CpuUsageAlert extends BaseAlert {
       const fullActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.fullAction', {
         defaultMessage: 'View nodes',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (ccs) {
-        globalState.push(`ccs:${ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${fullActionText}](${url})`;
+      const action = `[${fullActionText}](elasticsearch/nodes)`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
         {

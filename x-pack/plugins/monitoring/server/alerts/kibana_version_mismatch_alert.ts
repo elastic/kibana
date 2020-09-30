@@ -168,12 +168,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
           defaultMessage: 'View instances',
         }
       );
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#kibana/instances?_g=(${globalState.join(',')})`;
-      const action = `[${fullActionText}](${url})`;
+      const action = `[${fullActionText}](kibana/instances)`;
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',

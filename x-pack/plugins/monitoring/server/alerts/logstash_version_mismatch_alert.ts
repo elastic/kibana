@@ -159,12 +159,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
           defaultMessage: 'View nodes',
         }
       );
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#logstash/nodes?_g=(${globalState.join(',')})`;
-      const action = `[${fullActionText}](${url})`;
+      const action = `[${fullActionText}](logstash/nodes)`;
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',

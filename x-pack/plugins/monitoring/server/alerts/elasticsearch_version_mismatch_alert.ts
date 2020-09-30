@@ -163,14 +163,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
           defaultMessage: 'View nodes',
         }
       );
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${fullActionText}](${url})`;
+      const action = `[${fullActionText}](elasticsearch/nodes)`;
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.elasticsearchVersionMismatch.firing.internalShortMessage',

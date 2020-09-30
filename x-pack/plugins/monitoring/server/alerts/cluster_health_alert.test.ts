@@ -157,11 +157,10 @@ describe('ClusterHealthAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        action:
-          '[Allocate missing replica shards.](http://localhost:5601/app/monitoring#elasticsearch/indices?_g=(cluster_uuid:abc123))',
+        action: '[Allocate missing replica shards.](elasticsearch/indices)',
         actionPlain: 'Allocate missing replica shards.',
         internalFullMessage:
-          'Cluster health alert is firing for testCluster. Current health is yellow. [Allocate missing replica shards.](http://localhost:5601/app/monitoring#elasticsearch/indices?_g=(cluster_uuid:abc123))',
+          'Cluster health alert is firing for testCluster. Current health is yellow. [Allocate missing replica shards.](elasticsearch/indices)',
         internalShortMessage:
           'Cluster health alert is firing for testCluster. Current health is yellow. Allocate missing replica shards.',
         clusterName,

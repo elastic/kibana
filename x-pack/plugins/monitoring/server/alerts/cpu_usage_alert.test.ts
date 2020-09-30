@@ -153,7 +153,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        url:
+                        partialUrl:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
@@ -165,7 +165,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        url:
+                        partialUrl:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],
@@ -196,9 +196,9 @@ describe('CpuUsageAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](elasticsearch/nodes)`,
         internalShortMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify CPU levels across affected nodes.',
         clusterName,
         count,
@@ -373,9 +373,9 @@ describe('CpuUsageAlert', () => {
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. [View nodes](elasticsearch/nodes)`,
         internalShortMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify CPU levels across affected nodes.',
         clusterName,
         count,
@@ -505,7 +505,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        url:
+                        partialUrl:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
@@ -517,7 +517,7 @@ describe('CpuUsageAlert', () => {
                         startToken: '#start_link',
                         endToken: '#end_link',
                         type: 'docLink',
-                        url:
+                        partialUrl:
                           '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],
@@ -562,11 +562,10 @@ describe('CpuUsageAlert', () => {
       expect(scheduleActions.mock.calls[0]).toEqual([
         'default',
         {
-          action:
-            '[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+          action: '[View nodes](elasticsearch/nodes)',
           actionPlain: 'Verify CPU levels across affected nodes.',
           internalFullMessage:
-            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. [View nodes](elasticsearch/nodes)',
           internalShortMessage:
             'CPU usage alert is firing for 1 node(s) in cluster: testCluster. Verify CPU levels across affected nodes.',
           nodes: 'anotherNode:99.00',
@@ -597,7 +596,7 @@ describe('CpuUsageAlert', () => {
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
         internalShortMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
-        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        action: `[View nodes](elasticsearch/nodes)`,
         actionPlain: 'Verify CPU levels across affected nodes.',
         clusterName,
         count,

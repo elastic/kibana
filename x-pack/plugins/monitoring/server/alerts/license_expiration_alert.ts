@@ -172,14 +172,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
         defaultMessage: 'Please update your license.',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${actionText}](${url})`;
+      const action = `[${actionText}](elasticsearch/nodes)`;
       const expiredDate = $expiry.format(FORMAT_DURATION_TEMPLATE_SHORT).trim();
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(

@@ -191,14 +191,7 @@ export class NodesChangedAlert extends BaseAlert {
       const fullActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.fullAction', {
         defaultMessage: 'View nodes',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (alertState.ccs) {
-        globalState.push(`ccs:${alertState.ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
-        ','
-      )})`;
-      const action = `[${fullActionText}](${url})`;
+      const action = `[${fullActionText}](elasticsearch/nodes)`;
       const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
       const added = Object.values(states.added).join(',');
       const removed = Object.values(states.removed).join(',');

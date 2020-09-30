@@ -147,11 +147,10 @@ describe('LogstashVersionMismatchAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        action:
-          '[View nodes](http://localhost:5601/app/monitoring#logstash/nodes?_g=(cluster_uuid:abc123))',
+        action: '[View nodes](logstash/nodes)',
         actionPlain: 'Verify you have the same version across all nodes.',
         internalFullMessage:
-          'Logstash version mismatch alert is firing for testCluster. Logstash is running [8.0.0, 7.2.1]. [View nodes](http://localhost:5601/app/monitoring#logstash/nodes?_g=(cluster_uuid:abc123))',
+          'Logstash version mismatch alert is firing for testCluster. Logstash is running [8.0.0, 7.2.1]. [View nodes](logstash/nodes)',
         internalShortMessage:
           'Logstash version mismatch alert is firing for testCluster. Verify you have the same version across all nodes.',
         versionList: '[8.0.0, 7.2.1]',
