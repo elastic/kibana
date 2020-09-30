@@ -49,6 +49,13 @@ $pageWidth: 1200px;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
   width: 100%;
+
+  // Ensure card heights are stretched equally when wrapped with this element
+  .kbnRedirectCrossAppLinks {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
 }
 
 // Prevent children from rendering as flex items
