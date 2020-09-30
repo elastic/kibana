@@ -8,16 +8,10 @@ import { handleActions, Action } from 'redux-actions';
 import { Ping, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 import {
   FetchJourneyStepsParams,
-  FetchStepScreenshot,
   GetJourneyFailPayload,
   getJourneySteps,
   getJourneyStepsFail,
   getJourneyStepsSuccess,
-  getStepScreenshot,
-  getStepScreenshotFail,
-  GetStepScreenshotFailPayload,
-  getStepScreenshotSuccess,
-  GetStepScreenshotSuccessPayload,
 } from '../actions/journey';
 
 export interface JourneyState {
@@ -29,10 +23,7 @@ export interface JourneyState {
 
 const initialState: JourneyState[] = [];
 
-type Payload = FetchJourneyStepsParams &
-  SyntheticsJourneyApiResponse &
-  GetJourneyFailPayload &
-  GetStepScreenshotSuccessPayload;
+type Payload = FetchJourneyStepsParams & SyntheticsJourneyApiResponse & GetJourneyFailPayload;
 
 function loadJourney(state: JourneyState[], checkGroup: string) {
   const journeyToLoad: JourneyState | undefined = state.find((j) => j.checkGroup === checkGroup);
@@ -90,55 +81,6 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
       ...state.filter((j) => j.checkGroup !== action.payload.checkGroup),
       updateJourneyError(state, action),
     ],
-
-    [String(getStepScreenshot)]: (state: JourneyState[], action: Action<FetchStepScreenshot>) =>
-      state.map((j) => {
-        if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
-        if (!step) return j;
-        step.synthetics = {
-          ...step.synthetics,
-          screenshotLoading: true,
-        };
-        return j;
-      }),
-
-    [String(getStepScreenshotSuccess)]: (
-      state: JourneyState[],
-      action: Action<GetStepScreenshotSuccessPayload>
-    ) =>
-      state.map((j) => {
-        if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
-        if (!step) return j;
-        step.synthetics = {
-          ...step.synthetics,
-          blob: action.payload.screenshot,
-          screenshotLoading: false,
-          screenshotExists: !!action.payload.screenshot,
-        };
-        return j;
-      }),
-
-    [String(getStepScreenshotFail)]: (
-      state: JourneyState[],
-      action: Action<GetStepScreenshotFailPayload>
-    ) =>
-      state.map((j) => {
-        if (j.checkGroup !== action.payload.checkGroup) return j;
-        const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
-        if (!step) return j;
-        step.synthetics = {
-          ...step?.synthetics,
-          screenshotLoading: false,
-          screenshotExists: false,
-        };
-        // TODO: error handle
-        return {
-          ...j,
-          error: action.payload.error,
-        };
-      }),
   },
   initialState
 );

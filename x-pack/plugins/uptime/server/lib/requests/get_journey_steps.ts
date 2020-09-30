@@ -5,12 +5,13 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { Ping } from '../../../common/runtime_types';
 
 interface GetJourneyStepsParams {
   checkGroup: string;
 }
 
-export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any> = async ({
+export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
   callES,
   dynamicSettings,
   checkGroup,
@@ -23,7 +24,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any>
           filter: [
             {
               terms: {
-                'synthetics.type': ['step/end', 'stderr', 'cmd/status'],
+                'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
               },
             },
             {
@@ -34,13 +35,27 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, any>
           ],
         },
       },
+      _source: {
+        excludes: ['synthetics.blob'],
+      },
     },
     size: 500,
   };
   const result = await callES('search', params);
-  return result.hits.hits.map(({ _id, _source }: any) => ({
-    ..._source,
-    timestamp: _source['@timestamp'],
-    docId: _id,
-  }));
+  const screenshotIndexes: number[] = result.hits.hits
+    .filter((h) => h?._source?.synthetics?.type === 'step/screenshot')
+    .map((h) => h?._source?.synthetics?.step?.index);
+  return result.hits.hits
+    .filter((h) => h?._source?.synthetics?.type !== 'step/screenshot')
+    .map(
+      ({ _id, _source, _source: { synthetics } }: any): Ping => ({
+        ..._source,
+        timestamp: _source['@timestamp'],
+        docId: _id,
+        synthetics: {
+          ...synthetics,
+          screenshotExists: screenshotIndexes.some((i) => i === synthetics?.step?.index),
+        },
+      })
+    );
 };

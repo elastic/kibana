@@ -5,7 +5,7 @@
  */
 
 import { apiService } from './utils';
-import { FetchJourneyStepsParams, FetchStepScreenshot } from '../actions/journey';
+import { FetchJourneyStepsParams } from '../actions/journey';
 import {
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
@@ -19,10 +19,4 @@ export async function fetchJourneySteps(
     undefined,
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
-}
-
-export async function fetchStepScreenshot({ checkGroup, stepIndex }: FetchStepScreenshot) {
-  return await apiService.get(
-    `http://localhost:5601/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`
-  );
 }

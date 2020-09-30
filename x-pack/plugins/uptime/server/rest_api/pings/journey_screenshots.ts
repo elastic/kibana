@@ -17,7 +17,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex: schema.number(),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, context, request, response) => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
     const { checkGroup, stepIndex } = request.params;
     const result = await libs.requests.getJourneyScreenshot({
       callES,
@@ -27,14 +27,13 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     });
 
     if (result === null) {
-      return response.notFound({
-        body: 'Screenshot was not found',
-      });
+      return response.notFound();
     }
     return response.ok({
       body: Buffer.from(result, 'base64'),
       headers: {
         'content-type': 'image/png',
+        'cache-control': 'max-age=600',
       },
     });
   },

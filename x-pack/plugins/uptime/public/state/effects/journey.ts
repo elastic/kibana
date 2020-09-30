@@ -28,28 +28,3 @@ export function* fetchJourneyStepsEffect() {
     }
   });
 }
-
-export function* fetchStepScreenshotEffect() {
-  yield takeEvery(getStepScreenshot, function* (action: Action<FetchStepScreenshot>) {
-    const commonPayload = {
-      checkGroup: action.payload.checkGroup,
-      stepIndex: action.payload.stepIndex,
-    };
-    try {
-      const response = yield call(fetchStepScreenshot, action.payload);
-      yield put(
-        getStepScreenshotSuccess({
-          ...commonPayload,
-          screenshot: response,
-        })
-      );
-    } catch (error) {
-      yield put(
-        getStepScreenshotFail({
-          ...commonPayload,
-          error,
-        })
-      );
-    }
-  });
-}

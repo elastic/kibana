@@ -8,7 +8,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPopover,
   EuiText,
@@ -20,11 +19,9 @@ import { useIntersection } from 'react-use';
 import { UptimeThemeContext } from '../../../contexts';
 
 interface StepScreenshotDisplayProps {
-  isLoading?: boolean;
-  screenshot?: string;
   screenshotExists?: boolean;
+  checkGroup?: string;
   stepIndex?: number;
-  fetchScreenshot: (stepIndex: number) => void;
   stepName?: string;
 }
 
@@ -34,12 +31,10 @@ const POPOVER_IMG_WIDTH = 640;
 const POPOVER_IMG_HEIGHT = 360;
 
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
-  isLoading,
-  screenshot,
+  checkGroup,
   screenshotExists,
   stepIndex,
   stepName,
-  fetchScreenshot,
 }) => {
   const containerRef = useRef(null);
   const {
@@ -55,36 +50,30 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     threshold: 1,
   });
 
+  const [hasIntersected, setHasIntersected] = useState<boolean>(false);
+  const isIntersecting = intersection?.isIntersecting;
   useEffect(() => {
-    if (
-      screenshotExists !== false &&
-      screenshot === '' &&
-      stepIndex !== undefined &&
-      intersection &&
-      intersection.isIntersecting
-    ) {
-      fetchScreenshot(stepIndex);
+    if (hasIntersected === false && isIntersecting === true) {
+      setHasIntersected(true);
     }
-  }, [fetchScreenshot, intersection, screenshot, screenshotExists, stepIndex]);
+  }, [hasIntersected, isIntersecting, setHasIntersected]);
 
   let content: JSX.Element | null = null;
-  if (isLoading === true) {
-    content = <EuiLoadingSpinner size="xl" />;
-  } else if (screenshot) {
-    const screenshotSrc = `data:image/jpeg;base64,${screenshot}`;
+  const imgSrc = `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
+  if (hasIntersected && screenshotExists) {
     content = (
       <>
         {isOverlayOpen && (
           <EuiOverlayMask onClick={() => setIsOverlayOpen(false)}>
             <input
               type="image"
-              src={screenshotSrc}
+              src={imgSrc}
               alt={
                 stepName
                   ? i18n.translate(
                       'xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltText',
                       {
-                        defaultMessage: 'Full screenshot for step with name {stepName}',
+                        defaultMessage: 'Full screenshot for step with name "{stepName}"',
                         values: {
                           stepName,
                         },
@@ -113,11 +102,11 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                 objectFit: 'cover',
                 objectPosition: 'center top',
               }}
-              src={screenshotSrc}
+              src={imgSrc}
               alt={
                 stepName
                   ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
-                      defaultMessage: 'Screenshot for step with name {stepName}',
+                      defaultMessage: 'Screenshot for step with name "{stepName}"',
                       values: {
                         stepName,
                       },
@@ -138,7 +127,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
             alt={
               stepName
                 ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText', {
-                    defaultMessage: 'Thumbnail screenshot for step with name {stepName}',
+                    defaultMessage: 'Thumbnail screenshot for step with name "{stepName}"',
                     values: {
                       stepName,
                     },
@@ -150,13 +139,13 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                     }
                   )
             }
-            src={screenshotSrc}
+            src={imgSrc}
             style={{ width: POPOVER_IMG_WIDTH, height: POPOVER_IMG_HEIGHT, objectFit: 'contain' }}
           />
         </EuiPopover>
       </>
     );
-  } else if (isLoading === false && screenshot === '') {
+  } else if (screenshotExists === false) {
     content = (
       <EuiFlexGroup alignItems="center" direction="column" style={{ paddingTop: '32px' }}>
         <EuiFlexItem grow={false}>

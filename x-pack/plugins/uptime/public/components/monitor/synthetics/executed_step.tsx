@@ -47,6 +47,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <StepScreenshotDisplay
+              checkGroup={step.monitor.check_group}
               isLoading={step.synthetics?.screenshotLoading}
               screenshot={step.synthetics?.blob}
               screenshotExists={step.synthetics?.screenshotExists}
