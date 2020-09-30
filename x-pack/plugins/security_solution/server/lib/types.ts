@@ -174,6 +174,7 @@ export interface AggregationRequest {
   [aggField: string]: {
     terms?: {
       field: string;
+      missing?: string;
       size?: number;
       order?: {
         [aggSortField: string]: SortRequestDirection;
