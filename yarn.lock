@@ -4459,14 +4459,6 @@
     "@types/node" "*"
     "@types/webpack" "*"
 
-"@types/loader-utils@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@types/loader-utils/-/loader-utils-2.0.1.tgz#4073425aca25762099823f7b922e86599c2b85ec"
-  integrity sha512-X3jTNi/I2AEd2WrHdSqRppPkYzWkRMNGxJzeMwS0o3hVi8ZB6JCnf/XyQmqpUuCidld5lC/1VxVgTktEweRK+w==
-  dependencies:
-    "@types/node" "*"
-    "@types/webpack" "*"
-
 "@types/lodash.difference@^4.5.6":
   version "4.5.6"
   resolved "https://registry.yarnpkg.com/@types/lodash.difference/-/lodash.difference-4.5.6.tgz#41ec5c4e684eeacf543848a9a1b2a4856ccf9853"
@@ -5304,7 +5296,7 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
-"@types/webpack@^4.41.21", "@types/webpack@^4.41.5", "@types/webpack@^4.41.8":
+"@types/webpack@^4.41.8":
   version "4.41.21"
   resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.41.21.tgz#cc685b332c33f153bb2f5fc1fa3ac8adeb592dee"
   integrity sha512-2j9WVnNrr/8PLAB5csW44xzQSJwS26aOnICsP3pSGCEdsu6KYtfQ6QJsVUKHWRnm1bL7HziJsfh5fHqth87yKA==
