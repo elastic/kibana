@@ -5,7 +5,10 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../shared/http';
+
 import {
   FlashMessagesLogic,
   flashAPIErrors,
@@ -319,7 +322,15 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
         actions.getSearchResults(true);
         actions.setNewGroup(response);
 
-        setSuccessMessage(`Successfully created "${response.name}"`);
+        const SUCCESS_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.newGroupSavedSuccess',
+          {
+            defaultMessage: 'Successfully created {groupName}',
+            values: { groupName: response.name },
+          }
+        );
+
+        setSuccessMessage(SUCCESS_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }

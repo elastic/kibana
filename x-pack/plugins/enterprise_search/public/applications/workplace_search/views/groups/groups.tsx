@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
@@ -72,7 +73,9 @@ export const Groups: React.FC = () => {
   if (newGroup && hasMessages) {
     messages[0].description = (
       <EuiLinkButton to={getGroupPath(newGroup.id)} color="primary">
-        Manage Group
+        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
+          defaultMessage: 'Manage Group',
+        })}
       </EuiLinkButton>
     );
   }
@@ -81,7 +84,9 @@ export const Groups: React.FC = () => {
   const inviteUsersButton =
     !isFederatedAuth && canCreateInvitations ? (
       <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
-        Invite users
+        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
+          defaultMessage: 'Invite users',
+        })}
       </EuiLinkButton>
     ) : null;
 
@@ -89,7 +94,9 @@ export const Groups: React.FC = () => {
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
-          Create a group
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
+            defaultMessage: 'Create a group',
+          })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{inviteUsersButton}</EuiFlexItem>
@@ -104,7 +111,14 @@ export const Groups: React.FC = () => {
         ) : (
           <>
             {clearFilters}
-            <p>No results found. </p>
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.groups.searchResults.notFoound',
+                {
+                  defaultMessage: 'No results found.',
+                }
+              )}
+            </p>
           </>
         )}
       </EuiFlexItem>
@@ -117,8 +131,13 @@ export const Groups: React.FC = () => {
       <SendTelemetry action="viewed" metric="groups" />
       {hasMessages && <FlashMessages />}
       <ViewContentHeader
-        title="Manage groups"
-        description="Assign shared content sources and users to groups to create relevant search experiences for various internal teams."
+        title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
+          defaultMessage: 'Manage groups',
+        })}
+        description={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
+          defaultMessage:
+            'Assign shared content sources and users to groups to create relevant search experiences for various internal teams.',
+        })}
         action={headerAction}
       />
       <EuiSpacer size="m" />

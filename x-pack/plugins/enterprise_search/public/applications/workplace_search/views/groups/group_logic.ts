@@ -7,6 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -216,7 +217,15 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         const response = await HttpLogic.values.http.get(`/api/workplace_search/groups/${groupId}`);
         actions.onInitializeGroup(response);
       } catch (e) {
-        const error = e.response.status === 404 ? `Unable to find group with ID: ${groupId}` : e;
+        const NOT_FOUND_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupNotFound',
+          {
+            defaultMessage: 'Unable to find group with ID: "{groupId}".',
+            values: { groupId },
+          }
+        );
+
+        const error = e.response.status === 404 ? NOT_FOUND_MESSAGE : e;
 
         FlashMessagesLogic.actions.setQueuedMessages({
           type: 'error',
@@ -232,8 +241,15 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
       } = values;
       try {
         await HttpLogic.values.http.delete(`/api/workplace_search/groups/${id}`);
-        setQueuedSuccessMessage(`Group "${name}" was successfully deleted`);
+        const GROUP_DELETED_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupDeleted',
+          {
+            defaultMessage: 'Group "{name}" was successfully deleted.',
+            values: { groupName: name },
+          }
+        );
 
+        setQueuedSuccessMessage(GROUP_DELETED_MESSAGE);
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
@@ -250,7 +266,15 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
           body: JSON.stringify({ group: { name: groupNameInputValue } }),
         });
         actions.onGroupNameChanged(response);
-        setSuccessMessage(`Successfully renamed this group to "${response.name}".`);
+
+        const GROUP_RENAMED_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupRenamed',
+          {
+            defaultMessage: 'Successfully renamed this group to "{name}".',
+            values: { groupName: response.name },
+          }
+        );
+        setSuccessMessage(GROUP_RENAMED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -269,7 +293,13 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
           }
         );
         actions.onGroupSourcesSaved(response);
-        setSuccessMessage('Successfully updated shared content sources');
+        const GROUP_SOURCES_UPDATED_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupSourcesUpdated',
+          {
+            defaultMessage: 'Successfully updated shared content sources.',
+          }
+        );
+        setSuccessMessage(GROUP_SOURCES_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -288,7 +318,13 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
           }
         );
         actions.onGroupUsersSaved(response);
-        setSuccessMessage('Successfully updated the users of this group');
+        const GROUP_USERS_UPDATED_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupUsersUpdated',
+          {
+            defaultMessage: 'Successfully updated the users of this group',
+          }
+        );
+        setSuccessMessage(GROUP_USERS_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -313,7 +349,15 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
             body: JSON.stringify({ content_source_boosts: boosts }),
           }
         );
-        setSuccessMessage('Successfully updated shared source prioritization');
+
+        const GROUP_PRIORITIZATION_UPDATED_MESSAGE = i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.groups.groupPrioritizationUpdated',
+          {
+            defaultMessage: 'Successfully updated shared source prioritization',
+          }
+        );
+
+        setSuccessMessage(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
         actions.onGroupPrioritiesChanged(response);
       } catch (e) {
         flashAPIErrors(e);
