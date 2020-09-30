@@ -4074,45 +4074,41 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', (done) => {
+    test('updating the alert should not wait for the rerun the task to complete', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
-      resolveAfterAlertUpdatedCompletes.then(() => done());
 
       taskManager.runNow.mockReset();
       taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
 
-      alertsClient
-        .update({
-          id: alertId,
-          data: {
-            schedule: { interval: '10s' },
-            name: 'abc',
-            tags: ['foo'],
-            params: {
-              bar: true,
-            },
-            throttle: null,
-            actions: [
-              {
-                group: 'default',
-                id: '1',
-                params: {
-                  foo: true,
-                },
-              },
-            ],
+      await alertsClient.update({
+        id: alertId,
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
           },
-        })
-        .then(() => {
-          expect(taskManager.runNow).toHaveBeenCalled();
+          throttle: null,
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      });
 
-          resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
-        });
+      expect(taskManager.runNow).toHaveBeenCalled();
+      resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
     });
 
     test('logs when the rerun of an alerts underlying task fails', async () => {

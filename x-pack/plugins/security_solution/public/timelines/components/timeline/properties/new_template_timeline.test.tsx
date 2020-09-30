@@ -100,10 +100,6 @@ describe('NewTemplateTimeline', () => {
       );
     });
 
-    afterAll(() => {
-      jest.clearAllMocks();
-    });
-
     test('no render', () => {
       expect(
         wrapper.find('[data-test-subj="template-timeline-new-with-border"]').exists()
