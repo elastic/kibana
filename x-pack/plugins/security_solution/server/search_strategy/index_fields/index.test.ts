@@ -748,7 +748,10 @@ describe('Index Fields', () => {
 
   describe('createFieldItem', () => {
     test('Basic functionality', async () => {
+      const { fieldsBeat } = await import('../../utils/beat_schema/fields');
+
       const item = await createFieldItem(
+        fieldsBeat,
         ['auditbeat'],
         {
           name: '_id',

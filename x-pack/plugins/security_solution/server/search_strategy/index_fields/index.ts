@@ -12,6 +12,7 @@ import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
+  BeatFields,
 } from '../../../common/search_strategy/index_fields';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
@@ -113,20 +114,19 @@ const missingFields: FieldDescriptor[] = [
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
  */
-export const createFieldItem = async (
+export const createFieldItem = (
+  beatFields: BeatFields,
   indexesAlias: string[],
   index: FieldDescriptor,
   indexesAliasIdx: number
-): Promise<IndexField> => {
-  const { fieldsBeat } = await import('../../utils/beat_schema/fields');
-
+): IndexField => {
   const alias = indexesAlias[indexesAliasIdx];
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
       ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
       : index.name;
-  const beatIndex = fieldsBeat[indexName] ?? {};
+  const beatIndex = beatFields[indexName] ?? {};
   if (isEmpty(beatIndex.category)) {
     beatIndex.category = splitIndexName[0];
   }
@@ -154,18 +154,31 @@ export const formatFirstFields = async (
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const result: IndexField[] = [];
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // require the fields once we actually need them, rather than ahead of time, and pass
+      // them to createFieldItem to reduce the amount of work done as much as possible
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
-  for (const [indexesAliasIdx, indexFields] of responsesIndexFields.entries()) {
-    for (const index of missingFields) {
-      result.push(await createFieldItem(indexesAlias, index, indexesAliasIdx));
-    }
-    for (const index of indexFields) {
-      result.push(await createFieldItem(indexesAlias, index, indexesAliasIdx));
-    }
-  }
-
-  return result;
+      resolve(
+        responsesIndexFields.reduce(
+          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
+            missingFields.forEach((index) => {
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
+              accumulator.push(item);
+            });
+            indexFields.forEach((index) => {
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
+              accumulator.push(item);
+            });
+            return accumulator;
+          },
+          []
+        )
+      );
+    });
+  });
 };
 
 /**
