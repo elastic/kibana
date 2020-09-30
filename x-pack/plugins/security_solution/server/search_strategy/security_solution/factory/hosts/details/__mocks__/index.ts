@@ -1296,97 +1296,101 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
 export const formattedSearchStrategyResponse = {
   inspect: {
     dsl: [
-      JSON.stringify({
-        allowNoIndices: true,
-        index: [
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-        ],
-        ignoreUnavailable: true,
-        body: {
-          aggregations: {
-            host_architecture: {
-              terms: { field: 'host.architecture', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_id: {
-              terms: { field: 'host.id', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_ip: {
-              terms: {
-                script: { source: "doc['host.ip']", lang: 'painless' },
-                size: 10,
-                order: { timestamp: 'desc' },
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              host_architecture: {
+                terms: { field: 'host.architecture', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
               },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
+              host_id: {
+                terms: { field: 'host.id', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_ip: {
+                terms: {
+                  script: { source: "doc['host.ip']", lang: 'painless' },
+                  size: 10,
+                  order: { timestamp: 'desc' },
+                },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_mac: {
+                terms: { field: 'host.mac', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_name: {
+                terms: { field: 'host.name', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_os_family: {
+                terms: { field: 'host.os.family', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_os_name: {
+                terms: { field: 'host.os.name', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_os_platform: {
+                terms: { field: 'host.os.platform', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              host_os_version: {
+                terms: { field: 'host.os.version', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              cloud_instance_id: {
+                terms: { field: 'cloud.instance.id', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              cloud_machine_type: {
+                terms: { field: 'cloud.machine.type', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              cloud_provider: {
+                terms: { field: 'cloud.provider', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
+              cloud_region: {
+                terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
+                aggs: { timestamp: { max: { field: '@timestamp' } } },
+              },
             },
-            host_mac: {
-              terms: { field: 'host.mac', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_name: {
-              terms: { field: 'host.name', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_os_family: {
-              terms: { field: 'host.os.family', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_os_name: {
-              terms: { field: 'host.os.name', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_os_platform: {
-              terms: { field: 'host.os.platform', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            host_os_version: {
-              terms: { field: 'host.os.version', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            cloud_instance_id: {
-              terms: { field: 'cloud.instance.id', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            cloud_machine_type: {
-              terms: { field: 'cloud.machine.type', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            cloud_provider: {
-              terms: { field: 'cloud.provider', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-            cloud_region: {
-              terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
-              aggs: { timestamp: { max: { field: '@timestamp' } } },
-            },
-          },
-          query: {
-            bool: {
-              filter: [
-                { term: { 'host.name': 'bastion00.siem.estc.dev' } },
-                {
-                  range: {
-                    '@timestamp': {
-                      format: 'strict_date_optional_time',
-                      gte: '2020-09-02T15:17:13.678Z',
-                      lte: '2020-09-03T15:17:13.678Z',
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'host.name': 'bastion00.siem.estc.dev' } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        format: 'strict_date_optional_time',
+                        gte: '2020-09-02T15:17:13.678Z',
+                        lte: '2020-09-03T15:17:13.678Z',
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
+            size: 0,
+            track_total_hits: false,
           },
-          size: 0,
-          track_total_hits: false,
         },
-      }),
+        null,
+        2
+      ),
     ],
   },
   hostDetails: {},
@@ -1444,11 +1448,11 @@ export const expectedDsl = {
             source: "doc['host.ip']",
             lang: 'painless',
           },
+          size: 10,
           order: {
             timestamp: 'desc',
           },
         },
-        size: 10,
         aggs: {
           timestamp: {
             max: {
