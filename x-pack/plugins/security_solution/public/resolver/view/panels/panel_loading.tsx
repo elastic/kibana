@@ -38,7 +38,7 @@ export function PanelLoading() {
     <>
       <Breadcrumbs breadcrumbs={waitCrumbs} />
       <EuiSpacer size="l" />
-      <EuiTitle>
+      <EuiTitle data-test-subj="resolver:panel:loading">
         <h4>{waitingString}</h4>
       </EuiTitle>
     </>
