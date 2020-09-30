@@ -659,8 +659,7 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
  * This migration script is related to:
  *   @link https://github.com/elastic/kibana/pull/62194
  *   @link https://github.com/elastic/kibana/pull/14644
- * Important: migration scripts was moved from 6.7.2 -> 7.9.3
- * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated that script was added into 7.9.3
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -769,7 +768,7 @@ export const visualizationSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow(removeDateHistogramTimeZones),
+  '6.7.2': flow(migrateMatchAllQuery, removeDateHistogramTimeZones),
   '7.0.0': flow(
     addDocReferences,
     migrateIndexPattern,
