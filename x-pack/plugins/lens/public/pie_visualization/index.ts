@@ -6,8 +6,6 @@
 
 import { CoreSetup } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { pieVisualization } from './pie_visualization';
-import { pie, getPieRenderer } from './register_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -30,15 +28,18 @@ export class PieVisualization {
     core: CoreSetup,
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
-    expressions.registerFunction(() => pie);
+    editorFrame.registerVisualization(async () => {
+      const { pieVisualization, pie, getPieRenderer } = await import('../async_services');
 
-    expressions.registerRenderer(
-      getPieRenderer({
-        formatFactory,
-        chartsThemeService: charts.theme,
-      })
-    );
+      expressions.registerFunction(() => pie);
 
-    editorFrame.registerVisualization(pieVisualization);
+      expressions.registerRenderer(
+        getPieRenderer({
+          formatFactory,
+          chartsThemeService: charts.theme,
+        })
+      );
+      return pieVisualization;
+    });
   }
 }

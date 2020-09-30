@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../../../../common/constants';
 import {
@@ -33,9 +33,9 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -159,7 +159,7 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useSelector((state: State) =>
+    const { savedObjectId } = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;
