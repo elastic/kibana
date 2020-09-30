@@ -9,7 +9,8 @@ import { mergeProjection } from '../../../projections/util/merge_projection';
 import { Projection } from '../../../projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
-import { localUIFilters, LocalUIFilterName } from './config';
+import { localUIFilters } from './config';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 export const getLocalFilterQuery = ({
   uiFilters,

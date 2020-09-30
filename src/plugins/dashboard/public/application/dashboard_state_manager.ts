@@ -267,6 +267,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
+    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+      this.setExpandedPanelId(input.expandedPanelId);
+    }
+
     if (!_.isEqual(input.query, this.getQuery())) {
       this.setQuery(input.query);
     }
@@ -280,6 +284,14 @@ export class DashboardStateManager {
 
   public setFullScreenMode(fullScreenMode: boolean) {
     this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
+  }
+
+  public getExpandedPanelId() {
+    return this.appState.expandedPanelId;
+  }
+
+  public setExpandedPanelId(expandedPanelId?: string) {
+    this.stateContainer.transitions.set('expandedPanelId', expandedPanelId);
   }
 
   public setFilters(filters: Filter[]) {
