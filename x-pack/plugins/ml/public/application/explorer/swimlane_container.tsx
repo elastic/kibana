@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiText,
   EuiLoadingChart,
@@ -15,11 +15,13 @@ import {
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
-import { ExplorerSwimlane, ExplorerSwimlaneProps } from './explorer_swimlane';
+import { Chart, Settings, Heatmap } from '@elastic/charts';
+import moment from 'moment';
+import { ExplorerSwimlaneProps } from './explorer_swimlane';
 
-import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimLanePagination } from './swimlane_pagination';
 import { ViewBySwimLaneData } from './explorer_utils';
+import { ANOMALY_THRESHOLD } from '../../../common';
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -53,8 +55,10 @@ export const SwimlaneContainer: FC<
     onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
     isLoading: boolean;
     noDataWarning: string | JSX.Element | null;
+    id: string;
   }
 > = ({
+  id,
   children,
   onResize,
   perPage,
@@ -66,7 +70,10 @@ export const SwimlaneContainer: FC<
   ...props
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const containerHeightRef = useRef<number>();
+  /** Amount of rows during the previous render */
+  const prevRowsCount = useRef<number>();
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -93,6 +100,22 @@ export const SwimlaneContainer: FC<
     fromPage &&
     perPage;
 
+  const CELL_HEIGHT = 30;
+
+  const rowsCount = props?.swimlaneData?.laneLabels?.length ?? 0;
+
+  useEffect(() => {
+    // to prevent the visualization  form jumping during loading
+    if (!isLoading || rowsCount !== prevRowsCount.current) {
+      containerHeightRef.current = rowsCount * CELL_HEIGHT + 58;
+      prevRowsCount.current = rowsCount;
+    }
+  }, [rowsCount, isLoading, prevRowsCount.current]);
+
+  const highlightedData = props.selection
+    ? { x: props.selection.times.map((v) => v * 1000), y: props.selection.lanes }
+    : undefined;
+
   return (
     <>
       <EuiResizeObserver onResize={resizeHandler}>
@@ -106,39 +129,129 @@ export const SwimlaneContainer: FC<
             }}
             data-test-subj="mlSwimLaneContainer"
           >
-            <EuiFlexItem style={{ width: '100%', overflowY: 'auto' }} grow={false}>
-              <div ref={wrapperRef}>
-                <EuiText color="subdued" size="s">
-                  {showSwimlane && !isLoading && (
-                    <MlTooltipComponent>
-                      {(tooltipService) => (
-                        <ExplorerSwimlane
-                          {...props}
-                          chartWidth={chartWidth}
-                          tooltipService={tooltipService}
-                          parentRef={wrapperRef}
-                        />
-                      )}
-                    </MlTooltipComponent>
-                  )}
-                  {isLoading && (
-                    <EuiText textAlign={'center'}>
-                      <EuiLoadingChart
-                        size="xl"
-                        mono={true}
-                        data-test-subj="mlSwimLaneLoadingIndicator"
-                      />
-                    </EuiText>
-                  )}
-                  {!isLoading && !showSwimlane && (
-                    <EuiEmptyPrompt
-                      titleSize="xs"
-                      style={{ padding: 0 }}
-                      title={<h2>{noDataWarning}</h2>}
-                    />
-                  )}
+            <EuiFlexItem
+              style={{
+                width: '100%',
+                overflowY: 'auto',
+                height: `${containerHeightRef.current}px`,
+              }}
+              grow={false}
+            >
+              {showSwimlane && !isLoading && (
+                <Chart>
+                  <Settings
+                    onElementClick={(e) => {
+                      const [[cell]] = e;
+                      const payload = {
+                        lanes: [cell.datum.y],
+                        times: [cell.datum.x / 1000, cell.datum.x / 1000],
+                        type: props.swimlaneType,
+                        viewByFieldName: props.swimlaneData.fieldName,
+                      };
+                      props.onCellsSelection(payload);
+                    }}
+                    showLegend={false}
+                    legendPosition="top"
+                    onBrushEnd={(e) => {
+                      const payload = {
+                        lanes: e.y,
+                        times: e.x.map((v) => v / 1000),
+                        type: props.swimlaneType,
+                        viewByFieldName: props.swimlaneData.fieldName,
+                      };
+                      props.onCellsSelection(payload);
+                    }}
+                    brushAxis="both"
+                    xDomain={{
+                      min: props.swimlaneData.earliest * 1000,
+                      max: props.swimlaneData.latest * 1000,
+                      minInterval: props.swimlaneData.interval * 1000,
+                    }}
+                  />
+                  <Heatmap
+                    id={id}
+                    ranges={[
+                      ANOMALY_THRESHOLD.LOW,
+                      ANOMALY_THRESHOLD.WARNING,
+                      ANOMALY_THRESHOLD.MINOR,
+                      ANOMALY_THRESHOLD.MAJOR,
+                      ANOMALY_THRESHOLD.CRITICAL,
+                    ]}
+                    colorScale={'threshold'}
+                    colors={['#ffffff', '#d2e9f7', '#8bc8fb', '#fdec25', '#fba740', '#fe5050']}
+                    data={props.swimlaneData.points
+                      .map((v) => ({ ...v, time: v.time * 1000 }))
+                      .filter((v) => v.value > 0)}
+                    xAccessor={(d) => d.time}
+                    yAccessor={(d) => {
+                      return d.laneLabel;
+                    }}
+                    valueAccessor={(d) => {
+                      return d.value;
+                    }}
+                    highlightedData={highlightedData}
+                    valueFormatter={(d) => d.toFixed(0.2)}
+                    xScaleType={'time'}
+                    ySortPredicate="dataIndex"
+                    config={{
+                      grid: {
+                        cellHeight: {
+                          min: CELL_HEIGHT,
+                          max: CELL_HEIGHT, // 'fill',
+                        },
+                        stroke: {
+                          width: 1,
+                          color: '#D3DAE6',
+                        },
+                      },
+                      cell: {
+                        maxWidth: 'fill',
+                        maxHeight: 'fill',
+                        label: {
+                          visible: false,
+                        },
+                        border: {
+                          stroke: '#D3DAE6',
+                          strokeWidth: 0,
+                        },
+                      },
+                      yAxisLabel: {
+                        visible: true,
+                        width: 170,
+                        // eui color subdued
+                        fill: `#6a717d`,
+                        padding: 8,
+                      },
+                      xAxisLabel: {
+                        // eui color subdued
+                        fill: `#98A2B3`,
+                        formatter: (v) => {
+                          props.timeBuckets.setInterval(`${props.swimlaneData.interval}s`);
+                          const a = props.timeBuckets.getScaledDateFormat();
+                          return moment(v).format(a);
+                        },
+                      },
+                    }}
+                  />
+                </Chart>
+              )}
+
+              {isLoading && (
+                <EuiText textAlign={'center'}>
+                  <EuiLoadingChart
+                    size="xl"
+                    mono={true}
+                    data-test-subj="mlSwimLaneLoadingIndicator"
+                  />
                 </EuiText>
-              </div>
+              )}
+              {!isLoading && !showSwimlane && (
+                <EuiEmptyPrompt
+                  titleSize="xs"
+                  style={{ padding: 0 }}
+                  title={<h2>{noDataWarning}</h2>}
+                />
+              )}
             </EuiFlexItem>
 
             {isPaginationVisible && (

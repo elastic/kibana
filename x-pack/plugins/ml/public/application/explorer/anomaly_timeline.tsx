@@ -211,6 +211,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           <EuiSpacer size="m" />
 
           <SwimlaneContainer
+            id="overall"
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             filterActive={filterActive}
             maskAll={maskAll}
@@ -228,6 +229,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           {viewBySwimlaneOptions.length > 0 && (
             <SwimlaneContainer
+              id="view_by"
               data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
               filterActive={filterActive}
               maskAll={
