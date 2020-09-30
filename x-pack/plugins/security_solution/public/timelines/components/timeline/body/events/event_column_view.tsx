@@ -141,6 +141,7 @@ export const EventColumnView = React.memo<Props>(
                 updateNote={updateNote}
                 status={status}
                 timelineType={timelineType}
+                timelineId={timelineId}
               />,
               <PinEventAction
                 key="pin-event"

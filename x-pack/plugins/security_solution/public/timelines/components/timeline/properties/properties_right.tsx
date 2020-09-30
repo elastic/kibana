@@ -207,6 +207,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                     toggleShowNotes={onToggleShowNotes}
                     toolTip={i18n.NOTES_TOOL_TIP}
                     updateNote={updateNote}
+                    timelineId={timelineId}
                   />
                 </EuiFlexItem>
               ) : null}

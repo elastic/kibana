@@ -20,6 +20,7 @@ interface AddEventNoteActionProps {
   showNotes: boolean;
   status: TimelineStatus;
   timelineType: TimelineType;
+  timelineId: string;
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
@@ -31,6 +32,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   showNotes,
   status,
   timelineType,
+  timelineId,
   toggleShowNotes,
   updateNote,
 }) => (
@@ -45,6 +47,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
       size="s"
       status={status}
       timelineType={timelineType}
+      timelineId={timelineId}
       toggleShowNotes={toggleShowNotes}
       toolTip={
         timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP

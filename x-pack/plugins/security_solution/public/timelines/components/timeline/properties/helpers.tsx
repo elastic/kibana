@@ -297,6 +297,7 @@ interface NotesButtonProps {
   toolTip?: string;
   updateNote: UpdateNote;
   timelineType: TimelineTypeLiteral;
+  timelineId: string;
 }
 
 const getNewNoteId = (): string => uuid.v4();
@@ -366,6 +367,7 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
     text,
     updateNote,
     timelineType,
+    timelineId,
   }) => (
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
       <>
@@ -386,6 +388,7 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
                 getNewNoteId={getNewNoteId}
                 getNotesByIds={getNotesByIds}
                 status={status}
+                timelineId={timelineId}
                 noteIds={noteIds}
                 updateNote={updateNote}
               />
@@ -408,6 +411,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
     size,
     status,
     timelineType,
+    timelineId,
     toggleShowNotes,
     toolTip,
     text,
@@ -426,6 +430,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
         text={text}
         updateNote={updateNote}
         timelineType={timelineType}
+        timelineId={timelineId}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -441,6 +446,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
           text={text}
           updateNote={updateNote}
           timelineType={timelineType}
+          timelineId={timelineId}
         />
       </EuiToolTip>
     )

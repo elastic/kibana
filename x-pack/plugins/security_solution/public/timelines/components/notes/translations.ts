@@ -50,3 +50,7 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Copy to Clipboard',
   }
 );
+
+export const SAVE_NOTE_HINT = i18n.translate('xpack.securitySolution.notes.saveNoteCallOutTitle', {
+  defaultMessage: 'Add a title to current timeline before adding a note',
+});
