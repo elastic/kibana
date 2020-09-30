@@ -36,7 +36,6 @@ export interface ISessionService {
   getSessionId: () => string | undefined;
   getSessionTimeoutNotified: () => boolean;
   setSessionTimeoutNotified: () => void;
-  restore: (sessionId: string) => void;
   start: () => void;
   clear: () => void;
   trackSearch: (request: IKibanaSearchRequest, sessionId: string | undefined) => void;

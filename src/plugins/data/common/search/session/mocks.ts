@@ -22,7 +22,6 @@ import { ISessionService } from './types';
 export function getSessionServiceMock(): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
-    restore: jest.fn(),
     start: jest.fn(),
     getSessionId: jest.fn(),
     getSessionTimeoutNotified: jest.fn(),
