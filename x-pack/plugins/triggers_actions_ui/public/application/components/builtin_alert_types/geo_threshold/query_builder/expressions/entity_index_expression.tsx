@@ -59,6 +59,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
           IndexPatternSelectComponent={IndexPatternSelect}
           indexPatternService={dataIndexPatterns}
           http={http}
+          includedGeoTypes={ES_GEO_FIELD_TYPES}
         />
       </EuiFormRow>
       <EuiFormRow

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
 import { HttpSetup } from 'kibana/public';
-import { ES_GEO_FIELD_TYPES } from '../../types';
 
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
@@ -18,6 +17,7 @@ interface Props {
   IndexPatternSelectComponent: any;
   indexPatternService: IndexPatternsContract | undefined;
   http: HttpSetup;
+  includedGeoTypes: string[];
 }
 
 interface State {
@@ -138,7 +138,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
                   defaultMessage: 'Select index pattern',
                 }
               )}
-              fieldTypes={ES_GEO_FIELD_TYPES}
+              fieldTypes={this.props.includedGeoTypes}
               onNoIndexPatterns={this._onNoIndexPatterns}
               isClearable={false}
             />

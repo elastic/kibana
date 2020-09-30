@@ -56,6 +56,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           IndexPatternSelectComponent={IndexPatternSelect}
           indexPatternService={dataIndexPatterns}
           http={http}
+          includedGeoTypes={ES_GEO_SHAPE_TYPES}
         />
       </EuiFormRow>
       <EuiFormRow
