@@ -51,7 +51,17 @@ jest.mock('../../../kibana_services', () => ({
   }),
 }));
 
-function getComponent(selected = false, showDetails = false, useShortDots = false) {
+function getComponent({
+  selected = false,
+  showDetails = false,
+  useShortDots = false,
+  field,
+}: {
+  selected?: boolean;
+  showDetails?: boolean;
+  useShortDots?: boolean;
+  field?: IndexPatternField;
+}) {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
@@ -60,23 +70,25 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     coreMock.createSetup()
   );
 
-  const field = new IndexPatternField(
-    {
-      name: 'bytes',
-      type: 'number',
-      esTypes: ['long'],
-      count: 10,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    },
-    'bytes'
-  );
+  const finalField =
+    field ??
+    new IndexPatternField(
+      {
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        count: 10,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      'bytes'
+    );
 
   const props = {
     indexPattern,
-    field,
+    field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -91,18 +103,37 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
 
 describe('discover sidebar field', function () {
   it('should allow selecting fields', function () {
-    const { comp, props } = getComponent();
+    const { comp, props } = getComponent({});
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', function () {
-    const { comp, props } = getComponent(true);
+    const { comp, props } = getComponent({ selected: true });
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
   it('should trigger getDetails', function () {
-    const { comp, props } = getComponent(true);
+    const { comp, props } = getComponent({ selected: true });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
+  });
+  it('should not allow clicking on _source', function () {
+    const field = new IndexPatternField(
+      {
+        name: '_source',
+        type: '_source',
+        esTypes: ['_source'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      '_source'
+    );
+    const { comp, props } = getComponent({
+      selected: true,
+      field,
+    });
+    findTestSubject(comp, 'field-_source-showDetails').simulate('click');
+    expect(props.getDetails).not.toHaveBeenCalled();
   });
 });

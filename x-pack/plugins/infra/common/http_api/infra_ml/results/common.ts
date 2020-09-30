@@ -57,3 +57,11 @@ export const sortRT = rt.type({
 });
 
 export type Sort = rt.TypeOf<typeof sortRT>;
+
+export const metricRT = rt.keyof({
+  memory_usage: null,
+  network_in: null,
+  network_out: null,
+});
+
+export type Metric = rt.TypeOf<typeof metricRT>;
