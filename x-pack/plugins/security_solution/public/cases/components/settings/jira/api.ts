@@ -10,15 +10,13 @@ import { IssueTypes, Fields } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 
-export async function getIssueTypes({
-  http,
-  signal,
-  connectorId,
-}: {
+export interface GetIssueTypesProps {
   http: HttpSetup;
   signal: AbortSignal;
   connectorId: string;
-}) {
+}
+
+export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypesProps) {
   return http.post<ActionTypeExecutorResult<IssueTypes>>(
     `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
     {
@@ -30,17 +28,19 @@ export async function getIssueTypes({
   );
 }
 
+export interface GetFieldsByIssueTypeProps {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+  id: string;
+}
+
 export async function getFieldsByIssueType({
   http,
   signal,
   connectorId,
   id,
-}: {
-  http: HttpSetup;
-  signal: AbortSignal;
-  connectorId: string;
-  id: string;
-}): Promise<ActionTypeExecutorResult<Fields>> {
+}: GetFieldsByIssueTypeProps): Promise<ActionTypeExecutorResult<Fields>> {
   return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
