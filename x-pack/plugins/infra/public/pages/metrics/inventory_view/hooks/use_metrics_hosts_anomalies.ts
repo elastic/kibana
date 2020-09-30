@@ -7,6 +7,7 @@
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
+  Metric,
   Sort,
   Pagination,
   PaginationCursor,
@@ -168,7 +169,7 @@ export const useMetricsHostsAnomaliesResults = ({
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async () => {
+      createPromise: async (metric: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -179,6 +180,7 @@ export const useMetricsHostsAnomaliesResults = ({
           sourceId,
           queryStartTime,
           queryEndTime,
+          metric,
           sortOptions,
           {
             ...paginationOptions,
@@ -249,10 +251,6 @@ export const useMetricsHostsAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  useEffect(() => {
-    getMetricsHostsAnomalies();
-  }, [getMetricsHostsAnomalies]); // TODO: FIgure out the deps here.
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
@@ -294,6 +292,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
   sourceId: string,
   startTime: number,
   endTime: number,
+  metric: Metric,
   sort: Sort,
   pagination: Pagination
 ) => {
@@ -307,6 +306,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
             startTime,
             endTime,
           },
+          metric,
           sort,
           pagination,
         },
