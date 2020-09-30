@@ -290,6 +290,7 @@ export const ModelsList: FC = () => {
             analysisType: getAnalysisType(
               item.metadata?.analytics_config.analysis
             ) as DataFrameAnalysisConfigType,
+            defaultIsTraining: true,
           },
         });
 
