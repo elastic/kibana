@@ -204,12 +204,12 @@ export class TelemetryEventsSender {
     clusterUuid: string,
     licenseId: string | undefined
   ) {
-    this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
+    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
     const ndjson = transformDataToNdjson(events);
     // this.logger.debug(`NDJSON: ${ndjson}`);
 
     try {
-      const resp = await axios.post(`${telemetryUrl}`, ndjson, {
+      const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
