@@ -96,13 +96,13 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
+      data-test-subj="dropdown-connectors"
       disabled={disabled}
+      fullWidth
       isLoading={isLoading}
+      onChange={onChange}
       options={connectorsAsOptions}
       valueOfSelected={selectedConnector}
-      fullWidth
-      onChange={onChange}
-      data-test-subj="dropdown-connectors"
     />
   );
 };

@@ -116,7 +116,7 @@ export const EditConnector = React.memo(
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
-      if (fields != null && isValid && newData.connectorId) {
+      if (isValid && newData.connectorId) {
         onSubmit(newData.connectorId, fields, noop, onError);
         setEditConnector(false);
       }
@@ -138,7 +138,6 @@ export const EditConnector = React.memo(
     }, [selectedConnector, connectorId, userActions]);
 
     const onEditClick = useCallback(() => setEditConnector(true), []);
-
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -147,9 +146,9 @@ export const EditConnector = React.memo(
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
           {!isLoading && (
-            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
+            <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
-                data-test-subj="tag-list-edit-button"
+                data-test-subj="connector-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR_ARIA}
                 iconType={'pencil'}
@@ -160,6 +159,9 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
+          <span data-test-subj={editConnector ? 'editConnector-true' : 'editConnector-false'}>
+            {'hi'}
+          </span>
           {!editConnector && (
             <Connector
               name={currentConnector?.name ?? ''}

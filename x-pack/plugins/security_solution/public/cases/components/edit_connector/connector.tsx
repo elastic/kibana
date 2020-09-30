@@ -34,7 +34,9 @@ const ConnectorComponent: React.FC<TagsProps> = ({ name, type }) => {
         <EuiIcon type={connectorsConfiguration[type]?.logo ?? ''} size="xl" />
       </EuiFlexItem>
       <MyEuiText grow={false}>
-        <EuiText size="s">{name}</EuiText>
+        <EuiText size="s" data-test-subj="static-connector-name">
+          {name}
+        </EuiText>
       </MyEuiText>
     </MyFlexGroup>
   );

@@ -278,7 +278,8 @@ describe('CaseView ', () => {
           .first()
           .exists()
       ).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
+
+      expect(wrapper.find('button[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
     });
   });
 
@@ -463,19 +464,62 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    const connectorName = wrapper.find('[data-test-subj="static-connector-name"]').first().text();
     await waitFor(() => {
+      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    });
+    await waitFor(() => {
+      wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
       wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-      wrapper.update();
     });
     await waitFor(() => {
       wrapper.update();
-      expect(
-        wrapper.find('[data-test-subj="dropdown-connectors"]').at(0).prop('valueOfSelected')
-      ).toBe('servicenow-1');
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('connector');
+      expect(wrapper.find('[data-test-subj="static-connector-name"]').first().text()).toBe(
+        connectorName
+      );
+    });
+  });
+  it('should update connector', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...caseProps}
+            caseData={{
+              ...caseProps.caseData,
+              connector: { id: 'servicenow-1', name: 'SN 1', type: '.servicenow', fields: null },
+            }}
+          />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    });
+    await waitFor(() => {
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.update();
+      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+    });
+    await waitFor(() => {
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('connector');
+      expect(updateObject.updateValue).toEqual({
+        id: 'servicenow-2',
+        name: 'My Connector 2',
+        type: '.servicenow',
+        fields: null,
+      });
     });
   });
 });
