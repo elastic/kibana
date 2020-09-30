@@ -23,10 +23,9 @@ import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { use_query_params } from '../../../../hooks/useQueryParams';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -45,22 +44,24 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   return colorsPerItem;
 }
 
-export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
 
-  const { start, end } = absoluteTime;
+  const { absStart, absEnd, start, end } = use_query_params();
+
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('infra_logs')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
         bucketSize,
       });
     }
-  }, [start, end, bucketSize, relativeTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end, bucketSize]);
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  const min = moment.utc(absStart).valueOf();
+  const max = moment.utc(absEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

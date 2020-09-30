@@ -5,6 +5,7 @@
  */
 
 import { ObservabilityApp } from '../../../typings/common';
+import { UXMetrics } from '../../components/shared/core_web_vitals';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
@@ -23,7 +24,8 @@ export interface Series {
 export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
-  bucketSize: string;
+  bucketSize?: string;
+  serviceName?: string;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
@@ -89,9 +91,14 @@ export interface ApmFetchDataResponse extends FetchDataResponse {
   };
 }
 
+export interface UxFetchDataResponse extends FetchDataResponse {
+  coreWebVitals: UXMetrics;
+}
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
+  ux: UxFetchDataResponse;
 }

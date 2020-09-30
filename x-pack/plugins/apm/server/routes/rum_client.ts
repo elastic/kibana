@@ -18,6 +18,7 @@ import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
 import { getUrlSearch } from '../lib/rum_client/get_url_search';
+import { hasRumData } from '../lib/rum_client/has_data';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -214,5 +215,13 @@ export const rumJSErrors = createRoute(() => ({
       pageSize: Number(pageSize),
       pageIndex: Number(pageIndex),
     });
+  },
+}));
+
+export const rumHasDataRoute = createRoute(() => ({
+  path: '/api/apm/observability_overview/has_rum_data',
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return await hasRumData({ setup });
   },
 }));

@@ -18,6 +18,8 @@ import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { Breadcrumbs, routes } from '../routes';
 import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObsvSharedContextProvider } from '../context/shared_data';
+import { LoadingObservability } from '../pages/overview/loading_observability';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
@@ -32,6 +34,7 @@ function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
 function App() {
   return (
     <>
+      <LoadingObservability />
       <Switch>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
@@ -70,7 +73,9 @@ export const renderApp = (
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
               <RedirectAppLinks application={core.application}>
-                <App />
+                <ObsvSharedContextProvider>
+                  <App />
+                </ObsvSharedContextProvider>
               </RedirectAppLinks>
             </i18nCore.Context>
           </EuiThemeProvider>

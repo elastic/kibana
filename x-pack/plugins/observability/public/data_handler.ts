@@ -5,6 +5,7 @@
  */
 
 import { DataHandler, ObservabilityFetchDataPlugins } from './typings/fetch_overview_data';
+import { useFetcher } from './hooks/use_fetcher';
 
 const dataHandlers: Partial<Record<ObservabilityFetchDataPlugins, DataHandler>> = {};
 
@@ -31,26 +32,22 @@ export function getDataHandler<T extends ObservabilityFetchDataPlugins>(appName:
   }
 }
 
-export async function fetchHasData(): Promise<Record<ObservabilityFetchDataPlugins, boolean>> {
-  const apps: ObservabilityFetchDataPlugins[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
+export function useInfraLogsHasData() {
+  return useFetcher(() => getDataHandler('infra_logs')?.hasData(), []);
+}
 
-  const promises = apps.map(async (app) => getDataHandler(app)?.hasData() || false);
+export function useInfraMetricsHasData() {
+  return useFetcher(() => getDataHandler('infra_metrics')?.hasData(), []);
+}
 
-  const results = await Promise.allSettled(promises);
+export function useApmHasData() {
+  return useFetcher(() => getDataHandler('apm')?.hasData(), []);
+}
 
-  const [apm, uptime, logs, metrics] = results.map((result) => {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
+export function useUptimeHasData() {
+  return useFetcher(() => getDataHandler('uptime')?.hasData(), []);
+}
 
-    console.error('Error while fetching has data', result.reason);
-    return false;
-  });
-
-  return {
-    apm,
-    uptime,
-    infra_logs: logs,
-    infra_metrics: metrics,
-  };
+export function useUxHasData() {
+  return useFetcher(() => getDataHandler('ux')?.hasData(), []);
 }
