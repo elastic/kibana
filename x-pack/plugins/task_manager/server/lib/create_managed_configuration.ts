@@ -124,13 +124,11 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter
-    mergeScan(
-      ({ count }, next) =>
-        next === FLUSH_MARKER
-          ? of(emitErrorCount(count), resetErrorCount())
-          : of(incementErrorCount(count)),
-      emitErrorCount(0)
-    ),
+    mergeScan(({ count }, next) => {
+      return next === FLUSH_MARKER
+        ? of(emitErrorCount(count), resetErrorCount())
+        : of(incementErrorCount(count));
+    }, emitErrorCount(0)),
     filter(isEmitEvent),
     map(({ count }) => count)
   );
