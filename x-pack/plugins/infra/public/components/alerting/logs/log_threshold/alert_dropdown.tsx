@@ -8,7 +8,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../hooks/use_link_props';
 
 export const AlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);

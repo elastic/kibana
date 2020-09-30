@@ -124,4 +124,18 @@ describe('getDescriptor', () => {
       '@@INDEX@@': { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
     });
   });
+
+  it('serializes MappedTypes', () => {
+    const usageInterface = usageInterfaces.get('MappedTypes')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      mappedTypeWithExternallyDefinedProps: {
+        prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      },
+      mappedTypeWithOneInlineProp: {
+        prop3: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      },
+    });
+  });
 });
