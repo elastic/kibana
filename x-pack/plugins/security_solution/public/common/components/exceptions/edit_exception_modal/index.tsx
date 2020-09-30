@@ -22,6 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -247,8 +248,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   ]);
 
   const isRuleEQLSequenceStatement = useMemo((): boolean => {
-    if (maybeRule != null && maybeRule.query != null) {
-      return maybeRule.type === 'eql' && maybeRule.query.startsWith('sequence');
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
     }
     return false;
   }, [maybeRule]);

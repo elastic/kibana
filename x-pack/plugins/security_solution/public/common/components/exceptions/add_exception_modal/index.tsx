@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
@@ -315,6 +316,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const addExceptionMessage =
     exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
