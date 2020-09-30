@@ -223,7 +223,6 @@ interface FooterProps {
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
   serverSideEventCount: number;
-  totalPages: number;
 }
 
 /** Renders a loading indicator and paging controls */
@@ -240,7 +239,6 @@ export const FooterComponent = ({
   onChangeItemsPerPage,
   onChangePage,
   serverSideEventCount,
-  totalPages,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
@@ -283,6 +281,11 @@ export const FooterComponent = ({
       )),
     [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
   );
+
+  const totalPages = useMemo(() => Math.ceil(serverSideEventCount / itemsPerPage), [
+    itemsPerPage,
+    serverSideEventCount,
+  ]);
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {

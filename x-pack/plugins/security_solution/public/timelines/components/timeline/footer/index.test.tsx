@@ -34,7 +34,6 @@ describe('Footer Timeline Component', () => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           serverSideEventCount={totalCount}
-          totalPages={2}
         />
       );
 
@@ -56,7 +55,6 @@ describe('Footer Timeline Component', () => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           serverSideEventCount={totalCount}
-          totalPages={2}
         />
       );
 
@@ -79,7 +77,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );
@@ -130,7 +127,6 @@ describe('Footer Timeline Component', () => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
           serverSideEventCount={totalCount}
-          totalPages={2}
         />
       );
 
@@ -153,7 +149,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );
@@ -180,7 +175,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );
@@ -205,7 +199,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );
@@ -232,7 +225,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );
@@ -257,7 +249,6 @@ describe('Footer Timeline Component', () => {
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
             serverSideEventCount={totalCount}
-            totalPages={2}
           />
         </TestProviders>
       );

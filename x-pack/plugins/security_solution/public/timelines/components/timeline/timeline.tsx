@@ -302,7 +302,6 @@ export const TimelineComponent: React.FC<Props> = ({
                   onChangeItemsPerPage={onChangeItemsPerPage}
                   onChangePage={loadPage}
                   serverSideEventCount={totalCount}
-                  totalPages={pageInfo.totalPages}
                 />
               </StyledEuiFlyoutFooter>
             )
