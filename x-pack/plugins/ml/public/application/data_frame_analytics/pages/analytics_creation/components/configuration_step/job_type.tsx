@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
@@ -17,13 +18,13 @@ interface Props {
   setFormState: React.Dispatch<React.SetStateAction<any>>;
 }
 
-interface JobDetails {
-  [key: string]: {
-    helpText: string;
-    icon: string;
-    title: string;
-  };
+interface Details {
+  helpText: string;
+  icon: string;
+  title: string;
 }
+
+type JobDetails = Record<DataFrameAnalysisConfigType, Details>;
 
 const jobDetails: JobDetails = {
   [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: {
@@ -31,21 +32,27 @@ const jobDetails: JobDetails = {
       defaultMessage: 'Outlier detection identifies unusual data points in the data set.',
     }),
     icon: 'outlierDetectionJob',
-    title: 'Outlier detection',
+    title: i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionTitle', {
+      defaultMessage: 'Outlier detection',
+    }),
   },
   [ANALYSIS_CONFIG_TYPE.REGRESSION]: {
-    helpText: i18n.translate('xpack.ml.dataframe.analytics.create.outlierRegressionHelpText', {
+    helpText: i18n.translate('xpack.ml.dataframe.analytics.create.regressionHelpText', {
       defaultMessage: 'Regression predicts numerical values in the data set.',
     }),
     icon: 'regressionJob',
-    title: 'Regression',
+    title: i18n.translate('xpack.ml.dataframe.analytics.create.regressionTitle', {
+      defaultMessage: 'Regression',
+    }),
   },
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: {
     helpText: i18n.translate('xpack.ml.dataframe.analytics.create.classificationHelpText', {
       defaultMessage: 'Classification predicts labels of data points in the data set.',
     }),
     icon: 'classificationJob',
-    title: 'Classification',
+    title: i18n.translate('xpack.ml.dataframe.analytics.create.classificationTitle', {
+      defaultMessage: 'Classification',
+    }),
   },
 };
 
@@ -55,8 +62,8 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="m" data-test-subj="mlAnalyticsCreateJobWizardJobTypeSelect">
-        {Object.keys(jobDetails).map((jobType) => (
-          <EuiFlexItem key={jobType} grow={false}>
+        {(Object.keys(jobDetails) as Array<keyof typeof jobDetails>).map((jobType) => (
+          <EuiFlexItem key={jobType} grow={1}>
             <EuiCard
               icon={<EuiIcon size="xl" type={jobDetails[jobType].icon} />}
               title={jobDetails[jobType].title}

@@ -10710,7 +10710,6 @@
     "xpack.ml.dataframe.analytics.create.outlierFractionHelpText": "異常値検出の前に異常であると想定されるデータセットの比率を設定します。",
     "xpack.ml.dataframe.analytics.create.outlierFractionInputAriaLabel": "異常値検出の前に異常であると想定されるデータセットの比率を設定します。",
     "xpack.ml.dataframe.analytics.create.outlierFractionLabel": "異常値割合",
-    "xpack.ml.dataframe.analytics.create.outlierRegressionHelpText": "回帰はデータセットにおける数値を予測します。",
     "xpack.ml.dataframe.analytics.create.predictionFieldNameHelpText": "結果で予測フィールドの名前を定義します。デフォルトは<dependent_variable>_predictionです。",
     "xpack.ml.dataframe.analytics.create.predictionFieldNameLabel": "予測フィールド名",
     "xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel": "学習で使用されるドキュメントを選択するために使用される乱数生成器のシード",

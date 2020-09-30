@@ -10716,7 +10716,6 @@
     "xpack.ml.dataframe.analytics.create.outlierFractionHelpText": "设置在离群值检测之前被假设为离群的数据集比例。",
     "xpack.ml.dataframe.analytics.create.outlierFractionInputAriaLabel": "设置在离群值检测之前被假设为离群的数据集比例。",
     "xpack.ml.dataframe.analytics.create.outlierFractionLabel": "离群值比例",
-    "xpack.ml.dataframe.analytics.create.outlierRegressionHelpText": "回归用于预测数据集中的数值。",
     "xpack.ml.dataframe.analytics.create.predictionFieldNameHelpText": "定义结果中预测字段的名称。默认为 <dependent_variable>_prediction。",
     "xpack.ml.dataframe.analytics.create.predictionFieldNameLabel": "预测字段名称",
     "xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel": "用于选取哪个文档用于训练的随机生成器种子",
