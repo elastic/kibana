@@ -19,7 +19,14 @@ import {
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { buildRuleMessageFactory } from './rule_messages';
 
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('singleBulkCreate', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -158,6 +165,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -192,6 +200,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -218,6 +227,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -245,6 +255,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
@@ -274,6 +285,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(errors).toEqual(['[4]: internal server error']);
@@ -339,6 +351,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(1);
