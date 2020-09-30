@@ -39,7 +39,7 @@ export const caseProps: CaseProps = {
   userCanCrud: true,
   caseData: {
     ...basicCase,
-    connector: { id: 'servicenow-2', name: 'SN', type: '.serviceNow', fields: null },
+    connector: { id: 'servicenow-2', name: 'SN', type: '.servicenow', fields: null },
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
@@ -457,7 +457,7 @@ describe('CaseView ', () => {
             {...caseProps}
             caseData={{
               ...caseProps.caseData,
-              connector: { id: 'servicenow-1', name: 'SN 1', type: '.serviceNow', fields: null },
+              connector: { id: 'servicenow-1', name: 'SN 1', type: '.servicenow', fields: null },
             }}
           />
         </Router>

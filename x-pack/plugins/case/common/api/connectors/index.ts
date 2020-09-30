@@ -31,7 +31,7 @@ const ConnectorResillientTypeFieldsRt = rt.type({
 });
 
 const ConnectorServiceNowTypeFieldsRt = rt.type({
-  type: rt.literal('.serviceNow'),
+  type: rt.literal('.servicenow'),
   fields: rt.union([ServiceNowFieldsRT, rt.null]),
 });
 
