@@ -6,16 +6,16 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import {
-  RequestHandler,
-  RouteConfig,
-  RouteMethod,
-  LegacyCallAPIOptions,
-  SavedObjectsClientContract,
-  RequestHandlerContext,
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
-  IKibanaResponse,
-} from 'kibana/server';
+  LegacyCallAPIOptions,
+  RequestHandler,
+  RequestHandlerContext,
+  RouteConfig,
+  RouteMethod,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { DynamicSettings } from '../../common/runtime_types';
 import { UMServerLibs } from '../lib/lib';
 
