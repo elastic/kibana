@@ -132,11 +132,11 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
-              value={isFinite(to) ? Number(to) : ''}
+              value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
                   ...tempRange,
-                  to: target.value !== '' ? Number(target.value) : -Infinity,
+                  to: target.value !== '' ? Number(target.value) : Infinity,
                 };
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
