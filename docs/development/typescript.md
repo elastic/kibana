@@ -26,8 +26,8 @@ This architecture imposes several limitations to which we must comply:
 Since `tsc` doesn't support circular project references, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
 
 ### Implementation
-- make sure all the plugins listed as dependencies in `kibana.json` file have migrated to TS project references.
-- add `tsconfig.json` in the root folder of your plugin.
+- Make sure all the plugins listed as dependencies in `kibana.json` file have migrated to TS project references.
+- Add `tsconfig.json` in the root folder of your plugin.
 ```json
 {
   "extends": "../../../tsconfig.base.json",
@@ -48,9 +48,9 @@ Since `tsc` doesn't support circular project references, the migration order doe
 }
 ```
 If your plugin imports a file not listed in `include`, the build will fail with the next message `File ‘…’ is not listed within the file list of project …’. Projects must list all files or use an 'include' pattern.`
-- build you plugin `./node_modules/.bin/tsc -b src/plugins/my_plugin`. Fix errors if `tsc` cannot generate type declarations for your project.
-- make sure the `target/types` folder doesn’t contain files not belonging to your project. Otherwise, it means your plugin includes files from another project by mistake.
-- add your project reference to `include` property of `tsconfig.refs.json`
-- add your plugin to `include` property and plugin folder to `exclude` property of the `tsconfig.json` it used to belong to (for example, for `src/plugins/**` it's `tsconfig.json`; for `x-pack/plugins/**` it’s `x-pack/tsconfig.json`).
-- list the reference to your newly created project in all the Kibana `tsconfig.json` files that could import your project: `tsconfig.json`, `test/tsconfig.json`, `x-pack/tsconfig.json`, `x-pack/test/tsconfig.json`. And in all the plugin-specific `tsconfig.refs.json` for dependent plugins.
- - you can measure how your changes affect `tsc` compiler performance with `node --max-old-space-size=4096 ./node_modules/.bin/tsc -p tsconfig.json --extendedDiagnostics --noEmit`. Compare with **master** branch.
+- Build you plugin `./node_modules/.bin/tsc -b src/plugins/my_plugin`. Fix errors if `tsc` cannot generate type declarations for your project.
+- Make sure the `target/types` folder doesn’t contain files not belonging to your project. Otherwise, it means your plugin includes files from another project by mistake.
+- Add your project reference to `include` property of `tsconfig.refs.json`
+- Add your plugin to `include` property and plugin folder to `exclude` property of the `tsconfig.json` it used to belong to (for example, for `src/plugins/**` it's `tsconfig.json`; for `x-pack/plugins/**` it’s `x-pack/tsconfig.json`).
+- List the reference to your newly created project in all the Kibana `tsconfig.json` files that could import your project: `tsconfig.json`, `test/tsconfig.json`, `x-pack/tsconfig.json`, `x-pack/test/tsconfig.json`. And in all the plugin-specific `tsconfig.refs.json` for dependent plugins.
+ - You can measure how your changes affect `tsc` compiler performance with `node --max-old-space-size=4096 ./node_modules/.bin/tsc -p tsconfig.json --extendedDiagnostics --noEmit`. Compare with **master** branch.
