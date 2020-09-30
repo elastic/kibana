@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';

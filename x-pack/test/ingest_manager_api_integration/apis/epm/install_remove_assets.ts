@@ -29,7 +29,8 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('installs and uninstalls all assets', async () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
+  describe.skip('installs and uninstalls all assets', async () => {
     describe('installs all assets when installing a package for the first time', async () => {
       skipIfNoDockerRegistry(providerContext);
       before(async () => {
@@ -87,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should have installed the transform components', async function () {
         const res = await es.transport.request({
           method: 'GET',
-          path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+          path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
       });
@@ -275,7 +276,7 @@ export default function (providerContext: FtrProviderContext) {
         const res = await es.transport.request(
           {
             method: 'GET',
-            path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+            path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
           },
           {
             ignore: [404],
