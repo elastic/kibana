@@ -90,7 +90,7 @@ export class UiActionsEnhancedExamplesPlugin
               viewMode: 'create',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
-              placeContext: { sampleCanavsElementClickContext: sampleApp2ClickContext },
+              placeContext: {},
             })
           ),
           {
@@ -115,7 +115,7 @@ export class UiActionsEnhancedExamplesPlugin
               viewMode: 'manage',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
-              placeContext: { sampleCanavsElementClickContext: sampleApp2ClickContext },
+              placeContext: { sampleApp2ClickContext },
             })
           ),
           {
