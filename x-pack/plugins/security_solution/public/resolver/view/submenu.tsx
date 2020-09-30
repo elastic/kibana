@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { EuiI18nNumber } from '@elastic/eui';
-import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { useColors } from './use_colors';
@@ -43,11 +42,10 @@ interface ResolverSubmenuOption {
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
 /**
- * A Submenu to be displayed in one of two forms:
- *   1) Provided a collection of `optionsWithActions`: it will call `menuAction` then - if and when menuData becomes available - display each item with an optional prefix and call the supplied action for the options when that option is clicked.
- *   2) Provided `optionsWithActions` is undefined, it will call the supplied `menuAction` when its host button is clicked.
+ * A Submenu that displays a collection of "pills" for each related event
+ * category it has events for.
  */
-const NodeSubMenuComponents = React.memo(
+export const NodeSubMenuComponents = React.memo(
   ({
     className,
     nodeID,
@@ -117,53 +115,3 @@ const NodeSubMenuComponents = React.memo(
     );
   }
 );
-
-export const NodeSubMenu = styled(NodeSubMenuComponents)`
-  margin: 2px 0 0 0;
-  padding: 0;
-  border: none;
-  display: flex;
-  flex-flow: column;
-
-  &.options {
-    font-size: 0.8rem;
-    display: flex;
-    flex-flow: row wrap;
-    background: transparent;
-    position: absolute;
-    top: 4.5em;
-    contain: content;
-    width: 12em;
-    z-index: 2;
-  }
-
-  &.options .item {
-    margin: 0.25ch 0.35ch 0.35ch 0;
-    padding: 0.35em 0.5em;
-    height: fit-content;
-    width: fit-content;
-    border-radius: 2px;
-    line-height: 0.8;
-  }
-
-  &.options .item button {
-    appearance: none;
-    height: fit-content;
-    width: fit-content;
-    line-height: 0.8;
-    outline-style: none;
-    border-color: transparent;
-    box-shadow: none;
-  }
-
-  &.options .item button:focus {
-    outline-style: none;
-    border-color: transparent;
-    box-shadow: none;
-    text-decoration: underline;
-  }
-
-  &.options .item button:active {
-    transform: scale(0.95);
-  }
-`;

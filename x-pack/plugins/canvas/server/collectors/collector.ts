@@ -5,11 +5,16 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'kibana/server';
 import { TelemetryCollector } from '../../types';
 
-import { workpadCollector } from './workpad_collector';
-import { customElementCollector } from './custom_element_collector';
+import { workpadCollector, workpadSchema, WorkpadTelemetry } from './workpad_collector';
+import {
+  customElementCollector,
+  CustomElementTelemetry,
+  customElementSchema,
+} from './custom_element_collector';
+
+type CanvasUsage = WorkpadTelemetry & CustomElementTelemetry;
 
 const collectors: TelemetryCollector[] = [workpadCollector, customElementCollector];
 
@@ -29,18 +34,19 @@ export function registerCanvasUsageCollector(
     return;
   }
 
-  const canvasCollector = usageCollection.makeUsageCollector({
+  const canvasCollector = usageCollection.makeUsageCollector<CanvasUsage>({
     type: 'canvas',
     isReady: () => true,
-    fetch: async (callCluster: LegacyAPICaller) => {
+    fetch: async (callCluster) => {
       const collectorResults = await Promise.all(
         collectors.map((collector) => collector(kibanaIndex, callCluster))
       );
 
       return collectorResults.reduce((reduction, usage) => {
         return { ...reduction, ...usage };
-      }, {});
+      }, {}) as CanvasUsage; // We need the casting because `TelemetryCollector` claims it returns `Record<string, any>`
     },
+    schema: { ...workpadSchema, ...customElementSchema },
   });
 
   usageCollection.registerCollector(canvasCollector);

@@ -6,11 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
@@ -68,10 +68,7 @@ export const useNetworkDns = ({
   type,
 }: UseNetworkDns): [boolean, NetworkDnsArgs] => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const { activePage, sort, isPtrIncluded, limit } = useSelector(
-    (state: State) => getNetworkDnsSelector(state),
-    shallowEqual
-  );
+  const { activePage, sort, isPtrIncluded, limit } = useShallowEqualSelector(getNetworkDnsSelector);
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
