@@ -28,7 +28,7 @@ import {
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
 
-import './index';
+import './index.scss';
 
 interface Props {
   /** The path to set as the new default route in advanced settings */
