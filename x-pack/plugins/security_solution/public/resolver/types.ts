@@ -245,6 +245,15 @@ export interface DataState {
    */
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
 
+  /**
+   * Used when the panelView is `eventDetail`.
+   *
+   */
+  readonly currentRelatedEvent: {
+    loading: boolean;
+    data: SafeResolverEvent | null;
+  };
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties
