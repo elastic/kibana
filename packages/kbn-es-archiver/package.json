@@ -4,8 +4,8 @@
   "license": "Apache-2.0",
   "main": "target/index.js",
   "scripts": {
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:bootstrap": "rm -rf target && tsc",
+    "kbn:watch": "rm -rf target && tsc --watch"
   },
   "dependencies": {
     "@kbn/dev-utils": "1.0.0",
