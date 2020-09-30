@@ -403,7 +403,6 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
-          rest_total_hits_as_int: true,
           size: maxResults !== undefined ? maxResults : 100,
           body: {
             query: {
@@ -428,7 +427,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         })
         .pipe(
           map((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit: any) => {
                 obj.records.push(hit._source);
               });
