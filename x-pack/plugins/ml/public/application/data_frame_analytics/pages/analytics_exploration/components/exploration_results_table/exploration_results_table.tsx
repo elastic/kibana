@@ -48,6 +48,25 @@ const showingFirstDocs = i18n.translate(
   }
 );
 
+const filters = {
+  options: [
+    {
+      id: 'training',
+      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel', {
+        defaultMessage: 'Training',
+      }),
+    },
+    {
+      id: 'testing',
+      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel', {
+        defaultMessage: 'Testing',
+      }),
+    },
+  ],
+  columnId: 'ml.is_training',
+  key: { training: true, testing: false },
+};
+
 interface Props {
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
@@ -162,6 +181,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                     indexPattern={indexPattern}
                     setSearchQuery={setSearchQuery}
                     defaultQueryString={defaultQueryString}
+                    filters={filters}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
