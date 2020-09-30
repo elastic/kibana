@@ -70,3 +70,10 @@ export const ENABLE_ML_JOB_WARNING = i18n.translate(
       'This ML job is not currently running. Please set this job to run via "ML job settings" before activating this rule.',
   }
 );
+
+export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
+  {
+    defaultMessage: 'Select threat indices',
+  }
+);

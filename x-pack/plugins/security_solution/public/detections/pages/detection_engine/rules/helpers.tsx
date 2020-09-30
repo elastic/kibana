@@ -79,6 +79,13 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
   index: rule.index ?? [],
+  threatIndex: rule.threat_index ? [rule.threat_index] : [], // TODO: Change backend to use an array
+  threatQueryBar: {
+    query: { query: rule.threat_query ?? '', language: '' }, // TODO: Change to use threat_query_language
+    filters: (rule.threat_filters ?? []) as Filter[],
+    saved_id: undefined, // TODO: Do we need saved_id set here?
+  },
+  threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
@@ -341,7 +348,6 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
     'threat',
     'type',
     'version',
-    // 'lists',
   ];
 
   const ruleParamsKeys = [

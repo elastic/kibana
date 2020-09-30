@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  ThreatMap,
+  threatMap,
+  ThreatMapping,
+} from '../../../../common/detection_engine/schemas/types';
+
+import { IIndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
+import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
+
+/**
+ * Formats the entry into one that is easily usable for the UI.
+ *
+ * @param patterns IIndexPattern containing available fields on rule index
+ * @param item item entry
+ * @param itemIndex entry index
+ */
+export const getFormattedEntry = (
+  indexPattern: IIndexPattern,
+  item: Entry,
+  itemIndex: number
+): FormattedEntry => {
+  const { fields } = indexPattern;
+  const field = item.field;
+  const threatField = item.value;
+  const [foundField] = fields.filter(({ name }) => field != null && field === name);
+  const [threatFoundField] = fields.filter(
+    ({ name }) => threatField != null && threatField === name
+  );
+  return {
+    field: foundField,
+    type: 'mapping',
+    value: threatFoundField,
+    entryIndex: itemIndex,
+  };
+};
+
+/**
+ * Formats the entries to be easily usable for the UI
+ *
+ * @param patterns IIndexPattern containing available fields on rule index
+ * @param entries item entries
+ */
+export const getFormattedEntries = (
+  indexPattern: IIndexPattern,
+  entries: Entry[]
+): FormattedEntry[] => {
+  return entries.reduce<FormattedEntry[]>((acc, item, index) => {
+    const newItemEntry = getFormattedEntry(indexPattern, item, index);
+    return [...acc, newItemEntry];
+  }, []);
+};
+
+/**
+ * Determines whether an entire entry or item need to be removed
+ *
+ * @param item
+ * @param entryIndex index of given entry
+ *
+ */
+export const getUpdatedEntriesOnDelete = (
+  item: ThreatMapEntries,
+  entryIndex: number
+): ThreatMapEntries => {
+  return {
+    ...item,
+    entries: [...item.entries.slice(0, entryIndex), ...item.entries.slice(entryIndex + 1)],
+  };
+};
+
+/**
+ * Determines proper entry update when user selects new field
+ *
+ * @param item - current item entry values
+ * @param newField - newly selected field
+ *
+ */
+export const getEntryOnFieldChange = (
+  item: FormattedEntry,
+  newField: IFieldType
+): { updatedEntry: Entry; index: number } => {
+  const { entryIndex } = item;
+  return {
+    updatedEntry: {
+      field: newField != null ? newField.name : '',
+      type: 'mapping',
+      value: item.value != null ? item.value.name : '',
+    },
+    index: entryIndex,
+  };
+};
+
+/**
+ * Determines proper entry update when user selects new field
+ *
+ * @param item - current item entry values
+ * @param newField - newly selected field
+ *
+ */
+export const getEntryOnThreatFieldChange = (
+  item: FormattedEntry,
+  newField: IFieldType
+): { updatedEntry: Entry; index: number } => {
+  const { entryIndex } = item;
+  return {
+    updatedEntry: {
+      field: item.field != null ? item.field.name : '',
+      type: 'mapping',
+      value: newField != null ? newField.name : '',
+    },
+    index: entryIndex,
+  };
+};
+
+export const getDefaultEmptyEntry = (): EmptyEntry => ({
+  field: '',
+  type: 'mapping',
+  value: '',
+});
+
+export const getNewItem = (): ThreatMap => {
+  return {
+    entries: [
+      {
+        field: '',
+        type: 'mapping',
+        value: '',
+      },
+    ],
+  };
+};
+
+export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
+  return items.reduce<ThreatMapping>((acc, item) => {
+    const newItem = { ...item, entries: item.entries };
+    if (threatMap.is(newItem)) {
+      return [...acc, newItem];
+    } else {
+      return acc;
+    }
+  }, []);
+};

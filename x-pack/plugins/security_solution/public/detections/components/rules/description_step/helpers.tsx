@@ -56,6 +56,7 @@ export const buildQueryBarDescription = ({
   query,
   savedId,
   indexPatterns,
+  queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(filters)) {
@@ -89,7 +90,7 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{i18n.QUERY_LABEL} </>,
+        title: <>{queryLabel ?? i18n.QUERY_LABEL} </>,
         description: <>{query} </>,
       },
     ];
@@ -416,3 +417,21 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
     ),
   },
 ];
+
+export const buildThreatIndexDescription = (label: string, note: string): ListItems[] => {
+  if (note.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <NoteDescriptionContainer>
+            <div data-test-subj="noteDescriptionItem" className="eui-yScrollWithShadows">
+              {note}
+            </div>
+          </NoteDescriptionContainer>
+        ),
+      },
+    ];
+  }
+  return [];
+};

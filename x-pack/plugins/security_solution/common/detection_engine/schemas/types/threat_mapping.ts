@@ -19,24 +19,27 @@ export type ThreatFilters = t.TypeOf<typeof threat_filters>;
 export const threatFiltersOrUndefined = t.union([threat_filters, t.undefined]);
 export type ThreatFiltersOrUndefined = t.TypeOf<typeof threatFiltersOrUndefined>;
 
-export const threatMappingEntries = t.array(
-  t.exact(
-    t.type({
-      field: NonEmptyString,
-      type: t.keyof({ mapping: null }),
-      value: NonEmptyString,
-    })
-  )
+export const threatMapEntry = t.exact(
+  t.type({
+    field: NonEmptyString,
+    type: t.keyof({ mapping: null }),
+    value: NonEmptyString,
+  })
 );
+
+export type ThreatMapEntry = t.TypeOf<typeof threatMapEntry>;
+
+export const threatMappingEntries = t.array(threatMapEntry);
 export type ThreatMappingEntries = t.TypeOf<typeof threatMappingEntries>;
 
-export const threat_mapping = t.array(
-  t.exact(
-    t.type({
-      entries: threatMappingEntries,
-    })
-  )
+export const threatMap = t.exact(
+  t.type({
+    entries: threatMappingEntries,
+  })
 );
+export type ThreatMap = t.TypeOf<typeof threatMap>;
+
+export const threat_mapping = t.array(threatMap);
 export type ThreatMapping = t.TypeOf<typeof threat_mapping>;
 
 export const threatMappingOrUndefined = t.union([threat_mapping, t.undefined]);

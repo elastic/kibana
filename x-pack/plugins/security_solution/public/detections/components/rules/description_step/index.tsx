@@ -41,6 +41,7 @@ import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { THREAT_QUERY_LABEL } from './translations';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -156,6 +157,8 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
+// TODO: Fix the complexity below if possible
+// eslint-disable-next-line complexity
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -189,7 +192,7 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data))) {
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
@@ -214,6 +217,28 @@ export const getDescriptionItem = (
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
     return [];
+  } else if (field === 'threatQueryBar') {
+    const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
+    const query = get('threatQueryBar.query.query', data);
+    const savedId = get('threatQueryBar.saved_id', data);
+    return buildQueryBarDescription({
+      field,
+      filters,
+      filterManager,
+      query,
+      savedId,
+      indexPatterns,
+      queryLabel: THREAT_QUERY_LABEL,
+    });
+  } else if (field === 'threatMapping') {
+    // const values = get(field, data);
+    // TODO: Add buildMappingDescription();
+    return [
+      {
+        title: label,
+        description: 'TODO: Add buildMappingDescription()',
+      },
+    ];
   }
 
   const description: string = get(field, data);

@@ -47,6 +47,12 @@ import {
   risk_score_mapping,
   severity_mapping,
 } from '../common/schemas';
+import {
+  threat_index,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+} from '../types/threat_mapping';
 import { listArrayOrUndefined } from '../types/lists';
 
 /**
@@ -95,6 +101,10 @@ export const patchRulesSchema = t.exact(
     note,
     version,
     exceptions_list: listArrayOrUndefined,
+    threat_index,
+    threat_query,
+    threat_filters,
+    threat_mapping,
   })
 );
 
