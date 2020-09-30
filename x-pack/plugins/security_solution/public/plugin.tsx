@@ -333,7 +333,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     return {
       resolver: async () => {
-        const { resolverPluginSetup } = await import('./resolver');
+        const { resolverPluginSetup } = await import(
+          /* webpackChunkName: "resolver" */ './resolver'
+        );
         return resolverPluginSetup();
       },
     };
@@ -357,8 +359,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private async downloadAssets() {
     const [{ renderApp }, { composeLibs }] = await Promise.all([
-      import('./app'),
-      import('./common/lib/compose/kibana_compose'),
+      import(/* webpackChunkName: "app" */ './app'),
+      import(/* webpackChunkName: "kibana_compose" */ './common/lib/compose/kibana_compose'),
     ]);
 
     return {
@@ -376,7 +378,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overviewSubPlugin,
       timelinesSubPlugin,
       managementSubPlugin,
-    } = await import('./sub_plugins');
+    } = await import(/* webpackChunkName: "sub_plugins" */ './sub_plugins');
 
     return {
       detectionsSubPlugin,
