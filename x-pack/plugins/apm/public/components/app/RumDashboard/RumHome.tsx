@@ -9,6 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
 import { RumHeader } from './RumHeader';
+import { UserPercentile } from './UserPercentile';
+import { CsmSharedContextProvider } from './CsmSharedContext';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -17,16 +19,21 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 export function RumHome() {
   return (
     <div>
-      <RumHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>{UX_LABEL}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </RumHeader>
-      <RumOverview />
+      <CsmSharedContextProvider>
+        <RumHeader>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <EuiTitle size="l">
+                <h1>{UX_LABEL}</h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <UserPercentile />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </RumHeader>
+        <RumOverview />
+      </CsmSharedContextProvider>
     </div>
   );
 }

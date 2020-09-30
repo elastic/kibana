@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
-  deleteMetadataCurrentStream,
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
@@ -73,13 +72,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when initially navigating to page', () => {
       before(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
@@ -88,8 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 100000);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -97,12 +94,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await sleep(100000);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
@@ -215,12 +212,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('for the kql query: na, table shows an empty list', async () => {
