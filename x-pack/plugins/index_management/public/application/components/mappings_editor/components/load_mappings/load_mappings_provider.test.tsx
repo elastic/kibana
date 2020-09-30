@@ -6,8 +6,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('brace/mode/json', () => ({}));
-
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 

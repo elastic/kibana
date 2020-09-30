@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import 'brace/mode/json';
-
 import React, { useState, useMemo, useCallback } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';

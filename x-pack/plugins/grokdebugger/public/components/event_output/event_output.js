@@ -8,8 +8,6 @@ import React from 'react';
 import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import '../brace_imports';
-
 export function EventOutput({ value }) {
   return (
     <EuiFormRow

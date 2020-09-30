@@ -20,7 +20,6 @@
 import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
 
 jest.mock('brace/mode/groovy', () => ({}));
-jest.mock('brace/mode/json', () => ({}));
 
 import { FieldEditor, FieldEdiorProps } from './field_editor';
 

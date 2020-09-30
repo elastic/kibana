@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'brace/mode/javascript';
 import { EuiCodeEditor } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';

@@ -6,8 +6,6 @@
 import React from 'react';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
-jest.mock('brace/mode/json', () => ({}));
-
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 

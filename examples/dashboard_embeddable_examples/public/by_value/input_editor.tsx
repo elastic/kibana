@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'brace/mode/json';
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { JsonEditor } from '../../../../src/plugins/es_ui_shared/public';
