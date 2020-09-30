@@ -34,6 +34,7 @@ import {
   XScaleType,
   YScaleType,
 } from '../types';
+import { LabelRotation } from '../../../charts/public';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
@@ -127,7 +128,7 @@ function getAxisStyle(ticks?: TickOptions, title?: string): AxisSpec['style'] {
     },
     tickLabel: {
       visible: ticks?.show,
-      rotation: !ticks?.rotation ? ticks?.rotation : -ticks?.rotation,
+      rotation: -(ticks?.rotation ?? LabelRotation.Vertical),
     },
   };
 }
