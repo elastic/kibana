@@ -83,7 +83,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
     filters: (rule.threat_filters ?? []) as Filter[],
-    saved_id: undefined, // TODO: Should we store the saved_id or is that going away?
+    saved_id: undefined,
   },
   threatMapping: rule.threat_mapping ?? [],
   queryBar: {
