@@ -13,20 +13,20 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
 import {
-  DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
-  DEFAULT_INDEX_KEY,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_BYTES_FORMAT,
+  DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
-  DEFAULT_DARK_MODE,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_REFRESH_RATE_INTERVAL,
   DEFAULT_FROM,
-  DEFAULT_TO,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_BYTES_FORMAT,
-  DEFAULT_INDEX_PATTERN,
+  DEFAULT_REFRESH_RATE_INTERVAL,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TO,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -77,14 +77,43 @@ export const createStartServicesMock = (): StartServices => {
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
 
-  const services = ({
+  return ({
     ...core,
-    data,
+    data: {
+      ...data,
+      query: {
+        ...data.query,
+        savedQueries: {
+          ...data.query.savedQueries,
+          getAllSavedQueries: jest.fn(() =>
+            Promise.resolve({
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            })
+          ),
+          findSavedQueries: jest.fn(() =>
+            Promise.resolve({
+              total: 123,
+              queries: [],
+            })
+          ),
+        },
+      },
+      search: {
+        ...data.search,
+        search: jest.fn().mockImplementation(() => ({
+          subscribe: jest.fn().mockImplementation(() => ({
+            error: jest.fn(),
+            next: jest.fn(),
+          })),
+        })),
+      },
+    },
     security,
     storage,
   } as unknown) as StartServices;
-
-  return services;
 };
 
 export const createWithKibanaMock = () => {

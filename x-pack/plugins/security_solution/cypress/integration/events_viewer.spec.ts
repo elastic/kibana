@@ -14,8 +14,6 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
-  LOAD_MORE,
-  LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
 import { HEADERS_GROUP } from '../screens/timeline';
 
@@ -46,8 +44,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-// https://github.com/elastic/kibana/issues/70757
-describe.skip('Events Viewer', () => {
+describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
@@ -143,18 +140,9 @@ describe.skip('Events Viewer', () => {
           cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
         });
     });
-
-    it('loads more events when the load more button is clicked', () => {
-      const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('equal', defaultNumberOfLoadedEvents);
-
-      cy.get(LOAD_MORE).click({ force: true });
-
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
-    });
   });
 
-  context('Events columns', () => {
+  context.skip('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
