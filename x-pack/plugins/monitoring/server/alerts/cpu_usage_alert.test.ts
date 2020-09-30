@@ -154,7 +154,7 @@ describe('CpuUsageAlert', () => {
                         endToken: '#end_link',
                         type: 'docLink',
                         partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
                   },
@@ -166,7 +166,7 @@ describe('CpuUsageAlert', () => {
                         endToken: '#end_link',
                         type: 'docLink',
                         partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],
                   },
@@ -506,7 +506,7 @@ describe('CpuUsageAlert', () => {
                         endToken: '#end_link',
                         type: 'docLink',
                         partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
                       },
                     ],
                   },
@@ -518,7 +518,7 @@ describe('CpuUsageAlert', () => {
                         endToken: '#end_link',
                         type: 'docLink',
                         partialUrl:
-                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
                       },
                     ],
                   },
