@@ -20,11 +20,13 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiTextColor,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { ModelItemFull } from './models_list';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -69,6 +71,13 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         return description !== undefined;
       });
   }
+
+  const {
+    services: {
+      share,
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
   const tabs = [
     {
@@ -323,9 +332,35 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                     return (
                       <EuiFlexItem key={pipelineName}>
                         <EuiPanel>
-                          <EuiTitle size={'xs'}>
-                            <h5>{pipelineName}</h5>
-                          </EuiTitle>
+                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                            <EuiFlexItem grow={false}>
+                              <EuiTitle size={'xs'}>
+                                <h5>{pipelineName}</h5>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty
+                                onClick={async () => {
+                                  const ingestPipelinesAppUrlGenerator = share.urlGenerators.getUrlGenerator(
+                                    'INGEST_PIPELINES_APP_URL_GENERATOR'
+                                  );
+                                  await navigateToUrl(
+                                    await ingestPipelinesAppUrlGenerator.createUrl({
+                                      page: 'pipeline_edit',
+                                      pipelineId: pipelineName,
+                                      absolute: true,
+                                    })
+                                  );
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.ml.inference.modelsList.expandedRow.editPipelineLabel"
+                                  defaultMessage="Edit"
+                                />
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+
                           {description && <EuiText>{description}</EuiText>}
                           <EuiSpacer size={'m'} />
                           <EuiTitle size={'xxs'}>
