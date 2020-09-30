@@ -232,6 +232,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     'plugins/data/public',
     'plugins/expressions/server',
     'plugins/expressions/public',
+    'plugins/ui_actions/public',
     'plugins/kibana_utils/common/state_containers',
     'plugins/kibana_utils/public/state_sync',
   ];
