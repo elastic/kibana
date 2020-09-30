@@ -30,8 +30,13 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     return {
       active: false,
       globalLabels: {},
+      centralConfig: false,
+      captureHeaders: false,
+      captureBody: false,
+      logUncaughtExceptions: true,
     };
   }
+
   return {
     active: false,
     serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
@@ -60,14 +65,14 @@ export class ApmConfiguration {
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version, build } = require(join(this.rootDir, 'package.json'));
-    this.kibanaVersion = version.replace(/\./g, '_');
+    this.kibanaVersion = version;
     this.pkgBuild = build;
   }
 
   public getConfig(serviceName: string): ApmAgentConfig {
     return {
       ...this.getBaseConfig(),
-      serviceName: `${serviceName}-${this.kibanaVersion}`,
+      serviceName,
     };
   }
 
@@ -88,6 +93,8 @@ export class ApmConfiguration {
       if (uuid) {
         apmConfig.globalLabels.kibana_uuid = uuid;
       }
+
+      apmConfig.serviceVersion = this.kibanaVersion;
       this.baseConfig = apmConfig;
     }
 
