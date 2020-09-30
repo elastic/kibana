@@ -116,7 +116,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
             : [];
         return {
           events,
-          nextEvent: null,
+          nextEvent: typeof after === 'undefined' ? firstRelatedEventID : null,
         };
       },
 
