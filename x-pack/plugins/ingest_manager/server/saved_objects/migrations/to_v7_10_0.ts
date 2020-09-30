@@ -104,12 +104,33 @@ export const migrateAgentActionToV7100 = (
       return agentActionDoc.attributes.type === 'CONFIG_CHANGE';
     },
     (agentActionDoc) => {
-      agentActionDoc.attributes.type = 'POLICY_CHANGE';
-      if (agentActionDoc.attributes.data?.config) {
-        agentActionDoc.attributes.data.policy = agentActionDoc.attributes.data.config;
-        delete agentActionDoc.attributes.data.config;
+      let agentActionData;
+      try {
+        agentActionData = agentActionDoc.attributes.data
+          ? JSON.parse(agentActionDoc.attributes.data)
+          : undefined;
+      } catch (e) {
+        // Silently swallow JSON parsing error
       }
-      return agentActionDoc;
+      if (agentActionData && agentActionData.config) {
+        const {
+          attributes: { data, ...restOfAttributes },
+        } = agentActionDoc;
+        const { config, ...restOfData } = agentActionData;
+        return {
+          ...agentActionDoc,
+          attributes: {
+            ...restOfAttributes,
+            type: 'POLICY_CHANGE',
+            data: JSON.stringify({
+              ...restOfData,
+              policy: config,
+            }),
+          },
+        };
+      } else {
+        return agentActionDoc;
+      }
     }
   );
 };
