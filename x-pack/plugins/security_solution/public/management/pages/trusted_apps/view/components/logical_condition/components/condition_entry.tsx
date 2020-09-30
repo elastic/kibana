@@ -176,6 +176,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
+              fullWidth
               required
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
