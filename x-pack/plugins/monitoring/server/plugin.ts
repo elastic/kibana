@@ -148,7 +148,7 @@ export class Plugin {
     if (plugins.telemetryCollectionManager) {
       const collectionClients = {
         esCluster: this.cluster,
-        esClientGetter: this.telemetryElasticsearchClient,
+        esClientGetter: () => this.telemetryElasticsearchClient,
       };
       registerMonitoringCollection(plugins.telemetryCollectionManager, collectionClients, {
         maxBucketSize: config.ui.max_bucket_size,
