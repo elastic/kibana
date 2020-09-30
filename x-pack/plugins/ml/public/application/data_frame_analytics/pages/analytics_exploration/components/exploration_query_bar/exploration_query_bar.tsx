@@ -6,15 +6,7 @@
 
 import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 
-import {
-  EuiButton,
-  EuiCheckboxGroup,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInputPopover,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiCode, EuiInputPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +32,6 @@ interface ExplorationQueryBarProps {
   setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
   includeQueryString?: boolean;
   defaultQueryString?: string;
-  options: any;
 }
 
 export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
@@ -48,7 +39,6 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   setSearchQuery,
   includeQueryString = false,
   defaultQueryString,
-  options,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -93,106 +83,42 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     }
   };
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onButtonClick = () => setIsPopoverOpen(() => !isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
-
-  const featureButtons = [
-    {
-      id: `popoverAnalysis`,
-      label: 'Analysis',
-    },
-    {
-      id: `popoverResults`,
-      label: 'Results',
-    },
-    {
-      id: `popoverScatterplotMatrix`,
-      label: 'Scatterplot Matrix',
-    },
-  ];
-  const [toggleIdToSelectedMap, setToggleIdToSelectedMap] = useState<Record<string, boolean>>({
-    popoverResults: true,
-  });
-  const onChangeMulti = (optionId: string) => {
-    const newToggleIdToSelectedMap = {
-      ...toggleIdToSelectedMap,
-      ...{
-        [optionId]: !toggleIdToSelectedMap[optionId],
-      },
-    };
-    setToggleIdToSelectedMap(newToggleIdToSelectedMap);
-    options.onChange(optionId.replace('popover', 'section'));
-  };
-
-  useEffect(() => {
-    if (options.checkboxIdToSelectedMap !== undefined) {
-      setToggleIdToSelectedMap(
-        Object.entries(options.checkboxIdToSelectedMap).reduce((p, c) => {
-          return {
-            ...p,
-            [c[0].replace('section', 'popover')]: c[1],
-          };
-        }, {})
-      );
-    }
-  }, [options.checkboxIdToSelectedMap]);
-
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiInputPopover
-          style={{ maxWidth: '100%' }}
-          closePopover={() => setErrorMessage(undefined)}
-          input={
-            <QueryStringInput
-              bubbleSubmitEvent={true}
-              query={searchInput}
-              indexPatterns={[indexPattern]}
-              onChange={searchChangeHandler}
-              onSubmit={searchSubmitHandler}
-              placeholder={
-                searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
-                  ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
-                      defaultMessage: 'e.g. {example}',
-                      values: { example: 'method : "GET" or status : "404"' },
-                    })
-                  : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
-                      defaultMessage: 'e.g. {example}',
-                      values: { example: 'method:GET OR status:404' },
-                    })
-              }
-              disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
-              languageSwitcherPopoverAnchorPosition="rightDown"
-            />
+    <EuiInputPopover
+      style={{ maxWidth: '100%' }}
+      closePopover={() => setErrorMessage(undefined)}
+      input={
+        <QueryStringInput
+          bubbleSubmitEvent={true}
+          query={searchInput}
+          indexPatterns={[indexPattern]}
+          onChange={searchChangeHandler}
+          onSubmit={searchSubmitHandler}
+          placeholder={
+            searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
+              ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
+                  defaultMessage: 'e.g. {example}',
+                  values: { example: 'method : "GET" or status : "404"' },
+                })
+              : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
+                  defaultMessage: 'e.g. {example}',
+                  values: { example: 'method:GET OR status:404' },
+                })
           }
-          isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
-        >
-          <EuiCode>
-            {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
-              defaultMessage: 'Invalid Query',
-            })}
-            {': '}
-            {errorMessage?.message.split('\n')[0]}
-          </EuiCode>
-        </EuiInputPopover>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          ownFocus
-          button={<EuiButton onClick={onButtonClick}>Options</EuiButton>}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-        >
-          <EuiCheckboxGroup
-            options={featureButtons}
-            idToSelectedMap={toggleIdToSelectedMap}
-            onChange={onChangeMulti}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          disableAutoFocus={true}
+          dataTestSubj="transformQueryInput"
+          languageSwitcherPopoverAnchorPosition="rightDown"
+        />
+      }
+      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+    >
+      <EuiCode>
+        {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
+          defaultMessage: 'Invalid Query',
+        })}
+        {': '}
+        {errorMessage?.message.split('\n')[0]}
+      </EuiCode>
+    </EuiInputPopover>
   );
 };

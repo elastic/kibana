@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './outlier_exploration.scss';
+
 import React, { useEffect, useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -112,187 +116,155 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     setIsExpandedResultsTable(!isExpandedResultsTable);
   };
 
-  const featureButtons = [
-    {
-      id: `sectionAnalysis`,
-      label: 'Analysis',
-    },
-    {
-      id: `sectionResults`,
-      label: 'Results',
-    },
-    {
-      id: `sectionScatterplotMatrix`,
-      label: 'Scatterplot Matrix',
-    },
-  ];
-
-  const [toggleIdToSelectedMap, setToggleIdToSelectedMap] = useState<Record<string, boolean>>({
-    sectionResults: true,
-  });
-  const onChangeMulti = (optionId: string) => {
-    const newToggleIdToSelectedMap = {
-      ...toggleIdToSelectedMap,
-      ...{
-        [optionId]: !toggleIdToSelectedMap[optionId],
-      },
-    };
-    setToggleIdToSelectedMap(newToggleIdToSelectedMap);
-  };
-
   return (
     <>
-      <EuiButtonGroup
-        legend="Feature Button Group"
-        name="featureButtonGroup"
-        options={featureButtons}
-        idToSelectedMap={toggleIdToSelectedMap}
-        onChange={(id) => onChangeMulti(id)}
-        buttonSize="m"
-        type="multi"
-        color="primary"
-      />
-
-      <EuiSpacer size="m" />
-
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <ExplorationQueryBar
-              indexPattern={indexPattern}
-              setSearchQuery={setSearchQuery}
-              options={{
-                checkboxes: featureButtons,
-                checkboxIdToSelectedMap: toggleIdToSelectedMap,
-                onChange: (id: string) => {
-                  onChangeMulti(id);
-                },
-              }}
-            />
+            <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
             <EuiSpacer size="m" />
           </>
         )}
 
-      {toggleIdToSelectedMap.sectionAnalysis && (
-        <>
-          <EuiPanel paddingSize="none">
-            <div style={{ padding: '10px' }}>
-              <EuiButtonEmpty
-                onClick={toggleExpandedAnalysisDetails}
-                iconType={isExpandedAnalysisDetails ? 'arrowUp' : 'arrowDown'}
-                size="l"
-                iconSide="right"
-                flush="left"
-              >
-                Analysis
-              </EuiButtonEmpty>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Type</p>
-                  </EuiText>
-                  <EuiBadge>outlier detection</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Source index</p>
-                  </EuiText>
-                  <EuiBadge>glass_source</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Destination index</p>
-                  </EuiText>
-                  <EuiBadge>glass_outlier_detection</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-            {isExpandedAnalysisDetails && (
-              <>
-                <EuiHorizontalRule size="full" margin="none" />
-                {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-                  indexPattern !== undefined &&
-                  jobConfig !== undefined &&
-                  columnsWithCharts.length > 0 &&
-                  tableItems.length > 0 &&
-                  expandedRowItem !== undefined && <ExpandedRow item={expandedRowItem} />}
-              </>
+      <EuiPanel paddingSize="none">
+        <div className="mlSectionPanel">
+          <EuiButtonEmpty
+            onClick={toggleExpandedAnalysisDetails}
+            iconType={isExpandedAnalysisDetails ? 'arrowUp' : 'arrowDown'}
+            size="l"
+            iconSide="right"
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.exploration.analysisSectionTitle"
+              defaultMessage="Analysis"
+            />
+          </EuiButtonEmpty>
+          {expandedRowItem === undefined && <EuiLoadingContent lines={1} />}
+          {expandedRowItem !== undefined && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.exploration.analysisTypeLabel"
+                      defaultMessage="Type"
+                    />
+                  </p>
+                </EuiText>
+                <EuiBadge>{expandedRowItem.job_type}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.exploration.analysisSourceIndexLabel"
+                      defaultMessage="Source index"
+                    />
+                  </p>
+                </EuiText>
+                <EuiBadge>{expandedRowItem.config.source.index}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.exploration.analysisDestinationIndexLabel"
+                      defaultMessage="Destination index"
+                    />
+                  </p>
+                </EuiText>
+                <EuiBadge>{expandedRowItem.config.dest.index}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </div>
+        {isExpandedAnalysisDetails && (
+          <>
+            <EuiHorizontalRule size="full" margin="none" />
+            {expandedRowItem === undefined && (
+              <EuiText textAlign="center">
+                <EuiSpacer size="l" />
+                <EuiLoadingSpinner size="l" />
+                <EuiSpacer size="l" />
+              </EuiText>
             )}
-          </EuiPanel>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {toggleIdToSelectedMap.sectionResults && (
-        <>
-          <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
-            <div style={{ padding: '10px' }}>
-              <EuiButtonEmpty
-                onClick={toggleExpandedResultsTable}
-                iconType={isExpandedResultsTable ? 'arrowUp' : 'arrowDown'}
-                size="l"
-                iconSide="right"
-                flush="left"
-              >
-                Results
-              </EuiButtonEmpty>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Total docs</p>
-                  </EuiText>
-                  <EuiBadge>123456</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Training docs</p>
-                  </EuiText>
-                  <EuiBadge>1234 (12%)</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <p>Moar Stats</p>
-                  </EuiText>
-                  <EuiBadge>42</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ColorRangeLegend
-                    colorRange={colorRange}
-                    title={i18n.translate(
-                      'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                      {
-                        defaultMessage: 'Feature influence score',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-            {isExpandedResultsTable && (
-              <>
-                {jobConfig !== undefined && needsDestIndexPattern && (
-                  <IndexPatternPrompt destIndex={jobConfig.dest.index} />
-                )}
-                {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-                  indexPattern !== undefined && (
-                    <>
-                      <EuiSpacer size="s" />
-                      {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-                        <DataGrid
-                          {...outlierData}
-                          dataTestSubj="mlExplorationDataGrid"
-                          toastNotifications={getToastNotifications()}
-                        />
-                      )}
-                    </>
+            {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+              indexPattern !== undefined &&
+              jobConfig !== undefined &&
+              columnsWithCharts.length > 0 &&
+              tableItems.length > 0 &&
+              expandedRowItem !== undefined && <ExpandedRow item={expandedRowItem} />}
+          </>
+        )}
+      </EuiPanel>
+      <EuiSpacer size="m" />
+      <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+        <div style={{ padding: '10px' }}>
+          <EuiButtonEmpty
+            onClick={toggleExpandedResultsTable}
+            iconType={isExpandedResultsTable ? 'arrowUp' : 'arrowDown'}
+            size="l"
+            iconSide="right"
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.exploration.explorationTableTitle"
+              defaultMessage="Results"
+            />
+          </EuiButtonEmpty>
+          {(columnsWithCharts.length === 0 || tableItems.length === 0) && (
+            <EuiLoadingContent lines={1} />
+          )}
+          {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.exploration.explorationTableTotalDocsLabel"
+                      defaultMessage="Total docs"
+                    />
+                  </p>
+                </EuiText>
+                <EuiBadge>{outlierData.rowCount}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ColorRangeLegend
+                  colorRange={colorRange}
+                  title={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                    {
+                      defaultMessage: 'Feature influence score',
+                    }
                   )}
-              </>
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </div>
+        {isExpandedResultsTable && (
+          <>
+            {jobConfig !== undefined && needsDestIndexPattern && (
+              <IndexPatternPrompt destIndex={jobConfig.dest.index} />
             )}
-          </EuiPanel>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {toggleIdToSelectedMap.sectionScatterplotMatrix && <EuiPanel>SCATTERPLOT MATRIX</EuiPanel>}
+            {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+              indexPattern !== undefined && (
+                <>
+                  <EuiSpacer size="s" />
+                  {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+                    <DataGrid
+                      {...outlierData}
+                      dataTestSubj="mlExplorationDataGrid"
+                      toastNotifications={getToastNotifications()}
+                    />
+                  )}
+                </>
+              )}
+          </>
+        )}
+      </EuiPanel>
+      <EuiSpacer size="m" />
     </>
   );
 });
