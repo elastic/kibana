@@ -185,7 +185,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       ownFocus
       className="lnsFieldItem__popoverAnchor"
       display="block"
-      data-test-sub="lnsFieldListPanelField"
+      data-test-subj="lnsFieldListPanelField"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
@@ -514,7 +514,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} className="eui-textTruncate">
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued">
                   {Math.round((otherCount / props.sampledValues!) * 100)}%
                 </EuiText>
               </EuiFlexItem>

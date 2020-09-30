@@ -41,6 +41,11 @@ interface BaseProps {
   value?: unknown;
 
   /**
+   * Optional comparison function to check whether a value is the dragged one
+   */
+  isValueEqual?: (value1: unknown, value2: unknown) => boolean;
+
+  /**
    * The React element which will be passed the draggable handlers
    */
   children: React.ReactElement;
@@ -110,12 +115,14 @@ type Props = DraggableProps | NonDraggableProps;
 
 export const DragDrop = (props: Props) => {
   const { dragging, setDragging } = useContext(DragContext);
-  const { value, draggable, droppable } = props;
+  const { value, draggable, droppable, isValueEqual } = props;
   return (
     <DragDropInner
       {...props}
       dragging={droppable ? dragging : undefined}
-      isDragging={!!(draggable && value === dragging)}
+      isDragging={
+        !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
+      }
       isNotDroppable={
         // If the configuration has provided a droppable flag, but this particular item is not
         // droppable, then it should be less prominent. Ignores items that are both
@@ -154,16 +161,18 @@ const DragDropInner = React.memo(function DragDropInner(
     dropType = 'add',
   } = props;
 
+  const isMoveDragging = isDragging && dragType === 'move';
+
   const classes = classNames(
     'lnsDragDrop',
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isHidden': isDragging && dragType === 'move',
+      'lnsDragDrop-isHidden': isMoveDragging,
       'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
-      'lnsDragDrop-isNotDroppable': isNotDroppable,
+      'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
       'lnsDragDrop-isReplacing': droppable && state.isActive && dropType === 'replace',
     },
     className,
