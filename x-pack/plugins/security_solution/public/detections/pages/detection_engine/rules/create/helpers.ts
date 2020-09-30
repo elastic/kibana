@@ -76,6 +76,7 @@ export interface RuleFields {
   threatIndex?: unknown;
   threatQueryBar?: unknown;
   threatMapping?: unknown;
+  threatLanguage?: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -198,10 +199,10 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
-        threat_index: ruleFields.threatIndex[0], // TODO: Change this everywhere to be an array
+        threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
         threat_mapping: ruleFields.threatMapping,
-        // TODO: Add threat_language to the backend and here
+        threat_language: ruleFields.threatQueryBar?.query?.language,
       }
     : {
         index: ruleFields.index,

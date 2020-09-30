@@ -109,6 +109,7 @@ export const signalRulesAlertType = ({
         threatQuery,
         threatIndex,
         threatMapping,
+        threatLanguage,
         type,
         exceptionsList,
       } = params;
@@ -385,6 +386,7 @@ export const signalRulesAlertType = ({
             throttle,
             threatFilters: threatFilters ?? [],
             threatQuery,
+            threatLanguage,
             buildRuleMessage,
             threatIndex,
           });

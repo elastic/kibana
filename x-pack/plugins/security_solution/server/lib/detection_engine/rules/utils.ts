@@ -46,6 +46,7 @@ import {
   ListArrayOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
+  ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
 } from '../../../../common/detection_engine/schemas/types';
@@ -96,6 +97,7 @@ export interface UpdateProperties {
   threatIndex: ThreatIndexOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

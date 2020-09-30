@@ -263,7 +263,7 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'Threat Mapping',
       }
     ),
-    validatons: [],
+    validations: [],
   },
   threatQueryBar: {
     label: i18n.translate(

@@ -45,6 +45,15 @@ export type ThreatMapping = t.TypeOf<typeof threat_mapping>;
 export const threatMappingOrUndefined = t.union([threat_mapping, t.undefined]);
 export type ThreatMappingOrUndefined = t.TypeOf<typeof threatMappingOrUndefined>;
 
-export const threat_index = t.string;
+export const threat_index = t.array(t.string);
+export type ThreatIndex = t.TypeOf<typeof threat_index>;
 export const threatIndexOrUndefined = t.union([threat_index, t.undefined]);
 export type ThreatIndexOrUndefined = t.TypeOf<typeof threatIndexOrUndefined>;
+
+export const threat_language = t.union([
+  t.keyof({ eql: null, kuery: null, lucene: null }),
+  t.undefined,
+]);
+export type ThreatLanguage = t.TypeOf<typeof threat_language>;
+export const threatLanguageOrUndefined = t.union([threat_language, t.undefined]);
+export type ThreatLanguageOrUndefined = t.TypeOf<typeof threatLanguageOrUndefined>;

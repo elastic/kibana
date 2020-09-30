@@ -23,6 +23,7 @@ import {
   threat_query,
   threat_index,
   threat_mapping,
+  threat_language,
   threat_filters,
 } from '../../../../../common/detection_engine/schemas/types';
 import {
@@ -120,6 +121,7 @@ export const RuleSchema = t.intersection([
     threat_filters,
     threat_index,
     threat_mapping,
+    threat_language,
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,

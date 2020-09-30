@@ -79,11 +79,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
   index: rule.index ?? [],
-  threatIndex: rule.threat_index ? [rule.threat_index] : [], // TODO: Change backend to use an array
+  threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
-    query: { query: rule.threat_query ?? '', language: '' }, // TODO: Change to use threat_query_language
+    query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
     filters: (rule.threat_filters ?? []) as Filter[],
-    saved_id: undefined, // TODO: Do we need saved_id set here?
+    saved_id: undefined, // TODO: Should we store the saved_id or is that going away?
   },
   threatMapping: rule.threat_mapping ?? [],
   queryBar: {

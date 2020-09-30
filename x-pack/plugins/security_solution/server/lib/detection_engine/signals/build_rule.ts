@@ -169,6 +169,7 @@ export const buildRuleWithoutOverrides = (
     threat_index: ruleParams.threatIndex,
     threat_query: ruleParams.threatQuery,
     threat_mapping: ruleParams.threatMapping,
+    threat_language: ruleParams.threatLanguage,
   };
   return removeInternalTagsFromRule(rule);
 };

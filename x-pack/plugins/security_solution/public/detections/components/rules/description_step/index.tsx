@@ -9,6 +9,7 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import {
   IIndexPattern,
   Filter,
@@ -36,6 +37,7 @@ import {
   buildRiskScoreDescription,
   buildRuleTypeDescription,
   buildThresholdDescription,
+  buildThreatMappingDescription,
 } from './helpers';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
@@ -157,8 +159,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-// TODO: Fix the complexity below if possible
-// eslint-disable-next-line complexity
+/* eslint complexity: ["error", 21]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -231,14 +232,8 @@ export const getDescriptionItem = (
       queryLabel: THREAT_QUERY_LABEL,
     });
   } else if (field === 'threatMapping') {
-    // const values = get(field, data);
-    // TODO: Add buildMappingDescription();
-    return [
-      {
-        title: label,
-        description: 'TODO: Add buildMappingDescription()',
-      },
-    ];
+    const threatMap: ThreatMapping = get(field, data);
+    return buildThreatMappingDescription(label, threatMap);
   }
 
   const description: string = get(field, data);

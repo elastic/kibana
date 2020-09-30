@@ -353,10 +353,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   threatMapping: {
                     path: 'threatMapping',
                   },
-                  threatMatchValue: {
-                    // TODO: Use or remove this
-                    path: 'threatMatch.value',
-                  },
                 }}
               >
                 {ThreatMatchInputChildren}
