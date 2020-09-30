@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
-  const testPkgKey = 'apache-0.14';
+  const testPkgKey = 'apache-0.1.4';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('installs packages from direct upload', async () => {
-    after(async () => {
+    afterEach(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(testPkgKey);
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           .type('application/gzip')
           .send(buf)
           .expect(200);
-        expect(res.body.response.length).to.be(0);
+        expect(res.body.response.length).to.be(23);
       } else {
         warnAndSkipTest(this, log);
       }
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           .type('application/zip')
           .send(buf)
           .expect(200);
-        expect(res.body.response.length).to.be(0);
+        expect(res.body.response.length).to.be(23);
       } else {
         warnAndSkipTest(this, log);
       }

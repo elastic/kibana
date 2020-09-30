@@ -42,7 +42,11 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageOperationNotSupportedError,
+  PackageOutdatedError,
+} from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransform } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
@@ -289,7 +293,34 @@ export async function installPackageByUpload({
   contentType: string;
 }): Promise<AssetReference[]> {
   const { paths, archivePackageInfo } = await loadArchivePackage({ archiveBuffer, contentType });
-  return [];
+  const installedPkg = await getInstallationObject({
+    savedObjectsClient,
+    pkgName: archivePackageInfo.name,
+  });
+  const installType = getInstallType({ pkgVersion: archivePackageInfo.version, installedPkg });
+  if (installType !== 'install') {
+    throw new PackageOperationNotSupportedError(
+      `Package upload only supports fresh installations. Package ${archivePackageInfo.name} is already installed, please uninstall first.`
+    );
+  }
+
+  const removable = !isRequiredPackage(archivePackageInfo.name);
+  const { internal = false } = archivePackageInfo;
+  const installSource = 'upload';
+
+  return installPackage({
+    savedObjectsClient,
+    callCluster,
+    pkgName: archivePackageInfo.name,
+    pkgVersion: archivePackageInfo.version,
+    installedPkg,
+    paths,
+    removable,
+    internal,
+    packageInfo: archivePackageInfo,
+    installType,
+    installSource,
+  });
 }
 
 async function installPackage({
