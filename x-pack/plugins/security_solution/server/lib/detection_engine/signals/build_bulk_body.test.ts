@@ -546,7 +546,7 @@ describe('buildSignalFromEvent', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO();
-    const signal = buildSignalFromEvent(ancestor, ruleSO);
+    const signal = buildSignalFromEvent(ancestor, ruleSO, true);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete signal['@timestamp'];
