@@ -29,7 +29,7 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key1: 'hello',
-              datastream: {
+              data_stream: {
                 dataset: 'endpoint.events',
               },
             },
@@ -42,7 +42,7 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key2: 'hello',
-              datastream: {
+              data_stream: {
                 dataset: 'endpoint.alerts',
                 other: 'x',
               },
@@ -56,7 +56,7 @@ describe('sendAlertTelemetry', () => {
             _source: {
               '@timestamp': 'x',
               key3: 'hello',
-              datastream: {},
+              data_stream: {},
             },
           },
         ],
@@ -68,7 +68,7 @@ describe('sendAlertTelemetry', () => {
       {
         '@timestamp': 'x',
         key2: 'hello',
-        datastream: {
+        data_stream: {
           dataset: 'endpoint.alerts',
           other: 'x',
         },

@@ -153,7 +153,6 @@ export class TelemetryEventsSender {
       await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid, licenseInfo?.uid);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
-      // throw err;
       this.queue = [];
     }
     this.isSending = false;
@@ -218,9 +217,11 @@ export class TelemetryEventsSender {
           'X-Elastic-Telemetry': '1', // TODO: no longer needed?
         },
       });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${resp.data}`);
+      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(`Error sending events: ${err.response.status} ${err.response.data}`);
+      this.logger.warn(
+        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+      );
     }
   }
 }
