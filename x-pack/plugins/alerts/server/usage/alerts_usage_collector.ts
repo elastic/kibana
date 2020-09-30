@@ -50,6 +50,29 @@ export function createAlertsUsageCollector(
         };
       }
     },
+    schema: {
+      count_total: { type: 'long' },
+      count_active_total: { type: 'long' },
+      count_disabled_total: { type: 'long' },
+      throttle_time: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      schedule_time: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      connectors_per_alert: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      // TODO: Find out all the possible values for DYNAMIC_KEY or reformat into an array
+      count_active_by_type: { DYNAMIC_KEY: { type: 'long' } },
+      count_by_type: { DYNAMIC_KEY: { type: 'long' } },
+    },
   });
 }
 

@@ -1,5 +1,71 @@
 {
   "properties": {
+    "alerts": {
+      "properties": {
+        "count_total": {
+          "type": "long"
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_disabled_total": {
+          "type": "long"
+        },
+        "throttle_time": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "schedule_time": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "connectors_per_alert": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "canvas": {
       "properties": {
         "workpads": {
