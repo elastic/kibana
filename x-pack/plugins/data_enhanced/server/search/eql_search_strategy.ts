@@ -12,6 +12,7 @@ import {
   getDefaultSearchParams,
   ISearchStrategy,
   toSnakeCase,
+  shimAbortSignal,
 } from '../../../../../src/plugins/data/server';
 import { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '../../common/search/types';
 
@@ -55,10 +56,7 @@ export const eqlSearchStrategyProvider = (
         );
       }
 
-      // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-      if (options?.abortSignal)
-        options.abortSignal.addEventListener('abort', () => promise.abort());
-      const rawResponse = await promise;
+      const rawResponse = await shimAbortSignal(promise, options?.abortSignal);
       const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
 
       return {

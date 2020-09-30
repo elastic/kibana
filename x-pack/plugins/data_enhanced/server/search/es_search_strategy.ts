@@ -18,6 +18,7 @@ import {
   toSnakeCase,
   shimHitsTotal,
   getAsyncOptions,
+  shimAbortSignal,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import {
@@ -99,9 +100,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
     }
 
-    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
-    const esResponse = await promise;
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
     const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
     return {
       id,
@@ -136,9 +135,7 @@ export const enhancedEsSearchStrategyProvider = (
       querystring,
     });
 
-    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
-    const esResponse = await promise;
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
 
     const response = esResponse.body as SearchResponse<any>;
     return {

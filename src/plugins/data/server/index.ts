@@ -220,6 +220,7 @@ export {
   getTotalLoaded,
   shimHitsTotal,
   usageProvider,
+  shimAbortSignal,
   SearchUsage,
 } from './search';
 
