@@ -8,7 +8,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiLoadingContent, EuiButtonEmpty } from '@elastic/eui';
 
 import { GroupsLogic } from '../groups_logic';
 import { FilterableUsersPopover } from './filterable_users_popover';
@@ -36,11 +36,10 @@ export const GroupRowUsersDropdown: React.FC<IGroupRowUsersDropdownProps> = ({
     onButtonClick();
   };
 
-  // TODO: Add keydown handler
   const toggleLink = (
-    <a className="user-group-source--additional" onKeyDown={(e) => null} onClick={handleLinkClick}>
+    <EuiButtonEmpty className="user-group-source--additional" onClick={handleLinkClick}>
       + {numOptions}
-    </a>
+    </EuiButtonEmpty>
   );
 
   return (

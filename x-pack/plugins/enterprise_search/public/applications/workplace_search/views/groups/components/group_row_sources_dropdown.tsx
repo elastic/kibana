@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiFilterGroup, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
 
 import { IContentSource } from '../../../types';
 
@@ -27,11 +27,10 @@ export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = 
   onButtonClick,
   closePopover,
 }) => {
-  // TODO: Add keydown handler
   const toggleLink = (
-    <a className="user-group-source--additional" onKeyDown={(e) => null} onClick={onButtonClick}>
+    <EuiButtonEmpty className="user-group-source--additional" onClick={onButtonClick}>
       + {numOptions}
-    </a>
+    </EuiButtonEmpty>
   );
   const contentSourceCountHeading = <strong>{groupSources.length} Shared content sources</strong>;
 
