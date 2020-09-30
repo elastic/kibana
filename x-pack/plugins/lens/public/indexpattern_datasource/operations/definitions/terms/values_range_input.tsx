@@ -9,17 +9,6 @@ import { useDebounce } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import { EuiRange } from '@elastic/eui';
 
-type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
-// Add ticks to EuiRange component props
-const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
-  PropType<typeof EuiRange> & {
-    ticks?: Array<{
-      label: string;
-      value: number;
-    }>;
-  }
->;
-
 export const ValuesRangeInput = ({
   value,
   onChange,
@@ -44,7 +33,7 @@ export const ValuesRangeInput = ({
   );
 
   return (
-    <FixedEuiRange
+    <EuiRange
       min={MIN_NUMBER_OF_VALUES}
       max={MAX_NUMBER_OF_VALUES}
       step={1}

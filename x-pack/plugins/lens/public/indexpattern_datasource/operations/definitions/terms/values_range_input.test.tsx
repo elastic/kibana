@@ -49,7 +49,8 @@ describe('ValuesRangeInput', () => {
     instance.update();
     expect(instance.find(EuiRange).prop('value')).toEqual('107');
     // useDebounce only runs on initialization
-    expect(onChangeSpy.mock.calls.length).toBe(1);
+    expect(onChangeSpy.mock.calls.length).toBe(2);
     expect(onChangeSpy.mock.calls[0][0]).toBe(5);
+    expect(onChangeSpy.mock.calls[1][0]).toBe(100);
   });
 });
