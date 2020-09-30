@@ -17,23 +17,8 @@
  * under the License.
  */
 
-import { ISearchSetup, ISearchStart } from './types';
-import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { searchSourceMock } from './search_source/mocks';
+import { PluginInitializer } from 'src/core/server';
+import { DataSearchTestPlugin, TestPluginSetup, TestPluginStart } from './plugin';
 
-export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
-  return {
-    aggs: searchAggsSetupMock(),
-    registerSearchStrategy: jest.fn(),
-    __enhance: jest.fn(),
-  };
-}
-
-export function createSearchStartMock(): jest.Mocked<ISearchStart> {
-  return {
-    aggs: searchAggsStartMock(),
-    getSearchStrategy: jest.fn(),
-    search: jest.fn(),
-    searchSource: searchSourceMock.createStartContract(),
-  };
-}
+export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = () =>
+  new DataSearchTestPlugin();
