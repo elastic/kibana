@@ -37906,6 +37906,57 @@ async function validateYarnLock(kbn, yarnLock) {
 
     `);
     process.exit(1);
+  } // look through all the package.json files to find packages which have mismatched version ranges
+
+
+  const depRanges = new Map();
+
+  for (const project of kbn.getAllProjects().values()) {
+    for (const [dep, range] of Object.entries(project.allDependencies)) {
+      const existingDep = depRanges.get(dep);
+
+      if (!existingDep) {
+        depRanges.set(dep, [{
+          range,
+          projects: [project]
+        }]);
+        continue;
+      }
+
+      const existingRange = existingDep.find(existing => existing.range === range);
+
+      if (!existingRange) {
+        existingDep.push({
+          range,
+          projects: [project]
+        });
+        continue;
+      }
+
+      existingRange.projects.push(project);
+    }
+  }
+
+  const duplicateRanges = Array.from(depRanges.entries()).filter(([, ranges]) => ranges.length > 1).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
+    range,
+    projects
+  }) => `  ${range} => ${projects.map(p => p.name).join(', ')}`)], []).join('\n        ');
+
+  if (duplicateRanges) {
+    _log__WEBPACK_IMPORTED_MODULE_3__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+
+      [single_version_dependencies] Multiple version ranges for the same dependency
+      were found declared across different package.json files. Please consolidate
+      those to match across all package.json files. Different versions for the
+      same dependency is not supported.
+
+      If you have questions about this please reach out to the operations team.
+
+      The conflicting dependencies are:
+
+        ${duplicateRanges}
+    `);
+    process.exit(1);
   }
 
   _log__WEBPACK_IMPORTED_MODULE_3__["log"].success('yarn.lock analysis completed without any issues');
