@@ -185,7 +185,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       ownFocus
       className="lnsFieldItem__popoverAnchor"
       display="block"
-      data-test-sub="lnsFieldListPanelField"
+      data-test-subj="lnsFieldListPanelField"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop

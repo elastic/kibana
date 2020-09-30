@@ -161,16 +161,18 @@ const DragDropInner = React.memo(function DragDropInner(
     dropType = 'add',
   } = props;
 
+  const isMoveDragging = isDragging && dragType === 'move';
+
   const classes = classNames(
     'lnsDragDrop',
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isHidden': isDragging && dragType === 'move',
+      'lnsDragDrop-isHidden': isMoveDragging,
       'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
-      'lnsDragDrop-isNotDroppable': isNotDroppable,
+      'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
       'lnsDragDrop-isReplacing': droppable && state.isActive && dropType === 'replace',
     },
     className,
