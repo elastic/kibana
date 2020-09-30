@@ -244,7 +244,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         const GROUP_DELETED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupDeleted',
           {
-            defaultMessage: 'Group "{name}" was successfully deleted.',
+            defaultMessage: 'Group "{groupName}" was successfully deleted.',
             values: { groupName: name },
           }
         );
@@ -270,7 +270,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         const GROUP_RENAMED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupRenamed',
           {
-            defaultMessage: 'Successfully renamed this group to "{name}".',
+            defaultMessage: 'Successfully renamed this group to "{groupName}".',
             values: { groupName: response.name },
           }
         );
