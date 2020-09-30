@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render, wait } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { delay } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
@@ -65,7 +65,7 @@ describe('when simulating race condition', () => {
   it('should render "Hello from Peter" after 200ms', async () => {
     jest.advanceTimersByTime(200);
 
-    await wait();
+    await waitFor(() => {});
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -76,7 +76,7 @@ describe('when simulating race condition', () => {
 
   it('should render "Hello from Peter" after 600ms', async () => {
     jest.advanceTimersByTime(600);
-    await wait();
+    await waitFor(() => {});
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -87,7 +87,7 @@ describe('when simulating race condition', () => {
 
   it('should should NOT have rendered "Hello from John" at any point', async () => {
     jest.advanceTimersByTime(600);
-    await wait();
+    await waitFor(() => {});
 
     expect(renderSpy).not.toHaveBeenCalledWith({
       data: 'Hello from John',
@@ -98,7 +98,7 @@ describe('when simulating race condition', () => {
 
   it('should send and receive calls in the right order', async () => {
     jest.advanceTimersByTime(600);
-    await wait();
+    await waitFor(() => {});
 
     expect(requestCallOrder).toEqual([
       ['request', 'John', 500],

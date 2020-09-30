@@ -10,8 +10,9 @@ import expectedGroupedData from './mock_responses/group_resource_nodes_grouped.j
 
 describe('groupResourceNodes', () => {
   it('should group external nodes', () => {
-    // @ts-expect-error invalid json mock
-    const responseWithGroups = groupResourceNodes(preGroupedData);
+    const responseWithGroups = groupResourceNodes(
+      preGroupedData as { elements: ConnectionElement[] }
+    );
     expect(responseWithGroups.elements).toHaveLength(
       expectedGroupedData.elements.length
     );
