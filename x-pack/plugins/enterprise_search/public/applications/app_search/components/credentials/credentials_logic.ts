@@ -50,7 +50,7 @@ export interface ICredentialsLogicActions {
 
 export interface ICredentialsLogicValues {
   activeApiToken: IApiToken;
-  isActiveApiTokenExisting: boolean;
+  activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
   apiTokens: IApiToken[];
   dataLoading: boolean;
@@ -210,7 +210,7 @@ export const CredentialsLogic = kea<
         return isCredentialsDetailsComplete === false || isCredentialsDataComplete === false;
       },
     ],
-    isActiveApiTokenExisting: [
+    activeApiTokenExists: [
       () => [selectors.activeApiToken],
       (activeApiToken) => !!activeApiToken.id,
     ],
