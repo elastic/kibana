@@ -141,6 +141,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
+      popoverProps={{
+        repositionOnScroll: true,
+      }}
       popoverButton={
         <EuiHeaderSectionItemButton
           aria-label={i18n.translate(
@@ -160,6 +163,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
+      }}
+      popoverProps={{
+        repositionOnScroll: true,
       }}
       emptyMessage={
         <EuiSelectableMessage style={{ minHeight: 300 }}>
