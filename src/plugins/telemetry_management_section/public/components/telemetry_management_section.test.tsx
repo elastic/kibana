@@ -212,7 +212,7 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleExampleComponent = component.find('p > EuiLink[onClick]').at(0);
+      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInExampleFlyout');
       updatedView.simulate('close');
@@ -248,7 +248,7 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleExampleComponent = component.find('p > EuiLink[onClick]').at(1);
+      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(1);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInSecurityExampleFlyout');
       updatedView.simulate('close');

@@ -187,12 +187,12 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
       },
     },
     file: {
-      path: 'C:\\Users\\User\\Downloads\\mimikatz_trunk\\x64\\mimikatz.exe',
+      path: 'C:\\Windows\\Temp\\mimikatz.exe',
       size: 1263880,
       created: '2020-05-19T07:50:06.0Z',
       accessed: '2020-09-22T14:29:19.93531400Z',
       mtime: '2020-09-22T14:29:03.6040000Z',
-      directory: 'C:\\Users\\User\\Downloads\\mimikatz_trunk\\x64',
+      directory: 'C:\\Windows\\Temp',
       hash: {
         sha1: 'c9fb7f8a4c6b7b12b493a99a8dc6901d17867388',
         sha256: 'cb1553a3c88817e4cc774a5a93f9158f6785bd3815447d04b6c3f4c2c4b21ed7',

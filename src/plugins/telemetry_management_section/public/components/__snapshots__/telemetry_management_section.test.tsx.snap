@@ -98,12 +98,6 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     }
                   }
                 />
-                <EuiLink
-                  onClick={[Function]}
-                >
-                  endpoint security data
-                </EuiLink>
-                 that we collect.
               </p>
             </React.Fragment>,
             "displayName": "Provide usage statistics",

@@ -201,18 +201,16 @@ export class TelemetryManagementSection extends Component<Props, State> {
         />
       </p>
       <p>
-       <FormattedMessage
-        id="telemetry.seeExamplesOfWhatWeCollect"
-        defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-        values={{
-          clusterData: <EuiLink onClick={this.toggleExample}>cluster data</EuiLink>,
-          endpointSecurityData: (
-            <EuiLink onClick={this.toggleSecurityExample}>endpoint security data</EuiLink>
-          ),
-        }}
-      />
-        <EuiLink onClick={this.toggleSecurityExample}>endpoint security data</EuiLink> that we
-        collect.
+        <FormattedMessage
+          id="telemetry.seeExamplesOfWhatWeCollect"
+          defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+          values={{
+            clusterData: <EuiLink onClick={this.toggleExample}>cluster data</EuiLink>,
+            endpointSecurityData: (
+              <EuiLink onClick={this.toggleSecurityExample}>endpoint security data</EuiLink>
+            ),
+          }}
+        />
       </p>
     </Fragment>
   );
