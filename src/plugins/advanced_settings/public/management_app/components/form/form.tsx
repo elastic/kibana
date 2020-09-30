@@ -154,7 +154,9 @@ export class Form extends PureComponent<FormProps> {
       let equalsToDefault = false;
       switch (type) {
         case 'array':
-          valueToSave = valueToSave.split(',').map((val: string) => val.trim());
+          valueToSave = valueToSave.trim();
+          valueToSave =
+            valueToSave === '' ? [] : valueToSave.split(',').map((val: string) => val.trim());
           equalsToDefault = valueToSave.join(',') === (defVal as string[]).join(',');
           break;
         case 'json':

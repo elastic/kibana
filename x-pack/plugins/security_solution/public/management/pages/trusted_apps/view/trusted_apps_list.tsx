@@ -5,11 +5,16 @@
  */
 
 import { Dispatch } from 'redux';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { EuiBasicTable, EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiTableActionsColumnType,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
@@ -29,41 +34,51 @@ import {
 import { useTrustedAppsSelector } from './hooks';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { OS_TITLES } from './constants';
+import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from './translations';
+import { TrustedAppCard } from './components/trusted_app_card';
 
-const COLUMN_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'description' | 'entries'> | 'actions']: string }
-> = {
-  name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.name', {
-    defaultMessage: 'Name',
-  }),
-  os: i18n.translate('xpack.securitySolution.trustedapps.list.columns.os', {
-    defaultMessage: 'OS',
-  }),
-  created_at: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdAt', {
-    defaultMessage: 'Date Created',
-  }),
-  created_by: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdBy', {
-    defaultMessage: 'Created By',
-  }),
-  actions: i18n.translate('xpack.securitySolution.trustedapps.list.columns.actions', {
-    defaultMessage: 'Actions',
-  }),
-};
+interface DetailsMap {
+  [K: string]: ReactNode;
+}
 
+interface TrustedAppsListContext {
+  dispatch: Dispatch<Immutable<AppAction>>;
+  detailsMapState: [DetailsMap, (value: DetailsMap) => void];
+}
+
+type ColumnsList = Array<EuiBasicTableColumn<Immutable<TrustedApp>>>;
 type ActionsList = EuiTableActionsColumnType<Immutable<TrustedApp>>['actions'];
 
-const getActionDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): ActionsList => [
+const toggleItemDetailsInMap = (
+  map: DetailsMap,
+  item: Immutable<TrustedApp>,
+  { dispatch }: TrustedAppsListContext
+): DetailsMap => {
+  const changedMap = { ...map };
+
+  if (changedMap[item.id]) {
+    delete changedMap[item.id];
+  } else {
+    changedMap[item.id] = (
+      <TrustedAppCard
+        trustedApp={item}
+        onDelete={() => {
+          dispatch({
+            type: 'trustedAppDeletionDialogStarted',
+            payload: { entry: item },
+          });
+        }}
+      />
+    );
+  }
+
+  return changedMap;
+};
+
+const getActionDefinitions = ({ dispatch }: TrustedAppsListContext): ActionsList => [
   {
-    name: i18n.translate('xpack.securitySolution.trustedapps.list.actions.delete', {
-      defaultMessage: 'Delete',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.trustedapps.list.actions.delete.description',
-      {
-        defaultMessage: 'Delete this entry',
-      }
-    ),
+    name: LIST_ACTIONS.delete.name,
+    description: LIST_ACTIONS.delete.description,
     'data-test-subj': 'trustedAppDeleteAction',
     isPrimary: true,
     icon: 'trash',
@@ -78,44 +93,62 @@ const getActionDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): Actions
   },
 ];
 
-type ColumnsList = Array<EuiBasicTableColumn<Immutable<TrustedApp>>>;
+const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
+  const [itemDetailsMap, setItemDetailsMap] = context.detailsMapState;
 
-const getColumnDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): ColumnsList => [
-  {
-    field: 'name',
-    name: COLUMN_TITLES.name,
-  },
-  {
-    field: 'os',
-    name: COLUMN_TITLES.os,
-    render(value: TrustedApp['os'], record: Immutable<TrustedApp>) {
-      return OS_TITLES[value];
+  return [
+    {
+      field: 'name',
+      name: PROPERTY_TITLES.name,
     },
-  },
-  {
-    field: 'created_at',
-    name: COLUMN_TITLES.created_at,
-    render(value: TrustedApp['created_at'], record: Immutable<TrustedApp>) {
-      return (
-        <FormattedDate
-          fieldName={COLUMN_TITLES.created_at}
-          value={value}
-          className="eui-textTruncate"
-        />
-      );
+    {
+      field: 'os',
+      name: PROPERTY_TITLES.os,
+      render(value: TrustedApp['os'], record: Immutable<TrustedApp>) {
+        return OS_TITLES[value];
+      },
     },
-  },
-  {
-    field: 'created_by',
-    name: COLUMN_TITLES.created_by,
-  },
-  {
-    name: COLUMN_TITLES.actions,
-    actions: getActionDefinitions(dispatch),
-  },
-];
+    {
+      field: 'created_at',
+      name: PROPERTY_TITLES.created_at,
+      render(value: TrustedApp['created_at'], record: Immutable<TrustedApp>) {
+        return (
+          <FormattedDate
+            fieldName={PROPERTY_TITLES.created_at}
+            value={value}
+            className="eui-textTruncate"
+          />
+        );
+      },
+    },
+    {
+      field: 'created_by',
+      name: PROPERTY_TITLES.created_by,
+    },
+    {
+      name: ACTIONS_COLUMN_TITLE,
+      actions: getActionDefinitions(context),
+    },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render(item: Immutable<TrustedApp>) {
+        return (
+          <EuiButtonIcon
+            onClick={() => setItemDetailsMap(toggleItemDetailsInMap(itemDetailsMap, item, context))}
+            aria-label={itemDetailsMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemDetailsMap[item.id] ? 'arrowUp' : 'arrowDown'}
+            data-test-subj="trustedAppsListItemExpandButton"
+          />
+        );
+      },
+    },
+  ];
+};
 
 export const TrustedAppsList = memo(() => {
+  const [detailsMap, setDetailsMap] = useState<DetailsMap>({});
   const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex);
   const pageSize = useTrustedAppsSelector(getListCurrentPageSize);
   const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
@@ -125,10 +158,16 @@ export const TrustedAppsList = memo(() => {
 
   return (
     <EuiBasicTable
-      columns={useMemo(() => getColumnDefinitions(dispatch), [dispatch])}
+      columns={useMemo(
+        () => getColumnDefinitions({ dispatch, detailsMapState: [detailsMap, setDetailsMap] }),
+        [dispatch, detailsMap, setDetailsMap]
+      )}
       items={useMemo(() => [...listItems], [listItems])}
       error={useTrustedAppsSelector(getListErrorMessage)}
       loading={useTrustedAppsSelector(isListLoading)}
+      itemId="id"
+      itemIdToExpandedRowMap={detailsMap}
+      isExpandable={true}
       pagination={useMemo(
         () => ({
           pageIndex,
