@@ -33,7 +33,7 @@ const i18nTexts = {
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.description', {
       defaultMessage:
-        'Move data to data nodes optimized for less frequent, read-only access. Store cold data on less-expensive hardware.',
+        'Move data to nodes optimized for less frequent, read-only access. Store data in the cold phase on less-expensive hardware.',
     }),
   },
 };
@@ -192,8 +192,7 @@ export const ColdPhase: FunctionComponent<Props> = ({
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
-                    You can search a frozen index, but expect queries to be slower."
+                    defaultMessage="Make the index read-only and minimize its memory footprint."
                   />{' '}
                   <LearnMoreLink docPath="frozen-indices.html" />
                 </EuiTextColor>

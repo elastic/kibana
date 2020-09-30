@@ -221,7 +221,6 @@ export class SearchEmbeddable
       if (!searchScope.columns) {
         return;
       }
-      indexPattern.popularizeField(columnName, 1);
       const columns = columnActions.addColumn(searchScope.columns, columnName);
       this.updateInput({ columns });
     };

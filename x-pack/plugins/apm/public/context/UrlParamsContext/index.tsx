@@ -19,11 +19,12 @@ import { resolveUrlParams } from './resolveUrlParams';
 import { UIFilters } from '../../../typings/ui_filters';
 import {
   localUIFilterNames,
-  LocalUIFilterName,
+
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
+import { LocalUIFilterName } from '../../../common/ui_filter';
 
 interface TimeRange {
   rangeFrom: string;
