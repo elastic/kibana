@@ -21,14 +21,14 @@ export type TrackingEvent = 'entered' | 'exited';
 export const ActionGroupId = 'tracking threshold met';
 
 const actionVariableContextToEntityDateTimeLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextEnteredTimeStampLabel',
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToEntityDateTimeLabel',
   {
     defaultMessage: `The time the entity was detected in the current boundary`,
   }
 );
 
 const actionVariableContextFromEntityDateTimeLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextEnteredTimeStampLabel',
+  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityDateTimeLabel',
   {
     defaultMessage: `The last time the entity was recorded in the previous boundary`,
   }
