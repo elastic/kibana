@@ -55,3 +55,14 @@ export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
 export type TypeAliasWithUnion = Usage & WithUnion;
 
 export type TypeAliasWithRecord = Usage & Record<string, number>;
+
+export type MappedTypeProps = 'prop1' | 'prop2';
+
+export interface MappedTypes {
+  mappedTypeWithExternallyDefinedProps: {
+    [key in MappedTypeProps]: number;
+  };
+  mappedTypeWithOneInlineProp: {
+    [key in 'prop3']: number;
+  };
+}
