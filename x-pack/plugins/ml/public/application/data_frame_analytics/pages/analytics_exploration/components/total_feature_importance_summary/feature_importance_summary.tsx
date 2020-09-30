@@ -63,6 +63,13 @@ const axes: RecursivePartial<AxisStyle> = {
 };
 const theme: PartialTheme = {
   axes,
+  legend: {
+    /**
+     * Added buffer between label and value.
+     * Smaller values render a more compact legend
+     */
+    spacingBuffer: 100,
+  },
 };
 
 export interface FeatureImportanceSummaryPanelProps {
