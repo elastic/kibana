@@ -10,7 +10,7 @@ import React, { memo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
 import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';

@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactWrapper } from 'react';
 import { shallow } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
-import { IntlProvider } from 'react-intl';
+import { I18nProvider, __IntlProvider } from '@kbn/i18n/react';
 
-const intlProvider = new IntlProvider({ locale: 'en', messages: {} }, {});
-const { intl } = intlProvider.getChildContext();
+// Use fake component to extract `intl` property to use in tests.
+const { intl } = (mount(
+  <I18nProvider>
+    <br />
+  </I18nProvider>
+).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
+  .instance()
+  .getChildContext();
 
 /**
- * This helper shallow wraps a component with react-intl's <I18nProvider> which
+ * This helper shallow wraps a component with @kbn/i18n's <I18nProvider> which
  * fixes "Could not find required `intl` object" console errors when running tests
  *
  * Example usage (should be the same as shallow()):
