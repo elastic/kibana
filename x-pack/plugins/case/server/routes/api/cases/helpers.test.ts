@@ -76,7 +76,7 @@ describe('helpers', () => {
         id: '789',
         name: 'My connector 3',
         type: '.jira',
-        fields: [],
+        fields: null,
       });
     });
 

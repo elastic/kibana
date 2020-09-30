@@ -153,7 +153,7 @@ describe('GET case', () => {
 
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
-      fields: {},
+      fields: null,
       id: 'none',
       name: 'none',
       type: '.none',
@@ -183,7 +183,7 @@ describe('GET case', () => {
 
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
-      fields: {},
+      fields: null,
       id: '789',
       name: 'My connector 3',
       type: '.jira',

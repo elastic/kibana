@@ -35,7 +35,12 @@ describe('POST cases', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
-        connector: null,
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: '.none',
+          fields: null,
+        },
       },
     });
 
@@ -54,35 +59,6 @@ describe('POST cases', () => {
       name: 'none',
       type: '.none',
       fields: null,
-    });
-  });
-
-  it(`Posts a new case, connector configured`, async () => {
-    const request = httpServerMock.createKibanaRequest({
-      path: CASES_URL,
-      method: 'post',
-      body: {
-        description: 'This is a brand new case of a bad meanie defacing data',
-        title: 'Super Bad Security Issue',
-        tags: ['defacement'],
-        connector: null,
-      },
-    });
-
-    const theContext = createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCases,
-        caseConfigureSavedObject: mockCaseConfigure,
-      })
-    );
-
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(200);
-    expect(response.payload.connector).toEqual({
-      id: '789',
-      name: 'My connector 3',
-      type: '.jira',
-      fields: {},
     });
   });
 
@@ -176,7 +152,12 @@ describe('POST cases', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
-        connector: null,
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: '.none',
+          fields: null,
+        },
       },
     });
 
@@ -194,10 +175,10 @@ describe('POST cases', () => {
       closed_by: null,
       comments: [],
       connector: {
-        id: '789',
-        name: 'My connector 3',
-        type: '.jira',
-        fields: {},
+        id: 'none',
+        name: 'none',
+        type: '.none',
+        fields: null,
       },
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {

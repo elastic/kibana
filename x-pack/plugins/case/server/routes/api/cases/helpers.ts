@@ -152,7 +152,7 @@ export const transformESConnectorToCaseConnector = (connector: ESCaseConnector):
   const connectorTypeField = {
     type: connector?.type ?? '.none',
     fields:
-      connector.fields != null && connector.fields.length > 0
+      connector && connector.fields != null && connector.fields.length > 0
         ? connector.fields.reduce(
             (fields, { key, value }) => ({
               ...fields,
