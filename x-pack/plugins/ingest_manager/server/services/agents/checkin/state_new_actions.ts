@@ -116,10 +116,21 @@ export async function createAgentActionFromPolicyAction(
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
-  // Transform the policy action for agent version <=  7.9 for BWC
+  // Transform the policy action for agent version <=  7.9.x for BWC
   const agentVersion = semver.parse((agent.local_metadata?.elastic as any)?.agent?.version);
   const agentPolicyAction: AgentPolicyAction | AgentPolicyActionV7_9 =
-    agentVersion && semver.lt(agentVersion, '7.10.0')
+    agentVersion &&
+    semver.lt(
+      agentVersion,
+      // A prerelease tag is added here so that agent versions with prerelease tags can be compared
+      // correctly using `semvar`
+      '7.10.0-SNAPSHOT',
+      // `@types/semvar` is out of date with the version of `semvar` we use and doesn't have a
+      // corresponding release version we can update the typing to :( so, the typing error is
+      // suppressed here even though it is supported by `semvar`
+      // @ts-expect-error
+      { includePrerelease: true }
+    )
       ? {
           ...policyAction,
           type: 'CONFIG_CHANGE',

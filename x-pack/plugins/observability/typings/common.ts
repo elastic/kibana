@@ -10,7 +10,8 @@ export type ObservabilityApp =
   | 'apm'
   | 'uptime'
   | 'observability'
-  | 'stack_monitoring';
+  | 'stack_monitoring'
+  | 'ux';
 
 export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
   ? Value
