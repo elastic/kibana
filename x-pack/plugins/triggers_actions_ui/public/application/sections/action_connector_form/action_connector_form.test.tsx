@@ -48,7 +48,7 @@ describe('action_connector_form', () => {
 
     const initialConnector: UserConfiguredActionConnector<{}, {}> = {
       id: '123',
-      name: 'my-connector',
+      name: '',
       actionTypeId: actionType.id,
       config: {},
       secrets: {},
