@@ -45,10 +45,13 @@ describe('alert actions', () => {
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
 
-    searchStrategyClient = dataPluginMock.createStartContract().search as jest.Mocked<ISearchStart>;
-    searchStrategyClient.search.mockImplementation(() => {
-      return of({ rawResponse: mockTimelineDetails });
-    });
+    searchStrategyClient = {
+      aggs: {} as ISearchStart['aggs'],
+      showError: jest.fn(),
+      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      searchSource: {} as ISearchStart['searchSource'],
+      session: dataPluginMock.createStartContract().search.session,
+    };
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
       const id = get('variables.id', obj);
