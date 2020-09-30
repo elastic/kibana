@@ -6,11 +6,10 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data",
-    "kibanaLegacy"
+    "data"
   ],
   "requiredBundles": [
-    "kibanaUtils",
+    "kibanaReact",
     "share",
     "charts",
     "visDefaultEditor"
