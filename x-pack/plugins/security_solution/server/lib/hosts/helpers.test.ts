@@ -53,8 +53,10 @@ describe('#buildFieldsTermAggregation', () => {
       },
       host_ip: {
         terms: {
-          field: 'host.ip',
-          missing: '\u0000\u0000\u0000\u0000',
+          script: {
+            source: "doc['host.ip']",
+            lang: 'painless',
+          },
           size: 10,
           order: {
             timestamp: 'desc',
