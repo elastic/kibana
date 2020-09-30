@@ -8,6 +8,7 @@ import { Action } from 'history';
 import { Action as Action_3 } from 'src/plugins/ui_actions/public';
 import { ActionExecutionContext as ActionExecutionContext_2 } from 'src/plugins/ui_actions/public';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
