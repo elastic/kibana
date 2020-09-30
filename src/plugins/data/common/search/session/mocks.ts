@@ -19,7 +19,7 @@
 
 import { ISessionService } from './types';
 
-export function getSessionServiceMock(): MockedKeys<ISessionService> {
+export function getSessionServiceMock(): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
     restore: jest.fn(),
