@@ -17,26 +17,5 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { existsSync } = require('fs');
-
-const { REPO_ROOT } = require('@kbn/utils');
-const { DLL_DIST_DIR } = require('./constants');
-
-exports.buildDll = async ({ rebuildDll, log, procRunner }) => {
-  if (rebuildDll) {
-    log.info('rebuilding dll');
-  } else if (!existsSync(resolve(DLL_DIST_DIR, 'dll.js'))) {
-    log.info('dll missing, rebuilding');
-  } else {
-    log.info('dll exists');
-    return;
-  }
-
-  await procRunner.run('build dll ', {
-    cmd: require.resolve('webpack/bin/webpack'),
-    args: ['--config', require.resolve('./webpack.dll.config.js')],
-    cwd: REPO_ROOT,
-    wait: true,
-  });
-};
+// Storybook react doesn't declare this in its typings, but it's there.
+declare module '@storybook/react/standalone';

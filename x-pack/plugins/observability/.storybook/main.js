@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { join } from 'path';
-
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'ui_actions_enhanced',
-  storyGlobs: [join(__dirname, '..', 'public', '**', '*.story.tsx')],
-});
+module.exports = require('@kbn/storybook').defaultConfig;

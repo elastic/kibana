@@ -17,10 +17,5 @@
  * under the License.
  */
 
-import { join } from 'path';
-
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'code-editor',
-  storyGlobs: [join(__dirname, '..', '*.examples.tsx')],
-});
+export { defaultConfig } from './lib/default_config';
+export { runStorybookCli } from './lib/run_storybook_cli';
