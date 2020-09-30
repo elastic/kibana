@@ -64,10 +64,7 @@ export const newConfiguration: CasesConfigureRequest = {
     id: '456',
     name: 'My connector 2',
     type: '.jira',
-    fields: {
-      issueType: 'task',
-      priority: null,
-    },
+    fields: null,
   },
   closure_type: 'close-by-pushing',
 };

@@ -50,7 +50,6 @@ describe('PATCH configuration', () => {
     expect(res.payload).toEqual(
       expect.objectContaining({
         ...mockCaseConfigure[0].attributes,
-        connector: { ...mockCaseConfigure[0].attributes.connector, fields: {} },
         closure_type: 'close-by-pushing',
         updated_at: '2020-04-09T09:43:51.778Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -83,7 +82,6 @@ describe('PATCH configuration', () => {
     expect(res.payload).toEqual(
       expect.objectContaining({
         ...mockCaseConfigure[0].attributes,
-        connector: { ...mockCaseConfigure[0].attributes.connector, fields: {} },
         closure_type: 'close-by-pushing',
         updated_at: '2020-04-09T09:43:51.778Z',
         updated_by: { email: null, full_name: null, username: null },
@@ -102,8 +100,8 @@ describe('PATCH configuration', () => {
         connector: {
           id: 'connector-new',
           name: 'New connector',
-          type: '.new',
-          fields: {},
+          type: '.jira',
+          fields: null,
         },
         version: mockCaseConfigure[0].version,
       },
@@ -121,7 +119,7 @@ describe('PATCH configuration', () => {
     expect(res.payload).toEqual(
       expect.objectContaining({
         ...mockCaseConfigure[0].attributes,
-        connector: { id: 'connector-new', name: 'New connector', type: '.new', fields: {} },
+        connector: { id: 'connector-new', name: 'New connector', type: '.jira', fields: null },
         closure_type: 'close-by-user',
         updated_at: '2020-04-09T09:43:51.778Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -179,7 +177,7 @@ describe('PATCH configuration', () => {
       path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
-        connector: { id: 'no-version', name: 'no version', type: '.no-version', fields: {} },
+        connector: { id: 'no-version', name: 'no version', type: '.none', fields: null },
         version: mockCaseConfigure[0].version,
       },
     });

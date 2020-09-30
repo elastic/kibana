@@ -93,15 +93,15 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'not-id',
           name: 'unchanged',
-          type: '.test',
-          fields: {},
+          type: '.none',
+          fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'not-id',
             name: 'unchanged',
-            type: '.test',
-            fields: {},
+            type: '.none',
+            fields: null,
           },
           closureType: 'close-by-user',
         },
@@ -137,15 +137,15 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'unchanged',
-          type: '.test',
-          fields: {},
+          type: '.servicenow',
+          fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: '.test',
-            fields: {},
+            type: '.servicenow',
+            fields: null,
           },
           closureType: 'close-by-user',
         },
@@ -232,15 +232,15 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-2',
           name: 'unchanged',
-          type: '.test',
-          fields: {},
+          type: '.servicenow',
+          fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: '.test',
-            fields: {},
+            type: '.servicenow',
+            fields: null,
           },
           closureType: 'close-by-user',
         },
@@ -285,8 +285,8 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: '.test',
-          fields: {},
+          type: '.servicenow',
+          fields: null,
         },
         persistLoading: true,
       }));
@@ -359,15 +359,15 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-2',
           name: 'My connector',
-          type: '.test',
-          fields: {},
+          type: '.servicenow',
+          fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'My connector',
             name: 'My connector',
-            type: '.test',
-            fields: {},
+            type: '.jira',
+            fields: null,
           },
           closureType: 'close-by-user',
         },
@@ -404,17 +404,17 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'My connector',
-            type: '.test',
-            fields: {},
+            type: '.servicenow',
+            fields: null,
           },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
           connector: {
             id: 'servicenow-2',
-            name: 'My connector',
-            type: '.test',
-            fields: {},
+            name: 'My connector 2',
+            type: '.servicenow',
+            fields: null,
           },
         }));
 
@@ -447,15 +447,15 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: '.test',
-        fields: {},
+        type: '.servicenow',
+        fields: null,
       },
       currentConfiguration: {
         connector: {
           id: 'My connector',
           name: 'My connector',
-          type: '.test',
-          fields: {},
+          type: '.jira',
+          fields: null,
         },
         closureType: 'close-by-user',
       },
@@ -476,8 +476,8 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: '.test',
-        fields: {},
+        type: '.servicenow',
+        fields: null,
       },
       closureType: 'close-by-pushing',
     });
@@ -493,15 +493,15 @@ describe('user interactions', () => {
       connector: {
         id: 'servicenow-2',
         name: 'unchanged',
-        type: '.test',
-        fields: {},
+        type: '.servicenow',
+        fields: null,
       },
       currentConfiguration: {
         connector: {
           id: 'servicenow-2',
           name: 'unchanged',
-          type: '.test',
-          fields: {},
+          type: '.servicenow',
+          fields: null,
         },
         closureType: 'close-by-user',
       },

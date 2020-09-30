@@ -51,7 +51,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
-          fields: {},
+          fields: null,
         },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
@@ -86,7 +86,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
-          fields: {},
+          fields: null,
         },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
@@ -105,7 +105,7 @@ describe('POST configuration', () => {
         connector: {
           name: 'My connector 2',
           type: '.jira',
-          fields: {},
+          fields: null,
         },
         closure_type: 'close-by-pushing',
       },
@@ -130,7 +130,7 @@ describe('POST configuration', () => {
         connector: {
           id: '456',
           type: '.jira',
-          fields: {},
+          fields: null,
         },
         closure_type: 'close-by-pushing',
       },
@@ -155,7 +155,32 @@ describe('POST configuration', () => {
         connector: {
           id: '456',
           name: 'My connector 2',
-          fields: {},
+          fields: null,
+        },
+        closure_type: 'close-by-pushing',
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('throws when missing connector.fields', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.none',
         },
         closure_type: 'close-by-pushing',
       },
@@ -181,7 +206,7 @@ describe('POST configuration', () => {
           id: '456',
           name: 'My connector 2',
           type: '.jira',
-          fields: {},
+          fields: null,
         },
       },
     });
@@ -299,8 +324,11 @@ describe('POST configuration', () => {
       path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: 'throw-error-create',
-        connector_name: 'My connector 2',
+        connector: {
+          id: 'throw-error-create',
+          name: 'My connector 2',
+          fields: null,
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -322,7 +350,7 @@ describe('POST configuration', () => {
       method: 'post',
       body: {
         ...newConfiguration,
-        connector: { id: 'no-version', name: 'no version', type: '.no-version', fields: {} },
+        connector: { id: 'no-version', name: 'no version', type: '.none', fields: null },
       },
     });
 
@@ -339,5 +367,47 @@ describe('POST configuration', () => {
         version: '',
       })
     );
+  });
+
+  it('returns an error if fields are not null', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        ...newConfiguration,
+        connector: { id: 'not-null', name: 'not-null', type: '.none', fields: {} },
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('returns an error if the type of the connector does not exists', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        ...newConfiguration,
+        connector: { id: 'not-exists', name: 'not-exist', type: '.not-exists', fields: null },
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
   });
 });

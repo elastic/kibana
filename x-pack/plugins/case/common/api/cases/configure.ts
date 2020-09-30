@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 import { JiraCaseFieldsRt } from '../connectors/jira';
 import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
 import { ResilientCaseFieldsRT } from '../connectors/resilient';
-import { ConnectorTypeFieldsRt, ConnectorTypes } from '../connectors';
+import { ConnectorTypes, ConnectorTypesRt } from '../connectors';
 
 /*
  * This types below are related to the service now configuration
@@ -67,13 +67,12 @@ export type ActionConnector = ActionResult;
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
-const ConfigureCaseConnectorRt = rt.intersection([
-  rt.type({
-    id: rt.string,
-    name: rt.string,
-  }),
-  ConnectorTypeFieldsRt,
-]);
+const ConfigureCaseConnectorRt = rt.type({
+  id: rt.string,
+  name: rt.string,
+  type: ConnectorTypesRt,
+  fields: rt.null,
+});
 
 const CasesConfigureBasicRt = rt.type({
   connector: ConfigureCaseConnectorRt,
