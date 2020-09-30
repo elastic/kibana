@@ -124,9 +124,3 @@ This content has moved. See
 
 This content has moved. See
 <<quick-start-guide, Quick start>>.
-
-[role="exclude",id="gs-get-data-into-kibana"]
-== Get data into {kib}
-
-This content has moved. See
-<<add-the-sample-data, Add the sample data>>.
