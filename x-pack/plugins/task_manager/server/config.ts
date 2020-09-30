@@ -9,10 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
-export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
 
+// Monitoring Constants
+// ===================
 // Refresh "pull based" monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
+export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

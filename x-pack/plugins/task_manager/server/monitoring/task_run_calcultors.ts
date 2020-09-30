@@ -11,14 +11,12 @@ import { isUndefined, countBy, mapValues } from 'lodash';
 export interface AveragedStat extends JsonObject {
   mean: number;
   median: number;
-  mode: number;
 }
 
 export function calculateRunningAverage(values: number[]): AveragedStat {
   return {
-    mean: stats.mean(values),
+    mean: Math.round(stats.mean(values)),
     median: stats.median(values),
-    mode: stats.mode(values),
   };
 }
 
@@ -27,7 +25,9 @@ export function calculateRunningAverage(values: number[]): AveragedStat {
  * @param values
  */
 export function calculateFrequency<T>(values: T[]): JsonObject {
-  return mapValues(countBy(values), (count) => Math.round((count * 100) / values.length));
+  return values.length
+    ? mapValues(countBy(values), (count) => Math.round((count * 100) / values.length))
+    : {};
 }
 
 /**

@@ -92,11 +92,7 @@ export function createTaskRunAggregator(
     taskRunEvents$.pipe(startWith({ duration: {}, drift: [] })),
     taskPollingEvents$.pipe(
       startWith({
-        resultFrequency: {
-          [FillPoolResult.NoTasksClaimed]: 0,
-          [FillPoolResult.RanOutOfCapacity]: 0,
-          [FillPoolResult.PoolFilled]: 0,
-        },
+        resultFrequency: [],
       })
     )
   ).pipe(

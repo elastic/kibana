@@ -48,9 +48,8 @@ describe('Task Run Statistics', () => {
       window: number[]
     ) {
       expect(taskStat.value.drift).toMatchObject({
-        mean: stats.mean(window),
+        mean: Math.round(stats.mean(window)),
         median: stats.median(window),
-        mode: stats.mode(window),
       });
     }
 
