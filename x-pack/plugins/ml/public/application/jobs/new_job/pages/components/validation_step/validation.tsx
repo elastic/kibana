@@ -11,6 +11,7 @@ import { JobCreatorContext } from '../job_creator_context';
 import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
+import { ValidationWarningCallout } from './validation_warning_callout';
 
 const idFilterList = [
   'job_id_valid',
@@ -56,7 +57,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   // caught in previous basic checks
   function setIsValid(valid: boolean) {
     jobValidator.advancedValid = valid;
-    setNextActive(valid);
+    setNextActive(jobCreator.type === JOB_TYPE.ADVANCED || valid);
   }
 
   return (
@@ -71,6 +72,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             setIsValid={setIsValid}
             idFilterList={idFilterList}
           />
+          {jobCreator.type === JOB_TYPE.ADVANCED && <ValidationWarningCallout />}
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
