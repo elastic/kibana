@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
+import { ServiceName } from './service_name';
 
 export interface UXMetrics {
   cls: string;
@@ -36,16 +37,19 @@ const CoreVitalsThresholds = {
 };
 
 interface Props {
-  data?: UXMetrics | null;
   loading: boolean;
+  data?: UXMetrics | null;
+  displayServiceName?: boolean;
+  serviceName?: string;
 }
 
-export function CoreVitals({ data, loading }: Props) {
+export function CoreVitals({ data, loading, displayServiceName, serviceName }: Props) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
 
   return (
     <>
       <WebCoreVitalsTitle />
+      {displayServiceName && <ServiceName name={serviceName!} />}
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'}>
         <EuiFlexItem>

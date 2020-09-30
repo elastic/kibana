@@ -21,6 +21,7 @@ import {
   useUxHasData,
 } from '../../data_handler';
 import { ObsvSharedContext } from '../../context/shared_data';
+import { useQueryParams } from '../../hooks/use_query_params';
 
 const CentralizedFlexGroup = styled(EuiFlexGroup)`
   justify-content: center;
@@ -37,11 +38,13 @@ export function LoadingObservability() {
 
   const history = useHistory();
 
+  const { absStart, absEnd } = useQueryParams();
+
   const { data: logs, status: logsStatus } = useInfraLogsHasData();
   const { data: metrics, status: metricsStatus } = useInfraMetricsHasData();
   const { data: apm, status: apmStatus } = useApmHasData();
   const { data: uptime, status: uptimeStatus } = useUptimeHasData();
-  const { data: ux, status: uxStatus } = useUxHasData();
+  const { data: ux, status: uxStatus } = useUxHasData({ start: absStart, end: absEnd });
 
   useEffect(() => {
     const hasAnyData = logs || metrics || apm || uptime || ux;

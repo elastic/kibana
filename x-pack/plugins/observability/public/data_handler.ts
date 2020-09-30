@@ -48,6 +48,10 @@ export function useUptimeHasData() {
   return useFetcher(() => getDataHandler('uptime')?.hasData(), []);
 }
 
-export function useUxHasData() {
-  return useFetcher(() => getDataHandler('ux')?.hasData(), []);
+export function useUxHasData({ start, end }: { start: number; end: number }) {
+  return useFetcher(
+    () => getDataHandler('ux')?.hasData({ absoluteTime: { start, end } }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 }

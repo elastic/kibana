@@ -17,6 +17,8 @@ export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPl
 
 export * from './components/shared/action_menu/';
 
+export * from './components/shared/core_web_vitals/';
+
 export {
   useTrackPageview,
   useUiTracker,

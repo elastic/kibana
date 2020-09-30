@@ -28,14 +28,14 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { use_query_params } from '../../../../hooks/useQueryParams';
+import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
   bucketSize?: string;
 }
 
 export function UptimeSection({ bucketSize }: Props) {
-  const { absStart, absEnd, start, end } = use_query_params();
+  const { absStart, absEnd, start, end } = useQueryParams();
 
   const theme = useContext(ThemeContext);
   const history = useHistory();

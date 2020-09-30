@@ -6,6 +6,7 @@
 
 import {
   FetchDataParams,
+  HasDataParams,
   UxFetchDataResponse,
 } from '../../../../../observability/public/';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
@@ -34,8 +35,15 @@ export const fetchUxOverviewDate = async ({
   };
 };
 
-export async function hasRumData() {
+export async function hasRumData({ absoluteTime }: HasDataParams) {
   return await callApmApi({
     pathname: '/api/apm/observability_overview/has_rum_data',
+    params: {
+      query: {
+        start: new Date(absoluteTime.start).toISOString(),
+        end: new Date(absoluteTime.end).toISOString(),
+        uiFilters: '',
+      },
+    },
   });
 }

@@ -13,7 +13,7 @@ import {
   NO_OF_LONG_TASK,
   SUM_LONG_TASKS,
   TBT_LABEL,
-} from '../CoreVitals/translations';
+} from './translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 

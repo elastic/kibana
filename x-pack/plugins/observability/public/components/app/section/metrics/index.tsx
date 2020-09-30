@@ -16,7 +16,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
-import { use_query_params } from '../../../../hooks/useQueryParams';
+import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
   bucketSize?: string;
@@ -48,7 +48,7 @@ const StyledProgress = styled.div<{ color?: string }>`
 export function MetricsSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
 
-  const { absStart, absEnd, start, end } = use_query_params();
+  const { absStart, absEnd, start, end } = useQueryParams();
 
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {

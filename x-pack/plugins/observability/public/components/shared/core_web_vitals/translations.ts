@@ -18,26 +18,6 @@ export const CLS_LABEL = i18n.translate('xpack.apm.rum.coreVitals.cls', {
   defaultMessage: 'Cumulative layout shift',
 });
 
-export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
-  defaultMessage: 'First contentful paint',
-});
-
-export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
-  defaultMessage: 'Total blocking time',
-});
-
-export const NO_OF_LONG_TASK = i18n.translate('xpack.apm.rum.uxMetrics.noOfLongTasks', {
-  defaultMessage: 'No. of long tasks',
-});
-
-export const LONGEST_LONG_TASK = i18n.translate('xpack.apm.rum.uxMetrics.longestLongTasks', {
-  defaultMessage: 'Longest long task duration',
-});
-
-export const SUM_LONG_TASKS = i18n.translate('xpack.apm.rum.uxMetrics.sumLongTasks', {
-  defaultMessage: 'Total long tasks duration',
-});
-
 export const CV_POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
   defaultMessage: 'a poor',
 });

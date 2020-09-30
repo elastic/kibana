@@ -10,7 +10,7 @@ import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CoreVitals } from '../../../shared/core_web_vitals';
-import { use_query_params } from '../../../../hooks/useQueryParams';
+import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
   absoluteTime: { start?: number; end?: number };
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function UXSection({ serviceName }: Props) {
-  const { absStart, absEnd, start, end } = use_query_params();
+  const { absStart, absEnd, start, end } = useQueryParams();
 
   const { data, status } = useFetcher(() => {
     if (start && end) {
@@ -49,7 +49,12 @@ export function UXSection({ serviceName }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <CoreVitals data={coreWebVitals} loading={isLoading} />
+      <CoreVitals
+        data={coreWebVitals}
+        loading={isLoading}
+        displayServiceName={true}
+        serviceName={serviceName}
+      />
     </SectionContainer>
   );
 }

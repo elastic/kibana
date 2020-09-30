@@ -7,6 +7,7 @@
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  HasDataParams,
   ObservabilityPluginSetup,
 } from '../../observability/public';
 import {
@@ -112,9 +113,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       plugins.observability.dashboard.register({
         appName: 'ux',
-        hasData: async () => {
+        hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.hasRumData();
+          return await dataHelper.hasRumData(params!);
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getUxDataHelper();

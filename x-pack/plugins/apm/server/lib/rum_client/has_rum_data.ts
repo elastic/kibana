@@ -3,29 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../helpers/setup_request';
 import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+} from '../helpers/setup_request';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { mergeProjection } from '../../projections/util/merge_projection';
 
-export async function hasRumData({ setup }: { setup: Setup }) {
-  const { apmEventClient } = setup;
+export async function hasRumData({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
   try {
-    const params = {
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      terminateAfter: 1,
+    const projection = getRumPageLoadTransactionsProjection({
+      setup,
+    });
+
+    const params = mergeProjection(projection, {
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -35,7 +34,9 @@ export async function hasRumData({ setup }: { setup: Setup }) {
           },
         },
       },
-    };
+    });
+
+    const { apmEventClient } = setup;
 
     const response = await apmEventClient.search(params);
     return {

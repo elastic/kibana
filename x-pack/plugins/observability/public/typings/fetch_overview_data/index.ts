@@ -28,15 +28,19 @@ export interface FetchDataParams {
   serviceName?: string;
 }
 
+export interface HasDataParams {
+  absoluteTime: { start: number; end: number };
+}
+
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = () => Promise<boolean>;
+export type HasData = (params?: HasDataParams) => Promise<boolean>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability' | 'stack_monitoring' | 'ux'
+  'observability' | 'stack_monitoring'
 >;
 
 export interface DataHandler<

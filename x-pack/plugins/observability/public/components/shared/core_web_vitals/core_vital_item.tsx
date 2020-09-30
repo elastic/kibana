@@ -8,7 +8,7 @@ import { EuiFlexGroup, euiPaletteForStatus, EuiSpacer, EuiStat } from '@elastic/
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';
-import { ColorPaletteFlexItem } from './color_palette_flexItem';
+import { ColorPaletteFlexItem } from './color_palette_flex_item';
 import {
   CV_AVERAGE_LABEL,
   CV_GOOD_LABEL,
