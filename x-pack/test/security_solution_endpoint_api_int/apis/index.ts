@@ -10,9 +10,7 @@ import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/ing
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  // TODO: Temporarily skip until new package changes are
-  // available under a new docker tag
-  describe.skip('Endpoint plugin', function () {
+  describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
 
     this.tags('ciGroup7');
