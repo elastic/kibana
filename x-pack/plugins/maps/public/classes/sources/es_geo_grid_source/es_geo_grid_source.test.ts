@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-
-jest.mock('../../../kibana_services');
-
-import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
+import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
   GRID_RESOLUTION,
+  LICENSED_FEATURES,
   RENDER_AS,
   SOURCE_TYPES,
 } from '../../../../common/constants';
 import { SearchSource } from 'src/plugins/data/public';
+
+jest.mock('../../../kibana_services');
 
 export class MockSearchSource {
   setField = jest.fn();
@@ -27,6 +27,8 @@ export class MockSearchSource {
 
 describe('ESGeoGridSource', () => {
   const geoFieldName = 'bar';
+
+  let esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
   const mockIndexPatternService = {
     get() {
       return {
@@ -34,7 +36,7 @@ describe('ESGeoGridSource', () => {
           getByName() {
             return {
               name: geoFieldName,
-              type: ES_GEO_FIELD_TYPE.GEO_POINT,
+              type: esGeoFieldType,
             };
           },
         },
@@ -125,6 +127,11 @@ describe('ESGeoGridSource', () => {
         },
       },
     });
+  });
+
+  afterEach(() => {
+    esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
+    jest.resetAllMocks();
   });
 
   const extent: MapExtent = {
@@ -277,22 +284,8 @@ describe('ESGeoGridSource', () => {
     });
 
     it('Should have shape-aggs for geo_shape', async () => {
-      // @ts-expect-error
-      getIndexPatternService.mockReturnValue({
-        get() {
-          return {
-            fields: {
-              getByName() {
-                return {
-                  name: geoFieldName,
-                  type: ES_GEO_FIELD_TYPE.GEO_SHAPE,
-                };
-              },
-            },
-          };
-        },
-      });
-      expect(await geogridSource.getLicensedFeatures()).toEqual([]);
+      esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      expect(await geogridSource.getLicensedFeatures()).toEqual([LICENSED_FEATURES.GEO_SHAPE_AGGS]);
     });
   });
 });
