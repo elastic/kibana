@@ -320,7 +320,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <PreviewQuery index={index} query={queryInfo} />
+          <PreviewQuery
+            dataTestSubj="something"
+            idAria="someAriaId"
+            ruleType={formRuleType}
+            index={index}
+            query={queryInfo}
+          />
         </Form>
       </StepContentWrapper>
 

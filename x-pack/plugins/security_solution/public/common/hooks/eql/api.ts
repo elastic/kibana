@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { DataPublicPluginStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+
+import { DataPublicPluginStart, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -16,6 +17,7 @@ import {
   isErrorResponse,
   isValidationErrorResponse,
 } from '../../../../common/search_strategy/eql';
+import { InspectResponse } from '../../../types';
 import { ChartData } from '../../components/charts/common';
 import { getBucketRanges, getEqlAggsData, getInterval } from './helpers';
 
@@ -55,10 +57,9 @@ export const validateEql = async ({
 
 interface AggsParams extends EqlValidationRequest {
   data: DataPublicPluginStart;
-  indexPatterns: IIndexPattern;
   interval: string;
-  from: string;
-  to: string;
+  fromTime: string;
+  toTime: string;
   signal: AbortSignal;
 }
 
@@ -67,31 +68,47 @@ export interface EqlAggsResponse {
   total: number;
   lte: string;
   gte: string;
+  inspect: InspectResponse;
 }
 
 export const getEqlAggs = async ({
   data,
   index,
   interval,
-  indexPatterns,
   query,
-  from,
-  to,
+  fromTime,
+  toTime,
   signal,
 }: AggsParams): Promise<EqlAggsResponse> => {
-  const rangeFilter = data.query.timefilter.timefilter.createFilter(
-    { ...indexPatterns, timeFieldName: '@timestamp' },
-    { from, to }
-  );
-
-  if (rangeFilter == null) {
-    throw new Error('Unable to create specified time filter');
-  }
-
-  const toTime = rangeFilter.range['@timestamp'].gte ?? from;
-  const fromTime = rangeFilter.range['@timestamp'].lte ?? to;
   const { amount, intervalType } = getInterval(interval);
   const bucketRanges = getBucketRanges(moment(fromTime), moment(toTime), [], amount, intervalType);
+
+  const inspectResponse = await data.search
+    .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+      {
+        params: {
+          // @ts-expect-error allow_no_indices is missing on EqlSearch
+          allow_no_indices: true,
+          index: index.join(),
+          body: {
+            filter: {
+              range: {
+                '@timestamp': {
+                  gte: toTime,
+                  lte: fromTime,
+                },
+              },
+            },
+            query,
+          },
+        },
+      },
+      {
+        strategy: 'eql',
+        abortSignal: signal,
+      }
+    )
+    .toPromise();
 
   // For the time being, EQL does not support aggs
   // this is a temporary workaround :/
@@ -100,8 +117,8 @@ export const getEqlAggs = async ({
       data.search
         .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
           {
-            // @ts-expect-error allow_no_indices is missing on EqlSearch
             params: {
+              // @ts-expect-error allow_no_indices is missing on EqlSearch
               allow_no_indices: true,
               index: index.join(),
               body: {
@@ -126,9 +143,9 @@ export const getEqlAggs = async ({
     )
   );
 
-  if (responses.every((r) => isErrorResponse(r.body))) {
+  if (responses.every((r) => r.status === 'rejected')) {
     throw new Error('Unable to fetch query preview');
   } else {
-    return getEqlAggsData(responses, toTime, fromTime, bucketRanges);
+    return getEqlAggsData(inspectResponse, responses, toTime, fromTime, bucketRanges);
   }
 };

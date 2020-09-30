@@ -44,7 +44,7 @@ export const getBucketRanges = (
       return [
         ...acc,
         {
-          gte: `${before}\|\|/${interval}`,
+          gte: `${before}`,
           lte: `${bucket}`,
         },
       ];
@@ -55,26 +55,34 @@ export const getBucketRanges = (
 };
 
 export const getEqlAggsData = (
-  responses: PromiseSettledResult<EqlSearchStrategyResponse<IKibanaSearchResponse>>,
+  inspectResponse: any,
+  responses: EqlSearchStrategyResponse<IKibanaSearchResponse>[],
   to: string,
   from: string,
   ranges: Array<{ lte: string; gte: string }>
 ): EqlAggsResponse => {
+  const dsl = [JSON.stringify(inspectResponse.rawResponse.meta.request.params)];
+  const r = [JSON.stringify(inspectResponse.rawResponse.body, null, 2)];
+
   return responses.reduce<EqlAggsResponse>(
-    (acc, r, i) => {
-      // console.log('R', r, '------>', acc);
-      if (r.status === 'fulfilled') {
-        const hits = r.value.rawResponse.body.hits.total.value;
-        // console.log('HITS', hits);
+    (acc, res, index) => {
+      if (res.status === 'fulfilled' && res.value.rawResponse.body.hits.total != null) {
+        const hits = res.value.rawResponse.body.hits.total.value;
         return {
           ...acc,
           total: acc.total + hits,
-          data: [...acc.data, [Number(moment(ranges[i].lte).format('x')), hits]],
+          data: [
+            ...acc.data,
+            { x: Number(moment(ranges[index].lte).format('x')), y: hits, g: 'hits' },
+          ],
         };
       } else {
         return {
           ...acc,
-          data: [...acc.data, [Number(moment(ranges[i].lte).format('x')), 0]],
+          data: [
+            ...acc.data,
+            { x: Number(moment(ranges[index].lte).format('x')), y: 0, g: 'hits' },
+          ],
         };
       }
     },
@@ -83,6 +91,10 @@ export const getEqlAggsData = (
       total: 0,
       lte: from,
       gte: to,
+      inspect: {
+        dsl,
+        response: r,
+      },
     }
   );
 };
@@ -93,10 +105,6 @@ export const getInterval = (range: string) => {
       return { amount: 10, intervalType: 'm' };
     case 'd':
       return { amount: 3, intervalType: 'h' };
-    case 'M':
-      return { amount: 1, intervalType: 'd' };
-    case 'y':
-      return { amount: 1, intervalType: 'M' };
     default:
       throw new Error('Invalid time range selected');
   }

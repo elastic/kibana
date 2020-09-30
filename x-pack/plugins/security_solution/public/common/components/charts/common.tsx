@@ -43,10 +43,12 @@ export interface ChartSeriesConfigs {
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
+    stackAccessors?: string[] | undefined;
   };
   axis?: {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
+    tickSize?: number | undefined;
   };
   settings?: Partial<SettingsSpecProps>;
 }

@@ -56,3 +56,18 @@ export const QUERY_PREVIEW_TITLE = (hits: number) =>
       defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
     }
   );
+
+export const QUERY_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewFetchError',
+  {
+    defaultMessage: 'Query preview failure',
+  }
+);
+
+export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewNoiseWarning',
+  {
+    defaultMessage:
+      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query.',
+  }
+);

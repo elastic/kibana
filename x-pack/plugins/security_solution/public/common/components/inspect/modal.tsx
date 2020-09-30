@@ -75,6 +75,7 @@ const MyEuiModal = styled(EuiModal)`
 MyEuiModal.displayName = 'MyEuiModal';
 const parseInspectString = function <T>(objectStringify: string): T | null {
   try {
+    console.log(JSON.parse(objectStringify));
     return JSON.parse(objectStringify);
   } catch {
     return null;
