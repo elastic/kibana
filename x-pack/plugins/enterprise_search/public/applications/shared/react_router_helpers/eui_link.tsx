@@ -6,11 +6,10 @@
 
 import React from 'react';
 import { useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
 import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
 
 import { KibanaLogic } from '../../shared/kibana';
-import { letBrowserHandleEvent } from './link_events';
+import { letBrowserHandleEvent, createHref } from './';
 
 /**
  * Generates either an EuiLink or EuiButton with a React-Router-ified link
@@ -33,11 +32,10 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
   shouldNotCreateHref,
   children,
 }) => {
-  const history = useHistory();
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { navigateToUrl, history } = useValues(KibanaLogic);
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = shouldNotCreateHref ? to : history.createHref({ pathname: to });
+  const href = createHref(to, history, { shouldNotCreateHref });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -47,7 +45,7 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
     event.preventDefault();
 
     // Perform SPA navigation.
-    navigateToUrl(href);
+    navigateToUrl(to, { shouldNotCreateHref });
   };
 
   const reactRouterProps = { href, onClick: reactRouterLinkClick };

@@ -16,7 +16,7 @@ import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { RUM_AGENTS } from '../../../../common/agent_name';
+import { RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { URLFilter } from './URLFilter';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
@@ -48,7 +48,7 @@ export function RumOverview() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENTS }),
+              uiFilters: JSON.stringify({ agentName: RUM_AGENT_NAMES }),
             },
           },
         });
