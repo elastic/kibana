@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ConnectorTypeFields } from '../../../../../case/common/api';
 import {
   CaseField,
   ActionType,
   CasesConfigurationMapping,
   ThirdPartyField,
-  ConfigureCaseConnector,
   ActionConnector,
   CaseConnector,
 } from '../../containers/configure/types';
@@ -45,10 +45,10 @@ export const setThirdPartyToMapping = (
     return item;
   });
 
-export const getNoneConnector = (): ConfigureCaseConnector => ({
+export const getNoneConnector = (): CaseConnector => ({
   id: 'none',
   name: 'none',
-  type: '.none',
+  type: '.none' as CaseConnector['type'],
   fields: null,
 });
 
@@ -58,14 +58,21 @@ export const getConnectorById = (
 ): ActionConnector | null => connectors.find((c) => c.id === id) ?? null;
 
 export const normalizeActionConnector = (
-  actionConnector: ActionConnector
-): Omit<ConfigureCaseConnector, 'fields'> => ({
-  id: actionConnector.id,
-  name: actionConnector.name,
-  type: actionConnector.actionTypeId as ConfigureCaseConnector['type'],
-});
+  actionConnector: ActionConnector,
+  fields: CaseConnector['fields'] = null
+): CaseConnector => {
+  const caseConnectorFieldsType = {
+    type: actionConnector.actionTypeId,
+    fields,
+  } as ConnectorTypeFields;
+  return {
+    id: actionConnector.id,
+    name: actionConnector.name,
+    ...caseConnectorFieldsType,
+  };
+};
 
 export const normalizeCaseConnector = (
   connectors: ActionConnector[],
-  caseConnector: ConfigureCaseConnector | CaseConnector
+  caseConnector: CaseConnector
 ): ActionConnector | null => connectors.find((c) => c.id === caseConnector.id) ?? null;

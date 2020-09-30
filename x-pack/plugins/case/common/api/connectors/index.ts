@@ -47,15 +47,16 @@ export const ConnectorTypeFieldsRt = rt.union([
   ConnectorNoneTypeFieldsRt,
 ]);
 
-export const ConnectorTypesRt = rt.union([
-  ConnectorJiraTypeFieldsRt.props.type,
-  ConnectorResillientTypeFieldsRt.props.type,
-  ConnectorServiceNowTypeFieldsRt.props.type,
-  ConnectorNoneTypeFieldsRt.props.type,
+export const CaseConnectorRt = rt.intersection([
+  rt.type({
+    id: rt.string,
+    name: rt.string,
+  }),
+  ConnectorTypeFieldsRt,
 ]);
 
+export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
-export type ConnectorTypes = rt.TypeOf<typeof ConnectorTypesRt>;
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
@@ -64,3 +65,11 @@ export type ESConnectorFields = Array<{
   key: string;
   value: unknown;
 }>;
+
+export type ESCaseConnectorTypes = '.none' | '.jira' | '.resillient' | '.servicenow';
+export interface ESCaseConnector {
+  id: string;
+  name: string;
+  type: ESCaseConnectorTypes;
+  fields: ESConnectorFields | null;
+}

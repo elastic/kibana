@@ -17,7 +17,12 @@ describe('usePostCase', () => {
     description: 'description',
     tags: ['tags'],
     title: 'title',
-    connector: null,
+    connector: {
+      id: 'none',
+      name: 'none',
+      type: '.none' as const,
+      fields: null,
+    },
   };
   beforeEach(() => {
     jest.clearAllMocks();

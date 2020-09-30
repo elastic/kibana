@@ -374,7 +374,12 @@ describe('Case Configuration API', () => {
       description: 'description',
       tags: ['tag'],
       title: 'title',
-      connector: null,
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: '.none' as const,
+        fields: null,
+      },
     };
 
     test('check url, method, signal', async () => {

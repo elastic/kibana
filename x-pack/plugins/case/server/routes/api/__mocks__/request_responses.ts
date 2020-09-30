@@ -11,7 +11,12 @@ export const newCase: CasePostRequest = {
   title: 'My new case',
   description: 'A description',
   tags: ['new', 'case'],
-  connector: null,
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: '.none' as const,
+    fields: null,
+  },
 };
 
 export const getActions = (): FindActionResult[] => [

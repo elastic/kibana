@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 import { JiraCaseFieldsRt } from '../connectors/jira';
 import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
 import { ResilientCaseFieldsRT } from '../connectors/resilient';
-import { ConnectorTypes, ConnectorTypesRt } from '../connectors';
+import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 
 /*
  * This types below are related to the service now configuration
@@ -67,15 +67,9 @@ export type ActionConnector = ActionResult;
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
-const ConfigureCaseConnectorRt = rt.type({
-  id: rt.string,
-  name: rt.string,
-  type: ConnectorTypesRt,
-  fields: rt.null,
-});
 
 const CasesConfigureBasicRt = rt.type({
-  connector: ConfigureCaseConnectorRt,
+  connector: CaseConnectorRt,
   closure_type: ClosureTypeRT,
 });
 
@@ -103,21 +97,12 @@ export const CaseConfigureResponseRt = rt.intersection([
 ]);
 
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
-export type ConfigureCaseConnector = rt.TypeOf<typeof ConfigureCaseConnectorRt>;
 export type CasesConfigure = rt.TypeOf<typeof CasesConfigureBasicRt>;
-
 export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
 export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
 export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesRt>;
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
 
-export interface ESCasesConfigureConnector {
-  id: string;
-  name: string;
-  type: ConnectorTypes;
-  fields: null;
-}
-
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCasesConfigureConnector;
+  connector: ESCaseConnector;
 };

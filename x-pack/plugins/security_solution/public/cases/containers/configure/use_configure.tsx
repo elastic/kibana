@@ -13,14 +13,9 @@ import {
   displaySuccessToast,
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
-import {
-  CasesConfigurationMapping,
-  ClosureType,
-  CaseConfigure,
-  ConfigureCaseConnector,
-} from './types';
+import { CasesConfigurationMapping, ClosureType, CaseConfigure, CaseConnector } from './types';
 
-export type ConnectorConfiguration = { connector: ConfigureCaseConnector } & {
+export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
 };
 
@@ -39,7 +34,7 @@ export type Action =
     }
   | {
       type: 'setConnector';
-      connector: ConfigureCaseConnector;
+      connector: CaseConnector;
     }
   | {
       type: 'setLoading';
@@ -121,7 +116,7 @@ export interface ReturnUseCaseConfigure extends State {
   persistCaseConfigure: ({ connector, closureType }: ConnectorConfiguration) => unknown;
   refetchCaseConfigure: () => void;
   setClosureType: (closureType: ClosureType) => void;
-  setConnector: (connector: ConfigureCaseConnector) => void;
+  setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
   setMapping: (newMapping: CasesConfigurationMapping[]) => void;
 }
@@ -160,7 +155,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setConnector = useCallback((connector: ConfigureCaseConnector) => {
+  const setConnector = useCallback((connector: CaseConnector) => {
     dispatch({
       connector,
       type: 'setConnector',

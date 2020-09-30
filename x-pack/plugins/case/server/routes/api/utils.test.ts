@@ -23,7 +23,7 @@ import {
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
-import { ESCaseConnector } from '../../../common/api/cases';
+import { ESCaseConnector } from '../../../common/api';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {

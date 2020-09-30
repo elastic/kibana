@@ -16,7 +16,7 @@ import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/l
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector } from '../../../../../case/common/api/cases';
+import { CaseConnector, ActionConnector } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';

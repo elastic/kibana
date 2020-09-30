@@ -6,11 +6,7 @@
 
 import { User, UserActionField, UserAction, CaseConnector } from '../../../../case/common/api';
 
-export {
-  CaseConnector,
-  ActionConnector,
-  ConfigureCaseConnector,
-} from '../../../../case/common/api';
+export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
 export interface Comment {
   id: string;

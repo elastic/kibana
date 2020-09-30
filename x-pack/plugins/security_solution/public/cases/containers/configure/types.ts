@@ -13,7 +13,6 @@ import {
   ThirdPartyField,
   CasesConfigure,
   ActionConnector,
-  ConfigureCaseConnector,
   CaseConnector,
 } from '../../../../../case/common/api';
 
@@ -24,7 +23,6 @@ export {
   ClosureType,
   ThirdPartyField,
   ActionConnector,
-  ConfigureCaseConnector,
   CaseConnector,
 };
 

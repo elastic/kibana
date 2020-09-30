@@ -10,20 +10,12 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { ConnectorTypeFieldsRt, ESConnectorFields, ConnectorTypes } from '../connectors';
+import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
-
-const CaseConnectorRt = rt.intersection([
-  rt.type({
-    id: rt.string,
-    name: rt.string,
-  }),
-  ConnectorTypeFieldsRt,
-]);
 
 const CaseBasicRt = rt.type({
   connector: CaseConnectorRt,
@@ -69,7 +61,7 @@ export const CasePostRequestRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
-  connector: rt.union([rt.null, CaseConnectorRt]),
+  connector: CaseConnectorRt,
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
@@ -181,19 +173,11 @@ export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type Status = rt.TypeOf<typeof StatusRt>;
-export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
-
-export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ConnectorTypes;
-  fields: ESConnectorFields;
-}
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {

@@ -19,10 +19,16 @@ interface Props {
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
-  const onChange = useCallback((p, v) => onFieldsChange({ ...fields, [p]: v }), [
-    fields,
-    onFieldsChange,
-  ]);
+  const onChange = useCallback(
+    (p, v) => {
+      if (fields != null) {
+        onFieldsChange({ ...fields, [p]: v });
+      } else {
+        onFieldsChange({ [p]: v } as ConnectorTypeFields['fields']);
+      }
+    },
+    [fields, onFieldsChange]
+  );
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;

@@ -165,10 +165,10 @@ export const Create = React.memo(() => {
       const { connectorId: dataConnectorId, ...dataWithoutConnectorId } = data;
       const caseConnector = getConnectorById(dataConnectorId, connectors);
       const connectorToUpdate = caseConnector
-        ? normalizeActionConnector(caseConnector)
+        ? normalizeActionConnector(caseConnector, fields)
         : getNoneConnector();
 
-      await postCase({ ...dataWithoutConnectorId, connector: { ...connectorToUpdate, fields } });
+      await postCase({ ...dataWithoutConnectorId, connector: connectorToUpdate });
     }
   }, [submit, postCase, fields, connectors]);
 

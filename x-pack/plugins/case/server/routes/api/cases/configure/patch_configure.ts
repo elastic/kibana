@@ -17,6 +17,7 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { transformCaseConnectorToEsConnector } from '../helpers';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
@@ -35,8 +36,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         );
 
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const { version, ...queryWithoutVersion } = query;
-
+        const { version, connector, ...queryWithoutVersion } = query;
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
             'You can not patch this configuration since you did not created first with a post.'
@@ -58,6 +58,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
             ...queryWithoutVersion,
+            ...(connector != null
+              ? { connector: transformCaseConnectorToEsConnector(connector) }
+              : {}),
             updated_at: updateDate,
             updated_by: { email, full_name, username },
           },
