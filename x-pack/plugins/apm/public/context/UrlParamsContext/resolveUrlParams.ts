@@ -47,6 +47,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeTo,
     environment,
     searchTerm,
+    percentile,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -75,6 +76,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
+    percentile: toNumber(percentile),
 
     // ui filters
     environment,
