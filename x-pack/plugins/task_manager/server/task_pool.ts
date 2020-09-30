@@ -47,6 +47,7 @@ export class TaskPool {
   constructor(opts: Opts) {
     this.logger = opts.logger;
     opts.maxWorkers$.subscribe((maxWorkers) => {
+      this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
     });
   }

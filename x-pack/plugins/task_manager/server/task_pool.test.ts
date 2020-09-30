@@ -130,11 +130,9 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-    expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "Task TaskType \\"shooooo\\" failed in attempt to run: Saved object [task/foo] not found",
-      ]
-    `);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Task TaskType "shooooo" failed in attempt to run: Saved object [task/foo] not found'
+    );
     expect(logger.warn).not.toHaveBeenCalled();
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
