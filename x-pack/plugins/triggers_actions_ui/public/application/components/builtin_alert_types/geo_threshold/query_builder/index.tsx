@@ -95,13 +95,13 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     }
   );
 
-  function usePrevious(value) {
-    const ref = useRef();
+  const usePrevious = <T extends unknown>(value: T): T | undefined => {
+    const ref = useRef<T>();
     useEffect(() => {
       ref.current = value;
     });
     return ref.current;
-  }
+  };
 
   const oldIndex = usePrevious(index);
   useEffect(() => {

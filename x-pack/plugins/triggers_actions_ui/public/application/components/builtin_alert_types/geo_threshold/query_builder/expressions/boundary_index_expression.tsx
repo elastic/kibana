@@ -42,7 +42,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
   const nothingSelected: IFieldType = {
-    name: '_nothing selected',
+    name: '<nothing selected>',
     type: 'string',
   };
 
