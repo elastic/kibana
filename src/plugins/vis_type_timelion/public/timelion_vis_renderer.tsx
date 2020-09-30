@@ -42,7 +42,7 @@ export const getTimelionVisRenderer: (
     const [seriesList] = visData.sheet;
 
     render(
-      <VisualizationContainer showNoResult={!seriesList}>
+      <VisualizationContainer showNoResult={!seriesList || !seriesList.list.length}>
         <KibanaContextProvider services={{ ...deps }}>
           <TimelionVisComponent
             interval={visParams.interval}
