@@ -64,8 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
