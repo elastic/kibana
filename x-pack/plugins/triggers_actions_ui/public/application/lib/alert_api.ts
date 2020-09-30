@@ -70,12 +70,14 @@ export async function loadAlerts({
   searchText,
   typesFilter,
   actionTypesFilter,
+  alertStatusesFilter,
 }: {
   http: HttpSetup;
   page: { index: number; size: number };
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
 }): Promise<{
   page: number;
   perPage: number;
@@ -96,6 +98,9 @@ export async function loadAlerts({
         ')',
       ].join('')
     );
+  }
+  if (alertStatusesFilter && alertStatusesFilter.length) {
+    filters.push(`alert.attributes.status:(${alertStatusesFilter.join(' or ')})`);
   }
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {

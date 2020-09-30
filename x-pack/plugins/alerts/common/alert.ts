@@ -15,6 +15,19 @@ export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
 
+// for the `typeof ThingValues[number]` types below, become string types that
+// only accept the values in the associated string arrays
+export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'unknown'] as const;
+export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
+
+export const AlertExecutionStatusErrorReasonValues = [
+  'read',
+  'decrypt',
+  'execute',
+  'unknown',
+] as const;
+export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+
 export type AlertActionParams = SavedObjectAttributes;
 
 export interface AlertAction {

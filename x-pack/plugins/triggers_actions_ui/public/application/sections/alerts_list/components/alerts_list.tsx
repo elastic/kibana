@@ -21,6 +21,8 @@ import {
   EuiEmptyPrompt,
   EuiCallOut,
   EuiButtonEmpty,
+  EuiHealth,
+  EuiText,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -34,13 +36,14 @@ import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../com
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
+import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import { AlertExecutionStatusValues, ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 
 const ENTER_KEY = 13;
@@ -79,7 +82,10 @@ export const AlertsList: React.FunctionComponent = () => {
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
+  const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+  const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>({});
   const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
@@ -95,7 +101,7 @@ export const AlertsList: React.FunctionComponent = () => {
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypesState, page, searchText, typesFilter, actionTypesFilter]);
+  }, [alertTypesState, page, searchText, typesFilter, actionTypesFilter, alertStatusesFilter]);
 
   useEffect(() => {
     (async () => {
@@ -148,6 +154,7 @@ export const AlertsList: React.FunctionComponent = () => {
           searchText,
           typesFilter,
           actionTypesFilter,
+          alertStatusesFilter,
         });
         setAlertsState({
           isLoading: false,
@@ -172,7 +179,49 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  async function loadAlertsTotalStatuses() {
+    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    if (hasAnyAuthorizedAlertType) {
+      try {
+        AlertExecutionStatusValues.map(async (status: string) => {
+          const alertsTotalResponse = await loadAlerts({
+            http,
+            page: { index: 0, size: 0 },
+            searchText,
+            typesFilter,
+            actionTypesFilter,
+            alertStatusesFilter: [status],
+          });
+          setAlertsStatusesTotal({ ...alertsStatusesTotal, [status]: alertsTotalResponse.total });
+        });
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+            {
+              defaultMessage: 'Unable to load alert statuses info',
+            }
+          ),
+        });
+      }
+    }
+  }
+
   const alertsTableColumns = [
+    {
+      field: 'status',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
+        { defaultMessage: 'Status' }
+      ),
+      sortable: false,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-status',
+      render: (status: string) => {
+        const healthColor = getHealthColor(status);
+        return <EuiHealth color={healthColor}>{status}</EuiHealth>;
+      },
+    },
     {
       field: 'name',
       name: i18n.translate(
@@ -277,23 +326,11 @@ export const AlertsList: React.FunctionComponent = () => {
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
+    <AlertStatusFilter
+      key="alert-status-filter"
+      onChange={(ids: string[]) => setAlertStatusesFilter(ids)}
+    />,
   ];
-
-  if (authorizedToCreateAnyAlerts) {
-    toolsRight.push(
-      <EuiButton
-        key="create-alert"
-        data-test-subj="createAlertButton"
-        fill
-        onClick={() => setAlertFlyoutVisibility(true)}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-          defaultMessage="Create alert"
-        />
-      </EuiButton>
-    );
-  }
 
   const authorizedToModifySelectedAlerts = selectedIds.length
     ? filterAlertsById(alertsState.data, selectedIds).every((selectedAlert) =>
@@ -323,6 +360,21 @@ export const AlertsList: React.FunctionComponent = () => {
             </BulkOperationPopover>
           </EuiFlexItem>
         )}
+        {authorizedToCreateAnyAlerts ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              key="create-alert"
+              data-test-subj="createAlertButton"
+              fill
+              onClick={() => setAlertFlyoutVisibility(true)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
+                defaultMessage="Create alert"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
@@ -350,7 +402,60 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <EuiSpacer size="m" />
+      {!dissmissAlertErrors ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCallOut
+              color="danger"
+              size="s"
+              title={
+                <FormattedMessage
+                  id="core.ui.overlays.banner.attentionTitle"
+                  defaultMessage="There is 1 alert with an error."
+                />
+              }
+              iconType="alert"
+            >
+              <EuiButton
+                type="primary"
+                size="s"
+                color="danger"
+                onClick={() => setAlertStatusesFilter([AlertExecutionStatusValues[2]])}
+              >
+                <FormattedMessage id="banner.closeButtonLabel" defaultMessage="View" />
+              </EuiButton>
+              <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
+              </EuiButtonEmpty>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateDescription"
+              defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
+              values={{ totalItemCount: alertsState.totalItemCount, pageSize: page.size }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="subdued">Ok: 1</EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="success">Active: 0</EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="warning">No data: 0</EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="danger">Errors: 1</EuiHealth>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {/* Large to remain consistent with ActionsList table spacing */}
       <EuiSpacer size="l" />
 
@@ -399,7 +504,8 @@ export const AlertsList: React.FunctionComponent = () => {
   const isFilterApplied = !(
     isEmpty(searchText) &&
     isEmpty(typesFilter) &&
-    isEmpty(actionTypesFilter)
+    isEmpty(actionTypesFilter) &&
+    isEmpty(alertStatusesFilter)
   );
 
   return (
@@ -430,24 +536,6 @@ export const AlertsList: React.FunctionComponent = () => {
           setAlertsState({ ...alertsState, isLoading });
         }}
       />
-      <EuiCallOut
-        color="danger"
-        size="s"
-        title={
-          <FormattedMessage
-            id="core.ui.overlays.banner.attentionTitle"
-            defaultMessage="There is 1 alert with an error."
-          />
-        }
-        iconType="alert"
-      >
-        <EuiButton type="primary" size="s" color="danger">
-          <FormattedMessage id="banner.closeButtonLabel" defaultMessage="View" />
-        </EuiButton>
-        <EuiButtonEmpty color="danger">
-          <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
-        </EuiButtonEmpty>
-      </EuiCallOut>
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (
         table
