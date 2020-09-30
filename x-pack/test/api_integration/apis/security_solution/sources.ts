@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/search/securitySolutionIndexFields/')
         .set('kbn-xsrf', 'true')
         .send({
-          indices: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          indices: ['auditbeat-*', 'filebeat-*'],
           onlyCheckIfIndicesExist: false,
         })
         .expect(200);
