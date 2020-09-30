@@ -19,6 +19,11 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse
 > => {
+  // require the fields once we actually need them, rather than ahead of time, and pass
+  // them to createFieldItem to reduce the amount of work done as much as possible
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+
   return {
     search: async (context, request) => {
       const { elasticsearch } = context.core;
@@ -40,6 +45,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
 
       if (!request.onlyCheckIfIndicesExist) {
         indexFields = await formatIndexFields(
+          beatFields,
           responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
           dedupeIndices
         );
@@ -151,16 +157,12 @@ export const createFieldItem = (
  * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // require the fields once we actually need them, rather than ahead of time, and pass
-      // them to createFieldItem to reduce the amount of work done as much as possible
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
-
       resolve(
         responsesIndexFields.reduce(
           (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
@@ -229,10 +231,11 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(responsesIndexFields, indexesAlias);
+  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

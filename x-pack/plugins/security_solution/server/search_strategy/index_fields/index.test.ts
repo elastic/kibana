@@ -12,10 +12,13 @@ import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexFie
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {
     test('Basic functionality', async () => {
+      const { fieldsBeat } = await import('../../utils/beat_schema/fields');
+
       expect(
         sortBy(
           'name',
           await formatIndexFields(
+            fieldsBeat,
             [mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField],
             ['auditbeat', 'filebeat', 'packetbeat']
           )
@@ -166,7 +169,10 @@ describe('Index Fields', () => {
 
   describe('formatFirstFields', () => {
     test('Basic functionality', async () => {
+      const { fieldsBeat } = await import('../../utils/beat_schema/fields');
+
       const fields = await formatFirstFields(
+        fieldsBeat,
         [mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField],
         ['auditbeat', 'filebeat', 'packetbeat']
       );
