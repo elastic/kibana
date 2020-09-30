@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -94,6 +94,32 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       defaultMessage: 'Expression contains errors.',
     }
   );
+
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+  const oldIndex = usePrevious(index);
+  useEffect(() => {
+    if (oldIndex !== index) {
+      setAlertParams('geoField', '');
+      setAlertParams('entity', '');
+      setAlertParams('dateField', '');
+    }
+  }, [oldIndex, index, setAlertParams]);
+
+  const oldBoundaryIndex = usePrevious(boundaryIndexTitle);
+  useEffect(() => {
+    if (oldBoundaryIndex !== boundaryIndexTitle) {
+      setAlertParams('boundaryIndexId', '');
+      setAlertParams('boundaryGeoField', '');
+      setAlertParams('boundaryNameField', '');
+    }
+  }, [oldBoundaryIndex, boundaryIndexTitle, setAlertParams]);
 
   useEffect(() => {
     const initToDefaultParams = async () => {
