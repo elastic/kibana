@@ -8,6 +8,7 @@ import { Logger } from 'kibana/server';
 import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 
 import {
+  getAsyncOptions,
   getDefaultSearchParams,
   ISearchStrategy,
   toSnakeCase,
@@ -29,10 +30,7 @@ export const eqlSearchStrategyProvider = (
       let promise: TransportRequestPromise<ApiResponse>;
       const eqlClient = context.core.elasticsearch.client.asCurrentUser.eql;
       const uiSettingsClient = await context.core.uiSettings.client;
-      const asyncOptions = {
-        waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-        keepAlive: '1m', // Extend the TTL for this search request by one minute
-      };
+      const asyncOptions = getAsyncOptions();
 
       if (request.id) {
         promise = eqlClient.get({

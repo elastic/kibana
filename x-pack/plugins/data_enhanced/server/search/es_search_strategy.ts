@@ -17,6 +17,7 @@ import {
   getShardTimeout,
   toSnakeCase,
   shimHitsTotal,
+  getAsyncOptions,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import {
@@ -79,11 +80,7 @@ export const enhancedEsSearchStrategyProvider = (
     let promise: TransportRequestPromise<any>;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const uiSettingsClient = await context.core.uiSettings.client;
-
-    const asyncOptions = {
-      waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-      keepAlive: '1m', // Extend the TTL for this search request by one minute
-    };
+    const asyncOptions = getAsyncOptions();
 
     // If we have an ID, then just poll for that ID, otherwise send the entire request body
     if (!request.id) {

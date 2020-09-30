@@ -42,3 +42,8 @@ export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient
     trackTotalHits: true,
   };
 }
+
+export const getAsyncOptions = () => ({
+  waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+  keepAlive: '1m', // Extend the TTL for this search request by one minute
+});
