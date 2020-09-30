@@ -6,7 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
-import { ResolverRelatedEvents } from '../../../../common/endpoint/types';
+import { ResolverPaginatedEvents, ResolverRelatedEvents } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
@@ -29,20 +29,42 @@ export function RelatedEventsFetcher(
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 
-    // If the panel view params have changed and the current panel view is either `nodeEventsOfType` or `eventDetail`, then fetch the related events for that nodeID.
-    if (
-      !isEqual(newParams, oldParams) &&
-      (newParams.panelView === 'nodeEventsOfType' || newParams.panelView === 'eventDetail')
-    ) {
-      const nodeID = newParams.panelParameters.nodeID;
+    // If the panel view params have changed and the current panel view is either `nodeEventsInCategory` or `eventDetail`, then fetch the related events for that nodeID.
+    if (!isEqual(newParams, oldParams)) {
+      if (newParams.panelView === 'nodeEventsInCategory') {
+        const nodeID = newParams.panelParameters.nodeID;
 
-      const result: ResolverRelatedEvents | undefined = await dataAccessLayer.relatedEvents(nodeID);
+        const result:
+          | ResolverPaginatedEvents
+          | undefined = await dataAccessLayer.eventsWithEntityIDAndCategory(
+          nodeID,
+          newParams.panelParameters.eventCategory
+        );
 
-      if (result) {
-        api.dispatch({
-          type: 'serverReturnedRelatedEventData',
-          payload: result,
-        });
+        if (result) {
+          api.dispatch({
+            type: 'serverReturnedNodeEventsInCategory',
+            payload: {
+              events: result.events,
+              eventCategory: newParams.panelParameters.eventCategory,
+              cursor: result.nextEvent,
+              nodeID,
+            },
+          });
+        }
+      } else if (newParams.panelView === 'eventDetail') {
+        const nodeID = newParams.panelParameters.nodeID;
+
+        const result: ResolverRelatedEvents | undefined = await dataAccessLayer.relatedEvents(
+          nodeID
+        );
+
+        if (result) {
+          api.dispatch({
+            type: 'serverReturnedRelatedEventData',
+            payload: result,
+          });
+        }
       }
     }
   };
