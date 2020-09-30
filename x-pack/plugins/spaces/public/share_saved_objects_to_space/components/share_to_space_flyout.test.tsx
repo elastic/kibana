@@ -15,6 +15,7 @@ import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { ToastsApi } from 'src/core/public';
 import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
@@ -64,6 +65,8 @@ const setup = async (opts: SetupOpts = {}) => {
     ]
   );
 
+  mockSpacesManager.getShareSavedObjectPermissions.mockResolvedValue({ shareToAllSpaces: true });
+
   const mockToastNotifications = {
     addError: jest.fn(),
     addSuccess: jest.fn(),
@@ -82,6 +85,8 @@ const setup = async (opts: SetupOpts = {}) => {
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
   } as SavedObjectsManagementRecord;
 
+  const { getStartServices } = coreMock.createSetup();
+
   const wrapper = mountWithIntl(
     <ShareSavedObjectsToSpaceFlyout
       savedObject={savedObjectToShare}
@@ -89,6 +94,7 @@ const setup = async (opts: SetupOpts = {}) => {
       toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
       onClose={onClose}
       onObjectUpdated={onObjectUpdated}
+      getStartServices={getStartServices}
     />
   );
 
@@ -126,9 +132,11 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('shows a message within a NoSpacesAvailable when no spaces are available', async () => {
-    const { wrapper, onClose } = await setup({ mockSpaces: [] });
+    const { wrapper, onClose } = await setup({
+      mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+    });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
     expect(onClose).toHaveBeenCalledTimes(0);
@@ -139,7 +147,7 @@ describe('ShareToSpaceFlyout', () => {
       mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
     expect(onClose).toHaveBeenCalledTimes(0);

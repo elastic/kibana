@@ -6,25 +6,38 @@
 
 import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
-import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { CoreStart } from 'src/core/public';
 import { ShareOptions, SpaceTarget } from '../types';
-import { SelectableSpacesControl } from './selectable_spaces_control';
+import { ShareModeControl } from './share_mode_control';
 
 interface Props {
+  coreStart: CoreStart;
   spaces: SpaceTarget[];
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
   showShareWarning: boolean;
+  canShareToAllSpaces: boolean;
   makeCopy: () => void;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
+  const {
+    coreStart,
+    spaces,
+    onUpdate,
+    shareOptions,
+    showShareWarning,
+    canShareToAllSpaces,
+    makeCopy,
+  } = props;
+
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
-    props.onUpdate({ ...props.shareOptions, selectedSpaceIds });
+    onUpdate({ ...shareOptions, selectedSpaceIds });
 
   const getShareWarning = () => {
-    if (!props.showShareWarning) {
+    if (!showShareWarning) {
       return null;
     }
 
@@ -45,7 +58,7 @@ export const ShareToSpaceForm = (props: Props) => {
             defaultMessage="To edit in only one space, {makeACopyLink} instead."
             values={{
               makeACopyLink: (
-                <EuiLink data-test-subj="sts-copy-link" onClick={() => props.makeCopy()}>
+                <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
                   <FormattedMessage
                     id="xpack.spaces.management.shareToSpace.shareWarningLink"
                     defaultMessage="make a copy"
@@ -65,28 +78,13 @@ export const ShareToSpaceForm = (props: Props) => {
     <div data-test-subj="share-to-space-form">
       {getShareWarning()}
 
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.selectSpacesLabel"
-            defaultMessage="Select spaces"
-          />
-        }
-        labelAppend={
-          <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.selectSpacesLabelAppend"
-            defaultMessage="{selectedCount} selected"
-            values={{ selectedCount: props.shareOptions.selectedSpaceIds.length }}
-          />
-        }
-        fullWidth
-      >
-        <SelectableSpacesControl
-          spaces={props.spaces}
-          selectedSpaceIds={props.shareOptions.selectedSpaceIds}
-          onChange={(selection) => setSelectedSpaceIds(selection)}
-        />
-      </EuiFormRow>
+      <ShareModeControl
+        coreStart={coreStart}
+        spaces={spaces}
+        canShareToAllSpaces={canShareToAllSpaces}
+        selectedSpaceIds={shareOptions.selectedSpaceIds}
+        onChange={(selection) => setSelectedSpaceIds(selection)}
+      />
     </div>
   );
 };

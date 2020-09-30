@@ -13,7 +13,7 @@ import { ALL_SPACES_STRING } from '../../../lib/utils/namespace';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getStartServices } = deps;
+  const { externalRouter, getStartServices, spacesService } = deps;
 
   const shareSchema = schema.object({
     spaces: schema.arrayOf(
@@ -36,6 +36,25 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
     ),
     object: schema.object({ type: schema.string(), id: schema.string() }),
   });
+
+  externalRouter.get(
+    {
+      path: '/api/spaces/_share_saved_object_permissions',
+      validate: { query: schema.object({ type: schema.string() }) },
+    },
+    createLicensedRouteHandler(async (_context, request, response) => {
+      const spacesClient = await spacesService.scopedClient(request);
+
+      const { type } = request.query;
+
+      try {
+        const shareToAllSpaces = await spacesClient.hasGlobalAllPrivilegesForObjectType(type);
+        return response.ok({ body: { shareToAllSpaces } });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    })
+  );
 
   externalRouter.post(
     { path: '/api/spaces/_share_saved_object_add', validate: { body: shareSchema } },

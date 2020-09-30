@@ -5,28 +5,40 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart } from 'src/core/public';
 
-export const NoSpacesAvailable = () => {
+interface Props {
+  application: ApplicationStart;
+}
+
+export const NoSpacesAvailable = (props: Props) => {
+  const { capabilities, getUrlForApp } = props.application;
+  const canCreateNewSpaces = capabilities.spaces?.manage;
+  if (!canCreateNewSpaces) {
+    return null;
+  }
+
   return (
-    <EuiEmptyPrompt
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.noSpacesBody"
-            defaultMessage="There are no eligible spaces to share into."
-          />
-        </p>
-      }
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.noSpacesTitle"
-            defaultMessage="No spaces available"
-          />
-        </h3>
-      }
-    />
+    <EuiText size="s">
+      <FormattedMessage
+        id="xpack.spaces.management.shareToSpace.noAvailableSpaces.canCreateNewSpace.text"
+        defaultMessage="You can {createANewSpaceLink} for sharing your objects."
+        values={{
+          createANewSpaceLink: (
+            <EuiLink
+              data-test-subj="sts-new-space-link"
+              href={getUrlForApp('management', { path: 'kibana/spaces/create' })}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.shareToSpace.noAvailableSpaces.canCreateNewSpace.linkText"
+                defaultMessage="create a new space"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
   );
 };
