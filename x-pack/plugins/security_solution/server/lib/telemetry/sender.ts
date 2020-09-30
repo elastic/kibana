@@ -46,7 +46,7 @@ export interface TelemetryEvent {
 
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
-  private readonly checkIntervalMs = 5 * 1000; // TODO: change to 60s before merging
+  private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
   private core?: CoreStart;
   private maxQueueSize = 100;
@@ -110,7 +110,6 @@ export class TelemetryEventsSender {
   }
 
   private async sendIfDue() {
-    // this.logger.debug(`Send if due`);
     if (this.isSending) {
       return;
     }
@@ -132,26 +131,26 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const telemetryUrl = await this.fetchTelemetryUrl();
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+        this.fetchTelemetryUrl(),
+        this.fetchClusterInfo(),
+        this.fetchLicenseInfo(),
+      ]);
 
-      const clusterInfo = await this.fetchClusterInfo();
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
       this.logger.debug(
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
-      const licenseInfo = await this.fetchLicenseInfo();
-
-      const toSend: TelemetryEvent[] = cloneDeep(this.queue);
+      const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
+        ...event,
+        ...(licenseInfo ? { license: this.copyLicenseFields(licenseInfo) } : {}),
+        cluster_uuid: clusterInfo.cluster_uuid,
+        cluster_name: clusterInfo.cluster_name,
+      }));
       this.queue = [];
 
-      toSend.forEach((event) => {
-        event.cluster_uuid = clusterInfo.cluster_uuid;
-        event.cluster_name = clusterInfo.cluster_name;
-        this.copyLicenseFields(event, licenseInfo);
-      });
-
-      await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid);
+      await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid, licenseInfo?.uid);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       // throw err;
@@ -173,7 +172,7 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-endpoint'); // TODO: update
+    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-endpoint');
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -190,33 +189,32 @@ export class TelemetryEventsSender {
     }
   }
 
-  private copyLicenseFields(event: TelemetryEvent, lic: ESLicense | undefined) {
-    if (lic) {
-      event.license = {
-        uid: lic.uid,
-        status: lic.status,
-        type: lic.type,
-      };
-      if (lic.issued_to) {
-        event.license.issued_to = lic.issued_to;
-      }
-      if (lic.issuer) {
-        event.license.issuer = lic.issuer;
-      }
-    }
+  private copyLicenseFields(lic: ESLicense) {
+    return {
+      uid: lic.uid,
+      status: lic.status,
+      type: lic.type,
+      ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
+      ...(lic.issuer ? { issuer: lic.issuer } : {}),
+    };
   }
 
-  private async sendEvents(events: unknown[], telemetryUrl: string, clusterUuid: string) {
+  private async sendEvents(
+    events: unknown[],
+    telemetryUrl: string,
+    clusterUuid: string,
+    licenseId: string | undefined
+  ) {
     this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
     const ndjson = transformDataToNdjson(events);
     // this.logger.debug(`NDJSON: ${ndjson}`);
 
     try {
-      const resp = await axios.post(`${telemetryUrl}?debug=true`, ndjson, {
-        // TODO: remove the debug
+      const resp = await axios.post(`${telemetryUrl}`, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
+          ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
           'X-Elastic-Telemetry': '1', // TODO: no longer needed?
         },
       });
@@ -283,23 +281,21 @@ export function copyAllowlistedFields(
   allowlist: AllowlistFields,
   event: TelemetryEvent
 ): TelemetryEvent {
-  const newEvent: TelemetryEvent = {};
-  for (const key in allowlist) {
-    if (key in event) {
-      if (allowlist[key] === true) {
-        newEvent[key] = cloneDeep(event[key]);
-      } else if (typeof allowlist[key] === 'object' && typeof event[key] === 'object') {
-        const values = copyAllowlistedFields(
-          allowlist[key] as AllowlistFields,
-          event[key] as TelemetryEvent
-        );
-        if (Object.keys(values).length > 0) {
-          newEvent[key] = values;
-        }
+  return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
+    const eventValue = event[allowKey];
+    if (eventValue) {
+      if (allowValue === true) {
+        return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
+        const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
+        return {
+          ...newEvent,
+          ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
+        };
       }
     }
-  }
-  return newEvent;
+    return newEvent;
+  }, {});
 }
 
 // Forms URLs like:
@@ -307,7 +303,7 @@ export function copyAllowlistedFields(
 // https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
 export function getV3UrlFromV2(v2url: string, channel: string): string {
   const url = new URL(v2url);
-  if (url.hostname.search('staging') < 0) {
+  if (!url.hostname.includes('staging')) {
     url.pathname = `/v3/send/${channel}`;
   } else {
     url.pathname = `/v3-dev/send/${channel}`;
