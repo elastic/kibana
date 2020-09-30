@@ -503,6 +503,30 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
+    test('should show default allocation notice when hot tier exists, but not warm tier', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
+    });
+    test('should not show default allocation notice when node with "data" role exists', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+    });
   });
   describe('cold phase', () => {
     beforeEach(() => {
@@ -609,6 +633,30 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
+    });
+    test('should show default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
+    });
+    test('should not show default allocation notice when node with "data" role exists', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
     });
   });
   describe('delete phase', () => {
