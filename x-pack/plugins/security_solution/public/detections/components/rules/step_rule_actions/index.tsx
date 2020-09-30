@@ -34,7 +34,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
-import { useUserInfo } from '../../user_info';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -125,14 +124,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [getData, setForm]);
 
-  const { canReadActions } = useUserInfo();
-
   const throttleOptions = useMemo(() => {
-    if (canReadActions) {
+    if (application.capabilities.actions.show) {
       return getThrottleOptions(throttle);
     }
     return [{ value: DEFAULT_THROTTLE_OPTION.value, text: I18n.NO_ACTIONS_READ_PERMISSIONS }];
-  }, [throttle, canReadActions]);
+  }, [throttle, application.capabilities.actions.show]);
 
   const throttleFieldComponentProps = useMemo(
     () => ({

@@ -20,7 +20,6 @@ export interface State {
   hasEncryptionKey: boolean | null;
   loading: boolean;
   signalIndexName: string | null;
-  canReadActions: boolean | null;
 }
 
 const initialState: State = {
@@ -32,7 +31,6 @@ const initialState: State = {
   hasEncryptionKey: null,
   loading: true,
   signalIndexName: null,
-  canReadActions: null,
 };
 
 export type Action =
@@ -155,7 +153,6 @@ export const useUserInfo = (): State => {
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexWrite: hasApiIndexWrite,
-    canReadActions,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
@@ -242,6 +239,5 @@ export const useUserInfo = (): State => {
     hasIndexManage,
     hasIndexWrite,
     signalIndexName,
-    canReadActions,
   };
 };

@@ -18,6 +18,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
           siem: {
             crud: true,
           },
+          actions: {
+            read: true,
+          },
         },
       },
       triggers_actions_ui: {

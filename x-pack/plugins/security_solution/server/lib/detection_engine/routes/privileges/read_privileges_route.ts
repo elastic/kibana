@@ -40,12 +40,6 @@ export const readPrivilegesRoute = (
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: security?.authc.isAuthenticated(request) ?? false,
-          can_read_actions:
-            (
-              await security?.authz?.checkPrivilegesDynamicallyWithRequest(request)({
-                kibana: [security?.authz?.actions.ui.get('actions', 'show')],
-              })
-            )?.hasAllRequested ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
 
