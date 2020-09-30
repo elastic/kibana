@@ -11,6 +11,7 @@ import {
   HostPolicyResponse,
   AppLocation,
   PolicyData,
+  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
@@ -65,6 +66,16 @@ export interface EndpointState {
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
+  /** The total Agents that contain an Endpoint package */
+  agentsWithEndpointsTotal: number;
+  /** api error for total Agents that contain an Endpoint package */
+  agentsWithEndpointsTotalError?: ServerApiError;
+  /** The total, actual number of Endpoints regardless of any filtering */
+  endpointsTotal: number;
+  /** api error for total, actual Endpoints */
+  endpointsTotalError?: ServerApiError;
+  /** The query strategy version that informs whether the transform for KQL is enabled or not */
+  queryStrategyVersion?: MetadataQueryStrategyVersions;
 }
 
 /**

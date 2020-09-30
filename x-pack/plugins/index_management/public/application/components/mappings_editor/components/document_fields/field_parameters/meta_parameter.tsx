@@ -32,6 +32,7 @@ export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) 
       }),
       href: documentationService.getMetaLink(),
     }}
+    data-test-subj="metaParameter"
   >
     <UseField
       path="meta"
@@ -39,6 +40,7 @@ export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) 
       component={JsonEditorField}
       componentProps={{
         euiCodeEditorProps: {
+          ['data-test-subj']: 'metaParameterEditor',
           height: '300px',
           'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterAriaLabel', {
             defaultMessage: 'metadata field data editor',

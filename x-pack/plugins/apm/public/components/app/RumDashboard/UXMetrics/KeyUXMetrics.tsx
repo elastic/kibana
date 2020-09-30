@@ -14,8 +14,8 @@ import {
   SUM_LONG_TASKS,
   TBT_LABEL,
 } from '../CoreVitals/translations';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUxQuery } from '../hooks/useUxQuery';
 
 export function formatToSec(
   value?: number | string,
@@ -36,23 +36,23 @@ interface Props {
 }
 
 export function KeyUXMetrics({ data, loading }: Props) {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, serviceName } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data: longTaskData, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum-client/long-task-metrics',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              ...uxQuery,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [uxQuery]
   );
 
   // Note: FCP value is in ms unit

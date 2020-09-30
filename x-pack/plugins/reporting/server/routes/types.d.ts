@@ -18,11 +18,11 @@ export type HandlerFunction = (
 
 export type HandlerErrorFunction = (res: KibanaResponseFactory, err: Error) => any;
 
-export interface QueuedJobPayload<JobParamsType> {
+export interface QueuedJobPayload {
   error?: boolean;
   source: {
     job: {
-      payload: BasePayload<JobParamsType>;
+      payload: BasePayload;
     };
   };
 }

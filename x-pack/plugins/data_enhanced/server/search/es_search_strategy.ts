@@ -19,7 +19,11 @@ import {
   shimHitsTotal,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
-import { ISearchOptions, IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
+import {
+  ISearchOptions,
+  IEsSearchResponse,
+  isCompleteResponse,
+} from '../../../../../src/plugins/data/common/search';
 
 function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
   return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');
@@ -48,8 +52,7 @@ export const enhancedEsSearchStrategyProvider = (
         usage &&
         isAsync &&
         isEnhancedEsSearchResponse(response) &&
-        !response.isRunning &&
-        !response.isPartial
+        isCompleteResponse(response)
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }

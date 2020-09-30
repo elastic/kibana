@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import '../../__mocks__/kea.mock';
+import '../../__mocks__/shallow_useeffect.mock';
+import { mockHttpValues } from '../../__mocks__';
 
-import { httpServiceMock } from 'src/core/public/mocks';
+import React from 'react';
+import { shallow } from 'enzyme';
+
 import { JSON_HEADER as headers } from '../../../../common/constants';
-import { mountWithKibanaContext } from '../../__mocks__';
 
 import {
   sendTelemetry,
@@ -18,8 +21,6 @@ import {
 } from './';
 
 describe('Shared Telemetry Helpers', () => {
-  const httpMock = httpServiceMock.createSetupContract();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -27,13 +28,13 @@ describe('Shared Telemetry Helpers', () => {
   describe('sendTelemetry', () => {
     it('successfully calls the server-side telemetry endpoint', () => {
       sendTelemetry({
-        http: httpMock,
+        http: mockHttpValues.http,
         product: 'enterprise_search',
         action: 'viewed',
         metric: 'setup_guide',
       });
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(mockHttpValues.http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"setup_guide"}',
       });
@@ -50,33 +51,27 @@ describe('Shared Telemetry Helpers', () => {
 
   describe('React component helpers', () => {
     it('SendEnterpriseSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendEnterpriseSearchTelemetry action="viewed" metric="page" />, {
-        http: httpMock,
-      });
+      shallow(<SendEnterpriseSearchTelemetry action="viewed" metric="page" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(mockHttpValues.http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"page"}',
       });
     });
 
     it('SendAppSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendAppSearchTelemetry action="clicked" metric="button" />, {
-        http: httpMock,
-      });
+      shallow(<SendAppSearchTelemetry action="clicked" metric="button" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(mockHttpValues.http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"app_search","action":"clicked","metric":"button"}',
       });
     });
 
     it('SendWorkplaceSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />, {
-        http: httpMock,
-      });
+      shallow(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+      expect(mockHttpValues.http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"workplace_search","action":"error","metric":"not_found"}',
       });

@@ -11,6 +11,8 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
+  EuiIcon,
+  EuiHeaderSectionItemButton,
   EuiSelectableMessage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -107,7 +109,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         complete: () => {},
       });
     },
-    250,
+    350,
     [searchValue]
   );
 
@@ -138,6 +140,17 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     <EuiSelectableTemplateSitewide
       onChange={onChange}
       options={options}
+      popoverButtonBreakpoints={['xs', 's']}
+      popoverButton={
+        <EuiHeaderSectionItemButton
+          aria-label={i18n.translate(
+            'xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel',
+            { defaultMessage: 'Site-wide search' }
+          )}
+        >
+          <EuiIcon type="search" size="m" />
+        </EuiHeaderSectionItemButton>
+      }
       searchProps={{
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
@@ -147,6 +160,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
+      }}
+      popoverProps={{
+        repositionOnScroll: true,
       }}
       emptyMessage={
         <EuiSelectableMessage style={{ minHeight: 300 }}>
