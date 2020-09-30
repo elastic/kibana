@@ -132,6 +132,24 @@ export const I18LABELS = {
       defaultMessage: 'Impacted page loads',
     }
   ),
+  percentile: i18n.translate('xpack.apm.ux.percentile.label', {
+    defaultMessage: 'Percentile',
+  }),
+  percentile50thMedian: i18n.translate('xpack.apm.ux.percentile.50thMedian', {
+    defaultMessage: '50th (Median)',
+  }),
+  percentile75th: i18n.translate('xpack.apm.ux.percentile.75th', {
+    defaultMessage: '75th',
+  }),
+  percentile90th: i18n.translate('xpack.apm.ux.percentile.90th', {
+    defaultMessage: '90th',
+  }),
+  percentile95th: i18n.translate('xpack.apm.ux.percentile.95th', {
+    defaultMessage: '95th',
+  }),
+  percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
+    defaultMessage: '99th',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

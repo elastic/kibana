@@ -9,8 +9,8 @@ import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { I18LABELS } from '../translations';
+import { useUxQuery } from '../hooks/useUxQuery';
 import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
@@ -22,29 +22,23 @@ const ClFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function ClientMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   const { setSharedData } = useContext(CsmSharedContext);
