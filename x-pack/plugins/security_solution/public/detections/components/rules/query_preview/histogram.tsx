@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -70,7 +70,7 @@ export const PreviewQueryHistogram = ({
   const [noiseWarningThreshold, setNoiseWarningThreshold] = useState(1);
   const [timeframe, setTimeframe] = useState('h');
   const { setQuery, isInitializing } = useGlobalTime();
-
+  const ruleTypeRef = useRef<Type>('query');
   const queryBarQuery = useMemo((): string | null => {
     if (query == null || (query != null && query.query.query.trim() === '')) {
       return null;
@@ -100,7 +100,14 @@ export const PreviewQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing]);
 
-  const options = useMemo((): EuiSelectOption[] => getTimeframeOptions(ruleType), [ruleType]);
+  useEffect((): void => {
+    ruleTypeRef.current = ruleType;
+    setShowHistogram(false);
+  }, [ruleType]);
+
+  const options = useMemo((): EuiSelectOption[] => getTimeframeOptions(ruleTypeRef.current), [
+    ruleTypeRef,
+  ]);
 
   return (
     <>
@@ -170,7 +177,7 @@ export const PreviewQueryHistogram = ({
         </EuiFlexGroup>
       )}
       <EuiSpacer />
-      {totalHits > noiseWarningThreshold && (
+      {showHistogram && totalHits > noiseWarningThreshold && (
         <EuiCallOut color="warning" iconType="help">
           <EuiText>
             <p>{i18n.QUERY_PREVIEW_NOISE_WARNING}</p>

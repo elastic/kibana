@@ -49,7 +49,7 @@ interface AggsParams extends EqlValidationRequest {
 
 export interface EqlAggsResponse {
   data: ChartData[];
-  total: number;
+  totalCount: number;
   lte: string;
   gte: string;
   inspect: InspectResponse;

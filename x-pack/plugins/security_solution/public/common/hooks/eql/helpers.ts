@@ -70,7 +70,7 @@ export const getEqlAggsData = (
         const hits = res.value.rawResponse.body.hits.total.value;
         return {
           ...acc,
-          total: acc.total + hits,
+          totalCount: acc.totalCount + hits,
           data: [
             ...acc.data,
             { x: Number(moment(ranges[index].lte).format('x')), y: hits, g: 'hits' },
@@ -88,7 +88,7 @@ export const getEqlAggsData = (
     },
     {
       data: [],
-      total: 0,
+      totalCount: 0,
       lte: from,
       gte: to,
       inspect: {
