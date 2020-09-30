@@ -248,12 +248,11 @@ export class DataRecognizer {
 
     const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
       size,
       body: searchBody,
     });
 
-    return body.hits.total !== 0;
+    return body.hits.total.value > 0;
   }
 
   async listModules() {

@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
-import { ISearchOptions, IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import {
+  ISearchOptions,
+  ISearchStartSearchSource,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
@@ -69,6 +74,9 @@ export interface ISearchStart<
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;
+  searchSource: {
+    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+  };
 }
 
 /**
