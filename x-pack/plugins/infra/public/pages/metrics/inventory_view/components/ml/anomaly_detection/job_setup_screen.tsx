@@ -223,7 +223,7 @@ export const JobSetupScreen = (props: Props) => {
                   label={
                     <FormattedMessage
                       id="xpack.infra.ml.steps.setupProcess.partition.label"
-                      defaultMessage="Partition filed"
+                      defaultMessage="Partition field"
                     />
                   }
                   compressed
