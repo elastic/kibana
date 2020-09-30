@@ -19,59 +19,76 @@
 
 var resolve = require('path').resolve;
 
-// this must happen before `require('@babel/register')` and can't be changed
-// once the module has been loaded
-if (!process.env.BABEL_CACHE_PATH) {
-  process.env.BABEL_CACHE_PATH = resolve(
-    __dirname,
-    '../../../data/optimize/.babel_register_cache.json'
-  );
-}
+module.exports = function (options) {
+  options = options || {};
 
-// paths that @babel/register should ignore
-var ignore = [
-  /[\/\\]bower_components[\/\\]/,
-  /[\/\\]kbn-pm[\/\\]dist[\/\\]/,
+  // this must happen before `require('@babel/register')` and can't be changed
+  // once the module has been loaded
+  if (!process.env.BABEL_CACHE_PATH) {
+    process.env.BABEL_CACHE_PATH = resolve(
+      __dirname,
+      '../../../data/optimize/.babel_register_cache.json'
+    );
+  }
 
-  // TODO: remove this and just transpile plugins at build time, but
-  // has tricky edge cases that will probably require better eslint
-  // restrictions to make sure that code destined for the server/browser
-  // follows respects the limitations of each environment.
-  //
-  // https://github.com/elastic/kibana/issues/14800#issuecomment-366130268
+  // paths that @babel/register should ignore
+  var ignore = [
+    /[\/\\]bower_components[\/\\]/,
+    /[\/\\]kbn-pm[\/\\]dist[\/\\]/,
 
-  // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
-  // is `x-pack` and `b` is not `node_modules`
-  /[\/\\]node_modules[\/\\](?!x-pack[\/\\](?!node_modules)([^\/\\]+))([^\/\\]+[\/\\][^\/\\]+)/,
+    // TODO: remove this and just transpile plugins at build time, but
+    // has tricky edge cases that will probably require better eslint
+    // restrictions to make sure that code destined for the server/browser
+    // follows respects the limitations of each environment.
+    //
+    // https://github.com/elastic/kibana/issues/14800#issuecomment-366130268
 
-  // ignore paths matching `/canvas/canvas_plugin/`
-  /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
-];
+    // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
+    // is `x-pack` and `b` is not `node_modules`
+    /[\/\\]node_modules[\/\\](?!x-pack[\/\\](?!node_modules)([^\/\\]+))([^\/\\]+[\/\\][^\/\\]+)/,
 
-if (global.__BUILT_WITH_BABEL__) {
-  // when building the Kibana source we replace the statement
-  // `global.__BUILT_WITH_BABEL__` with the value `true` so that
-  // when @babel/register is required for the first time by users
-  // it will exclude kibana's `src` directory.
-  //
-  // We still need @babel/register for plugins though, we've been
-  // building their server code at require-time since version 4.2
-  // TODO: the plugin install process could transpile plugin server code...
-  ignore.push(resolve(__dirname, '../../../src'));
-} else {
-  ignore.push(
-    // ignore any path in the packages, unless it is in the package's
-    // root `src` directory, in any test or __tests__ directory, or it
-    // ends with .test.js, .test.ts, or .test.tsx
-    /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/
-  );
-}
+    // ignore paths matching `/canvas/canvas_plugin/`
+    /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
+  ];
 
-// modifies all future calls to require() to automatically
-// compile the required source with babel
-require('@babel/register')({
-  ignore,
-  babelrc: false,
-  presets: [require.resolve('@kbn/babel-preset/node_preset')],
-  extensions: ['.js', '.ts', '.tsx'],
-});
+  if (global.__BUILT_WITH_BABEL__) {
+    // when building the Kibana source we replace the statement
+    // `global.__BUILT_WITH_BABEL__` with the value `true` so that
+    // when @babel/register is required for the first time by users
+    // it will exclude kibana's `src` directory.
+    //
+    // We still need @babel/register for plugins though, we've been
+    // building their server code at require-time since version 4.2
+    // TODO: the plugin install process could transpile plugin server code...
+    ignore.push(resolve(__dirname, '../../../src'));
+  } else {
+    ignore.push(
+      // ignore any path in the packages, unless it is in the package's
+      // root `src` directory, in any test or __tests__ directory, or it
+      // ends with .test.js, .test.ts, or .test.tsx
+      /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/
+    );
+  }
+
+  // prevent @babel/register from loading cache on require by setting env var
+  var clearBabelCacheEnvVar = false;
+  if (options.cache === false) {
+    clearBabelCacheEnvVar = true;
+    process.env.BABEL_DISABLE_CACHE = 'true';
+  }
+
+  // modifies all future calls to require() to automatically
+  // compile the required source with babel
+  require('@babel/register')({
+    ignore,
+    cache: options.cache !== false,
+    babelrc: false,
+    presets: [require.resolve('@kbn/babel-preset/node_preset')],
+    extensions: ['.js', '.ts', '.tsx'],
+  });
+
+  // clear the disable cache env var if we set it to prevent cache loading
+  if (clearBabelCacheEnvVar) {
+    delete process.env.BABEL_DISABLE_CACHE;
+  }
+};

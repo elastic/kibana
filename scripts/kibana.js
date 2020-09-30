@@ -18,5 +18,8 @@
  */
 
 require('../src/apm')(process.env.ELASTIC_APM_PROXY_SERVICE_NAME || 'kibana-proxy');
-require('../src/setup_node_env');
+require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('../src/setup_node_env/babel_register')({
+  cache: false,
+});
 require('../src/cli/cli');

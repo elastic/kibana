@@ -20,5 +20,7 @@
 // register and polyfill need to happen in this
 // order and in separate files. Checkout each file
 // for a much more detailed explanation
-require('./register');
-require('./polyfill');
+module.exports = function (options) {
+  require('./register')(options);
+  require('./polyfill');
+};
