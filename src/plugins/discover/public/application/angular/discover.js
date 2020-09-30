@@ -70,6 +70,7 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
+import { popularizeField } from '../helpers/popularize_field';
 
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -952,7 +953,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
-    $scope.indexPattern.popularizeField(field, 1);
+    const { indexPattern } = $scope;
+
+    popularizeField(indexPattern, field.name, indexPatterns);
     const newFilters = esFilters.generateFilters(
       filterManager,
       field,
@@ -965,7 +968,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.addColumn = function addColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
@@ -973,7 +977,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.removeColumn = function removeColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
