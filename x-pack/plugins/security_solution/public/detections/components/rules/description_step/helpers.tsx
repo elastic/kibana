@@ -420,7 +420,6 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
   },
 ];
 
-// TODO: This should be updated with better UI effects from UI/UX than just text.
 export const buildThreatMappingDescription = (
   title: string,
   threatMapping: ThreatMapping
