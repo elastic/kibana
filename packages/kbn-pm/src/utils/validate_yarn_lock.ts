@@ -96,6 +96,7 @@ export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
     process.exit(1);
   }
 
+  // TODO: remove this once we move into a single package.json
   // look through all the package.json files to find packages which have mismatched version ranges
   const depRanges = new Map<string, Array<{ range: string; projects: Project[] }>>();
   for (const project of kbn.getAllProjects().values()) {
