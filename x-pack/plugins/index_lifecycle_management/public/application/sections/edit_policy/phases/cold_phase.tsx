@@ -192,8 +192,7 @@ export const ColdPhase: FunctionComponent<Props> = ({
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
-                    You can search a frozen index, but expect queries to be slower."
+                    defaultMessage="Make the index read-only and minimize its memory footprint."
                   />{' '}
                   <LearnMoreLink docPath="frozen-indices.html" />
                 </EuiTextColor>

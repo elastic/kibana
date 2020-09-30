@@ -33,7 +33,8 @@ const i18nTexts = {
       ),
       body: (nodeRole: NodeDataRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.warm', {
-          defaultMessage: 'Data in the warm phase will be allocated to {tier} tier nodes instead.',
+          defaultMessage:
+            'This policy will move data in the warm phase to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
     },
@@ -44,7 +45,8 @@ const i18nTexts = {
       ),
       body: (nodeRole: NodeDataRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.cold', {
-          defaultMessage: 'Data in the cold phase will be allocated to {tier} tier nodes instead.',
+          defaultMessage:
+            'This policy will move data in the cold phase to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
     },
