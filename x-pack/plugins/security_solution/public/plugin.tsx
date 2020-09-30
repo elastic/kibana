@@ -51,8 +51,7 @@ import {
 /** This pulls in about 7 KiB. Can we register a promise instead of the actual component? */
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
-/** This pulls in a ton. Definitely import this async. */
-import { State, createStore, createInitialState } from './common/store';
+import { State } from './common/store';
 import { RenderAppProps, SecurityPageName } from './app/types';
 /** 6 KiB */
 import { manageOldSiemRoutes } from './helpers';
@@ -374,10 +373,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
     renderApp: (props: RenderAppProps) => () => void;
   }> {
-    const [{ renderApp }, { composeLibs }] = await Promise.all([
-      import(/* webpackChunkName: "app" */ './app'),
-      import(/* webpackChunkName: "kibana_compose" */ './common/lib/compose/kibana_compose'),
-    ]);
+    const { renderApp, composeLibs } = await import(
+      /* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'
+    );
 
     return {
       renderApp,
@@ -394,7 +392,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overviewSubPlugin,
       timelinesSubPlugin,
       managementSubPlugin,
-    } = await import(/* webpackChunkName: "sub_plugins" */ './sub_plugins');
+    } = await import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies');
 
     return {
       detectionsSubPlugin,
@@ -420,6 +418,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         managementSubPlugin,
       },
       configIndexPatterns,
+      { createStore, createInitialState },
     ] = await Promise.all([
       this.downloadAssets(),
       startPlugins.data.indexPatterns.getIdsWithTitle(),
@@ -432,6 +431,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }
         )
         .toPromise(),
+      import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'),
     ]);
 
     const { apolloClient } = composeLibs(coreStart);
