@@ -342,7 +342,10 @@ export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, 
   if (actions && actions.length > 0) {
     actions.forEach((actionSet) => {
       const { actionGroup, context } = actionSet;
-      alertInstance.scheduleActions(actionGroup, context);
+      const sharedContext = {
+        timestamp: new Date().toISOString(),
+      };
+      alertInstance.scheduleActions(actionGroup, { ...sharedContext, ...context });
     });
   }
 
