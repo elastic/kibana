@@ -121,8 +121,17 @@ export const createFieldItem = (
   indexesAliasIdx: number
 ): IndexField => {
   const alias = indexesAlias[indexesAliasIdx];
+  const splitIndexName = index.name.split('.');
+  const indexName =
+    splitIndexName[splitIndexName.length - 1] === 'text'
+      ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
+      : index.name;
+  const beatIndex = fieldsBeat[indexName] ?? {};
+  if (isEmpty(beatIndex.category)) {
+    beatIndex.category = splitIndexName[0];
+  }
   return {
-    ...(fieldsBeat[index.name] ?? {}),
+    ...beatIndex,
     ...index,
     indexes: [alias],
   };
