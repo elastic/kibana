@@ -273,8 +273,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const coreStart = this.coreStart!;
-        return new CoreRouteHandlerContext(coreStart, req);
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
