@@ -23,6 +23,7 @@ const idFilterList = [
 export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
+  const [showValidationWarning, setShowValidationWarning] = useState(false);
 
   if (jobCreator.type === JOB_TYPE.ADVANCED) {
     // for advanced jobs, ignore time range warning as the
@@ -58,6 +59,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   function setIsValid(valid: boolean) {
     jobValidator.advancedValid = valid;
     setNextActive(jobCreator.type === JOB_TYPE.ADVANCED || valid);
+    setShowValidationWarning(jobCreator.type === JOB_TYPE.ADVANCED && valid === false);
   }
 
   return (
@@ -72,7 +74,9 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             setIsValid={setIsValid}
             idFilterList={idFilterList}
           />
-          {jobCreator.type === JOB_TYPE.ADVANCED && <ValidationWarningCallout />}
+
+          {showValidationWarning && <ValidationWarningCallout />}
+
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
