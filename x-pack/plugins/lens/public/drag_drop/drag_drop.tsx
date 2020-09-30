@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './drag_drop.scss';
+
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext } from './providers';
@@ -37,6 +39,11 @@ interface BaseProps {
    * "dragging" in the root drag/drop context.
    */
   value?: unknown;
+
+  /**
+   * Optional comparison function to check whether a value is the dragged one
+   */
+  isValueEqual?: (value1: unknown, value2: unknown) => boolean;
 
   /**
    * The React element which will be passed the draggable handlers
@@ -108,12 +115,14 @@ type Props = DraggableProps | NonDraggableProps;
 
 export const DragDrop = (props: Props) => {
   const { dragging, setDragging } = useContext(DragContext);
-  const { value, draggable, droppable } = props;
+  const { value, draggable, droppable, isValueEqual } = props;
   return (
     <DragDropInner
       {...props}
       dragging={droppable ? dragging : undefined}
-      isDragging={!!(draggable && value === dragging)}
+      isDragging={
+        !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
+      }
       isNotDroppable={
         // If the configuration has provided a droppable flag, but this particular item is not
         // droppable, then it should be less prominent. Ignores items that are both

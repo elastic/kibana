@@ -35,7 +35,6 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { getSearchProvider } from './search_provider';
 
-import './index.scss';
 import { getLensAttributeService, LensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {

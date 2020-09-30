@@ -1,3 +1,6 @@
+@import '../variables';
+@import '../mixins';
+
 .lnsDragDrop {
   transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
 }

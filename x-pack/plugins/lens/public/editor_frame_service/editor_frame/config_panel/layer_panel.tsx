@@ -32,6 +32,19 @@ const initialDimensionContainerState = {
   addingToGroupId: null,
 };
 
+// { columnId: accessor, groupId: group.groupId, layerId }
+function isSameConfiguration(config1: unknown, config2: unknown) {
+  return (
+    config1 &&
+    config2 &&
+    typeof config1 === 'object' &&
+    typeof config2 === 'object' &&
+    config1.columnId === config2.columnId &&
+    config1.groupId === config2.groupId &&
+    config1.layerId === config2.layerId
+  );
+}
+
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
@@ -217,6 +230,7 @@ export function LayerPanel(
                       data-test-subj={group.dataTestSubj}
                       draggable={!dimensionContainerState.isOpen}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
+                      isValueEqual={isSameConfiguration}
                       label={group.groupLabel}
                       droppable={
                         Boolean(dragDropContext.dragging) &&
