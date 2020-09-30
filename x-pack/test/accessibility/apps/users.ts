@@ -27,7 +27,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for search user input box', async () => {
+    it('a11y test for search user bar', async () => {
+      await testSubjects.click('searchUsers');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for searching a user', async () => {
+      await testSubjects.setValue('searchUsers', 'test');
+      await a11y.testAppSnapshot();
+      await testSubjects.setValue('searchUsers', '');
+    });
+
+    it('a11y test for toggle button for show reserved users only', async () => {
+      await retry.waitFor(
+        'show reserved users toggle button is visible',
+        async () => await testSubjects.exists('showReservedUsersSwitch')
+      );
+      await testSubjects.click('showReservedUsersSwitch');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('showReservedUsersSwitch');
+    });
+
+    it('a11y test for toggle button for show reserved users only', async () => {
+      await retry.waitFor(
+        'show reserved users toggle button is visible',
+        async () => await testSubjects.exists('showReservedUsersSwitch')
+      );
+      await testSubjects.click('showReservedUsersSwitch');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('showReservedUsersSwitch');
+    });
+
+    it('a11y test for create user panel', async () => {
+      await testSubjects.click('createUserButton');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for roles drop down', async () => {
       await a11y.testAppSnapshot();
     });
   });
