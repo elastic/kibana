@@ -34,7 +34,7 @@ import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
   useKibana,
-  OverviewFooter,
+  PageFooter,
   OverviewHeader,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
@@ -253,7 +253,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <OverviewFooter path={PLUGIN_PATH} />
+        <PageFooter path={PLUGIN_PATH} />
       </div>
     </main>
   );
