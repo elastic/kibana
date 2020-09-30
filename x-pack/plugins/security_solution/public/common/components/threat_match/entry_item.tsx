@@ -100,7 +100,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
       if (isFirst) {
         return (
-          <EuiFormRow label={i18n.FIELD} data-test-subj="threatFieldInputFormRow">
+          <EuiFormRow label={i18n.THREAT_FIELD} data-test-subj="threatFieldInputFormRow">
             {comboBox}
           </EuiFormRow>
         );

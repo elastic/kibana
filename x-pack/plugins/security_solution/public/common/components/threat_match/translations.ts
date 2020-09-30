@@ -10,6 +10,13 @@ export const FIELD = i18n.translate('xpack.securitySolution.threatMatch.fieldDes
   defaultMessage: 'Field',
 });
 
+export const THREAT_FIELD = i18n.translate(
+  'xpack.securitySolution.threatMatch.threatFieldDescription',
+  {
+    defaultMessage: 'Threat index field',
+  }
+);
+
 export const FIELD_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.threatMatch.fieldPlaceholderDescription',
   {
