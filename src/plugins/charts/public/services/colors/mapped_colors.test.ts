@@ -18,7 +18,9 @@
  */
 
 import _ from 'lodash';
-import { rgb } from 'color';
+import Color from 'color';
+
+import d3 from 'd3';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
@@ -61,7 +63,7 @@ describe('Mapped Colors', () => {
     mappedColors.mapKeys(arr);
 
     const colorValues = _(mappedColors.mapping).values();
-    expect(colorValues.includes(seedColors[0])).toBe(false);
+    expect(colorValues).not.toContain(seedColors[0]);
     expect(colorValues.uniq().size()).toBe(arr.length);
   });
 
@@ -78,8 +80,8 @@ describe('Mapped Colors', () => {
   });
 
   it('should treat different formats of colors as equal', () => {
-    const color = rgb(seedColors[0]);
-    const rgbColorString = `rgbColorString(${color.red}, ${color.green}, ${color.blue})`;
+    const color = new Color(seedColors[0]);
+    const rgbColorString = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
     const newConfig = { bar: rgbColorString };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 

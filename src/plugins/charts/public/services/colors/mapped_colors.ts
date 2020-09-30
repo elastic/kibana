@@ -18,14 +18,14 @@
  */
 
 import _ from 'lodash';
-import { rgb } from 'color';
+import Color from 'color';
 
 import { CoreSetup } from 'kibana/public';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from './color_palette';
 
-const standardizeColor = (color: string) => rgb(color).toString();
+const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 
 /**
  * Maintains a lookup table that associates the value (key) with a hex color (value)
