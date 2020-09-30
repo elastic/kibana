@@ -25,6 +25,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -36,6 +37,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "list_id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -49,6 +51,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "name"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -62,6 +65,7 @@ describe('exception_list_schema', () => {
 
   test('it should accept an undefined for "namespace_type" and make "namespace_type" that of "single"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -73,6 +77,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "description"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -97,6 +102,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -110,6 +116,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "created_by"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.created_by;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -123,6 +130,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "tie_breaker_id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.tie_breaker_id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -136,6 +144,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "type"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -149,6 +158,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_at"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.updated_at;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -162,6 +172,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_by"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.updated_by;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

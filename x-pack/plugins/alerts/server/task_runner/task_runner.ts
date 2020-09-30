@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -73,7 +73,7 @@ export class TaskRunner {
     return apiKey;
   }
 
-  private getFakeKibanaRequest(spaceId: string, apiKey: string | null) {
+  private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -98,7 +98,7 @@ export class TaskRunner {
 
   private getServicesWithSpaceLevelPermissions(
     spaceId: string,
-    apiKey: string | null
+    apiKey: RawAlert['apiKey']
   ): [Services, PublicMethodsOf<AlertsClient>] {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
     return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
@@ -109,7 +109,7 @@ export class TaskRunner {
     alertName: string,
     tags: string[] | undefined,
     spaceId: string,
-    apiKey: string | null,
+    apiKey: RawAlert['apiKey'],
     actions: Alert['actions'],
     alertParams: RawAlert['params']
   ) {
@@ -228,12 +228,13 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
+      const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
-        Object.entries(enabledAlertInstances)
+        Object.entries(instancesWithScheduledActions)
           .filter(
-            ([, alertInstance]: [string, AlertInstance]) => !alertInstance.isThrottled(throttle)
+            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
+              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
           )
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
@@ -250,7 +251,11 @@ export class TaskRunner {
     };
   }
 
-  async validateAndExecuteAlert(services: Services, apiKey: string | null, alert: SanitizedAlert) {
+  async validateAndExecuteAlert(
+    services: Services,
+    apiKey: RawAlert['apiKey'],
+    alert: SanitizedAlert
+  ) {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
@@ -355,41 +360,53 @@ interface GenerateNewAndResolvedInstanceEventsParams {
 }
 
 function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { currentAlertInstanceIds, originalAlertInstanceIds } = params;
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstanceIds,
+    originalAlertInstanceIds,
+  } = params;
+
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
-
-  for (const id of newIds) {
-    const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
-  }
 
   for (const id of resolvedIds) {
     const message = `${params.alertLabel} resolved instance: '${id}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message);
   }
 
-  function logInstanceEvent(id: string, action: string, message: string) {
+  for (const id of newIds) {
+    const message = `${params.alertLabel} created new instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
+  }
+
+  for (const id of currentAlertInstanceIds) {
+    const message = `${params.alertLabel} active instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+  }
+
+  function logInstanceEvent(instanceId: string, action: string, message: string) {
     const event: IEvent = {
       event: {
         action,
       },
       kibana: {
         alerting: {
-          instance_id: id,
+          instance_id: instanceId,
         },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
-            id: params.alertId,
-            namespace: params.namespace,
+            id: alertId,
+            namespace,
           },
         ],
       },
       message,
     };
-    params.eventLogger.logEvent(event);
+    eventLogger.logEvent(event);
   }
 }
 

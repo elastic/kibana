@@ -13,9 +13,13 @@ import {
 import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
-import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import {
+  isEnhancedEmbeddable,
+  embeddableEnhancedContextMenuDrilldownGrouping,
+} from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -27,6 +31,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
+  public grouping = embeddableEnhancedContextMenuDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -62,6 +67,8 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
+          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          placeContext={{ embeddable }}
         />
       ),
       {

@@ -29,15 +29,14 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
   const dispatch = useDispatch();
 
   const parsedFieldsDefaultValue = useMemo(() => normalize(value?.fields), [value?.fields]);
-
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
     // it is valid and we can byPass its form validation (that requires a "name" to be defined)
     const isFieldFormVisible = state.fieldForm !== undefined;
     const emptyNameValue =
       isFieldFormVisible &&
-      state.fieldForm!.data.raw.name !== undefined &&
-      state.fieldForm!.data.raw.name.trim() === '';
+      (state.fieldForm!.data.raw.name === undefined ||
+        state.fieldForm!.data.raw.name.trim() === '');
 
     const bypassFieldFormValidation =
       state.documentFields.status === 'creatingField' && emptyNameValue;

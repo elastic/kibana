@@ -22,6 +22,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
+    clickIncludeStatsSwitch: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -72,6 +73,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       router.navigateTo(findEmptyPromptIndexTemplateLink().props().href!);
     });
     component.update();
+  };
+
+  const clickIncludeStatsSwitch = () => {
+    const { find } = testBed;
+    find('includeStatsSwitch').simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -149,6 +155,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     actions: {
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
+      clickIncludeStatsSwitch,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -174,4 +181,8 @@ export const createDataStreamPayload = (name: string): DataStream => ({
     },
   ],
   generation: 1,
+  health: 'green',
+  indexTemplateName: 'indexTemplate',
+  storageSize: '1b',
+  maxTimeStamp: 420,
 });

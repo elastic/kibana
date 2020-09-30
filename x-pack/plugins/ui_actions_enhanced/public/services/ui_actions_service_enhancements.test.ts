@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionsServiceEnhancements } from './ui_actions_service_enhancements';
+import {
+  UiActionsServiceEnhancements,
+  UiActionsServiceEnhancementsParams,
+} from './ui_actions_service_enhancements';
 import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
 import { licensingMock } from '../../../licensing/public/mocks';
 
-const getLicenseInfo = () => licensingMock.createLicense();
+const deps: UiActionsServiceEnhancementsParams = {
+  getLicense: () => licensingMock.createLicense(),
+  featureUsageSetup: licensingMock.createSetup().featureUsage,
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+};
 
 describe('UiActionsService', () => {
   describe('action factories', () => {
@@ -18,6 +25,9 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
     const factoryDefinition2: ActionFactoryDefinition = {
       id: 'test-factory-2',
@@ -25,10 +35,13 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
-      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+      const service = new UiActionsServiceEnhancements(deps);
 
       const factories = service.getActionFactories();
 
@@ -36,7 +49,7 @@ describe('UiActionsService', () => {
     });
 
     test('can register and retrieve an action factory', () => {
-      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+      const service = new UiActionsServiceEnhancements(deps);
 
       service.registerActionFactory(factoryDefinition1);
 
@@ -47,7 +60,7 @@ describe('UiActionsService', () => {
     });
 
     test('can retrieve all action factories', () => {
-      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+      const service = new UiActionsServiceEnhancements(deps);
 
       service.registerActionFactory(factoryDefinition1);
       service.registerActionFactory(factoryDefinition2);
@@ -61,13 +74,108 @@ describe('UiActionsService', () => {
     });
 
     test('throws when retrieving action factory that does not exist', () => {
-      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+      const service = new UiActionsServiceEnhancements(deps);
 
       service.registerActionFactory(factoryDefinition1);
 
       expect(() => service.getActionFactory('UNKNOWN_ID')).toThrowError(
         'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
       );
+    });
+
+    test('isCompatible from definition is used on registered factory', async () => {
+      const service = new UiActionsServiceEnhancements(deps);
+
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        isCompatible: () => Promise.resolve(false),
+      });
+
+      await expect(
+        service.getActionFactory(factoryDefinition1.id).isCompatible({ triggers: [] })
+      ).resolves.toBe(false);
+    });
+
+    test('action factory extract function gets called when calling uiactions extract', () => {
+      const service = new UiActionsServiceEnhancements(deps);
+      const actionState = {
+        events: [
+          {
+            eventId: 'test',
+            triggers: [],
+            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
+          },
+        ],
+      };
+      const extract = jest.fn().mockImplementation((state) => ({ state, references: [] }));
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        extract,
+      });
+      service.extract(actionState);
+      expect(extract).toBeCalledWith(actionState.events[0]);
+    });
+
+    test('action factory inject function gets called when calling uiactions inject', () => {
+      const service = new UiActionsServiceEnhancements(deps);
+      const actionState = {
+        events: [
+          {
+            eventId: 'test',
+            triggers: [],
+            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
+          },
+        ],
+      };
+      const inject = jest.fn().mockImplementation((state) => state);
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        inject,
+      });
+      service.inject(actionState, []);
+      expect(inject).toBeCalledWith(actionState.events[0], []);
+    });
+
+    test('action factory telemetry function gets called when calling uiactions telemetry', () => {
+      const service = new UiActionsServiceEnhancements(deps);
+      const actionState = {
+        events: [
+          {
+            eventId: 'test',
+            triggers: [],
+            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
+          },
+        ],
+      };
+      const telemetry = jest.fn().mockImplementation((state) => ({}));
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        telemetry,
+      });
+      service.telemetry(actionState);
+      expect(telemetry).toBeCalledWith(actionState.events[0], {});
+    });
+
+    describe('registerFeature for licensing', () => {
+      const spy = jest.spyOn(deps.featureUsageSetup, 'register');
+      beforeEach(() => {
+        spy.mockClear();
+      });
+      test('registerFeature is not called if no license requirements', () => {
+        const service = new UiActionsServiceEnhancements(deps);
+        service.registerActionFactory(factoryDefinition1);
+        expect(spy).not.toBeCalled();
+      });
+
+      test('registerFeature is called if has license requirements', () => {
+        const service = new UiActionsServiceEnhancements(deps);
+        service.registerActionFactory({
+          ...factoryDefinition1,
+          minimalLicense: 'gold',
+          licenseFeatureName: 'a name',
+        });
+        expect(spy).toBeCalledWith('a name', 'gold');
+      });
     });
   });
 });

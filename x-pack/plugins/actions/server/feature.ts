@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const ACTIONS_FEATURE = {
   id: 'actions',
@@ -14,6 +15,7 @@ export const ACTIONS_FEATURE = {
   }),
   icon: 'bell',
   navLinkId: 'actions',
+  category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {
     insightsAndAlerting: ['triggersActions'],

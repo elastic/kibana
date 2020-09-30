@@ -27,7 +27,7 @@ const { fail404 } = testCaseFailures;
 const createSingleTestCases = (spaceId: string) => {
   const namespaces = [spaceId];
   return [
-    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { ...CASES.DEFAULT_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SPACE_1_ONLY, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SPACE_2_ONLY, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
     { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
@@ -43,7 +43,7 @@ const createSingleTestCases = (spaceId: string) => {
  */
 const createMultiTestCases = () => {
   const nonExistentSpaceId = 'does_not_exist'; // space that doesn't exist
-  let id = CASES.DEFAULT_SPACE_ONLY.id;
+  let id = CASES.DEFAULT_ONLY.id;
   const one = [
     { id, namespaces: [nonExistentSpaceId] },
     { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID] },

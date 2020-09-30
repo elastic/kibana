@@ -8,7 +8,7 @@ import { format as formatUrl } from 'url';
 
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { elasticsearchClientPlugin as securityEsClientPlugin } from '../../../plugins/security/server/elasticsearch_client_plugin';
+import { elasticsearchClientPlugin as securityEsClientPlugin } from '../../../plugins/security/server/elasticsearch/elasticsearch_client_plugin';
 import { elasticsearchJsPlugin as indexManagementEsClientPlugin } from '../../../plugins/index_management/server/client/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DEFAULT_API_VERSION } from '../../../../src/core/server/elasticsearch/elasticsearch_config';

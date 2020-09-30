@@ -167,7 +167,7 @@ describe('AuthenticationResult', () => {
       );
     });
 
-    it('correctly produces `redirected` authentication result without state.', () => {
+    it('correctly produces `redirected` authentication result without state, user and response headers.', () => {
       const redirectURL = '/redirect/url';
       const authenticationResult = AuthenticationResult.redirectTo(redirectURL);
 
@@ -199,6 +199,49 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.error).toBeUndefined();
+    });
+
+    it('correctly produces `redirected` authentication result with state and user.', () => {
+      const redirectURL = '/redirect/url';
+      const state = { some: 'state' };
+      const user = mockAuthenticatedUser();
+      const authenticationResult = AuthenticationResult.redirectTo(redirectURL, { user, state });
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.succeeded()).toBe(false);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+
+      expect(authenticationResult.redirectURL).toBe(redirectURL);
+      expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.authHeaders).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.error).toBeUndefined();
+    });
+
+    it('correctly produces `redirected` authentication result with state, user and response headers.', () => {
+      const redirectURL = '/redirect/url';
+      const state = { some: 'state' };
+      const user = mockAuthenticatedUser();
+      const authResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+      const authenticationResult = AuthenticationResult.redirectTo(redirectURL, {
+        user,
+        state,
+        authResponseHeaders,
+      });
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.succeeded()).toBe(false);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+
+      expect(authenticationResult.redirectURL).toBe(redirectURL);
+      expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.authHeaders).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBe(authResponseHeaders);
+      expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.error).toBeUndefined();
     });
   });

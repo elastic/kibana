@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../../../../common/constants';
 import {
@@ -33,9 +33,9 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -159,7 +159,7 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useSelector((state: State) =>
+    const { savedObjectId } = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;
@@ -272,9 +272,6 @@ export interface NewTimelineProps {
 
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
@@ -282,7 +279,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     });
     const button = getButton({ outline, title });
 
-    return capabilitiesCanUserCRUD ? button : null;
+    return button;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
@@ -334,26 +331,23 @@ const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, tog
 LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
-  noteIds: string[];
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ noteIds, toggleShowNotes, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, timelineType }) => {
+  const isTemplate = timelineType === TimelineType.template;
 
-    return (
-      <EuiButtonIcon
-        aria-label={i18n.NOTES}
-        data-test-subj="timeline-notes-button-small"
-        iconType="editorComment"
-        onClick={() => toggleShowNotes()}
-        isDisabled={isTemplate}
-      />
-    );
-  }
-);
+  return (
+    <EuiButtonIcon
+      aria-label={i18n.NOTES}
+      data-test-subj="timeline-notes-button-small"
+      iconType="editorComment"
+      onClick={() => toggleShowNotes()}
+      isDisabled={isTemplate}
+    />
+  );
+});
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -378,15 +372,15 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
         {size === 'l' ? (
           <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton
-            noteIds={noteIds}
-            toggleShowNotes={toggleShowNotes}
-            timelineType={timelineType}
-          />
+          <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
+            <EuiModal
+              data-test-subj="notesModal"
+              maxWidth={NOTES_PANEL_WIDTH}
+              onClose={toggleShowNotes}
+            >
               <Notes
                 associateNote={associateNote}
                 getNewNoteId={getNewNoteId}

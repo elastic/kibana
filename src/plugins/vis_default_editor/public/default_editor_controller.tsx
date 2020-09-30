@@ -69,7 +69,6 @@ class DefaultEditorController {
           ]
         : visType.editorConfig.optionTabs),
     ];
-
     this.state = {
       vis,
       optionTabs,

@@ -65,7 +65,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
-      await nextTick();
+      await nextTick(10);
       component.update();
     });
   };

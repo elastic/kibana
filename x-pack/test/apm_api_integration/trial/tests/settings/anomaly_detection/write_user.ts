@@ -35,7 +35,8 @@ export default function apiTest({ getService }: FtrProviderContext) {
     describe('when calling the endpoint for listing jobs', () => {
       it('returns a list of jobs', async () => {
         const { body } = await getJobs();
-        expect(body).to.eql({ jobs: [], hasLegacyJobs: false });
+        expect(body.jobs.length).to.be(0);
+        expect(body.hasLegacyJobs).to.be(false);
       });
     });
 

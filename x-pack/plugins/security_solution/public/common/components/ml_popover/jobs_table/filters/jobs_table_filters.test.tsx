@@ -7,20 +7,20 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
-import { SiemJob } from '../../types';
+import { SecurityJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
-import { mockSiemJobs } from '../../__mocks__/api';
+import { mockSecurityJobs } from '../../api.mock';
 
 describe('JobsTableFilters', () => {
-  let siemJobs: SiemJob[];
+  let securityJobs: SecurityJob[];
 
   beforeEach(() => {
-    siemJobs = cloneDeep(mockSiemJobs);
+    securityJobs = cloneDeep(mockSecurityJobs);
   });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={jest.fn()} />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={jest.fn()} />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -28,7 +28,7 @@ describe('JobsTableFilters', () => {
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper.find('[data-test-subj="show-elastic-jobs-filter-button"]').first().simulate('click');
@@ -45,7 +45,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
@@ -62,7 +62,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
@@ -88,7 +88,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter twice, state is updated and it is revert', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');

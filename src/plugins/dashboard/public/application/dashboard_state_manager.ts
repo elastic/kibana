@@ -25,7 +25,7 @@ import { History } from 'history';
 
 import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { migrateLegacyQuery } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 import { ViewMode } from '../embeddable_plugin';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
@@ -267,6 +267,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
+    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+      this.setExpandedPanelId(input.expandedPanelId);
+    }
+
     if (!_.isEqual(input.query, this.getQuery())) {
       this.setQuery(input.query);
     }
@@ -280,6 +284,14 @@ export class DashboardStateManager {
 
   public setFullScreenMode(fullScreenMode: boolean) {
     this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
+  }
+
+  public getExpandedPanelId() {
+    return this.appState.expandedPanelId;
+  }
+
+  public setExpandedPanelId(expandedPanelId?: string) {
+    this.stateContainer.transitions.set('expandedPanelId', expandedPanelId);
   }
 
   public setFilters(filters: Filter[]) {

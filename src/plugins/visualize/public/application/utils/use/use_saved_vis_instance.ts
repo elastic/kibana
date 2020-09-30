@@ -59,7 +59,6 @@ export const useSavedVisInstance = (
     const getSavedVisInstance = async () => {
       try {
         let savedVisInstance: SavedVisInstance;
-
         if (history.location.pathname === '/create') {
           const searchParams = parse(history.location.search);
           const visTypes = services.visualizations.all();

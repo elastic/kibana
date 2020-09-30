@@ -26,16 +26,14 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(200);
 
-      expect(apiResponse.success).to.be(true);
+      expect(apiResponse.item.type).to.eql('POLICY_CHANGE');
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
-      expect(apiResponse.item.sent_at).to.be('2020-03-18T19:45:02.620Z');
     });
 
     it('should return a 400 when request does not have type information', async () => {
@@ -60,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { History } from 'history';
+
+import { KibanaLogic } from '../../shared/kibana';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
@@ -13,57 +15,60 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
-import { letBrowserHandleEvent } from '../react_router_helpers';
+import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 /**
  * Generate React-Router-friendly EUI breadcrumb objects
  * https://elastic.github.io/eui/#/navigation/breadcrumbs
  */
 
-interface IGenerateBreadcrumbProps {
+interface IBreadcrumb {
   text: string;
   path?: string;
-  history?: History;
+  // Used to navigate outside of the React Router basename,
+  // i.e. if we need to go from App Search to Enterprise Search
+  shouldNotCreateHref?: boolean;
 }
+export type TBreadcrumbs = IBreadcrumb[];
 
-export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbProps) => {
-  const breadcrumb = { text } as EuiBreadcrumb;
+export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
+  const { navigateToUrl, history } = useValues(KibanaLogic);
 
-  if (path && history) {
-    breadcrumb.href = history.createHref({ pathname: path });
-    breadcrumb.onClick = (event) => {
-      if (letBrowserHandleEvent(event)) return;
-      event.preventDefault();
-      history.push(path);
-    };
-  }
+  return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
+    const breadcrumb = { text } as EuiBreadcrumb;
 
-  return breadcrumb;
+    if (path) {
+      breadcrumb.href = createHref(path, history, { shouldNotCreateHref });
+      breadcrumb.onClick = (event) => {
+        if (letBrowserHandleEvent(event)) return;
+        event.preventDefault();
+        navigateToUrl(path, { shouldNotCreateHref });
+      };
+    }
+
+    return breadcrumb;
+  });
 };
 
 /**
  * Product-specific breadcrumb helpers
  */
 
-export type TBreadcrumbs = IGenerateBreadcrumbProps[];
-
-export const enterpriseSearchBreadcrumbs = (history: History) => (
-  breadcrumbs: TBreadcrumbs = []
-) => [
-  generateBreadcrumb({ text: ENTERPRISE_SEARCH_PLUGIN.NAME }),
-  ...breadcrumbs.map(({ text, path }: IGenerateBreadcrumbProps) =>
-    generateBreadcrumb({ text, path, history })
-  ),
-];
-
-export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([
-    { text: APP_SEARCH_PLUGIN.NAME, path: '/' },
+export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useBreadcrumbs([
+    {
+      text: ENTERPRISE_SEARCH_PLUGIN.NAME,
+      path: ENTERPRISE_SEARCH_PLUGIN.URL,
+      shouldNotCreateHref: true,
+    },
     ...breadcrumbs,
   ]);
 
-export const workplaceSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([
+export const useAppSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+
+export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
     { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
     ...breadcrumbs,
   ]);

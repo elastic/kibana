@@ -13,14 +13,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Agent, AgentConfig } from '../../../../types';
+import { Agent, AgentPolicy } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { AgentHealth } from '../../components';
 
 export const AgentDetailsContent: React.FunctionComponent<{
   agent: Agent;
-  agentConfig?: AgentConfig;
-}> = memo(({ agent, agentConfig }) => {
+  agentPolicy?: AgentPolicy;
+}> = memo(({ agent, agentPolicy }) => {
   const { getHref } = useLink();
   return (
     <EuiDescriptionList>
@@ -48,18 +48,18 @@ export const AgentDetailsContent: React.FunctionComponent<{
           description: <AgentHealth agent={agent} />,
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.agentConfigurationLabel', {
-            defaultMessage: 'Agent configuration',
+          title: i18n.translate('xpack.ingestManager.agentDetails.agentPolicyLabel', {
+            defaultMessage: 'Agent policy',
           }),
-          description: agentConfig ? (
+          description: agentPolicy ? (
             <EuiLink
-              href={getHref('configuration_details', { configId: agent.config_id! })}
+              href={getHref('policy_details', { policyId: agent.policy_id! })}
               className="eui-textBreakWord"
             >
-              {agentConfig.name || agent.config_id}
+              {agentPolicy.name || agent.policy_id}
             </EuiLink>
           ) : (
-            agent.config_id || '-'
+            agent.policy_id || '-'
           ),
         },
         {

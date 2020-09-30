@@ -90,6 +90,7 @@ describe('useVisualizeAppState', () => {
     expect(createVisualizeAppState).toHaveBeenCalledWith({
       stateDefaults: visualizeAppStateStub,
       kbnUrlStateStorage: undefined,
+      byValue: false,
     });
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       visualizeAppStateStub.filters

@@ -5,7 +5,11 @@
  */
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import {
+  SavedTimelineRuntimeType,
+  TimelineStatusLiteralRt,
+  TimelineTypeLiteralRt,
+} from '../../../../../common/types/timeline';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const createTimelineSchema = rt.intersection([
@@ -13,7 +17,11 @@ export const createTimelineSchema = rt.intersection([
     timeline: SavedTimelineRuntimeType,
   }),
   rt.partial({
+    status: unionWithNullType(TimelineStatusLiteralRt),
     timelineId: unionWithNullType(rt.string),
+    templateTimelineId: unionWithNullType(rt.string),
+    templateTimelineVersion: unionWithNullType(rt.number),
+    timelineType: unionWithNullType(TimelineTypeLiteralRt),
     version: unionWithNullType(rt.string),
   }),
 ]);

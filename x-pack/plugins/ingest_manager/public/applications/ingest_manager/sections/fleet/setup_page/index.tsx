@@ -95,8 +95,7 @@ export const SetupPage: React.FunctionComponent<{
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestManager.setupPage.enableText"
-                defaultMessage="In order to use Fleet, you must create an Elastic user. This user can create API keys
-        and write to logs-* and metrics-*."
+                defaultMessage="Fleet requires an Elastic user who can create API keys and write to logs-* and metrics-*."
               />
             </EuiText>
             <EuiSpacer size="l" />
@@ -134,7 +133,7 @@ export const SetupPage: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.missingRequirementsElasticsearchTitle"
-            defaultMessage="In your Elasticsearch configuration, enable:"
+            defaultMessage="In your Elasticsearch policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={false}>
@@ -190,7 +189,7 @@ xpack.security.authc.api_key.enabled: true`}
           <EuiSpacer size="l" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.missingRequirementsKibanaTitle"
-            defaultMessage="In your Kibana configuration, enable:"
+            defaultMessage="In your Kibana policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={missingRequirements.includes('tls_required')}>

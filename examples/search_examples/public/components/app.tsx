@@ -47,7 +47,6 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import {
   PLUGIN_ID,
   PLUGIN_NAME,
-  IMyStrategyRequest,
   IMyStrategyResponse,
   SERVER_SEARCH_ROUTE_PATH,
 } from '../../common';
@@ -57,6 +56,8 @@ import {
   IndexPatternSelect,
   IndexPattern,
   IndexPatternField,
+  isCompleteResponse,
+  isErrorResponse,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -134,12 +135,9 @@ export const SearchExamplesApp = ({
           query,
         },
       },
-    };
-
-    if (strategy) {
       // Add a custom request parameter to be consumed by `MyStrategy`.
-      (request as IMyStrategyRequest).get_cool = getCool;
-    }
+      ...(strategy ? { get_cool: getCool } : {}),
+    };
 
     // Submit the search request using the `data.search` service.
     const searchSubscription$ = data.search
@@ -148,7 +146,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (response) => {
-          if (!response.isPartial && !response.isRunning) {
+          if (isCompleteResponse(response)) {
             setTimeTook(response.rawResponse.took);
             const avgResult: number | undefined = response.rawResponse.aggregations
               ? response.rawResponse.aggregations[1].value
@@ -166,7 +164,7 @@ export const SearchExamplesApp = ({
               text: mountReactNode(message),
             });
             searchSubscription$.unsubscribe();
-          } else if (response.isPartial && !response.isRunning) {
+          } else if (isErrorResponse(response)) {
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
             searchSubscription$.unsubscribe();

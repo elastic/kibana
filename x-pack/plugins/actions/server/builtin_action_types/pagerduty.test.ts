@@ -64,12 +64,12 @@ describe('validateConfig()', () => {
     );
   });
 
-  test('should validate and pass when the pagerduty url is whitelisted', () => {
+  test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (url) => {
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
       },
@@ -80,13 +80,13 @@ describe('validateConfig()', () => {
     ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (_) => {
-          throw new Error(`target url is not whitelisted`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not added to allowedHosts`);
         },
       },
     });
@@ -94,7 +94,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not whitelisted"`
+      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });
@@ -169,6 +169,16 @@ describe('validateParams()', () => {
       });
     }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
+
+  test('should validate and throw error when dedupKey is missing on resolve', () => {
+    expect(() => {
+      validateParams(actionType, {
+        eventAction: 'resolve',
+      });
+    }).toThrowError(
+      `error validating action params: DedupKey is required when eventAction is "resolve"`
+    );
+  });
 });
 
 describe('execute()', () => {
@@ -199,7 +209,6 @@ describe('execute()', () => {
       Object {
         "apiUrl": "https://events.pagerduty.com/v2/enqueue",
         "data": Object {
-          "dedup_key": "action:some-action-id",
           "event_action": "trigger",
           "payload": Object {
             "severity": "info",
@@ -506,6 +515,63 @@ describe('execute()', () => {
         "actionId": "some-action-id",
         "message": "error posting pagerduty event: unexpected status 418",
         "status": "error",
+      }
+    `);
+  });
+
+  test('should not set a default dedupkey to ensure each execution is a unique PagerDuty incident', async () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: randoDate,
+    };
+
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    const actionResponse = await actionType.executor(executorOptions);
+    const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
+    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+      Object {
+        "apiUrl": "the-api-url",
+        "data": Object {
+          "event_action": "trigger",
+          "payload": Object {
+            "severity": "critical",
+            "source": "the-source",
+            "summary": "the summary",
+            "timestamp": "1963-09-23T01:23:45.000Z",
+          },
+        },
+        "headers": Object {
+          "Content-Type": "application/json",
+          "X-Routing-Key": "super-secret",
+        },
+      }
+    `);
+    expect(actionResponse).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
       }
     `);
   });

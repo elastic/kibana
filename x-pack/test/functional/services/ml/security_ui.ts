@@ -16,7 +16,6 @@ export function MachineLearningSecurityUIProvider(
   return {
     async loginAs(user: USER) {
       const password = mlSecurityCommon.getPasswordForUser(user);
-
       await PageObjects.security.forceLogout();
 
       await PageObjects.security.login(user, password, {
@@ -30,6 +29,10 @@ export function MachineLearningSecurityUIProvider(
 
     async loginAsMlViewer() {
       await this.loginAs(USER.ML_VIEWER);
+    },
+
+    async logout() {
+      await PageObjects.security.forceLogout();
     },
   };
 }

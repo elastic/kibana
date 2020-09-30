@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
@@ -53,37 +52,37 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('loads from job list row link', async () => {
+    it('opens a job from job list link', async () => {
+      await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
+      await ml.testExecution.logTestStep('open job in single metric viewer');
       await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
       await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
-      await ml.common.waitForMlLoadingIndicatorToDisappear();
+      await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
     });
 
-    it('pre-fills the job selection', async () => {
+    it('displays job results', async () => {
+      await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-    });
 
-    it('pre-fills the detector input', async () => {
+      await ml.testExecution.logTestStep('pre-fills the detector input');
       await ml.singleMetricViewer.assertDetectorInputExsist();
       await ml.singleMetricViewer.assertDetectorInputValue('0');
-    });
 
-    it('displays the chart', async () => {
+      await ml.testExecution.logTestStep('displays the chart');
       await ml.singleMetricViewer.assertChartExsist();
-    });
 
-    it('displays the anomalies table', async () => {
+      await ml.testExecution.logTestStep('should display the annotations section');
+      await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+
+      await ml.testExecution.logTestStep('displays the anomalies table');
       await ml.anomaliesTable.assertTableExists();
-    });
 
-    it('anomalies table is not empty', async () => {
+      await ml.testExecution.logTestStep('anomalies table is not empty');
       await ml.anomaliesTable.assertTableNotEmpty();
     });
   });

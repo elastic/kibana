@@ -40,6 +40,7 @@ describe('TaskManager', () => {
     index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
+    max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
   };
   const taskManagerOpts = {

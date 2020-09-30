@@ -18,12 +18,11 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 
-const indexPattern = {
+const indexPattern = ({
   fields: {
     getAll: () => [
       {
@@ -61,7 +60,7 @@ const indexPattern = {
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
-} as IndexPattern;
+} as unknown) as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
@@ -75,6 +74,8 @@ describe('DocViewTable at Discover', () => {
 
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
     _score: 1,
     _source: {
       message:
@@ -192,6 +193,8 @@ describe('DocViewTable at Discover Doc', () => {
   const hit = {
     _index: 'logstash-2014.09.09',
     _score: 1,
+    _type: 'doc',
+    _id: 'id123',
     _source: {
       extension: 'html',
       not_mapped: 'yes',
@@ -214,6 +217,9 @@ describe('DocViewTable at Discover Context', () => {
   // here no toggleColumnButtons  are rendered
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: 1,
     _source: {
       message:
         'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. \

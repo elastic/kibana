@@ -17,50 +17,27 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  IFieldType,
-  KbnFieldType,
-  getKbnFieldType,
-  KBN_FIELD_TYPES,
-  FieldFormat,
-} from '../../../common';
-import { OnNotification, FieldSpec } from '../types';
-
-import { IndexPattern } from '../index_patterns';
+import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { IFieldType } from './types';
+import { FieldSpec, IndexPattern } from '../..';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly indexPattern: IndexPattern;
   readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(
-    indexPattern: IndexPattern,
-    spec: FieldSpec,
-    displayName: string,
-    onNotification: OnNotification
-  ) {
-    this.indexPattern = indexPattern;
+  constructor(spec: FieldSpec, displayName: string) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
-        values: { type: spec.type },
-        defaultMessage: 'Unknown field type {type}',
-      });
-      const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-        values: { name: spec.name, title: indexPattern.title },
-        defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
-      });
-      onNotification({ title, text, color: 'danger', iconType: 'alert' });
-    }
   }
 
   // writable attrs
+  /**
+   * Count is used for field popularity
+   */
   public get count() {
     return this.spec.count || 0;
   }
@@ -69,6 +46,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.count = count;
   }
 
+  /**
+   * Script field code
+   */
   public get script() {
     return this.spec.script;
   }
@@ -77,6 +57,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.script = script;
   }
 
+  /**
+   * Script field language
+   */
   public get lang() {
     return this.spec.lang;
   }
@@ -85,6 +68,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  /**
+   * Description of field type conflicts across different indices in the same index pattern
+   */
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }
@@ -146,10 +132,6 @@ export class IndexPatternField implements IFieldType {
     return this.aggregatable;
   }
 
-  public get format(): FieldFormat {
-    return this.indexPattern.getFormatterForField(this);
-  }
-
   public toJSON() {
     return {
       count: this.count,
@@ -168,7 +150,11 @@ export class IndexPatternField implements IFieldType {
     };
   }
 
-  public toSpec() {
+  public toSpec({
+    getFormatterForField,
+  }: {
+    getFormatterForField?: IndexPattern['getFormatterForField'];
+  } = {}): FieldSpec {
     return {
       count: this.count,
       script: this.script,
@@ -182,7 +168,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
-      format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
+      format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
     };
   }
 }

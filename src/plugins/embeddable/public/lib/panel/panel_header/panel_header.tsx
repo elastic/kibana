@@ -30,18 +30,20 @@ import React from 'react';
 import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
-import { EmbeddableContext } from '../../triggers';
+import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
+import { uiToReactComponent } from '../../../../../kibana_react/public';
 
 export interface PanelHeaderProps {
   title?: string;
   isViewMode: boolean;
-  hidePanelTitles: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
+  hidePanelTitle: boolean;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
+  showPlaceholderTitle?: boolean;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -49,11 +51,11 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable })}
-      onClick={() => badge.execute({ embeddable })}
-      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
-      {badge.getDisplayName({ embeddable })}
+      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
   ));
 }
@@ -65,19 +67,24 @@ function renderNotifications(
   return notifications.map((notification) => {
     const context = { embeddable };
 
-    let badge = (
+    let badge = notification.MenuItem ? (
+      React.createElement(uiToReactComponent(notification.MenuItem))
+    ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
         key={notification.id}
         style={{ marginTop: '4px', marginRight: '4px' }}
-        onClick={() => notification.execute(context)}
+        onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
       >
-        {notification.getDisplayName(context)}
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
       </EuiNotificationBadge>
     );
 
     if (notification.getDisplayNameTooltip) {
-      const tooltip = notification.getDisplayNameTooltip(context);
+      const tooltip = notification.getDisplayNameTooltip({
+        ...context,
+        trigger: panelNotificationTrigger,
+      });
 
       if (tooltip) {
         badge = (
@@ -120,7 +127,7 @@ function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
 export function PanelHeader({
   title,
   isViewMode,
-  hidePanelTitles,
+  hidePanelTitle,
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
@@ -129,12 +136,30 @@ export function PanelHeader({
   headerId,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
-  const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
-  const showPanelBar = badges.length > 0 || showTitle;
+  const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
+  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
+  const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
+    defaultMessage: '[No Title]',
+  });
+
+  const getAriaLabel = () => {
+    return (
+      <span id={headerId}>
+        {showPanelBar && title
+          ? i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel: {title}',
+              values: { title: title || placeholderTitle },
+            })
+          : i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel',
+            })}
+      </span>
+    );
+  };
 
   if (!showPanelBar) {
     return (
@@ -145,6 +170,7 @@ export function PanelHeader({
           closeContextMenu={closeContextMenu}
           title={title}
         />
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
     );
   }
@@ -154,34 +180,20 @@ export function PanelHeader({
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <h2
-        id={headerId}
-        data-test-subj="dashboardPanelTitle"
-        className="embPanel__title embPanel__dragger"
-      >
+      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
         {showTitle ? (
           <span className="embPanel__titleInner">
-            <span className="embPanel__titleText" aria-hidden="true">
-              {title}
+            <span
+              className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
+              aria-hidden="true"
+            >
+              {title || placeholderTitle}
             </span>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-                  defaultMessage: 'Dashboard panel: {title}',
-                  values: { title },
-                })}
-              </span>
-            </EuiScreenReaderOnly>
+            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
             {renderTooltip(viewDescription)}
           </span>
         ) : (
-          <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-                defaultMessage: 'Dashboard panel',
-              })}
-            </span>
-          </EuiScreenReaderOnly>
+          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         )}
         {renderBadges(badges, embeddable)}
       </h2>

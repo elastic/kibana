@@ -7,13 +7,16 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI, OperationMetadata } from '../types';
+import { OperationMetadata, DatasourcePublicAPI } from '../types';
 
 interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
-export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
+export const toExpression = (
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
   }
@@ -21,19 +24,20 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const datasource = datasourceLayers[layer.layerId];
     datasource.getTableSpec().forEach((column) => {
-      const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
-        column.columnId
-      );
+      const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
       metadata[layer.layerId][column.columnId] = operation;
     });
   });
 
-  return buildExpression(state, metadata, frame);
+  return buildExpression(state, metadata, datasourceLayers);
 };
 
-export function toPreviewExpression(state: State, frame: FramePublicAPI) {
+export function toPreviewExpression(
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+) {
   return toExpression(
     {
       ...state,
@@ -44,7 +48,7 @@ export function toPreviewExpression(state: State, frame: FramePublicAPI) {
         isVisible: false,
       },
     },
-    frame
+    datasourceLayers
   );
 }
 
@@ -77,10 +81,10 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI
+  datasourceLayers?: Record<string, DatasourcePublicAPI>
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.xAccessor && layer.accessors.length)
+    Boolean(layer.accessors.length)
   );
   if (!validLayers.length) {
     return null;
@@ -95,6 +99,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
+          yRightTitle: [state.yRightTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -114,8 +119,22 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
-          showXAxisTitle: [state.showXAxisTitle ?? true],
-          showYAxisTitle: [state.showYAxisTitle ?? true],
+          axisTitlesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  arguments: {
+                    x: [state?.axisTitlesVisibilitySettings?.x ?? true],
+                    yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
           tickLabelsVisibilitySettings: [
             {
               type: 'expression',
@@ -125,7 +144,8 @@ export const buildExpression = (
                   function: 'lens_xy_tickLabelsConfig',
                   arguments: {
                     x: [state?.tickLabelsVisibilitySettings?.x ?? true],
-                    y: [state?.tickLabelsVisibilitySettings?.y ?? true],
+                    yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.tickLabelsVisibilitySettings?.yRight ?? true],
                   },
                 },
               ],
@@ -140,7 +160,8 @@ export const buildExpression = (
                   function: 'lens_xy_gridlinesConfig',
                   arguments: {
                     x: [state?.gridlinesVisibilitySettings?.x ?? true],
-                    y: [state?.gridlinesVisibilitySettings?.y ?? true],
+                    yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.gridlinesVisibilitySettings?.yRight ?? true],
                   },
                 },
               ],
@@ -149,8 +170,8 @@ export const buildExpression = (
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
-            if (frame) {
-              const datasource = frame.datasourceLayers[layer.layerId];
+            if (datasourceLayers) {
+              const datasource = datasourceLayers[layer.layerId];
               layer.accessors
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
                 .forEach((accessor) => {
@@ -162,8 +183,8 @@ export const buildExpression = (
             }
 
             const xAxisOperation =
-              frame &&
-              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
+              datasourceLayers &&
+              datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
               xAxisOperation &&
@@ -183,7 +204,7 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor],
+                    xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],

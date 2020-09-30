@@ -4,28 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useValues } from 'kea';
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentBody,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { LicensingLogic } from '../../../shared/licensing';
 
-import EnginesIcon from '../../assets/engine.svg';
-import MetaEnginesIcon from '../../assets/meta_engine.svg';
+import { EngineIcon } from './assets/engine_icon';
+import { MetaEngineIcon } from './assets/meta_engine_icon';
 
-import { LoadingState, EmptyState, ErrorState } from '../empty_states';
-import { EngineOverviewHeader } from '../engine_overview_header';
+import { EngineOverviewHeader, LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
@@ -40,12 +39,10 @@ interface ISetEnginesCallbacks {
 }
 
 export const EngineOverview: React.FC = () => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { license } = useContext(LicenseContext) as ILicenseContext;
+  const { http } = useValues(HttpLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
-
   const [engines, setEngines] = useState([]);
   const [enginesPage, setEnginesPage] = useState(1);
   const [enginesTotal, setEnginesTotal] = useState(0);
@@ -59,16 +56,12 @@ export const EngineOverview: React.FC = () => {
     });
   };
   const setEnginesData = async (params: IGetEnginesParams, callbacks: ISetEnginesCallbacks) => {
-    try {
-      const response = await getEnginesData(params);
+    const response = await getEnginesData(params);
 
-      callbacks.setResults(response.results);
-      callbacks.setResultsTotal(response.meta.page.total_results);
+    callbacks.setResults(response.results);
+    callbacks.setResultsTotal(response.meta.page.total_results);
 
-      setIsLoading(false);
-    } catch (error) {
-      setHasErrorConnecting(true);
-    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -79,77 +72,72 @@ export const EngineOverview: React.FC = () => {
   }, [enginesPage]);
 
   useEffect(() => {
-    if (hasPlatinumLicense(license)) {
+    if (hasPlatinumLicense) {
       const params = { type: 'meta', pageIndex: metaEnginesPage };
       const callbacks = { setResults: setMetaEngines, setResultsTotal: setMetaEnginesTotal };
 
       setEnginesData(params, callbacks);
     }
-  }, [license, metaEnginesPage]);
+  }, [hasPlatinumLicense, metaEnginesPage]);
 
-  if (hasErrorConnecting) return <ErrorState />;
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
 
   return (
-    <EuiPage restrictWidth className="engineOverview">
+    <>
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
-      <EuiPageBody>
-        <EngineOverviewHeader />
+      <EngineOverviewHeader />
+      <EuiPageContent panelPaddingSize="s" className="engineOverview">
+        <FlashMessages />
+        <EuiPageContentHeader>
+          <EuiTitle size="s">
+            <h2>
+              <EngineIcon />
+              {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.engines', {
+                defaultMessage: 'Engines',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiPageContentHeader>
+        <EuiPageContentBody data-test-subj="appSearchEngines">
+          <EngineTable
+            data={engines}
+            pagination={{
+              totalEngines: enginesTotal,
+              pageIndex: enginesPage - 1,
+              onPaginate: setEnginesPage,
+            }}
+          />
+        </EuiPageContentBody>
 
-        <EuiPageContent panelPaddingSize="s" className="engineOverview__body">
-          <EuiPageContentHeader>
-            <EuiTitle size="s">
-              <h2>
-                <img src={EnginesIcon} alt="" className="engineIcon" />
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
-                  defaultMessage="Engines"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
-          <EuiPageContentBody data-test-subj="appSearchEngines">
-            <EngineTable
-              data={engines}
-              pagination={{
-                totalEngines: enginesTotal,
-                pageIndex: enginesPage - 1,
-                onPaginate: setEnginesPage,
-              }}
-            />
-          </EuiPageContentBody>
-
-          {metaEngines.length > 0 && (
-            <>
-              <EuiSpacer size="xl" />
-              <EuiPageContentHeader>
-                <EuiTitle size="s">
-                  <h2>
-                    <img src={MetaEnginesIcon} alt="" className="engineIcon" />
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
-                      defaultMessage="Meta Engines"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeader>
-              <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-                <EngineTable
-                  data={metaEngines}
-                  pagination={{
-                    totalEngines: metaEnginesTotal,
-                    pageIndex: metaEnginesPage - 1,
-                    onPaginate: setMetaEnginesPage,
-                  }}
-                />
-              </EuiPageContentBody>
-            </>
-          )}
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        {metaEngines.length > 0 && (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiPageContentHeader>
+              <EuiTitle size="s">
+                <h2>
+                  <MetaEngineIcon />
+                  {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines', {
+                    defaultMessage: 'Meta Engines',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeader>
+            <EuiPageContentBody data-test-subj="appSearchMetaEngines">
+              <EngineTable
+                data={metaEngines}
+                pagination={{
+                  totalEngines: metaEnginesTotal,
+                  pageIndex: metaEnginesPage - 1,
+                  onPaginate: setMetaEnginesPage,
+                }}
+              />
+            </EuiPageContentBody>
+          </>
+        )}
+      </EuiPageContent>
+    </>
   );
 };

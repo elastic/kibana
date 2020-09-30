@@ -9,10 +9,11 @@ import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
-
+import { Link } from 'react-router-dom';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -27,12 +28,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       setRecognizerResultsCount(recognizerResults.count);
     },
   };
-
-  function openAdvancedJobWizard() {
-    // TODO - pass the search string to the advanced job page as well as the index pattern
-    //       (add in with new advanced job wizard?)
-    window.open(`#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
-  }
+  const createJobLink = `/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB}/advanced?index=${indexPattern.id}`;
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
@@ -76,19 +72,19 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <CreateJobLinkCard
-        icon="createAdvancedJob"
-        title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
-          defaultMessage: 'Advanced',
-        })}
-        description={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedDescription', {
-          defaultMessage:
-            'Use the full range of options to create a job for more advanced use cases',
-        })}
-        onClick={openAdvancedJobWizard}
-        href={`#/jobs/new_job/advanced?index=${indexPattern}`}
-        data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
-      />
+      <Link to={createJobLink}>
+        <CreateJobLinkCard
+          icon="createAdvancedJob"
+          title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
+            defaultMessage: 'Advanced',
+          })}
+          description={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedDescription', {
+            defaultMessage:
+              'Use the full range of options to create a job for more advanced use cases',
+          })}
+          data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
+        />
+      </Link>
     </div>
   );
 };

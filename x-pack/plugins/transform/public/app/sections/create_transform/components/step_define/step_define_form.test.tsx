@@ -15,10 +15,11 @@ import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
 const startMock = coreMock.createStart();
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
+
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -28,6 +29,9 @@ import { StepDefineForm } from './step_define_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
+
+import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { getMlSharedImports } from '../../../../../shared_imports';
 
 const createMockWebStorage = () => ({
   clear: jest.fn(),
@@ -50,6 +54,8 @@ describe('Transform: <DefinePivotForm />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async (done) => {
     // Arrange
+    const mlSharedImports = await getMlSharedImports();
+
     const searchItems = {
       indexPattern: {
         title: 'the-index-pattern-title',
@@ -65,17 +71,20 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const { getByLabelText } = render(
+    const { getByText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+          </MlSharedContext.Provider>
         </KibanaContextProvider>
       </I18nProvider>
     );
 
     // Act
     // Assert
-    expect(getByLabelText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
     await wait();
     done();
   });

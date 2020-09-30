@@ -33,7 +33,7 @@ interface UserClickedPolicyListDeleteButton {
 
 interface UserOpenedPolicyListDeleteModal {
   type: 'userOpenedPolicyListDeleteModal';
-  payload: { agentConfigId: string };
+  payload: { agentPolicyId: string };
 }
 
 interface ServerDeletedPolicyFailure {

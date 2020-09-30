@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const simpleRule = getSimpleRule('rule-1');
@@ -335,13 +335,17 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2'], true), 'rules.ndjson')
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3'], true),
+            'rules.ndjson'
+          )
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest

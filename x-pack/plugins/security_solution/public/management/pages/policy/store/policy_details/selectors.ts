@@ -22,7 +22,7 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
 
 /**
- * Given a Policy Data (package config) object, return back a new object with only the field
+ * Given a Policy Data (package policy) object, return back a new object with only the field
  * needed for an Update/Create API action
  * @param policy
  */

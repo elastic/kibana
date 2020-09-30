@@ -21,7 +21,8 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +48,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -64,7 +65,7 @@ export class VegaParser {
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
-  _urlParsers: UrlParserConfig;
+  _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
@@ -79,13 +80,16 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
+  getServiceSettings: () => Promise<IServiceSettings>;
+  filters: Bool;
+  timeCache: TimeCache;
 
   constructor(
     spec: VegaSpec | string,
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    serviceSettings: IServiceSettings
+    getServiceSettings: () => Promise<IServiceSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -93,13 +97,9 @@ export class VegaParser {
     this.error = undefined;
     this.warnings = [];
     this.searchAPI = searchAPI;
-
-    const onWarn = this._onWarning.bind(this);
-    this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, this.searchAPI, filters, onWarn),
-      emsfile: new EmsFileParser(serviceSettings),
-      url: new UrlParser(onWarn),
-    };
+    this.getServiceSettings = getServiceSettings;
+    this.filters = filters;
+    this.timeCache = timeCache;
   }
 
   async parseAsync() {
@@ -122,7 +122,7 @@ export class VegaParser {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
             defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
-Vega (see {vegaSchemaUrl}) or 
+Vega (see {vegaSchemaUrl}) or
 Vega-Lite (see {vegaLiteSchemaUrl}).
 The URL is an identifier only. Kibana and your browser will never access this URL.`,
             values: {
@@ -242,13 +242,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         // and will be automatically updated on resize events.
         // We delete width & height if the autosize is set to "fit"
         // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize.type || this.spec.autosize;
+        const autosize = this.spec.autosize?.type || this.spec.autosize;
         if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
           this.useResize = true;
         }
       }
 
-      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
+      if (this.useResize && this.spec.padding && this.spec.autosize?.contains !== 'padding') {
         if (typeof this.spec.padding === 'object') {
           this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
           this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
@@ -546,6 +546,15 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * @private
    */
   async _resolveDataUrls() {
+    if (!this._urlParsers) {
+      const serviceSettings = await this.getServiceSettings();
+      const onWarn = this._onWarning.bind(this);
+      this._urlParsers = {
+        elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        emsfile: new EmsFileParser(serviceSettings),
+        url: new UrlParser(onWarn),
+      };
+    }
     const pending: PendingType = {};
 
     this.searchAPI.resetSearchStats();
@@ -559,7 +568,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         type = DEFAULT_PARSER;
       }
 
-      const parser = this._urlParsers[type];
+      const parser = this._urlParsers![type];
       if (parser === undefined) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
@@ -583,7 +592,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
     }
   }
@@ -659,6 +668,35 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**

@@ -7,12 +7,12 @@
 import React, { FC } from 'react';
 
 import { EuiTabbedContent } from '@elastic/eui';
-
+import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment-timezone';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../shared_imports';
 import { TransformListRow } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -35,8 +35,13 @@ interface Props {
   item: TransformListRow;
 }
 
+type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
+
 export const ExpandedRow: FC<Props> = ({ item }) => {
-  const stateValues = { ...item.stats };
+  const {
+    ml: { formatHumanReadableDateTimeSeconds },
+  } = useAppDependencies();
+  const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;
 

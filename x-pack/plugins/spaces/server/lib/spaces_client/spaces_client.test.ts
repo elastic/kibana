@@ -242,6 +242,11 @@ describe('#getAll', () => {
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.savedObject.get('config', 'find'),
       },
+      {
+        purpose: 'shareSavedObjectsIntoSpace' as GetSpacePurpose,
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
+          mockAuthorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+      },
     ].forEach((scenario) => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
@@ -255,10 +260,12 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            privileges: [
-              { resource: savedObjects[0].id, privilege, authorized: false },
-              { resource: savedObjects[1].id, privilege, authorized: false },
-            ],
+            privileges: {
+              kibana: [
+                { resource: savedObjects[0].id, privilege, authorized: false },
+                { resource: savedObjects[1].id, privilege, authorized: false },
+              ],
+            },
           });
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
@@ -293,7 +300,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            [privilege]
+            { kibana: [privilege] }
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
             username,
@@ -313,10 +320,12 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            privileges: [
-              { resource: savedObjects[0].id, privilege, authorized: true },
-              { resource: savedObjects[1].id, privilege, authorized: false },
-            ],
+            privileges: {
+              kibana: [
+                { resource: savedObjects[0].id, privilege, authorized: true },
+                { resource: savedObjects[1].id, privilege, authorized: false },
+              ],
+            },
           });
           const mockInternalRepository = {
             find: jest.fn().mockReturnValue({
@@ -352,7 +361,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            [privilege]
+            { kibana: [privilege] }
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
           expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
@@ -446,9 +455,9 @@ describe('#canEnumerateSpaces', () => {
       expect(canEnumerateSpaces).toEqual(false);
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
 
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -481,9 +490,9 @@ describe('#canEnumerateSpaces', () => {
       expect(canEnumerateSpaces).toEqual(true);
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
 
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -598,7 +607,9 @@ describe('#get', () => {
       await expect(client.get(id)).rejects.toThrowErrorMatchingSnapshot();
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, mockAuthorization.actions.login);
+      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, {
+        kibana: mockAuthorization.actions.login,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'get', [
         id,
       ]);
@@ -636,7 +647,9 @@ describe('#get', () => {
 
       expect(space).toEqual(expectedSpace);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, mockAuthorization.actions.login);
+      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, {
+        kibana: mockAuthorization.actions.login,
+      });
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [
@@ -881,9 +894,9 @@ describe('#create', () => {
 
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'create');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -934,9 +947,9 @@ describe('#create', () => {
       });
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'create');
     });
@@ -984,9 +997,9 @@ describe('#create', () => {
       expect(mockInternalRepository.create).not.toHaveBeenCalled();
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'create');
     });
@@ -1123,9 +1136,9 @@ describe('#update', () => {
 
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'update');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1162,9 +1175,9 @@ describe('#update', () => {
       expect(actualSpace).toEqual(expectedReturnedSpace);
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockInternalRepository.update).toHaveBeenCalledWith('space', id, attributes);
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -1348,9 +1361,9 @@ describe('#delete', () => {
 
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'delete');
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1384,9 +1397,9 @@ describe('#delete', () => {
 
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
@@ -1424,9 +1437,9 @@ describe('#delete', () => {
 
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
-        mockAuthorization.actions.space.manage
-      );
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith({
+        kibana: mockAuthorization.actions.space.manage,
+      });
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.deleteByNamespace).toHaveBeenCalledWith(id);

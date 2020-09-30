@@ -25,12 +25,12 @@ export const OverviewAgentSection = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTitle', {
-          defaultMessage: 'Fleet',
+        title={i18n.translate('xpack.ingestManager.overviewPageAgentsPanelTitle', {
+          defaultMessage: 'Agents',
         })}
         tooltip={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTooltip', {
           defaultMessage:
-            'Use Fleet to enroll agents and manage their configurations from a central location.',
+            'Use Fleet to enroll agents and manage their policies from a central location.',
         })}
         linkTo={getHref('fleet_agent_list')}
         linkToText={i18n.translate('xpack.ingestManager.overviewPageFleetPanelAction', {

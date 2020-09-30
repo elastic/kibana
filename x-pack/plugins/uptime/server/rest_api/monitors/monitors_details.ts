@@ -19,8 +19,11 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       dateEnd: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
+
+    const alertsClient = context.alerting?.getAlertsClient();
+
     return response.ok({
       body: {
         ...(await libs.requests.getMonitorDetails({
@@ -29,6 +32,7 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
           monitorId,
           dateStart,
           dateEnd,
+          alertsClient,
         })),
       },
     });

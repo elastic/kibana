@@ -17,7 +17,7 @@
  * under the License.
  */
 import { useEffect, useState } from 'react';
-import { IndexPattern } from '../../../kibana_services';
+import { IndexPattern, getServices } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -53,7 +53,6 @@ export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<
  * Custom react hook for querying a single doc in ElasticSearch
  */
 export function useEsDocSearch({
-  esClient,
   id,
   index,
   indexPatternId,
@@ -69,12 +68,18 @@ export function useEsDocSearch({
         const indexPatternEntity = await indexPatternService.get(indexPatternId);
         setIndexPattern(indexPatternEntity);
 
-        const { hits } = await esClient.search({
-          index,
-          body: buildSearchBody(id, indexPatternEntity),
-        });
+        const { rawResponse } = await getServices()
+          .data.search.search({
+            params: {
+              index,
+              body: buildSearchBody(id, indexPatternEntity),
+            },
+          })
+          .toPromise();
 
-        if (hits && hits.hits && hits.hits[0]) {
+        const hits = rawResponse.hits;
+
+        if (hits?.hits?.[0]) {
           setStatus(ElasticRequestState.Found);
           setHit(hits.hits[0]);
         } else {
@@ -91,6 +96,6 @@ export function useEsDocSearch({
       }
     }
     requestData();
-  }, [esClient, id, index, indexPatternId, indexPatternService]);
+  }, [id, index, indexPatternId, indexPatternService]);
   return [status, hit, indexPattern];
 }

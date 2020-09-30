@@ -35,11 +35,17 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
 }) => {
   const { retention = {} } = policy;
 
-  const updatePolicyRetention = (updatedFields: Partial<SlmPolicyPayload['retention']>): void => {
+  const updatePolicyRetention = (
+    updatedFields: Partial<SlmPolicyPayload['retention']>,
+    validationHelperData = {}
+  ): void => {
     const newRetention = { ...retention, ...updatedFields };
-    updatePolicy({
-      retention: newRetention,
-    });
+    updatePolicy(
+      {
+        retention: newRetention,
+      },
+      validationHelperData
+    );
   };
 
   // State for touched inputs

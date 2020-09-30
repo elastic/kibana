@@ -7,6 +7,7 @@
 import {
   DESCRIPTION,
   ENDPOINT_TYPE,
+  LIST_ID,
   META,
   NAME,
   NAMESPACE_TYPE,
@@ -25,4 +26,23 @@ export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema =>
   tags: [],
   type: ENDPOINT_TYPE,
   version: VERSION,
+});
+
+/**
+ * Useful for end to end testing
+ */
+export const getCreateExceptionListMinimalSchemaMock = (): CreateExceptionListSchema => ({
+  description: DESCRIPTION,
+  list_id: LIST_ID,
+  name: NAME,
+  type: ENDPOINT_TYPE,
+});
+
+/**
+ * Useful for end to end testing
+ */
+export const getCreateExceptionListMinimalSchemaMockWithoutId = (): CreateExceptionListSchema => ({
+  description: DESCRIPTION,
+  name: NAME,
+  type: ENDPOINT_TYPE,
 });

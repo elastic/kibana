@@ -20,12 +20,13 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { PathConfigType } from '../path';
+import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -92,6 +93,12 @@ export type PluginName = string;
 
 /** @public */
 export type PluginOpaqueId = symbol;
+
+/** @internal */
+export interface PluginDependencies {
+  asNames: ReadonlyMap<PluginName, PluginName[]>;
+  asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
 
 /**
  * Describes the set of required and optional properties plugin can define in its
@@ -255,8 +262,9 @@ export interface Plugin<
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
+  savedObjects: ['maxImportPayloadBytes'] as const,
 };
 
 /**
@@ -266,6 +274,7 @@ export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
 /**
@@ -278,6 +287,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {

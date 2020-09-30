@@ -36,15 +36,12 @@ import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
-
-import { useWithSource } from '../../../../../common/containers/source';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -71,8 +68,9 @@ import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_o
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -88,6 +86,9 @@ import { showGlobalFilters } from '../../../../../timelines/components/timeline/
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
+import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -123,21 +124,23 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   setAbsoluteRangeDatePicker,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    hasIndexWrite,
-    signalIndexName,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      hasIndexWrite,
+      signalIndexName,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId } = useParams();
+  const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
@@ -161,8 +164,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
-  const hasMlPermissions =
-    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   // persist rule until refresh is complete
@@ -263,10 +265,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [rule, ruleDetailTab]
   );
 
-  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
-    signalIndexName,
-  ]);
-
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -306,7 +304,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [setShowBuildingBlockAlerts]
   );
 
-  const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
+  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionIdentifiers[];
@@ -348,6 +346,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     return null;
   }
 
+  const defaultRuleStackByOption: AlertsHistogramOption = {
+    text: 'event.category',
+    value: 'event.category',
+  };
+
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
@@ -388,7 +391,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiToolTip
                       position="top"
                       content={
-                        rule?.type === 'machine_learning' && !hasMlPermissions
+                        isMlRule(rule?.type) && !hasMlPermissions
                           ? detectionI18n.ML_RULES_DISABLED_MESSAGE
                           : undefined
                       }
@@ -483,6 +486,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     signalIndexName={signalIndexName}
                     setQuery={setQuery}
                     stackByOptions={alertsHistogramOptions}
+                    defaultStackByOption={defaultRuleStackByOption}
                     to={to}
                     updateDateRange={updateDateRangeCallback}
                   />
@@ -498,7 +502,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    signalsIndex={signalIndexName ?? ''}
                     to={to}
                   />
                 )}

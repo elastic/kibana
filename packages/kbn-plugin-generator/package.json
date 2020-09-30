@@ -1,14 +1,26 @@
 {
   "name": "@kbn/plugin-generator",
-  "license": "Apache-2.0",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "scripts": {
+    "kbn:bootstrap": "node scripts/build",
+    "kbn:watch": "node scripts/build --watch"
+  },
   "dependencies": {
-    "chalk": "^4.1.0",
-    "dedent": "^0.7.0",
+    "@kbn/dev-utils": "1.0.0",
+    "ejs": "^3.1.5",
     "execa": "^4.0.2",
-    "getopts": "^2.2.4",
-    "lodash": "^4.17.15",
-    "sao": "^0.22.12"
+    "inquirer": "^7.3.3",
+    "normalize-path": "^3.0.0",
+    "prettier": "^2.1.1",
+    "vinyl": "^2.2.0",
+    "vinyl-fs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.0.4",
+    "@types/prettier": "^2.0.2",
+    "@types/inquirer": "^7.3.1"
   }
 }

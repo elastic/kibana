@@ -76,7 +76,6 @@ export const getTimelionVisualizationConfig = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as Filter[],
       visParams,
-      forceFetch: true,
     });
 
     response.visType = TIMELION_VIS_NAME;

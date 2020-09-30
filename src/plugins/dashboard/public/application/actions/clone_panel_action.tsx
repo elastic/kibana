@@ -24,7 +24,11 @@ import _ from 'lodash';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import { SavedObject } from '../../../../saved_objects/public';
-import { PanelNotFoundError, EmbeddableInput } from '../../../../embeddable/public';
+import {
+  PanelNotFoundError,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+} from '../../../../embeddable/public';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
@@ -143,7 +147,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
         },
         { references: _.cloneDeep(savedObjectToClone.references) }
       );
-      panelState.explicitInput.savedObjectId = clonedSavedObject.id;
+      (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId = clonedSavedObject.id;
     }
     this.core.notifications.toasts.addSuccess({
       title: i18n.translate('dashboard.panel.clonedToast', {

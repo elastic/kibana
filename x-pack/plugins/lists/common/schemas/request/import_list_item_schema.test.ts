@@ -25,6 +25,7 @@ describe('import_list_item_schema', () => {
 
   test('it should NOT accept an undefined for a file', () => {
     const payload = getImportListItemSchemaMock();
+    // @ts-expect-error
     delete payload.file;
     const decoded = importListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
