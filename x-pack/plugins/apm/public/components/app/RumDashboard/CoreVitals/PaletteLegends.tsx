@@ -90,7 +90,6 @@ export function PaletteLegends({
             <StyledSpan darkMode={darkMode}>
               <PaletteLegend color={color}>
                 <EuiText size="xs">
-                  {labels[ind]} ({ranks?.[ind]}%)
                   <FormattedMessage
                     id="xpack.apm.rum.coreVitals.paletteLegend.rankPercentage"
                     defaultMessage="{labelsInd} ({ranksInd}%)"
