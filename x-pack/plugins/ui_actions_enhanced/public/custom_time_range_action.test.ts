@@ -5,7 +5,7 @@
  */
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { skip } from 'rxjs/operators';
+import { skip, take } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
@@ -27,7 +27,7 @@ const createOpenModalMock = () => {
   return mock;
 };
 
-test('Custom time range action prevents embeddable from using container time', (done) => {
+test('Custom time range action prevents embeddable from using container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -50,50 +50,48 @@ test('Custom time range action prevents embeddable from using container time', (
     (() => {}) as any
   );
 
-  Promise.all([container.untilEmbeddableLoaded('1'), container.untilEmbeddableLoaded('2')]).then(
-    () => {
-      const child1 = container.getChild<TimeRangeEmbeddable>('1');
-      expect(child1).toBeDefined();
-      expect(child1.getInput().timeRange).toEqual({ from: 'now-15m', to: 'now' });
+  await container.untilEmbeddableLoaded('1');
+  await container.untilEmbeddableLoaded('2');
 
-      const child2 = container.getChild<TimeRangeEmbeddable>('2');
-      expect(child2).toBeDefined();
-      expect(child2.getInput().timeRange).toEqual({ from: 'now-15m', to: 'now' });
+  const child1 = container.getChild<TimeRangeEmbeddable>('1');
+  expect(child1).toBeDefined();
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-15m', to: 'now' });
 
-      const openModalMock = createOpenModalMock();
+  const child2 = container.getChild<TimeRangeEmbeddable>('2');
+  expect(child2).toBeDefined();
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-15m', to: 'now' });
 
-      new CustomTimeRangeAction({
-        openModal: openModalMock,
-        commonlyUsedRanges: [],
-        dateFormat: 'MM YYY',
-      }).execute({
-        embeddable: child1,
-      });
+  const openModalMock = createOpenModalMock();
 
-      nextTick().then(() => {
-        const openModal = openModalMock.mock.calls[0][0] as ReactElement;
+  new CustomTimeRangeAction({
+    openModal: openModalMock,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
+    embeddable: child1,
+  });
 
-        const wrapper = mount(openModal);
-        wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
+  await nextTick();
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
-        findTestSubject(wrapper, 'addPerPanelTimeRangeButton').simulate('click');
+  const wrapper = mount(openModal);
+  wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
 
-        const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-          .pipe(skip(2))
-          .subscribe(() => {
-            expect(child1.getInput().timeRange).toEqual({ from: 'now-30days', to: 'now-29days' });
-            expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
-            subscription.unsubscribe();
-            done();
-          });
+  findTestSubject(wrapper, 'addPerPanelTimeRangeButton').simulate('click');
 
-        container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
-      });
-    }
-  );
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
+
+  container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-30days', to: 'now-29days' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
 });
 
-test('Removing custom time range action resets embeddable back to container time', (done) => {
+test('Removing custom time range action resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -116,61 +114,58 @@ test('Removing custom time range action resets embeddable back to container time
     (() => {}) as any
   );
 
-  Promise.all([container.untilEmbeddableLoaded('1'), container.untilEmbeddableLoaded('2')]).then(
-    () => {
-      const child1 = container.getChild<TimeRangeEmbeddable>('1');
-      const child2 = container.getChild<TimeRangeEmbeddable>('2');
+  await container.untilEmbeddableLoaded('1');
+  await container.untilEmbeddableLoaded('2');
 
-      const openModalMock = createOpenModalMock();
-      new CustomTimeRangeAction({
-        openModal: openModalMock,
-        commonlyUsedRanges: [],
-        dateFormat: 'MM YYY',
-      }).execute({
-        embeddable: child1,
-      });
+  const child1 = container.getChild<TimeRangeEmbeddable>('1');
+  const child2 = container.getChild<TimeRangeEmbeddable>('2');
 
-      nextTick().then(() => {
-        const openModal = openModalMock.mock.calls[0][0] as ReactElement;
+  const openModalMock = createOpenModalMock();
+  new CustomTimeRangeAction({
+    openModal: openModalMock,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
+    embeddable: child1,
+  });
 
-        const wrapper = mount(openModal);
-        wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
+  await nextTick();
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
-        findTestSubject(wrapper, 'addPerPanelTimeRangeButton').simulate('click');
+  const wrapper = mount(openModal);
+  wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
 
-        container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
+  findTestSubject(wrapper, 'addPerPanelTimeRangeButton').simulate('click');
 
-        new CustomTimeRangeAction({
-          openModal: openModalMock,
-          commonlyUsedRanges: [],
-          dateFormat: 'MM YYY',
-        }).execute({
-          embeddable: child1,
-        });
+  container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 
-        nextTick().then(() => {
-          const openModal2 = openModalMock.mock.calls[1][0];
+  new CustomTimeRangeAction({
+    openModal: openModalMock,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
+    embeddable: child1,
+  });
 
-          const wrapper2 = mount(openModal2);
-          findTestSubject(wrapper2, 'removePerPanelTimeRangeButton').simulate('click');
+  await nextTick();
+  const openModal2 = openModalMock.mock.calls[1][0];
 
-          const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-            .pipe(skip(2))
-            .subscribe(() => {
-              expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-              expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-              subscription.unsubscribe();
-              done();
-            });
+  const wrapper2 = mount(openModal2);
+  findTestSubject(wrapper2, 'removePerPanelTimeRangeButton').simulate('click');
 
-          container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
-        });
-      });
-    }
-  );
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
+
+  container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
 });
 
-test('Cancelling custom time range action leaves state alone', (done) => {
+test('Cancelling custom time range action leaves state alone', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -194,41 +189,39 @@ test('Cancelling custom time range action leaves state alone', (done) => {
     (() => {}) as any
   );
 
-  Promise.all([container.untilEmbeddableLoaded('1'), container.untilEmbeddableLoaded('2')]).then(
-    () => {
-      const child1 = container.getChild<TimeRangeEmbeddable>('1');
-      const child2 = container.getChild<TimeRangeEmbeddable>('2');
+  await container.untilEmbeddableLoaded('1');
+  await container.untilEmbeddableLoaded('2');
 
-      const openModalMock = createOpenModalMock();
-      new CustomTimeRangeAction({
-        openModal: openModalMock,
-        commonlyUsedRanges: [],
-        dateFormat: 'MM YYY',
-      }).execute({
-        embeddable: child1,
-      });
+  const child1 = container.getChild<TimeRangeEmbeddable>('1');
+  const child2 = container.getChild<TimeRangeEmbeddable>('2');
 
-      nextTick().then(() => {
-        const openModal = openModalMock.mock.calls[0][0] as ReactElement;
+  const openModalMock = createOpenModalMock();
+  new CustomTimeRangeAction({
+    openModal: openModalMock,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
+    embeddable: child1,
+  });
 
-        const wrapper = mount(openModal);
-        wrapper.setState({ timeRange: { from: 'now-300m', to: 'now-400m' } });
+  await nextTick();
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
-        findTestSubject(wrapper, 'cancelPerPanelTimeRangeButton').simulate('click');
+  const wrapper = mount(openModal);
+  wrapper.setState({ timeRange: { from: 'now-300m', to: 'now-400m' } });
 
-        const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-          .pipe(skip(2))
-          .subscribe(() => {
-            expect(child1.getInput().timeRange).toEqual({ from: '1', to: '2' });
-            expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
-            subscription.unsubscribe();
-            done();
-          });
+  findTestSubject(wrapper, 'cancelPerPanelTimeRangeButton').simulate('click');
 
-        container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
-      });
-    }
-  );
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
+
+  container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: '1', to: '2' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
 });
 
 test(`badge is compatible with embeddable that inherits from parent`, async () => {

@@ -110,7 +110,6 @@ describe('licensing plugin', () => {
 
         await refresh();
         await refresh();
-        await refresh();
 
         const licenses = await promise;
         expect(licenses[0].type).toBe('basic');
