@@ -5,12 +5,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CaseConnector,
-  ESCaseConnector,
-  CasesConfigureAttributes,
-  ESCasesConfigureAttributes,
-} from '../../../../common/api';
+import { CaseConnector, ESCaseConnector, ESCasesConfigureAttributes } from '../../../../common/api';
 import { mockCaseConfigure } from '../__fixtures__';
 import {
   transformCaseConnectorToEsConnector,

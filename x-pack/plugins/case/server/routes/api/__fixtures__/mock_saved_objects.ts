@@ -301,7 +301,7 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
         id: '789',
         name: 'My connector 3',
         type: '.jira',
-        fields: [],
+        fields: null,
       },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',

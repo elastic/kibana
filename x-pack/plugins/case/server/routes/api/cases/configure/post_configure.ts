@@ -54,7 +54,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             connector: {
               ...query.connector,
               // Reserve for future implementations
-              fields: [],
+              fields: null,
             },
             created_at: creationDate,
             created_by: { email, full_name, username },

@@ -79,7 +79,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           fullWidth
           data-test-subj="urgencySelect"
           options={selectOptions}
-          value={urgency}
+          value={urgency ?? undefined}
           hasNoInitialSelection
           onChange={(e) => {
             onChange('urgency', e.target.value);
@@ -102,7 +102,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               fullWidth
               data-test-subj="severitySelect"
               options={selectOptions}
-              value={severity}
+              value={severity ?? undefined}
               hasNoInitialSelection
               onChange={(e) => {
                 onChange('severity', e.target.value);
@@ -124,7 +124,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               fullWidth
               data-test-subj="impactSelect"
               options={selectOptions}
-              value={impact}
+              value={impact ?? undefined}
               hasNoInitialSelection
               onChange={(e) => {
                 onChange('impact', e.target.value);

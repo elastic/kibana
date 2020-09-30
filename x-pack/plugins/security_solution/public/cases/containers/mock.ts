@@ -61,7 +61,7 @@ export const basicCase: Case = {
   connector: {
     id: '123',
     name: 'My Connector',
-    type: '.test',
+    type: '.none' as const,
     fields: null,
   },
   description: 'Security banana Issue',
@@ -207,7 +207,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: {
     id: '123',
     name: 'My Connector',
-    type: '.test',
+    type: '.none' as const,
     fields: null,
   },
   created_at: basicCreatedAt,

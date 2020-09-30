@@ -6,6 +6,12 @@
 
 import * as rt from 'io-ts';
 
+export const ServiceNowCaseFieldsRT = rt.union([
+  rt.literal('short_description'),
+  rt.literal('description'),
+  rt.literal('comments'),
+]);
+
 export const ServiceNowFieldsRT = rt.type({
   impact: rt.union([rt.string, rt.null]),
   severity: rt.union([rt.string, rt.null]),

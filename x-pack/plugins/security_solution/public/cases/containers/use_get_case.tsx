@@ -60,7 +60,7 @@ export const initialData: Case = {
   closedBy: null,
   createdAt: '',
   comments: [],
-  connector: { ...getNoneConnector(), fields: {} },
+  connector: { ...getNoneConnector(), fields: null },
   createdBy: {
     username: '',
   },

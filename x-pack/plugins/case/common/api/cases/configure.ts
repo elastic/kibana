@@ -8,9 +8,9 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
-import { JiraFieldsRT } from '../connectors/jira';
-import { ServiceNowFieldsRT } from '../connectors/servicenow';
-import { ResilientFieldsRT } from '../connectors/resilient';
+import { JiraCaseFieldsRt } from '../connectors/jira';
+import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
+import { ResilientCaseFieldsRT } from '../connectors/resilient';
 import { ConnectorTypeFieldsRt, ConnectorTypes } from '../connectors';
 
 /*
@@ -32,9 +32,9 @@ const CaseFieldRT = rt.union([
 ]);
 
 const ThirdPartyFieldRT = rt.union([
-  JiraFieldsRT,
-  ServiceNowFieldsRT,
-  ResilientFieldsRT,
+  JiraCaseFieldsRt,
+  ServiceNowCaseFieldsRT,
+  ResilientCaseFieldsRT,
   rt.literal('not_mapped'),
 ]);
 

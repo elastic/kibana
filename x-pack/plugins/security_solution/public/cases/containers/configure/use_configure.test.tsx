@@ -20,7 +20,7 @@ const configuration: ConnectorConfiguration = {
   connector: {
     id: '456',
     name: 'My connector 2',
-    type: '.test',
+    type: '.none',
     fields: null,
   },
   closureType: 'close-by-pushing',

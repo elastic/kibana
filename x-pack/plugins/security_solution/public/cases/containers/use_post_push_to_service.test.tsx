@@ -40,7 +40,7 @@ describe('usePostPushToService', () => {
     connector: {
       id: '123',
       name: 'connector name',
-      type: '.jira',
+      type: '.jira' as const,
       fields: { issueType: 'Task', priority: 'Low', labels: [] },
     },
     updateCase,
@@ -155,8 +155,8 @@ describe('usePostPushToService', () => {
       connector: {
         name: 'connector name',
         id: 'none',
-        type: '.none',
-        fields: {},
+        type: '.none' as const,
+        fields: null,
       },
       updateCase,
     };
@@ -217,7 +217,7 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: '.test',
+      type: '.jira' as const,
       fields: { issueType: 'Task', priority: 'High', labels: ['test'] },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);
@@ -235,7 +235,7 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: '.test',
+      type: '.jira' as const,
       fields: { issueType: 'Task', priority: 'High', labels: [] },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);

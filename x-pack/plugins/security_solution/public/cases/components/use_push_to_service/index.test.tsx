@@ -54,7 +54,7 @@ describe('usePushToService', () => {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: '.test',
+      type: '.none' as const,
       fields: null,
     },
     caseId,
@@ -92,7 +92,7 @@ describe('usePushToService', () => {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
-          type: '.test',
+          type: '.servicenow',
         },
         updateCase,
       });
@@ -202,7 +202,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'not-exist',
               name: 'not-exist',
-              type: '.not-exist',
+              type: '.none',
               fields: null,
             },
             isValidConnector: false,
@@ -228,7 +228,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'not-exist',
               name: 'not-exist',
-              type: '.not-exist',
+              type: '.none',
               fields: null,
             },
             isValidConnector: false,

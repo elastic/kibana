@@ -6,6 +6,12 @@
 
 import * as rt from 'io-ts';
 
+export const ResilientCaseFieldsRT = rt.union([
+  rt.literal('name'),
+  rt.literal('description'),
+  rt.literal('comments'),
+]);
+
 export const ResilientFieldsRT = rt.type({
   incidentTypes: rt.union([rt.array(rt.number), rt.null]),
   severityCode: rt.union([rt.number, rt.null]),
