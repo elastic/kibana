@@ -19,6 +19,7 @@ export const buildEventsHistogramQuery = ({
   timerange: { from, to },
   defaultIndex,
   stackByField = 'event.action',
+  threshold,
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -69,6 +70,16 @@ export const buildEventsHistogramQuery = ({
           events: dateHistogram,
         },
       },
+      ...(threshold != null
+        ? {
+            threshold: {
+              terms: {
+                field: threshold.field,
+                min_doc_count: threshold.value,
+              },
+            },
+          }
+        : {}),
     };
   };
 

@@ -36,6 +36,7 @@ export const getMatrixHistorgram = async ({
   indexNames,
   stackByField,
   startDate,
+  threshold,
   signal,
 }: GetMatrixHistogramProps): Promise<GetMatrixHistogramReturnArgs> => {
   const request = {
@@ -49,6 +50,7 @@ export const getMatrixHistorgram = async ({
       to: endDate,
     },
     stackByField,
+    threshold,
   };
 
   const response = await data.search

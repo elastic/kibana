@@ -133,10 +133,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   });
   const { getFields, getFormData, reset, submit } = form;
   const [
-    { index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex, queryBar: queryInfo },
+    {
+      index: formIndex,
+      ruleType: formRuleType,
+      queryBar: formQuery,
+      threatIndex: formThreatIndex,
+      'threshold.value': formThresholdValue,
+      'threshold.field': formThresholdField,
+    },
   ] = (useFormData({
     form,
-    watch: ['index', 'ruleType', 'queryBar', 'threatIndex'],
+    watch: ['index', 'ruleType', 'queryBar', 'threatIndex', 'threshold.value', 'threshold.field'],
   }) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
@@ -379,7 +386,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             idAria="someAriaId"
             ruleType={formRuleType}
             index={index}
-            query={queryInfo}
+            query={formQuery}
+            threshold={{ value: formThresholdValue, field: formThresholdField }}
           />
         )}
       </StepContentWrapper>

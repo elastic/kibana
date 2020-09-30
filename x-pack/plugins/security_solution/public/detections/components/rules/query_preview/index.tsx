@@ -11,7 +11,11 @@ import { getQueryFilter } from '../../../../../common/detection_engine/get_query
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { FieldValueQueryBar } from '../query_bar';
 import { RangeFilter } from '../../../../../../../../src/plugins/data/common/es_query';
-import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  Language,
+  Threshold,
+  Type,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useMatrixHistogramAsync } from '../../../../common/containers/matrix_histogram/use_matrix_histogram_async';
 import { PreviewQueryHistogram } from './histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
@@ -27,6 +31,7 @@ interface PreviewQueryProps {
   query: FieldValueQueryBar | undefined;
   index: string[];
   ruleType: Type;
+  threshold: Threshold | undefined;
 }
 
 export const PreviewQuery = ({
@@ -35,6 +40,7 @@ export const PreviewQuery = ({
   idAria,
   query,
   index,
+  threshold,
 }: PreviewQueryProps) => {
   const [toTime, setTo] = useState('');
   const [fromTime, setFrom] = useState('');
@@ -80,6 +86,10 @@ export const PreviewQuery = ({
 
   const handlePreviewCustomQuery = useCallback(
     (filterQuery: ESQueryStringQuery | undefined, to: string, from: string): void => {
+      const thresholdField =
+        threshold != null && threshold.field[0] != null
+          ? { ...threshold, field: threshold.field[0] }
+          : undefined;
       startCustomQuery({
         data,
         endDate: from,
@@ -88,9 +98,10 @@ export const PreviewQuery = ({
         indexNames: index,
         startDate: to,
         stackByField: 'event.category',
+        threshold: thresholdField,
       });
     },
-    [index, data, startCustomQuery]
+    [index, data, startCustomQuery, threshold]
   );
 
   const handlePreviewClick = useCallback(
@@ -102,14 +113,16 @@ export const PreviewQuery = ({
           : '';
       const filterQuery =
         q.trim() !== ''
-          ? ((getQueryFilter(
-              q,
-              query.query.language as Language,
-              [],
-              index,
-              [],
-              true
-            ) as unknown) as ESQueryStringQuery)
+          ? {
+              ...((getQueryFilter(
+                q,
+                query.query.language as Language,
+                [],
+                index,
+                [],
+                true
+              ) as unknown) as ESQueryStringQuery),
+            }
           : undefined;
 
       if (ruleType === 'eql') {

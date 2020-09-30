@@ -20,6 +20,60 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const a = {
+  allowNoIndices: true,
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  size: 0,
+  ignoreUnavailable: true,
+  body: {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              must: [],
+              filter: [
+                { bool: { should: [{ exists: { field: 'host.name' } }], minimum_should_match: 1 } },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [{ range: { '@timestamp': { gte: 'now-90s' } } }],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [{ range: { '@timestamp': { lte: 'now' } } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          { match_all: {} },
+        ],
+      },
+    },
+    aggregations: { threshold: { terms: { field: 'source.ip', min_doc_count: 11 } } },
+    sort: [{ '@timestamp': { order: 'asc' } }],
+  },
+};
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 

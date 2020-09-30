@@ -12,6 +12,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
+import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -70,6 +71,7 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
+  threshold?: Threshold | undefined;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

@@ -63,6 +63,7 @@ export const buildAlertsHistogramQuery = ({
         },
       },
     };
+
     return {
       alertsGroup: {
         terms: {
