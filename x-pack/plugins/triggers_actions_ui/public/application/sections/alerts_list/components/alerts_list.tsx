@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
@@ -43,7 +45,11 @@ import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import { AlertExecutionStatusValues, ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatus,
+  AlertExecutionStatusValues,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 
 const ENTER_KEY = 13;
@@ -85,7 +91,16 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
-  const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>({});
+  const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
+    AlertExecutionStatusValues.reduce(
+      (prev: Record<string, number>, status: string) =>
+        ({
+          ...prev,
+          [status]: 0,
+        } as Record<string, number>),
+      {}
+    )
+  );
   const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
@@ -100,13 +115,14 @@ export const AlertsList: React.FunctionComponent = () => {
 
   useEffect(() => {
     loadAlertsData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypesState, page, searchText]);
-
-  useEffect(() => {
-    loadAlertsData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(typesFilter), JSON.stringify(actionTypesFilter), JSON.stringify(alertStatusesFilter)]);
+  }, [
+    alertTypesState,
+    page,
+    searchText,
+    JSON.stringify(typesFilter),
+    JSON.stringify(actionTypesFilter),
+    JSON.stringify(alertStatusesFilter),
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -128,7 +144,6 @@ export const AlertsList: React.FunctionComponent = () => {
         setAlertTypesState({ ...alertTypesState, isLoading: false });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,7 +160,6 @@ export const AlertsList: React.FunctionComponent = () => {
         });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadAlertsData() {
@@ -161,6 +175,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypesFilter,
           alertStatusesFilter,
         });
+        await loadAlertsTotalStatuses();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -185,36 +200,35 @@ export const AlertsList: React.FunctionComponent = () => {
   }
 
   async function loadAlertsTotalStatuses() {
-    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
-    if (hasAnyAuthorizedAlertType) {
-      try {
-        AlertExecutionStatusValues.map(async (status: string) => {
-          const alertsTotalResponse = await loadAlerts({
-            http,
-            page: { index: 0, size: 0 },
-            searchText,
-            typesFilter,
-            actionTypesFilter,
-            alertStatusesFilter: [status],
-          });
-          setAlertsStatusesTotal({ ...alertsStatusesTotal, [status]: alertsTotalResponse.total });
+    let alertsStatuses = {};
+    try {
+      AlertExecutionStatusValues.forEach(async (status: string) => {
+        const alertsTotalResponse = await loadAlerts({
+          http,
+          page: { index: 0, size: 0 },
+          searchText,
+          typesFilter,
+          actionTypesFilter,
+          alertStatusesFilter: [status],
         });
-      } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
-            {
-              defaultMessage: 'Unable to load alert statuses info',
-            }
-          ),
-        });
-      }
+        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
+        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
+      });
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+          {
+            defaultMessage: 'Unable to load alert statuses info',
+          }
+        ),
+      });
     }
   }
 
   const alertsTableColumns = [
     {
-      field: 'status',
+      field: 'executionStatus',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
         { defaultMessage: 'Status' }
@@ -222,9 +236,9 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: false,
       'data-test-subj': 'alertsTableCell-status',
-      render: (status: string) => {
-        const healthColor = getHealthColor(status);
-        return <EuiHealth color={healthColor}>{status}</EuiHealth>;
+      render: (executionStatus: AlertExecutionStatus) => {
+        const healthColor = getHealthColor(executionStatus.status);
+        return <EuiHealth color={healthColor}>{executionStatus.status}</EuiHealth>;
       },
     },
     {
@@ -408,7 +422,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!dissmissAlertErrors ? (
+      {!dissmissAlertErrors && alertsStatusesTotal[AlertExecutionStatusValues[2]] > 0 ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCallOut
@@ -417,7 +431,12 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="core.ui.overlays.banner.attentionTitle"
-                  defaultMessage="There is 1 alert with an error."
+                  defaultMessage="There is {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}} with an error."
+                  values={{
+                    totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]],
+                    singleTitle: 'alert',
+                    multipleTitle: 'alerts',
+                  }}
                 />
               }
               iconType="alert"
@@ -442,23 +461,51 @@ export const AlertsList: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateDescription"
+              id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
               defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
               values={{ totalItemCount: alertsState.totalItemCount, pageSize: page.size }}
             />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">Ok: 1</EuiHealth>
+          <EuiHealth color="subdued">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
+              defaultMessage="Ok: {totalStausesOk}"
+              values={{ totalStausesOk: alertsStatusesTotal[AlertExecutionStatusValues[0]] }}
+            />
+          </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="success">Active: 0</EuiHealth>
+          <EuiHealth color="success">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
+              defaultMessage="Active: {totalStausesActive}"
+              values={{
+                totalStausesActive: alertsStatusesTotal[AlertExecutionStatusValues[1]],
+              }}
+            />
+          </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning">No data: 0</EuiHealth>
+          <EuiHealth color="warning">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesNoDataDescription"
+              defaultMessage="No data: {totalStausesNoData}"
+              values={{
+                totalStausesNoData: alertsStatusesTotal[AlertExecutionStatusValues[3]],
+              }}
+            />
+          </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="danger">Errors: 1</EuiHealth>
+          <EuiHealth color="danger">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
+              defaultMessage="Errors: {totalStausesError}"
+              values={{ totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]] }}
+            />
+          </EuiHealth>
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* Large to remain consistent with ActionsList table spacing */}

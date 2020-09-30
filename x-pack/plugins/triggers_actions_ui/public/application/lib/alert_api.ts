@@ -100,7 +100,7 @@ export async function loadAlerts({
     );
   }
   if (alertStatusesFilter && alertStatusesFilter.length) {
-    filters.push(`alert.attributes.status:(${alertStatusesFilter.join(' or ')})`);
+    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
   }
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
