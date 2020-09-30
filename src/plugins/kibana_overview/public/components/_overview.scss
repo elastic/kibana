@@ -39,9 +39,8 @@ $kbnOverviewPageWidth: 1200px;
 }
 
 // Accounting for no `flush="both"` prop on EuiButtonEmpty
-.kbnOverviewHeader__actionItem .euiButtonEmpty__content {
-  padding-left: 0;
-  padding-right: 0;
+.kbnOverviewHeader__actionButton {
+  margin-right: 0;
 }
 
 .kbnOverviewContent {
@@ -130,12 +129,9 @@ $kbnOverviewPageWidth: 1200px;
   }
 }
 
-.kbnOverviewDataAdd__actions {
-  // Accounting for no `flush="both"` prop on EuiButtonEmpty
-  .euiButtonEmpty__content {
-    padding-left: 0;
-    padding-right: 0;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.kbnOverviewDataAdd__actionButton {
+  margin-right: 0;
 }
 
 .kbnOverviewDataAdd__content,

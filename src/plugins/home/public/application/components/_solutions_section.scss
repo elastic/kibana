@@ -50,20 +50,20 @@
     @include euiSlightShadowHover;
     transform: translateY(-2px);
 
-    .euiTitle {
+    .homSolutionPanel__title {
       text-decoration: underline;
     }
   }
+}
 
-  &,
-  .euiPanel {
-    display: flex;
-    flex-direction: column;
-  }
+.homSolutionPanel,
+.homSolutionPanel__inner {
+  display: flex;
+  flex-direction: column;
+}
 
-  .euiPanel {
-    overflow: hidden;
-  }
+.homSolutionPanel__inner {
+  overflow: hidden;
 }
 
 .homSolutionPanel__header {

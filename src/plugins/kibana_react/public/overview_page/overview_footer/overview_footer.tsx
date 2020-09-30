@@ -51,8 +51,10 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
     defaultRoute === path ? (
       <RedirectAppLinks application={application}>
         <EuiButtonEmpty
-          iconType="home"
+          className="kbnOverviewFooter__button"
+          flush="left"
           href={'/app/management/kibana/settings#defaultRoute'}
+          iconType="home"
           size="xs"
         >
           <FormattedMessage
@@ -63,6 +65,8 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
       </RedirectAppLinks>
     ) : (
       <EuiButtonEmpty
+        className="kbnOverviewFooter__button"
+        flush="left"
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
@@ -82,25 +86,30 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
     );
 
   return (
-    <footer className={`kbnOverviewFooter`}>
+    <footer className="kbnOverviewFooter">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {isAdvancedSettingsEnabled ? defaultRoutebutton : null}
+          <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <RedirectAppLinks application={application}>
-            <EuiButtonEmpty
-              data-test-subj="allPlugins"
-              href={'/app/home#/feature_directory'}
-              size="xs"
-              iconType="apps"
-            >
-              <FormattedMessage
-                id="kibana-react.overviewFooter.appDirectoryButtonLabel"
-                defaultMessage="View app directory"
-              />
-            </EuiButtonEmpty>
-          </RedirectAppLinks>
+          <div>
+            <RedirectAppLinks application={application}>
+              <EuiButtonEmpty
+                className="kbnOverviewFooter__button"
+                data-test-subj="allPlugins"
+                flush="left"
+                href="/app/home#/feature_directory"
+                iconType="apps"
+                size="xs"
+              >
+                <FormattedMessage
+                  id="kibana-react.overviewFooter.appDirectoryButtonLabel"
+                  defaultMessage="View app directory"
+                />
+              </EuiButtonEmpty>
+            </RedirectAppLinks>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </footer>

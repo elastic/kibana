@@ -17,12 +17,9 @@
  * under the License.
  */
 
-.homDataAdd__actions {
-  // Accounting for no `flush="both"` prop on EuiButtonEmpty
-  .euiButtonEmpty__content {
-    padding-left: 0;
-    padding-right: 0;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.homDataAdd__actionButton {
+  margin-right: 0;
 }
 
 .homDataAdd__content .euiIcon__fillSecondary {

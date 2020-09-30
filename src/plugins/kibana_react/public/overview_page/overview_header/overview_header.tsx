@@ -46,7 +46,12 @@ export const OverviewHeader: FC<Props> = ({ title, showManagementLink, showDevTo
         <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
           <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
             <RedirectAppLinks application={application}>
-              <EuiButtonEmpty href={'/app/home#/tutorial_directory'} iconType="indexOpen">
+              <EuiButtonEmpty
+                className="kbnOverviewHeader__actionButton"
+                flush="left"
+                href={'/app/home#/tutorial_directory'}
+                iconType="indexOpen"
+              >
                 {i18n.translate('kibana-react.overviewHeader.addDataButtonLabel', {
                   defaultMessage: 'Add data',
                 })}
@@ -57,7 +62,12 @@ export const OverviewHeader: FC<Props> = ({ title, showManagementLink, showDevTo
           {showManagementLink && isManagementEnabled ? (
             <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
               <RedirectAppLinks application={application}>
-                <EuiButtonEmpty iconType="gear" href={'/app/management'}>
+                <EuiButtonEmpty
+                  className="kbnOverviewHeader__actionButton"
+                  flush="left"
+                  iconType="gear"
+                  href={'/app/management'}
+                >
                   {i18n.translate('kibana-react.overviewHeader.stackManagementButtonLabel', {
                     defaultMessage: 'Manage',
                   })}
@@ -69,7 +79,12 @@ export const OverviewHeader: FC<Props> = ({ title, showManagementLink, showDevTo
           {showDevToolsLink && isDevToolsEnabled ? (
             <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
               <RedirectAppLinks application={application}>
-                <EuiButtonEmpty iconType="wrench" href={'/app/dev_tools#/console'}>
+                <EuiButtonEmpty
+                  className="kbnOverviewHeader__actionButton"
+                  flush="left"
+                  iconType="wrench"
+                  href={'/app/dev_tools#/console'}
+                >
                   {i18n.translate('kibana-react.overviewHeader.devToolsButtonLabel', {
                     defaultMessage: 'Dev tools',
                   })}
