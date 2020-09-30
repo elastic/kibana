@@ -7,10 +7,9 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-
+import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
@@ -72,18 +71,18 @@ export const Groups: React.FC = () => {
 
   if (newGroup && hasMessages) {
     messages[0].description = (
-      <Link to={getGroupPath(newGroup.id)}>
-        <EuiButton color="primary">Manage Group</EuiButton>
-      </Link>
+      <EuiLinkButton to={getGroupPath(newGroup.id)} color="primary">
+        Manage Group
+      </EuiLinkButton>
     );
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
   const inviteUsersButton =
     !isFederatedAuth && canCreateInvitations ? (
-      <Link to={USERS_PATH}>
-        <EuiButton data-test-subj="InviteUsersButton">Invite users</EuiButton>
-      </Link>
+      <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
+        Invite users
+      </EuiLinkButton>
     ) : null;
 
   const headerAction = (

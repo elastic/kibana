@@ -6,12 +6,12 @@
 
 import React from 'react';
 import moment from 'moment';
-import { Link } from 'react-router-dom';
 import { useValues } from 'kea';
 
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
+import { EuiLink } from '../../../../shared/react_router_helpers';
 
 import { IGroup } from '../../../types';
 
@@ -42,9 +42,9 @@ export const GroupRow: React.FC<IGroup> = ({
     <EuiTableRow data-test-subj="GroupsRow">
       <EuiTableRowCell>
         <strong>
-          <Link to={getGroupPath(id)}>
+          <EuiLink to={getGroupPath(id)}>
             <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
-          </Link>
+          </EuiLink>
         </strong>
         <br />
         <small>Last updated {dateDisplay(updatedAt)}</small>
@@ -71,9 +71,9 @@ export const GroupRow: React.FC<IGroup> = ({
       )}
       <EuiTableRowCell>
         <strong>
-          <Link to={getGroupPath(id)}>
+          <EuiLink to={getGroupPath(id)}>
             <EuiIcon type="pencil" />
-          </Link>
+          </EuiLink>
         </strong>
       </EuiTableRowCell>
     </EuiTableRow>

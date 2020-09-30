@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -24,6 +23,8 @@ import {
   EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
+
+import { EuiButton as EuiLinkButton } from '../../../../shared/react_router_helpers';
 
 import { IGroup } from '../../../types';
 import { ORG_SOURCES_PATH } from '../../../routes';
@@ -62,11 +63,9 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
   const sourcesButton = (
-    <Link to={ORG_SOURCES_PATH}>
-      <EuiButton fill color="primary">
-        Add a Shared Source
-      </EuiButton>
-    </Link>
+    <EuiLinkButton to={ORG_SOURCES_PATH} fill color="primary">
+      Add a Shared Source
+    </EuiLinkButton>
   );
 
   const emptyState = (
@@ -112,7 +111,7 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
                 <EuiButtonEmpty onClick={handleClose}>Cancel</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton disabled={false} onClick={saveItems} fill>
+                <EuiButton isDisabled={false} onClick={saveItems} fill>
                   Update
                 </EuiButton>
               </EuiFlexItem>
