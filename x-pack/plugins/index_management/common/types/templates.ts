@@ -33,7 +33,7 @@ export interface TemplateSerialized {
 export interface TemplateDeserialized {
   name: string;
   indexPatterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
