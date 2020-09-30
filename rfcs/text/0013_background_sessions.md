@@ -97,7 +97,9 @@ export enum BackgroundSessionStatus {
 ### Saved Object Structure
 
 The saved object created for a background session will be scoped to a single space, and will be a `hidden` saved object
-(so that it doesn't show in the management listings). 
+(so that it doesn't show in the management listings). We will provide a separate interface for users to manage their own
+background sessions (which will use the `list`, `expire`, and `extend` methods described below, which will be restricted
+per-user).
 
 ```ts
 interface BackgroundSessionAttributes extends SavedObjectAttributes {
