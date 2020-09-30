@@ -27,6 +27,12 @@ import { i18n } from '@kbn/i18n';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
+import {
+  esFilters,
+  indexPatterns as indexPatternsUtils,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+} from '../../../../data/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
@@ -34,7 +40,6 @@ import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
@@ -65,13 +70,8 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
+import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
-import {
-  esFilters,
-  indexPatterns as indexPatternsUtils,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-} from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -801,18 +801,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
 
-        const fetchError = getPainlessError(error);
+        $scope.fetchStatus = fetchStatuses.NO_RESULTS;
+        $scope.rows = [];
 
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
-            }),
-            toastMessage: error.shortMessage || error.body?.message,
-          });
-        }
+        data.search.showError(error);
       });
   };
 
@@ -975,7 +967,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
-    $scope.indexPattern.popularizeField(field, 1);
+    const { indexPattern } = $scope;
+
+    popularizeField(indexPattern, field.name, indexPatterns);
     const newFilters = esFilters.generateFilters(
       filterManager,
       field,
@@ -988,7 +982,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.addColumn = function addColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
@@ -996,7 +991,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.removeColumn = function removeColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
