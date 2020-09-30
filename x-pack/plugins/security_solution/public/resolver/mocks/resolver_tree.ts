@@ -307,6 +307,15 @@ export function mockTreeWithNoProcessEvents(): ResolverTree {
   };
 }
 
+/**
+ * first ID (to check in the mock data access layer)
+ */
+export const firstRelatedEventID = 'id of first related event';
+/**
+ * second ID (to check in the mock data access layer)
+ */
+export const secondRelatedEventID = 'id of second related event';
+
 export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
   originID,
   firstChildID,
@@ -326,14 +335,14 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     mockEndpointEvent({
       entityID: originID,
       parentEntityID,
-      eventID: 'first related event',
+      eventID: firstRelatedEventID,
       eventType: 'access',
       eventCategory: 'registry',
     }),
     mockEndpointEvent({
       entityID: originID,
       parentEntityID,
-      eventID: 'second related event',
+      eventID: secondRelatedEventID,
       eventType: 'access',
       eventCategory: 'registry',
     }),
