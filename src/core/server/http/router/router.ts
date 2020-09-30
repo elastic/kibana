@@ -40,7 +40,8 @@ import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
-interface RouterRoute {
+/** @internal */
+export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;

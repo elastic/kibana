@@ -290,6 +290,10 @@ export interface InternalHttpServiceSetup
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
+  notReadyServer?: {
+    registerRoutes(path: string, callback: (router: IRouter) => void): void;
+    // createRouter(path: string): IRouter;
+  };
 }
 
 /** @public */
