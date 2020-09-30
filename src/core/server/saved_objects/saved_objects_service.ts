@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 import { first, filter, take, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -403,11 +402,7 @@ export class SavedObjectsService
       ).toPromise();
 
       this.logger.info('Starting saved objects migrations');
-      const migrationSpan = apm.startSpan('saved_objects.migration', 'migration');
       await migrator.runMigrations();
-      if (migrationSpan) {
-        migrationSpan.end();
-      }
     }
 
     const createRepository = (
