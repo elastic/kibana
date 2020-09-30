@@ -5,11 +5,9 @@
  */
 
 import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
 
-export interface JiraActionConnector {
-  config: JiraConfig;
-  secrets: JiraSecrets;
-}
+export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 
 export interface JiraActionParams {
   subAction: string;
@@ -29,14 +27,14 @@ interface IncidentConfiguration {
   mapping: CasesConfigurationMapping[];
 }
 
-interface JiraConfig {
+export interface JiraConfig {
   apiUrl: string;
   projectKey: string;
   incidentConfiguration?: IncidentConfiguration;
   isCaseOwned?: boolean;
 }
 
-interface JiraSecrets {
+export interface JiraSecrets {
   email: string;
   apiToken: string;
 }

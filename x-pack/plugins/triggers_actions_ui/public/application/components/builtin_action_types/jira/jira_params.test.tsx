@@ -11,6 +11,7 @@ import { coreMock } from 'src/core/public/mocks';
 
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { ActionConnector } from '../../../../types';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
@@ -33,7 +34,7 @@ const actionParams = {
     externalId: null,
   },
 };
-const connector = {
+const connector: ActionConnector = {
   secrets: {},
   config: {},
   id: 'test',
