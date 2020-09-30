@@ -27,7 +27,8 @@
     "spaces",
     "usageCollection",
     "lists",
-    "home"
+    "home",
+    "telemetry"
   ],
   "server": true,
   "ui": true,
