@@ -224,26 +224,34 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       state.prevLocationArr,
       params.trackingEvent
     );
+    const tempMovedEntities = movedEntities[0];
 
     // Create alert instances
-    movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
+    [tempMovedEntities].forEach(({ entityName, currLocation, prevLocation }) => {
       const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || '';
       const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || '';
       services
         .alertInstanceFactory(`${entityName}-${toBoundaryName || currLocation.shapeId}`)
         .scheduleActions(ActionGroupId, {
           entityId: entityName,
-          timeOfDetection: currIntervalEndTime,
-          crossingLine: [prevLocation.location, currLocation.location],
+          timeOfDetection: new Date(currIntervalEndTime).getTime(),
+          crossingLine: `LINESTRING (
+            ${prevLocation.location[0]} ${prevLocation.location[1]},
+            ${currLocation.location[0]} ${currLocation.location[1]}
+          )`,
 
-          toEntityLocation: currLocation.location,
+          toEntityLocation: `POINT (
+            ${currLocation.location[0]} ${currLocation.location[1]}
+          )`,
           toEntityDateTime: currLocation.date,
           toEntityDocumentId: currLocation.docId,
 
           toBoundaryId: currLocation.shapeId,
           toBoundaryName,
 
-          fromEntityLocation: prevLocation.location,
+          fromEntityLocation: `POINT (
+            ${prevLocation.location[0]} ${prevLocation.location[1]}
+          )`,
           fromEntityDateTime: prevLocation.date,
           fromEntityDocumentId: prevLocation.docId,
 
