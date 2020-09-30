@@ -50,4 +50,3 @@ module.exports.getConfig = (serviceName) => {
   }
   return {};
 };
-module.exports.isKibanaDistributable = isKibanaDistributable;
