@@ -39,7 +39,9 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   };
 
   const oldIndexFields = usePrevious(indexFields);
-  const fields = useRef({
+  const fields = useRef<{
+    indexFields: IFieldType[];
+  }>({
     indexFields: [],
   });
   useEffect(() => {

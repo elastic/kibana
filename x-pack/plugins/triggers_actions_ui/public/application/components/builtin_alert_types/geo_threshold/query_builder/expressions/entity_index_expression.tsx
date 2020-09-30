@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  Fragment,
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +53,10 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   };
 
   const oldIndexPattern = usePrevious(indexPattern);
-  const fields = useRef({
+  const fields = useRef<{
+    dateFields: IFieldType[];
+    geoFields: IFieldType[];
+  }>({
     dateFields: [],
     geoFields: [],
   });

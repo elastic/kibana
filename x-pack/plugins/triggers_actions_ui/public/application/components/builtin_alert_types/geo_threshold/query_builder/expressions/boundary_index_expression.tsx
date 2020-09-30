@@ -55,7 +55,10 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   };
 
   const oldIndexPattern = usePrevious(boundaryIndexPattern);
-  const fields = useRef({
+  const fields = useRef<{
+    geoFields: IFieldType[];
+    boundaryNameFields: IFieldType[];
+  }>({
     geoFields: [],
     boundaryNameFields: [],
   });
