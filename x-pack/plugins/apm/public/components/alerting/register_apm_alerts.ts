@@ -23,6 +23,17 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing for the following configuration:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Triggered value: \\{\\{context.triggerValue\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -38,6 +49,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing for the following configuration:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Triggered value: \\{\\{context.triggerValue\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -53,6 +76,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing for the following configuration:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Triggered value: \\{\\{context.triggerValue\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -68,5 +103,16 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing for the following configuration:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}`,
+      }
+    ),
   });
 }

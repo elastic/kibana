@@ -61,6 +61,7 @@ export function registerTransactionDurationAnomalyAlertType({
         apmActionVariables.serviceName,
         apmActionVariables.transactionType,
         apmActionVariables.environment,
+        apmActionVariables.threshold,
       ],
     },
     producer: 'apm',
@@ -196,6 +197,7 @@ export function registerTransactionDurationAnomalyAlertType({
             serviceName,
             environment,
             transactionType,
+            threshold: selectedOption?.label,
           });
         }
 

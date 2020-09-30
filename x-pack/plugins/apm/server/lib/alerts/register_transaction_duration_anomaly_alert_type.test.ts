@@ -223,11 +223,13 @@ describe('Transaction duration anomaly alert', () => {
         serviceName: 'foo',
         transactionType: 'type-foo',
         environment: 'production',
+        threshold: 'minor',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: 'type-bar',
         environment: 'production',
+        threshold: 'minor',
       });
     });
 
@@ -305,21 +307,25 @@ describe('Transaction duration anomaly alert', () => {
         serviceName: 'foo',
         transactionType: undefined,
         environment: 'production',
+        threshold: 'minor',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: undefined,
         environment: 'production',
+        threshold: 'minor',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'foo',
         transactionType: undefined,
         environment: 'testing',
+        threshold: 'minor',
       });
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
         serviceName: 'bar',
         transactionType: undefined,
         environment: 'testing',
+        threshold: 'minor',
       });
     });
   });
