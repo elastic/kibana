@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './field_item.scss';
+
 import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
