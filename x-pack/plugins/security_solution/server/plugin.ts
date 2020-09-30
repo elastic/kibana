@@ -62,6 +62,7 @@ import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 
 export interface SetupPlugins {
@@ -277,9 +278,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionIndexFields',
+        securitySolutionIndexFields
       );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',

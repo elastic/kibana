@@ -24,3 +24,13 @@ export interface ActionResult {
   config: Record<string, any>;
   isPreconfigured: boolean;
 }
+
+// the result returned from an action type executor function
+export interface ActionTypeExecutorResult<Data> {
+  actionId: string;
+  status: 'ok' | 'error';
+  message?: string;
+  serviceMessage?: string;
+  data?: Data;
+  retry?: null | boolean | Date;
+}

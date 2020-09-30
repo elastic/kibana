@@ -50,14 +50,12 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
 
-  // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/storybook/*',
-
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
-  // filename is required by storybook
-  'packages/kbn-storybook/storybook_config/preview-head.html',
+  // Storybook has predetermined filesnames
+  '**/preview-body.html',
+  '**/preview-head.html',
 
   // filename required by api-extractor
   'api-documenter.json',

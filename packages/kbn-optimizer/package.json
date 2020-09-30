@@ -27,7 +27,7 @@
     "jest-diff": "^25.5.0",
     "json-stable-stringify": "^1.0.1",
     "loader-utils": "^1.2.3",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "normalize-path": "^3.0.0",
     "postcss": "^7.0.32",
     "postcss-loader": "^3.0.0",
