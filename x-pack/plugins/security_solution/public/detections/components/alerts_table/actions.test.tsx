@@ -22,7 +22,6 @@ import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { of } from 'rxjs';
 
 jest.mock('apollo-client');
 

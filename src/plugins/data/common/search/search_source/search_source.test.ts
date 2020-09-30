@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
@@ -54,16 +54,7 @@ describe('SearchSource', () => {
   let searchSourceDependencies: SearchSourceDependencies;
 
   beforeEach(() => {
-    mockSearchMethod = jest.fn(() => {
-      return new Observable((subscriber) => {
-        setTimeout(() => {
-          subscriber.next({
-            rawResponse: '',
-          });
-          subscriber.complete();
-        }, 100);
-      });
-    });
+    mockSearchMethod = jest.fn().mockResolvedValue({ rawResponse: '' });
 
     searchSourceDependencies = {
       getConfig: jest.fn(),

@@ -20,8 +20,8 @@
 import { BehaviorSubject } from 'rxjs';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
-import { ISearchSource, SearchSource } from './search_source';
-import { SearchSourceFields } from './types';
+import { SearchSource } from './search_source';
+import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
@@ -45,7 +45,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   serialize: jest.fn(),
 };
 
-export const searchSourceMock = {
+export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
 };
