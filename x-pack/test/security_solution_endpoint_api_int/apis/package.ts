@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe.skip('Endpoint package', () => {
+  describe('Endpoint package', () => {
     describe('ingested processor', () => {
       let event: Event;
       let genData: InsertedEvents;
