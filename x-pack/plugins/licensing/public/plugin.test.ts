@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { skip, take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
