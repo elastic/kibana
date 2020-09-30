@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isEqual } from 'lodash';
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -153,6 +154,8 @@ export function DiscoverSidebar({
     return null;
   }
 
+  const filterChanged = isEqual(fieldFilterState, getDefaultFieldFilter());
+
   return (
     <I18nProvider>
       <section
@@ -207,7 +210,10 @@ export function DiscoverSidebar({
                             </EuiText>
                           }
                           extraAction={
-                            <EuiNotificationBadge size="m" color="subdued">
+                            <EuiNotificationBadge
+                              color={filterChanged ? 'subdued' : 'accent'}
+                              size="m"
+                            >
                               {selectedFields.length}
                             </EuiNotificationBadge>
                           }
@@ -258,7 +264,7 @@ export function DiscoverSidebar({
                         </EuiText>
                       }
                       extraAction={
-                        <EuiNotificationBadge size="m" color="subdued">
+                        <EuiNotificationBadge size="m" color={filterChanged ? 'subdued' : 'accent'}>
                           {popularFields.length + unpopularFields.length}
                         </EuiNotificationBadge>
                       }
