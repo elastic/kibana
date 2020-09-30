@@ -7,6 +7,8 @@
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
@@ -14,7 +16,6 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timelin
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -53,6 +54,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -140,18 +142,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
-    index,
-    RuleStep.defineRule
-  );
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
 
   const [
-    {
-      browserFields: threatBrowserFields,
-      indexPatterns: threatIndexPatterns,
-      isLoading: threatIndexPatternsLoading,
-    },
-  ] = useFetchIndexPatterns(threatIndex, `${RuleStep.defineRule}/threat`);
+    threatIndexPatternsLoading,
+    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
+  ] = useFetchIndex(threatIndex);
 
   // reset form when rule type changes
   useEffect(() => {

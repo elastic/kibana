@@ -39,6 +39,7 @@ import {
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import {
@@ -66,6 +67,7 @@ export interface UpdateProperties {
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;

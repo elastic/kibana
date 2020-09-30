@@ -89,6 +89,7 @@ export class BookEmbeddable
       } else {
         this.updateOutput({
           attributes: this.attributes,
+          defaultTitle: this.attributes.title,
           hasMatch: getHasMatch(this.input.search, this.attributes),
         });
       }
@@ -125,6 +126,7 @@ export class BookEmbeddable
 
     this.updateOutput({
       attributes: this.attributes,
+      defaultTitle: this.attributes.title,
       hasMatch: getHasMatch(this.input.search, this.attributes),
     });
   }

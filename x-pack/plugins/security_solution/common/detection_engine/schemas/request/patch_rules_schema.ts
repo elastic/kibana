@@ -46,6 +46,7 @@ import {
   timestamp_override,
   risk_score_mapping,
   severity_mapping,
+  event_category_override,
 } from '../common/schemas';
 import {
   threat_index,
@@ -71,6 +72,7 @@ export const patchRulesSchema = t.exact(
     actions,
     anomaly_threshold,
     enabled,
+    event_category_override,
     false_positives,
     filters,
     from,

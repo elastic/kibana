@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -41,6 +40,7 @@ export interface NetworkKpiNetworkEventsArgs {
 interface UseNetworkKpiNetworkEvents {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -48,18 +48,18 @@ interface UseNetworkKpiNetworkEvents {
 export const useNetworkKpiNetworkEvents = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiNetworkEvents): [boolean, NetworkKpiNetworkEventsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] = useState<
     NetworkKpiNetworkEventsRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkKpiQueries.networkEvents,
     filterQuery: createFilter(filterQuery),
     id: ID,
@@ -145,7 +145,7 @@ export const useNetworkKpiNetworkEvents = ({
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -158,7 +158,7 @@ export const useNetworkKpiNetworkEvents = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);

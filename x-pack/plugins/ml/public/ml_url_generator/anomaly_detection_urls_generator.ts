@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEmpty from 'lodash/isEmpty';
-import {
+import { isEmpty } from 'lodash';
+import type {
   AnomalyDetectionQueryState,
   AnomalyDetectionUrlState,
   ExplorerAppState,
