@@ -21,9 +21,9 @@ import {
   getNumerator,
   getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import { Errors, CriterionErrors } from '../../validation';
 import { AlertsContext, ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
-import { Errors, CriterionErrors } from '../validation';
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 

@@ -24,7 +24,7 @@ import { Criteria } from './criteria';
 import { TypeSwitcher } from './type_switcher';
 import { useSourceId } from '../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
-import { Errors } from '../validation';
+import { Errors } from '../../validation';
 
 export interface ExpressionCriteria {
   field?: string;
