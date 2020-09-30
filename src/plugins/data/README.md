@@ -108,7 +108,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 
 ```
 
-### Low level search
+### Low-level search
 
 #### Default Search Strategy
 
