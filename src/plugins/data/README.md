@@ -91,7 +91,7 @@ It contains sub-services for each of those configurations:
 
 ## Search
 
-Provides access to Elasticsearch using the high level `SearchSource` API or low level `Search Strategies`.
+Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
 
 ### SearchSource
 
