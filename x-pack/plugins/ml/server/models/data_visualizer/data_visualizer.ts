@@ -627,12 +627,12 @@ export class DataVisualizer {
 
     const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
+      track_total_hits: true,
       size,
       body: searchBody,
     });
     const aggregations = body.aggregations;
-    const totalCount = get(body, ['hits', 'total'], 0);
+    const totalCount = body.hits.total.value;
     const stats = {
       totalCount,
       aggregatableExistsFields: [] as FieldData[],
@@ -694,11 +694,10 @@ export class DataVisualizer {
 
     const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
       size,
       body: searchBody,
     });
-    return body.hits.total > 0;
+    return body.hits.total.value > 0;
   }
 
   async getDocumentCountStats(
@@ -1164,7 +1163,6 @@ export class DataVisualizer {
 
     const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
       size,
       body: searchBody,
     });
@@ -1172,7 +1170,7 @@ export class DataVisualizer {
       fieldName: field,
       examples: [] as any[],
     };
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {
         // Look in the _source for the field value.

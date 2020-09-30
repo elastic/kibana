@@ -9,7 +9,6 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { saveInstalledEsRefs } from '../../packages/install';
 import * as Registry from '../../registry';
 import {
-  Dataset,
   ElasticsearchAssetType,
   EsAssetReference,
   RegistryPackage,
@@ -24,12 +23,7 @@ interface TransformInstallation {
   content: string;
 }
 
-interface TransformPathDataset {
-  path: string;
-  dataset: Dataset;
-}
-
-export const installTransformForDataset = async (
+export const installTransform = async (
   registryPackage: RegistryPackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
@@ -51,53 +45,32 @@ export const installTransformForDataset = async (
     callCluster,
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
-  // install the latest dataset
-  const datasets = registryPackage.datasets;
-  if (!datasets?.length) return [];
-  const installNameSuffix = `${registryPackage.version}`;
 
+  const installNameSuffix = `${registryPackage.version}`;
   const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
-    const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
-      transformPaths.forEach((path) => {
-        if (isDatasetTransform(path, dataset.path)) {
-          acc.push({ path, dataset });
-        }
+    const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
+      acc.push({
+        id: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        type: ElasticsearchAssetType.transform,
       });
+
       return acc;
     }, []);
-
-    const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
-      (acc, transformPathDataset) => {
-        if (transformPathDataset) {
-          acc.push({
-            id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
-            type: ElasticsearchAssetType.transform,
-          });
-        }
-        return acc;
-      },
-      []
-    );
 
     // get and save transform refs before installing transforms
     await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
 
-    const transforms: TransformInstallation[] = transformPathDatasets.map(
-      (transformPathDataset: TransformPathDataset) => {
-        return {
-          installationName: getTransformNameForInstallation(
-            transformPathDataset,
-            installNameSuffix
-          ),
-          content: getAsset(transformPathDataset.path).toString('utf-8'),
-        };
-      }
-    );
+    const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      return {
+        installationName: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        content: getAsset(path).toString('utf-8'),
+      };
+    });
 
     const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform });
+      return handleTransformInstall({ callCluster, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -123,20 +96,10 @@ export const installTransformForDataset = async (
 
 const isTransform = (path: string) => {
   const pathParts = Registry.pathParts(path);
-  return pathParts.type === ElasticsearchAssetType.transform;
+  return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
-const isDatasetTransform = (path: string, datasetName: string) => {
-  const pathParts = Registry.pathParts(path);
-  return (
-    !path.endsWith('/') &&
-    pathParts.type === ElasticsearchAssetType.transform &&
-    pathParts.dataset !== undefined &&
-    datasetName === pathParts.dataset
-  );
-};
-
-async function installTransform({
+async function handleTransformInstall({
   callCluster,
   transform,
 }: {
@@ -160,9 +123,12 @@ async function installTransform({
 }
 
 const getTransformNameForInstallation = (
-  transformDataset: TransformPathDataset,
+  registryPackage: RegistryPackage,
+  path: string,
   suffix: string
 ) => {
-  const filename = transformDataset?.path.split('/')?.pop()?.split('.')[0];
-  return `${transformDataset.dataset.type}-${transformDataset.dataset.name}-${filename}-${suffix}`;
+  const pathPaths = path.split('/');
+  const filename = pathPaths?.pop()?.split('.')[0];
+  const folderName = pathPaths?.pop();
+  return `${registryPackage.name}.${folderName}-${filename}-${suffix}`;
 };
