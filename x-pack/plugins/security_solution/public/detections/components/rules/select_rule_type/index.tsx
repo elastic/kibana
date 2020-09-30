@@ -154,7 +154,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             data-test-subj="threatMatchRuleType"
             title={i18n.THREAT_MATCH_TYPE_TITLE}
             description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="indexFlush" />}
+            icon={<EuiIcon size="l" type="list" />}
             isDisabled={
               threatMatchSelectableConfig.isDisabled && !threatMatchSelectableConfig.isSelected
             }
