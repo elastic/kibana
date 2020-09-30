@@ -13,6 +13,7 @@ import {
   getMetricsK8sAnomaliesSuccessReponsePayloadRT,
   getMetricsK8sAnomaliesRequestPayloadRT,
   MetricsK8sAnomaly,
+  Metric,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import { npStart } from '../../../../legacy_singletons';
@@ -168,7 +169,7 @@ export const useMetricsK8sAnomaliesResults = ({
   const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async () => {
+      createPromise: async (metric: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -180,6 +181,7 @@ export const useMetricsK8sAnomaliesResults = ({
           sourceId,
           queryStartTime,
           queryEndTime,
+          metric,
           sortOptions,
           {
             ...paginationOptions,
@@ -251,10 +253,6 @@ export const useMetricsK8sAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  useEffect(() => {
-    getMetricsK8sAnomalies();
-  }, [getMetricsK8sAnomalies]);
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
@@ -296,6 +294,7 @@ export const callGetMetricsK8sAnomaliesAPI = async (
   sourceId: string,
   startTime: number,
   endTime: number,
+  metric: Metric,
   sort: Sort,
   pagination: Pagination,
   datasets?: string[]
@@ -310,6 +309,7 @@ export const callGetMetricsK8sAnomaliesAPI = async (
             startTime,
             endTime,
           },
+          metric,
           sort,
           pagination,
           datasets,
