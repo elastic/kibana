@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { join } from 'path';
+import { StorybookConfig } from '@storybook/core/types';
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'embeddable',
-  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
-});
+export const defaultConfig: StorybookConfig = {
+  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
+  stories: ['../**/*.stories.tsx'],
+  typescript: {
+    reactDocgen: false,
+  },
+};
