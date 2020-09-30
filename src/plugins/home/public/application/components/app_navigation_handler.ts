@@ -24,12 +24,6 @@ export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEv
   if (event.altKey || event.metaKey || event.ctrlKey) {
     return;
   }
-  if (targetUrl.startsWith('/app/')) {
-    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl) || [];
-    if (!appId) {
-      return;
-    }
-    event.preventDefault();
-    getServices().application.navigateToApp(appId, { path });
-  }
+  event.preventDefault();
+  getServices().application.navigateToUrl(targetUrl);
 };

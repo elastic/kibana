@@ -52,6 +52,7 @@ export function FieldList({
   hasSyncedExistingFields,
   filter,
   currentIndexPatternId,
+  existFieldsInIndex,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -63,6 +64,7 @@ export function FieldList({
     typeFilter: string[];
   };
   currentIndexPatternId: string;
+  existFieldsInIndex: boolean;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -180,7 +182,7 @@ export function FieldList({
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
                     isAffectedByFieldFilter={isAffectedByFieldFilter}
                     isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                    existFieldsInIndex={!!fieldGroup.fieldCount}
+                    existFieldsInIndex={!!existFieldsInIndex}
                   />
                 }
               />

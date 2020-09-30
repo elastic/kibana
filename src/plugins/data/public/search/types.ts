@@ -21,9 +21,11 @@ import { PackageInfo } from 'kibana/server';
 import { ISearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import { ISearchGeneric, ISearchSource, SearchSourceFields } from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+
+export { ISearchStartSearchSource };
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
@@ -43,21 +45,6 @@ export interface ISearchSetup {
 }
 
 /**
- * high level search service
- * @public
- */
-export interface ISearchStartSearchSource {
-  /**
-   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
-   * @param fields
-   */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-  /**
-   * creates empty {@link SearchSource}
-   */
-  createEmpty: () => ISearchSource;
-}
-/**
  * search service
  * @public
  */
@@ -73,6 +60,8 @@ export interface ISearchStart {
    * {@link ISearchGeneric}
    */
   search: ISearchGeneric;
+
+  showError: (e: Error) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}
