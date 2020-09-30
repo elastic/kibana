@@ -393,10 +393,6 @@ It will query the list of all incomplete sessions, and check the status of each 
 
 Once there's a notification area in Kibana, we may use that mechanism to push completion \ error notifications to the client.
 
-### Feature Controls
-
-Background sessions as a feature will be enabled/disabled per role/space by an admin. When set to "all", the feature will be available in its entirety, and when set to "read" or "none", the feature will be unavailable (i.e. search requests will only continue to run while a user waits on page, with no way to continue requests in the background).
-
 ## Miscellaneous
 
 #### Relative dates and restore URLs
