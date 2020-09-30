@@ -21,7 +21,7 @@
 import { InternalCoreStart } from './internal_types';
 import { KibanaRequest } from './http/router';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { InternalSavedObjectsServiceStart } from './saved_objects';
+import { InternalSavedObjectsServiceStart, ISavedObjectTypeRegistry } from './saved_objects';
 import {
   InternalElasticsearchServiceStart,
   IScopedClusterClient,
@@ -64,6 +64,7 @@ class CoreSavedObjectsRouteHandlerContext {
     private readonly request: KibanaRequest
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
+  #typeRegistry?: ISavedObjectTypeRegistry;
 
   public get client() {
     if (this.#scopedSavedObjectsClient == null) {
@@ -73,7 +74,10 @@ class CoreSavedObjectsRouteHandlerContext {
   }
 
   public get typeRegistry() {
-    return this.savedObjectsStart.getTypeRegistry();
+    if (this.#typeRegistry == null) {
+      this.#typeRegistry = this.savedObjectsStart.getTypeRegistry();
+    }
+    return this.#typeRegistry;
   }
 }
 
