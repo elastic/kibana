@@ -79,8 +79,8 @@ describe('Mapped Colors', () => {
 
   it('should treat different formats of colors as equal', () => {
     const color = new Color(seedColors[0]);
-    const rgbColorString = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
-    const newConfig = { bar: rgbColorString };
+    const rgb = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
+    const newConfig = { bar: rgb };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'bar', 'baz', 'qux'];
