@@ -11,14 +11,14 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertDiskUsageState,
+  AlertMemoryUsageState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
-import { INDEX_PATTERN_ELASTICSEARCH, ALERT_DISK_USAGE } from '../../common/constants';
-import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
+import { INDEX_PATTERN_ELASTICSEARCH, ALERT_MEMORY_USAGE } from '../../common/constants';
+import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
@@ -30,28 +30,28 @@ interface ParamDetails {
   [key: string]: CommonAlertParamDetail;
 }
 
-export class DiskUsageAlert extends BaseAlert {
+export class MemoryUsageAlert extends BaseAlert {
   public static readonly PARAM_DETAILS: ParamDetails = {
     threshold: {
-      label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.threshold.label', {
-        defaultMessage: `Notify when disk capacity is over`,
+      label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.threshold.label', {
+        defaultMessage: `Notify when memory usage is over`,
       }),
       type: AlertParamType.Percentage,
     },
     duration: {
-      label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.duration.label', {
+      label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.duration.label', {
         defaultMessage: `Look at the average over`,
       }),
       type: AlertParamType.Duration,
     },
   };
-  public static paramDetails = DiskUsageAlert.PARAM_DETAILS;
-  public static readonly TYPE = ALERT_DISK_USAGE;
-  public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
-    defaultMessage: 'Disk Usage',
+  public static paramDetails = MemoryUsageAlert.PARAM_DETAILS;
+  public static readonly TYPE = ALERT_MEMORY_USAGE;
+  public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
+    defaultMessage: 'Memory Usage (JVM)',
   });
-  public type = DiskUsageAlert.TYPE;
-  public label = DiskUsageAlert.LABEL;
+  public type = MemoryUsageAlert.TYPE;
+  public label = MemoryUsageAlert.LABEL;
 
   protected defaultParams = {
     threshold: 90,
@@ -61,14 +61,14 @@ export class DiskUsageAlert extends BaseAlert {
   protected actionVariables = [
     {
       name: 'nodes',
-      description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.nodes', {
-        defaultMessage: 'The list of nodes reporting high disk usage.',
+      description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.nodes', {
+        defaultMessage: 'The list of nodes reporting high memory usage.',
       }),
     },
     {
       name: 'count',
-      description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.count', {
-        defaultMessage: 'The number of nodes reporting high disk usage.',
+      description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.count', {
+        defaultMessage: 'The number of nodes reporting high memory usage.',
       }),
     },
     ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -86,7 +86,7 @@ export class DiskUsageAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const { duration, threshold } = params;
-    const stats = await fetchDiskUsageNodeStats(
+    const stats = await fetchMemoryUsageNodeStats(
       callCluster,
       clusters,
       esIndexPattern,
@@ -95,10 +95,10 @@ export class DiskUsageAlert extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, nodeId, diskUsage, ccs } = stat;
+      const { clusterUuid, nodeId, memoryUsage, ccs } = stat;
       return {
         instanceKey: `${clusterUuid}:${nodeId}`,
-        shouldFire: diskUsage > threshold,
+        shouldFire: memoryUsage > threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
         clusterUuid,
@@ -108,7 +108,7 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceStates = alertInstance.state?.alertStates as AlertDiskUsageState[];
+    const alertInstanceStates = alertInstance.state?.alertStates as AlertMemoryUsageState[];
     const nodeFilter = filters?.find((filter) => filter.nodeUuid);
 
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
@@ -126,14 +126,14 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertDiskUsageState;
+    const stat = item.meta as AlertMemoryUsageState;
     if (!alertState.ui.isFiring) {
       return {
-        text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.resolvedMessage', {
-          defaultMessage: `The disk usage on node {nodeName} is now under the threshold, currently reporting at {diskUsage}% as of #resolved`,
+        text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.resolvedMessage', {
+          defaultMessage: `The JVM memory usage on node {nodeName} is now under the threshold, currently reporting at {memoryUsage}% as of #resolved`,
           values: {
             nodeName: stat.nodeName,
-            diskUsage: stat.diskUsage.toFixed(2),
+            memoryUsage: stat.memoryUsage.toFixed(2),
           },
         }),
         tokens: [
@@ -148,41 +148,41 @@ export class DiskUsageAlert extends BaseAlert {
       };
     }
     return {
-      text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.firingMessage', {
-        defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,
+      text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.firingMessage', {
+        defaultMessage: `Node #start_link{nodeName}#end_link is reporting JVM memory usage of {memoryUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          diskUsage: stat.diskUsage,
+          memoryUsage: stat.memoryUsage,
         },
       }),
       nextSteps: [
         createLink(
-          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk', {
-            defaultMessage: '#start_linkTune for disk usage#end_link',
+          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.tuneThreadPools', {
+            defaultMessage: '#start_linkTune thread pools#end_link',
           }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html`
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.identifyIndices', {
-            defaultMessage: '#start_linkIdentify large indices#end_link',
+          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.managingHeap', {
+            defaultMessage: '#start_linkManaging ES Heap#end_link',
+          }),
+          `{elasticWebsiteUrl}blog/a-heap-of-trouble`
+        ),
+        createLink(
+          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.identifyIndicesShards', {
+            defaultMessage: '#start_linkIdentify large indices/shards#end_link',
           }),
           'elasticsearch/indices',
           AlertMessageTokenType.Link
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies', {
-            defaultMessage: '#start_linkImplement ILM policies#end_link',
-          }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
-        ),
-        createLink(
-          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes', {
+          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.addMoreNodes', {
             defaultMessage: '#start_linkAdd more data nodes#end_link',
           }),
           `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment', {
+          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.resizeYourDeployment', {
             defaultMessage: '#start_linkResize your deployment (ECE)#end_link',
           }),
           `{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html`
@@ -214,22 +214,22 @@ export class DiskUsageAlert extends BaseAlert {
   ) {
     const firingNodes = alertStates.filter(
       (alertState) => alertState.ui.isFiring
-    ) as AlertDiskUsageState[];
+    ) as AlertMemoryUsageState[];
     const firingCount = firingNodes.length;
 
     if (firingCount > 0) {
-      const shortActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.shortAction', {
-        defaultMessage: 'Verify disk usage levels across affected nodes.',
+      const shortActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.shortAction', {
+        defaultMessage: 'Verify memory usage levels across affected nodes.',
       });
-      const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
+      const fullActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.fullAction', {
         defaultMessage: 'View nodes',
       });
 
       const action = `[${fullActionText}](elasticsearch/nodes)`;
       const internalShortMessage = i18n.translate(
-        'xpack.monitoring.alerts.diskUsage.firing.internalShortMessage',
+        'xpack.monitoring.alerts.memoryUsage.firing.internalShortMessage',
         {
-          defaultMessage: `Disk usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
+          defaultMessage: `Memory usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -238,9 +238,9 @@ export class DiskUsageAlert extends BaseAlert {
         }
       );
       const internalFullMessage = i18n.translate(
-        'xpack.monitoring.alerts.diskUsage.firing.internalFullMessage',
+        'xpack.monitoring.alerts.memoryUsage.firing.internalFullMessage',
         {
-          defaultMessage: `Disk usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
+          defaultMessage: `Memory usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -254,7 +254,7 @@ export class DiskUsageAlert extends BaseAlert {
         internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         nodes: firingNodes
-          .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
+          .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`)
           .join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
@@ -262,16 +262,16 @@ export class DiskUsageAlert extends BaseAlert {
         actionPlain: shortActionText,
       });
     } else {
-      const resolvedNodes = (alertStates as AlertDiskUsageState[])
+      const resolvedNodes = (alertStates as AlertMemoryUsageState[])
         .filter((state) => !state.ui.isFiring)
-        .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`);
+        .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`);
       const resolvedCount = resolvedNodes.length;
 
       if (resolvedCount > 0) {
         const internalMessage = i18n.translate(
-          'xpack.monitoring.alerts.diskUsage.resolved.internalMessage',
+          'xpack.monitoring.alerts.memoryUsage.resolved.internalMessage',
           {
-            defaultMessage: `Disk usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
+            defaultMessage: `Memory usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
             values: {
               count: resolvedCount,
               clusterName: cluster.clusterName,
@@ -311,12 +311,12 @@ export class DiskUsageAlert extends BaseAlert {
         .join(',');
       const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertDiskUsageState[] = [];
+      const newAlertStates: AlertMemoryUsageState[] = [];
 
       for (const node of nodes) {
-        const stat = node.meta as AlertDiskUsageState;
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertDiskUsageState;
-        nodeState.diskUsage = stat.diskUsage;
+        const stat = node.meta as AlertMemoryUsageState;
+        const nodeState = this.getDefaultAlertState(cluster, node) as AlertMemoryUsageState;
+        nodeState.memoryUsage = stat.memoryUsage;
         nodeState.nodeId = stat.nodeId;
         nodeState.nodeName = stat.nodeName;
 

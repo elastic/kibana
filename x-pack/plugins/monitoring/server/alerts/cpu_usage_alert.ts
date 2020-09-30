@@ -193,13 +193,13 @@ export class CpuUsageAlert extends BaseAlert {
           i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.hotThreads', {
             defaultMessage: '#start_linkCheck hot threads#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.runningTasks', {
             defaultMessage: '#start_linkCheck long running tasks#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
         ),
       ],
       tokens: [
