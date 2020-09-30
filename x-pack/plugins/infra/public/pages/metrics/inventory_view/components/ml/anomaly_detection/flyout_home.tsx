@@ -84,7 +84,7 @@ export const FlyoutHome = (props: Props) => {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.ml.anomalyFlyout.jobStatusLoadingMessage', {
-          defaultMessage: 'Checking status of metris jobs...',
+          defaultMessage: 'Checking status of metrics jobs...',
         })}
       />
     );
