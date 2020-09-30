@@ -128,9 +128,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
 
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
-    features.forEach((feature) => {
-      registerFeatureUse(feature);
-    });
+    features.forEach(registerFeatureUse);
   };
 }
 

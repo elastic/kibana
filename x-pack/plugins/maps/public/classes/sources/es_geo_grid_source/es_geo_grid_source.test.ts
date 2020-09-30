@@ -270,4 +270,29 @@ describe('ESGeoGridSource', () => {
       );
     });
   });
+
+  describe('Gold+ usage', () => {
+    it('Should have none for points', async () => {
+      expect(await geogridSource.getLicensedFeatures()).toEqual([]);
+    });
+
+    it('Should have shape-aggs for geo_shape', async () => {
+      // @ts-expect-error
+      getIndexPatternService.mockReturnValue({
+        get() {
+          return {
+            fields: {
+              getByName() {
+                return {
+                  name: geoFieldName,
+                  type: ES_GEO_FIELD_TYPE.GEO_SHAPE,
+                };
+              },
+            },
+          };
+        },
+      });
+      expect(await geogridSource.getLicensedFeatures()).toEqual([]);
+    });
+  });
 });
