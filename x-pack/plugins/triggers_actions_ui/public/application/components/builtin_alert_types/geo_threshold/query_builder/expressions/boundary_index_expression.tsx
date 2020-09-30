@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IErrorObject } from '../../../../../../types';
@@ -46,6 +46,54 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
     type: 'string',
   };
 
+  const usePrevious = <T extends unknown>(value: T): T | undefined => {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  };
+
+  const oldIndexPattern = usePrevious(boundaryIndexPattern);
+  const fields = useRef({
+    geoFields: [],
+    boundaryNameFields: [],
+  });
+  useEffect(() => {
+    if (oldIndexPattern !== boundaryIndexPattern) {
+      fields.current.geoFields =
+        (boundaryIndexPattern.fields.length &&
+          boundaryIndexPattern.fields.filter((field: IFieldType) =>
+            ES_GEO_SHAPE_TYPES.includes(field.type)
+          )) ||
+        [];
+      if (fields.current.geoFields.length) {
+        setBoundaryGeoField(fields.current.geoFields[0].name);
+      }
+
+      fields.current.boundaryNameFields = [
+        ...boundaryIndexPattern.fields.filter((field: IFieldType) => {
+          return (
+            BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
+            !field.name.startsWith('_') &&
+            !field.name.endsWith('keyword')
+          );
+        }),
+        nothingSelected,
+      ];
+      if (fields.current.boundaryNameFields.length) {
+        setBoundaryNameField(fields.current.boundaryNameFields[0].name);
+      }
+    }
+  }, [
+    BOUNDARY_NAME_ENTITY_TYPES,
+    boundaryIndexPattern,
+    nothingSelected,
+    oldIndexPattern,
+    setBoundaryGeoField,
+    setBoundaryNameField,
+  ]);
+
   const indexPopover = (
     <Fragment>
       <EuiFormRow id="geoIndexPatternSelect" fullWidth error={errors.index}>
@@ -76,13 +124,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           })}
           value={boundaryGeoField}
           onChange={setBoundaryGeoField}
-          fields={
-            (boundaryIndexPattern.fields.length &&
-              boundaryIndexPattern.fields.filter((field: IFieldType) =>
-                ES_GEO_SHAPE_TYPES.includes(field.type)
-              )) ||
-            []
-          }
+          fields={fields.current.geoFields}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -100,16 +142,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           onChange={(name) => {
             setBoundaryNameField(name === nothingSelected.name ? undefined : name);
           }}
-          fields={[
-            ...boundaryIndexPattern.fields.filter((field: IFieldType) => {
-              return (
-                BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
-                !field.name.startsWith('_') &&
-                !field.name.endsWith('keyword')
-              );
-            }),
-            nothingSelected,
-          ]}
+          fields={fields.current.boundaryNameFields}
         />
       </EuiFormRow>
     </Fragment>
