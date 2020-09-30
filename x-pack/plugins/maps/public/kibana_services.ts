@@ -19,7 +19,7 @@ export const setIsGoldPlus = (igp: boolean) => (isGoldPlus = igp);
 export const getIsGoldPlus = () => isGoldPlus;
 
 let regFeatureUse: (featureName: LICENSED_FEATURES) => void;
-export const setRegisterFeatureUse = (value) => {
+export const setRegisterFeatureUse = (value: (featureName: LICENSED_FEATURES) => void) => {
   regFeatureUse = value;
 };
 export const registerFeatureUse = (featureName: LICENSED_FEATURES) => {

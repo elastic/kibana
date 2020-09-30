@@ -6,6 +6,7 @@
 
 import { addLayer } from './layer_actions';
 import { LICENSED_FEATURES } from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
@@ -20,7 +21,7 @@ describe('layer_actions', () => {
 
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../kibana_services').registerFeatureUse = (register) => {
+      require('../kibana_services').registerFeatureUse = (register: LICENSED_FEATURES) => {
         registerFeatureUseMock(register);
       };
 
@@ -40,7 +41,7 @@ describe('layer_actions', () => {
     });
 
     it('should register feature-use', async () => {
-      const action = addLayer({ foo: 'bar' });
+      const action = addLayer(({} as unknown) as LayerDescriptor);
       await action(dispatchMock, getStoreMock);
       expect(registerFeatureUseMock).toHaveBeenCalledWith(LICENSED_FEATURES.GEO_SHAPE_AGGS);
     });

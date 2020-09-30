@@ -54,7 +54,7 @@ import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters: Adapters
+  inspectorAdapters?: Adapters
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -94,7 +94,7 @@ export function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters: Adapters): ISource {
+function createSourceInstance(sourceDescriptor: any, inspectorAdapters?: Adapters): ISource {
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);

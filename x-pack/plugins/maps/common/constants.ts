@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
+import { LicenseType } from '../../licensing/common/types';
 
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
@@ -84,7 +85,12 @@ export enum LICENSED_FEATURES {
   GEO_SHAPE_AGGS = 'GEO_SHAPE_AGGS',
 }
 
-export const LICENCED_FEATURES_DETAILS = {
+export interface LicensedFeatureDetail {
+  name: string;
+  license: LicenseType;
+}
+
+export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatureDetail> = {
   [LICENSED_FEATURES.GEO_SHAPE_AGGS]: {
     name: 'geo aggs on geo_shape fields',
     license: 'gold',
