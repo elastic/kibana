@@ -180,8 +180,15 @@ It also provides a stateful version of it on the start contract.
 which also contains the timelion APIs and backend, look at the vis_type_timelion plugin.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ui_actions/README.md[uiActions]
+|<<uiactions-plugin>>
 |An API for:
+
+- creating custom functionality (`actions`)
+- creating custom user interaction events (`triggers`)
+- attaching and detaching `actions` to `triggers`.
+- emitting `trigger` events
+- executing `actions` attached to a given `trigger`.
+- exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
@@ -524,5 +531,6 @@ in their infrastructure.
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
