@@ -32,7 +32,7 @@ import {
 } from '../../../ingest_manager/common';
 import { factory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
-import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/resolver_generator_script';
+import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 
 export async function indexHostsAndAlerts(
   client: Client,
