@@ -5,8 +5,7 @@
  */
 
 import Boom from 'boom';
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { each, get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
