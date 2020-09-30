@@ -115,6 +115,7 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
           ...step.synthetics,
           blob: action.payload.screenshot,
           screenshotLoading: false,
+          screenshotExists: !!action.payload.screenshot,
         };
         return j;
       }),
@@ -127,7 +128,11 @@ export const journeyReducer = handleActions<JourneyState[], Payload>(
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics?.step?.index === action.payload.stepIndex);
         if (!step) return j;
-        step.synthetics = { ...step?.synthetics, screenshotLoading: false };
+        step.synthetics = {
+          ...step?.synthetics,
+          screenshotLoading: false,
+          screenshotExists: false,
+        };
         // TODO: error handle
         return {
           ...j,

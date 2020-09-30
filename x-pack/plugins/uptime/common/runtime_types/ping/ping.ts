@@ -194,6 +194,8 @@ export const PingType = t.intersection([
       type: t.string,
       // ui-related field
       screenshotLoading: t.boolean,
+      // ui-related field
+      screenshotExists: t.boolean,
       blob: t.string,
       payload: t.partial({
         duration: t.number,

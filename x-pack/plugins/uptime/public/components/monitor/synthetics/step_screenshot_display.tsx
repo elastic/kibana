@@ -22,6 +22,7 @@ import { UptimeThemeContext } from '../../../contexts';
 interface StepScreenshotDisplayProps {
   isLoading?: boolean;
   screenshot?: string;
+  screenshotExists?: boolean;
   stepIndex?: number;
   fetchScreenshot: (stepIndex: number) => void;
   stepName?: string;
@@ -35,6 +36,7 @@ const POPOVER_IMG_HEIGHT = 360;
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   isLoading,
   screenshot,
+  screenshotExists,
   stepIndex,
   stepName,
   fetchScreenshot,
@@ -55,14 +57,15 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
 
   useEffect(() => {
     if (
-      screenshot === undefined &&
+      screenshotExists !== false &&
+      screenshot === '' &&
       stepIndex !== undefined &&
       intersection &&
       intersection.isIntersecting
     ) {
       fetchScreenshot(stepIndex);
     }
-  }, [fetchScreenshot, intersection, screenshot, stepIndex]);
+  }, [fetchScreenshot, intersection, screenshot, screenshotExists, stepIndex]);
 
   let content: JSX.Element | null = null;
   if (isLoading === true) {

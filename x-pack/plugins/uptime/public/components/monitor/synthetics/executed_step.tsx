@@ -49,6 +49,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
             <StepScreenshotDisplay
               isLoading={step.synthetics?.screenshotLoading}
               screenshot={step.synthetics?.blob}
+              screenshotExists={step.synthetics?.screenshotExists}
               stepIndex={step.synthetics?.step?.index}
               stepName={step.synthetics?.step?.name}
               fetchScreenshot={fetchScreenshot}
