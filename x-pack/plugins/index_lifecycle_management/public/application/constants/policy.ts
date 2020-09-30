@@ -10,7 +10,6 @@ import {
   DeletePhase,
   HotPhase,
   WarmPhase,
-  FrozenPhase,
 } from '../../../common/types';
 
 export const defaultNewHotPhase: HotPhase = {
@@ -42,17 +41,6 @@ export const defaultNewWarmPhase: WarmPhase = {
 };
 
 export const defaultNewColdPhase: ColdPhase = {
-  phaseEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  selectedReplicaCount: '',
-  freezeEnabled: false,
-  phaseIndexPriority: '0',
-  dataTierAllocationType: 'default',
-};
-
-export const defaultNewFrozenPhase: FrozenPhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',

@@ -86,38 +86,6 @@ const i18nTexts = {
         ),
       },
     },
-    frozen: {
-      default: {
-        input: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.input',
-          { defaultMessage: 'Use frozen nodes (recommended)' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.helpText',
-          { defaultMessage: 'Move data to nodes in the frozen tier.' }
-        ),
-      },
-      none: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.input',
-          { defaultMessage: 'Off' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.helpText',
-          { defaultMessage: 'Do not move data in the frozen phase.' }
-        ),
-      },
-      custom: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.customOption.input',
-          { defaultMessage: 'Custom' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.customOption.helpText',
-          { defaultMessage: 'Move data based on node attributes.' }
-        ),
-      },
-    },
   },
 };
 
