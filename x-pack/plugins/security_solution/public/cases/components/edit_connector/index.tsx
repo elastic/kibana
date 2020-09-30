@@ -117,7 +117,7 @@ export const EditConnector = React.memo(
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
       if (isValid && newData.connectorId) {
-        onSubmit(newData.connectorId, fields, noop, onError);
+        onSubmit(newData.connectorId, fields, onError, noop);
         setEditConnector(false);
       }
     }, [submit, fields, onSubmit, onError]);

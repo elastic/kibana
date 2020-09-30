@@ -113,7 +113,7 @@ describe('Create case', () => {
     await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
   });
 
-  it('should redirect to all cases on cancel click', () => {
+  it('should redirect to all cases on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -122,9 +122,9 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    expect(mockHistory.push).toHaveBeenCalledWith('/');
+    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
   });
-  it('should redirect to new case when caseData is there', () => {
+  it('should redirect to new case when caseData is there', async () => {
     const sampleId = '777777';
     usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, caseData: { id: sampleId } }));
     mount(
@@ -134,10 +134,10 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777');
+    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777'));
   });
 
-  it('should render spinner when loading', () => {
+  it('should render spinner when loading', async () => {
     usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
@@ -146,9 +146,11 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
+    await waitFor(() =>
+      expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy()
+    );
   });
-  it('Tag options render with new tags added', () => {
+  it('Tag options render with new tags added', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -156,8 +158,10 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(
-      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
-    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
+    await waitFor(() =>
+      expect(
+        wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
+      ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }])
+    );
   });
 });

@@ -76,7 +76,6 @@ export const TagList = React.memo(
         ),
       [tagOptions]
     );
-
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">

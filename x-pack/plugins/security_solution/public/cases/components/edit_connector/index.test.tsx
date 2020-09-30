@@ -38,7 +38,7 @@ const defaultProps = {
 
 describe('EditConnector ', () => {
   const sampleConnector = '123';
-  const formHookMock = getFormMock({ connector: sampleConnector });
+  const formHookMock = getFormMock({ connectorId: sampleConnector });
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
@@ -52,6 +52,7 @@ describe('EditConnector ', () => {
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     expect(
       wrapper.find(`span[data-test-subj="dropdown-connector-no-connector"]`).last().exists()
@@ -71,6 +72,7 @@ describe('EditConnector ', () => {
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
@@ -92,6 +94,7 @@ describe('EditConnector ', () => {
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
@@ -103,7 +106,7 @@ describe('EditConnector ', () => {
     wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
     await waitFor(() => {
       wrapper.update();
-      expect(formHookMock.setFieldValue).toHaveBeenCalledWith('connector', 'none');
+      expect(formHookMock.setFieldValue).toHaveBeenCalledWith('connectorId', 'none');
     });
   });
 
@@ -116,6 +119,7 @@ describe('EditConnector ', () => {
         <EditConnector {...props} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
@@ -126,7 +130,7 @@ describe('EditConnector ', () => {
     await waitFor(() => {
       wrapper.update();
       expect(formHookMock.setFieldValue).toBeCalledWith(
-        'connector',
+        'connectorId',
         defaultProps.selectedConnector
       );
     });

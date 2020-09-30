@@ -54,7 +54,7 @@ describe('usePushToService', () => {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: '.none' as const,
+      type: '.servicenow' as const,
       fields: null,
     },
     caseId,

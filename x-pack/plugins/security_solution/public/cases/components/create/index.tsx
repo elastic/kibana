@@ -17,7 +17,15 @@ import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash/fp';
 
-import { Field, Form, getUseField, useForm, UseField, useFormData } from '../../../shared_imports';
+import {
+  Field,
+  Form,
+  getUseField,
+  useForm,
+  UseField,
+  useFormData,
+  FormDataProvider,
+} from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema, FormProps } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
@@ -207,6 +215,25 @@ export const Create = React.memo(() => {
                 },
               }}
             />
+            <FormDataProvider pathsToWatch="tags">
+              {({ tags: anotherTags }) => {
+                const current: string[] = options.map((opt) => opt.label);
+                const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+                  if (!acc.includes(item)) {
+                    return [...acc, item];
+                  }
+                  return acc;
+                }, current);
+                if (!isEqual(current, newOptions)) {
+                  setOptions(
+                    newOptions.map((label: string) => ({
+                      label,
+                    }))
+                  );
+                }
+                return null;
+              }}
+            </FormDataProvider>
           </Container>
           <Container big>
             <UseField
