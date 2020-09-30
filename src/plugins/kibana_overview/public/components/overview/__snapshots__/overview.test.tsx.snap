@@ -139,7 +139,7 @@ exports[`Overview render 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibana_overview.more.title"
+                id="kibanaOverview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -404,7 +404,7 @@ exports[`Overview without features 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibana_overview.more.title"
+                id="kibanaOverview.more.title"
                 values={Object {}}
               />
             </h2>
