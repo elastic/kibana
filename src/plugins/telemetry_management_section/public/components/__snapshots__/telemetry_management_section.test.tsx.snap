@@ -80,14 +80,24 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 />
               </p>
               <p>
-                See examples of the 
-                <EuiLink
-                  onClick={[Function]}
-                >
-                  cluster data
-                </EuiLink>
-                 and
-                 
+                <FormattedMessage
+                  defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+                  id="telemetry.seeExamplesOfWhatWeCollect"
+                  values={
+                    Object {
+                      "clusterData": <EuiLink
+                        onClick={[Function]}
+                      >
+                        cluster data
+                      </EuiLink>,
+                      "endpointSecurityData": <EuiLink
+                        onClick={[Function]}
+                      >
+                        endpoint security data
+                      </EuiLink>,
+                    }
+                  }
+                />
                 <EuiLink
                   onClick={[Function]}
                 >
