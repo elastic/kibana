@@ -27,15 +27,16 @@ export async function __kbnBootstrap__() {
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
-  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig);
-  await apmSystem.setup();
-
   let i18nError: Error | undefined;
-  try {
-    await i18n.load(injectedMetadata.i18n.translationsUrl);
-  } catch (error) {
-    i18nError = error;
-  }
+  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig);
+
+  await Promise.all([
+    // eslint-disable-next-line no-console
+    apmSystem.setup().catch(console.warn),
+    i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
+      i18nError = error;
+    }),
+  ]);
 
   const coreSystem = new CoreSystem({
     injectedMetadata,
