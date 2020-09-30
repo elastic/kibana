@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './outlier_exploration.scss';
-
 import React, { useEffect, useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -13,13 +11,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingContent,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -47,6 +43,7 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
 
+import { ExpandableSection } from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
@@ -106,16 +103,6 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     fetchStats();
   }, [jobConfig?.id]);
 
-  const [isExpandedAnalysisDetails, setIsExpandedAnalysisDetails] = useState(false);
-  const toggleExpandedAnalysisDetails = () => {
-    setIsExpandedAnalysisDetails(!isExpandedAnalysisDetails);
-  };
-
-  const [isExpandedResultsTable, setIsExpandedResultsTable] = useState(true);
-  const toggleExpandedResultsTable = () => {
-    setIsExpandedResultsTable(!isExpandedResultsTable);
-  };
-
   return (
     <>
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
@@ -126,60 +113,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
 
-      <EuiPanel paddingSize="none">
-        <div className="mlSectionPanel">
-          <EuiButtonEmpty
-            onClick={toggleExpandedAnalysisDetails}
-            iconType={isExpandedAnalysisDetails ? 'arrowUp' : 'arrowDown'}
-            size="l"
-            iconSide="right"
-            flush="left"
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.analysisSectionTitle"
-              defaultMessage="Analysis"
-            />
-          </EuiButtonEmpty>
-          {expandedRowItem === undefined && <EuiLoadingContent lines={1} />}
-          {expandedRowItem !== undefined && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.exploration.analysisTypeLabel"
-                      defaultMessage="Type"
-                    />
-                  </p>
-                </EuiText>
-                <EuiBadge>{expandedRowItem.job_type}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.exploration.analysisSourceIndexLabel"
-                      defaultMessage="Source index"
-                    />
-                  </p>
-                </EuiText>
-                <EuiBadge>{expandedRowItem.config.source.index}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.exploration.analysisDestinationIndexLabel"
-                      defaultMessage="Destination index"
-                    />
-                  </p>
-                </EuiText>
-                <EuiBadge>{expandedRowItem.config.dest.index}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </div>
-        {isExpandedAnalysisDetails && (
+      <ExpandableSection
+        content={
           <>
             <EuiHorizontalRule size="full" margin="none" />
             {expandedRowItem === undefined && (
@@ -196,54 +131,60 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
               tableItems.length > 0 &&
               expandedRowItem !== undefined && <ExpandedRow item={expandedRowItem} />}
           </>
-        )}
-      </EuiPanel>
+        }
+        headerContent={
+          <>
+            {expandedRowItem === undefined && <EuiLoadingContent lines={1} />}
+            {expandedRowItem !== undefined && (
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.exploration.analysisTypeLabel"
+                        defaultMessage="Type"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiBadge>{expandedRowItem.job_type}</EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.exploration.analysisSourceIndexLabel"
+                        defaultMessage="Source index"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiBadge>{expandedRowItem.config.source.index}</EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.exploration.analysisDestinationIndexLabel"
+                        defaultMessage="Destination index"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiBadge>{expandedRowItem.config.dest.index}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        }
+        isExpanded={false}
+        title={
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.exploration.analysisSectionTitle"
+            defaultMessage="Analysis"
+          />
+        }
+      />
       <EuiSpacer size="m" />
-      <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
-        <div style={{ padding: '10px' }}>
-          <EuiButtonEmpty
-            onClick={toggleExpandedResultsTable}
-            iconType={isExpandedResultsTable ? 'arrowUp' : 'arrowDown'}
-            size="l"
-            iconSide="right"
-            flush="left"
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.explorationTableTitle"
-              defaultMessage="Results"
-            />
-          </EuiButtonEmpty>
-          {(columnsWithCharts.length === 0 || tableItems.length === 0) && (
-            <EuiLoadingContent lines={1} />
-          )}
-          {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.exploration.explorationTableTotalDocsLabel"
-                      defaultMessage="Total docs"
-                    />
-                  </p>
-                </EuiText>
-                <EuiBadge>{outlierData.rowCount}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ColorRangeLegend
-                  colorRange={colorRange}
-                  title={i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                    {
-                      defaultMessage: 'Feature influence score',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </div>
-        {isExpandedResultsTable && (
+      <ExpandableSection
+        content={
           <>
             {jobConfig !== undefined && needsDestIndexPattern && (
               <IndexPatternPrompt destIndex={jobConfig.dest.index} />
@@ -262,8 +203,47 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
                 </>
               )}
           </>
-        )}
-      </EuiPanel>
+        }
+        headerContent={
+          <>
+            {(columnsWithCharts.length === 0 || tableItems.length === 0) && (
+              <EuiLoadingContent lines={1} />
+            )}
+            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.exploration.explorationTableTotalDocsLabel"
+                        defaultMessage="Total docs"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiBadge>{outlierData.rowCount}</EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <ColorRangeLegend
+                    colorRange={colorRange}
+                    title={i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                      {
+                        defaultMessage: 'Feature influence score',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        }
+        title={
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.exploration.explorationTableTitle"
+            defaultMessage="Results"
+          />
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );
