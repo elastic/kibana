@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
 
 import { IContentSource } from '../../../types';
@@ -32,7 +34,14 @@ export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = 
       + {numOptions}
     </EuiButtonEmpty>
   );
-  const contentSourceCountHeading = <strong>{groupSources.length} Shared content sources</strong>;
+  const contentSourceCountHeading = (
+    <strong>
+      {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.contentSourceCountHeading', {
+        defaultMessage: '{numSources} shared content sources',
+        values: { numSources: groupSources.length },
+      })}
+    </strong>
+  );
 
   const sources = groupSources.map((source, index) => (
     <div className="euiFilterSelectItem user-group__item" key={index}>

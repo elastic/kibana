@@ -8,10 +8,19 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
 import { GroupsLogic } from '../groups_logic';
 import { SourcesList } from './sources_list';
+
+const FILTER_SOURCES_BUTTON_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.filterSources.buttonText',
+  {
+    defaultMessage: 'Sources',
+  }
+);
 
 export const TableFilterSourcesDropdown: React.FC = () => {
   const {
@@ -34,7 +43,7 @@ export const TableFilterSourcesDropdown: React.FC = () => {
       hasActiveFilters={filteredSources.length > 0}
       numActiveFilters={filteredSources.length}
     >
-      Sources
+      {FILTER_SOURCES_BUTTON_TEXT}
     </EuiFilterButton>
   );
 

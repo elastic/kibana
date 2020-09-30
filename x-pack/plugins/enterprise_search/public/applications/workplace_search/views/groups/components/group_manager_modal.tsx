@@ -8,6 +8,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,6 +35,37 @@ import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
+
+const CANCEL_BUTTON_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerCancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+const UPDATE_BUTTON_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdate',
+  {
+    defaultMessage: 'Update',
+  }
+);
+const ADD_SOURCE_BUTTON_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdateAddSourceButton',
+  {
+    defaultMessage: 'Add a Shared Source',
+  }
+);
+const EMPTY_STATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceEmpty.title',
+  {
+    defaultMessage: 'Whoops!',
+  }
+);
+const EMPTY_STATE_BODY = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceEmpty.body',
+  {
+    defaultMessage: 'Looks like you have not added any shared content sources yet.',
+  }
+);
 
 interface IGroupManagerModalProps {
   children: React.ReactElement;
@@ -64,7 +97,7 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
 
   const sourcesButton = (
     <EuiLinkButton to={ORG_SOURCES_PATH} fill color="primary">
-      Add a Shared Source
+      {ADD_SOURCE_BUTTON_TEXT}
     </EuiLinkButton>
   );
 
@@ -73,8 +106,8 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
       <EuiSpacer size="m" />
       <EuiEmptyPrompt
         iconType={noSharedSourcesIcon}
-        title={<h3>Whoops!</h3>}
-        body="Looks like you have not added any shared content sources yet."
+        title={<h3>{EMPTY_STATE_TITLE}</h3>}
+        body={EMPTY_STATE_BODY}
         actions={sourcesButton}
       />
     </EuiModalBody>
@@ -83,7 +116,12 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   const modalContent = (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Manage {label}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.groupManagerHeaderTitle', {
+            defaultMessage: 'Manage {label}',
+            values: { label },
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup gutterSize="s">
@@ -102,17 +140,23 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={handleSelectAll}>
-              {allSelected ? 'Deselect' : 'Select'} All
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSelectAllToggle',
+                {
+                  defaultMessage: '{action} All',
+                  values: { action: allSelected ? 'Deselect' : 'Select' },
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleClose}>Cancel</EuiButtonEmpty>
+                <EuiButtonEmpty onClick={handleClose}>{CANCEL_BUTTON_TEXT}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton isDisabled={false} onClick={saveItems} fill>
-                  Update
+                  {UPDATE_BUTTON_TEXT}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

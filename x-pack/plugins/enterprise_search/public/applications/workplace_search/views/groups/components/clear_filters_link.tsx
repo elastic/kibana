@@ -7,10 +7,18 @@
 import React from 'react';
 
 import { useActions } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { GroupsLogic } from '../groups_logic';
+
+const CLEAR_FILTERS = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.clearFilters.action',
+  {
+    defaultMessage: 'Clear Filters',
+  }
+);
 
 export const ClearFiltersLink: React.FC<{}> = () => {
   const { resetGroupsFilters } = useActions(GroupsLogic);
@@ -24,7 +32,7 @@ export const ClearFiltersLink: React.FC<{}> = () => {
           </small>
         </EuiFlexItem>
         <EuiFlexItem component="span" grow={false}>
-          <small>Clear Filters</small>
+          <small>{CLEAR_FILTERS}</small>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiLink>

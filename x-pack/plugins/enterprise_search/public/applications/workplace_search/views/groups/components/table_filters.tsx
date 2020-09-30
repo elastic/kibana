@@ -8,6 +8,8 @@ import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AppLogic } from '../../../app_logic';
@@ -16,7 +18,12 @@ import { GroupsLogic } from '../groups_logic';
 import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
 import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 
-const PLACEHOLDER = 'Filter groups by name...';
+const FILTER_GROUPS_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.filterGroups.placeholder',
+  {
+    defaultMessage: 'Filter groups by name...',
+  }
+);
 
 export const TableFilters: React.FC = () => {
   const { setFilterValue } = useActions(GroupsLogic);
@@ -34,7 +41,7 @@ export const TableFilters: React.FC = () => {
               value={filterValue}
               onChange={handleSearchChange}
               fullWidth={true}
-              placeholder={PLACEHOLDER}
+              placeholder={FILTER_GROUPS_PLACEHOLDER}
             />
           </EuiFlexItem>
           <EuiFlexItem className="user-groups-filters__filter-sources">

@@ -8,6 +8,8 @@ import React from 'react';
 import moment from 'moment';
 import { useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
@@ -22,6 +24,18 @@ import { GroupSources } from './group_sources';
 import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
+const NO_SOURCES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage',
+  {
+    defaultMessage: 'No shared content sources',
+  }
+);
+const NO_USERS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.noUsersMessage',
+  {
+    defaultMessage: 'No users',
+  }
+);
 
 const dateDisplay = (date: string) =>
   moment(date).isAfter(moment().subtract(DAYS_CUTOFF, 'days'))
@@ -38,6 +52,14 @@ export const GroupRow: React.FC<IGroup> = ({
 }) => {
   const { isFederatedAuth } = useValues(AppLogic);
 
+  const GROUP_UPDATED_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
+    {
+      defaultMessage: 'Last updated {updatedAt}.',
+      values: { updatedAt: dateDisplay(updatedAt) },
+    }
+  );
+
   return (
     <EuiTableRow data-test-subj="GroupsRow">
       <EuiTableRowCell>
@@ -47,14 +69,14 @@ export const GroupRow: React.FC<IGroup> = ({
           </EuiLink>
         </strong>
         <br />
-        <small>Last updated {dateDisplay(updatedAt)}</small>
+        <small>{GROUP_UPDATED_TEXT}</small>
       </EuiTableRowCell>
       <EuiTableRowCell>
         <div className="user-group__sources">
           {contentSources.length > 0 ? (
             <GroupSources groupSources={contentSources} />
           ) : (
-            'No shared content sources'
+            NO_SOURCES_MESSAGE
           )}
         </div>
       </EuiTableRowCell>
@@ -64,7 +86,7 @@ export const GroupRow: React.FC<IGroup> = ({
             {usersCount > 0 ? (
               <GroupUsers groupUsers={users} usersCount={usersCount} groupId={id} />
             ) : (
-              'No users'
+              NO_USERS_MESSAGE
             )}
           </div>
         </EuiTableRowCell>

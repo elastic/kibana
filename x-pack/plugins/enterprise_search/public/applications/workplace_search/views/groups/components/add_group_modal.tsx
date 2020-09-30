@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -23,6 +24,25 @@ import {
 
 import { GroupsLogic } from '../groups_logic';
 
+const ADD_GROUP_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.heading',
+  {
+    defaultMessage: 'Add a group',
+  }
+);
+const ADD_GROUP_CANCEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.cancel.action',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+const ADD_GROUP_SUBMIT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.submit.action',
+  {
+    defaultMessage: 'Add Group',
+  }
+);
+
 export const AddGroupModal: React.FC<{}> = () => {
   const { closeNewGroupModal, saveNewGroup, setNewGroupName } = useActions(GroupsLogic);
   const { newGroupNameErrors, newGroupName } = useValues(GroupsLogic);
@@ -37,7 +57,7 @@ export const AddGroupModal: React.FC<{}> = () => {
       <EuiModal onClose={closeNewGroupModal} initialFocus=".euiFieldText">
         <form onSubmit={handleFormSumbit}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Add a group</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{ADD_GROUP_HEADER}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
@@ -52,14 +72,14 @@ export const AddGroupModal: React.FC<{}> = () => {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeNewGroupModal}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeNewGroupModal}>{ADD_GROUP_CANCEL}</EuiButtonEmpty>
             <EuiButton
               disabled={!newGroupName}
               onClick={saveNewGroup}
               fill={true}
               data-test-subj="AddGroupSubmit"
             >
-              Add Group
+              {ADD_GROUP_SUBMIT}
             </EuiButton>
           </EuiModalFooter>
         </form>

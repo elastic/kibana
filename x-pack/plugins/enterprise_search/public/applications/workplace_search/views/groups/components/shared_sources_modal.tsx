@@ -8,11 +8,20 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
 import { GroupManagerModal } from './group_manager_modal';
 import { SourcesList } from './sources_list';
+
+const MODAL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalLabel',
+  {
+    defaultMessage: 'shared content sources',
+  }
+);
 
 export const SharedSourcesModal: React.FC = () => {
   const {
@@ -29,7 +38,7 @@ export const SharedSourcesModal: React.FC = () => {
 
   return (
     <GroupManagerModal
-      label="shared content sources"
+      label={MODAL_LABEL}
       allItems={contentSources}
       numSelected={selectedGroupSources.length}
       hideModal={hideSharedSourcesModal}
@@ -37,7 +46,12 @@ export const SharedSourcesModal: React.FC = () => {
       saveItems={saveGroupSources}
     >
       <>
-        <p>Select content sources to share with {group.name}</p>
+        <p>
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalTitle', {
+            defaultMessage: 'Select content sources to share with {groupName}',
+            values: { groupName: group.name },
+          })}
+        </p>
         <SourcesList
           contentSources={contentSources}
           filteredSources={selectedGroupSources}

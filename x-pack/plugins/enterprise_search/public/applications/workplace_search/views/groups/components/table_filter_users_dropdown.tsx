@@ -8,10 +8,19 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFilterButton } from '@elastic/eui';
 
 import { GroupsLogic } from '../groups_logic';
 import { FilterableUsersPopover } from './filterable_users_popover';
+
+const FILTER_USERS_BUTTON_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.filterUsers.buttonText',
+  {
+    defaultMessage: 'Users',
+  }
+);
 
 export const TableFilterUsersDropdown: React.FC<{}> = () => {
   const { closeFilterUsersDropdown, toggleFilterUsersDropdown } = useActions(GroupsLogic);
@@ -26,7 +35,7 @@ export const TableFilterUsersDropdown: React.FC<{}> = () => {
       hasActiveFilters={filteredUsers.length > 0}
       numActiveFilters={filteredUsers.length}
     >
-      Users
+      {FILTER_USERS_BUTTON_TEXT}
     </EuiFilterButton>
   );
 

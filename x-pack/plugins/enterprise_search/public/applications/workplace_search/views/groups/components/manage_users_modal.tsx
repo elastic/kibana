@@ -8,11 +8,20 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
 import { FilterableUsersList } from './filterable_users_list';
 import { GroupManagerModal } from './group_manager_modal';
+
+const MODAL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.usersModalLabel',
+  {
+    defaultMessage: 'users',
+  }
+);
 
 export const ManageUsersModal: React.FC = () => {
   const {
@@ -28,7 +37,7 @@ export const ManageUsersModal: React.FC = () => {
 
   return (
     <GroupManagerModal
-      label="users"
+      label={MODAL_LABEL}
       allItems={users}
       numSelected={selectedGroupUsers.length}
       hideModal={hideManageUsersModal}

@@ -8,6 +8,8 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiSpacer,
   EuiTable,
@@ -23,6 +25,25 @@ import { GroupsLogic } from '../groups_logic';
 import { GroupRow } from './group_row';
 
 import { ClearFiltersLink } from './clear_filters_link';
+
+const GROUP_TABLE_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupTableHeader',
+  {
+    defaultMessage: 'Group',
+  }
+);
+const SOURCES_TABLE_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader',
+  {
+    defaultMessage: 'Content sources',
+  }
+);
+const USERS_TABLE_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader',
+  {
+    defaultMessage: 'Users',
+  }
+);
 
 export const GroupsTable: React.FC<{}> = () => {
   const { setActivePage } = useActions(GroupsLogic);
@@ -57,9 +78,9 @@ export const GroupsTable: React.FC<{}> = () => {
       <EuiSpacer size="m" />
       <EuiTable className="groups-table" tableLayout="auto">
         <EuiTableHeader>
-          <EuiTableHeaderCell>Group</EuiTableHeaderCell>
-          <EuiTableHeaderCell>Content sources</EuiTableHeaderCell>
-          {!isFederatedAuth && <EuiTableHeaderCell>Users</EuiTableHeaderCell>}
+          <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
+          <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
+          {!isFederatedAuth && <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>}
           <EuiTableHeaderCell />
         </EuiTableHeader>
         <EuiTableBody>

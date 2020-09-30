@@ -6,6 +6,8 @@
 
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiCard,
   EuiFieldSearch,
@@ -20,6 +22,19 @@ import { IUser } from '../../../types';
 import { UserOptionItem } from './user_option_item';
 
 const MAX_VISIBLE_USERS = 20;
+
+const FILTER_USERS_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.filterUsers.placeholder',
+  {
+    defaultMessage: 'Filter users...',
+  }
+);
+const NO_USERS_FOUND = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.noUsersFound',
+  {
+    defaultMessage: 'No users found',
+  }
+);
 
 interface IFilterableUsersListProps {
   users: IUser[];
@@ -74,13 +89,13 @@ export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
   const filterUsersBar = (
     <EuiFieldSearch
       value={filterValue}
-      placeholder="Filter users..."
+      placeholder={FILTER_USERS_PLACEHOLDER}
       onChange={(e) => updateValue(e.target.value)}
     />
   );
   const noResults = (
     <>
-      <EuiIcon type="minusInCircle" /> <span>No users found</span>
+      <EuiIcon type="minusInCircle" /> <span>{NO_USERS_FOUND}</span>
     </>
   );
 
@@ -99,7 +114,10 @@ export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
       {hiddenUsers.length > 0 && (
         <div className="euiFilterSelectItem">
           <small>
-            Showing {MAX_VISIBLE_USERS} of {availableUsers.length} users.
+            {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.userListCount', {
+              defaultMessage: 'Showing {maxVisibleUsers} of {numUsers} users.',
+              values: { maxVisibleUsers: MAX_VISIBLE_USERS, numUsers: availableUsers.length },
+            })}
           </small>
         </div>
       )}
