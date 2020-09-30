@@ -22,6 +22,7 @@ import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
   ALERT_MISSING_DATA,
+  ALERT_DISK_USAGE,
 } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
@@ -55,7 +56,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE, ALERT_MISSING_DATA],
+            alertTypeIds: [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_DATA],
             filters: [
               {
                 nodeUuid: nodeName,
