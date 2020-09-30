@@ -1,0 +1,182 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiFormRow,
+  EuiButton,
+  EuiLoadingChart,
+  EuiCallOut,
+  EuiSelectOption,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import styled from 'styled-components';
+
+import * as i18n from './translations';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { BarChart } from '../../../../common/components/charts/barchart';
+import { HITS_THRESHOLD, getHistogramConfig, getTimeframeOptions } from './helpers';
+import { ChartData } from '../../../../common/components/charts/common';
+import { FieldValueQueryBar } from '../query_bar';
+import { InspectQuery } from '../../../../common/store/inputs/model';
+import { InspectButton } from '../../../../common/components/inspect';
+
+export const ID = 'queryPreviewHistogramQuery';
+
+const FlexGroup = styled(EuiFlexGroup)`
+  height: 220px;
+  width: 100%;
+  position: relative;
+  margin: 0;
+`;
+
+interface PreviewQueryHistogramProps {
+  dataTestSubj: string;
+  idAria: string;
+  to: string;
+  from: string;
+  isLoading: boolean;
+  totalHits: number;
+  data: ChartData[];
+  query: FieldValueQueryBar | undefined;
+  inspect: InspectQuery;
+  ruleType: Type;
+  onPreviewClick: (arg: string) => void;
+}
+
+export const PreviewQueryHistogram = ({
+  dataTestSubj,
+  idAria,
+  onPreviewClick,
+  isLoading,
+  from,
+  to,
+  totalHits,
+  data,
+  query,
+  inspect,
+  ruleType,
+}: PreviewQueryHistogramProps) => {
+  const [showHistogram, setShowHistogram] = useState(false);
+  const [noiseWarningThreshold, setNoiseWarningThreshold] = useState(1);
+  const [timeframe, setTimeframe] = useState('h');
+  const { setQuery, isInitializing } = useGlobalTime();
+
+  const queryBarQuery = useMemo((): string | null => {
+    if (query == null || (query != null && query.query.query.trim() === '')) {
+      return null;
+    }
+
+    const q = query.query.query;
+
+    return typeof q === 'string' ? q : null;
+  }, [query]);
+
+  const handleSelectPreviewTimeframe = ({
+    target: { value },
+  }: React.ChangeEvent<HTMLSelectElement>): void => {
+    setTimeframe(value);
+    setNoiseWarningThreshold(HITS_THRESHOLD[value]);
+  };
+
+  const handlePreviewClicked = useCallback((): void => {
+    setShowHistogram(true);
+
+    onPreviewClick(timeframe);
+  }, [onPreviewClick, timeframe]);
+
+  useEffect((): void => {
+    if (!isLoading && !isInitializing) {
+      setQuery({ id: ID, inspect, loading: isLoading, refetch: () => {} });
+    }
+  }, [setQuery, inspect, isLoading, isInitializing]);
+
+  const options = useMemo((): EuiSelectOption[] => getTimeframeOptions(ruleType), [ruleType]);
+
+  return (
+    <>
+      <EuiFormRow
+        label={i18n.QUERY_PREVIEW_LABEL}
+        helpText={i18n.QUERY_PREVIEW_HELP_TEXT}
+        error={undefined}
+        isInvalid={false}
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiSelect
+              id="queryPreviewSelect"
+              options={options}
+              value={timeframe}
+              onChange={handleSelectPreviewTimeframe}
+              aria-label={i18n.PREVIEW_SELECT_ARIA}
+              disabled={queryBarQuery == null}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill isDisabled={queryBarQuery == null} onClick={handlePreviewClicked}>
+              {i18n.PREVIEW_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showHistogram && isLoading && (
+        <FlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </FlexGroup>
+      )}
+      {showHistogram && !isLoading && (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup direction="row" justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2 data-test-subj="header-section-title">
+                    {i18n.QUERY_PREVIEW_TITLE(totalHits)}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <InspectButton
+                  queryId={ID}
+                  inspectIndex={0}
+                  title={i18n.QUERY_PREVIEW_TITLE(totalHits)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <BarChart
+              configs={getHistogramConfig(to, from)}
+              barChart={[{ key: 'hits', value: data }]}
+              stackByField={undefined}
+              timelineId={undefined}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer />
+      {totalHits > noiseWarningThreshold && (
+        <EuiCallOut color="warning" iconType="help">
+          <EuiText>
+            <p>{i18n.QUERY_PREVIEW_NOISE_WARNING}</p>
+          </EuiText>
+        </EuiCallOut>
+      )}
+    </>
+  );
+};

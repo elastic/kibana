@@ -53,6 +53,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -131,12 +132,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, reset, submit } = form;
-  const [{ index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex }] = (useFormData(
-    {
-      form,
-      watch: ['index', 'ruleType', 'threatIndex'],
-    }
-  ) as unknown) as [Partial<DefineStepRule>];
+  const [
+    { index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex, queryBar: queryInfo },
+  ] = (useFormData({
+    form,
+    watch: ['index', 'ruleType', 'queryBar', 'threatIndex'],
+  }) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
@@ -372,6 +373,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
+        {formRuleType != null && (
+          <PreviewQuery
+            dataTestSubj="something"
+            idAria="someAriaId"
+            ruleType={formRuleType}
+            index={index}
+            query={queryInfo}
+          />
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
