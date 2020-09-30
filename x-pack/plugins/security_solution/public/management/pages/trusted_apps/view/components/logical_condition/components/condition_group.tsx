@@ -11,8 +11,18 @@ import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoi
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
 import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
 
-const AndBadgeFlexItem = styled(EuiFlexItem)`
-  padding-top: 20px;
+const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
+  .and-badge {
+    padding-top: 20px;
+  }
+
+  .group-entries > * {
+    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 `;
 
 export interface ConditionGroupProps {
@@ -35,15 +45,19 @@ export const ConditionGroup = memo<ConditionGroupProps>(
       [dataTestSubj]
     );
     return (
-      <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
+      <ConditionGroupFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
         {entries.length > 1 && (
           <EuiHideFor sizes={['xs', 's']}>
-            <AndBadgeFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
+            <EuiFlexItem
+              grow={false}
+              data-test-subj={getTestId('andConnector')}
+              className="and-badge"
+            >
               <AndOrBadge type={'and'} includeAntennas={true} />
-            </AndBadgeFlexItem>
+            </EuiFlexItem>
           </EuiHideFor>
         )}
-        <EuiFlexItem grow={1} data-test-subj={getTestId('entries')}>
+        <EuiFlexItem grow={1} data-test-subj={getTestId('entries')} className="group-entries">
           {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
             <ConditionEntry
               key={index}
@@ -58,7 +72,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
             />
           ))}
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ConditionGroupFlexGroup>
     );
   }
 );
