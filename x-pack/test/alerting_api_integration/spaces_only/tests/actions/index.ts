@@ -5,10 +5,14 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { buildUp, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
-export default function actionsTests({ loadTestFile }: FtrProviderContext) {
+export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Actions', () => {
+    before(async () => buildUp(getService));
+    after(async () => tearDown(getService));
+
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
