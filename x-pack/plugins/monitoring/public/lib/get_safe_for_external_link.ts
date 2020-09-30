@@ -4,6 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSafeForExternalLink(url: string) {
-  return `${url.split('?')[0]}?${location.hash.split('?')[1]}`;
+interface Location {
+  hash: string;
+}
+
+export function getSafeForExternalLink(url: string, location: Location = window.location) {
+  const hashParts = location.hash.split('?').filter(Boolean);
+  if (hashParts.length === 0) {
+    return url;
+  }
+  const urlParts = url.split('?').filter(Boolean);
+  return `${urlParts[0]}?${
+    urlParts.length === 2 ? urlParts[1] : hashParts.length === 2 ? hashParts[1] : ''
+  }`;
 }
