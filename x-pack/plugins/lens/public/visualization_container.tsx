@@ -27,13 +27,19 @@ export function VisualizationContainer({
   className,
   ...rest
 }: Props) {
+  const attributes: Partial<{ 'data-title': string; 'data-description': string }> = {};
+  if (reportTitle) {
+    attributes['data-title'] = reportTitle;
+  }
+  if (reportDescription) {
+    attributes['data-description'] = reportDescription;
+  }
   return (
     <div
       data-shared-item
       data-render-complete={isReady}
       className={classNames(className, 'lnsVisualizationContainer')}
-      data-title={reportTitle}
-      data-description={reportDescription}
+      {...attributes}
       {...rest}
     >
       {children}

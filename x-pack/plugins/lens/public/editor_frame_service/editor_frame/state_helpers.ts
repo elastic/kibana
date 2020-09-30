@@ -80,8 +80,10 @@ export async function persistedStateToExpression(
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
 
   return buildExpression({
+    title,
+    description,
     visualization,
-    visualizationState: { ...(visualizationState as object), title, description },
+    visualizationState,
     datasourceMap: datasources,
     datasourceStates,
     datasourceLayers,

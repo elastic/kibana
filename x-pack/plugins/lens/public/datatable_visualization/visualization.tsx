@@ -15,8 +15,6 @@ export interface LayerState {
 }
 
 export interface DatatableVisualizationState {
-  title?: string;
-  description?: string;
   layers: LayerState[];
 }
 
@@ -196,7 +194,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  toExpression(state, datasourceLayers): Ast {
+  toExpression(state, datasourceLayers, { title, description } = {}): Ast {
     const layer = state.layers[0];
     const datasource = datasourceLayers[layer.layerId];
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
@@ -213,8 +211,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           type: 'function',
           function: 'lens_datatable',
           arguments: {
-            title: [state.title || ''],
-            description: [state.description || ''],
+            title: [title || ''],
+            description: [description || ''],
             columns: [
               {
                 type: 'expression',
