@@ -29,7 +29,7 @@ export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
  */
 export function fetchClusterUuids(
-  { callCluster, start, end }: StatsCollectionConfig,
+  { scopedClients, start, end }: StatsCollectionConfig,
   maxBucketSize: number
 ) {
   const params = {
@@ -50,7 +50,7 @@ export function fetchClusterUuids(
     },
   };
 
-  return callCluster('search', params);
+  return scopedClients.callCluster('search', params);
 }
 
 /**

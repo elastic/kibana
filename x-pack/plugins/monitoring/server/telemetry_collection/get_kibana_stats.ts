@@ -175,7 +175,7 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: StatsCollectionConfig['scopedClients']['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],

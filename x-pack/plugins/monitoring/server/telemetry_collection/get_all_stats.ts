@@ -28,10 +28,11 @@ export interface CustomContext {
  */
 export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
-  { callCluster, start, end, esClient },
+  { scopedClients, start, end },
   { maxBucketSize }
 ) => {
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
+  const { callCluster } = scopedClients;
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version

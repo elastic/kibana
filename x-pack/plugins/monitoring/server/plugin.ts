@@ -146,14 +146,13 @@ export class Plugin {
 
     // Initialize telemetry
     if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(
-        plugins.telemetryCollectionManager,
-        this.cluster,
-        () => this.telemetryElasticsearchClient,
-        {
-          maxBucketSize: config.ui.max_bucket_size,
-        }
-      );
+      const collectionClients = {
+        esCluster: this.cluster,
+        esClientGetter: this.telemetryElasticsearchClient,
+      };
+      registerMonitoringCollection(plugins.telemetryCollectionManager, collectionClients, {
+        maxBucketSize: config.ui.max_bucket_size,
+      });
     }
 
     // Register collector objects for stats to show up in the APIs

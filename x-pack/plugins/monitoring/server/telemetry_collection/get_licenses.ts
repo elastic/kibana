@@ -18,11 +18,11 @@ import { CustomContext } from './get_all_stats';
  */
 export const getLicenses: LicenseGetter<CustomContext> = async (
   clustersDetails,
-  { callCluster },
+  { scopedClients },
   { maxBucketSize }
 ) => {
   const clusterUuids = clustersDetails.map(({ clusterUuid }) => clusterUuid);
-  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchLicenses(scopedClients.callCluster, clusterUuids, maxBucketSize);
   return handleLicenses(response);
 };
 
@@ -36,7 +36,7 @@ export const getLicenses: LicenseGetter<CustomContext> = async (
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchLicenses(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: StatsCollectionConfig['scopedClients']['callCluster'],
   clusterUuids: string[],
   maxBucketSize: number
 ) {

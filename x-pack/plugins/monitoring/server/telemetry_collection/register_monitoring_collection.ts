@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyCustomClusterClient, IClusterClient } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  TelemetryCollectionManagerPluginSetup,
+  CollectionClients,
+} from 'src/plugins/telemetry_collection_manager/server';
 import { getAllStats, CustomContext } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
 
 export function registerMonitoringCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
-  esCluster: ILegacyCustomClusterClient,
-  esClientGetter: () => IClusterClient | undefined,
+  collectionClients: CollectionClients,
   customContext: CustomContext
 ) {
   telemetryCollectionManager.setCollection({
-    esCluster,
-    esClientGetter,
+    collectionClients,
     title: 'monitoring',
     priority: 2,
     statsGetter: getAllStats,

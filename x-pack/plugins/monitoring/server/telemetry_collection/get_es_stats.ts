@@ -16,7 +16,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: StatsCollectionConfig['scopedClients']['callCluster'],
   clusterUuids: string[],
   maxBucketSize: number
 ) {
@@ -34,7 +34,7 @@ export async function getElasticsearchStats(
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchElasticsearchStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: StatsCollectionConfig['scopedClients']['callCluster'],
   clusterUuids: string[],
   maxBucketSize: number
 ) {

@@ -32,9 +32,12 @@ describe('get_cluster_uuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
-        await getClusterUuids({ callCluster, esClient, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await getClusterUuids(
+          { scopedClients: { callCluster, esClient }, start, end, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(expectedUuids);
     });
   });
@@ -43,9 +46,12 @@ describe('get_cluster_uuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
       expect(
-        await fetchClusterUuids({ callCluster, esClient, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await fetchClusterUuids(
+          { scopedClients: { callCluster, esClient }, start, end, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(response);
     });
   });

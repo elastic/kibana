@@ -176,8 +176,7 @@ describe('get_all_stats', () => {
         await getAllStats(
           [{ clusterUuid: 'a' }],
           {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
+            scopedClients: { callCluster: callCluster as any, esClient: esClient as any },
             usageCollection: {} as any,
             start,
             end,
@@ -202,8 +201,7 @@ describe('get_all_stats', () => {
         await getAllStats(
           [],
           {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
+            scopedClients: { callCluster: callCluster as any, esClient: esClient as any },
             usageCollection: {} as any,
             start,
             end,

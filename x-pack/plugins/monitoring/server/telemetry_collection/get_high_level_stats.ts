@@ -268,7 +268,7 @@ export async function getHighLevelStats(
 export async function fetchHighLevelStats<
   T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: StatsCollectionConfig['scopedClients']['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'] | undefined,
   end: StatsCollectionConfig['end'] | undefined,
