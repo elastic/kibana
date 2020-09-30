@@ -29,6 +29,7 @@ export declare class IndexPatternsService
 |  [getFieldsForIndexPattern](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforindexpattern.md) |  | <code>(indexPattern: IndexPattern &#124; IndexPatternSpec, options?: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing an index patttern (or spec) |
 |  [getFieldsForWildcard](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforwildcard.md) |  | <code>(options?: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing { pattern } |
 |  [getIds](./kibana-plugin-plugins-data-public.indexpatternsservice.getids.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern ids |
+|  [getIdsWithTitle](./kibana-plugin-plugins-data-public.indexpatternsservice.getidswithtitle.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;Array&lt;{</code><br/><code>        id: string;</code><br/><code>        title: string;</code><br/><code>    }&gt;&gt;</code> | Get list of index pattern ids with titles |
 |  [getTitles](./kibana-plugin-plugins-data-public.indexpatternsservice.gettitles.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern titles |
 |  [refreshFields](./kibana-plugin-plugins-data-public.indexpatternsservice.refreshfields.md) |  | <code>(indexPattern: IndexPattern) =&gt; Promise&lt;void&gt;</code> | Refresh field list for a given index pattern |
 |  [savedObjectToSpec](./kibana-plugin-plugins-data-public.indexpatternsservice.savedobjecttospec.md) |  | <code>(savedObject: SavedObject&lt;IndexPatternAttributes&gt;) =&gt; IndexPatternSpec</code> | Converts index pattern saved object to index pattern spec |
@@ -42,5 +43,5 @@ export declare class IndexPatternsService
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-public.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-public.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
-|  [updateSavedObject(indexPattern, saveAttempts)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
+|  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
 

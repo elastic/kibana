@@ -5,13 +5,19 @@
  */
 
 /**
+ * Combine all shared mock values/actions into a single obj
+ *
  * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
+import { mockKibanaValues } from './kibana_logic.mock';
+import { mockLicensingValues } from './licensing_logic.mock';
 import { mockHttpValues } from './http_logic.mock';
 import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 
 export const mockAllValues = {
+  ...mockKibanaValues,
+  ...mockLicensingValues,
   ...mockHttpValues,
   ...mockFlashMessagesValues,
 };
@@ -42,8 +48,11 @@ jest.mock('kea', () => ({
  *   setMockValues({ someValue: 'hello' });
  * });
  */
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 export const setMockValues = (values: object) => {
   (useValues as jest.Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));
+};
+export const setMockActions = (actions: object) => {
+  (useActions as jest.Mock).mockImplementation(() => ({ ...mockAllActions, ...actions }));
 };

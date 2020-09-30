@@ -10,9 +10,7 @@
 
 import React from 'react';
 import './_explorer.scss';
-import isEqual from 'lodash/isEqual';
-import uniq from 'lodash/uniq';
-import get from 'lodash/get';
+import { isEqual, uniq, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 import DragSelect from 'dragselect';

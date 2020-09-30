@@ -10,7 +10,7 @@ import { RequestBasicOptions } from '../..';
 
 export type HostOverviewRequestOptions = RequestBasicOptions;
 
-export interface HostOverviewStrategyResponse extends IEsSearchResponse {
+export interface HostsOverviewStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   overviewHost: {
     auditbeatAuditd?: Maybe<number>;

@@ -26,7 +26,7 @@ describe('PagerDutyParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <PagerDutyParamsFields
         actionParams={actionParams}
-        errors={{ summary: [], timestamp: [] }}
+        errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}

@@ -7,7 +7,8 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
-import '../../../../common/mock/match_media.ts';
+import '../../../../common/mock/match_media';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -26,8 +27,25 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 
-jest.mock('../../../../common/components/link_to');
+// not sure why this can't be imported from '../../../../common/mock/formatted_relative';
+// but sure enough it needs to be inline in this one file
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
+jest.mock('../../../../common/components/link_to');
+jest.mock('../../policy/store/policy_list/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+  return {
+    ...originalModule,
+    sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  };
+});
 describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -35,7 +53,6 @@ describe('when on the list page', () => {
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
-
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
@@ -130,6 +147,63 @@ describe('when on the list page', () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
       });
       expect(renderResult.queryByTestId('adminSearchBar')).toBeNull();
+    });
+  });
+
+  describe('when determining when to show the enrolling message', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 4,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 5,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 6,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
     });
   });
 
