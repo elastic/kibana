@@ -30,6 +30,7 @@ export function getEmptyAspect(): Aspect {
   return {
     accessor: null,
     aggId: null,
+    aggType: null,
     title: i18n.translate('visTypeXY.aggResponse.allDocsTitle', {
       defaultMessage: 'All docs',
     }),
@@ -83,12 +84,13 @@ function getAspectsFromDimension(
 
 const getAspect = (
   { id: accessor, name: title }: KibanaDatatableColumn,
-  { accessor: column, format, params }: Dimension
+  { accessor: column, format, params, aggType }: Dimension
 ): Aspect => ({
   accessor,
   column,
   title,
   format,
+  aggType,
   // TODO: Change this to be more clear. Now it's based on how _add_to_siri creates id for params
   // src/legacy/ui/public/agg_response/point_series/_add_to_siri.js
   aggId: (accessor ?? '').split('-').pop() ?? null,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isNil } from 'lodash';
+import { identity, isNil } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
@@ -38,7 +38,7 @@ import {
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, formatter, title: fallbackTitle = '' }: Aspect
+  { params, formatter, title: fallbackTitle = '', aggType }: Aspect
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   const groupId = isCategoryAxis ? axis.id : undefined;
@@ -49,9 +49,11 @@ export function getAxis<S extends XScaleType | YScaleType>(
     : {
         show: valueAxis === axis.id,
       };
+  // Date range formatter applied on xAccessor
+  const tickFormatter = aggType === 'date_range' ? identity : formatter;
   const ticks: TickOptions = {
-    formatter,
-    labelFormatter: getLabelFormatter(labels.truncate, formatter),
+    formatter: tickFormatter,
+    labelFormatter: getLabelFormatter(labels.truncate, tickFormatter),
     show: labels.show,
     rotation: labels.rotate,
     showOverlappingLabels: !labels.filter,

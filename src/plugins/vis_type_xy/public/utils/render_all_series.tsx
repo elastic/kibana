@@ -27,11 +27,13 @@ import {
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
   SeriesName,
+  AccessorFn,
 } from '@elastic/charts';
+import { Accessor } from '@elastic/charts/dist/utils/accessor';
 
 import { KibanaDatatableRow } from '../../../expressions/public';
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig, FakeParams } from '../types';
+import { SeriesParam, VisConfig, FakeParams, Aspect } from '../types';
 
 /**
  * Matches vislib curve to elastic charts
@@ -47,6 +49,27 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
     default:
       return CurveType.LINEAR;
   }
+};
+
+const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
+  if (xAspect.accessor) {
+    if (xAspect.aggType === 'date_range' && xAspect.formatter) {
+      const formatter = xAspect.formatter;
+      const accessor = xAspect.accessor;
+      return (d) => {
+        const v = d[accessor];
+        if (!v) {
+          return;
+        }
+        const f = formatter(v);
+        return f;
+      };
+    }
+
+    return xAspect.accessor;
+  }
+
+  return () => (xAspect.params as FakeParams)?.defaultValue;
 };
 
 /**
@@ -65,7 +88,7 @@ export const renderAllSeries = (
   getSeriesColor: SeriesColorAccessorFn,
   timeZone: string
 ) => {
-  const xAccessor = aspects.x.accessor ?? (() => (aspects.x.params as FakeParams)?.defaultValue);
+  const xAccessor = getXAccessor(aspects.x);
 
   return seriesParams.map(
     ({
@@ -92,9 +115,7 @@ export const renderAllSeries = (
         : [];
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const stackAccessors =
-        mode === 'stacked' || yAxisScale?.mode === 'percentage'
-          ? [typeof xAccessor === 'string' ? xAccessor : xAccessor()]
-          : undefined;
+        mode === 'stacked' || yAxisScale?.mode === 'percentage' ? ['__any_value__'] : undefined;
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
 
       switch (type) {

@@ -42,6 +42,7 @@ export interface Column {
 
 export interface Aspect {
   accessor: Column['id'];
+  aggType: string | null;
   aggId: string | null;
   column?: Dimension['accessor'];
   title: Column['name'];
