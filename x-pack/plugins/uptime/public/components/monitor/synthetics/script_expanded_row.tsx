@@ -5,10 +5,10 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useEffect, FC } from 'react';
+import React, { useEffect, FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
-import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
+import { getJourneySteps } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
 import { EmptyStepState } from './empty_journey';
@@ -30,24 +30,10 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
   const journeys = useSelector(journeySelector);
   const journey = journeys.find((j) => j.checkGroup === checkGroup);
 
-  const fetchScreenshot = useCallback(
-    (stepIndex: number) => {
-      dispatch(getStepScreenshot({ checkGroup: checkGroup!, stepIndex }));
-    },
-    [checkGroup, dispatch]
-  );
-
-  return (
-    <ScriptExpandedRowComponent
-      checkGroup={checkGroup}
-      fetchScreenshot={fetchScreenshot}
-      journey={journey}
-    />
-  );
+  return <ScriptExpandedRowComponent checkGroup={checkGroup} journey={journey} />;
 };
 
 type ComponentProps = ScriptExpandedRowProps & {
-  fetchScreenshot: (stepIndex: number) => void;
   journey?: JourneyState;
 };
 
@@ -55,11 +41,7 @@ const someStepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
 const someStepConsole = (step: Ping) =>
   ['stderr', 'cmd/status'].indexOf(step.synthetics?.type ?? '') !== -1;
 
-export const ScriptExpandedRowComponent: FC<ComponentProps> = ({
-  checkGroup,
-  journey,
-  fetchScreenshot,
-}) => {
+export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, journey }) => {
   if (!!journey && journey.loading) {
     return (
       <div>
@@ -72,8 +54,7 @@ export const ScriptExpandedRowComponent: FC<ComponentProps> = ({
     return <EmptyStepState checkGroup={checkGroup} />;
   }
 
-  if (journey.steps.some(someStepEnd))
-    return <ExecutedJourney journey={journey} fetchScreenshot={fetchScreenshot} />;
+  if (journey.steps.some(someStepEnd)) return <ExecutedJourney journey={journey} />;
 
   if (journey.steps.some(someStepConsole)) return <ConsoleOutputStepList journey={journey} />;
 

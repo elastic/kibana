@@ -18,10 +18,9 @@ const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 interface ExecutedStepProps {
   step: Ping;
   index: number;
-  fetchScreenshot: (stepIndex: number) => void;
 }
 
-export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreenshot }) => (
+export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
   <>
     <div style={{ padding: '8px' }}>
       <div>
@@ -48,12 +47,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, fetchScreensh
           <EuiFlexItem grow={false}>
             <StepScreenshotDisplay
               checkGroup={step.monitor.check_group}
-              isLoading={step.synthetics?.screenshotLoading}
-              screenshot={step.synthetics?.blob}
               screenshotExists={step.synthetics?.screenshotExists}
               stepIndex={step.synthetics?.step?.index}
               stepName={step.synthetics?.step?.name}
-              fetchScreenshot={fetchScreenshot}
             />
           </EuiFlexItem>
           <EuiFlexItem>

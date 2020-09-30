@@ -51,10 +51,9 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
 
 interface ExecutedJourneyProps {
   journey: JourneyState;
-  fetchScreenshot: (stepIndex: number) => void;
 }
 
-export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey, fetchScreenshot }) => (
+export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
   <div>
     <EuiText>
       <h3>
@@ -74,7 +73,7 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey, fetchScreen
       {journey.steps
         .filter((step) => step.synthetics?.type === 'step/end')
         .map((step, index) => (
-          <ExecutedStep key={index} index={index} step={step} fetchScreenshot={fetchScreenshot} />
+          <ExecutedStep key={index} index={index} step={step} />
         ))}
     </EuiFlexGroup>
   </div>
