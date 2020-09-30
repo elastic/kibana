@@ -5,8 +5,8 @@
  */
 import fs from 'fs';
 import Path from 'path';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { KIBANA_ROOT } from '@kbn/test';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 const TELEMETRY_API_ROOT = '/api/stats?extended=true';
 const TELEMETRY_DATA_ROOT = Path.join(
