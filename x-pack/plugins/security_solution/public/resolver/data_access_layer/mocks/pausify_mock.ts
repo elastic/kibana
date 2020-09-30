@@ -17,7 +17,7 @@ type PausableRequests =
   | 'relatedEvents'
   | 'resolverTree'
   | 'entities'
-  | 'eventsWithEntityIDAndCategoryPromise'
+  | 'eventsWithEntityIDAndCategory'
   | 'event';
 
 interface Metadata<T> {
@@ -65,7 +65,7 @@ export function pausifyMock<T>({
       const pauseResolverTreeRequest = pausableRequests.includes('resolverTree');
       const pauseEntitiesRequest = pausableRequests.includes('entities');
       const pauseEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
-        'eventsWithEntityIDAndCategoryPromise'
+        'eventsWithEntityIDAndCategory'
       );
       const pauseEventRequest = pausableRequests.includes('event');
 
@@ -105,7 +105,7 @@ export function pausifyMock<T>({
       const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
       const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
       const resumeEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
-        'eventsWithEntityIDAndCategoryPromise'
+        'eventsWithEntityIDAndCategory'
       );
       const resumeEventRequest = pausableRequests.includes('event');
 

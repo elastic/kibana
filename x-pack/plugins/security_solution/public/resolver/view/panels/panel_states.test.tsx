@@ -11,7 +11,6 @@ import { emptifyMock } from '../../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../../test_utilities/url_search';
 import '../../test_utilities/extend_jest';
-import { VoidType } from 'io-ts';
 
 describe('Resolver: panel loading and resolution states', () => {
   let simulator: Simulator;
@@ -25,6 +24,14 @@ describe('Resolver: panel loading and resolution states', () => {
       eventID: 'first related event',
     },
     panelView: 'eventDetail',
+  });
+
+  const queryStringWithEventCategorySelected = urlSearch(resolverComponentInstanceID, {
+    panelParameters: {
+      nodeID: 'origin',
+      eventCategory: 'registry',
+    },
+    panelView: 'nodeEventsInCategory',
   });
   describe('When analyzing a tree with no ancestors and two children with related events on the origin', () => {
     describe('when navigating to the event detail panel', () => {
@@ -80,7 +87,7 @@ describe('Resolver: panel loading and resolution states', () => {
       });
     });
 
-    describe('when the server fails to return event data', () => {
+    describe('when the server fails to return event data on the event detail panel', () => {
       beforeEach(() => {
         const {
           metadata: { databaseDocumentID },
@@ -108,6 +115,63 @@ describe('Resolver: panel loading and resolution states', () => {
         ).toYieldEqualTo({
           resolverPanelError: 1,
           resolverPanelEventDetail: 0,
+        });
+      });
+    });
+
+    describe('when navigating to the event categories panel', () => {
+      let resumeRequest: (pausableRequest: ['entities']) => void;
+      beforeEach(() => {
+        const {
+          metadata: { databaseDocumentID },
+          dataAccessLayer,
+          pause,
+          resume,
+        } = pausifyMock(noAncestorsTwoChildrenWithRelatedEventsOnOrigin());
+
+        resumeRequest = resume;
+        memoryHistory = createMemoryHistory();
+        pause(['entities']);
+
+        simulator = new Simulator({
+          dataAccessLayer,
+          databaseDocumentID,
+          history: memoryHistory,
+          resolverComponentInstanceID,
+          indices: [],
+        });
+
+        memoryHistory.push({
+          search: queryStringWithEventCategorySelected,
+        });
+      });
+
+      it('should display a loading state in the panel', async () => {
+        await expect(
+          simulator.map(() => ({
+            resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
+            resolverPanelEventsInCategory: simulator.testSubject(
+              'resolver:panel:events-in-category'
+            ).length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelLoading: 1,
+          resolverPanelEventsInCategory: 0,
+        });
+      });
+
+      it('should successfully load the events in category panel', async () => {
+        await resumeRequest(['entities']);
+        await expect(
+          simulator.map(() => ({
+            resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
+            resolverPanelEventsInCategory: simulator.testSubject(
+              'resolver:panel:events-in-category'
+            ).length,
+          }))
+        ).toYieldEqualTo({
+          resolverPanelLoading: 0,
+          resolverPanelEventsInCategory: 1,
         });
       });
     });

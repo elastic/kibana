@@ -18,7 +18,7 @@ type EmptiableRequests =
   | 'relatedEvents'
   | 'resolverTree'
   | 'entities'
-  | 'eventsWithEntityIDAndCategoryPromise'
+  | 'eventsWithEntityIDAndCategory'
   | 'event';
 
 interface Metadata<T> {
@@ -71,7 +71,7 @@ export function emptifyMock<T>(
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {
-        return dataShouldBeEmpty.includes('event')
+        return dataShouldBeEmpty.includes('eventsWithEntityIDAndCategory')
           ? {
               events: [],
               nextEvent: null,
