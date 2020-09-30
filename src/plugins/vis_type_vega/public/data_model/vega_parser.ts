@@ -169,9 +169,9 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Ensure that Vega and Vega-Lite will take the full width of the container unless
-   * the user has explicitly disabled this setting. Also sets the default width to include
-   * the padding. This creates the least configuration needed for most cases, with the option
-   * to do more.
+   * the user has explicitly disabled this setting by setting it to "none".
+   * Also sets the default width to include the padding. This creates the least configuration
+   * needed for most cases, with the option to do more.
    */
   private _compileWithAutosize() {
     const defaultAutosize = {
@@ -179,17 +179,15 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       contains: 'padding',
     };
 
-    if (
-      !this.isVegaLite &&
-      this.spec.autosize &&
-      typeof this.spec.autosize === 'object' &&
-      'signal' in this.spec.autosize
-    ) {
+    let autosize = this.spec.autosize;
+    let useResize = true;
+
+    if (!this.isVegaLite && autosize && typeof autosize === 'object' && 'signal' in autosize) {
       // Vega supports dynamic autosize information, so we ignore it
       return;
     }
 
-    if (!this.spec.autosize && typeof this.spec.autosize !== 'undefined') {
+    if (!autosize && typeof autosize !== 'undefined') {
       this._onWarning(
         i18n.translate('visTypeVega.vegaParser.autoSizeDoesNotAllowFalse', {
           defaultMessage:
@@ -200,25 +198,23 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           },
         })
       );
+    }
 
-      this.spec.autosize = defaultAutosize;
-      this.useResize = true;
-    } else if (typeof this.spec.autosize === 'string') {
-      this.useResize = this.spec.autosize !== 'none';
-      this.spec.autosize = { ...defaultAutosize, type: this.spec.autosize };
-    } else if (typeof this.spec.autosize === 'object') {
-      this.spec.autosize = { ...defaultAutosize, ...this.spec.autosize } as {
+    if (typeof autosize === 'string') {
+      useResize = autosize !== 'none';
+      autosize = { ...defaultAutosize, type: autosize };
+    } else if (typeof autosize === 'object') {
+      autosize = { ...defaultAutosize, ...autosize } as {
         type: string;
         contains: string;
       };
-      this.useResize = Boolean(this.spec.autosize?.type && this.spec.autosize?.type !== 'none');
+      useResize = Boolean(autosize?.type && autosize?.type !== 'none');
     } else {
-      this.spec.autosize = defaultAutosize;
-      this.useResize = true;
+      autosize = defaultAutosize;
     }
 
     if (
-      this.useResize &&
+      useResize &&
       ((this.spec.width && this.spec.width !== 'container') ||
         (this.spec.height && this.spec.height !== 'container'))
     ) {
@@ -236,10 +232,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       );
     }
 
-    if (this.useResize) {
+    if (useResize) {
       this.spec.width = 'container';
       this.spec.height = 'container';
     }
+
+    this.spec.autosize = autosize;
+    this.useResize = useResize;
   }
 
   /**
