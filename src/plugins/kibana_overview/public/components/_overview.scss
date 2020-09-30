@@ -18,7 +18,7 @@
  */
 
 // Local page variables
-$pageWidth: 1200px;
+$kbnOverviewPageWidth: 1200px;
 
 .kbnOverviewWrapper {
   background-color: $euiColorEmptyShade;
@@ -34,7 +34,7 @@ $pageWidth: 1200px;
 
 .kbnOverviewHeader__inner {
   margin: 0 auto;
-  max-width: $pageWidth;
+  max-width: $kbnOverviewPageWidth;
   padding: $euiSizeXL $euiSize;
 }
 
@@ -46,7 +46,7 @@ $pageWidth: 1200px;
 
 .kbnOverviewContent {
   margin: 0 auto;
-  max-width: $pageWidth;
+  max-width: $kbnOverviewPageWidth;
   padding: $euiSizeXL $euiSize;
   width: 100%;
 
