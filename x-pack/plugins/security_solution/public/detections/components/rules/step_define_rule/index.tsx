@@ -380,7 +380,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        {formRuleType != null && (
+        {formRuleType != null && formRuleType !== 'machine_learning' && (
           <PreviewQuery
             dataTestSubj="something"
             idAria="someAriaId"
