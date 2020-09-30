@@ -20,7 +20,7 @@ import {
   isRatioAlert,
   getNumerator,
   getDenominator,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../../common/alerting/logs/log_threshold/types';
 import { AlertsContext, ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
 import { Errors, CriterionErrors } from '../validation';
