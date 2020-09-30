@@ -1,9 +1,11 @@
-[[quick-start-guide]]
+[[get-started]]
 == Quick start
 
 To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can use to explore and analyze.
 
-NOTE: When security is enabled, you must have `read`, `write`, and `manage` privileges
+[float]
+=== Required privileges 
+When security is enabled, you must have `read`, `write`, and `manage` privileges
 on the `kibana_sample_data_*` indices. For more information, refer to
 {ref}/security-privileges.html[Security privileges].
 
@@ -30,34 +32,33 @@ image::getting-started/images/add-sample-data.png[]
 
 [float]
 [[explore-the-data]]
+[[query-the-data]]
 == Explore the data
 
-With *Discover*, you use {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
+With *Discover*, use {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
 queries] and filters to explore your data. *Discover* displays an interactive histogram that shows the distribution of 
-of data, or documents, over time, and a table that lists the fields for each document that matches the index.
+of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
 
 . Open the menu, then click *Discover*.
-+
-By default, all fields are shown for each matching document.
 
-. To view more documents, change the <<set-time-filter, time filter>> to *Last 7 days*.
+. Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
 [role="screenshot"]
 image::images/tutorial-discover-2.png[]
 
-. In the *KQL* search field, enter:
+. To focus in on the documents you want to view., use the <<kuery-query,{kib} Query Language>>. In the *KQL* search field, enter:
 +
 [source,text]
 products.taxless_price >= 60 AND category : Women's Clothing
 +
-The search returns all women's clothing orders for $60 and more.
+The query returns the women's clothing orders for $60 and more.
 +
 [role="screenshot"]
 image::images/tutorial-discover-4.png[]
 
-. Hover over the list of *Available fields*, then click *+* next to the fields you want to view.
+. Hover over the list of *Available fields*, then click *+* next to the fields you want to view in the table.
 +
-For example, when you add the `category` field, the table displays the product categories for the orders.
+For example, when you add the *category* field, the table displays the product categories for the orders.
 +
 [role="screenshot"]
 image::images/tutorial-discover-3.png[]
@@ -69,26 +70,22 @@ For more information, refer to <<discover, *Discover*>>.
 == View and analyze the data
 
 Gain insight into your data with *Dashboard*, which is a collection of panels that you can 
-use to analyze your data. Panels contain visualizations, interactive controls, Markdown, and more.
+use to view and analyze your data. Panels contain visualizations, interactive controls, Markdown, and more.
 
-. Open the menu, then click *Dashboard*.
+. Open the menu, then click *Dashboard*. 
 
 . Click *[eCommerce] Revenue Dashboard*.
 
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-dashboard.png[]
 
-For more information, refer to <<dashboard,*Dashboard*>>.
-
 [float]
 [[filter-and-query-the-data]]
-=== Filter and query the data
+=== Filter the data
 
-To focus in on the data you want to view, use filters and queries. 
+To focus in on the data you want to view on the dashboard, use filters. 
 
-To filter the data:
-
-. In the *Controls* visualization, make a selection from the*Manufacturer* and *Category* dropdowns, then click *Apply changes*.
+. From the *Controls* visualization, make a selection from the *Manufacturer* and *Category* dropdowns, then click *Apply changes*.
 +
 For example, the following dashboard shows the data for women's clothing from Gnomehouse. 
 +
@@ -97,37 +94,14 @@ image::getting-started/images/tutorial-sample-filter.png[]
 
 . To manually add a filter, click *Add filter*, then specify the options.
 +
-For example, if you want to view the orders for Wednesday, select *day_of_week* from the *Field* dropdown, select *is* from the *Operator* dropdown, then select *Wednesday* from the *Value* dropdown.
+For example, to view the orders for Wednesday, select *day_of_week* from the *Field* dropdown, select *is* from the *Operator* dropdown, then select *Wednesday* from the *Value* dropdown.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-filter2.png[]
 
 . When you are done, remove the filters.
 
-[[query-the-data]]
-To query the data:
-
-. Enter the following in the *KQL* search field to view the data from the Gnomehouse manufacturer:
-+
-[source,text]
-manufacturer: Gnomehouse
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-query.png[]
-
-. For a more complex query with AND and OR, enter the following in the *KQL* search field:
-+
-[source,text]
-manufacturer: Gnomehouse AND (category: Women's Clothing OR category: Women's Shoes)
-+
-The dashboard displays the women's clothing and shoe orders from the Gnomehouse manufacturer.  
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-query2.png[]
-
-. When you are done, clear the *KQL* search field.
-
-For more information, refer to {ref}/query-filter-context.html[Query and filter context].
+For more information, refer to <<dashboard,*Dashboard*>>.
 
 [float]
 [[create-a-visualization]]
