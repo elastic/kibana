@@ -31,7 +31,7 @@ const licenseSchema: MakeSchemaFrom<LicenseUsage> = {
   max_resource_units: { type: 'long' },
 };
 
-export const staticTelemetrySchema: MakeSchemaFrom<Required<StaticTelemetryUsage>> = {
+export const staticTelemetrySchema: MakeSchemaFrom<StaticTelemetryUsage> = {
   ece: {
     kb_uuid: { type: 'keyword' },
     es_uuid: { type: 'keyword' },
