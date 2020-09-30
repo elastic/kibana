@@ -60,6 +60,12 @@
   .embPanel__titleText {
     @include euiTextTruncate;
   }
+
+  .embPanel__placeholderTitleText {
+    @include euiTextTruncate;
+    font-weight: $euiFontWeightRegular;
+    color: $euiColorMediumShade;
+  }
 }
 
 .embPanel__dragger:not(.embPanel__title) {
