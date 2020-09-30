@@ -86,7 +86,7 @@ const isThresholdFields = <T>(
   fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: Type) => {
+export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(fields: T, type: Type) => {
   switch (type) {
     case 'machine_learning':
       const { index, queryBar, threshold, ...mlRuleFields } = fields;

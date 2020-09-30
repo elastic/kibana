@@ -18,10 +18,7 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  filterRuleFieldsForType,
-  RuleFields,
-} from '../../../pages/detection_engine/rules/create/helpers';
+import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
   RuleStep,
@@ -189,7 +186,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatterns}
-        schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
+        schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
