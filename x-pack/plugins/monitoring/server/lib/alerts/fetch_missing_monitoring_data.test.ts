@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { fetchMissingData } from './fetch_missing_data';
+import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
 function getResponse(
   index: string,
@@ -35,7 +35,7 @@ function getResponse(
   };
 }
 
-describe('fetchMissingData', () => {
+describe('fetchMissingMonitoringData', () => {
   let callCluster = jest.fn();
   const index = '.monitoring-*';
   const limit = 100;
@@ -137,7 +137,7 @@ describe('fetchMissingData', () => {
         },
       };
     });
-    const result = await fetchMissingData(callCluster, clusters, index, limit, size, now);
+    const result = await fetchMissingMonitoringData(callCluster, clusters, index, limit, size, now);
     expect(result).toEqual([
       {
         stackProduct: 'elasticsearch',
@@ -220,7 +220,7 @@ describe('fetchMissingData', () => {
         },
       };
     });
-    const result = await fetchMissingData(callCluster, clusters, index, limit, size, now);
+    const result = await fetchMissingMonitoringData(callCluster, clusters, index, limit, size, now);
     expect(result).toEqual([
       {
         stackProduct: 'elasticsearch',

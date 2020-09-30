@@ -23,14 +23,14 @@ import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './help
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { ALERT_MISSING_DATA, BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { ALERT_MISSING_MONITORING_DATA, BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { AlertsBadge } from '../../../alerts/badge';
 
-const BEATS_PANEL_ALERTS = [ALERT_MISSING_DATA];
+const BEATS_PANEL_ALERTS = [ALERT_MISSING_MONITORING_DATA];
 
 export function BeatsPanel(props) {
   const { setupMode, alerts } = props;

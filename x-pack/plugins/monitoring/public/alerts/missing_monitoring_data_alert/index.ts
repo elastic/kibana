@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createMissingDataAlertType } from './missing_data_alert';
+export { createMissingMonitoringDataAlertType } from './missing_monitoring_data_alert';

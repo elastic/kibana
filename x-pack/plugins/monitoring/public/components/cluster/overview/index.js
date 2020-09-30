@@ -14,7 +14,7 @@ import { ApmPanel } from './apm_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
-  ALERT_MISSING_DATA,
+  ALERT_MISSING_MONITORING_DATA,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
@@ -47,7 +47,7 @@ export function Overview(props) {
               setupMode={props.setupMode}
               showLicenseExpiration={props.showLicenseExpiration}
               alerts={filterAlertStates(props.alerts, (type, { state }) => {
-                if (type === ALERT_MISSING_DATA) {
+                if (type === ALERT_MISSING_MONITORING_DATA) {
                   return state.stackProduct === ELASTICSEARCH_SYSTEM_ID;
                 }
                 return true;
@@ -57,7 +57,7 @@ export function Overview(props) {
               {...props.cluster.kibana}
               setupMode={props.setupMode}
               alerts={filterAlertStates(props.alerts, (type, { state }) => {
-                if (type === ALERT_MISSING_DATA) {
+                if (type === ALERT_MISSING_MONITORING_DATA) {
                   return state.stackProduct === KIBANA_SYSTEM_ID;
                 }
                 return true;
@@ -70,7 +70,7 @@ export function Overview(props) {
           {...props.cluster.logstash}
           setupMode={props.setupMode}
           alerts={filterAlertStates(props.alerts, (type, { state }) => {
-            if (type === ALERT_MISSING_DATA) {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
               return state.stackProduct === LOGSTASH_SYSTEM_ID;
             }
             return true;
@@ -81,7 +81,7 @@ export function Overview(props) {
           {...props.cluster.beats}
           setupMode={props.setupMode}
           alerts={filterAlertStates(props.alerts, (type, { state }) => {
-            if (type === ALERT_MISSING_DATA) {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
               return state.stackProduct === BEATS_SYSTEM_ID;
             }
             return true;
@@ -92,7 +92,7 @@ export function Overview(props) {
           {...props.cluster.apm}
           setupMode={props.setupMode}
           alerts={filterAlertStates(props.alerts, (type, { state }) => {
-            if (type === ALERT_MISSING_DATA) {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
               return state.stackProduct === APM_SYSTEM_ID;
             }
             return true;

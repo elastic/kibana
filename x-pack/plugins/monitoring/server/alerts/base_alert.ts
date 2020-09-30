@@ -239,19 +239,33 @@ export class BaseAlert {
       return await mbSafeQuery(async () => _callCluster(endpoint, clientParams, options));
     };
     const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
-    // Support CCS use cases by querying to find available remote clusters
-    // and then adding those to the index pattern we are searching against
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const clusters = await fetchClusters(callCluster, esIndexPattern);
+    const clusters = await this.fetchClusters(callCluster, availableCcs, params);
     const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
       services.savedObjectsClient
     );
 
     const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
     return await this.processData(data, clusters, services, logger, state);
+  }
+
+  protected async fetchClusters(
+    callCluster: any,
+    availableCcs: string[] | undefined = undefined,
+    params: CommonAlertParams
+  ) {
+    let ccs;
+    if (!availableCcs) {
+      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
+    } else {
+      ccs = availableCcs;
+    }
+    // Support CCS use cases by querying to find available remote clusters
+    // and then adding those to the index pattern we are searching against
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    if (ccs) {
+      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
+    }
+    return await fetchClusters(callCluster, esIndexPattern);
   }
 
   protected async fetchData(

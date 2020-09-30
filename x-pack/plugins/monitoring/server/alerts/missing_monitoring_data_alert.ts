@@ -19,7 +19,11 @@ import {
   AlertMessageLinkToken,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
-import { INDEX_PATTERN, ALERT_MISSING_DATA } from '../../common/constants';
+import {
+  INDEX_PATTERN,
+  ALERT_MISSING_MONITORING_DATA,
+  INDEX_PATTERN_ELASTICSEARCH,
+} from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
@@ -32,10 +36,12 @@ import {
   CommonAlertNodeUuidFilter,
 } from '../../common/types';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { fetchMissingData } from '../lib/alerts/fetch_missing_data';
+import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { getTypeLabelForStackProduct } from '../lib/alerts/get_type_label_for_stack_product';
 import { getListingLinkForStackProduct } from '../lib/alerts/get_listing_link_for_stack_product';
 import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
   defaultMessage: 'resolved',
@@ -47,12 +53,15 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
 const DEFAULT_DURATION = '5m';
 const DEFAULT_LIMIT = '1d';
 
+// Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
+const LIMIT_BUFFER = 3 * 60 * 1000;
+
 interface MissingDataParams {
   duration: string;
   limit: string;
 }
 
-export class MissingDataAlert extends BaseAlert {
+export class MissingMonitoringDataAlert extends BaseAlert {
   public static paramDetails = {
     duration: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
@@ -68,7 +77,7 @@ export class MissingDataAlert extends BaseAlert {
     } as CommonAlertParamDetail,
   };
 
-  public type = ALERT_MISSING_DATA;
+  public type = ALERT_MISSING_MONITORING_DATA;
   public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {
     defaultMessage: 'Missing monitoring data',
   });
@@ -144,6 +153,32 @@ export class MissingDataAlert extends BaseAlert {
     },
   ];
 
+  protected async fetchClusters(
+    callCluster: any,
+    availableCcs: string[] | undefined = undefined,
+    params: CommonAlertParams
+  ) {
+    const limit = parseDuration(((params as unknown) as MissingDataParams).limit);
+    let ccs;
+    if (!availableCcs) {
+      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
+    } else {
+      ccs = availableCcs;
+    }
+    // Support CCS use cases by querying to find available remote clusters
+    // and then adding those to the index pattern we are searching against
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    if (ccs) {
+      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
+    }
+    return await fetchClusters(callCluster, esIndexPattern, {
+      timestamp: {
+        format: 'epoch_millis',
+        gte: limit - LIMIT_BUFFER,
+      },
+    });
+  }
+
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
@@ -157,13 +192,15 @@ export class MissingDataAlert extends BaseAlert {
     }
     const duration = parseDuration(((params as unknown) as MissingDataParams).duration);
     const limit = parseDuration(((params as unknown) as MissingDataParams).limit);
-    const missingData = await fetchMissingData(
+    const now = +new Date();
+    const missingData = await fetchMissingMonitoringData(
       callCluster,
       clusters,
       indexPattern,
       limit,
       this.config.ui.max_bucket_size,
-      +new Date()
+      now,
+      now - limit - LIMIT_BUFFER
     );
     return missingData.map((missing) => {
       return {
@@ -442,7 +479,7 @@ export class MissingDataAlert extends BaseAlert {
     }
   }
 
-  protected processData(
+  protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,

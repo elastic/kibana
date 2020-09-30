@@ -11,7 +11,11 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { CODE_PATH_BEATS, ALERT_MISSING_DATA, BEATS_SYSTEM_ID } from '../../../../common/constants';
+import {
+  CODE_PATH_BEATS,
+  ALERT_MISSING_MONITORING_DATA,
+  BEATS_SYSTEM_ID,
+} from '../../../../common/constants';
 import { BeatsOverview } from '../../../components/beats/overview';
 
 uiRoutes.when('/beats', {
@@ -47,7 +51,7 @@ uiRoutes.when('/beats', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_MISSING_DATA],
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
             filters: [
               {
                 stackProduct: BEATS_SYSTEM_ID,

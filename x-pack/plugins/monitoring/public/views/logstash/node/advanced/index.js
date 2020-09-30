@@ -29,7 +29,7 @@ import { MonitoringTimeseriesContainer } from '../../../../components/chart';
 import {
   CODE_PATH_LOGSTASH,
   ALERT_LOGSTASH_VERSION_MISMATCH,
-  ALERT_MISSING_DATA,
+  ALERT_MISSING_MONITORING_DATA,
   LOGSTASH_SYSTEM_ID,
 } from '../../../../../common/constants';
 import { AlertsCallout } from '../../../../alerts/callout';
@@ -78,7 +78,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_DATA],
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
             filters: [
               {
                 stackProduct: LOGSTASH_SYSTEM_ID,

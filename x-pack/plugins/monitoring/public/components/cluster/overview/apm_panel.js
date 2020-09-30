@@ -27,7 +27,7 @@ import { formatTimestampToDuration } from '../../../../common';
 import {
   CALCULATE_DURATION_SINCE,
   APM_SYSTEM_ID,
-  ALERT_MISSING_DATA,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -36,7 +36,7 @@ import { SetupModeFeature } from '../../../../common/enums';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { AlertsBadge } from '../../../alerts/badge';
 
-const SERVERS_PANEL_ALERTS = [ALERT_MISSING_DATA];
+const SERVERS_PANEL_ALERTS = [ALERT_MISSING_MONITORING_DATA];
 
 export function ApmPanel(props) {
   const { setupMode, alerts } = props;

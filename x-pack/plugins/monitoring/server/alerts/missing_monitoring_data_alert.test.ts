@@ -3,24 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MissingDataAlert } from './missing_data_alert';
-import { ALERT_MISSING_DATA } from '../../common/constants';
-import { fetchMissingData } from '../lib/alerts/fetch_missing_data';
+import { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
+import { ALERT_MISSING_MONITORING_DATA } from '../../common/constants';
+import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_missing_data', () => ({
-  fetchMissingData: jest.fn(),
+jest.mock('../lib/alerts/fetch_missing_monitoring_data', () => ({
+  fetchMissingMonitoringData: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
-describe('MissingDataAlert', () => {
+describe('MissingMonitoringDataAlert', () => {
   it('should have defaults', () => {
-    const alert = new MissingDataAlert();
-    expect(alert.type).toBe(ALERT_MISSING_DATA);
+    const alert = new MissingMonitoringDataAlert();
+    expect(alert.type).toBe(ALERT_MISSING_MONITORING_DATA);
     expect(alert.label).toBe('Missing monitoring data');
     expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
@@ -109,7 +109,7 @@ describe('MissingDataAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchMissingData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
         return missingData;
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
@@ -125,7 +125,7 @@ describe('MissingDataAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new MissingDataAlert();
+      const alert = new MissingMonitoringDataAlert();
       alert.initializeAlertType(
         getUiSettingsService as any,
         monitoringCluster as any,
@@ -245,7 +245,7 @@ describe('MissingDataAlert', () => {
     });
 
     it('should not fire actions if under threshold', async () => {
-      (fetchMissingData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
         return [
           {
             ...missingData[0],
@@ -253,7 +253,7 @@ describe('MissingDataAlert', () => {
           },
         ];
       });
-      const alert = new MissingDataAlert();
+      const alert = new MissingMonitoringDataAlert();
       alert.initializeAlertType(
         getUiSettingsService as any,
         monitoringCluster as any,
@@ -294,7 +294,7 @@ describe('MissingDataAlert', () => {
     });
 
     it('should resolve with a resolved message', async () => {
-      (fetchMissingData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
         return [
           {
             ...missingData[0],
@@ -327,7 +327,7 @@ describe('MissingDataAlert', () => {
           ],
         };
       });
-      const alert = new MissingDataAlert();
+      const alert = new MissingMonitoringDataAlert();
       alert.initializeAlertType(
         getUiSettingsService as any,
         monitoringCluster as any,
@@ -387,7 +387,7 @@ describe('MissingDataAlert', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchMissingData as jest.Mock).mockImplementation(() => {
+      (fetchMissingMonitoringData as jest.Mock).mockImplementation(() => {
         return [
           {
             ...missingData[0],
@@ -395,7 +395,7 @@ describe('MissingDataAlert', () => {
           },
         ];
       });
-      const alert = new MissingDataAlert();
+      const alert = new MissingMonitoringDataAlert();
       alert.initializeAlertType(
         getUiSettingsService as any,
         monitoringCluster as any,
@@ -425,7 +425,7 @@ describe('MissingDataAlert', () => {
     });
 
     it('should fire with different messaging for cloud', async () => {
-      const alert = new MissingDataAlert();
+      const alert = new MissingMonitoringDataAlert();
       alert.initializeAlertType(
         getUiSettingsService as any,
         monitoringCluster as any,

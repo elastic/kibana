@@ -86,16 +86,16 @@ function getStackProductFromIndex(index: string, beatType: string) {
   return '';
 }
 
-export async function fetchMissingData(
+export async function fetchMissingMonitoringData(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
   limit: number,
   size: number,
-  nowInMS: number
+  nowInMs: number,
+  startMs: number
 ): Promise<AlertMissingData[]> {
-  const endMs = nowInMS;
-  const startMs = endMs - limit - 3 * 60 * 1000; // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
+  const endMs = nowInMs;
 
   const nameFields = [
     'source_node.name',
@@ -251,7 +251,7 @@ export async function fetchMissingData(
         indexName,
         get(uuidBucket, `document.hits.hits[0]._source.beats_stats.beat.type`)
       );
-      const differenceInMs = nowInMS - uuidBucket.most_recent.value;
+      const differenceInMs = nowInMs - uuidBucket.most_recent.value;
       let stackProductName = stackProductUuid;
       for (const nameField of nameFields) {
         stackProductName = get(uuidBucket, `document.hits.hits[0]._source.${nameField}`);

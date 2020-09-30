@@ -30,7 +30,7 @@ import { MonitoringViewBaseController } from '../../base_controller';
 import {
   CODE_PATH_KIBANA,
   ALERT_KIBANA_VERSION_MISMATCH,
-  ALERT_MISSING_DATA,
+  ALERT_MISSING_MONITORING_DATA,
   KIBANA_SYSTEM_ID,
 } from '../../../../common/constants';
 import { AlertsCallout } from '../../../alerts/callout';
@@ -81,7 +81,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_DATA],
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
             filters: [
               {
                 stackProduct: KIBANA_SYSTEM_ID,

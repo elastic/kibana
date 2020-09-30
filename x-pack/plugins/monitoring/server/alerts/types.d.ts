@@ -106,7 +106,7 @@ export interface AlertMissingData {
   stackProductName: string;
   clusterUuid: string;
   gapDuration: number;
-  ccs: string | null;
+  ccs?: string;
 }
 
 export interface AlertData {

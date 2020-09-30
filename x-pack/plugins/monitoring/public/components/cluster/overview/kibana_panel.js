@@ -31,7 +31,7 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import {
   KIBANA_SYSTEM_ID,
   ALERT_KIBANA_VERSION_MISMATCH,
-  ALERT_MISSING_DATA,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
@@ -39,7 +39,7 @@ import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badg
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_DATA];
+const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;

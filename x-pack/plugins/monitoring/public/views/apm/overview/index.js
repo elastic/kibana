@@ -12,7 +12,11 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
-import { CODE_PATH_APM, ALERT_MISSING_DATA, APM_SYSTEM_ID } from '../../../../common/constants';
+import {
+  CODE_PATH_APM,
+  ALERT_MISSING_MONITORING_DATA,
+  APM_SYSTEM_ID,
+} from '../../../../common/constants';
 
 uiRoutes.when('/apm', {
   template,
@@ -45,7 +49,7 @@ uiRoutes.when('/apm', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_MISSING_DATA],
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
             filters: [
               {
                 stackProduct: APM_SYSTEM_ID,
