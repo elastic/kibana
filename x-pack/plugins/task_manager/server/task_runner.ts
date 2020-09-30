@@ -16,7 +16,7 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
-import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
+import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from './lib/result_type';
 import {
   TaskRun,
   TaskMarkRunning,
@@ -70,6 +70,21 @@ interface Opts {
   beforeRun: BeforeRunFunction;
   beforeMarkRunning: BeforeMarkRunningFunction;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+}
+
+export enum TaskRunResult {
+  // Task completed successfully
+  Success = 'Success',
+  // Recurring Task completed successfully
+  SuccessRescheduled = 'Success',
+  // // Task completed successfully after a retry
+  // SuccessfulRetry = 'SuccessfulRetry',
+  // // Recurring Task completed successfully after a retry
+  // SuccessfulRetryRescheduled = 'SuccessfulRetry',
+  // Task has failed and a retry has been scheduled
+  RetryScheduled = 'RetryScheduled',
+  // Task has failed
+  Failed = 'Failed',
 }
 
 /**
@@ -350,8 +365,9 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(
     result: Result<SuccessfulRunResult, FailedRunResult>
-  ): Promise<void> {
-    const fieldUpdates = flow(
+  ): Promise<TaskRunResult> {
+    const hasTaskRunFailed = isOk(result);
+    const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
@@ -370,7 +386,7 @@ export class TaskManagerRunner implements TaskRunner {
     await this.bufferedTaskStore.update(
       defaults(
         {
-          ...(fieldUpdates as Partial<ConcreteTaskInstance>),
+          ...fieldUpdates,
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,
@@ -379,9 +395,15 @@ export class TaskManagerRunner implements TaskRunner {
         this.instance
       )
     );
+
+    return fieldUpdates.status === TaskStatus.Failed
+      ? TaskRunResult.Failed
+      : hasTaskRunFailed
+      ? TaskRunResult.SuccessRescheduled
+      : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(): Promise<void> {
+  private async processResultWhenDone(): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
       await this.bufferedTaskStore.remove(this.instance.id);
@@ -392,25 +414,38 @@ export class TaskManagerRunner implements TaskRunner {
         throw err;
       }
     }
+    return TaskRunResult.Success;
   }
 
   private async processResult(
     result: Result<SuccessfulRunResult, FailedRunResult>,
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const task = this.instance;
     await eitherAsync(
       result,
       async ({ runAt }: SuccessfulRunResult) => {
-        if (runAt || this.instance.schedule) {
-          await this.processResultForRecurringTask(result);
-        } else {
-          await this.processResultWhenDone();
-        }
-        this.onTaskEvent(asTaskRunEvent(this.id, asOk(this.instance), taskTiming));
+        this.onTaskEvent(
+          asTaskRunEvent(
+            this.id,
+            asOk({
+              task,
+              result: await (runAt || task.schedule
+                ? this.processResultForRecurringTask(result)
+                : this.processResultWhenDone()),
+            }),
+            taskTiming
+          )
+        );
       },
       async ({ error }: FailedRunResult) => {
-        await this.processResultForRecurringTask(result);
-        this.onTaskEvent(asTaskRunEvent(this.id, asErr(error), taskTiming));
+        this.onTaskEvent(
+          asTaskRunEvent(
+            this.id,
+            asErr({ task, result: await this.processResultForRecurringTask(result), error }),
+            taskTiming
+          )
+        );
       }
     );
     return result;

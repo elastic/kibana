@@ -26,11 +26,13 @@ import {
   TaskClaim,
   TaskRunRequest,
   TaskPollingCycle,
+  ErroredTask,
   isTaskRunEvent,
   isTaskClaimEvent,
   isTaskRunRequestEvent,
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
+  RanTask,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
@@ -539,26 +541,32 @@ export async function awaitTaskRunResult(
             );
           }, taskEvent.event);
         } else {
-          either<ConcreteTaskInstance | FillPoolResult, Error | Option<ConcreteTaskInstance>>(
+          either<
+            RanTask | ConcreteTaskInstance | FillPoolResult,
+            Error | ErroredTask | Option<ConcreteTaskInstance>
+          >(
             taskEvent.event,
-            (taskInstance: ConcreteTaskInstance | FillPoolResult) => {
+            (taskInstance: RanTask | ConcreteTaskInstance | FillPoolResult) => {
               // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
-                resolve({ id: (taskInstance as ConcreteTaskInstance).id });
+                resolve({ id: (taskInstance as RanTask).task.id });
               }
             },
-            async (error: Error | Option<ConcreteTaskInstance>) => {
+            async (errorResult: Error | ErroredTask | Option<ConcreteTaskInstance>) => {
               // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-              if (isTaskRunRequestEvent(taskEvent)) {
-                return reject(
-                  new Error(
-                    `Failed to run task "${taskId}" as Task Manager is at capacity, please try again later`
-                  )
-                );
-              }
-              return reject(new Error(`Failed to run task "${taskId}": ${error}`));
+              return reject(
+                new Error(
+                  `Failed to run task "${taskId}"${
+                    isTaskRunRequestEvent(taskEvent)
+                      ? `: Task Manager is at capacity, please try again later`
+                      : isTaskRunEvent(taskEvent)
+                      ? `: ${(errorResult as ErroredTask).error}`
+                      : `: ${errorResult}`
+                  }`
+                )
+              );
             }
           );
         }

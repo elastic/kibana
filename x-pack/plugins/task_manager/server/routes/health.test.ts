@@ -182,6 +182,8 @@ function mockHealthStats(overrides = {}) {
           timestamp: new Date().toISOString(),
           value: {
             drift: [1000, 1000],
+            duration: [],
+            taskRunResultFrequency: [],
             polling: {
               lastSuccessfulPoll: new Date().toISOString(),
               resultFrequency: ['NoTasksClaimed', 'NoTasksClaimed', 'NoTasksClaimed'],

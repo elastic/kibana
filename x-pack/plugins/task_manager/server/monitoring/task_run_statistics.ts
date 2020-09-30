@@ -10,9 +10,17 @@ import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskManager, TaskLifecycleEvent } from '../task_manager';
-import { isTaskRunEvent, isTaskPollingCycleEvent } from '../task_events';
-import { isOk, Ok } from '../lib/result_type';
+import {
+  isTaskRunEvent,
+  isTaskPollingCycleEvent,
+  TaskRun,
+  ErroredTask,
+  RanTask,
+  TaskTiming,
+} from '../task_events';
+import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
+import { TaskRunResult } from '../task_runner';
 import { FillPoolResult } from '../lib/fill_pool';
 import {
   AveragedStat,
@@ -30,9 +38,9 @@ interface FillPoolStat extends JsonObject {
 export interface TaskRunStat extends JsonObject {
   drift: number[];
   duration: Record<string, number[]>;
+  taskRunResultFrequency: TaskRunResult[];
   polling: FillPoolStat | Omit<FillPoolStat, 'lastSuccessfulPoll'>;
 }
-
 interface FillPoolRawStat extends JsonObject {
   lastSuccessfulPoll: string;
   resultFrequency: {
@@ -45,6 +53,12 @@ interface FillPoolRawStat extends JsonObject {
 export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
   duration: Record<string, AveragedStat>;
+  taskRunResultFrequency: {
+    [TaskRunResult.Success]: number;
+    [TaskRunResult.SuccessRescheduled]: number;
+    [TaskRunResult.RetryScheduled]: number;
+    [TaskRunResult.Failed]: number;
+  };
   polling: FillPoolRawStat | Omit<FillPoolRawStat, 'lastSuccessfulPoll'>;
 }
 
@@ -52,25 +66,12 @@ export function createTaskRunAggregator(
   taskManager: TaskManager,
   runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
-  const driftQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
-  const taskRunEvents$: Observable<Pick<
-    TaskRunStat,
-    'drift' | 'duration'
-  >> = taskManager.events.pipe(
-    filter(
-      (taskEvent: TaskLifecycleEvent) =>
-        isTaskRunEvent(taskEvent) &&
-        isOk<ConcreteTaskInstance, unknown>(taskEvent.event) &&
-        !!taskEvent?.timing?.start
-    ),
+  const taskRunEventToStat = createTaskRunEventToStat(runningAverageWindowSize);
+  const taskRunEvents$: Observable<Omit<TaskRunStat, 'polling'>> = taskManager.events.pipe(
+    filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
     map((taskEvent: TaskLifecycleEvent) => {
-      const task = (taskEvent.event as Ok<ConcreteTaskInstance>).value;
-      const { timing } = taskEvent;
-      return {
-        duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
-        drift: driftQueue(timing!.start - task.runAt.getTime()),
-      };
+      const { task, result }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
+      return taskRunEventToStat(task, taskEvent.timing!, result);
     })
   );
 
@@ -89,7 +90,7 @@ export function createTaskRunAggregator(
   );
 
   return combineLatest(
-    taskRunEvents$.pipe(startWith({ duration: {}, drift: [] })),
+    taskRunEvents$.pipe(startWith({ duration: {}, drift: [], taskRunResultFrequency: [] })),
     taskPollingEvents$.pipe(
       startWith({
         resultFrequency: [],
@@ -108,10 +109,30 @@ export function createTaskRunAggregator(
   );
 }
 
+function hasTiming(taskEvent: TaskLifecycleEvent) {
+  return !!taskEvent?.timing;
+}
+
+function createTaskRunEventToStat(runningAverageWindowSize: number) {
+  const driftQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
+  const resultFrequencyQueue = createRunningAveragedStat<TaskRunResult>(runningAverageWindowSize);
+  return (
+    task: ConcreteTaskInstance,
+    timing: TaskTiming,
+    result: TaskRunResult
+  ): Omit<TaskRunStat, 'polling'> => ({
+    duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
+    drift: driftQueue(timing!.start - task.runAt.getTime()),
+    taskRunResultFrequency: resultFrequencyQueue(result),
+  });
+}
+
 export function summarizeTaskRunStat({
   polling: { lastSuccessfulPoll, resultFrequency },
   drift,
   duration,
+  taskRunResultFrequency,
 }: TaskRunStat): SummarizedTaskRunStat {
   return {
     polling: {
@@ -125,5 +146,12 @@ export function summarizeTaskRunStat({
     },
     drift: calculateRunningAverage(drift),
     duration: mapValues(duration, (typedDuration) => calculateRunningAverage(typedDuration)),
+    taskRunResultFrequency: {
+      [TaskRunResult.Success]: 0,
+      [TaskRunResult.SuccessRescheduled]: 0,
+      [TaskRunResult.RetryScheduled]: 0,
+      [TaskRunResult.Failed]: 0,
+      ...calculateFrequency<TaskRunResult>(taskRunResultFrequency),
+    },
   };
 }

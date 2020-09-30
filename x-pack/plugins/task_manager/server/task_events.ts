@@ -11,6 +11,7 @@ import { ConcreteTaskInstance } from './task';
 import { Result, Err } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
+import { TaskRunResult } from './task_runner';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
@@ -36,8 +37,16 @@ export interface TaskEvent<T, E> {
   type: TaskEventType;
   event: Result<T, E>;
 }
+export interface RanTask {
+  task: ConcreteTaskInstance;
+  result: TaskRunResult;
+}
+export type ErroredTask = RanTask & {
+  error: Error;
+};
+
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
-export type TaskRun = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskRun = TaskEvent<RanTask, ErroredTask>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<FillPoolResult, PollingError<T>>;
@@ -57,7 +66,7 @@ export function asTaskMarkRunningEvent(
 
 export function asTaskRunEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Error>,
+  event: Result<RanTask, ErroredTask>,
   timing?: TaskTiming
 ): TaskRun {
   return {

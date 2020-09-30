@@ -26,6 +26,7 @@ import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
+import { TaskRunResult } from './task_runner';
 import { Middleware } from './lib/middleware';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
@@ -284,7 +285,7 @@ describe('TaskManager', () => {
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
         const task = { id } as ConcreteTaskInstance;
-        events$.next(asTaskRunEvent(id, asOk(task)));
+        events$.next(asTaskRunEvent(id, asOk({ task, result: TaskRunResult.Success })));
 
         return expect(result).resolves.toEqual({ id });
       });
@@ -299,7 +300,16 @@ describe('TaskManager', () => {
         const task = { id } as ConcreteTaskInstance;
         events$.next(asTaskClaimEvent(id, asOk(task)));
         events$.next(asTaskMarkRunningEvent(id, asOk(task)));
-        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
+        events$.next(
+          asTaskRunEvent(
+            id,
+            asErr({
+              error: new Error('some thing gone wrong'),
+              task,
+              result: TaskRunResult.Failed,
+            })
+          )
+        );
 
         return expect(result).rejects.toMatchInlineSnapshot(
           `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
@@ -381,7 +391,7 @@ describe('TaskManager', () => {
 
         await expect(result).rejects.toEqual(
           new Error(
-            `Failed to run task "${id}" as Task Manager is at capacity, please try again later`
+            `Failed to run task "${id}": Task Manager is at capacity, please try again later`
           )
         );
         expect(getLifecycle).not.toHaveBeenCalled();
@@ -432,9 +442,20 @@ describe('TaskManager', () => {
         events$.next(asTaskClaimEvent(id, asOk(task)));
         events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
 
-        events$.next(asTaskRunEvent(differentTask, asOk(task)));
+        events$.next(
+          asTaskRunEvent(differentTask, asOk({ task: otherTask, result: TaskRunResult.Success }))
+        );
 
-        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
+        events$.next(
+          asTaskRunEvent(
+            id,
+            asErr({
+              task,
+              error: new Error('some thing gone wrong'),
+              result: TaskRunResult.Failed,
+            })
+          )
+        );
 
         return expect(result).rejects.toMatchInlineSnapshot(
           `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
