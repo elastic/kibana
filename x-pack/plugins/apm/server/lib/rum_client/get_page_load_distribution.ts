@@ -122,7 +122,7 @@ export async function getPageLoadDistribution({
   const maxPercQuery = durPercentiles?.values['99.0'] ?? 0;
 
   // we assumed that page load will never exceed 50secs, if 99th percentile is
-  // greater than let's fetch additional 10 steps, to cover that on the chart
+  // greater then let's fetch additional 10 steps, to cover that on the chart
   if (maxPercQuery > maxDuration && !maxPercentile) {
     const additionalStepsPageVals = await getPercentilesDistribution({
       setup,

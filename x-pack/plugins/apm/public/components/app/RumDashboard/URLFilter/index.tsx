@@ -5,16 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiSpacer, EuiBadge } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { Projection } from '../../../../../common/projections';
-import { useLocalUIFilters } from '../../../../hooks/useLocalUIFilters';
+import { omit } from 'lodash';
 import { URLSearch } from './URLSearch';
-import { LocalUIFilters } from '../../../shared/LocalUIFilters';
 import { UrlList } from './UrlList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { removeUndefinedProps } from '../../../../context/UrlParamsContext/helpers';
+import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 const removeSearchTermLabel = i18n.translate(
   'xpack.apm.uiFilter.url.removeSearchTerm',
@@ -28,18 +28,19 @@ export function URLFilter() {
     urlParams: { searchTerm },
   } = useUrlParams();
 
-  const localUIFiltersConfig = useMemo(() => {
-    const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionUrl'],
-      projection: Projection.rumOverview,
-    };
+  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
+    const search = omit(toQuery(history.location.search), name);
 
-    return config;
-  }, []);
-
-  const { filters, setFilterValue } = useLocalUIFilters({
-    ...localUIFiltersConfig,
-  });
+    history.push({
+      ...history.location,
+      search: fromQuery(
+        removeUndefinedProps({
+          ...search,
+          [name]: value.length ? value.join(',') : undefined,
+        })
+      ),
+    });
+  };
 
   const updateSearchTerm = useCallback(
     (searchTermN?: string) => {
@@ -55,7 +56,12 @@ export function URLFilter() {
     [history]
   );
 
-  const { name, value: filterValue } = filters[0];
+  const name = 'transactionUrl';
+
+  const { uiFilters } = useUrlParams();
+  const { transactionUrl } = uiFilters;
+
+  const filterValue = transactionUrl ?? [];
 
   return (
     <span data-cy="csmUrlFilter">

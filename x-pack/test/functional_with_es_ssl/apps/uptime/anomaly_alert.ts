@@ -111,7 +111,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('change button to disable anomaly alert', async () => {
       await uptime.ml.openMLManageMenu();
-      expect(uptime.ml.disableAnomalyAlertIsVisible()).to.eql(true);
+      expect(uptime.ml.manageAnomalyAlertIsVisible()).to.eql(true);
     });
 
     it('can delete job successfully', async () => {
