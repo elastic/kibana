@@ -455,7 +455,7 @@ export const signalRulesAlertType = ({
             );
           } else if (response.hits.events !== undefined) {
             newSignals = response.hits.events.map((event) =>
-              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
+              wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
             );
           } else {
             throw new Error(
