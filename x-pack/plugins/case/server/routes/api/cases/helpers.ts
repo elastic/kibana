@@ -15,7 +15,7 @@ import {
   ESCasePatchRequest,
   ESCasesConfigureAttributes,
 } from '../../../../common/api';
-import { ESConnectorFields } from '../../../../common/api/connectors';
+import { ESConnectorFields, ConnectorFields } from '../../../../common/api/connectors';
 
 interface CompareArrays {
   addedItems: string[];
@@ -142,13 +142,13 @@ export const transformESConnectorToCaseConnector = (connector: ESCaseConnector):
   name: connector?.name ?? 'none',
   type: connector?.type ?? '.none',
   fields:
-    connector.fields.length > 0
-      ? (connector.fields.reduce(
+    connector.fields != null && connector.fields.length > 0
+      ? connector.fields.reduce<ConnectorFields>(
           (fields, { key, value }) => ({
             ...fields,
             [key]: value,
           }),
-          {}
-        ) as any)
+          {} as ConnectorFields
+        )
       : null,
 });

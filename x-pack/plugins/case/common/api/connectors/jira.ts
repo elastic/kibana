@@ -12,3 +12,6 @@ export const JiraFieldsRT = rt.type({
 });
 
 export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;
+export type JiraESFieldsType =
+  | { key: 'issueType'; value: string }
+  | { key: 'priority'; value: string | null };

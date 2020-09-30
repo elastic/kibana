@@ -9,8 +9,6 @@ import { lazy } from 'react';
 import { CaseSetting } from '../types';
 import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
 
-export * from './types';
-
 export const getCaseSetting = (): CaseSetting<ServiceNowFieldsType> => {
   return {
     id: '.servicenow',

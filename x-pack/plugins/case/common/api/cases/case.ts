@@ -10,7 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { ConnectorTypeFieldsRt, ESConnectorFields } from '../connectors';
+import { ConnectorTypeFieldsRt, ESConnectorFields, ConnectorTypes } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
@@ -188,9 +188,12 @@ export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCase
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
 
-export type ESCaseConnector = Omit<CaseConnector, 'fields'> & {
+export interface ESCaseConnector {
+  id: string;
+  name: string;
+  type: ConnectorTypes;
   fields: ESConnectorFields;
-};
+}
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {

@@ -12,3 +12,6 @@ export const ResilientFieldsRT = rt.type({
 });
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;
+export type ResilientESFieldsType =
+  | { key: 'incidentTypes'; value: number[] | null }
+  | { key: 'severityCode'; value: number | null };

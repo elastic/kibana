@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 import { JiraFieldsRT } from '../connectors/jira';
 import { ServiceNowFieldsRT } from '../connectors/servicenow';
 import { ResilientFieldsRT } from '../connectors/resilient';
-import { ConnectorTypeFieldsRt, ESConnectorFields } from '../connectors';
+import { ConnectorTypeFieldsRt, ConnectorTypes } from '../connectors';
 
 /*
  * This types below are related to the service now configuration
@@ -112,9 +112,12 @@ export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
 export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesRt>;
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
 
-export type ESCasesConfigureConnector = Omit<ConfigureCaseConnector, 'fields'> & {
-  fields: ESConnectorFields;
-};
+export interface ESCasesConfigureConnector {
+  id: string;
+  name: string;
+  type: ConnectorTypes;
+  fields: null;
+}
 
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
   connector: ESCasesConfigureConnector;

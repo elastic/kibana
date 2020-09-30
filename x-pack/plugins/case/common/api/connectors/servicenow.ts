@@ -11,4 +11,9 @@ export const ServiceNowFieldsRT = rt.type({
   severity: rt.union([rt.string, rt.null]),
   urgency: rt.union([rt.string, rt.null]),
 });
+
 export type ServiceNowFieldsType = rt.TypeOf<typeof ServiceNowFieldsRT>;
+export type ServiceNowESFieldsType =
+  | { key: 'impact'; value: string | null }
+  | { key: 'severity'; value: string | null }
+  | { key: 'urgency'; value: string | null };
