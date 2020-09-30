@@ -316,7 +316,18 @@ const fleetEnrollAgentForHost = async (
     return;
   }
 
-  const kibanaVersion = await kbnClient.fetchKibanaVersion().number;
+  const fetchKibanaVersion = async () => {
+    const version = ((await kbnClient.request({
+      path: '/api/status',
+      method: 'GET',
+    })) as AxiosResponse).data.version.number;
+    if (!version) {
+      // eslint-disable-next-line no-console
+      console.log('failed to retrieve kibana version');
+    }
+    return version;
+  };
+
   // Enroll an agent for the Host
   const body: PostAgentEnrollRequest['body'] = {
     type: 'PERMANENT',
@@ -324,7 +335,7 @@ const fleetEnrollAgentForHost = async (
       local: {
         elastic: {
           agent: {
-            version: '8.0.0',
+            version: await fetchKibanaVersion(),
           },
         },
         host: {
