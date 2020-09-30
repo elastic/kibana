@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
+
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -78,6 +79,17 @@ export enum SOURCE_TYPES {
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
 }
+
+export enum LICENSED_FEATURES {
+  GEO_SHAPE_AGGS = 'GEO_SHAPE_AGGS',
+}
+
+export const LICENCED_FEATURES_DETAILS = {
+  [LICENSED_FEATURES.GEO_SHAPE_AGGS]: {
+    name: 'geo aggs on geo_shape fields',
+    license: 'gold',
+  },
+};
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',

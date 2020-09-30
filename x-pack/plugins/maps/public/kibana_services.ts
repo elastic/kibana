@@ -5,10 +5,11 @@
  */
 
 import _ from 'lodash';
+import { CoreStart } from 'kibana/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
-import { CoreStart } from '../../../../src/core/public';
+import { LICENSED_FEATURES } from '../common/constants';
 
 let licenseId: string | undefined;
 export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
@@ -16,6 +17,19 @@ export const getLicenseId = () => licenseId;
 let isGoldPlus: boolean = false;
 export const setIsGoldPlus = (igp: boolean) => (isGoldPlus = igp);
 export const getIsGoldPlus = () => isGoldPlus;
+
+let regFeatureUse: (featureName: LICENSED_FEATURES) => void;
+export const setRegisterFeatureUse = (value) => {
+  regFeatureUse = value;
+};
+export const registerFeatureUse = (featureName: LICENSED_FEATURES) => {
+  if (regFeatureUse) {
+    regFeatureUse(featureName);
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn('Should not register a feature before Maps-plugin startup has completed.');
+  }
+};
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

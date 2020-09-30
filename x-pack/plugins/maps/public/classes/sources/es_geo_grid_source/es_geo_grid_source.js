@@ -24,6 +24,8 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   GEOTILE_GRID_AGG_NAME,
   GEOCENTROID_AGG_NAME,
+  ES_GEO_FIELD_TYPE,
+  LICENSED_FEATURES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -398,6 +400,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
     }
 
     return [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  async getLicensedFeatures() {
+    const geoField = await this._getGeoField();
+    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE ? [LICENSED_FEATURES.GEO_SHAPE_AGGS] : [];
   }
 }
 

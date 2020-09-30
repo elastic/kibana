@@ -12,7 +12,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { copyPersistentState } from '../../reducers/util';
 
 import { IField } from '../fields/field';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { FieldFormatter, LICENSED_FEATURES, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
@@ -66,6 +66,7 @@ export interface ISource {
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 }
 
 export class AbstractSource implements ISource {
@@ -187,5 +188,9 @@ export class AbstractSource implements ISource {
 
   getMaxZoom() {
     return MAX_ZOOM;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [];
   }
 }

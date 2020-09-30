@@ -975,4 +975,8 @@ export class VectorLayer extends AbstractLayer {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }
+
+  async getLicensedFeatures() {
+    return await this._source.getLicensedFeatures();
+  }
 }

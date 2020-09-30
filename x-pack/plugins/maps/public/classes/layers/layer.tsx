@@ -16,6 +16,7 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
+  LICENSED_FEATURES,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -91,6 +92,7 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -540,5 +542,9 @@ export class AbstractLayer implements ILayer {
 
   supportsLabelsOnTop(): boolean {
     return false;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [];
   }
 }

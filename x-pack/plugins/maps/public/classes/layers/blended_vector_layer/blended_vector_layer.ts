@@ -20,6 +20,7 @@ import {
   VECTOR_STYLES,
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
+  LICENSED_FEATURES,
 } from '../../../../common/constants';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
@@ -327,5 +328,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     }
 
     super._syncData(syncContext, activeSource, activeStyle);
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [
+      ...(await this._clusterSource.getLicensedFeatures()),
+      ...(await this._documentSource.getLicensedFeatures()),
+    ];
   }
 }

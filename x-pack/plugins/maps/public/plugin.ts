@@ -23,6 +23,7 @@ import {
   setKibanaVersion,
   setLicenseId,
   setMapAppConfig,
+  setRegisterFeatureUse,
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -30,7 +31,13 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import {
+  APP_ICON_SOLUTION,
+  APP_ID,
+  LICENCED_FEATURES_DETAILS,
+  LICENSED_FEATURES,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -50,7 +57,7 @@ import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/shar
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 
 export interface MapsPluginSetupDependencies {
@@ -60,6 +67,7 @@ export interface MapsPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: MapsLegacyConfig };
   share: SharePluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -97,6 +105,11 @@ export class MapsPlugin
   }
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+    plugins.licensing.featureUsage.register(
+      LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.name,
+      LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.license
+    );
+
     const config = this._initializerContext.config.get<MapsConfigType>();
     setKibanaCommonConfig(plugins.mapsLegacy.config);
     setMapAppConfig(config);
@@ -140,9 +153,13 @@ export class MapsPlugin
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     if (plugins.licensing) {
       plugins.licensing.license$.subscribe((license: ILicense) => {
-        const gold = license.check(APP_ID, 'gold');
+        const gold = license.check(APP_ID, LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.license);
         setIsGoldPlus(gold.state === 'valid');
         setLicenseId(license.uid);
+      });
+
+      setRegisterFeatureUse((feature: LICENSED_FEATURES) => {
+        plugins.licensing.featureUsage.notifyUsage(LICENCED_FEATURES_DETAILS[feature].name);
       });
     }
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);

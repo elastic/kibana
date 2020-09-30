@@ -52,7 +52,7 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
 
-function createLayerInstance(
+export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
   inspectorAdapters: Adapters
 ): ILayer {
