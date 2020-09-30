@@ -5,7 +5,15 @@
   "configPath": ["ui_actions_enhanced_examples"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "uiActionsEnhanced", "data", "discover", "dashboard", "developerExamples"],
+  "requiredPlugins": [
+    "uiActions",
+    "uiActionsEnhanced",
+    "data",
+    "discover",
+    "dashboard",
+    "dashboardEnhanced",
+    "developerExamples"
+  ],
   "optionalPlugins": [],
   "requiredBundles": [
     "dashboardEnhanced",
