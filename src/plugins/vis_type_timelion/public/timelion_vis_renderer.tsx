@@ -20,8 +20,8 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { KibanaContextProvider } from '../../kibana_react/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { VisualizationContainer } from '../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
@@ -34,7 +34,7 @@ export const getTimelionVisRenderer: (
   name: 'timelion_vis',
   displayName: 'Timelion visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visParams }, handlers) => {
+  render: (domNode, { visData, visParams }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });

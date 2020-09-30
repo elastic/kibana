@@ -23,6 +23,7 @@ import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
 import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
@@ -48,10 +49,10 @@ interface CrosshairPlot extends jquery.flot.plot {
 }
 
 interface TimelionVisComponentProps {
-  fireEvent(event: any): void;
+  fireEvent: IInterpreterRenderHandlers['event'];
   interval: string;
   seriesList: Sheet;
-  renderComplete(): void;
+  renderComplete: IInterpreterRenderHandlers['done'];
 }
 
 interface Position {
