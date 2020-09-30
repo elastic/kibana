@@ -17,6 +17,7 @@ import { transformError, buildSiemResponse } from '../utils';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
 export const findRulesRoute = (router: IRouter) => {
   router.get(
@@ -57,6 +58,32 @@ export const findRulesRoute = (router: IRouter) => {
           filter: query.filter,
           fields: query.fields,
         });
+
+        // if any rules attempted to execute but failed before the rule executor is called,
+        // an execution status will be written directly onto the rule via the kibana alerting framework,
+        // which we are filtering on and will write a failure status
+        // for any rules found to be in a failing state into our rule status saved objects
+        const failingRules = rules.data.filter(
+          (rule) =>
+            rule.executionStatus != null &&
+            Object.keys(rule.executionStatus).length !== 0 &&
+            rule.executionStatus.status === 'error'
+        );
+        if (failingRules.length > 0) {
+          // write failure statuses for failing rules
+          await Promise.all(
+            failingRules.map(async (rule) => {
+              const ruleStatusService = await ruleStatusServiceFactory({
+                alertId: rule.id,
+                ruleStatusClient,
+              });
+              await ruleStatusService.error(
+                `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`
+              );
+            })
+          );
+        }
+
         const ruleStatuses = await Promise.all(
           rules.data.map(async (rule) => {
             const results = await ruleStatusClient.find({
