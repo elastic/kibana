@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import d3 from 'd3';
+import { rgb } from 'color';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
@@ -78,9 +78,9 @@ describe('Mapped Colors', () => {
   });
 
   it('should treat different formats of colors as equal', () => {
-    const color = d3.rgb(seedColors[0]);
-    const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
-    const newConfig = { bar: rgb };
+    const color = rgb(seedColors[0]);
+    const rgbColorString = `rgbColorString(${color.red}, ${color.green}, ${color.blue})`;
+    const newConfig = { bar: rgbColorString };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'bar', 'baz', 'qux'];
