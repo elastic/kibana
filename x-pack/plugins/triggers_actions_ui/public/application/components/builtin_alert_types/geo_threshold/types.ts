@@ -23,5 +23,6 @@ export interface GeoThresholdAlertParams {
   boundaryNameField?: string;
 }
 
-export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
+// Will eventually include 'geo_shape'
+export const ES_GEO_FIELD_TYPES = ['geo_point'];
 export const ES_GEO_SHAPE_TYPES = ['geo_shape'];
