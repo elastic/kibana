@@ -59,13 +59,20 @@ export const useNetworkDetails = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: NetworkQueries.details,
-    filterQuery: createFilter(filterQuery),
-    ip,
-  });
+  const [
+    networkDetailsRequest,
+    setNetworkDetailsRequest,
+  ] = useState<NetworkDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: NetworkQueries.details,
+          filterQuery: createFilter(filterQuery),
+          ip,
+        }
+      : null
+  );
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
@@ -79,7 +86,11 @@ export const useNetworkDetails = ({
   });
 
   const networkDetailsSearch = useCallback(
-    (request: NetworkDetailsRequestOptions) => {
+    (request: NetworkDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();

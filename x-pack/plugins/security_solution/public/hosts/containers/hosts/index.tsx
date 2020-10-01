@@ -76,29 +76,39 @@ export const useAllHost = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.hosts,
-    filterQuery: createFilter(filterQuery),
-    pagination: generateTablePaginationOptions(activePage, limit),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    sort: {
-      direction,
-      field: sortField,
-    },
-  });
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: HostsQueries.hosts,
+          filterQuery: createFilter(filterQuery),
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          sort: {
+            direction,
+            field: sortField,
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -124,7 +134,11 @@ export const useAllHost = ({
   });
 
   const hostsSearch = useCallback(
-    (request: HostsRequestOptions) => {
+    (request: HostsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -180,7 +194,7 @@ export const useAllHost = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),

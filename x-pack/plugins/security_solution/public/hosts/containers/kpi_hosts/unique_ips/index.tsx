@@ -52,19 +52,24 @@ export const useHostsKpiUniqueIps = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] = useState<
-    HostsKpiUniqueIpsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    hostsKpiUniqueIpsRequest,
+    setHostsKpiUniqueIpsRequest,
+  ] = useState<HostsKpiUniqueIpsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {
@@ -83,7 +88,11 @@ export const useHostsKpiUniqueIps = ({
   );
 
   const hostsKpiUniqueIpsSearch = useCallback(
-    (request: HostsKpiUniqueIpsRequestOptions) => {
+    (request: HostsKpiUniqueIpsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();

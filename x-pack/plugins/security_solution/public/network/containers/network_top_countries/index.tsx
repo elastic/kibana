@@ -74,26 +74,39 @@ export const useNetworkTopCountries = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTopCountriesRequest, setHostRequest] = useState<NetworkTopCountriesRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.topCountries,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [
+    networkTopCountriesRequest,
+    setHostRequest,
+  ] = useState<NetworkTopCountriesRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.topCountries,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -119,7 +132,11 @@ export const useNetworkTopCountries = ({
   });
 
   const networkTopCountriesSearch = useCallback(
-    (request: NetworkTopCountriesRequestOptions) => {
+    (request: NetworkTopCountriesRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -178,9 +195,10 @@ export const useNetworkTopCountries = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
@@ -194,7 +212,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);
