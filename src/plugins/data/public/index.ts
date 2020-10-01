@@ -50,7 +50,7 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '../common';
 
-import { FilterLabel } from './ui/filter_bar';
+import { FilterLabel } from './ui';
 
 import {
   generateFilters,
@@ -421,7 +421,6 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
-  FilterBar,
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,

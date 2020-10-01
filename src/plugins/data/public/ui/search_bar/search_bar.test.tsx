@@ -120,7 +120,7 @@ function wrapSearchBarInContext(testProps: any) {
 describe('SearchBar', () => {
   const SEARCH_BAR_TEST_ID = 'globalQueryBar';
   const SEARCH_BAR_ROOT = '.globalQueryBar';
-  const FILTER_BAR = '.filterBar';
+  const FILTER_BAR = '.globalFilterBar';
   const QUERY_BAR = '.queryBar';
 
   beforeEach(() => {
