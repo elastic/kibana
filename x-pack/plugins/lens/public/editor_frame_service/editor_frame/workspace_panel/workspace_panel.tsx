@@ -257,7 +257,7 @@ export function InnerWorkspacePanel({
 
     if (localState.expressionBuildError) {
       return (
-        <EuiFlexGroup direction="column" alignItems="center">
+        <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
           <EuiFlexItem>
             <EuiIcon type="alert" size="xl" color="danger" />
           </EuiFlexItem>
@@ -283,7 +283,7 @@ export function InnerWorkspacePanel({
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
-              <EuiFlexGroup direction="column" alignItems="center">
+              <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
                 <EuiFlexItem>
                   <EuiIcon type="alert" size="xl" color="danger" />
                 </EuiFlexItem>
