@@ -84,25 +84,25 @@ describe('VALUE_CLICK_TRIGGER', () => {
       ]) as ValueClickTriggerEventScope;
       expect(mockEventScope.points.length).toBeGreaterThan(3);
       expect(mockEventScope.points).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "key": "event.points.0.key",
-          "value": "event.points.0.value",
-        },
-        Object {
-          "key": "event.points.1.key",
-          "value": "event.points.1.value",
-        },
-        Object {
-          "key": "event.points.2.key",
-          "value": "event.points.2.value",
-        },
-        Object {
-          "key": "event.points.3.key",
-          "value": "event.points.3.value",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "key": "event.points.[0].key",
+            "value": "event.points.[0].value",
+          },
+          Object {
+            "key": "event.points.[1].key",
+            "value": "event.points.[1].value",
+          },
+          Object {
+            "key": "event.points.[2].key",
+            "value": "event.points.[2].value",
+          },
+          Object {
+            "key": "event.points.[3].key",
+            "value": "event.points.[3].value",
+          },
+        ]
+      `);
     });
   });
 

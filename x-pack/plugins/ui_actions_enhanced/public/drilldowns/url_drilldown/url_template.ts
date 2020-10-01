@@ -69,7 +69,11 @@ handlebars.registerHelper('date', (...args) => {
   return format ? momentDate.format(format) : momentDate.toISOString();
 });
 
-export function compile(url: string, context: object): string {
-  const template = handlebars.compile(url, { strict: true, noEscape: true });
+export function compile(
+  url: string,
+  context: object,
+  { strict = true }: { strict: boolean } = { strict: true }
+): string {
+  const template = handlebars.compile(url, { strict, noEscape: true });
   return encodeURI(template(context));
 }

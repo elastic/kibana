@@ -108,6 +108,7 @@ export interface ValueClickTriggerEventScope {
   value: Primitive;
   negate: boolean;
   points: Array<{ key?: string; value: Primitive }>;
+  row: Primitive[];
 }
 export interface RangeSelectTriggerEventScope {
   key: string;
@@ -131,7 +132,7 @@ function getEventScopeFromRangeSelectTriggerContext(
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
-    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string,
+    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field ?? column?.name) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
@@ -141,19 +142,29 @@ function getEventScopeFromValueClickTriggerContext(
   eventScopeInput: ValueClickContext
 ): ValueClickTriggerEventScope {
   const negate = eventScopeInput.data.negate ?? false;
+
   const points = eventScopeInput.data.data.map(({ table, value, column: columnIndex }) => {
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,
-      key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+      key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field ?? column?.name) as
+        | string
+        | undefined,
     };
   });
+
+  const dataPoint = eventScopeInput.data.data[0];
+
+  const row = dataPoint.table.columns.map(
+    ({ id }) => dataPoint.table.rows[dataPoint.row][id]
+  ) as Primitive[];
 
   return cleanEmptyKeys({
     key: points[0]?.key,
     value: points[0]?.value,
     negate,
     points,
+    row,
   });
 }
 
@@ -174,14 +185,19 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
     // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
     const nPoints = 4;
     const points = new Array(nPoints).fill(0).map((_, index) => ({
-      key: `event.points.${index}.key`,
-      value: `event.points.${index}.value`,
+      key: `event.points.[${index}].key`,
+      value: `event.points.[${index}].value`,
     }));
+
+    // number of mock columns to generate
+    const nColumns = 4;
+    const row = new Array(nColumns).fill(0).map((_, index) => `event.row.[${index}]`);
     return {
-      key: `event.key`,
-      value: `event.value`,
+      key: points[0].key,
+      value: points[0].value,
       negate: false,
       points,
+      row,
     };
   }
 }

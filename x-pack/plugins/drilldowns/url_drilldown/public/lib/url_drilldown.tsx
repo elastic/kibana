@@ -90,14 +90,19 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     config: Config,
     context: ActionFactoryContext
   ): config is Config => {
-    const { isValid } = urlDrilldownValidateUrlTemplate(config.url, this.buildEditorScope(context));
+    const { isValid } = urlDrilldownValidateUrlTemplate(
+      config.url,
+      this.buildEditorScope(context),
+      { validateVariables: false }
+    );
     return isValid;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const { isValid, error } = urlDrilldownValidateUrlTemplate(
       config.url,
-      await this.buildRuntimeScope(context)
+      await this.buildRuntimeScope(context),
+      { validateVariables: true }
     );
 
     if (!isValid) {
