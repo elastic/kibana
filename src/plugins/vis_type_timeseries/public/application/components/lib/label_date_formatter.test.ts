@@ -25,11 +25,6 @@ describe('Label Date Formatter Function', () => {
     expect(label).toEqual('Sep 24, 2020 9:59 PM');
   });
 
-  it('Should format the date string on the given formatter', () => {
-    const label = labelDateFormatter('2020-09-24T18:59:02.000Z', 'MM/DD/YYYY');
-    expect(label).toEqual('09/24/2020');
-  });
-
   it('Returns the label if it is not date string', () => {
     const label = labelDateFormatter('test date');
     expect(label).toEqual('test date');
