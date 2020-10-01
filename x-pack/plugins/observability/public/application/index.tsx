@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, Router, Switch, useRouteMatch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
@@ -19,7 +19,7 @@ import { useRouteParams } from '../hooks/use_route_params';
 import { Breadcrumbs, routes } from '../routes';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 import { ObsvSharedContextProvider } from '../context/shared_data';
-import { LoadingObservability } from '../pages/overview/loading_observability';
+import { ManageHasDataFetches } from '../pages/manage_has_data';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
@@ -32,9 +32,11 @@ function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
 }
 
 function App() {
+  const isLandingPage = useRouteMatch('/landing');
+
   return (
     <>
-      <LoadingObservability />
+      {!isLandingPage && <ManageHasDataFetches />}
       <Switch>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;

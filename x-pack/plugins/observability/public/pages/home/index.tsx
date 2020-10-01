@@ -6,6 +6,7 @@
 import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObsvSharedContext } from '../../context/shared_data';
+import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
@@ -21,5 +22,6 @@ export function HomePage() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return <span />;
+
+  return !hasAnyData ? <LoadingObservability /> : null;
 }

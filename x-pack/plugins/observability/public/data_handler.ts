@@ -5,7 +5,6 @@
  */
 
 import { DataHandler, ObservabilityFetchDataPlugins } from './typings/fetch_overview_data';
-import { useFetcher } from './hooks/use_fetcher';
 
 const dataHandlers: Partial<Record<ObservabilityFetchDataPlugins, DataHandler>> = {};
 
@@ -30,28 +29,4 @@ export function getDataHandler<T extends ObservabilityFetchDataPlugins>(appName:
   if (dataHandler) {
     return dataHandler as DataHandler<T>;
   }
-}
-
-export function useInfraLogsHasData() {
-  return useFetcher(() => getDataHandler('infra_logs')?.hasData(), []);
-}
-
-export function useInfraMetricsHasData() {
-  return useFetcher(() => getDataHandler('infra_metrics')?.hasData(), []);
-}
-
-export function useApmHasData() {
-  return useFetcher(() => getDataHandler('apm')?.hasData(), []);
-}
-
-export function useUptimeHasData() {
-  return useFetcher(() => getDataHandler('uptime')?.hasData(), []);
-}
-
-export function useUxHasData({ start, end }: { start: number; end: number }) {
-  return useFetcher(
-    () => getDataHandler('ux')?.hasData({ absoluteTime: { start, end } }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 }

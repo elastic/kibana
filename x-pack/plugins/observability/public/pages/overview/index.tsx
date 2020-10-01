@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
@@ -24,7 +24,6 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { DataSections } from './data_sections';
-import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import { ObsvSharedContext } from '../../context/shared_data';
 
 interface Props {
@@ -82,6 +81,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   return (
     <>
+      {!hasAnyData && <LoadingObservability />}
       <WithHeaderLayout
         headerColor={theme.eui.euiColorEmptyShade}
         bodyColor={theme.eui.euiPageBackgroundColor}
