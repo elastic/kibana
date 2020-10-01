@@ -17,40 +17,20 @@
  * under the License.
  */
 
-import { modifyUrl } from '@kbn/std';
+import { App, AppNavLinkStatus, AppStatus, PublicAppInfo } from '../types';
 
-export class BasePath {
-  constructor(
-    private readonly basePath: string = '',
-    public readonly serverBasePath: string = basePath
-  ) {}
-
-  public get = () => {
-    return this.basePath;
-  };
-
-  public prepend = (path: string): string => {
-    if (!this.basePath) return path;
-    return modifyUrl(path, (parts) => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.basePath}${parts.pathname}`;
-      }
-    });
-  };
-
-  public remove = (path: string): string => {
-    if (!this.basePath) {
-      return path;
-    }
-
-    if (path === this.basePath) {
-      return '/';
-    }
-
-    if (path.startsWith(`${this.basePath}/`)) {
-      return path.slice(this.basePath.length);
-    }
-
-    return path;
+export function getAppInfo(app: App<unknown>): PublicAppInfo {
+  const navLinkStatus =
+    app.navLinkStatus === AppNavLinkStatus.default
+      ? app.status === AppStatus.inaccessible
+        ? AppNavLinkStatus.hidden
+        : AppNavLinkStatus.visible
+      : app.navLinkStatus!;
+  const { updater$, mount, ...infos } = app;
+  return {
+    ...infos,
+    status: app.status!,
+    navLinkStatus,
+    appRoute: app.appRoute!,
   };
 }

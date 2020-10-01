@@ -17,13 +17,19 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
+/**
+ * Converts a relative path to an absolute url.
+ * Implementation is based on a specified behavior of the browser to automatically convert
+ * a relative url to an absolute one when setting the `href` attribute of a `<a>` html element.
+ *
+ * @example
+ * ```ts
+ * // current url: `https://kibana:8000/base-path/app/my-app`
+ * relativeToAbsolute('/base-path/app/another-app') => `https://kibana:8000/base-path/app/another-app`
+ * ```
+ */
+export const relativeToAbsolute = (url: string): string => {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+};
