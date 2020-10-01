@@ -46,29 +46,23 @@ export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinition
         // 4. Use `Set` to get only unique field names.
         const fields = Array.from(
           new Set(
-            Object.values(indexMappings)
-              .map((indexMapping) => {
-                return Object.entries(indexMapping.mappings).map(([fieldName, properties]) => {
-                  const mappingValues = Object.values(properties.mapping);
-                  const hasMapping = mappingValues.length > 0;
+            Object.values(indexMappings).flatMap((indexMapping) => {
+              return Object.keys(indexMapping.mappings).filter((fieldName) => {
+                const mappingValues = Object.values(indexMapping.mappings[fieldName].mapping);
+                const hasMapping = mappingValues.length > 0;
 
-                  const isRuntimeField = hasMapping && mappingValues[0]?.type === 'runtime';
+                const isRuntimeField = hasMapping && mappingValues[0]?.type === 'runtime';
 
-                  // fields without mappings are internal fields such as `_routing` and `_index`,
-                  // and therefore don't make sense as autocomplete suggestions for FLS.
+                // fields without mappings are internal fields such as `_routing` and `_index`,
+                // and therefore don't make sense as autocomplete suggestions for FLS.
 
-                  // Runtime fields are not securable via FLS.
-                  // Administrators should instead secure access to the fields which derive this information.
-                  if (!hasMapping || isRuntimeField) {
-                    return null;
-                  }
-
-                  return fieldName;
-                });
-              })
-              .flat()
+                // Runtime fields are not securable via FLS.
+                // Administrators should instead secure access to the fields which derive this information.
+                return hasMapping && !isRuntimeField;
+              });
+            })
           )
-        ).filter((field) => field !== null) as string[];
+        );
 
         return response.ok({
           body: fields,

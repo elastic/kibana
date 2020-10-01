@@ -68,27 +68,25 @@ export default function ({ getService }: FtrProviderContext) {
         ).to.eql('runtime');
 
         // Now, make sure it's not returned here
-        await supertest
+        const { body: actualFields } = (await supertest
           .get('/internal/security/fields/flstest')
           .set('kbn-xsrf', 'xxx')
           .send()
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            const actualFields = response.body as string[];
-            const expectedFields = [
-              'customer_ssn',
-              'customer_ssn.keyword',
-              'customer_region',
-              'customer_region.keyword',
-              'customer_name',
-              'customer_name.keyword',
-            ];
+          .expect(200)) as { body: string[] };
 
-            actualFields.sort();
-            expectedFields.sort();
+        const expectedFields = [
+          'customer_ssn',
+          'customer_ssn.keyword',
+          'customer_region',
+          'customer_region.keyword',
+          'customer_name',
+          'customer_name.keyword',
+        ];
 
-            expect(actualFields).to.eql(expectedFields);
-          });
+        actualFields.sort();
+        expectedFields.sort();
+
+        expect(actualFields).to.eql(expectedFields);
       });
     });
   });
