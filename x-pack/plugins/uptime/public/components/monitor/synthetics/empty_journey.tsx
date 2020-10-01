@@ -28,7 +28,7 @@ export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
         <p>
           <FormattedMessage
             id="xpack.uptime.synthetics.emptyJourney.message.heading"
-            defaultMessage="There are no steps associated with the run of this journey."
+            defaultMessage="This journey did not contain any steps."
           />
         </p>
         {!!checkGroup && (
