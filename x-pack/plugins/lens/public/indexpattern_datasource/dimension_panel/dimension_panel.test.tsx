@@ -960,12 +960,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
       expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-        'Unique count',
         'Average',
         'Count',
         'Maximum',
         'Minimum',
         'Sum',
+        'Unique count',
       ]);
     });
 
