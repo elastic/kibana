@@ -19,7 +19,7 @@ export type AgentStatus =
   | 'warning'
   | 'enrolling'
   | 'unenrolling'
-  | 'upgrading'
+  | 'updating'
   | 'degraded';
 
 export type AgentActionType = 'POLICY_CHANGE' | 'UNENROLL' | 'UPGRADE';
@@ -129,7 +129,7 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
 }

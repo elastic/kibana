@@ -71,9 +71,9 @@ const statusFilters = [
     }),
   },
   {
-    status: 'upgrading',
-    label: i18n.translate('xpack.ingestManager.agentList.statusUpgradingFilterText', {
-      defaultMessage: 'Upgrading',
+    status: 'updating',
+    label: i18n.translate('xpack.ingestManager.agentList.statusUpdatingFilterText', {
+      defaultMessage: 'Updating',
     }),
   },
 ] as Array<{ label: string; status: string }>;
@@ -233,8 +233,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return AgentStatusKueryHelper.buildKueryForOnlineAgents();
           case 'offline':
             return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-          case 'upgrading':
-            return AgentStatusKueryHelper.buildKueryForUpgradingAgents();
+          case 'updating':
+            return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
           case 'error':
             return AgentStatusKueryHelper.buildKueryForErrorAgents();
         }
@@ -580,8 +580,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   </div>
                 </EuiPopover>
                 <EuiFilterButton
-                  hasActiveFilters={showInactive}
-                  onClick={() => setShowUpgradeAvailable(!showUpgradeAvailable)}
+                  hasActiveFilters={showUpgradeAvailable}
+                  onClick={() => {
+                    setShowUpgradeAvailable(!showUpgradeAvailable);
+                  }}
                 >
                   <FormattedMessage
                     id="xpack.ingestManager.agentList.showUpgradeableFilterLabel"
