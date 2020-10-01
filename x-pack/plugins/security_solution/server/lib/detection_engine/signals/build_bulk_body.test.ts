@@ -12,7 +12,13 @@ import {
   sampleDocWithAncestors,
   sampleRuleSO,
 } from './__mocks__/es_results';
-import { buildBulkBody, buildSignalFromSequence, buildSignalFromEvent } from './build_bulk_body';
+import {
+  buildBulkBody,
+  buildSignalFromSequence,
+  buildSignalFromEvent,
+  objectPairIntersection,
+  objectArrayIntersection,
+} from './build_bulk_body';
 import { SignalHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
@@ -438,13 +444,20 @@ describe('buildBulkBody', () => {
 
 describe('buildSignalFromSequence', () => {
   test('builds a basic signal from a sequence of building blocks', () => {
-    const blocks = [sampleDocWithAncestors().hits.hits[0], sampleDocWithAncestors().hits.hits[0]];
+    const block1 = sampleDocWithAncestors().hits.hits[0];
+    block1._source.new_key = 'new_key_value';
+    block1._source.new_key2 = 'new_key2_value';
+    const block2 = sampleDocWithAncestors().hits.hits[0];
+    block2._source.new_key = 'new_key_value';
+    const blocks = [block1, block2];
     const ruleSO = sampleRuleSO();
     const signal = buildSignalFromSequence(blocks, ruleSO);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete signal['@timestamp'];
-    const expected: Omit<SignalHit, '@timestamp'> = {
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: string; new_key: string } = {
+      someKey: 'someValue',
+      new_key: 'new_key_value',
       event: {
         kind: 'signal',
       },
@@ -630,5 +643,343 @@ describe('buildSignalFromEvent', () => {
       },
     };
     expect(signal).toEqual(expected);
+  });
+});
+
+describe('recursive intersection between objects', () => {
+  test('should treat numbers and strings as unequal', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+    };
+    const b = {
+      field1: 1,
+      field2: '1',
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = {
+      field1: 1,
+    };
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should strip unequal numbers and strings', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+      field3: 'abcd',
+      field4: 'abcd',
+    };
+    const b = {
+      field1: 1,
+      field2: 100,
+      field3: 'abcd',
+      field4: 'wxyz',
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = {
+      field1: 1,
+      field3: 'abcd',
+    };
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should handle null values', () => {
+    const a = {
+      field1: 1,
+      field2: '1',
+      field3: null,
+    };
+    const b = {
+      field1: null,
+      field2: null,
+      field3: null,
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = {
+      field3: null,
+    };
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should handle explicit undefined values and return undefined if left with only undefined fields', () => {
+    const a = {
+      field1: 1,
+      field2: '1',
+      field3: undefined,
+    };
+    const b = {
+      field1: undefined,
+      field2: undefined,
+      field3: undefined,
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = undefined;
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should strip arrays out regardless of whether they are equal', () => {
+    const a = {
+      array_field1: [1, 2],
+      array_field2: [1, 2],
+    };
+    const b = {
+      array_field1: [1, 2],
+      array_field2: [3, 4],
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = undefined;
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should strip fields that are not in both objects', () => {
+    const a = {
+      field1: 1,
+    };
+    const b = {
+      field2: 1,
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = undefined;
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should work on nested fields', () => {
+    const a = {
+      container_field: {
+        field1: 1,
+        field2: 1,
+        field3: 10,
+        field5: 1,
+        field6: null,
+        array_field: [1, 2],
+        nested_container_field: {
+          field1: 1,
+          field2: 1,
+        },
+        nested_container_field2: {
+          field1: undefined,
+        },
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    const b = {
+      container_field: {
+        field1: 1,
+        field2: 2,
+        field4: 10,
+        field5: '1',
+        field6: null,
+        array_field: [1, 2],
+        nested_container_field: {
+          field1: 1,
+          field2: 2,
+        },
+        nested_container_field2: {
+          field1: undefined,
+        },
+      },
+      container_field_without_intersection: {
+        sub_field2: 1,
+      },
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = {
+      container_field: {
+        field1: 1,
+        field6: null,
+        nested_container_field: {
+          field1: 1,
+        },
+      },
+    };
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should work on objects with a variety of fields', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+      field3: 10,
+      field5: 1,
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 1,
+        sub_field3: 10,
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    const b = {
+      field1: 1,
+      field2: 2,
+      field4: 10,
+      field5: '1',
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 2,
+        sub_field4: 10,
+      },
+      container_field_without_intersection: {
+        sub_field2: 1,
+      },
+    };
+    const intersection = objectPairIntersection(a, b);
+    const expected = {
+      field1: 1,
+      field6: null,
+      container_field: {
+        sub_field1: 1,
+      },
+    };
+    expect(intersection).toEqual(expected);
+  });
+});
+
+describe('objectArrayIntersection', () => {
+  test('should return undefined if the array is empty', () => {
+    const intersection = objectArrayIntersection([]);
+    const expected = undefined;
+    expect(intersection).toEqual(expected);
+  });
+  test('should return the initial object if there is only 1', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+      field3: 10,
+      field5: 1,
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 1,
+        sub_field3: 10,
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    const intersection = objectArrayIntersection([a]);
+    const expected = {
+      field1: 1,
+      field2: 1,
+      field3: 10,
+      field5: 1,
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 1,
+        sub_field3: 10,
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    expect(intersection).toEqual(expected);
+  });
+  test('should work with exactly 2 objects', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+      field3: 10,
+      field5: 1,
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 1,
+        sub_field3: 10,
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    const b = {
+      field1: 1,
+      field2: 2,
+      field4: 10,
+      field5: '1',
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 2,
+        sub_field4: 10,
+      },
+      container_field_without_intersection: {
+        sub_field2: 1,
+      },
+    };
+    const intersection = objectArrayIntersection([a, b]);
+    const expected = {
+      field1: 1,
+      field6: null,
+      container_field: {
+        sub_field1: 1,
+      },
+    };
+    expect(intersection).toEqual(expected);
+  });
+
+  test('should work with 3 or more objects', () => {
+    const a = {
+      field1: 1,
+      field2: 1,
+      field3: 10,
+      field5: 1,
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 1,
+        sub_field3: 10,
+      },
+      container_field_without_intersection: {
+        sub_field1: 1,
+      },
+    };
+    const b = {
+      field1: 1,
+      field2: 2,
+      field4: 10,
+      field5: '1',
+      field6: null,
+      array_field: [1, 2],
+      container_field: {
+        sub_field1: 1,
+        sub_field2: 2,
+        sub_field4: 10,
+      },
+      container_field_without_intersection: {
+        sub_field2: 1,
+      },
+    };
+    const c = {
+      field1: 1,
+      field2: 2,
+      field4: 10,
+      field5: '1',
+      array_field: [1, 2],
+      container_field: {
+        sub_field2: 2,
+        sub_field4: 10,
+      },
+      container_field_without_intersection: {
+        sub_field2: 1,
+      },
+    };
+    const intersection = objectArrayIntersection([a, b, c]);
+    const expected = {
+      field1: 1,
+    };
+    expect(intersection).toEqual(expected);
   });
 });
