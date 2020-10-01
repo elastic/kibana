@@ -140,7 +140,7 @@ export const MonitorListComponent: ({
         show: false,
       },
       render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval} />
+        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
       ),
     },
     {

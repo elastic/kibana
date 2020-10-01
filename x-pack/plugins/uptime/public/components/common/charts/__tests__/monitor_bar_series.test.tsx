@@ -193,14 +193,16 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('shallow renders nothing if the data series is null', () => {
-    const component = shallowWithRouter(<MonitorBarSeries histogramSeries={null} />);
+    const component = shallowWithRouter(
+      <MonitorBarSeries histogramSeries={null} minInterval={5} />
+    );
     expect(component).toEqual({});
   });
 
   it('renders if the data series is present', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <MonitorBarSeries histogramSeries={histogramSeries} />
+        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={5} />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot();
