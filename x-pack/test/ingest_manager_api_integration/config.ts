@@ -11,8 +11,12 @@ import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Ingest Manager API integration tests.
 // This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit
+// export const dockerImage =
+//   'docker.elastic.co/package-registry/distribution:518a65a993ab7e9c77b1d8d20cd6f847921d04ec';
+
+// Temporarily use custom image for testing package renaming changes
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:518a65a993ab7e9c77b1d8d20cd6f847921d04ec';
+  'docker.elastic.co/observability-ci/package-registry/distribution:PR-405';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
