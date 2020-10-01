@@ -223,6 +223,7 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
+        {flyout}
         <div className="dscApp__frame">
           <EuiHideFor sizes={['xs', 's']}>
             {!isSidebarClosed && (
