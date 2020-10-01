@@ -11,12 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import pick from 'lodash/pick';
+import { get, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -31,7 +26,7 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
 import { EntityCell } from '../entity_cell';
 import {

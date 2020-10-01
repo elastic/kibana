@@ -7,8 +7,11 @@
 import { uniq } from 'lodash/fp';
 import { db } from 'suricata-sid-db';
 
+const has = <T>(obj: T, key: string | number | symbol): key is keyof T =>
+  Object.prototype.hasOwnProperty.call(obj, key);
+
 export const getLinksFromSignature = (id: number): string[] => {
-  const refs = db[id];
+  const refs = has(db, id) ? db[id] : null;
   if (refs != null) {
     return uniq(refs);
   } else {

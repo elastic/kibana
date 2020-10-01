@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
@@ -48,6 +48,7 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -106,6 +107,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
+    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
 
     const environmentSetup = await this.environment.setup();
 
@@ -207,20 +209,25 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
+    setupTransaction?.end();
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
+    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+
     const auditTrailStart = this.auditTrail.start();
 
     const elasticsearchStart = await this.elasticsearch.start({
       auditTrail: auditTrailStart,
     });
+    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
@@ -248,6 +255,7 @@ export class Server {
 
     await this.http.start();
 
+    startTransaction?.end();
     return this.coreStart;
   }
 
@@ -272,25 +280,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const coreStart = this.coreStart!;
-        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
-
-        return {
-          savedObjects: {
-            client: savedObjectsClient,
-            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
-          },
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(req),
-            legacy: {
-              client: coreStart.elasticsearch.legacy.client.asScoped(req),
-            },
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          auditor: coreStart.auditTrail.asScoped(req),
-        };
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
