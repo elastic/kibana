@@ -20,6 +20,7 @@ const TextArea = styled(EuiTextArea)`
   border: ${({ theme }) => theme.eui.euiBorderThin};
   border-bottom: 0;
   box-shadow: none;
+  min-height: ${({ theme }) => theme.eui.euiFormControlHeight};
 `;
 
 export interface EqlQueryBarProps {
