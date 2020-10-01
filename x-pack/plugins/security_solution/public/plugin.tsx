@@ -79,6 +79,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   /**
    * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
+   * TODO, make this a function
    */
   private get lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
     /**
@@ -118,6 +119,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
+    // TODO, this doesn't need to be a promise
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
 
@@ -140,6 +142,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * Function that lazily get the dependencies needed to mount any of the applications defined in this plugin.
      * This is a thunk for the `SecurityAppStore` so that the dependencies can be dynamically imported later on.
      */
+    // TODO, rename this `store`.
     const storeFactory: () => Promise<SecurityAppStore> = async () => {
       if (!_store) {
         _store = (async () => {
@@ -171,24 +174,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { overview: overviewSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { overview: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
 
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
-          SubPluginRoutes: overviewSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
     });
@@ -201,23 +198,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { detections: detectionsSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { detections: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store,
-          SubPluginRoutes: detectionsSubPlugin.start(this.storage).SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
     });
@@ -230,23 +221,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { hosts: hostsSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { hosts: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
-          SubPluginRoutes: hostsSubPlugin.start(this.storage).SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
     });
@@ -259,23 +244,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { network: networkSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { network: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
-          SubPluginRoutes: networkSubPlugin.start(this.storage).SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
     });
@@ -288,23 +267,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { timelines: timelinesSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { timelines: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
-          SubPluginRoutes: timelinesSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
     });
@@ -317,23 +290,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart],
-          store,
-          { cases: casesSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart] = await core.getStartServices();
+        const store = await storeFactory();
+        const { cases: subPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
-          SubPluginRoutes: casesSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
     });
@@ -346,21 +313,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
-        const [
-          [coreStart, startPlugins],
-          store,
-          { management: managementSubPlugin },
-          { renderApp, composeLibs },
-        ] = await Promise.all([
-          core.getStartServices(),
-          storeFactory(),
-          this.subPlugins(),
-          this.lazyApplicationDependencies,
-        ]);
+        const [coreStart, startPlugins] = await core.getStartServices();
+        const store = await storeFactory();
+        const { management: managementSubPlugin } = await this.subPlugins();
+        const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+        const services = await startServices;
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services: await startServices,
+          services,
           store,
           SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
         });
