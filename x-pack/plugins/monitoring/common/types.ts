@@ -27,8 +27,9 @@ export interface CommonAlertState {
   meta: any;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CommonAlertFilter {}
+export interface CommonAlertFilter {
+  nodeUuid?: string;
+}
 
 export interface CommonAlertCpuUsageFilter extends CommonAlertFilter {
   nodeUuid: string;

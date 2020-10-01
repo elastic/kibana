@@ -85,7 +85,6 @@ describe('fetchStatus', () => {
     alertStates = [
       {
         cluster: defaultClusterState,
-        ccs: null,
         ui: {
           ...defaultUiState,
           isFiring: true,
@@ -111,7 +110,6 @@ describe('fetchStatus', () => {
     alertStates = [
       {
         cluster: defaultClusterState,
-        ccs: null,
         ui: {
           ...defaultUiState,
           resolvedMS: 1500,
