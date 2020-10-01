@@ -146,13 +146,22 @@ export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
   }, []);
 };
 
+/**
+ * Given a list of items checks each one to see if any of them have an empty field
+ * or an empty value.
+ * @param items The items to check if we have an empty entries.
+ */
 export const containsInvalidItems = (items: ThreatMapEntries[]): boolean => {
   return items.some((item) =>
     item.entries.some((subEntry) => subEntry.field === '' || subEntry.value === '')
   );
 };
 
-export const containsEmptyItem = (items: ThreatMapEntries[]): boolean => {
+/**
+ * Given a list of items checks if we have a single empty entry and if we do returns true.
+ * @param items The items to check if we have a single empty entry.
+ */
+export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
   return (
     items.length === 1 &&
     items[0].entries.length === 1 &&

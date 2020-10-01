@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import {
-  containsEmptyItem,
+  singleEntryThreat,
   containsInvalidItems,
 } from '../../../../common/components/threat_match/helpers';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
@@ -279,7 +279,7 @@ export const schema: FormSchema<DefineStepRule> = {
           if (!needsValidation) {
             return;
           }
-          if (containsEmptyItem(formData.threatMapping)) {
+          if (singleEntryThreat(formData.threatMapping)) {
             return {
               code: 'ERR_FIELD_MISSING',
               path,

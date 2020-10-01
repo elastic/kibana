@@ -88,6 +88,6 @@ export const THREAT_MATCH_REQUIRED = i18n.translate(
 export const THREAT_MATCH_EMPTIES = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError',
   {
-    defaultMessage: 'All matches require both a field and Threat index field.',
+    defaultMessage: 'All matches require both a field and threat index field.',
   }
 );

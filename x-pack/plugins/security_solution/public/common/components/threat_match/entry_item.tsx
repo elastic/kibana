@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -53,63 +53,57 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
-  const renderFieldInput = useCallback(
-    (isFirst: boolean): JSX.Element => {
-      const comboBox = (
-        <FieldComponent
-          placeholder={i18n.FIELD_PLACEHOLDER}
-          indexPattern={indexPattern}
-          selectedField={entry.field}
-          isClearable={false}
-          isLoading={false}
-          isDisabled={indexPattern == null}
-          onChange={handleFieldChange}
-          data-test-subj="entryField"
-          fieldInputWidth={360}
-        />
+  const renderFieldInput = useMemo(() => {
+    const comboBox = (
+      <FieldComponent
+        placeholder={i18n.FIELD_PLACEHOLDER}
+        indexPattern={indexPattern}
+        selectedField={entry.field}
+        isClearable={false}
+        isLoading={false}
+        isDisabled={indexPattern == null}
+        onChange={handleFieldChange}
+        data-test-subj="entryField"
+        fieldInputWidth={360}
+      />
+    );
+
+    if (showLabel) {
+      return (
+        <EuiFormRow label={i18n.FIELD} data-test-subj="entryItemFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
       );
+    } else {
+      return comboBox;
+    }
+  }, [handleFieldChange, indexPattern, entry, showLabel]);
 
-      if (isFirst) {
-        return (
-          <EuiFormRow label={i18n.FIELD} data-test-subj="entryItemFieldInputFormRow">
-            {comboBox}
-          </EuiFormRow>
-        );
-      } else {
-        return comboBox;
-      }
-    },
-    [handleFieldChange, indexPattern, entry]
-  );
+  const renderThreatFieldInput = useMemo(() => {
+    const comboBox = (
+      <FieldComponent
+        placeholder={i18n.FIELD_PLACEHOLDER}
+        indexPattern={threatIndexPatterns}
+        selectedField={entry.value}
+        isClearable={false}
+        isLoading={false}
+        isDisabled={threatIndexPatterns == null}
+        onChange={handleThreatFieldChange}
+        data-test-subj="threatEntryField"
+        fieldInputWidth={360}
+      />
+    );
 
-  const renderThreatFieldInput = useCallback(
-    (isFirst: boolean): JSX.Element => {
-      const comboBox = (
-        <FieldComponent
-          placeholder={i18n.FIELD_PLACEHOLDER}
-          indexPattern={threatIndexPatterns}
-          selectedField={entry.value}
-          isClearable={false}
-          isLoading={false}
-          isDisabled={threatIndexPatterns == null}
-          onChange={handleThreatFieldChange}
-          data-test-subj="threatEntryField"
-          fieldInputWidth={360}
-        />
+    if (showLabel) {
+      return (
+        <EuiFormRow label={i18n.THREAT_FIELD} data-test-subj="threatFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
       );
-
-      if (isFirst) {
-        return (
-          <EuiFormRow label={i18n.THREAT_FIELD} data-test-subj="threatFieldInputFormRow">
-            {comboBox}
-          </EuiFormRow>
-        );
-      } else {
-        return comboBox;
-      }
-    },
-    [handleThreatFieldChange, threatIndexPatterns, entry]
-  );
+    } else {
+      return comboBox;
+    }
+  }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 
   return (
     <EuiFlexGroup
@@ -119,7 +113,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       justifyContent="spaceAround"
       data-test-subj="itemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{renderFieldInput}</EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
           {showLabel ? (
@@ -129,7 +123,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{renderThreatFieldInput(showLabel)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
