@@ -16,3 +16,11 @@ export interface TagAttributes {
   description: string;
   color: string;
 }
+
+export interface ITagsClient {
+  create(attributes: TagAttributes): Promise<Tag>;
+  get(id: string): Promise<Tag>;
+  getAll(): Promise<Tag[]>;
+  delete(id: string): Promise<void>;
+  // TODO: add update
+}

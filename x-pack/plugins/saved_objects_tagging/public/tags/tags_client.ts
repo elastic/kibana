@@ -6,21 +6,15 @@
 
 import { HttpSetup } from 'src/core/public';
 import { tagsApiPrefix } from '../../common/constants';
-import { Tag, TagAttributes } from '../../common/types';
+import { Tag, TagAttributes, ITagsClient } from '../../common/types';
 
 interface TagsClientOptions {
   http: HttpSetup;
 }
 
-export interface ITagsClient {
-  create(attributes: TagAttributes): Promise<Tag>;
-  get(id: string): Promise<Tag>;
-  getAll(): Promise<Tag[]>;
-  delete(id: string): Promise<void>;
-  // TODO: add update
-}
+type InternalTagClient = ITagsClient;
 
-export class TagsClient implements ITagsClient {
+export class TagsClient implements InternalTagClient {
   private readonly http: HttpSetup;
 
   constructor({ http }: TagsClientOptions) {
@@ -28,7 +22,9 @@ export class TagsClient implements ITagsClient {
   }
 
   public async create(attributes: TagAttributes) {
-    const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/create`);
+    const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/create`, {
+      body: JSON.stringify(attributes),
+    });
     return tag;
   }
 

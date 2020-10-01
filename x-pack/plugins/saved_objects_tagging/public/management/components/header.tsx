@@ -16,8 +16,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header: FC<{}> = () => {
-  // TODO: implement canDelete
+interface HeaderProps {
+  onCreate: () => void;
+}
+
+export const Header: FC<HeaderProps> = ({ onCreate }) => {
+  // TODO: implement canCreate
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -38,6 +42,7 @@ export const Header: FC<{}> = () => {
             color="primary"
             fill
             data-test-subj="createTagButton"
+            onClick={onCreate}
             isDisabled={false}
           >
             <FormattedMessage

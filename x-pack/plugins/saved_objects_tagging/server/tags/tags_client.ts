@@ -5,18 +5,10 @@
  */
 
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { Tag, TagAttributes } from '../../common/types';
+import { Tag, TagAttributes, ITagsClient } from '../../common/types';
 import { tagSavedObjectTypeName } from '../../common/constants';
 
 type TagSavedObject = SavedObject<TagAttributes>;
-
-export interface ITagsClient {
-  create(attributes: TagAttributes): Promise<Tag>;
-  get(id: string): Promise<Tag>;
-  getAll(): Promise<Tag[]>;
-  delete(id: string): Promise<void>;
-  // TODO: add update
-}
 
 interface TagsClientOptions {
   client: SavedObjectsClientContract;

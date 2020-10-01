@@ -19,7 +19,7 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { management }: SetupDeps) {
+  public setup(core: CoreSetup<{}, SavedObjectTaggingPluginStart>, { management }: SetupDeps) {
     const kibanaSection = management.sections.section.kibana;
     kibanaSection.registerApp({
       id: tagManagementSectionId,
@@ -30,6 +30,7 @@ export class SavedObjectTaggingPlugin
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
         return mountSection({
+          core,
           mountParams,
         });
       },

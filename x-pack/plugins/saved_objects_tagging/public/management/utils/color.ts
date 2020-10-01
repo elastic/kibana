@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ITagsClient } from '../common/types';
-
-export interface TagsRequestHandlerContext {
-  tagsClient: ITagsClient;
-}
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
-  }
-}
+export const getRandomColor = (): string => {
+  return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
+};

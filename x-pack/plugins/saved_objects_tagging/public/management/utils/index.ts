@@ -4,14 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ITagsClient } from '../common/types';
-
-export interface TagsRequestHandlerContext {
-  tagsClient: ITagsClient;
-}
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
-  }
-}
+export { getRandomColor } from './color';
