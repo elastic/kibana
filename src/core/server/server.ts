@@ -48,6 +48,7 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreTelemetryService } from './telemetry/telemetry_service';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -71,6 +72,7 @@ export class Server {
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
+  private readonly coreTelemetry: CoreTelemetryService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -102,6 +104,7 @@ export class Server {
     this.httpResources = new HttpResourcesService(core);
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
+    this.coreTelemetry = new CoreTelemetryService(core);
   }
 
   public async setup() {
@@ -179,6 +182,8 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    this.coreTelemetry.setup({ metrics: metricsSetup });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -225,6 +230,7 @@ export class Server {
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    const coreTelemetryStart = this.coreTelemetry.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -234,6 +240,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
+      coreTelemetry: coreTelemetryStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
