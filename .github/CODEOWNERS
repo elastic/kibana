@@ -36,16 +36,13 @@
 #CC# /src/legacy/core_plugins/kibana/migrations @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/console_legacy @elastic/kibana-app
 #CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-app
 #CC# /src/legacy/core_plugins/timelion @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_tagcloud @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_vega @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
-#CC# /src/legacy/server/sample_data/ @elastic/kibana-app
 #CC# /src/legacy/server/url_shortening/ @elastic/kibana-app
 #CC# /src/legacy/ui/public/state_management @elastic/kibana-app
 #CC# /src/plugins/charts/public/static/color_maps @elastic/kibana-app
@@ -147,6 +144,7 @@
 /src/plugins/home/server/services/ @elastic/kibana-core-ui
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 #CC# /src/legacy/core_plugins/newsfeed @elastic/kibana-core-ui
+#CC# /src/legacy/server/sample_data/ @elastic/kibana-core-ui
 #CC# /src/plugins/newsfeed @elastic/kibana-core-ui
 #CC# /src/plugins/home/public @elastic/kibana-core-ui
 #CC# /src/plugins/home/server/services/ @elastic/kibana-core-ui
@@ -351,6 +349,8 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/ingest_pipelines/  @elastic/es-ui
 /packages/kbn-ace/ @elastic/es-ui
 /packages/kbn-monaco/ @elastic/es-ui
+#CC# /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/es-ui
+#CC# /src/legacy/core_plugins/console_legacy @elastic/es-ui
 #CC# /x-pack/legacy/plugins/rollup/ @elastic/es-ui
 #CC# /x-pack/legacy/server/lib/create_router/ @elastic/es-ui
 #CC# /x-pack/legacy/server/lib/check_license/ @elastic/es-ui
