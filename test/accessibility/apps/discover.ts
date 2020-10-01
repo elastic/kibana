@@ -39,6 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
+    after(async () => {
+      await esArchiver.unload('logstash_functional');
+    });
+
     it('Discover main page', async () => {
       await a11y.testAppSnapshot();
     });
