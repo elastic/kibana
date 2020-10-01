@@ -65,7 +65,6 @@ const testFooSummary: MonitorSummary = {
     },
     timestamp: '123',
     url: {},
-    minInterval: 10,
   },
 };
 
@@ -101,7 +100,6 @@ const testBarSummary: MonitorSummary = {
     },
     timestamp: '125',
     url: {},
-    minInterval: 5,
   },
 };
 

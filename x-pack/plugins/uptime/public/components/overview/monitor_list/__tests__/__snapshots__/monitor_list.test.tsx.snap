@@ -199,7 +199,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "minInterval": 10,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 2,
@@ -256,7 +255,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "minInterval": 5,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 0,
@@ -509,7 +507,6 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "minInterval": 10,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 2,
@@ -566,7 +563,6 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "minInterval": 5,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 0,
@@ -714,7 +710,6 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "minInterval": 10,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 2,
@@ -771,7 +766,6 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "minInterval": 5,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 0,
@@ -1724,7 +1718,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "minInterval": 10,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 2,
@@ -1781,7 +1774,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "minInterval": 5,
                   "monitor": Object {},
                   "summary": Object {
                     "down": 0,
