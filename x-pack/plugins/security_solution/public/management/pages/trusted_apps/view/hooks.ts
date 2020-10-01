@@ -24,9 +24,13 @@ export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageS
   );
 }
 
-export function useTrustedAppsNavigateCallback(callback: () => TrustedAppsListPageLocation) {
+export function useTrustedAppsNavigateCallback(
+  callback: (...args: Parameters<Parameters<typeof useCallback>[0]>) => TrustedAppsListPageLocation
+) {
   const history = useHistory();
-  const location = callback();
 
-  return useCallback(() => history.push(getTrustedAppsListPath(location)), [history, location]);
+  return useCallback((...args) => history.push(getTrustedAppsListPath(callback(...args))), [
+    history,
+    callback,
+  ]);
 }
