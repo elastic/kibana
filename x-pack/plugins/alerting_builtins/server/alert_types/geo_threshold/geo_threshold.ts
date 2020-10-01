@@ -10,10 +10,9 @@ import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_qu
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_THRESHOLD_ID } from './alert_type';
 import { Logger } from '../../types';
-import { ID } from '../index_threshold/alert_type';
 
 interface LatestEntityLocation {
-  location: number[] | null;
+  location: number[];
   shapeLocationId: string;
   entityName: string;
   dateInShape: string | null;
@@ -74,13 +73,13 @@ export function transformResults(
 interface EntityMovementDescriptor {
   entityName: string;
   currLocation: {
-    location: number[] | null;
+    location: number[];
     shapeId: string;
     date: string | null;
     docId: string;
   };
   prevLocation: {
-    location: number[] | null;
+    location: number[];
     shapeId: string;
     date: string | null;
     docId: string;
@@ -108,7 +107,7 @@ export function getMovedEntities(
             entityName: string;
             shapeLocationId: string;
             dateInShape: string | null;
-            location: number[] | null;
+            location: number[];
             docId: string;
           }
         ) => {
