@@ -48,7 +48,7 @@ Object {
       "y": 1,
     },
   ],
-  "minInterval": 993097821074,
+  "minInterval": 993097883489,
 }
 `;
 
@@ -62,7 +62,7 @@ Object {
       "y": 1,
     },
   ],
-  "minInterval": 36001,
+  "minInterval": 36000,
 }
 `;
 
