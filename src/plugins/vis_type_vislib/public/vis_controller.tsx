@@ -25,8 +25,6 @@ import { Position } from '@elastic/charts';
 import { mountReactNode } from '../../../core/public/utils';
 import { VisParams, ExprVis } from '../../visualizations/public';
 
-// @ts-ignore
-import { Vis as Vislib } from './vislib/vis';
 import { VisTypeVislibDependencies } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { getKibanaLegacy } from './services';

@@ -27,7 +27,7 @@ import { buildExpression, buildExpressionFunction } from '../../expressions/publ
 import { ChartType } from '../common';
 import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 
-export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) => {
+export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params, schemas) => {
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -62,7 +62,7 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) 
     }
   }
 
-  const visConfig = vis.params as VisParams;
+  const visConfig = vis.params;
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
@@ -96,7 +96,7 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) 
  * Get esaggs expressions function
  * @param vis
  */
-function getEsaggsFn(vis: Vis) {
+function getEsaggsFn(vis: Vis<VisParams & { showPartialRows?: any }>) {
   // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,

@@ -27,8 +27,13 @@ import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type
 
 import { VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
+import { BasicVislibParams } from './types';
 
-export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) => {
+export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (
+  vis,
+  params,
+  schemas
+) => {
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -102,7 +107,7 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params, schemas) 
  * Get esaggs expressions function
  * @param vis
  */
-function getEsaggsFn(vis: Vis) {
+function getEsaggsFn(vis: Vis<BasicVislibParams & { showPartialRows?: any }>) {
   // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
