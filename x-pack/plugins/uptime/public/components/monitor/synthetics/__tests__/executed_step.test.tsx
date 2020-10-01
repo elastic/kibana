@@ -60,7 +60,9 @@ describe('ExecutedStep', () => {
   });
 
   it('supplies status badge correct status', () => {
-    step.synthetics.payload = { status: 'THE_STATUS' };
+    step.synthetics = {
+      payload: { status: 'THE_STATUS' },
+    };
     expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('StatusBadge'))
       .toMatchInlineSnapshot(`
       <StatusBadge
@@ -70,12 +72,14 @@ describe('ExecutedStep', () => {
   });
 
   it('renders accordions for step, error message, and error stack script', () => {
-    step.synthetics.error = {
-      message: 'There was an error executing the step.',
-      stack: 'some.stack.trace.string',
-    };
-    step.synthetics.payload = {
-      source: 'const someVar = "the var"',
+    step.synthetics = {
+      error: {
+        message: 'There was an error executing the step.',
+        stack: 'some.stack.trace.string',
+      },
+      payload: {
+        source: 'const someVar = "the var"',
+      },
     };
 
     expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('Accordion'))
