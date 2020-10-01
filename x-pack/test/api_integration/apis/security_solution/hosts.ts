@@ -153,25 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
       const expected = {
-        isPartial: false,
-        isRunning: false,
-        rawResponse: {
-          took: 2,
-          timed_out: false,
-          _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
-          hits: { total: 88, max_score: null, hits: [] },
-          aggregations: {
-            lastSeen: { value: 1550608953561, value_as_string: '2019-02-19T20:42:33.561Z' },
-            firstSeen: { value: 1550604983561, value_as_string: '2019-02-19T19:36:23.561Z' },
-          },
-        },
-        total: 2,
-        loaded: 2,
-        inspect: {
-          dsl: [
-            '{\n  "allowNoIndices": true,\n  "index": [\n    "auditbeat-*",\n    "filebeat-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "docvalue_fields": [],\n    "aggregations": {\n      "firstSeen": {\n        "min": {\n          "field": "@timestamp"\n        }\n      },\n      "lastSeen": {\n        "max": {\n          "field": "@timestamp"\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          {\n            "term": {\n              "host.name": "zeek-sensor-san-francisco"\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
-          ],
-        },
         firstSeen: '2019-02-19T19:36:23.561Z',
         lastSeen: '2019-02-19T20:42:33.561Z',
       };
