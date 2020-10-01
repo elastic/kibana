@@ -17,25 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { Vis } from '../../visualizations/public';
+import { TimelionExpressionFunctionDefinition, TimelionVisParams } from './timelion_vis_fn';
 
-import { Sheet } from '../helpers/timelion_request_handler';
-import { Panel } from './panel';
-import { ExprVisAPIEvents } from '../../../visualizations/public';
+const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+};
 
-interface ChartComponentProp {
-  applyFilter: ExprVisAPIEvents['applyFilter'];
-  interval: string;
-  renderComplete(): void;
-  seriesList: Sheet;
-}
+export const toExpressionAst = (vis: Vis<TimelionVisParams>) => {
+  const timelion = buildExpressionFunction<TimelionExpressionFunctionDefinition>('timelion_vis', {
+    expression: escapeString(vis.params.expression),
+    interval: escapeString(vis.params.interval),
+  });
 
-function ChartComponent(props: ChartComponentProp) {
-  if (!props.seriesList) {
-    return null;
-  }
+  const ast = buildExpression([timelion]);
 
-  return <Panel {...props} />;
-}
-
-export { ChartComponent };
+  return ast.toAst();
+};
