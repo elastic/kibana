@@ -8,13 +8,12 @@ import React, { FC, useCallback, ChangeEvent, useEffect, useState } from 'react'
 import styled from 'styled-components';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import { useEqlValidation } from '../../../../common/hooks/eql/use_eql_validation';
+import { FieldHook } from '../../../../shared_imports';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import { EqlQueryBarFooter } from './footer';
+import { getValidationResults } from './validators';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -31,32 +30,23 @@ export interface EqlQueryBarProps {
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, index }) => {
-  const { http } = useKibana().services;
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const { error, start, result } = useEqlValidation();
-  const { setErrors, setValue } = field;
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const { setValue } = field;
+  const { isValid, message, messages, error } = getValidationResults(field);
   const fieldValue = field.value.query.query as string;
+
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      setErrorMessages(messages);
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (error) {
       addError(error, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
     }
   }, [error, addError]);
-
-  useEffect(() => {
-    if (result != null && result.valid === false && result.errors.length > 0) {
-      setErrors([{ message: '' }]);
-      setErrorMessages(result.errors);
-    }
-  }, [result, setErrors]);
-
-  const handleValidation = useCallback(() => {
-    if (fieldValue) {
-      start({ http, index, query: fieldValue });
-    }
-  }, [fieldValue, http, index, start]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -79,8 +69,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      error={message}
+      isInvalid={!isValid}
       fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -89,9 +79,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
         <TextArea
           data-test-subj="eqlQueryBarTextInput"
           fullWidth
-          isInvalid={isInvalid}
+          isInvalid={!isValid}
           value={fieldValue}
-          onBlur={handleValidation}
           onChange={handleChange}
         />
         <EqlQueryBarFooter errors={errorMessages} />

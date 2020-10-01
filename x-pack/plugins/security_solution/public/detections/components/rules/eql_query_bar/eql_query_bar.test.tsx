@@ -8,25 +8,17 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
-import { useEqlValidation } from '../../../../common/hooks/eql/use_eql_validation';
-import {
-  getEqlValidationResponseMock,
-  getValidEqlValidationResponseMock,
-} from '../../../../../common/detection_engine/schemas/response/eql_validation_schema.mock';
 import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { EqlQueryBar, EqlQueryBarProps } from './eql_query_bar';
+import { getEqlValidationError } from './validators.mock';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/eql/use_eql_validation');
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
   let mockIndex: string[];
 
   beforeEach(() => {
-    (useEqlValidation as jest.Mock).mockReturnValue({
-      result: getValidEqlValidationResponseMock(),
-    });
     mockIndex = ['index-123*'];
     mockField = useFormFieldMock({
       value: mockQueryBar,
@@ -77,13 +69,13 @@ describe('EqlQueryBar', () => {
   });
 
   it('renders errors for an invalid query', () => {
-    (useEqlValidation as jest.Mock).mockReturnValue({
-      result: getEqlValidationResponseMock(),
+    const invalidMockField = useFormFieldMock({
+      value: mockQueryBar,
+      errors: [getEqlValidationError()],
     });
-
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={invalidMockField} />
       </TestProviders>
     );
 

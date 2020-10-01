@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -21,6 +21,7 @@ import {
 } from '../../../../shared_imports';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
+import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -101,6 +102,9 @@ export const schema: FormSchema<DefineStepRule> = {
             }
           }
         },
+      },
+      {
+        validator: debounceAsync(eqlValidator, 300),
       },
     ],
   },
