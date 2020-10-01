@@ -73,10 +73,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
-    const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
-      defaultMessage: 'Security',
-    });
-
     initTelemetry(plugins.usageCollection, APP_ID);
 
     if (plugins.home) {
@@ -103,7 +99,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const mountSecurityFactory = async () => {
+    /**
+     * Lazily get the dependencies needed to mount any of the applications defined in this plugin.
+     * This is done lazily so that we can dynamically import code only when the applications are being mounted.
+     */
+    const applicationMountDependencies = async () => {
       const storage = new Storage(localStorage);
       const [coreStart, startPlugins] = await core.getStartServices();
       if (this.store == null) {
@@ -116,7 +116,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         storage,
         security: plugins.security,
       } as StartServices;
-      return { coreStart, startPlugins, services, store: this.store, storage };
+      return {
+        coreStart,
+        startPlugins,
+        services,
+        store: this.store,
+        storage,
+        ...(await this.downloadAssets()),
+      };
     };
 
     core.application.register({
@@ -141,14 +148,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
-          { renderApp, composeLibs },
+          { coreStart, store, services, renderApp, composeLibs },
           { overviewSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
 
         return renderApp({
           ...composeLibs(coreStart),
@@ -169,14 +171,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage },
-          { renderApp, composeLibs },
+          { coreStart, store, services, storage, renderApp, composeLibs },
           { detectionsSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -196,14 +193,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage },
-          { renderApp, composeLibs },
+          { coreStart, store, services, storage, renderApp, composeLibs },
           { hostsSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -223,14 +215,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage },
-          { renderApp, composeLibs },
+          { coreStart, store, services, storage, renderApp, composeLibs },
           { networkSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -250,14 +237,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
-          { renderApp, composeLibs },
+          { coreStart, store, services, renderApp, composeLibs },
           { timelinesSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -277,14 +259,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
-          { renderApp, composeLibs },
+          { coreStart, store, services, renderApp, composeLibs },
           { casesSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -304,14 +281,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, startPlugins, store, services },
-          { renderApp, composeLibs },
+          { coreStart, startPlugins, store, services, renderApp, composeLibs },
           { managementSubPlugin },
-        ] = await Promise.all([
-          mountSecurityFactory(),
-          this.downloadAssets(),
-          this.downloadSubPlugins(),
-        ]);
+        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -490,3 +462,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 }
+
+const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
+  defaultMessage: 'Security',
+});
