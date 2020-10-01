@@ -19,11 +19,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+// https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const security = getService('security');
+  const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'console',
     'common',
@@ -41,16 +47,26 @@ export default function ({ getService, getPageObjects }) {
     // So to modify a metric or aggregation tests need to keep track of the
     // order they are added.
     let aggIndex = 1;
+    // Used to track flag before and after reset
+    let isNewChartUiEnabled = false;
 
     before(async function () {
       log.debug(
         'Load empty_kibana and Shakespeare Getting Started data\n' +
           'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
       );
+      isNewChartUiEnabled = await PageObjects.visChart.isNewChartUiEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
       await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
+
+      if (isNewChartUiEnabled) {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': true,
+        });
+        await browser.refresh();
+      }
     });
 
     after(async () => {
@@ -77,6 +93,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch('shakespeare');
       await PageObjects.visChart.waitForVisualization();
+      await PageObjects.visualize.clickRefresh();
 
       const expectedChartValues = [111396];
       await retry.try(async () => {
@@ -227,8 +244,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
 
       // same values as previous test except scaled down by the 50 for Y-Axis min
-      const expectedChartValues = [21, 15, 12, 5, 5];
-      const expectedChartValues2 = [127, 56, 103, 82, 112];
+      const expectedChartValues = await PageObjects.visChart.getExpectedValue(
+        [21, 15, 12, 5, 5],
+        [71, 65, 62, 55, 55] // no scaled values in elastic-charts
+      );
+      const expectedChartValues2 = await PageObjects.visChart.getExpectedValue(
+        [127, 56, 103, 82, 112],
+        [177, 106, 153, 132, 162] // no scaled values in elastic-charts
+      );
       await retry.try(async () => {
         const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visChart.getBarChartData('Max Speaking Parts');

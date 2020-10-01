@@ -318,7 +318,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async createIndexPattern(
       indexPatternName: string,
-      timefield = '@timestamp',
+      // null to bypass default value
+      timefield: string | null = '@timestamp',
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {

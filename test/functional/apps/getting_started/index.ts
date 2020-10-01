@@ -17,8 +17,11 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Getting Started ', function () {
     this.tags(['ciGroup6']);
@@ -26,7 +29,28 @@ export default function ({ getService, loadTestFile }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
     });
-    // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
-    loadTestFile(require.resolve('./_shakespeare'));
+
+    // TODO: Remove when vislib is removed
+    describe('newChartUi', function () {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': true,
+        });
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': false,
+        });
+        await browser.refresh();
+      });
+
+      loadTestFile(require.resolve('./_shakespeare'));
+    });
+
+    describe('', () => {
+      loadTestFile(require.resolve('./_shakespeare'));
+    });
   });
 }
