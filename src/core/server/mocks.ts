@@ -56,6 +56,7 @@ export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from './context/context_service.mock';
 export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { coreTelemetryServiceMock } from './telemetry/telemetry_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -158,6 +159,7 @@ function createCoreStartMock() {
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    coreTelemetry: coreTelemetryServiceMock.createStartContract(),
   };
 
   return mock;

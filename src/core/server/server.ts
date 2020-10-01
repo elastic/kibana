@@ -48,7 +48,7 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
-import { CoreTelemetryService } from './telemetry/telemetry_service';
+import { CoreTelemetryService } from './telemetry';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';

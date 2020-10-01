@@ -39,7 +39,7 @@ import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
-import { CoreTelemetryStart } from './telemetry/types';
+import { CoreTelemetryStart } from './telemetry';
 
 /** @internal */
 export interface InternalCoreSetup {

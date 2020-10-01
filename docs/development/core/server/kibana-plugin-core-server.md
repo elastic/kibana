@@ -70,6 +70,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
+|  [CoreTelemetry](./kibana-plugin-core-server.coretelemetry.md) |  |
+|  [CoreTelemetryStart](./kibana-plugin-core-server.coretelemetrystart.md) |  |
 |  [CountResponse](./kibana-plugin-core-server.countresponse.md) |  |
 |  [CustomHttpResponseOptions](./kibana-plugin-core-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DeleteDocumentResponse](./kibana-plugin-core-server.deletedocumentresponse.md) |  |

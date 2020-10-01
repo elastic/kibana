@@ -98,6 +98,8 @@ export class CoreTelemetryService implements CoreService<void, CoreTelemetryStar
             certificateConfigured: isConfigured.string(es.ssl.certificate),
             keyConfigured: isConfigured.string(es.ssl.key),
             verificationMode: es.ssl.verificationMode,
+            truststoreConfigured: isConfigured.record(es.ssl.truststore),
+            keystoreConfigured: isConfigured.record(es.ssl.keystore),
           },
         },
         http: {

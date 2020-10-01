@@ -71,8 +71,8 @@ export interface CoreConfigTelemetry {
       certificateAuthoritiesConfigured: boolean;
       certificateConfigured: boolean;
       keyConfigured: boolean;
-      // keystoreConfigured: boolean;
-      // truststoreConfigured: boolean; requires access to rawConfig
+      keystoreConfigured: boolean;
+      truststoreConfigured: boolean;
       alwaysPresentCertificate: boolean;
     };
     apiVersion: string;
@@ -133,5 +133,9 @@ export interface CoreConfigTelemetry {
 }
 
 export interface CoreTelemetryStart {
+  /**
+   * Internal API for collecting Core telemetry data
+   * @internal
+   * */
   getCoreTelemetry(): CoreTelemetry | null;
 }

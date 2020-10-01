@@ -46,6 +46,8 @@ const createStartContractMock = () => {
               certificateConfigured: false,
               keyConfigured: false,
               verificationMode: 'full',
+              keystoreConfigured: false,
+              truststoreConfigured: false,
             },
           },
           http: {

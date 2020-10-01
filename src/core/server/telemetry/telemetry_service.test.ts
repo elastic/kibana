@@ -93,6 +93,8 @@ describe('CoreTelemetryService', () => {
                   "certificateAuthoritiesConfigured": false,
                   "certificateConfigured": false,
                   "keyConfigured": false,
+                  "keystoreConfigured": false,
+                  "truststoreConfigured": false,
                   "verificationMode": "full",
                 },
               },

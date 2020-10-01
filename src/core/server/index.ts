@@ -64,6 +64,7 @@ import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { CoreTelemetryStart } from './telemetry';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -349,6 +350,8 @@ export {
   StatusServiceSetup,
 } from './status';
 
+export { CoreTelemetryStart, CoreTelemetry } from './telemetry';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -456,6 +459,8 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** {@link AuditTrailSetup} */
   auditTrail: AuditTrailStart;
+  /** {@link CoreTelemetryStart} */
+  coreTelemetry: CoreTelemetryStart;
 }
 
 export {

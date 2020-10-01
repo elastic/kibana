@@ -439,6 +439,8 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
+    coreTelemetry: CoreTelemetryStart;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
     http: HttpServiceStart;
@@ -456,6 +458,28 @@ export interface CoreStatus {
     elasticsearch: ServiceStatus;
     // (undocumented)
     savedObjects: ServiceStatus;
+}
+
+// Warning: (ae-missing-release-tag) "CoreTelemetry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface CoreTelemetry {
+    // Warning: (ae-forgotten-export) The symbol "CoreConfigTelemetry" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    config: CoreConfigTelemetry;
+    // Warning: (ae-forgotten-export) The symbol "CoreEnvironmentTelemetry" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    environment: CoreEnvironmentTelemetry;
+}
+
+// Warning: (ae-missing-release-tag) "CoreTelemetryStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface CoreTelemetryStart {
+    // @internal
+    getCoreTelemetry(): CoreTelemetry | null;
 }
 
 // @public (undocumented)
