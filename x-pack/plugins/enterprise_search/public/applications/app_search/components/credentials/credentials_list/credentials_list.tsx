@@ -10,13 +10,14 @@ import { useActions, useValues } from 'kea';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   CredentialsLogic,
   ICredentialsLogicActions,
   ICredentialsLogicValues,
 } from '../credentials_logic';
+import { Credential } from './credential';
+import { HiddenText } from '../../../../shared/hidden_text';
 import { IApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { apiTokenSort } from '../utils/api_token_sort';
@@ -59,19 +60,16 @@ export const CredentialsList: React.FC = () => {
               })}
             >
               {(copy) => (
-                <div>
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copyClipboard"
-                    aria-label={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
-                      {
-                        defaultMessage: 'Copy API Key to clipboard',
-                      }
-                    )}
-                  />
-                  {item.key}
-                </div>
+                <HiddenText text={item.key || ''}>
+                  {({ hiddenText, isHidden, toggle }) => (
+                    <Credential
+                      copy={copy}
+                      toggleIsHidden={toggle}
+                      isHidden={isHidden}
+                      text={hiddenText}
+                    />
+                  )}
+                </HiddenText>
               )}
             </EuiCopy>
           </div>
