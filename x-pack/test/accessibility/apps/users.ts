@@ -11,11 +11,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
   const a11y = getService('a11y');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const toasts = getService('toasts');
 
   describe('Kibana users page a11y tests', () => {
     before(async () => {
