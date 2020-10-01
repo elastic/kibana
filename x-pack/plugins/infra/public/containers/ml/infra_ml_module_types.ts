@@ -33,11 +33,11 @@ export interface ModuleDescriptor<JobType extends string> {
     partitionField?: string
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
-  validateSetupIndices?: (
+  validateSetupIndices: (
     indices: string[],
     timestampField: string
   ) => Promise<ValidationIndicesResponsePayload>;
-  validateSetupDatasets?: (
+  validateSetupDatasets: (
     indices: string[],
     timestampField: string,
     startTime: number,
