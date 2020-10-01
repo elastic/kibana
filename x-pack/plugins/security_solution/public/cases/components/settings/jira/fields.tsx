@@ -16,18 +16,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SettingFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
-import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
+import { SearchIssues } from './search_issues';
 
 const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<JiraFieldsType>> = ({
   fields,
   connector,
   onChange,
 }) => {
-  const { issueType, priority } = fields || {};
+  const { issueType, priority, parent } = fields || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
@@ -53,6 +54,11 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   const hasPriority = useMemo(
     () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'priority'),
+    [fieldsByIssueType]
+  );
+
+  const hasParent = useMemo(
+    () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'parent'),
     [fieldsByIssueType]
   );
 
@@ -135,6 +141,34 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
       </EuiFormRow>
       <EuiSpacer size="m" />
       <>
+        {hasParent && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    {
+                      defaultMessage: 'Parent issue',
+                    }
+                  )}
+                >
+                  <SearchIssues
+                    selectedValue={parent}
+                    http={http}
+                    toastNotifications={notifications.toasts}
+                    actionConnector={connector}
+                    onChange={(parentIssueKey) => {
+                      onChange('parent', parentIssueKey);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {hasPriority && (
           <>
             <EuiFlexGroup>

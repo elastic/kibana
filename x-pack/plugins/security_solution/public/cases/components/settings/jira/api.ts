@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { ActionTypeExecutorResult } from '../../../../../../case/common/api';
-import { IssueTypes, Fields } from './types';
+import { IssueTypes, Fields, Issues, Issue } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 
@@ -44,6 +44,48 @@ export async function getFieldsByIssueType({
   return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
+    }),
+    signal,
+  });
+}
+
+export interface GetIssuesTypeProps {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+  title: string;
+}
+
+export async function getIssues({
+  http,
+  signal,
+  connectorId,
+  title,
+}: GetIssuesTypeProps): Promise<ActionTypeExecutorResult<Issues>> {
+  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'issues', subActionParams: { title } },
+    }),
+    signal,
+  });
+}
+
+export interface GetIssueTypeProps {
+  http: HttpSetup;
+  signal: AbortSignal;
+  connectorId: string;
+  id: string;
+}
+
+export async function getIssue({
+  http,
+  signal,
+  connectorId,
+  id,
+}: GetIssueTypeProps): Promise<ActionTypeExecutorResult<Issue>> {
+  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'issue', subActionParams: { id } },
     }),
     signal,
   });

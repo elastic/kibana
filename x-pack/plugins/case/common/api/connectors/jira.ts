@@ -15,6 +15,7 @@ export const JiraCaseFieldsRt = rt.union([
 export const JiraFieldsRT = rt.type({
   issueType: rt.string,
   priority: rt.union([rt.string, rt.null]),
+  parent: rt.union([rt.string, rt.null]),
 });
 
 export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;

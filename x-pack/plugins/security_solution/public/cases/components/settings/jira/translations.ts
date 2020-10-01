@@ -19,3 +19,37 @@ export const FIELDS_API_ERROR = i18n.translate(
     defaultMessage: 'Unable to get fields',
   }
 );
+
+export const ISSUES_API_ERROR = i18n.translate(
+  'xpack.securitySolution.components.settings.jira.unableToGetIssuesMessage',
+  {
+    defaultMessage: 'Unable to get issues',
+  }
+);
+
+export const GET_ISSUE_API_ERROR = (id: string) =>
+  i18n.translate('xpack.securitySolution.components.settings.jira.unableToGetIssueMessage', {
+    defaultMessage: 'Unable to get issue with id {id}',
+    values: { id },
+  });
+
+export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxAriaLabel',
+  {
+    defaultMessage: 'Select parent issue',
+  }
+);
+
+export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxPlaceholder',
+  {
+    defaultMessage: 'Select parent issue',
+  }
+);
+
+export const SEARCH_ISSUES_LOADING = i18n.translate(
+  'xpack.securitySolution.components.settings.jira.searchIssuesLoading',
+  {
+    defaultMessage: 'Loading...',
+  }
+);

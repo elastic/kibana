@@ -101,13 +101,14 @@ const pushToServiceHandler = async ({
       currentIncident,
     });
 
-    const { priority, labels, issueType } = params;
+    const { priority, labels, issueType, parent } = params;
     incident = {
       summary: transformedFields.summary,
       description: transformedFields.description,
       priority,
       labels,
       issueType,
+      parent,
     };
   } else {
     const { title, description, priority, labels, issueType, parent } = params;

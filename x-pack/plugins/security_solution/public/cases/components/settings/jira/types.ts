@@ -11,3 +11,11 @@ export interface Fields {
     defaultValue: { name: string; id: string } | {};
   };
 }
+
+export interface Issue {
+  id: string;
+  key: string;
+  title: string;
+}
+
+export type Issues = Issue[];
