@@ -20,6 +20,7 @@ export interface GetAgentsRequest {
     perPage: number;
     kuery?: string;
     showInactive: boolean;
+    showUpgradeable?: boolean;
   };
 }
 

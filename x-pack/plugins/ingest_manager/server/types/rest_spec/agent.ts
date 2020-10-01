@@ -13,6 +13,7 @@ export const GetAgentsRequestSchema = {
     perPage: schema.number({ defaultValue: 20 }),
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
+    showUpgradeable: schema.boolean({ defaultValue: false }),
   }),
 };
 

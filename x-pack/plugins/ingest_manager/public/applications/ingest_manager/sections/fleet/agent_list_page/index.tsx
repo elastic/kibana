@@ -172,7 +172,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
-
+  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
   // Table and search states
   const [search, setSearch] = useState<string>(defaultKuery);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
@@ -254,6 +254,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       perPage: pagination.pageSize,
       kuery: kuery && kuery !== '' ? kuery : undefined,
       showInactive,
+      showUpgradeable,
     },
     {
       pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -577,6 +578,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     ))}
                   </div>
                 </EuiPopover>
+                <EuiFilterButton
+                  hasActiveFilters={showUpgradeable}
+                  onClick={() => {
+                    setShowUpgradeable(!showUpgradeable);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.showUpgradeableFilterLabel"
+                    defaultMessage="Upgrade available"
+                  />
+                </EuiFilterButton>
                 <EuiFilterButton
                   hasActiveFilters={showInactive}
                   onClick={() => setShowInactive(!showInactive)}
