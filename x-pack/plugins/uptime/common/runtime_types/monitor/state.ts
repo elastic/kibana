@@ -63,10 +63,10 @@ export const MonitorSummaryType = t.intersection([
   t.type({
     monitor_id: t.string,
     state: StateType,
+    minInterval: t.number,
   }),
   t.partial({
     histogram: HistogramType,
-    minInterval: t.number,
   }),
 ]);
 

@@ -31,6 +31,7 @@ describe('MonitorBarSeries component', () => {
           up: 0,
         },
       ],
+      minInterval: 10,
     };
     histogramSeries = [
       { timestamp: 1580387868000, up: 0, down: 5 },
