@@ -46,12 +46,12 @@ export interface ModuleDescriptor<JobType extends string> {
     sourceId: string,
     fetch: HttpHandler
   ) => Promise<DeleteJobsResponsePayload>;
-  validateSetupIndices: (
+  validateSetupIndices?: (
     indices: string[],
     timestampField: string,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
-  validateSetupDatasets: (
+  validateSetupDatasets?: (
     indices: string[],
     timestampField: string,
     startTime: number,

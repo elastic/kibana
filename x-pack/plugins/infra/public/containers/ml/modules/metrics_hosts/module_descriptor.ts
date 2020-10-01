@@ -11,16 +11,26 @@ import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import { callValidateIndicesAPI } from '../../../logs/log_analysis/api/validate_indices';
-import { callValidateDatasetsAPI } from '../../../logs/log_analysis/api/validate_datasets';
 import {
   metricsHostsJobTypes,
   getJobId,
   MetricsHostsJobType,
   bucketSpan,
-  partitionField,
 } from '../../../../../common/infra_ml';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
 
+type JobType = 'hosts_memory_usage' | 'hosts_network_in' | 'hosts_network_out';
 const moduleId = 'metrics_ui_hosts';
 const moduleName = i18n.translate('xpack.infra.ml.metricsModuleName', {
   defaultMessage: 'Metrics anomanly detection',
@@ -57,23 +67,69 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     start,
     end,
     moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+    partitionField,
   } = setUpModuleArgs;
 
   const indexNamePattern = indices.join(',');
-  const jobIds = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
-  const jobOverrides = jobIds.map((id) => ({
-    job_id: id,
-    data_description: {
-      time_field: timestampField,
-    },
-    custom_settings: {
-      metrics_source_config: {
-        indexPattern: indexNamePattern,
-        timestampField,
-        bucketSpan,
+  const jobIds: JobType[] = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
+
+  const jobOverrides = jobIds.map((id) => {
+    const { job: defaultJobConfig } = getDefaultJobConfigs(id);
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const analysis_config = {
+      ...defaultJobConfig.analysis_config,
+    };
+
+    if (partitionField) {
+      analysis_config.detectors[0].partition_field_name = partitionField;
+      if (analysis_config.influencers.indexOf(partitionField) === -1) {
+        analysis_config.influencers.push(partitionField);
+      }
+    }
+
+    return {
+      job_id: id,
+      data_description: {
+        time_field: timestampField,
       },
-    },
-  }));
+      analysis_config,
+      custom_settings: {
+        metrics_source_config: {
+          indexPattern: indexNamePattern,
+          timestampField,
+          bucketSpan,
+        },
+      },
+    };
+  });
+
+  const datafeedOverrides = jobIds.map((id) => {
+    const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+
+    if (!partitionField || id === 'hosts_memory_usage') {
+      // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
+      return defaultDatafeedConfig;
+    }
+
+    // If we have a partition field, we need to change the aggregation to do a terms agg at the top level
+    const aggregations = {
+      [partitionField]: {
+        terms: {
+          field: partitionField,
+        },
+        aggregations: {
+          ...defaultDatafeedConfig.aggregations,
+        },
+      },
+    };
+
+    return {
+      ...defaultDatafeedConfig,
+      job_id: id,
+      aggregations,
+    };
+  });
 
   return callSetupMlModuleAPI(
     {
@@ -84,46 +140,34 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
       sourceId,
       indexPattern: indexNamePattern,
       jobOverrides,
+      datafeedOverrides,
     },
     fetch
   );
+};
+
+const getDefaultJobConfigs = (jobId: JobType) => {
+  switch (jobId) {
+    case 'hosts_memory_usage':
+      return {
+        datafeed: MemoryDatafeed,
+        job: MemoryJob,
+      };
+    case 'hosts_network_in':
+      return {
+        datafeed: NetworkInDatafeed,
+        job: NetworkInJob,
+      };
+    case 'hosts_network_out':
+      return {
+        datafeed: NetworkOutDatafeed,
+        job: NetworkOutJob,
+      };
+  }
 };
 
 const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes, fetch);
-};
-
-const validateSetupIndices = async (
-  indices: string[],
-  timestampField: string,
-  fetch: HttpHandler
-) => {
-  return await callValidateIndicesAPI(
-    {
-      indices,
-      fields: [
-        {
-          name: timestampField,
-          validTypes: ['date'],
-        },
-        {
-          name: partitionField,
-          validTypes: ['keyword'],
-        },
-      ],
-    },
-    fetch
-  );
-};
-
-const validateSetupDatasets = async (
-  indices: string[],
-  timestampField: string,
-  startTime: number,
-  endTime: number,
-  fetch: HttpHandler
-) => {
-  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };
 
 export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {
@@ -137,6 +181,4 @@ export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {
   getModuleDefinition,
   setUpModule,
   cleanUpModule,
-  validateSetupDatasets,
-  validateSetupIndices,
 };

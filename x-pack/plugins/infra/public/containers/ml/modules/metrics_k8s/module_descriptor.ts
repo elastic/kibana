@@ -11,16 +11,27 @@ import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import { callValidateIndicesAPI } from '../../../logs/log_analysis/api/validate_indices';
-import { callValidateDatasetsAPI } from '../../../logs/log_analysis/api/validate_datasets';
 import {
   metricsK8SJobTypes,
   getJobId,
   MetricK8sJobType,
   bucketSpan,
-  partitionField,
 } from '../../../../../common/infra_ml';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_out.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_out.json';
 
+type JobType = 'k8s_memory_usage' | 'k8s_network_in' | 'k8s_network_out';
+export const DEFAULT_K8S_PARTITION_FIELD = 'kubernetes.namespace';
 const moduleId = 'metrics_ui_k8s';
 const moduleName = i18n.translate('xpack.infra.ml.metricsModuleName', {
   defaultMessage: 'Metrics anomanly detection',
@@ -57,26 +68,73 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     start,
     end,
     moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+    partitionField,
   } = setUpModuleArgs;
 
   const indexNamePattern = indices.join(',');
-  const jobIds = ['k8s_memory_usage', 'k8s_network_in', 'k8s_network_out'];
-  const jobOverrides = jobIds.map((id) => ({
-    job_id: id,
-    analysis_config: {
-      bucket_span: `${bucketSpan}ms`,
-    },
-    data_description: {
-      time_field: timestampField,
-    },
-    custom_settings: {
-      metrics_source_config: {
-        indexPattern: indexNamePattern,
-        timestampField,
-        bucketSpan,
+  const jobIds: JobType[] = ['k8s_memory_usage', 'k8s_network_in', 'k8s_network_out'];
+  const jobOverrides = jobIds.map((id) => {
+    const { job: defaultJobConfig } = getDefaultJobConfigs(id);
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const analysis_config = {
+      ...defaultJobConfig.analysis_config,
+    };
+
+    if (partitionField) {
+      analysis_config.detectors[0].partition_field_name = partitionField;
+      if (analysis_config.influencers.indexOf(partitionField) === -1) {
+        analysis_config.influencers.push(partitionField);
+      }
+    }
+
+    return {
+      job_id: id,
+      data_description: {
+        time_field: timestampField,
       },
-    },
-  }));
+      analysis_config,
+      custom_settings: {
+        metrics_source_config: {
+          indexPattern: indexNamePattern,
+          timestampField,
+          bucketSpan,
+        },
+      },
+    };
+  });
+
+  const datafeedOverrides = jobIds.map((id) => {
+    const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+
+    if (!partitionField || id === 'k8s_memory_usage') {
+      // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
+      return defaultDatafeedConfig;
+    }
+
+    // Because the ML K8s jobs ship with a default partition field of {kubernetes.namespace}, ignore that agg and wrap it in our own agg.
+    const innerAggregation =
+      defaultDatafeedConfig.aggregations[DEFAULT_K8S_PARTITION_FIELD].aggregations;
+
+    // If we have a partition field, we need to change the aggregation to do a terms agg to partition the data at the top level
+    const aggregations = {
+      [partitionField]: {
+        terms: {
+          field: partitionField,
+          size: 25, // 25 is arbitratry and only used to keep the number of buckets to a managable level in the event that the user choose a high cardinality partition field.
+        },
+        aggregations: {
+          ...innerAggregation,
+        },
+      },
+    };
+
+    return {
+      ...defaultDatafeedConfig,
+      job_id: id,
+      aggregations,
+    };
+  });
 
   return callSetupMlModuleAPI(
     {
@@ -87,46 +145,34 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
       sourceId,
       indexPattern: indexNamePattern,
       jobOverrides,
+      datafeedOverrides,
     },
     fetch
   );
+};
+
+const getDefaultJobConfigs = (jobId: JobType) => {
+  switch (jobId) {
+    case 'k8s_memory_usage':
+      return {
+        datafeed: MemoryDatafeed,
+        job: MemoryJob,
+      };
+    case 'k8s_network_in':
+      return {
+        datafeed: NetworkInDatafeed,
+        job: NetworkInJob,
+      };
+    case 'k8s_network_out':
+      return {
+        datafeed: NetworkOutDatafeed,
+        job: NetworkOutJob,
+      };
+  }
 };
 
 const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsK8SJobTypes, fetch);
-};
-
-const validateSetupIndices = async (
-  indices: string[],
-  timestampField: string,
-  fetch: HttpHandler
-) => {
-  return await callValidateIndicesAPI(
-    {
-      indices,
-      fields: [
-        {
-          name: timestampField,
-          validTypes: ['date'],
-        },
-        {
-          name: partitionField,
-          validTypes: ['keyword'],
-        },
-      ],
-    },
-    fetch
-  );
-};
-
-const validateSetupDatasets = async (
-  indices: string[],
-  timestampField: string,
-  startTime: number,
-  endTime: number,
-  fetch: HttpHandler
-) => {
-  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };
 
 export const metricHostsModule: ModuleDescriptor<MetricK8sJobType> = {
@@ -140,6 +186,4 @@ export const metricHostsModule: ModuleDescriptor<MetricK8sJobType> = {
   getModuleDefinition,
   setUpModule,
   cleanUpModule,
-  validateSetupDatasets,
-  validateSetupIndices,
 };
