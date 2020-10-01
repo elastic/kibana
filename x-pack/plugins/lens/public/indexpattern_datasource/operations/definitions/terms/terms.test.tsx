@@ -5,15 +5,17 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { createMockedIndexPattern } from '../../mocks';
-import { TermsIndexPatternColumn } from './terms';
-import { termsOperation } from './index';
-import { IndexPatternPrivateState, IndexPattern } from '../../types';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { createMockedIndexPattern } from '../../../mocks';
+import { ValuesRangeInput } from './values_range_input';
+import { TermsIndexPatternColumn } from '.';
+import { termsOperation } from '../index';
+import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -479,7 +481,7 @@ describe('terms', () => {
 
     it('should render current size value', () => {
       const setStateSpy = jest.fn();
-      const instance = shallow(
+      const instance = mount(
         <InlineOptions
           {...defaultProps}
           state={state}
@@ -490,12 +492,12 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(3);
+      expect(instance.find(EuiRange).prop('value')).toEqual('3');
     });
 
     it('should update state with the size value', () => {
       const setStateSpy = jest.fn();
-      const instance = shallow(
+      const instance = mount(
         <InlineOptions
           {...defaultProps}
           state={state}
@@ -506,14 +508,10 @@ describe('terms', () => {
         />
       );
 
-      instance.find(EuiRange).prop('onChange')!(
-        {
-          target: {
-            value: '7',
-          },
-        } as React.ChangeEvent<HTMLInputElement>,
-        true
-      );
+      act(() => {
+        instance.find(ValuesRangeInput).prop('onChange')!(7);
+      });
+
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
         layers: {
