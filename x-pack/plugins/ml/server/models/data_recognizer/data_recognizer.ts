@@ -736,7 +736,7 @@ export class DataRecognizer {
     );
   }
 
-  async saveDatafeed(datafeed: ModuleDataFeed) {
+  async saveDatafeed(datafeed: ModuleDatafeed) {
     return this._mlClient.putDatafeed(
       {
         datafeed_id: datafeed.id,
