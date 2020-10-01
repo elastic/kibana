@@ -12,6 +12,26 @@ This example shows a dashboard panel that contains a pie chart with a configured
 image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
 
 [float]
+[[dashboard-drilldown-supported-panels]]
+==== Supported panels
+
+The following panels support dashboard drilldowns:
+
+* Lens
+* Area
+* Data table
+* Heat map
+* Horizontal bar
+* Line
+* Maps
+* Pie
+* TSVB
+* Tag cloud
+* Timelion
+* Vega
+* Vertical bar
+
+[float]
 [[drilldowns-example]]
 ==== Try it: Create a dashboard drilldown
 
@@ -74,3 +94,4 @@ image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to an
 +
 You are navigated to your destination dashboard. Verify that the search query, filters,
 and time range are carried over.
+
