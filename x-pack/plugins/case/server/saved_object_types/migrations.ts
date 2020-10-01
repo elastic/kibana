@@ -35,6 +35,12 @@ interface SanitizedConfigure {
   };
 }
 
+interface UserActions {
+  action_field: string[];
+  new_value: string;
+  old_value: string;
+}
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCase>
@@ -73,6 +79,47 @@ export const configureMigrations = {
           type: connector_id ? null : '.none',
           fields: null,
         },
+      },
+      references: doc.references || [],
+    };
+  },
+};
+
+export const userActionsMigrations = {
+  '7.10.0': (doc: SavedObjectUnsanitizedDoc<UserActions>): SavedObjectSanitizedDoc<UserActions> => {
+    const { action_field, new_value, old_value, ...restAttributes } = doc.attributes;
+
+    if (
+      action_field == null ||
+      !Array.isArray(action_field) ||
+      action_field[0] !== 'connector_id'
+    ) {
+      return { ...doc, references: doc.references || [] };
+    }
+
+    return {
+      ...doc,
+      attributes: {
+        ...restAttributes,
+        action_field: ['connector'],
+        new_value:
+          new_value != null
+            ? JSON.stringify({
+                id: new_value,
+                name: new_value === 'none' ? 'none' : null,
+                type: new_value === 'none' ? '.none' : null,
+                fields: null,
+              })
+            : new_value,
+        old_value:
+          old_value != null
+            ? JSON.stringify({
+                id: old_value,
+                name: new_value === 'none' ? 'none' : null,
+                type: new_value === 'none' ? '.none' : null,
+                fields: null,
+              })
+            : old_value,
       },
       references: doc.references || [],
     };
