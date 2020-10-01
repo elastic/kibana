@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -119,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
           const rowData = await PageObjects.discover.getDocTableField(1);
           log.debug(`The first timestamp value in doc table: ${rowData}`);
           const dateParsed = Date.parse(rowData);
-          //compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
+          // compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
           return dateParsed >= 1442770200000 && dateParsed <= 1442791800000;
         });
       });

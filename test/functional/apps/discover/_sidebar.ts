@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -53,26 +55,26 @@ export default function ({ getService, getPageObjects }) {
 
     describe('collapse expand', function () {
       it('should initially be expanded', async function () {
-        const width = await PageObjects.discover.getSidebarWidth();
+        const width = Number(await PageObjects.discover.getSidebarWidth());
         log.debug('expanded sidebar width = ' + width);
-        expect(width > 20).to.be(true);
+        expect(width).to.be.greaterThan(20);
       });
 
       it('should collapse when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
         log.debug('PageObjects.discover.getSidebarWidth()');
-        const width = await PageObjects.discover.getSidebarWidth();
+        const width = Number(await PageObjects.discover.getSidebarWidth());
         log.debug('collapsed sidebar width = ' + width);
-        expect(width < 20).to.be(true);
+        expect(width).to.be.lessThan(20);
       });
 
       it('should expand when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
 
         log.debug('PageObjects.discover.getSidebarWidth()');
-        const width = await PageObjects.discover.getSidebarWidth();
+        const width = Number(await PageObjects.discover.getSidebarWidth());
         log.debug('expanded sidebar width = ' + width);
-        expect(width > 20).to.be(true);
+        expect(width).to.be.greaterThan(20);
       });
     });
   });

@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -27,10 +29,15 @@ export default function ({ getService, getPageObjects }) {
 
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
-  function getHitCount(requestStats) {
+  function getHitCount(requestStats: string[][]): string | undefined {
     const hitsCountStatsRow = requestStats.find((statsRow) => {
       return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
     });
+
+    if (!hitsCountStatsRow) {
+      return;
+    }
+
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }
 

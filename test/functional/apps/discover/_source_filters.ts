@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -43,8 +45,8 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-      //After hiding the time picker, we need to wait for
-      //the refresh button to hide before clicking the share button
+      // After hiding the time picker, we need to wait for
+      // the refresh button to hide before clicking the share button
       await PageObjects.common.sleep(1000);
     });
 

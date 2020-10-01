@@ -355,7 +355,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
-      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+      await elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
     }
 
     public async waitForDocTableLoadingComplete() {

@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -29,9 +31,9 @@ export default function ({ getService, getPageObjects }) {
   const toasts = getService('toasts');
 
   describe('shared links', function describeIndexTests() {
-    let baseUrl;
+    let baseUrl: string;
 
-    async function setup({ storeStateInSessionStorage }) {
+    async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
       baseUrl = PageObjects.common.getHostPort();
       log.debug('baseUrl = ' + baseUrl);
       // browsers don't show the ':port' if it's 80 or 443 so we have to
@@ -57,21 +59,19 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-      //After hiding the time picker, we need to wait for
-      //the refresh button to hide before clicking the share button
+      // After hiding the time picker, we need to wait for
+      // the refresh button to hide before clicking the share button
       await PageObjects.common.sleep(1000);
 
       await PageObjects.share.clickShareTopNavButton();
 
       return async () => {
-        await kibanaServer.uiSettings.replace({
-          'state:storeInSessionStorage': undefined,
-        });
+        await kibanaServer.uiSettings.unset('state:storeInSessionStorage');
       };
     }
 
     describe('shared links with state in query', async () => {
-      let teardown;
+      let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: false });
       });
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('shared links with state in sessionStorage', async () => {
-      let teardown;
+      let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
       });
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
       it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
         const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
         await PageObjects.share.checkShortenUrl();
-        let actualUrl;
+        let actualUrl: string = '';
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.match(re);
