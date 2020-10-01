@@ -8,25 +8,23 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
 import { useMount } from 'react-use';
+import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import {
   ForLastExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../../../triggers_actions_ui/public/application/context/alerts_context';
+  AlertsContextValue,
+} from '../../../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Comparator,
   ThresholdType,
   isRatioAlert,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../../common/alerting/logs/log_threshold/types';
 import { Threshold } from './threshold';
 import { Criteria } from './criteria';
 import { TypeSwitcher } from './type_switcher';
-import { useSourceId } from '../../../../../containers/source_id';
-import { LogSourceProvider, useLogSourceContext } from '../../../../../containers/logs/log_source';
-import { GroupByExpression } from '../../../shared/group_by_expression/group_by_expression';
-import { Errors } from '../validation';
+import { useSourceId } from '../../../../containers/source_id';
+import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
+import { Errors } from '../../validation';
 
 export interface ExpressionCriteria {
   field?: string;

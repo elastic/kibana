@@ -18,12 +18,12 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
   Comparator,
   ComparatorToi18nMap,
   AlertParams,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../../common/alerting/logs/log_threshold/types';
 
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
   defaultMessage: 'is',

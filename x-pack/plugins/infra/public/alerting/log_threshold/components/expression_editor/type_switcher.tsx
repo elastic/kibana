@@ -11,7 +11,7 @@ import {
   AlertParams,
   ThresholdType,
   isRatioAlert,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../../common/alerting/logs/log_threshold/types';
 import { ExpressionLike } from './editor';
 
 const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {

@@ -31,21 +31,21 @@ import {
   getChartTheme,
   yAxisFormatter,
   NUM_BUCKETS,
-} from '../../../shared/criterion_preview_chart/criterion_preview_chart';
+} from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import {
   AlertParams,
   Threshold,
   Criterion,
   Comparator,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
-import { Color, colorTransformer } from '../../../../../../common/color_palette';
+} from '../../../../../common/alerting/logs/log_threshold/types';
+import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../../common/http_api/log_alerts/';
+} from '../../../../../common/http_api/log_alerts/';
 import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
-import { decodeOrThrow } from '../../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 const GROUP_LIMIT = 5;
 

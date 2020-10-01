@@ -6,10 +6,10 @@
 
 import React, { useContext } from 'react';
 import { ApplicationStart, DocLinksStart, HttpStart, NotificationsStart } from 'src/core/public';
-import { AlertsContextProvider, AlertAdd } from '../../../../../../triggers_actions_ui/public';
-import { TriggerActionsContext } from '../../../../utils/triggers_actions_context';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../../common/alerting/logs/log_threshold/types';
+import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
+import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
 
 interface Props {
   visible?: boolean;
