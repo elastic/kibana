@@ -96,10 +96,12 @@ export const ConnectorEditFlyout = ({
   }
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errorsInConnectorConfig = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
+  const errorsInConnectorConfig = (!connector.isPreconfigured
+    ? {
+        ...actionTypeModel?.validateConnector(connector).errors,
+        ...validateBaseProperties(connector).errors,
+      }
+    : {}) as IErrorObject;
   const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
     (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
   );
