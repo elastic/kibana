@@ -240,7 +240,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.path.text',
+          field: 'process.executable.text',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -293,7 +293,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path.text',
+            field: 'process.executable.text',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -320,7 +320,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'process.path.text',
+                field: 'process.executable.text',
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -357,7 +357,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     it('should trim condition entry values', async () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
-        field: 'process.path.text',
+        field: 'process.executable.text',
         value: '\n    some value \r\n ',
         operator: 'included',
         type: 'match',
@@ -366,13 +366,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
         {
-          field: 'process.path.text',
+          field: 'process.executable.text',
           operator: 'included',
           type: 'match',
           value: 'c:/programs files/Anti-Virus',
         },
         {
-          field: 'process.path.text',
+          field: 'process.executable.text',
           value: 'some value',
           operator: 'included',
           type: 'match',
@@ -392,7 +392,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
         {
-          field: 'process.path.text',
+          field: 'process.executable.text',
           operator: 'included',
           type: 'match',
           value: 'c:/programs files/Anti-Virus',
