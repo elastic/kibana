@@ -12,16 +12,23 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
+import { isSome } from 'fp-ts/lib/Option';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { extractActionVariable } from '../extract_action_variable';
 
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
 >> = ({ actionParams, editAction, index, errors, messageVariables }) => {
   const { title, description, comment, severity, urgency, impact, savedObjectId } =
     actionParams.subActionParams || {};
+
+  const isActionBeingConfiguredByAnAlert = messageVariables
+    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    : false;
+
   const selectOptions = [
     {
       value: '1',
@@ -61,7 +68,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
+    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {
@@ -174,6 +181,28 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           errors={errors.title as string[]}
         />
       </EuiFormRow>
+      {!isActionBeingConfiguredByAnAlert && (
+        <Fragment>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+              {
+                defaultMessage: 'Referenced Saved Object ID (optional)',
+              }
+            )}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'savedObjectId'}
+              inputTargetValue={savedObjectId}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </Fragment>
+      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

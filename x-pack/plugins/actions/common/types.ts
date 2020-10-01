@@ -34,3 +34,15 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
 }
+
+export function isActionTypeExecutorResult(
+  result: unknown
+): result is ActionTypeExecutorResult<unknown> {
+  const unsafeResult = result as ActionTypeExecutorResult<unknown>;
+  return (
+    unsafeResult &&
+    typeof unsafeResult === 'object' &&
+    unsafeResult?.actionId === 'string' &&
+    (unsafeResult?.status === 'ok' || unsafeResult?.status === 'error')
+  );
+}

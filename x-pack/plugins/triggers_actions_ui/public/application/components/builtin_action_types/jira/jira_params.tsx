@@ -6,6 +6,7 @@
 
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
 import { map } from 'lodash/fp';
+import { isSome } from 'fp-ts/lib/Option';
 import { EuiFormRow, EuiComboBox, EuiSelectOption, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
@@ -20,6 +21,7 @@ import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { extractActionVariable } from '../extract_action_variable';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -37,6 +39,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
+
+  const isActionBeingConfiguredByAnAlert = messageVariables
+    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    : false;
 
   useEffect(() => {
     setFirstLoad(true);
@@ -127,7 +133,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
+    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,6 +245,28 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               </EuiFlexGroup>
               <EuiSpacer size="m" />
             </>
+          )}
+          {!isActionBeingConfiguredByAnAlert && (
+            <Fragment>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+                  {
+                    defaultMessage: 'Referenced Saved Object ID (optional)',
+                  }
+                )}
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'savedObjectId'}
+                  inputTargetValue={savedObjectId}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </Fragment>
           )}
           <EuiFormRow
             fullWidth
