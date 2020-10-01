@@ -271,7 +271,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
-    "@babel/register": "^7.10.5",
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.10.0",

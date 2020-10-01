@@ -116,7 +116,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
-    "@babel/register": "^7.10.5",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.9.1",
     "@elastic/eui": "29.0.0",
@@ -156,7 +155,6 @@
     "chokidar": "^3.4.2",
     "color": "1.0.3",
     "commander": "^3.0.2",
-    "core-js": "^3.6.4",
     "cypress-promise": "^1.1.0",
     "deep-freeze-strict": "^1.1.1",
     "del": "^5.1.0",

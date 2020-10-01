@@ -18,4 +18,4 @@
  */
 
 require('./prebuilt_dev_only_entry');
-require('./babel_register');
+require('@kbn/optimizer').registerNodeAutoTranspilation();
