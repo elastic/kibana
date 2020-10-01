@@ -13,6 +13,7 @@ import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { ResetPercentileZoom } from './ResetPercentileZoom';
+import { FULL_HEIGHT } from '../RumDashboard';
 
 export interface PercentileRange {
   min?: number | null;
@@ -33,7 +34,9 @@ export function PageLoadDistribution() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
           params: {
@@ -69,7 +72,7 @@ export function PageLoadDistribution() {
   };
 
   return (
-    <div data-cy="pageLoadDist">
+    <div data-cy="pageLoadDist" style={FULL_HEIGHT}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">

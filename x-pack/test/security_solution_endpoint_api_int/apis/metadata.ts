@@ -7,7 +7,6 @@ import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
-  deleteMetadataCurrentStream,
   deleteAllDocsFromMetadataIndex,
   deleteMetadataStream,
 } from './data_stream_helper';
@@ -23,13 +22,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('test metadata api', () => {
+  describe('test metadata api', () => {
     describe(`POST ${METADATA_REQUEST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataIndex(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         const { body } = await supertest
           .post(`${METADATA_REQUEST_ROUTE}`)
@@ -54,7 +51,6 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataIndex(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('metadata api should return one entry for each host with default paging', async () => {
