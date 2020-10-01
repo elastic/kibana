@@ -15,13 +15,13 @@ import { ResolverAction } from '../actions';
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
-): () => void {
+): (action: ResolverAction) => void {
   let last: PanelViewAndParameters | undefined;
 
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
   // if the entityID changes while
-  return async () => {
+  return async (action: ResolverAction) => {
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
@@ -63,6 +63,38 @@ export function RelatedEventsFetcher(
           api.dispatch({
             type: 'serverReturnedRelatedEventData',
             payload: result,
+          });
+        }
+      }
+    } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
+      console.log(state.data.nodeEventsInCategory);
+      const currentData = state.data.nodeEventsInCategory;
+      if (currentData !== undefined) {
+        api.dispatch({
+          type: 'appRequestedAdditionalRelatedEvents',
+          payload: {},
+        });
+        const { nodeID, eventCategory, cursor } = currentData;
+        let result: ResolverPaginatedEvents | null = null;
+        if (cursor) {
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory(
+            nodeID,
+            eventCategory,
+            cursor
+          );
+        } else {
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+        }
+
+        if (result) {
+          api.dispatch({
+            type: 'serverReturnedNodeEventsInCategory',
+            payload: {
+              events: result.events,
+              eventCategory,
+              cursor: result.nextEvent,
+              nodeID,
+            },
           });
         }
       }

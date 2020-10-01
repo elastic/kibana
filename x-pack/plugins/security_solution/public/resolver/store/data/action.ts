@@ -45,6 +45,27 @@ interface UserRequestedAdditionalRelatedEvents {
   readonly payload: {};
 }
 
+interface AppRequestedAdditionalRelatedEvents {
+  readonly type: 'appRequestedAdditionalRelatedEvents';
+  readonly payload: {};
+}
+
+/**
+ * When an additional page of related events is returned
+ */
+interface ServerReturnedAdditionalRelatedEventData {
+  readonly type: 'serverReturnedAdditionalRelatedEventData';
+  readonly payload: ResolverRelatedEvents;
+}
+
+interface ServerFailedToReturnAdditionalRelatedEventData {
+  readonly type: 'serverFailedToReturnAdditionalRelatedEventData';
+  /**
+   * entity ID used to make the failed request
+   */
+  readonly payload: TreeFetcherParameters;
+}
+
 interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
   /**
@@ -114,4 +135,7 @@ export type DataAction =
   | AppRequestedResolverData
   | AppRequestedRelatedEventData
   | UserRequestedAdditionalRelatedEvents
+  | AppRequestedAdditionalRelatedEvents
+  | ServerFailedToReturnAdditionalRelatedEventData
+  | ServerReturnedAdditionalRelatedEventData
   | AppAbortedResolverDataRequest;

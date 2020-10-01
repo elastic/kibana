@@ -227,6 +227,8 @@ export interface NodeEventsInCategoryState {
    * The cursor, if any, that can be used to retrieve more events.
    */
   cursor: null | string;
+
+  loading?: boolean;
 }
 
 /**

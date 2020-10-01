@@ -26,6 +26,7 @@ import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
+import { useResolverDispatch } from '../use_resolver_dispatch';
 import { useFormattedDate } from './use_formatted_date';
 
 /**
@@ -141,6 +142,7 @@ const NodeEventList = memo(function NodeEventList({
   events: SafeResolverEvent[];
   nodeID: string;
 }) {
+  const dispatch = useResolverDispatch();
   return (
     <>
       {events.map((event, index) => (
@@ -150,7 +152,17 @@ const NodeEventList = memo(function NodeEventList({
         </Fragment>
       ))}
       <EuiFlexItem grow={false}>
-        <EuiButton color="danger" size="s" fill onClick={() => window.alert('Button clicked')}>
+        <EuiButton
+          color="danger"
+          size="s"
+          fill
+          onClick={() =>
+            dispatch({
+              type: 'userRequestedAdditionalRelatedEvents',
+              payload: {},
+            })
+          }
+        >
           {'Load More Data'}
         </EuiButton>
       </EuiFlexItem>

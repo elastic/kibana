@@ -140,6 +140,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
             ...state,
             nodeEventsInCategory: updated,
           };
+          if (next.nodeEventsInCategory) {
+            next.nodeEventsInCategory.loading = false;
+          }
           return next;
         } else {
           // this should never happen. This reducer ensures that any `nodeEventsInCategory` that are in state are relevant to the `panelViewAndParameters`.
@@ -151,12 +154,24 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
           ...state,
           nodeEventsInCategory: action.payload,
         };
+        if (next.nodeEventsInCategory) {
+          next.nodeEventsInCategory.loading = false;
+        }
         return next;
       }
     } else {
       // the action is stale, ignore it
       return state;
     }
+  } else if (action.type === 'appRequestedAdditionalRelatedEvents') {
+    const nextState: DataState = {
+      ...state,
+      nodeEventsInCategory: {
+        ...state.nodeEventsInCategory,
+        loading: true,
+      },
+    };
+    return nextState;
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {
       ...state,
