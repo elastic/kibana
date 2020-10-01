@@ -13,11 +13,17 @@ import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 
 interface Props {
   connector: CaseSettingsConnector | null;
-  onFieldsChange: (fields: ConnectorTypeFields['fields']) => void;
   fields: ConnectorTypeFields['fields'];
+  isEdit: boolean;
+  onFieldsChange: (fields: ConnectorTypeFields['fields']) => void;
 }
 
-const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
+const SettingFieldsFormComponent: React.FC<Props> = ({
+  connector,
+  fields,
+  isEdit = true,
+  onFieldsChange,
+}) => {
   const { caseSettingsRegistry } = useCaseSettings();
   const onChange = useCallback(
     (newFields) => {
@@ -45,7 +51,12 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange
             </EuiFlexGroup>
           }
         >
-          <FieldsComponent fields={fields} connector={connector} onChange={onChange} />
+          <FieldsComponent
+            isEdit={isEdit}
+            fields={fields}
+            connector={connector}
+            onChange={onChange}
+          />
         </Suspense>
       ) : null}
     </>

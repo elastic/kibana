@@ -5,7 +5,12 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { CaseConnector, ESCaseConnector, ESCasesConfigureAttributes } from '../../../../common/api';
+import {
+  CaseConnector,
+  ConnectorTypes,
+  ESCaseConnector,
+  ESCasesConfigureAttributes,
+} from '../../../../common/api';
 import { mockCaseConfigure } from '../__fixtures__';
 import {
   transformCaseConnectorToEsConnector,
@@ -48,7 +53,7 @@ describe('helpers', () => {
       expect(transformCaseConnectorToEsConnector(null)).toEqual({
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: [],
       });
     });
@@ -64,7 +69,7 @@ describe('helpers', () => {
       expect(transformESConnectorToCaseConnector(null)).toEqual({
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       });
     });
@@ -96,7 +101,7 @@ describe('helpers', () => {
       expect(getConnectorFromConfiguration(caseConfigureNoConnector)).toEqual({
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       });
     });

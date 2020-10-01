@@ -9,6 +9,7 @@ import { UseConnectorsResponse } from '../../../containers/configure/use_connect
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 export { mapping } from '../../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../../case/common/api';
 
 export const connectors: ActionConnector[] = connectorsMock;
 
@@ -21,14 +22,14 @@ export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   connector: {
     id: 'none',
     name: 'none',
-    type: '.none',
+    type: ConnectorTypes.none,
     fields: null,
   },
   currentConfiguration: {
     connector: {
       id: 'none',
       name: 'none',
-      type: '.none',
+      type: ConnectorTypes.none,
       fields: null,
     },
     closureType: 'close-by-user',

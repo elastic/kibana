@@ -51,6 +51,7 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
+import { ConnectorTypes } from '../../../../case/common/api/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -377,7 +378,7 @@ describe('Case Configuration API', () => {
       connector: {
         id: 'none',
         name: 'none',
-        type: '.none' as const,
+        type: ConnectorTypes.none,
         fields: null,
       },
     };

@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
+import { ConnectorTypes } from '../../common/api/connectors';
 
 interface UnsanitizedCase {
   connector_id: string;
@@ -54,7 +55,7 @@ export const caseMigrations = {
         connector: {
           id: connector_id ?? 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       },
@@ -76,7 +77,7 @@ export const configureMigrations = {
         connector: {
           id: connector_id ?? 'none',
           name: connector_name ?? 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       },
@@ -107,7 +108,7 @@ export const userActionsMigrations = {
             ? JSON.stringify({
                 id: new_value,
                 name: 'none',
-                type: '.none',
+                type: ConnectorTypes.none,
                 fields: null,
               })
             : new_value,
@@ -116,7 +117,7 @@ export const userActionsMigrations = {
             ? JSON.stringify({
                 id: old_value,
                 name: 'none',
-                type: '.none',
+                type: ConnectorTypes.none,
                 fields: null,
               })
             : old_value,

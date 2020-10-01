@@ -20,23 +20,30 @@ export const ConnectorFieldsRt = rt.union([
   rt.null,
 ]);
 
+export enum ConnectorTypes {
+  jira = '.jira',
+  resilient = '.resilient',
+  servicenow = '.servicenow',
+  none = '.none',
+}
+
 const ConnectorJiraTypeFieldsRt = rt.type({
-  type: rt.literal('.jira'),
+  type: rt.literal(ConnectorTypes.jira),
   fields: rt.union([JiraFieldsRT, rt.null]),
 });
 
 const ConnectorResillientTypeFieldsRt = rt.type({
-  type: rt.literal('.resillient'),
+  type: rt.literal(ConnectorTypes.resilient),
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
 
 const ConnectorServiceNowTypeFieldsRt = rt.type({
-  type: rt.literal('.servicenow'),
+  type: rt.literal(ConnectorTypes.servicenow),
   fields: rt.union([ServiceNowFieldsRT, rt.null]),
 });
 
 const ConnectorNoneTypeFieldsRt = rt.type({
-  type: rt.literal('.none'),
+  type: rt.literal(ConnectorTypes.none),
   fields: rt.null,
 });
 
@@ -66,7 +73,7 @@ export type ESConnectorFields = Array<{
   value: unknown;
 }>;
 
-export type ESCaseConnectorTypes = '.none' | '.jira' | '.resillient' | '.servicenow';
+export type ESCaseConnectorTypes = ConnectorTypes;
 export interface ESCaseConnector {
   id: string;
   name: string;

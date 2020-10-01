@@ -8,6 +8,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostCase, UsePostCase } from './use_post_case';
 import { basicCasePost } from './mock';
 import * as api from './api';
+import { ConnectorTypes } from '../../../../case/common/api/connectors';
 
 jest.mock('./api');
 
@@ -20,7 +21,7 @@ describe('usePostCase', () => {
     connector: {
       id: 'none',
       name: 'none',
-      type: '.none' as const,
+      type: ConnectorTypes.none,
       fields: null,
     },
   };

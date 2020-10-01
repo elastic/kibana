@@ -19,6 +19,7 @@ import {
   CasesFindResponse,
 } from '../../../../case/common/api/cases';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
@@ -61,7 +62,7 @@ export const basicCase: Case = {
   connector: {
     id: '123',
     name: 'My Connector',
-    type: '.none' as const,
+    type: ConnectorTypes.none,
     fields: null,
   },
   description: 'Security banana Issue',
@@ -207,7 +208,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: {
     id: '123',
     name: 'My Connector',
-    type: '.none' as const,
+    type: ConnectorTypes.none,
     fields: null,
   },
   created_at: basicCreatedAt,

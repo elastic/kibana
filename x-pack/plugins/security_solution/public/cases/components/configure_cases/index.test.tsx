@@ -25,6 +25,7 @@ import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 import { connectors, searchURL, useCaseConfigureResponse, useConnectorsResponse } from './__mock__';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -93,14 +94,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'not-id',
           name: 'unchanged',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'not-id',
             name: 'unchanged',
-            type: '.none',
+            type: ConnectorTypes.none,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -137,14 +138,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'unchanged',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: '.servicenow',
+            type: ConnectorTypes.servicenow,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -232,14 +233,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-2',
           name: 'unchanged',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: '.servicenow',
+            type: ConnectorTypes.servicenow,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -285,7 +286,7 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         persistLoading: true,
@@ -359,14 +360,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-2',
           name: 'My connector',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'My connector',
             name: 'My connector',
-            type: '.jira',
+            type: ConnectorTypes.jira,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -390,7 +391,7 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-2',
           name: 'My Connector 2',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         closureType: 'close-by-user',
@@ -404,7 +405,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'My connector',
-            type: '.servicenow',
+            type: ConnectorTypes.servicenow,
             fields: null,
           },
         }))
@@ -413,7 +414,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-2',
             name: 'My connector 2',
-            type: '.servicenow',
+            type: ConnectorTypes.servicenow,
             fields: null,
           },
         }));
@@ -447,14 +448,14 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: '.servicenow',
+        type: ConnectorTypes.servicenow,
         fields: null,
       },
       currentConfiguration: {
         connector: {
           id: 'My connector',
           name: 'My connector',
-          type: '.jira',
+          type: ConnectorTypes.jira,
           fields: null,
         },
         closureType: 'close-by-user',
@@ -476,7 +477,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: '.servicenow',
+        type: ConnectorTypes.servicenow,
         fields: null,
       },
       closureType: 'close-by-pushing',
@@ -493,14 +494,14 @@ describe('user interactions', () => {
       connector: {
         id: 'servicenow-2',
         name: 'unchanged',
-        type: '.servicenow',
+        type: ConnectorTypes.servicenow,
         fields: null,
       },
       currentConfiguration: {
         connector: {
           id: 'servicenow-2',
           name: 'unchanged',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
           fields: null,
         },
         closureType: 'close-by-user',

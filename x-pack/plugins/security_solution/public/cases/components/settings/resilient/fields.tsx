@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiFormRow,
   EuiComboBox,
-  EuiSelect,
-  EuiSpacer,
   EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiSelect,
   EuiSelectOption,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
@@ -21,11 +21,12 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import { ResilientFieldsType } from '../../../../../../case/common/api/connectors';
+import { ConnectorTypes, ResilientFieldsType } from '../../../../../../case/common/api/connectors';
+import { ConnectorCard } from '../card';
 
 const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ResilientFieldsType
->> = ({ fields, connector, onChange }) => {
+>> = ({ isEdit, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields || {};
 
   const [firstLoad, setFirstLoad] = useState(false);
@@ -111,8 +112,28 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         : []
     );
   }, [connector, allIncidentTypes, incidentTypes]);
-
-  return (
+  const listItems = useMemo(
+    () => [
+      ...(incidentTypes != null
+        ? [
+            {
+              title: i18n.INCIDENT_TYPES_LABEL,
+              description: incidentTypes.map((incident) => <p>{incident}</p>),
+            },
+          ]
+        : []),
+      ...(severityCode != null
+        ? [
+            {
+              title: i18n.SEVERITY_LABEL,
+              description: severityCode,
+            },
+          ]
+        : []),
+    ],
+    [incidentTypes, severityCode]
+  );
+  return isEdit ? (
     <span data-test-subj={'connector-settings-resilient'}>
       <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
         <EuiComboBox
@@ -163,6 +184,12 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
       </EuiFormRow>
       <EuiSpacer size="m" />
     </span>
+  ) : (
+    <ConnectorCard
+      connectorType={ConnectorTypes.resilient}
+      title={connector.name}
+      listItems={listItems}
+    />
   );
 };
 

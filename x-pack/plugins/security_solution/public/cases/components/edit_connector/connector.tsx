@@ -9,10 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { ConnectorTypes } from '../../../../../case/common/api';
 
-interface TagsProps {
+interface ConnectorComponentProps {
   name: string;
-  type: string;
+  type: ConnectorTypes;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -27,18 +28,23 @@ const MyEuiText = styled(EuiText)`
   margin-left: 10px;
 `;
 
-const ConnectorComponent: React.FC<TagsProps> = ({ name, type }) => {
+const ConnectorComponent: React.FC<ConnectorComponentProps> = ({ name, type }) => {
+  console.log({ name, type });
   return (
-    <MyFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={connectorsConfiguration[type]?.logo ?? ''} size="xl" />
+        <MyFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={connectorsConfiguration[type]?.logo ?? ''} size="xl" />
+          </EuiFlexItem>
+          <MyEuiText grow={false}>
+            <EuiText size="s" data-test-subj="static-connector-name">
+              {name}
+            </EuiText>
+          </MyEuiText>
+        </MyFlexGroup>
       </EuiFlexItem>
-      <MyEuiText grow={false}>
-        <EuiText size="s" data-test-subj="static-connector-name">
-          {name}
-        </EuiText>
-      </MyEuiText>
-    </MyFlexGroup>
+    </EuiFlexGroup>
   );
 };
 

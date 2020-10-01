@@ -12,6 +12,7 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -98,7 +99,7 @@ describe('Case Configuration API', () => {
     test('check url, body, method, signal', async () => {
       await patchCaseConfigure(
         {
-          connector: { id: '456', name: 'My Connector 2', type: '.none', fields: null },
+          connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
           version: 'WzHJ12',
         },
         abortCtrl.signal
@@ -114,7 +115,7 @@ describe('Case Configuration API', () => {
     test('happy path', async () => {
       const resp = await patchCaseConfigure(
         {
-          connector: { id: '456', name: 'My Connector 2', type: '.none', fields: null },
+          connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
           version: 'WzHJ12',
         },
         abortCtrl.signal

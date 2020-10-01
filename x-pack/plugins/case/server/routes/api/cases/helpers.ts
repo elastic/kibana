@@ -14,6 +14,7 @@ import {
   ESCaseAttributes,
   ESCasePatchRequest,
   ESCasesConfigureAttributes,
+  ConnectorTypes,
 } from '../../../../common/api';
 import { ESConnectorFields, ConnectorTypeFields } from '../../../../common/api/connectors';
 
@@ -110,7 +111,7 @@ export const getConnectorFromConfiguration = (
   let caseConnector = {
     id: 'none',
     name: 'none',
-    type: '.none' as CaseConnector['type'],
+    type: ConnectorTypes.none,
     fields: null,
   };
   if (
@@ -120,7 +121,7 @@ export const getConnectorFromConfiguration = (
     caseConnector = {
       id: caseConfigure.saved_objects[0].attributes.connector.id,
       name: caseConfigure.saved_objects[0].attributes.connector.name,
-      type: caseConfigure.saved_objects[0].attributes.connector.type as CaseConnector['type'],
+      type: caseConfigure.saved_objects[0].attributes.connector.type as ConnectorTypes,
       fields: null,
     };
   }

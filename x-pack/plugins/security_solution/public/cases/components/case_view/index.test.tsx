@@ -21,6 +21,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -39,7 +40,7 @@ export const caseProps: CaseProps = {
   userCanCrud: true,
   caseData: {
     ...basicCase,
-    connector: { id: 'servicenow-2', name: 'SN', type: '.servicenow', fields: null },
+    connector: { id: 'servicenow-2', name: 'SN', type: ConnectorTypes.servicenow, fields: null },
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
@@ -458,7 +459,12 @@ describe('CaseView ', () => {
             {...caseProps}
             caseData={{
               ...caseProps.caseData,
-              connector: { id: 'servicenow-1', name: 'SN 1', type: '.servicenow', fields: null },
+              connector: {
+                id: 'servicenow-1',
+                name: 'SN 1',
+                type: ConnectorTypes.servicenow,
+                fields: null,
+              },
             }}
           />
         </Router>
@@ -493,7 +499,12 @@ describe('CaseView ', () => {
             {...caseProps}
             caseData={{
               ...caseProps.caseData,
-              connector: { id: 'servicenow-1', name: 'SN 1', type: '.servicenow', fields: null },
+              connector: {
+                id: 'servicenow-1',
+                name: 'SN 1',
+                type: ConnectorTypes.servicenow,
+                fields: null,
+              },
             }}
           />
         </Router>
@@ -517,7 +528,7 @@ describe('CaseView ', () => {
       expect(updateObject.updateValue).toEqual({
         id: 'servicenow-2',
         name: 'My Connector 2',
-        type: '.servicenow',
+        type: ConnectorTypes.servicenow,
         fields: null,
       });
     });

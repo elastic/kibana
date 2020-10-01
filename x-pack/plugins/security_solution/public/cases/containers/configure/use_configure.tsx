@@ -14,6 +14,7 @@ import {
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
 import { CasesConfigurationMapping, ClosureType, CaseConfigure, CaseConnector } from './types';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -127,7 +128,7 @@ export const initialState: State = {
     fields: null,
     id: 'none',
     name: 'none',
-    type: '.none',
+    type: ConnectorTypes.none,
   },
   currentConfiguration: {
     closureType: 'close-by-user',
@@ -135,7 +136,7 @@ export const initialState: State = {
       fields: null,
       id: 'none',
       name: 'none',
-      type: '.none',
+      type: ConnectorTypes.none,
     },
   },
   firstLoad: false,

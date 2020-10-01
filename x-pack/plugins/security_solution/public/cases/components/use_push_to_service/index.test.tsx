@@ -10,10 +10,12 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
+
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -54,7 +56,7 @@ describe('usePushToService', () => {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: '.servicenow' as const,
+      type: ConnectorTypes.servicenow,
       fields: null,
     },
     caseId,
@@ -92,7 +94,7 @@ describe('usePushToService', () => {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
-          type: '.servicenow',
+          type: ConnectorTypes.servicenow,
         },
         updateCase,
       });
@@ -154,7 +156,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'none',
               name: 'none',
-              type: '.none',
+              type: ConnectorTypes.none,
               fields: null,
             },
           }),
@@ -178,7 +180,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'none',
               name: 'none',
-              type: '.none',
+              type: ConnectorTypes.none,
               fields: null,
             },
           }),
@@ -202,7 +204,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'not-exist',
               name: 'not-exist',
-              type: '.none',
+              type: ConnectorTypes.none,
               fields: null,
             },
             isValidConnector: false,
@@ -228,7 +230,7 @@ describe('usePushToService', () => {
             connector: {
               id: 'not-exist',
               name: 'not-exist',
-              type: '.none',
+              type: ConnectorTypes.none,
               fields: null,
             },
             isValidConnector: false,

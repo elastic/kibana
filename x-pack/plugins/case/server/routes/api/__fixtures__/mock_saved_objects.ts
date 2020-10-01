@@ -9,6 +9,7 @@ import {
   ESCasesConfigureAttributes,
   CommentAttributes,
   ESCaseAttributes,
+  ConnectorTypes,
 } from '../../../../common/api';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -21,7 +22,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       connector: {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: [],
       },
       created_at: '2019-11-25T21:54:48.952Z',
@@ -55,7 +56,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       connector: {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: [],
       },
       created_at: '2019-11-25T22:32:00.900Z',
@@ -89,7 +90,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       connector: {
         id: '123',
         name: 'My connector',
-        type: '.jira',
+        type: ConnectorTypes.jira,
         fields: [
           { key: 'issueType', value: 'Task' },
           { key: 'priority', value: 'High' },
@@ -130,7 +131,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       connector: {
         id: '123',
         name: 'My connector',
-        type: '.jira',
+        type: ConnectorTypes.jira,
         fields: [
           { key: 'issueType', value: 'Task' },
           { key: 'priority', value: 'High' },
@@ -300,7 +301,7 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
       connector: {
         id: '789',
         name: 'My connector 3',
-        type: '.jira',
+        type: ConnectorTypes.jira,
         fields: null,
       },
       closure_type: 'close-by-user',

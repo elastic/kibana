@@ -16,6 +16,7 @@ import {
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 
 describe('PATCH configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -177,7 +178,12 @@ describe('PATCH configuration', () => {
       path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
-        connector: { id: 'no-version', name: 'no version', type: '.none', fields: null },
+        connector: {
+          id: 'no-version',
+          name: 'no version',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
         version: mockCaseConfigure[0].version,
       },
     });

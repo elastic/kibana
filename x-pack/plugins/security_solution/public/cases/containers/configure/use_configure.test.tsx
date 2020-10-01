@@ -13,6 +13,7 @@ import {
 } from './use_configure';
 import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('./api');
 
@@ -20,7 +21,7 @@ const configuration: ConnectorConfiguration = {
   connector: {
     id: '456',
     name: 'My connector 2',
-    type: '.none',
+    type: ConnectorTypes.none,
     fields: null,
   },
   closureType: 'close-by-pushing',

@@ -20,6 +20,7 @@ import {
 } from './mock';
 import * as api from './api';
 import { CaseServices } from './use_get_case_user_actions';
+import { ConnectorTypes } from '../../../../case/common/api/connectors';
 
 jest.mock('./api');
 
@@ -40,8 +41,8 @@ describe('usePostPushToService', () => {
     connector: {
       id: '123',
       name: 'connector name',
-      type: '.jira' as const,
-      fields: { issueType: 'Task', priority: 'Low', labels: [] },
+      type: ConnectorTypes.jira,
+      fields: { issueType: 'Task', priority: 'Low' },
     },
     updateCase,
   };
@@ -65,7 +66,6 @@ describe('usePostPushToService', () => {
     updatedAt: pushedCase.updatedAt,
     updatedBy: serviceConnectorUser,
     issueType: 'Task',
-    labels: [],
     priority: 'Low',
   };
   const sampleCaseServices = {
@@ -155,7 +155,7 @@ describe('usePostPushToService', () => {
       connector: {
         name: 'connector name',
         id: 'none',
-        type: '.none' as const,
+        type: ConnectorTypes.none,
         fields: null,
       },
       updateCase,
@@ -217,7 +217,7 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: '.jira' as const,
+      type: ConnectorTypes.jira,
       fields: { issueType: 'Task', priority: 'High', labels: ['test'] },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);
@@ -235,8 +235,8 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: '.jira' as const,
-      fields: { issueType: 'Task', priority: 'High', labels: [] },
+      type: ConnectorTypes.jira,
+      fields: { issueType: 'Task', priority: 'High' },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);
     expect(result).toEqual({

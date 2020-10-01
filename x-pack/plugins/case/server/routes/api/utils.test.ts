@@ -23,7 +23,7 @@ import {
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
-import { ESCaseConnector } from '../../../common/api';
+import { ConnectorTypes, ESCaseConnector } from '../../../common/api';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {
@@ -244,7 +244,7 @@ describe('Utils', () => {
         {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         }
       );
@@ -258,7 +258,7 @@ describe('Utils', () => {
           {
             id: 'none',
             name: 'none',
-            type: '.none',
+            type: ConnectorTypes.none,
             fields: null,
           }
         ),
@@ -275,7 +275,7 @@ describe('Utils', () => {
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       });
 
@@ -287,7 +287,7 @@ describe('Utils', () => {
           connector: {
             id: 'none',
             name: 'none',
-            type: '.none',
+            type: ConnectorTypes.none,
             fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
@@ -319,7 +319,7 @@ describe('Utils', () => {
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       });
 
@@ -331,7 +331,7 @@ describe('Utils', () => {
           connector: {
             id: 'none',
             name: 'none',
-            type: '.none',
+            type: ConnectorTypes.none,
             fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
@@ -370,7 +370,7 @@ describe('Utils', () => {
       const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData, {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       });
 
@@ -382,7 +382,7 @@ describe('Utils', () => {
           connector: {
             id: 'none',
             name: 'none',
-            type: '.none',
+            type: ConnectorTypes.none,
             fields: null,
           },
           created_at: '2019-11-25T21:54:48.952Z',
@@ -419,7 +419,7 @@ describe('Utils', () => {
         caseConfigureConnector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       });
@@ -446,7 +446,7 @@ describe('Utils', () => {
         caseConfigureConnector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       });
@@ -474,7 +474,7 @@ describe('Utils', () => {
         caseConfigureConnector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       });

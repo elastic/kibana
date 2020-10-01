@@ -28,7 +28,6 @@ import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
-import { Connector } from './connector';
 
 import * as i18n from './translations';
 
@@ -56,6 +55,14 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
+const DisappearingFlexItem = styled(EuiFlexItem)`
+  ${({ isHidden }: { isHidden: boolean }) =>
+    isHidden &&
+    css`
+      margin: 0 !important;
+    `}
+`;
+
 export const EditConnector = React.memo(
   ({
     caseFields,
@@ -81,7 +88,6 @@ export const EditConnector = React.memo(
     });
 
     const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
-    const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
     const [fields, setFields] = useState<ConnectorTypeFields['fields']>(caseFields);
     const [editConnector, setEditConnector] = useState(false);
 
@@ -127,10 +133,6 @@ export const EditConnector = React.memo(
     }, [connectors, connectorId]);
 
     useEffect(() => {
-      setCurrentConnector(getConnectorById(selectedConnector, connectors) ?? null);
-    }, [connectors, selectedConnector]);
-
-    useEffect(() => {
       // Get fields of the connector from user actions when changing connector
       if (connectorId && selectedConnector && selectedConnector !== connectorId) {
         setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
@@ -145,13 +147,13 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && (
+          {!isLoading && !editConnector && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
-                data-test-subj="connector-edit-button"
-                isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR_ARIA}
+                data-test-subj="connector-edit-button"
                 iconType={'pencil'}
+                isDisabled={disabled}
                 onClick={onEditClick}
               />
             </EuiFlexItem>
@@ -159,45 +161,38 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
-          <span data-test-subj={editConnector ? 'editConnector-true' : 'editConnector-false'}>
-            {'hi'}
-          </span>
-          {!editConnector && (
-            <Connector
-              name={currentConnector?.name ?? ''}
-              type={currentConnector?.actionTypeId ?? ''}
-            />
-          )}
-          {editConnector && (
-            <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
-              <EuiFlexItem>
-                <Form form={form}>
-                  <EuiFlexGroup gutterSize="none" direction="row">
-                    <EuiFlexItem>
-                      <UseField
-                        path="connectorId"
-                        component={ConnectorSelector}
-                        componentProps={{
-                          connectors,
-                          dataTestSubj: 'caseConnectors',
-                          idAria: 'caseConnectors',
-                          isLoading,
-                          disabled,
-                          defaultValue: selectedConnector,
-                        }}
-                        onChange={onChangeConnector}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </Form>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <SettingFieldsForm
-                  connector={actionConnector}
-                  onFieldsChange={onFields}
-                  fields={fields}
-                />
-              </EuiFlexItem>
+          <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
+            <DisappearingFlexItem isHidden={!editConnector}>
+              <Form form={form}>
+                <EuiFlexGroup gutterSize="none" direction="row">
+                  <EuiFlexItem>
+                    <UseField
+                      path="connectorId"
+                      component={ConnectorSelector}
+                      componentProps={{
+                        connectors,
+                        dataTestSubj: 'caseConnectors',
+                        defaultValue: selectedConnector,
+                        disabled,
+                        idAria: 'caseConnectors',
+                        isEdit: editConnector,
+                        isLoading,
+                      }}
+                      onChange={onChangeConnector}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Form>
+            </DisappearingFlexItem>
+            <EuiFlexItem>
+              <SettingFieldsForm
+                connector={actionConnector}
+                fields={fields}
+                isEdit={editConnector}
+                onFieldsChange={onFields}
+              />
+            </EuiFlexItem>
+            {editConnector && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -224,8 +219,8 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            )}
+          </EuiFlexGroup>
         </MyFlexGroup>
       </EuiText>
     );

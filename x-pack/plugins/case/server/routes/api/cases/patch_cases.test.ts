@@ -16,6 +16,7 @@ import {
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
+import { ConnectorTypes } from '../../../../common/api/connectors';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -58,7 +59,7 @@ describe('PATCH cases', () => {
         connector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
         created_at: '2019-11-25T21:54:48.952Z',

@@ -53,3 +53,24 @@ export const SEARCH_ISSUES_LOADING = i18n.translate(
     defaultMessage: 'Loading...',
   }
 );
+
+export const PRIORITY = i18n.translate(
+  'xpack.securitySolution.case.settings.jira.prioritySelectFieldLabel',
+  {
+    defaultMessage: 'Priority',
+  }
+);
+
+export const ISSUE_TYPE = i18n.translate(
+  'xpack.securitySolution.case.settings.jira.issueTypesSelectFieldLabel',
+  {
+    defaultMessage: 'Issue type',
+  }
+);
+
+export const PARENT_ISSUE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+  {
+    defaultMessage: 'Parent issue',
+  }
+);

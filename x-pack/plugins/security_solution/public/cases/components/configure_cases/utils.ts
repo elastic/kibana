@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConnectorTypeFields } from '../../../../../case/common/api';
+import { ConnectorTypeFields, ConnectorTypes } from '../../../../../case/common/api';
 import {
   CaseField,
   ActionType,
@@ -48,7 +48,7 @@ export const setThirdPartyToMapping = (
 export const getNoneConnector = (): CaseConnector => ({
   id: 'none',
   name: 'none',
-  type: '.none' as CaseConnector['type'],
+  type: ConnectorTypes.none,
   fields: null,
 });
 

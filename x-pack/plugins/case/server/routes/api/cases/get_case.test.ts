@@ -7,7 +7,7 @@
 import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ESCaseAttributes } from '../../../../common/api';
+import { ConnectorTypes, ESCaseAttributes } from '../../../../common/api';
 import {
   createMockSavedObjectsRepository,
   createRoute,
@@ -53,7 +53,12 @@ describe('GET case', () => {
     expect(response.payload).toEqual(
       flattenCaseSavedObject({
         savedObject,
-        caseConfigureConnector: { id: 'none', name: 'none', type: '.none', fields: null },
+        caseConfigureConnector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
       })
     );
     expect(response.payload.comments).toEqual([]);
@@ -156,7 +161,7 @@ describe('GET case', () => {
       fields: null,
       id: 'none',
       name: 'none',
-      type: '.none',
+      type: ConnectorTypes.none,
     });
   });
 

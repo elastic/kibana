@@ -17,6 +17,7 @@ import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPostCaseConfigure } from './post_configure';
 import { newConfiguration } from '../../__mocks__/request_responses';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 
 describe('POST configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -180,7 +181,7 @@ describe('POST configuration', () => {
         connector: {
           id: '456',
           name: 'My connector 2',
-          type: '.none',
+          type: ConnectorTypes.none,
         },
         closure_type: 'close-by-pushing',
       },
@@ -350,7 +351,12 @@ describe('POST configuration', () => {
       method: 'post',
       body: {
         ...newConfiguration,
-        connector: { id: 'no-version', name: 'no version', type: '.none', fields: null },
+        connector: {
+          id: 'no-version',
+          name: 'no version',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
       },
     });
 
@@ -375,7 +381,7 @@ describe('POST configuration', () => {
       method: 'post',
       body: {
         ...newConfiguration,
-        connector: { id: 'not-null', name: 'not-null', type: '.none', fields: {} },
+        connector: { id: 'not-null', name: 'not-null', type: ConnectorTypes.none, fields: {} },
       },
     });
 

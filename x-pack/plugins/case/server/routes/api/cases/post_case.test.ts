@@ -16,6 +16,7 @@ import {
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
+import { ConnectorTypes } from '../../../../common/api/connectors';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -38,7 +39,7 @@ describe('POST cases', () => {
         connector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       },
@@ -57,7 +58,7 @@ describe('POST cases', () => {
     expect(response.payload.connector).toEqual({
       id: 'none',
       name: 'none',
-      type: '.none',
+      type: ConnectorTypes.none,
       fields: null,
     });
   });
@@ -155,7 +156,7 @@ describe('POST cases', () => {
         connector: {
           id: 'none',
           name: 'none',
-          type: '.none',
+          type: ConnectorTypes.none,
           fields: null,
         },
       },
@@ -177,7 +178,7 @@ describe('POST cases', () => {
       connector: {
         id: 'none',
         name: 'none',
-        type: '.none',
+        type: ConnectorTypes.none,
         fields: null,
       },
       created_at: '2019-11-25T21:54:48.952Z',

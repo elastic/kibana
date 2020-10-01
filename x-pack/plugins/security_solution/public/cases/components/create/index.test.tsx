@@ -21,6 +21,7 @@ import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/stati
 import { waitFor } from '@testing-library/react';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -79,7 +80,7 @@ const sampleData = {
     fields: null,
     id: 'none',
     name: 'none',
-    type: '.none',
+    type: ConnectorTypes.none,
   },
 };
 const defaultPostCase = {

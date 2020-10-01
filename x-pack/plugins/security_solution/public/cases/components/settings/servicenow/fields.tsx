@@ -4,46 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import * as i18n from './translations';
 
 import { SettingFieldsProps } from '../types';
-import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
+import { ConnectorTypes, ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
+import { ConnectorCard } from '../card';
 
 const selectOptions = [
   {
     value: '1',
-    text: i18n.translate(
-      'xpack.securitySolution.components.settings.servicenow.severitySelectHighOptionLabel',
-      {
-        defaultMessage: 'High',
-      }
-    ),
+    text: i18n.SEVERITY_HIGH,
   },
   {
     value: '2',
-    text: i18n.translate(
-      'xpack.securitySolution.components.settings.servicenow.severitySelectMediumOptionLabel',
-      {
-        defaultMessage: 'Medium',
-      }
-    ),
+    text: i18n.SEVERITY_MEDIUM,
   },
   {
     value: '3',
-    text: i18n.translate(
-      'xpack.securitySolution.components.settings.servicenow.severitySelectLawOptionLabel',
-      {
-        defaultMessage: 'Low',
-      }
-    ),
+    text: i18n.SEVERITY_LOW,
   },
 ];
 
 const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ServiceNowFieldsType
->> = ({ fields, connector, onChange }) => {
+>> = ({ isEdit, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields || {};
 
   const [firstLoad, setFirstLoad] = useState(false);
@@ -63,18 +49,38 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
     onChange({ severity: null, urgency: null, impact: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
-
-  return (
+  const listItems = useMemo(
+    () => [
+      ...(urgency != null
+        ? [
+            {
+              title: i18n.URGENCY,
+              description: urgency,
+            },
+          ]
+        : []),
+      ...(severity != null
+        ? [
+            {
+              title: i18n.SEVERITY,
+              description: severity,
+            },
+          ]
+        : []),
+      ...(impact != null
+        ? [
+            {
+              title: i18n.IMPACT,
+              description: impact,
+            },
+          ]
+        : []),
+    ],
+    [urgency, severity, impact]
+  );
+  return isEdit ? (
     <span data-test-subj={'connector-settings-sn'}>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.urgencySelectFieldLabel',
-          {
-            defaultMessage: 'Urgency',
-          }
-        )}
-      >
+      <EuiFormRow fullWidth label={i18n.URGENCY}>
         <EuiSelect
           fullWidth
           data-test-subj="urgencySelect"
@@ -89,15 +95,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.severitySelectFieldLabel',
-              {
-                defaultMessage: 'Severity',
-              }
-            )}
-          >
+          <EuiFormRow fullWidth label={i18n.SEVERITY}>
             <EuiSelect
               fullWidth
               data-test-subj="severitySelect"
@@ -111,15 +109,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.impactSelectFieldLabel',
-              {
-                defaultMessage: 'Impact',
-              }
-            )}
-          >
+          <EuiFormRow fullWidth label={i18n.IMPACT}>
             <EuiSelect
               fullWidth
               data-test-subj="impactSelect"
@@ -134,6 +124,12 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
         </EuiFlexItem>
       </EuiFlexGroup>
     </span>
+  ) : (
+    <ConnectorCard
+      connectorType={ConnectorTypes.servicenow}
+      title={connector.name}
+      listItems={listItems}
+    />
   );
 };
 

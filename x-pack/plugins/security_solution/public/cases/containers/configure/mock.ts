@@ -8,6 +8,7 @@ import {
   ActionConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
+  ConnectorTypes,
 } from '../../../../../case/common/api';
 import { CaseConfigure, CasesConfigurationMapping } from './types';
 
@@ -88,7 +89,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
   connector: {
     id: '123',
     name: 'My connector',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: null,
   },
   closure_type: 'close-by-pushing',
@@ -101,7 +102,7 @@ export const caseConfigurationMock: CasesConfigureRequest = {
   connector: {
     id: '123',
     name: 'My connector',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: null,
   },
   closure_type: 'close-by-user',
@@ -113,7 +114,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   connector: {
     id: '123',
     name: 'My connector',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: null,
   },
   closureType: 'close-by-pushing',
