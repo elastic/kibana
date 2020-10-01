@@ -79,12 +79,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
         const { body } = await mlClient.getDataFrameAnalytics({ size: 1000 });
-        // const jobs = await context.core.savedObjects.client.find({
-        //   type: 'ml-job',
-        //   search: 'data-frame-analytics',
-        //   searchFields: ['type'],
-        // });
-        // console.log(jobs.saved_objects.map((o) => o.attributes));
         return response.ok({
           body,
         });
@@ -211,7 +205,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
       try {
         const { analyticsId } = request.params;
         const { body } = await mlClient.putDataFrameAnalytics(
@@ -221,6 +215,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           },
           getAuthorizationHeader(request)
         );
+
+        await jobsInSpaces.createDataFrameAnalyticsJob(analyticsId);
+
         return response.ok({
           body,
         });
@@ -320,86 +317,90 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, client, request, response, context }) => {
-      try {
-        const { analyticsId } = request.params;
-        const { deleteDestIndex, deleteDestIndexPattern } = request.query;
-        let destinationIndex: string | undefined;
-        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-        const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-        const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
-          success: false,
-        };
-
+    mlLicense.fullLicenseAPIGuard(
+      async ({ mlClient, client, request, response, context, jobsInSpaces }) => {
         try {
-          // Check if analyticsId is valid and get destination index
-          const { body } = await mlClient.getDataFrameAnalytics({
-            id: analyticsId,
-          });
-          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
-            destinationIndex = body.data_frame_analytics[0].dest.index;
+          const { analyticsId } = request.params;
+          const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+          let destinationIndex: string | undefined;
+          const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+          const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+          const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+            success: false,
+          };
+
+          try {
+            // Check if analyticsId is valid and get destination index
+            const { body } = await mlClient.getDataFrameAnalytics({
+              id: analyticsId,
+            });
+            if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+              destinationIndex = body.data_frame_analytics[0].dest.index;
+            }
+            await jobsInSpaces.jobExists('data-frame-analytics', analyticsId);
+          } catch (e) {
+            // exist early if the job doesn't exist
+            return response.customError(wrapError(e));
           }
+
+          if (deleteDestIndex || deleteDestIndexPattern) {
+            // If user checks box to delete the destinationIndex associated with the job
+            if (destinationIndex && deleteDestIndex) {
+              // Verify if user has privilege to delete the destination index
+              const userCanDeleteDestIndex = await userCanDeleteIndex(client, destinationIndex);
+              // If user does have privilege to delete the index, then delete the index
+              if (userCanDeleteDestIndex) {
+                try {
+                  await client.asCurrentUser.indices.delete({
+                    index: destinationIndex,
+                  });
+                  destIndexDeleted.success = true;
+                } catch ({ body }) {
+                  destIndexDeleted.error = body;
+                }
+              } else {
+                return response.forbidden();
+              }
+            }
+
+            // Delete the index pattern if there's an index pattern that matches the name of dest index
+            if (destinationIndex && deleteDestIndexPattern) {
+              try {
+                const indexPatternId = await getIndexPatternId(context, destinationIndex);
+                if (indexPatternId) {
+                  await deleteDestIndexPatternById(context, indexPatternId);
+                }
+                destIndexPatternDeleted.success = true;
+              } catch (deleteDestIndexPatternError) {
+                destIndexPatternDeleted.error = deleteDestIndexPatternError;
+              }
+            }
+          }
+          // Grab the target index from the data frame analytics job id
+          // Delete the data frame analytics
+
+          try {
+            await mlClient.deleteDataFrameAnalytics({
+              id: analyticsId,
+            });
+            await jobsInSpaces.deleteDataFrameAnalyticsJob(analyticsId);
+            analyticsJobDeleted.success = true;
+          } catch ({ body }) {
+            analyticsJobDeleted.error = body;
+          }
+          const results = {
+            analyticsJobDeleted,
+            destIndexDeleted,
+            destIndexPatternDeleted,
+          };
+          return response.ok({
+            body: results,
+          });
         } catch (e) {
-          // exist early if the job doesn't exist
           return response.customError(wrapError(e));
         }
-
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          // If user checks box to delete the destinationIndex associated with the job
-          if (destinationIndex && deleteDestIndex) {
-            // Verify if user has privilege to delete the destination index
-            const userCanDeleteDestIndex = await userCanDeleteIndex(client, destinationIndex);
-            // If user does have privilege to delete the index, then delete the index
-            if (userCanDeleteDestIndex) {
-              try {
-                await client.asCurrentUser.indices.delete({
-                  index: destinationIndex,
-                });
-                destIndexDeleted.success = true;
-              } catch ({ body }) {
-                destIndexDeleted.error = body;
-              }
-            } else {
-              return response.forbidden();
-            }
-          }
-
-          // Delete the index pattern if there's an index pattern that matches the name of dest index
-          if (destinationIndex && deleteDestIndexPattern) {
-            try {
-              const indexPatternId = await getIndexPatternId(context, destinationIndex);
-              if (indexPatternId) {
-                await deleteDestIndexPatternById(context, indexPatternId);
-              }
-              destIndexPatternDeleted.success = true;
-            } catch (deleteDestIndexPatternError) {
-              destIndexPatternDeleted.error = deleteDestIndexPatternError;
-            }
-          }
-        }
-        // Grab the target index from the data frame analytics job id
-        // Delete the data frame analytics
-
-        try {
-          await mlClient.deleteDataFrameAnalytics({
-            id: analyticsId,
-          });
-          analyticsJobDeleted.success = true;
-        } catch ({ body }) {
-          analyticsJobDeleted.error = body;
-        }
-        const results = {
-          analyticsJobDeleted,
-          destIndexDeleted,
-          destIndexPatternDeleted,
-        };
-        return response.ok({
-          body: results,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
       }
-    })
+    )
   );
 
   /**

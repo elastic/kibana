@@ -179,11 +179,6 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
 
         await jobsInSpaces.addDatafeed(datafeedId, request.body.job_id);
 
-        // const jobs = await context.core.savedObjects.client.find({
-        //   type: 'ml-job',
-        // });
-        // console.log(jobs.saved_objects.map((o) => o.attributes));
-
         return response.ok({
           body,
         });
@@ -255,7 +250,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
       try {
         const options: RequestParams.MlDeleteDatafeed = {
           datafeed_id: request.params.jobId,
@@ -266,6 +261,8 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         }
 
         const { body } = await mlClient.deleteDatafeed(options);
+
+        await jobsInSpaces.deleteDatafeed(request.params.jobId);
 
         return response.ok({
           body,

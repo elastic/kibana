@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { RequestHandlerContext, ElasticsearchClient } from 'kibana/server';
 
-import { filterJobIdsFactory, createError } from '../../saved_objects/filter';
+import { filterJobIdsFactory, JobType } from '../../saved_objects/filter';
 
 import {
   Job,
@@ -15,6 +15,8 @@ import {
   Datafeed,
   DatafeedStats,
 } from '../../../common/types/anomaly_detection_jobs';
+
+import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 
 export type MlClient = ElasticsearchClient['ml'];
 
@@ -26,6 +28,10 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
     return await jobsInSpaces.filterJobsForSpace<T>('anomaly-detector', jobs, 'job_id' as keyof T);
   }
 
+  async function filterDFAJobsForSpace<T>(jobs: T[]) {
+    return await jobsInSpaces.filterJobsForSpace<T>('data-frame-analytics', jobs, 'id' as keyof T);
+  }
+
   async function filterDatafeedsForSpace<T>(datafeeds: T[]) {
     return await jobsInSpaces.filterDatafeedsForSpace<T>(
       'anomaly-detector',
@@ -34,10 +40,10 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
     );
   }
 
-  async function jobIdsCheck(p: any) {
+  async function jobIdsCheck(jobType: JobType, p: any) {
     const jobIds = getJobIds(p);
     if (jobIds.length) {
-      const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace('anomaly-detector', jobIds);
+      const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
       if (missingIds.length) {
         throw Boom.notFound(`${missingIds.join(',')} missing`);
@@ -56,17 +62,9 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
     }
   }
 
-  // async function filterDFAJobsForSpace<T>(jobs: T[]) {
-  //   return await jobsInSpaces.filterJobsForSpace<T>(
-  //     'data-frame-analytics',
-  //     jobs,
-  //     'job_id' as keyof T
-  //   );
-  // }
-
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.closeJob(...p);
     },
     async deleteCalendar(...p: Parameters<MlClient['deleteCalendar']>) {
@@ -76,11 +74,11 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.deleteCalendarEvent(...p);
     },
     async deleteCalendarJob(...p: Parameters<MlClient['deleteCalendarJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteCalendarJob(...p);
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
       return mlClient.deleteDataFrameAnalytics(...p);
     },
     async deleteDatafeed(...p: any) {
@@ -88,72 +86,81 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.deleteDatafeed(...p);
     },
     async deleteExpiredData(...p: Parameters<MlClient['deleteExpiredData']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteExpiredData(...p);
     },
     async deleteFilter(...p: Parameters<MlClient['deleteFilter']>) {
       return mlClient.deleteFilter(...p);
     },
     async deleteForecast(...p: Parameters<MlClient['deleteForecast']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteForecast(...p);
     },
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteJob(...p);
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteModelSnapshot(...p);
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      // FIX!!!!!!!!!!!!!
       return mlClient.deleteTrainedModel(...p);
     },
     async estimateModelMemory(...p: Parameters<MlClient['estimateModelMemory']>) {
       return mlClient.estimateModelMemory(...p);
     },
     async evaluateDataFrame(...p: Parameters<MlClient['evaluateDataFrame']>) {
-      // FIX!!!!!!!!!!!!!
       return mlClient.evaluateDataFrame(...p);
     },
     async explainDataFrameAnalytics(...p: Parameters<MlClient['explainDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
       return mlClient.explainDataFrameAnalytics(...p);
     },
     async findFileStructure(...p: Parameters<MlClient['findFileStructure']>) {
       return mlClient.findFileStructure(...p);
     },
     async flushJob(...p: Parameters<MlClient['flushJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.flushJob(...p);
     },
     async forecast(...p: Parameters<MlClient['forecast']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.forecast(...p);
     },
     async getBuckets(...p: Parameters<MlClient['getBuckets']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getBuckets(...p);
     },
     async getCalendarEvents(...p: Parameters<MlClient['getCalendarEvents']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getCalendarEvents(...p);
     },
     async getCalendars(...p: Parameters<MlClient['getCalendars']>) {
+      // FIX, this contains a list of job ids that will need filtering
       return mlClient.getCalendars(...p);
     },
     async getCategories(...p: Parameters<MlClient['getCategories']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getCategories(...p);
     },
     async getDataFrameAnalytics(...p: Parameters<MlClient['getDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!!!
-      return mlClient.getDataFrameAnalytics(...p);
+      await jobIdsCheck('data-frame-analytics', p);
+      const { body } = await mlClient.getDataFrameAnalytics<{
+        data_frame_analytics: DataFrameAnalyticsConfig[];
+      }>(...p);
+      const jobs = await filterDFAJobsForSpace<DataFrameAnalyticsConfig>(body.data_frame_analytics);
+      return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
       // FIX!!!!!!!!!!!!!
-      return mlClient.getDataFrameAnalyticsStats(...p);
+      // this should use DataFrameAnalyticsStats, but needs a refactor !!!!!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
+      const { body } = await mlClient.getDataFrameAnalyticsStats<{
+        data_frame_analytics: DataFrameAnalyticsConfig[];
+      }>(...p);
+      const jobs = await filterDFAJobsForSpace<DataFrameAnalyticsConfig>(body.data_frame_analytics);
+      return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
     },
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
       const { body } = await mlClient.getDatafeedStats<{ datafeeds: DatafeedStats[] }>(...p);
@@ -170,17 +177,17 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.getFilters(...p);
     },
     async getInfluencers(...p: Parameters<MlClient['getInfluencers']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getInfluencers(...p);
     },
     async getJobStats(...p: Parameters<MlClient['getJobStats']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>(...p);
       const jobs = await filterADJobsForSpace<JobStats>(body.jobs);
       return { body: { ...body, count: jobs.length, jobs } };
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       // if ids specified, should we get only use for the get jobs?
       // we would have to expand wildcards and send them to getJobs
       const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
@@ -188,15 +195,15 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return { body: { ...body, count: jobs.length, jobs } };
     },
     async getModelSnapshots(...p: Parameters<MlClient['getModelSnapshots']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getModelSnapshots(...p);
     },
     async getOverallBuckets(...p: Parameters<MlClient['getOverallBuckets']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getOverallBuckets(...p);
     },
     async getRecords(...p: Parameters<MlClient['getRecords']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
@@ -209,14 +216,14 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.info(...p);
     },
     async openJob(...p: Parameters<MlClient['openJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.openJob(...p);
     },
     async postCalendarEvents(...p: Parameters<MlClient['postCalendarEvents']>) {
       return mlClient.postCalendarEvents(...p);
     },
     async postData(...p: Parameters<MlClient['postData']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.postData(...p);
     },
     async previewDatafeed(...p: Parameters<MlClient['previewDatafeed']>) {
@@ -227,38 +234,33 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.putCalendar(...p);
     },
     async putCalendarJob(...p: Parameters<MlClient['putCalendarJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.putCalendarJob(...p);
     },
     async putDataFrameAnalytics(...p: Parameters<MlClient['putDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!
       return mlClient.putDataFrameAnalytics(...p);
     },
     async putDatafeed(...p: Parameters<MlClient['putDatafeed']>) {
-      // SHOULD WE DO A JOB CHECK HERE???!!!!!!!!!!
-      // should we do a datafeed exists check? YES
       return mlClient.putDatafeed(...p);
     },
     async putFilter(...p: Parameters<MlClient['putFilter']>) {
       return mlClient.putFilter(...p);
     },
     async putJob(...p: Parameters<MlClient['putJob']>) {
-      // CHECK FOR EXISTING JOB!!!!!!!!!!!!
-      // await jobIdsCheck(p);
       return mlClient.putJob(...p);
     },
     async putTrainedModel(...p: Parameters<MlClient['putTrainedModel']>) {
       return mlClient.putTrainedModel(...p);
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.revertModelSnapshot(...p);
     },
     async setUpgradeMode(...p: Parameters<MlClient['setUpgradeMode']>) {
       return mlClient.setUpgradeMode(...p);
     },
     async startDataFrameAnalytics(...p: Parameters<MlClient['startDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
       return mlClient.startDataFrameAnalytics(...p);
     },
     async startDatafeed(...p: Parameters<MlClient['startDatafeed']>) {
@@ -266,7 +268,7 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.startDatafeed(...p);
     },
     async stopDataFrameAnalytics(...p: Parameters<MlClient['stopDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
       return mlClient.stopDataFrameAnalytics(...p);
     },
     async stopDatafeed(...p: Parameters<MlClient['stopDatafeed']>) {
@@ -274,7 +276,7 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.stopDatafeed(...p);
     },
     async updateDataFrameAnalytics(...p: Parameters<MlClient['updateDataFrameAnalytics']>) {
-      // FIX!!!!!!!!!!
+      await jobIdsCheck('data-frame-analytics', p);
       return mlClient.updateDataFrameAnalytics(...p);
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
@@ -285,11 +287,11 @@ export function getMlClient(context: RequestHandlerContext): MlClient {
       return mlClient.updateFilter(...p);
     },
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
-      await jobIdsCheck(p);
+      await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateModelSnapshot(...p);
     },
     async validate(...p: Parameters<MlClient['validate']>) {

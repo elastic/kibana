@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 // import Boom from 'boom';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 
-type JobType = 'anomaly-detector' | 'data-frame-analytics';
+export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 
 interface JobObject {
   job_id: string;
@@ -38,22 +38,38 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     return await savedObjectsClient.find<JobObject>(options);
   }
 
-  async function createAnomalyDetectionJob(jobId: string) {
+  async function createJob(jobType: JobType, jobId: string) {
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
       job_id: jobId,
       datafeed_id: null,
-      type: 'anomaly-detector',
+      type: jobType,
     });
   }
 
-  async function deleteAnomalyDetectionJob(jobId: string) {
-    const jobs = await getJobObjects('anomaly-detector', jobId);
+  async function deleteJob(jobType: JobType, jobId: string) {
+    const jobs = await getJobObjects(jobType, jobId);
     const job = jobs.saved_objects[0];
     if (job === undefined) {
       throw new Error('job not found');
     }
 
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id);
+  }
+
+  async function createAnomalyDetectionJob(jobId: string) {
+    await createJob('anomaly-detector', jobId);
+  }
+
+  async function deleteAnomalyDetectionJob(jobId: string) {
+    await deleteJob('anomaly-detector', jobId);
+  }
+
+  async function createDataFrameAnalyticsJob(jobId: string) {
+    await createJob('data-frame-analytics', jobId);
+  }
+
+  async function deleteDataFrameAnalyticsJob(jobId: string) {
+    await deleteJob('data-frame-analytics', jobId);
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -99,15 +115,6 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     return filterJobObjectsForSpace<T>(jobType, list, field, 'job_id');
   }
 
-  async function filterJobsForSpace2<T>(jobType: JobType, list: T[], field: keyof T): Promise<T[]> {
-    const jobs = await filterJobObjectsForSpace<T>(jobType, list, field, 'job_id');
-    if (jobs.length === 0) {
-      throw Error('404');
-      // throw { body: {createError()} };
-    }
-    return jobs;
-  }
-
   async function filterDatafeedsForSpace<T>(
     jobType: JobType,
     list: T[],
@@ -145,13 +152,16 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   async function jobExists(jobType: JobType, id: string) {
     const exists = await jobsExists(jobType, [id]);
     if (exists[0].exists === false) {
-      throw exists[0].error;
+      // throw exists[0].error;
+      throw new Error(exists[0].error?.body.error.reason);
     }
   }
 
   return {
     createAnomalyDetectionJob,
+    createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,
+    deleteDataFrameAnalyticsJob,
     addDatafeed,
     deleteDatafeed,
     filterJobsForSpace,
