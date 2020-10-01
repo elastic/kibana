@@ -23,11 +23,9 @@ export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
-  mlAnomaliesEnvironment,
 }: {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
-  mlAnomaliesEnvironment?: string;
 }) {
   const params = {
     projection: getServicesProjection({
@@ -51,7 +49,7 @@ export async function getServicesItems({
     getTransactionRates(params),
     getTransactionErrorRates(params),
     getEnvironments(params),
-    getHealthStatuses(params, mlAnomaliesEnvironment),
+    getHealthStatuses(params, setup.uiFilters.environment),
   ]);
 
   const allMetrics = [

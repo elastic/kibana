@@ -16,17 +16,14 @@ export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 export async function getServices({
   setup,
   searchAggregatedTransactions,
-  mlAnomaliesEnvironment,
 }: {
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-  mlAnomaliesEnvironment?: string;
 }) {
   const [items, hasLegacyData] = await Promise.all([
     getServicesItems({
       setup,
       searchAggregatedTransactions,
-      mlAnomaliesEnvironment,
     }),
     getLegacyDataStatus(setup),
   ]);

@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { Logger } from 'kibana/server';
 import { isActivePlatinumLicense } from '../../../common/service_map';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -14,7 +15,7 @@ import {
   ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
-import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
+import { getEsFilter } from './convert_ui_filters/get_es_filter';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
@@ -74,14 +75,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
   ]);
 
-  const uiFilters: UIFilters = {};
-  if (query.uiFilters) {
-    try {
-      Object.assign(uiFilters, JSON.parse(query.uiFilters));
-    } catch (error) {
-      logger.error(error);
-    }
-  }
+  const uiFilters = decodeUiFilters(logger, query.uiFilters);
 
   const coreSetupRequest = {
     indices,
@@ -105,7 +99,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
         : undefined,
     config,
     uiFilters,
-    esFilter: getUiFiltersES(uiFilters),
+    esFilter: getEsFilter(uiFilters),
   };
 
   return {
@@ -125,4 +119,16 @@ function getMlSetup(
     anomalyDetectors: ml.anomalyDetectorsProvider(request),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
+}
+
+function decodeUiFilters(logger: Logger, uiFiltersEncoded?: string): UIFilters {
+  if (!uiFiltersEncoded) {
+    return {};
+  }
+  try {
+    return JSON.parse(uiFiltersEncoded);
+  } catch (error) {
+    logger.error(error);
+    return {};
+  }
 }

@@ -14,7 +14,7 @@ import {
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../projections/typings';
 import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
-import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
+import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../projections/services';
 import { getTransactionGroupsProjection } from '../projections/transaction_groups';
@@ -96,23 +96,23 @@ function createLocalFiltersRoute<
     },
     handler: async ({ context, request }) => {
       const setup = await setupRequest(context, request);
+      const { uiFilters } = setup;
       const { query } = context.params;
 
-      const { uiFilters, filterNames } = query;
-      const parsedUiFilters = JSON.parse(uiFilters);
+      const { filterNames } = query;
       const projection = await getProjection({
         query,
         context,
         setup: {
           ...setup,
-          esFilter: getUiFiltersES(omit(parsedUiFilters, filterNames)),
+          esFilter: getEsFilter(omit(uiFilters, filterNames)),
         },
       });
 
       return getLocalUIFilters({
         projection,
         setup,
-        uiFilters: parsedUiFilters,
+        uiFilters,
         localFilterNames: filterNames,
       });
     },

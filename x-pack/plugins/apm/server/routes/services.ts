@@ -30,11 +30,7 @@ export const servicesRoute = createRoute(() => ({
       setup
     );
 
-    const services = await getServices({
-      setup,
-      searchAggregatedTransactions,
-      mlAnomaliesEnvironment: setup.uiFilters.environment,
-    });
+    const services = await getServices({ setup, searchAggregatedTransactions });
 
     return services;
   },
