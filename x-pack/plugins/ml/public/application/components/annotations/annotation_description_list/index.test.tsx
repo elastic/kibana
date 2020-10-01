@@ -21,6 +21,7 @@ describe('AnnotationDescriptionList', () => {
   });
 
   test('Initialization with annotation.', () => {
+    // @ts-expect-error mock data is too loosely typed
     const wrapper = shallowWithIntl(<AnnotationDescriptionList annotation={mockAnnotations[0]} />);
     expect(wrapper).toMatchSnapshot();
   });
