@@ -5,21 +5,36 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { tagsApiPrefix } from '../../common/constants';
-import { Tag, TagAttributes, ITagsClient } from '../../common/types';
+import { tagsApiPrefix, tagsInternalApiPrefix } from '../../common/constants';
+import { Tag, TagAttributes, ITagsClient, TagSavedObjectWithRelations } from '../../common/types';
 
 interface TagsClientOptions {
   http: HttpSetup;
 }
 
-type InternalTagClient = ITagsClient;
+interface FindTagsOptions {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}
 
-export class TagsClient implements InternalTagClient {
+interface FindTagsResponse {
+  tags: TagSavedObjectWithRelations[];
+  total: number;
+}
+
+export interface ITagInternalClient extends ITagsClient {
+  find(options: FindTagsOptions): Promise<FindTagsResponse>;
+}
+
+export class TagsClient implements ITagInternalClient {
   private readonly http: HttpSetup;
 
   constructor({ http }: TagsClientOptions) {
     this.http = http;
   }
+
+  // public APIs from ITagsClient
 
   public async create(attributes: TagAttributes) {
     const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/create`, {
@@ -28,17 +43,29 @@ export class TagsClient implements InternalTagClient {
     return tag;
   }
 
-  public async get(id: string): Promise<Tag> {
+  public async get(id: string) {
     const { tag } = await this.http.get<{ tag: Tag }>(`${tagsApiPrefix}/${id}`);
     return tag;
   }
 
-  public async getAll(): Promise<Tag[]> {
+  public async getAll() {
     const { tags } = await this.http.get<{ tags: Tag[] }>(`${tagsApiPrefix}/get_all`);
     return tags;
   }
 
-  public async delete(id: string): Promise<void> {
+  public async delete(id: string) {
     await this.http.delete<{}>(`${tagsApiPrefix}/${id}`);
+  }
+
+  // internal APIs from ITagInternalClient
+
+  public async find({ page, perPage, search }: FindTagsOptions) {
+    return await this.http.get<FindTagsResponse>(`${tagsInternalApiPrefix}/_find`, {
+      query: {
+        page,
+        perPage,
+        search,
+      },
+    });
   }
 }

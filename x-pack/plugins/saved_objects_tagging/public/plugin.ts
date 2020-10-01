@@ -17,6 +17,8 @@ interface SetupDeps {
 
 export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
+  private tagClient?: TagsClient;
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<{}, SavedObjectTaggingPluginStart>, { management }: SetupDeps) {
@@ -30,6 +32,7 @@ export class SavedObjectTaggingPlugin
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
         return mountSection({
+          tagClient: this.tagClient!,
           core,
           mountParams,
         });
@@ -40,10 +43,10 @@ export class SavedObjectTaggingPlugin
   }
 
   public start({ http }: CoreStart) {
-    const tags = new TagsClient({ http });
+    this.tagClient = new TagsClient({ http });
 
     return {
-      tags,
+      tags: this.tagClient,
     };
   }
 }

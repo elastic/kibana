@@ -50,6 +50,8 @@ export class TagsClient implements ITagsClient {
   }
 
   public async delete(id: string) {
+    // TODO: remove references from objects referencing the tag.
+    //       We will need the internal client for that.
     await this.client.delete(this.type, id);
   }
 }

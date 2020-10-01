@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObject } from 'src/core/types';
+
 export interface Tag {
   id: string;
   title: string;
@@ -24,3 +26,7 @@ export interface ITagsClient {
   delete(id: string): Promise<void>;
   // TODO: add update
 }
+
+export type TagSavedObject = SavedObject<TagAttributes>;
+
+export type TagSavedObjectWithRelations = TagSavedObject;

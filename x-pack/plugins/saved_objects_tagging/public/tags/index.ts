@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagsClient, ITagsClient } from './tags_client';
+export { TagsClient, ITagInternalClient } from './tags_client';

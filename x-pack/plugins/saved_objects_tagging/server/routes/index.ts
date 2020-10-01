@@ -9,10 +9,14 @@ import { registerCreateTagRoute } from './create_tag';
 import { registerDeleteTagRoute } from './delete_tag';
 import { registerGetAllTagsRoute } from './get_all_tags';
 import { registerGetTagRoute } from './get_tag';
+import { registerInternalFindTagsRoute } from './internal';
 
 export const registerRoutes = ({ router }: { router: IRouter }) => {
+  // public API
   registerCreateTagRoute(router);
   registerDeleteTagRoute(router);
   registerGetAllTagsRoute(router);
   registerGetTagRoute(router);
+  // internal API
+  registerInternalFindTagsRoute(router);
 };

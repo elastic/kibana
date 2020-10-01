@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const tagSavedObjectTypeName = 'tag';
-export const tagManagementSectionId = 'tags';
-export const tagsApiPrefix = '/api/tags';
-export const tagsInternalApiPrefix = '/internal/tags';
+export interface PaginationState {
+  pageNumber: number;
+  pageSize: number;
+}

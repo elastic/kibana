@@ -10,20 +10,25 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { SavedObjectTaggingPluginStart } from '../types';
+import { ITagInternalClient } from '../tags';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {
+  tagClient: ITagInternalClient;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
 }
 
-export const mountSection = async ({ core, mountParams }: MountSectionParams) => {
-  const [{ overlays }, {}, pluginStart] = await core.getStartServices();
+export const mountSection = async ({ tagClient, core, mountParams }: MountSectionParams) => {
+  const [{ overlays }] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
-  const { tags } = pluginStart;
   ReactDOM.render(
     <I18nProvider>
-      <TagManagementPage setBreadcrumbs={setBreadcrumbs} overlays={overlays} tagClient={tags} />
+      <TagManagementPage
+        setBreadcrumbs={setBreadcrumbs}
+        overlays={overlays}
+        tagClient={tagClient}
+      />
     </I18nProvider>,
     element
   );
