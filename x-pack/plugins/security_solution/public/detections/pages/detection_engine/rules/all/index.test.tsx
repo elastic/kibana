@@ -14,8 +14,6 @@ import { TestProviders } from '../../../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
 
-const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
-
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -68,7 +66,7 @@ jest.mock('./reducer', () => {
           risk_score: 73,
           rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
           severity: 'high',
-          tags: mockTags,
+          tags: ['Elastic', 'Endpoint'],
           threat: [],
           throttle: null,
           to: 'now',
@@ -114,7 +112,7 @@ jest.mock('../../../../containers/detection_engine/rules', () => {
             risk_score: 73,
             rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
             severity: 'high',
-            tags: mockTags,
+            tags: ['Elastic', 'Endpoint'],
             threat: [],
             throttle: null,
             to: 'now',
@@ -210,12 +208,6 @@ describe('AllRules', () => {
           expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
         });
       });
-    });
-
-    it('visibly renders all tags', () => {
-      for (let i = 0; i < mockTags.length; i++) {
-        expect(wrapper.exists(`[data-test-subj="rules-table-column-tags-${i}"]`)).toBeTruthy();
-      }
     });
   });
 

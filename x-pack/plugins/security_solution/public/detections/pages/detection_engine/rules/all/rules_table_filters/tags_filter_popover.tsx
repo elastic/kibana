@@ -36,9 +36,19 @@ interface TagsFilterPopoverProps {
   isLoading: boolean; // TO DO reimplement?
 }
 
+const PopoverContentWrapper = styled.div`
+  width: 275px;
+`;
+
 const ScrollableDiv = styled.div`
   max-height: 250px;
-  overflow: auto;
+  overflow-y: auto;
+`;
+
+const TagOverflowContainer = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 /**
@@ -65,8 +75,9 @@ const TagsFilterPopoverComponent = ({
         checked={selectedTags.includes(tag) ? 'on' : undefined}
         key={`${index}-${tag}`}
         onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
+        title={tag}
       >
-        {`${tag}`}
+        <TagOverflowContainer>{tag}</TagOverflowContainer>
       </EuiFilterSelectItem>
     ));
   }, [onSelectedTagsChanged, selectedTags, filterTags]);
@@ -101,25 +112,27 @@ const TagsFilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      <EuiPopoverTitle>
-        <EuiFieldSearch
-          placeholder="Search tags"
-          value={searchInput}
-          onChange={onSearchInputChange}
-          isClearable
-          aria-label="Rules tag search"
-        />
-      </EuiPopoverTitle>
-      <ScrollableDiv>{tagsComponent}</ScrollableDiv>
-      {filterTags.length === 0 && (
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-          <EuiFlexItem grow={true}>
-            <EuiPanel>
-              <EuiText>{i18n.NO_TAGS_AVAILABLE}</EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <PopoverContentWrapper>
+        <EuiPopoverTitle>
+          <EuiFieldSearch
+            placeholder="Search tags"
+            value={searchInput}
+            onChange={onSearchInputChange}
+            isClearable
+            aria-label="Rules tag search"
+          />
+        </EuiPopoverTitle>
+        <ScrollableDiv>{tagsComponent}</ScrollableDiv>
+        {filterTags.length === 0 && (
+          <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+            <EuiFlexItem grow={true}>
+              <EuiPanel>
+                <EuiText>{i18n.NO_TAGS_AVAILABLE}</EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </PopoverContentWrapper>
     </EuiPopover>
   );
 };

@@ -5,18 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiText,
-  EuiFieldSearch,
-  EuiPopoverTitle,
-  EuiBadgeGroup,
-  EuiBadge,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiPopover, EuiBadgeGroup, EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../translations';
 
@@ -29,7 +18,9 @@ const TagWrapper = styled(EuiBadgeGroup)`
 `;
 
 const TagPopoverWrapper = styled(EuiBadgeGroup)`
-  width: min-content;
+  max-height: 200px;
+  max-width: 600px;
+  overflow: auto;
 `;
 
 const TagPopoverButton = styled(EuiButtonEmpty)`
@@ -73,6 +64,7 @@ const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
           <EuiPopover
             ownFocus
             display="block"
+            data-test-subj="tags-display-popover"
             button={
               <TagPopoverButton
                 size="xs"

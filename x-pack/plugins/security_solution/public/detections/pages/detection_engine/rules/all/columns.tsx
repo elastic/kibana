@@ -211,7 +211,7 @@ export const getColumns = ({
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: Rule['tags']) => {
-        if (value != null && value.length > 0) {
+        if (value.length > 0) {
           return <TagsDisplay tags={value} />;
         }
         return getEmptyTagValue();
