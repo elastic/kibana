@@ -11,37 +11,6 @@ export async function getVisualizationCounts(
   callCluster: LegacyAPICaller,
   kibanaIndex: string
 ): Promise<LensVisualizationUsage> {
-  const scriptedMetric = {
-    scripted_metric: {
-      // Each cluster collects its own type data in a key-value Map that looks like:
-      // { lnsDatatable: 5, area_stacked: 3 }
-      init_script: 'state.types = [:]',
-      // The map script relies on having flattened keyword mapping for the Lens saved object,
-      // without this kind of mapping we would not be able to access `lens.state` in painless
-      map_script: `
-        String visType = doc['lens.visualizationType'].value;
-        String niceType = visType == 'lnsXY' ? doc['lens.state.visualization.preferredSeriesType'].value : visType;
-        state.types.put(niceType, state.types.containsKey(niceType) ? state.types.get(niceType) + 1 : 1);
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-        Map result = [:];
-        for (Map m : states.toArray()) {
-          if (m !== null) {
-            for (String k : m.keySet()) {
-              result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
-            }
-          }
-        }
-        return result;
-      `,
-    },
-  };
-
   const results = await callCluster('search', {
     index: kibanaIndex,
     rest_total_hits_as_int: true,
@@ -61,7 +30,18 @@ export async function getVisualizationCounts(
             },
           },
           aggs: {
-            byType: scriptedMetric,
+            byType: {
+              terms: {
+                // The script relies on having flattened keyword mapping for the Lens saved object,
+                // without this kind of mapping we would not be able to access `lens.state` in painless
+                script: `
+                String visType = doc['lens.visualizationType'].value;
+                String niceType = visType == 'lnsXY' ? doc['lens.state.visualization.preferredSeriesType'].value : visType;
+                return niceType;
+                `,
+                size: 100,
+              },
+            },
           },
         },
       },
@@ -71,10 +51,19 @@ export async function getVisualizationCounts(
 
   const buckets = results.aggregations.groups.buckets;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function bucketsToObject(arg: any) {
+    const obj: Record<string, number> = {};
+    arg.buckets.forEach((bucket: { key: string; doc_count: number }) => {
+      obj[bucket.key] = bucket.doc_count + (obj[bucket.key] ?? 0);
+    });
+    return obj;
+  }
+
   return {
-    saved_overall: buckets.overall.byType.value.types,
-    saved_30_days: buckets.last30.byType.value.types,
-    saved_90_days: buckets.last90.byType.value.types,
+    saved_overall: bucketsToObject(buckets.overall.byType),
+    saved_30_days: bucketsToObject(buckets.last30.byType),
+    saved_90_days: bucketsToObject(buckets.last90.byType),
     saved_overall_total: buckets.overall.doc_count,
     saved_30_days_total: buckets.last30.doc_count,
     saved_90_days_total: buckets.last90.doc_count,

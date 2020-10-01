@@ -12,4 +12,3 @@ export { registerEmbeddables } from './embeddables';
 export { registerFeature } from './register_feature';
 export { registerManagementSection } from './application/management';
 export { registerMlUiActions } from './ui_actions';
-export { registerUrlGenerator } from './ml_url_generator';
