@@ -33,6 +33,7 @@ export interface ExpandableSectionProps {
   content: ReactNode;
   headerItems?: HeaderItem[] | 'loading';
   isExpanded?: boolean;
+  dataTestId: string;
   title: ReactNode;
 }
 
@@ -44,6 +45,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   // callback.
   isExpanded: isExpandedDefault = true,
   content,
+  dataTestId,
   title,
 }) => {
   const [isExpanded, setIsExpanded] = useState(isExpandedDefault);
@@ -52,7 +54,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   };
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+    <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>
       <div className="mlExpandableSection">
         <EuiButtonEmpty
           onClick={toggleExpanded}
@@ -67,7 +69,11 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
         {isHeaderItems(headerItems) && (
           <EuiFlexGroup>
             {headerItems.map(({ label, value, id }) => (
-              <EuiFlexItem grow={false} key={id}>
+              <EuiFlexItem
+                grow={false}
+                key={id}
+                data-test-subj={`mlDFExpandableSectionItem-${dataTestId}-${id}`}
+              >
                 {label !== undefined && value !== undefined && (
                   <>
                     <EuiText size="xs" color="subdued">

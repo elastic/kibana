@@ -235,6 +235,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         )}
 
       <ExpandableSection
+        dataTestId="analysis"
         content={analyticsSectionContent}
         headerItems={analyticsSectionHeaderItems}
         isExpanded={false}
@@ -249,6 +250,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       <EuiSpacer size="m" />
 
       <ExpandableSection
+        dataTestId="results"
         content={resultsSectionContent}
         headerItems={resultsSectionHeaderItems}
         title={
