@@ -39,6 +39,19 @@ const FlexGroup = styled(EuiFlexGroup)`
   margin: 0;
 `;
 
+const GraphContainer = styled(EuiFlexGroup)`
+  border: ${({ theme }) => theme.eui.euiBorderThin};
+  padding: ${({ theme }) => theme.eui.euiSize};
+`;
+
+const Select = styled(EuiSelect)`
+  width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
+`;
+
+const PreviewButton = styled(EuiButton)`
+  margin-left: 0;
+`;
+
 interface PreviewQueryHistogramProps {
   dataTestSubj: string;
   idAria: string;
@@ -121,7 +134,7 @@ export const PreviewQueryHistogram = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
-            <EuiSelect
+            <Select
               id="queryPreviewSelect"
               options={options}
               value={timeframe}
@@ -131,13 +144,13 @@ export const PreviewQueryHistogram = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={queryBarQuery == null} onClick={handlePreviewClicked}>
+            <PreviewButton fill isDisabled={queryBarQuery == null} onClick={handlePreviewClicked}>
               {i18n.PREVIEW_LABEL}
-            </EuiButton>
+            </PreviewButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {showHistogram && isLoading && (
         <FlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -146,7 +159,7 @@ export const PreviewQueryHistogram = ({
         </FlexGroup>
       )}
       {showHistogram && !isLoading && (
-        <EuiFlexGroup direction="column">
+        <GraphContainer gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <EuiFlexGroup direction="row" justifyContent="center">
               <EuiFlexItem grow={false}>
@@ -174,7 +187,7 @@ export const PreviewQueryHistogram = ({
               timelineId={undefined}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </GraphContainer>
       )}
       <EuiSpacer />
       {showHistogram && totalHits > noiseWarningThreshold && (

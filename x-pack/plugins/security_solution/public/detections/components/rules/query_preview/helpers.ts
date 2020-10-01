@@ -6,6 +6,7 @@
 import { ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 
+import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -43,6 +44,7 @@ export const getHistogramConfig = (to: string, from: string): ChartSeriesConfigs
       yTickFormatter: (value: string | number): string => value.toLocaleString(),
       tickSize: 8,
     },
+    yAxisTitle: i18n.QUERY_GRAPH_COUNT,
     settings: {
       showLegend: false,
       theme: {

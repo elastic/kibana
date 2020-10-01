@@ -50,6 +50,7 @@ export interface ChartSeriesConfigs {
     yTickFormatter?: TickFormatter | undefined;
     tickSize?: number | undefined;
   };
+  yAxisTitle?: string | undefined;
   settings?: Partial<SettingsSpecProps>;
 }
 
