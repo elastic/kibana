@@ -75,10 +75,8 @@
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
-|  [getAsyncOptions](./kibana-plugin-plugins-data-server.getasyncoptions.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
-|  [shimAbortSignal](./kibana-plugin-plugins-data-server.shimabortsignal.md) | NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297 is resolved |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 
 ## Type Aliases

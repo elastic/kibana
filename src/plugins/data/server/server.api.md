@@ -355,9 +355,7 @@ export type Filter = {
     query?: any;
 };
 
-// Warning: (ae-missing-release-tag) "getAsyncOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @internal (undocumented)
 export const getAsyncOptions: () => {
     waitForCompletionTimeout: string;
     keepAlive: string;
@@ -989,9 +987,7 @@ export interface SearchUsage {
     trackSuccess(duration: number): Promise<void>;
 }
 
-// Warning: (ae-missing-release-tag) "shimAbortSignal" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
+// @internal
 export const shimAbortSignal: <T extends TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
 
 // @internal

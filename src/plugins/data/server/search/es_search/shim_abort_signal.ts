@@ -21,6 +21,7 @@ import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 
 /**
  *
+ * @internal
  * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
  * is resolved
  *
