@@ -36,10 +36,11 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SecurityPluginSetup } from '../../security/public';
 
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 
 import { setDependencyCache } from './application/util/dependency_cache';
-import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
-import { registerUrlGenerator } from './ml_url_generator';
+// Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
+import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
