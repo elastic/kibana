@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContextProvider } from '../../kibana_react/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
-import { TimelionOptions, TimelionOptionsProps } from './timelion_options';
+import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+
+const TimelionOptions = lazy(() => import('./timelion_options'));
 
 export const TIMELION_VIS_NAME = 'timelion';
 
@@ -51,9 +52,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     editorConfig: {
       optionsTemplate: (props: TimelionOptionsProps) => (
-        <KibanaContextProvider services={{ ...dependencies }}>
-          <TimelionOptions {...props} />
-        </KibanaContextProvider>
+        <TimelionOptions services={dependencies} {...props} />
       ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
