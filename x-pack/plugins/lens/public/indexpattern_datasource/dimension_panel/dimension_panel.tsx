@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -22,7 +22,7 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { isDraggedField, hasField, fieldIsInvalid } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { DateRange } from '../../../common';
@@ -233,26 +233,71 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   props: IndexPatternDimensionTriggerProps
 ) {
   const layerId = props.layerId;
+  const layer = props.state.layers[layerId];
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
 
-  const selectedColumn: IndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const selectedColumnSourceField =
+    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
+  const currentFieldIsInvalid = useMemo(
+    () =>
+      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
+    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
+  );
 
   const { columnId, uniqueLabel } = props;
   if (!selectedColumn) {
     return null;
   }
+
+  const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
+    defaultMessage: 'Click to edit configuration or drag to move',
+  });
+
+  if (currentFieldIsInvalid) {
+    return (
+      <EuiToolTip
+        content={
+          <p>
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+              defaultMessage: 'Invalid configuration.',
+            })}
+            <br />
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+              defaultMessage: 'Click for more details.',
+            })}
+          </p>
+        }
+        anchorClassName="eui-displayBlock"
+      >
+        <EuiLink
+          color="danger"
+          id={columnId}
+          className="lnsLayerPanel__triggerLink"
+          onClick={props.onClick}
+          data-test-subj="lns-dimensionTrigger"
+          aria-label={triggerLinkA11yText}
+          title={triggerLinkA11yText}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="alert" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>{selectedColumn.label}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
+
   return (
     <EuiLink
       id={columnId}
       className="lnsLayerPanel__triggerLink"
       onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
-      aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
-      title={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
+      aria-label={triggerLinkA11yText}
+      title={triggerLinkA11yText}
     >
       {uniqueLabel}
     </EuiLink>

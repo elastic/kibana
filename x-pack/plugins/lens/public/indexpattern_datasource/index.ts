@@ -35,18 +35,18 @@ export class IndexPatternDatasource {
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
-    expressions.registerFunction(renameColumns);
-    calculationFunctions.forEach((fn) => expressions.registerFunction(fn));
-
-    editorFrame.registerDatasource(
-      core.getStartServices().then(([coreStart, { data }]) =>
+    editorFrame.registerDatasource(async () => {
+      const { getIndexPatternDatasource, renameColumns } = await import('../async_services');
+      expressions.registerFunction(renameColumns);
+      calculationFunctions.forEach((fn) => expressions.registerFunction(fn));
+      return core.getStartServices().then(([coreStart, { data }]) =>
         getIndexPatternDatasource({
           core: coreStart,
           storage: new Storage(localStorage),
           data,
           charts,
         })
-      ) as Promise<Datasource>
-    );
+      ) as Promise<Datasource>;
+    });
   }
 }

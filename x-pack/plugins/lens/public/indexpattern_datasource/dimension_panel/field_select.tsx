@@ -41,6 +41,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  fieldIsInvalid: boolean;
 }
 
 export function FieldSelect({
@@ -53,6 +54,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  fieldIsInvalid,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationSupportMatrix;
@@ -116,7 +118,8 @@ export function FieldSelect({
         }));
     }
 
-    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
+    const [metaFields, nonMetaFields] = _.partition(normalFields, (field) => fieldMap[field].meta);
+    const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
       fieldsArr.length > 0 && {
@@ -138,10 +141,18 @@ export function FieldSelect({
       })
     );
 
+    const metaFieldsOptions = constructFieldsOptions(
+      metaFields,
+      i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
+        defaultMessage: 'Meta fields',
+      })
+    );
+
     return [
       ...fieldNamesToOptions(specialFields),
       availableFieldsOptions,
       emptyFieldsOptions,
+      metaFieldsOptions,
     ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
@@ -162,17 +173,17 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType || fieldIsInvalid)}
       selectedOptions={
-        ((selectedColumnOperationType
-          ? selectedColumnSourceField
-            ? [
-                {
-                  label: fieldMap[selectedColumnSourceField].displayName,
-                  value: { type: 'field', field: selectedColumnSourceField },
-                },
-              ]
-            : [memoizedFieldOptions[0]]
+        ((selectedColumnOperationType && selectedColumnSourceField
+          ? [
+              {
+                label: fieldIsInvalid
+                  ? selectedColumnSourceField
+                  : fieldMap[selectedColumnSourceField]?.displayName,
+                value: { type: 'field', field: selectedColumnSourceField },
+              },
+            ]
           : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}

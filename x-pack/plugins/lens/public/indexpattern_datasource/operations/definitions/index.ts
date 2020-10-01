@@ -72,6 +72,24 @@ const internalOperationDefinitions = [
   derivativeOperation,
 ];
 
+export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
+
+// List of all operation definitions registered to this data source.
+// If you want to implement a new operation, add the definition to this array and
+// the column type to the `IndexPatternColumn` union type below.
+const internalOperationDefinitions = [
+  filtersOperation,
+  termsOperation,
+  dateHistogramOperation,
+  minOperation,
+  maxOperation,
+  averageOperation,
+  cardinalityOperation,
+  sumOperation,
+  countOperation,
+  rangeOperation,
+];
+
 export { termsOperation } from './terms';
 export { rangeOperation } from './ranges';
 export { filtersOperation } from './filters';
@@ -274,6 +292,21 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   none: FieldlessOperationDefinition<C>;
   reference: ReferenceBasedOperationDefinition<C>;
 }
+
+interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
+  field: FieldBasedOperationDefinition<C>;
+  none: FieldlessOperationDefinition<C>;
+}
+
+/**
+ * Shape of an operation definition. If the type parameter of the definition
+ * indicates a field based column, `getPossibleOperationForField` has to be
+ * specified, otherwise `getPossibleOperation` has to be defined.
+ */
+export type OperationDefinition<
+  C extends BaseIndexPatternColumn,
+  Input extends keyof OperationDefinitionMap<C>
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * Shape of an operation definition. If the type parameter of the definition

@@ -16,7 +16,7 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
   loginAndWaitForPage(
-    `/app/csm`,
+    `/app/ux`,
     {
       from: RANGE_FROM,
       to: RANGE_TO,
@@ -26,7 +26,7 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
 });
 
 Then(`should have correct client metrics`, () => {
-  const metrics = ['4 ms', '0.06 s', '55 '];
+  const metrics = ['4 ms', '58 ms', '55'];
 
   verifyClientMetrics(metrics, true);
 });

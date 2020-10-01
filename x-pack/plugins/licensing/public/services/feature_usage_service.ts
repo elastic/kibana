@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isDate from 'lodash/isDate';
+import { isDate } from 'lodash';
 import type { HttpSetup, HttpStart } from 'src/core/public';
 import { LicenseType } from '../../common/types';
 
