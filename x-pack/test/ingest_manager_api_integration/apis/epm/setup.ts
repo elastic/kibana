@@ -33,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
         log.info(`Endpoint package latest version: ${latestEndpointVersion}`);
         // make sure we're actually doing an upgrade
         expect(latestEndpointVersion).not.eql(oldEndpointVersion);
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+        await supertest.post(`/api/fleet/agents/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
         ({ body } = await supertest
           .get(`/api/fleet/epm/packages/endpoint-${latestEndpointVersion}`)

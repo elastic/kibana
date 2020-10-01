@@ -9,7 +9,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
-  FLEET_SETUP_API_ROUTES,
+  AGENTS_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
   SETUP_API_ROUTE,
@@ -121,8 +121,8 @@ export const dataStreamRouteService = {
 };
 
 export const fleetSetupRouteService = {
-  getFleetSetupPath: () => FLEET_SETUP_API_ROUTES.INFO_PATTERN,
-  postFleetSetupPath: () => FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+  getFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
+  postFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
 };
 
 export const agentRouteService = {

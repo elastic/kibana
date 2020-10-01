@@ -35,19 +35,19 @@ export default function (providerContext: FtrProviderContext) {
 
       // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
-        .get(`/api/fleet/fleet/enrollment-api-keys`)
+        .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
 
       expect(enrollmentApiKeysResponse.list).length(1);
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(`/api/fleet/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
         .expect(200);
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
       const enrollmentAPIToken = enrollmentApiKeyResponse.item.api_key;
       // Enroll agent
       const { body: enrollmentResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `ApiKey ${enrollmentAPIToken}`)
         .send({
@@ -65,7 +65,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Agent checkin
       const { body: checkinApiResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -80,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Ack actions
       await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
 
@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Second agent checkin
       const { body: secondCheckinApiResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -112,7 +112,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Get agent
       const { body: getAgentApiResponse } = await supertest
-        .get(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}`)
+        .get(`/api/fleet/agents/${enrollmentResponse.item.id}`)
         .expect(200);
 
       expect(getAgentApiResponse.item.packages).to.contain(
@@ -122,13 +122,13 @@ export default function (providerContext: FtrProviderContext) {
 
       // Unenroll agent
       await supertest
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
         .set('kbn-xsrf', 'xx')
         .expect(200);
 
       //  Checkin after unenrollment
       const { body: checkinAfterUnenrollResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -142,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
 
       //  ack unenroll actions
       await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
         .send({
@@ -162,7 +162,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Checkin after unenrollment acknowledged
       await supertestWithoutAuth
-        .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -196,12 +196,12 @@ export default function (providerContext: FtrProviderContext) {
 
     // Get enrollment token
     const { body: enrollmentApiKeysResponse } = await supertest
-      .get(`/api/fleet/fleet/enrollment-api-keys`)
+      .get(`/api/fleet/enrollment-api-keys`)
       .expect(200);
 
     expect(enrollmentApiKeysResponse.list).length(1);
     const { body: enrollmentApiKeyResponse } = await supertest
-      .get(`/api/fleet/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+      .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
       .expect(200);
 
     expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
@@ -273,7 +273,7 @@ export default function (providerContext: FtrProviderContext) {
 
     // Get agent
     const { body: getAgentApiResponse } = await supertest
-      .get(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}`)
+      .get(`/api/fleet/agents/${enrollmentResponse.item.id}`)
       .expect(200);
 
     expect(getAgentApiResponse.item.packages).to.contain(
@@ -283,7 +283,7 @@ export default function (providerContext: FtrProviderContext) {
 
     // Unenroll agent
     await supertest
-      .post(`/api/fleet/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
+      .post(`/api/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
       .set('kbn-xsrf', 'xx')
       .expect(200);
 

@@ -2,7 +2,7 @@
 
 ## Request
 
-`GET /api/fleet/fleet/agents`
+`GET /api/fleet/agents`
 
 ## Query
 
@@ -18,5 +18,5 @@
 ## Example
 
 ```js
-GET /api/fleet/fleet/agents?kuery=fleet-agents.last_checkin:2019-10-01T13:42:54.323Z
+GET /api/fleet/agents?kuery=fleet-agents.last_checkin:2019-10-01T13:42:54.323Z
 ```

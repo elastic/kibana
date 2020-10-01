@@ -55,7 +55,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/fleet/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
@@ -88,7 +88,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/fleet/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
@@ -127,7 +127,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/fleet/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
@@ -161,7 +161,7 @@ describe('ingestManager', () => {
     });
 
     it('does have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/fleet/fleet/setup').expect(200);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(200);
     });
   });
 
@@ -196,7 +196,7 @@ describe('ingestManager', () => {
     });
 
     it('does have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/fleet/fleet/setup').expect(200);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(200);
     });
   });
 });
