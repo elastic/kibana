@@ -97,9 +97,10 @@ const statusOptions = [
 ];
 
 export function rowShouldExpand(item: Ping) {
-  return (
-    !!item.error || (item.http?.response?.body?.bytes ?? 0 > 0) || item.monitor.type === 'browser'
-  );
+  const errorPresent = !!item.error;
+  const httpBodyPresent = item.http?.response?.body?.bytes ?? 0 > 0;
+  const isBrowserMonitor = item.monitor.type === 'browser';
+  return errorPresent || httpBodyPresent || isBrowserMonitor;
 }
 
 export const PingListComponent = (props: Props) => {
