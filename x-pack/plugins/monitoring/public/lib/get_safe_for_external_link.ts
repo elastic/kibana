@@ -4,17 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Location {
-  hash: string;
+interface LocationHash {
+  hash?: string;
 }
 
-export function getSafeForExternalLink(url: string, location: Location = window.location) {
-  const hashParts = location.hash.split('?').filter(Boolean);
-  if (hashParts.length === 0) {
-    return url;
+export function getSafeForExternalLink(
+  url: string,
+  globalState: Record<string, any> = {},
+  location: LocationHash = window.location
+) {
+  let hash = location.hash ? location.hash.split('?')[1] : '';
+  const globalStateExecResult = /_g=\((.+)\)$/.exec(hash);
+  if (!globalStateExecResult || !globalStateExecResult.length) {
+    if (!hash) {
+      return url;
+    }
+    return `${url.split('?')[0]}?${hash}`;
   }
-  const urlParts = url.split('?').filter(Boolean);
-  return `${urlParts[0]}?${
-    urlParts.length === 2 ? urlParts[1] : hashParts.length === 2 ? hashParts[1] : ''
-  }`;
+
+  let newGlobalState = globalStateExecResult[1];
+  Object.keys(globalState).forEach((globalStateKey) => {
+    const keyRegExp = new RegExp(`${globalStateKey}:([^,]+)`);
+    const execResult = keyRegExp.exec(newGlobalState);
+    if (execResult && execResult.length) {
+      newGlobalState = newGlobalState.replace(
+        execResult[0],
+        `${globalStateKey}:${globalState[globalStateKey]}`
+      );
+    } else {
+      newGlobalState += `,${globalStateKey}:${globalState[globalStateKey]}`;
+    }
+  });
+
+  hash = hash.replace(globalStateExecResult[0], `_g=(${newGlobalState})`);
+  return `${url.split('?')[0]}?${hash}`;
 }
