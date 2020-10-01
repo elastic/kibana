@@ -38,7 +38,7 @@ function getResponse(
 describe('fetchMissingMonitoringData', () => {
   let callCluster = jest.fn();
   const index = '.monitoring-*';
-  const limit = 100;
+  const startMs = 100;
   const size = 10;
 
   it('fetch as expected', async () => {
@@ -137,7 +137,14 @@ describe('fetchMissingMonitoringData', () => {
         },
       };
     });
-    const result = await fetchMissingMonitoringData(callCluster, clusters, index, limit, size, now);
+    const result = await fetchMissingMonitoringData(
+      callCluster,
+      clusters,
+      index,
+      size,
+      now,
+      startMs
+    );
     expect(result).toEqual([
       {
         stackProduct: 'elasticsearch',
@@ -220,7 +227,14 @@ describe('fetchMissingMonitoringData', () => {
         },
       };
     });
-    const result = await fetchMissingMonitoringData(callCluster, clusters, index, limit, size, now);
+    const result = await fetchMissingMonitoringData(
+      callCluster,
+      clusters,
+      index,
+      size,
+      now,
+      startMs
+    );
     expect(result).toEqual([
       {
         stackProduct: 'elasticsearch',

@@ -90,7 +90,6 @@ export async function fetchMissingMonitoringData(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
-  limit: number,
   size: number,
   nowInMs: number,
   startMs: number
