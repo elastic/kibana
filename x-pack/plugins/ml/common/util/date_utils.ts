@@ -6,10 +6,11 @@
 
 // utility functions for handling dates
 
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import dateMath from '@elastic/datemath';
-import { TimeRange } from '../../../../../../src/plugins/data/common';
+import { formatDate } from '@elastic/eui';
+import { TimeRange } from '../../../../../src/plugins/data/common';
+import { TIME_FORMAT } from '../constants/time_format';
+
 export function formatHumanReadableDate(ts: number) {
   return formatDate(ts, 'MMMM Do YYYY');
 }
@@ -28,3 +29,7 @@ export function validateTimeRange(time?: TimeRange): boolean {
   const momentDateTo = dateMath.parse(time.to);
   return !!(momentDateFrom && momentDateFrom.isValid() && momentDateTo && momentDateTo.isValid());
 }
+
+export const timeFormatter = (value: number) => {
+  return formatDate(value, TIME_FORMAT);
+};

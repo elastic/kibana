@@ -15,7 +15,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { Annotation } from '../../../../../common/types/annotations';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 
 interface Props {
   annotation: Annotation;

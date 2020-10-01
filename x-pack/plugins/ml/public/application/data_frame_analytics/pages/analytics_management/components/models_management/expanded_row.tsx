@@ -26,7 +26,7 @@ import {
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { ModelItemFull } from './models_list';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { timeFormatter } from '../../../../../../../common/util/time_formatter';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
