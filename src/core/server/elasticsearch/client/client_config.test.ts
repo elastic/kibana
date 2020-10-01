@@ -19,6 +19,7 @@
 
 import { duration } from 'moment';
 import { ElasticsearchClientConfig, parseClientOptions } from './client_config';
+import { KIBANA_HEADERS } from '../kibana_headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -36,6 +37,18 @@ const createConfig = (
 };
 
 describe('parseClientOptions', () => {
+  it('includes `KIBANA_HEADERS`', () => {
+    const config = createConfig({});
+
+    expect(parseClientOptions(config, false)).toEqual(
+      expect.objectContaining({
+        headers: {
+          ...KIBANA_HEADERS,
+        },
+      })
+    );
+  });
+
   describe('basic options', () => {
     it('`customHeaders` option', () => {
       const config = createConfig({
@@ -48,6 +61,7 @@ describe('parseClientOptions', () => {
       expect(parseClientOptions(config, false)).toEqual(
         expect.objectContaining({
           headers: {
+            ...KIBANA_HEADERS,
             foo: 'bar',
             hello: 'dolly',
           },
