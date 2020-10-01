@@ -39,7 +39,11 @@ export function PointSeriesOptions(
     }
   >
 ) {
-  const { stateParams, setValue, vis } = props;
+  const { stateParams, setValue, vis, aggs } = props;
+  const hasBarChart = stateParams.seriesParams.some(
+    ({ type, data: { id: paramId } }) =>
+      type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+  );
 
   return (
     <>
@@ -80,7 +84,7 @@ export function PointSeriesOptions(
           />
         )}
 
-        {vis.type.name === ChartType.Histogram && (
+        {hasBarChart && (
           <SwitchOption
             data-test-subj="showValuesOnChart"
             label={i18n.translate('visTypeXy.editors.pointSeries.showLabels', {
