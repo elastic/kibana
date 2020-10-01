@@ -83,7 +83,6 @@ import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../co
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
-import type { ISessionService } from '../session';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -102,7 +101,6 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  session?: ISessionService;
   search: (request: IEsSearchRequest, options: ISearchOptions) => Promise<IEsSearchResponse>;
 }
 

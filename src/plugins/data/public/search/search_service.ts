@@ -123,7 +123,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      session: this.sessionService,
       search: (request: IEsSearchRequest, options: ISearchOptions) => {
         return search(request, options).toPromise();
       },

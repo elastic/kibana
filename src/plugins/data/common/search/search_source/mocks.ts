@@ -54,7 +54,6 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
     search: jest.fn(),
-    session: {} as any,
     onResponse: jest.fn().mockImplementation((req, res) => res),
     legacy: {
       callMsearch: jest.fn(),

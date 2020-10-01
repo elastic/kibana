@@ -34,7 +34,6 @@ describe('createSearchSource', () => {
     dependencies = {
       getConfig: jest.fn(),
       search: jest.fn(),
-      session: {} as any,
       onResponse: (req, res) => res,
       legacy: {
         callMsearch: jest.fn(),
