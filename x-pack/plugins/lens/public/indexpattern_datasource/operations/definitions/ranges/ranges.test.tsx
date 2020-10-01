@@ -13,7 +13,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { rangeOperation } from '../index';
-import { RangeIndexPatternColumn, RangeTypeLens } from './ranges';
+import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
   DEFAULT_INTERVAL,
@@ -554,13 +554,12 @@ describe('ranges', () => {
       it('should handle correctly open ranges when saved', () => {
         const setStateSpy = jest.fn();
 
-        // TODO: improve the type definitions about ranges in the operation
         // Add an extra open range:
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push(({
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
           from: null,
           to: null,
           label: '',
-        } as unknown) as RangeTypeLens);
+        });
 
         const instance = mount(
           <InlineOptions
