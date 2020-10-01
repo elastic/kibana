@@ -100,7 +100,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
