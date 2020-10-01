@@ -410,7 +410,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }}
             />
           )}
-
+          {selectedColumn && selectedColumn.dataType === 'number' ? (
+            <FormatSelector
+              selectedColumn={selectedColumn}
+              onChange={(newFormat) => {
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn: selectedColumn,
+                    paramName: 'format',
+                    value: newFormat,
+                  })
+                );
+              }}
+            />
+          ) : null}
           {!hideGrouping && (
             <BucketNestingEditor
               fieldMap={fieldMap}
@@ -430,23 +445,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }}
             />
           )}
-
-          {selectedColumn && selectedColumn.dataType === 'number' ? (
-            <FormatSelector
-              selectedColumn={selectedColumn}
-              onChange={(newFormat) => {
-                setState(
-                  updateColumnParam({
-                    state,
-                    layerId,
-                    currentColumn: selectedColumn,
-                    paramName: 'format',
-                    value: newFormat,
-                  })
-                );
-              }}
-            />
-          ) : null}
         </div>
       )}
     </div>
