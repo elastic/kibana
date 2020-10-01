@@ -110,12 +110,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         await this.buildStore(coreStart, startPlugins, storage);
       }
 
-      const services = {
+      const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         storage,
         security: plugins.security,
-      } as StartServices;
+      };
       return {
         coreStart,
         startPlugins,
