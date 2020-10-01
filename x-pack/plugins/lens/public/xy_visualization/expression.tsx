@@ -286,10 +286,12 @@ export function XYChart({
     yRight: true,
   };
 
+  const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
+
   const chartHasMoreThanOneBarSeries =
-    filteredLayers
-      .filter((layer) => layer.seriesType.includes('bar'))
-      .reduce((sum, layer) => sum + layer.accessors.length, 0) > 1;
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
+    filteredBarLayers.some((layer) => layer.splitAccessor);
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
