@@ -9477,7 +9477,6 @@
     "xpack.lens.configPanel.color.tooltip.custom": "清除定制颜色以返回到“自动”模式。",
     "xpack.lens.configPanel.color.tooltip.disabled": "当图层包括“细分依据”，各个系列无法定制颜色。",
     "xpack.lens.configPanel.selectVisualization": "选择可视化",
-    "xpack.lens.configure.addConfig": "添加配置",
     "xpack.lens.configure.editConfig": "编辑配置",
     "xpack.lens.configure.emptyConfig": "将字段拖放到此处",
     "xpack.lens.dataPanelWrapper.switchDatasource": "切换到数据源",
