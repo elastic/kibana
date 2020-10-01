@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart, StartServicesAccessor, CoreStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
@@ -207,17 +208,23 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     const activeSpace = spaces.find((x) => x.isActiveSpace)!;
     const showShareWarning =
       spaces.length > 1 && arraysAreEqual(currentNamespaces, [activeSpace.id]);
+    const { application, docLinks } = coreStart!;
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      application,
+      docLinks,
+    });
     // Step 2: Share has not been initiated yet; User must fill out form to continue.
     return (
-      <ShareToSpaceForm
-        coreStart={coreStart!}
-        spaces={spaces}
-        shareOptions={shareOptions}
-        onUpdate={setShareOptions}
-        showShareWarning={showShareWarning}
-        canShareToAllSpaces={canShareToAllSpaces}
-        makeCopy={() => setShowMakeCopy(true)}
-      />
+      <KibanaReactContextProvider>
+        <ShareToSpaceForm
+          spaces={spaces}
+          shareOptions={shareOptions}
+          onUpdate={setShareOptions}
+          showShareWarning={showShareWarning}
+          canShareToAllSpaces={canShareToAllSpaces}
+          makeCopy={() => setShowMakeCopy(true)}
+        />
+      </KibanaReactContextProvider>
     );
   };
 

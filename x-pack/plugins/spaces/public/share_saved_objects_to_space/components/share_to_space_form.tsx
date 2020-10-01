@@ -8,12 +8,10 @@ import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
 import { EuiHorizontalRule, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'src/core/public';
 import { ShareOptions, SpaceTarget } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
-  coreStart: CoreStart;
   spaces: SpaceTarget[];
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
@@ -23,15 +21,7 @@ interface Props {
 }
 
 export const ShareToSpaceForm = (props: Props) => {
-  const {
-    coreStart,
-    spaces,
-    onUpdate,
-    shareOptions,
-    showShareWarning,
-    canShareToAllSpaces,
-    makeCopy,
-  } = props;
+  const { spaces, onUpdate, shareOptions, showShareWarning, canShareToAllSpaces, makeCopy } = props;
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     onUpdate({ ...shareOptions, selectedSpaceIds });
@@ -79,7 +69,6 @@ export const ShareToSpaceForm = (props: Props) => {
       {getShareWarning()}
 
       <ShareModeControl
-        coreStart={coreStart}
         spaces={spaces}
         canShareToAllSpaces={canShareToAllSpaces}
         selectedSpaceIds={shareOptions.selectedSpaceIds}

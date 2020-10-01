@@ -19,15 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'src/core/public';
 import { NoSpacesAvailable } from './no_spaces_available';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
 import { SpaceTarget } from '../types';
 
 interface Props {
-  coreStart: CoreStart;
   spaces: SpaceTarget[];
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
@@ -43,8 +42,9 @@ const activeSpaceProps = {
 };
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { coreStart, spaces, selectedSpaceIds, onChange } = props;
-  const { application, docLinks } = coreStart;
+  const { spaces, selectedSpaceIds, onChange } = props;
+  const { services } = useKibana();
+  const { application, docLinks } = services;
 
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
