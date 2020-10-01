@@ -13,7 +13,6 @@ import {
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from './persistence';
-import { SavedObjectAttributes } from '../../../../src/core/target/types/saved_objects';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 export type LensAttributeService = AttributeService<
@@ -44,8 +43,8 @@ export function getLensAttributeService(
       });
       return { id: savedDoc.savedObjectId };
     },
-    unwrapMethod: async (savedObjectId: string) => {
-      const savedObject = await core.savedObjects.client.get<SavedObjectAttributes>(
+    unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+      const savedObject = await core.savedObjects.client.get<LensSavedObjectAttributes>(
         DOC_TYPE,
         savedObjectId
       );
