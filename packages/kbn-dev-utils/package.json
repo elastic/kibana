@@ -24,7 +24,7 @@
     "markdown-it": "^10.0.0",
     "moment": "^2.24.0",
     "normalize-path": "^3.0.0",
-    "rxjs": "^6.5.5",
+    "rxjs": "^6.6.3",
     "strip-ansi": "^6.0.0",
     "tree-kill": "^1.2.2",
     "vinyl": "^2.2.0"

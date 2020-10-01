@@ -20,7 +20,7 @@
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.20",
     "moment": "^2.24.0",
-    "rxjs": "^6.5.5",
+    "rxjs": "^6.6.3",
     "type-detect": "^4.0.8"
   },
   "devDependencies": {

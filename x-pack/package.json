@@ -373,7 +373,7 @@
     "redux-thunk": "^2.3.0",
     "request": "^2.88.0",
     "rison-node": "0.3.1",
-    "rxjs": "^6.5.5",
+    "rxjs": "^6.6.3",
     "semver": "^5.7.0",
     "set-value": "^3.0.2",
     "squel": "^5.13.0",

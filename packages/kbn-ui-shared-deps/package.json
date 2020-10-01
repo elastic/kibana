@@ -31,7 +31,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "regenerator-runtime": "^0.13.3",
-    "rxjs": "^6.5.5",
+    "rxjs": "^6.6.3",
     "styled-components": "^5.1.0",
     "symbol-observable": "^1.2.0",
     "whatwg-fetch": "^3.0.0"
