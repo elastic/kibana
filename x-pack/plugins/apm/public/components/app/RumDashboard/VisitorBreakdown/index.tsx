@@ -18,7 +18,9 @@ export function VisitorBreakdown() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/visitor-breakdown',
           params: {
@@ -42,7 +44,7 @@ export function VisitorBreakdown() {
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ height: 'calc(100% - 32px)' }}>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.browser}</h4>

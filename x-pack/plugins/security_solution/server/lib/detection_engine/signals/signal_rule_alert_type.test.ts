@@ -138,6 +138,7 @@ describe('rules_notification_alert_type', () => {
 
     alert = signalRulesAlertType({
       logger,
+      eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
@@ -344,6 +345,7 @@ describe('rules_notification_alert_type', () => {
         payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         alert = signalRulesAlertType({
           logger,
+          eventsTelemetry: undefined,
           version,
           ml: undefined,
           lists: undefined,
