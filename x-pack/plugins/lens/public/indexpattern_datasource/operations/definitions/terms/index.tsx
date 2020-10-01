@@ -6,24 +6,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { IndexPatternColumn } from '../../indexpattern';
-import { updateColumnParam } from '../../state_helpers';
-import { DataType } from '../../../types';
-import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
-
-type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
-
-// Add ticks to EuiRange component props
-const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
-  PropType<typeof EuiRange> & {
-    ticks?: Array<{
-      label: string;
-      value: number;
-    }>;
-  }
->;
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { IndexPatternColumn } from '../../../indexpattern';
+import { updateColumnParam } from '../../../state_helpers';
+import { DataType } from '../../../../types';
+import { OperationDefinition } from '../index';
+import { FieldBasedIndexPatternColumn } from '../column_types';
+import { ValuesRangeInput } from './values_range_input';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -182,30 +171,19 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           display="columnCompressed"
           fullWidth
         >
-          <FixedEuiRange
-            min={1}
-            max={20}
-            step={1}
+          <ValuesRangeInput
             value={currentColumn.params.size}
-            showInput
-            showLabels
-            compressed
-            onChange={(
-              e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-            ) =>
+            onChange={(value) => {
               setState(
                 updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
                   paramName: 'size',
-                  value: Number((e.target as HTMLInputElement).value),
+                  value,
                 })
-              )
-            }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-              defaultMessage: 'Number of values',
-            })}
+              );
+            }}
           />
         </EuiFormRow>
         <EuiFormRow
