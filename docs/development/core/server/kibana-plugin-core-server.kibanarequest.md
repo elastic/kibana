@@ -33,4 +33,5 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [route](./kibana-plugin-core-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt;</code> | matched route details |
 |  [socket](./kibana-plugin-core-server.kibanarequest.socket.md) |  | <code>IKibanaSocket</code> | [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) |
 |  [url](./kibana-plugin-core-server.kibanarequest.url.md) |  | <code>Url</code> | a WHATWG URL standard object. |
+|  [uuid](./kibana-plugin-core-server.kibanarequest.uuid.md) |  | <code>string</code> | A UUID to identify this request. |
 

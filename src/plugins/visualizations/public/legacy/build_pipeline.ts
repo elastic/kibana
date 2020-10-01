@@ -20,7 +20,7 @@
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 
-import { Vis, VisParams, PipelineParams } from '../types';
+import { Vis, VisParams } from '../types';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -70,14 +70,13 @@ interface BuildVisConfigFunction {
   [key: string]: buildVisConfigFunction;
 }
 
-export const getSchemas = (
-  vis: Vis,
-  opts: {
-    timeRange?: any;
-    timefilter: TimefilterContract;
-  }
-): Schemas => {
-  const { timeRange, timefilter } = opts;
+export interface BuildPipelineParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
+}
+
+export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelineParams): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
@@ -231,30 +230,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
     return `tsvb ${paramsArray.join(' ')}`;
   },
-  timelion: (params) => {
-    const expression = prepareString('expression', params.expression);
-    const interval = prepareString('interval', params.interval);
-    return `timelion_vis ${expression}${interval}`;
-  },
   table: (params, schemas) => {
     const visConfig = {
       ...params,
       ...buildVisConfig.table(schemas, params),
     };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
-  },
-  tagcloud: (params, schemas) => {
-    const { scale, orientation, minFontSize, maxFontSize, showLabel } = params;
-    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
-    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
-    expr += prepareValue('scale', scale);
-    expr += prepareValue('orientation', orientation);
-    expr += prepareValue('minFontSize', minFontSize);
-    expr += prepareValue('maxFontSize', maxFontSize);
-    expr += prepareValue('showLabel', showLabel);
-    expr += prepareDimension('bucket', bucket);
-
-    return expr;
   },
   region_map: (params, schemas) => {
     const visConfig = {
@@ -300,14 +281,6 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  tagcloud: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.metric = schemas.metric[0];
-    if (schemas.segment) {
-      visConfig.bucket = schemas.segment[0];
-    }
-    return visConfig;
-  },
   region_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
@@ -337,7 +310,7 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildPipeline = async (vis: Vis, params: PipelineParams) => {
+export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
@@ -356,10 +329,7 @@ export const buildPipeline = async (vis: Vis, params: PipelineParams) => {
   }
   pipeline += '| ';
 
-  const schemas = getSchemas(vis, {
-    timeRange: params.timeRange,
-    timefilter: params.timefilter,
-  });
+  const schemas = getSchemas(vis, params);
 
   if (vis.type.toExpressionAst) {
     const visAst = await vis.type.toExpressionAst(vis, params, schemas);

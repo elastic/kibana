@@ -62,7 +62,13 @@ import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import {
+  TelemetryPluginStart,
+  TelemetryPluginSetup,
+} from '../../../../src/plugins/telemetry/server';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -76,12 +82,14 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface StartPlugins {
   data: DataPluginStart;
   ingestManager?: IngestManagerStartContract;
   taskManager?: TaskManagerStartContract;
+  telemetry?: TelemetryPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -106,6 +114,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
@@ -119,6 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
 
     this.logger.debug('plugin initialized');
   }
@@ -240,6 +250,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.alerts != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
+        eventsTelemetry: this.telemetryEventsSender,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
@@ -277,15 +288,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionIndexFields',
+        securitySolutionIndexFields
       );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy
       );
     });
+
+    this.telemetryEventsSender.setup(plugins.telemetry);
 
     return {};
   }
@@ -332,11 +351,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
+    this.telemetryEventsSender.start(core, plugins.telemetry);
+
     return {};
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
   }
 }

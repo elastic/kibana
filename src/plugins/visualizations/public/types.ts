@@ -27,6 +27,7 @@ import { ExpressionAstExpression } from '../../expressions/public';
 
 import { SerializedVis, Vis, VisParams } from './vis';
 import { Schemas } from './legacy/build_pipeline';
+import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -36,15 +37,9 @@ export interface VisualizationController {
   isLoaded?(): Promise<void> | void;
 }
 
-export interface PipelineParams {
-  timefilter: TimefilterContract;
-  timeRange?: any;
-  abortSignal?: AbortSignal;
-}
-
 export type VisualizationControllerConstructor = new (
   el: HTMLElement,
-  vis: Vis
+  vis: ExprVis
 ) => VisualizationController;
 
 export interface SavedVisState {
@@ -80,8 +75,8 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst = (
-  vis: Vis,
+export type VisToExpressionAst<TVisParams = VisParams> = (
+  vis: Vis<TVisParams>,
   params: VisToExpressionAstParams,
   schemas: Schemas
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

@@ -22,9 +22,8 @@ import { IconType } from '@elastic/eui';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-import { BaseVisType } from './base_vis_type';
-import { ReactVisType } from './react_vis_type';
-import { VisToExpressionAst } from '../types';
+import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
+import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 
 export interface VisType {
   name: string;
@@ -40,7 +39,6 @@ export interface VisType {
   stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
-  toExpressionAst?: VisToExpressionAst;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition
@@ -73,17 +71,17 @@ export class TypesService {
     return {
       /**
        * registers a visualization type
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createBaseVisualization: (config: any) => {
+      createBaseVisualization: <TVisParams>(config: BaseVisTypeOptions<TVisParams>): void => {
         const vis = new BaseVisType(config);
         registerVisualization(() => vis);
       },
       /**
        * registers a visualization which uses react for rendering
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createReactVisualization: (config: any) => {
+      createReactVisualization: (config: ReactVisTypeOptions): void => {
         const vis = new ReactVisType(config);
         registerVisualization(() => vis);
       },

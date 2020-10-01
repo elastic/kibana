@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
 
   describe('Endpoint Event Resolver', function () {
     before(async () => {
@@ -22,9 +23,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await queryBar.setQuery('event.dataset : endpoint.events.file');
       await queryBar.submitQuery();
-      await (await testSubjects.find('draggable-content-host.name')).click();
+      await browser.refresh();
+      await browser.setWindowSize(1800, 1200);
+      await testSubjects.click('draggable-content-host.name');
       await testSubjects.existOrFail('header-page-title');
-      await (await testSubjects.find('navigation-events')).click();
+      await testSubjects.click('navigation-events');
       await testSubjects.existOrFail('events-viewer-panel');
       await testSubjects.exists('investigate-in-resolver-button', { timeout: 4000 });
       await (await testSubjects.findAll('investigate-in-resolver-button'))[0].click();

@@ -4,18 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import get from 'lodash/get';
 import {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsFindResult,
+  Capabilities,
 } from 'src/core/server';
 import { GlobalSearchProviderResult } from '../../../../global_search/server';
 
 export const mapToResults = (
   objects: Array<SavedObjectsFindResult<unknown>>,
-  registry: ISavedObjectTypeRegistry
+  registry: ISavedObjectTypeRegistry,
+  capabilities: Capabilities
 ): GlobalSearchProviderResult[] => {
-  return objects.map((obj) => mapToResult(obj, registry.getType(obj.type)!));
+  return objects
+    .filter((obj) => isAccessible(obj, registry.getType(obj.type)!, capabilities))
+    .map((obj) => mapToResult(obj, registry.getType(obj.type)!));
+};
+
+const isAccessible = (
+  object: SavedObjectsFindResult<unknown>,
+  type: SavedObjectsType,
+  capabilities: Capabilities
+): boolean => {
+  const { getInAppUrl } = type.management ?? {};
+  if (getInAppUrl === undefined) {
+    throw new Error('Trying to map an object from a type without management metadata');
+  }
+  const { uiCapabilitiesPath } = getInAppUrl(object);
+  return Boolean(get(capabilities, uiCapabilitiesPath) ?? false);
 };
 
 export const mapToResult = (
