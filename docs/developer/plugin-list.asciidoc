@@ -48,7 +48,7 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/data/README.md[data]
-|data plugin provides common data access services.
+|The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
