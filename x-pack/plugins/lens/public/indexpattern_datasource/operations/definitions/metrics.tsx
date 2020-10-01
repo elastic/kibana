@@ -29,7 +29,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     priority,
     displayName,
     input: 'field',
-    canAggOrderChangeResult: false,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&

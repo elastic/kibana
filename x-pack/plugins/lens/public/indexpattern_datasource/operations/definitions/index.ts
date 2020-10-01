@@ -131,11 +131,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * present on the new index pattern.
    */
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
-  /**
-   * defines if changing the aggregations order in case of nested aggregations
-   * can change the data coming from es
-   */
-  canAggOrderChangeResult: boolean;
 }
 
 interface BaseBuildColumnArgs {

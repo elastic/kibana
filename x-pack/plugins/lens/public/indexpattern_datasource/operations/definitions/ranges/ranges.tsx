@@ -83,7 +83,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
-  canAggOrderChangeResult: false,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&

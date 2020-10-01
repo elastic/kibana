@@ -25,7 +25,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
-  canAggOrderChangeResult: false,
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,

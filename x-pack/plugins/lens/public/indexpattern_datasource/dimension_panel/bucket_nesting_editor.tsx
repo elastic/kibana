@@ -54,14 +54,8 @@ export function BucketNestingEditor({
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 
-  const [target] = aggColumns;
-  const operationDefinition = operationDefinitionMap[column.operationType];
-
-  const canAggOrderChangeResult =
-    operationDefinition.canAggOrderChangeResult ||
-    operationDefinitionMap[target.operationType].canAggOrderChangeResult;
-
-  if (aggColumns.length === 1 && canAggOrderChangeResult) {
+  if (aggColumns.length === 1) {
+    const [target] = aggColumns;
     return (
       <>
         <EuiHorizontalRule margin="m" />

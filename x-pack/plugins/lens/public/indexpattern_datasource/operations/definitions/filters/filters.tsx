@@ -72,7 +72,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   type: 'filters',
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
-  canAggOrderChangeResult: false,
   input: 'none',
   isTransferable: () => true,
 
