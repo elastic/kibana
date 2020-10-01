@@ -396,9 +396,10 @@ export const createExternalService = (
   };
 
   const getIssues = async (title: string) => {
-    const query = `${searchUrl}?jql=project="${encodeURIComponent(
-      projectKey
-    )}" and summary ~"${encodeURIComponent(title)}"`;
+    const query = `${searchUrl}?jql=${encodeURIComponent(
+      `project="${projectKey}" and summary ~"${title}"`
+    )}`;
+
     try {
       const res = await request({
         axios: axiosInstance,

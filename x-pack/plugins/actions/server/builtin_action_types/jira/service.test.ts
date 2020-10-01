@@ -965,7 +965,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'get',
-        url: `https://siem-kibana.atlassian.net/rest/api/2/search?jql=project="CK" and summary ~"Test%20title"`,
+        url: `https://siem-kibana.atlassian.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
       });
     });
 
