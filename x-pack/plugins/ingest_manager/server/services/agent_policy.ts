@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
+import { safeLoad } from 'js-yaml';
 import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -20,7 +21,11 @@ import {
   AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
+import {
+  DeleteAgentPolicyResponse,
+  Settings,
+  storedPackagePoliciesToAgentInputs,
+} from '../../common';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -428,11 +433,21 @@ class AgentPolicyService {
       return null;
     }
 
+    let settings: Settings;
+    try {
+      settings = await getSettings(soClient);
+    } catch (error) {
+      throw new Error('Default settings is not setup');
+    }
+
     const defaultOutputId = await outputService.getDefaultOutputId(soClient);
     if (!defaultOutputId) {
       throw new Error('Default output is not setup');
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
+    const globalConfig = settings.additional_yaml_config
+      ? safeLoad(settings.additional_yaml_config)
+      : {};
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
@@ -446,6 +461,7 @@ class AgentPolicyService {
               hosts,
               ca_sha256,
               api_key,
+              ...globalConfig,
               ...outputConfig,
             };
 
@@ -479,17 +495,10 @@ class AgentPolicyService {
             },
           }),
     };
-    console.log('getFullAgentPolicy', id, fullAgentPolicy);
+
     // only add settings if not in standalone
     if (!standalone) {
-      let settings;
-      try {
-        settings = await getSettings(soClient);
-      } catch (error) {
-        throw new Error('Default settings is not setup');
-      }
       if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
-      console.log({ settings });
       fullAgentPolicy.fleet = {
         kibana: {
           hosts: settings.kibana_urls,

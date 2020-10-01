@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
+import { safeLoad } from 'js-yaml';
 import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
@@ -70,9 +71,18 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
   });
 
-  const additionalYamlConfigInput = useInput(undefined, (value) => {
-    console.log('validate yaml', value);
-    return undefined;
+  const additionalYamlConfigInput = useInput('', (value) => {
+    try {
+      safeLoad(value);
+      return;
+    } catch (error) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.invalidYamlFormatErrorMessage', {
+          defaultMessage: 'Invalid YAML: {reason}',
+          values: { reason: error.message },
+        }),
+      ];
+    }
   });
   return {
     isLoading,
@@ -80,7 +90,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       if (
         !kibanaUrlsInput.validate() ||
         !elasticsearchUrlInput.validate() ||
-        !elasticsearchUrlInput.validate()
+        !additionalYamlConfigInput.validate()
       ) {
         return;
       }
