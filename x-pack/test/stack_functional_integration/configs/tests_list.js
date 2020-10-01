@@ -20,7 +20,11 @@ export default (envObj) => {
   }
 
   if (envObj.BEATS.includes('metricbeat')) {
-    xs.push('metricbeat');
+    xs.push('metricbeat/_metricbeat');
+    if (envObj.XPACK === 'YES') {
+      // the esArchive and dashboard png are specific to the default distribution (with XPACK)
+      xs.push('metricbeat/_metricbeat_dashboard');
+    }
   }
   if (envObj.BEATS.includes('filebeat')) {
     xs.push('filebeat');
