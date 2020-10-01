@@ -5,12 +5,18 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 
 import { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import { BrowserField } from '../../../../common/containers/source';
-import { FieldHook, Field, getUseField, UseField } from '../../../../shared_imports';
+import {
+  FieldHook,
+  Field,
+  getUseField,
+  UseField,
+  getFieldValidityAndErrorMessage,
+} from '../../../../shared_imports';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
@@ -33,6 +39,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   threatBrowserFields,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(threatMapping);
   const handleBuilderOnChange = useCallback(
     ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
       setValue(entryItems);
@@ -81,15 +88,24 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <ThreatMatchComponent
-        listItems={threatItems as ThreatMapEntries[]}
-        indexPatterns={indexPatterns}
-        threatIndexPatterns={threatIndexPatterns}
-        data-test-subj="threatmatch-builder"
-        id-aria="threatmatch-builder"
-        onChange={handleBuilderOnChange}
-      />
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={threatMapping.label}
+        labelAppend={threatMapping.labelAppend}
+        helpText={threatMapping.helpText}
+        error={errorMessage}
+        isInvalid={isInvalid}
+        fullWidth
+      >
+        <ThreatMatchComponent
+          listItems={threatItems as ThreatMapEntries[]}
+          indexPatterns={indexPatterns}
+          threatIndexPatterns={threatIndexPatterns}
+          data-test-subj="threatmatch-builder"
+          id-aria="threatmatch-builder"
+          onChange={handleBuilderOnChange}
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
     </>
   );

@@ -9,6 +9,10 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import {
+  containsEmptyItem,
+  containsInvalidItems,
+} from '../../../../common/components/threat_match/helpers';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
@@ -26,6 +30,8 @@ import {
   INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
+  THREAT_MATCH_REQUIRED,
+  THREAT_MATCH_EMPTIES,
 } from './translations';
 
 export const schema: FormSchema<DefineStepRule> = {
@@ -263,7 +269,34 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'Threat Mapping',
       }
     ),
-    validations: [],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          if (containsEmptyItem(formData.threatMapping)) {
+            return {
+              code: 'ERR_FIELD_MISSING',
+              path,
+              message: THREAT_MATCH_REQUIRED,
+            };
+          } else if (containsInvalidItems(formData.threatMapping)) {
+            return {
+              code: 'ERR_FIELD_MISSING',
+              path,
+              message: THREAT_MATCH_EMPTIES,
+            };
+          } else {
+            return undefined;
+          }
+        },
+      },
+    ],
   },
   threatQueryBar: {
     label: i18n.translate(

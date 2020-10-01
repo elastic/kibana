@@ -145,3 +145,18 @@ export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
     }
   }, []);
 };
+
+export const containsInvalidItems = (items: ThreatMapEntries[]): boolean => {
+  return items.some((item) =>
+    item.entries.some((subEntry) => subEntry.field === '' || subEntry.value === '')
+  );
+};
+
+export const containsEmptyItem = (items: ThreatMapEntries[]): boolean => {
+  return (
+    items.length === 1 &&
+    items[0].entries.length === 1 &&
+    items[0].entries[0].field === '' &&
+    items[0].entries[0].value === ''
+  );
+};
