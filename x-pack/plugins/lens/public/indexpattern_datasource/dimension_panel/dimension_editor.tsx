@@ -411,7 +411,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!hideGrouping && (
+          {!incompatibleSelectedOperationType && !hideGrouping && (
             <BucketNestingEditor
               fieldMap={fieldMap}
               layer={state.layers[props.layerId]}

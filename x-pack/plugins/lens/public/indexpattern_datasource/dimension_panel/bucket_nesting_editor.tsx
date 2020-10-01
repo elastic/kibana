@@ -55,53 +55,55 @@ export function BucketNestingEditor({
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
     return (
-      <>
-        <EuiHorizontalRule margin="m" />
-        <EuiFormRow>
-          <EuiSwitch
-            data-test-subj="indexPattern-nesting-switch"
-            label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
-              defaultMessage: 'Use as top level aggregation',
-            })}
-            checked={!prevColumn}
-            onChange={() => {
-              if (prevColumn) {
-                setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-              } else {
-                setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-              }
-            }}
-          />
-        </EuiFormRow>
-      </>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.indexPattern.grouping', {
+          defaultMessage: 'Grouping',
+        })}
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          compressed
+          data-test-subj="indexPattern-nesting-switch"
+          name="nestingSwitch"
+          label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
+            defaultMessage: 'Use as top level aggregation',
+          })}
+          checked={!prevColumn}
+          onChange={() => {
+            if (prevColumn) {
+              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+            } else {
+              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+            }
+          }}
+        />
+      </EuiFormRow>
     );
   }
 
   return (
-    <>
-      <EuiHorizontalRule margin="m" />
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.groupByDropdown', {
-          defaultMessage: 'Group by',
-        })}
-        display="rowCompressed"
-      >
-        <EuiSelect
-          compressed
-          data-test-subj="indexPattern-nesting-select"
-          options={[
-            {
-              value: '',
-              text: i18n.translate('xpack.lens.xyChart.nestUnderRoot', {
-                defaultMessage: 'Entire data set',
-              }),
-            },
-            ...aggColumns.map(({ value, text }) => ({ value, text })),
-          ]}
-          value={prevColumn}
-          onChange={(e) => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
-        />
-      </EuiFormRow>
-    </>
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.indexPattern.groupByDropdown', {
+        defaultMessage: 'Group by',
+      })}
+      display="columnCompressed"
+      fullWidth
+    >
+      <EuiSelect
+        compressed
+        data-test-subj="indexPattern-nesting-select"
+        options={[
+          {
+            value: '',
+            text: i18n.translate('xpack.lens.xyChart.nestUnderRoot', {
+              defaultMessage: 'Entire data set',
+            }),
+          },
+          ...aggColumns.map(({ value, text }) => ({ value, text })),
+        ]}
+        value={prevColumn}
+        onChange={(e) => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
+      />
+    </EuiFormRow>
   );
 }
