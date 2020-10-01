@@ -421,7 +421,7 @@ export const getResult = (): RuleAlertType => ({
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
   executionStatus: {
     status: 'unknown',
-    date: new Date('2020-08-20T19:23:38Z'),
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
 });
 
@@ -636,7 +636,7 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
   updatedAt: new Date('2020-03-21T12:37:08.730Z'),
   executionStatus: {
     status: 'unknown',
-    date: new Date('2020-08-20T19:23:38Z'),
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
 });
 

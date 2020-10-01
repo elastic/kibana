@@ -231,7 +231,7 @@ export class AlertsClient {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'waiting',
-        date: new Date().toISOString(),
+        lastExecutionDate: new Date().toISOString(),
         error: null,
       },
     };
@@ -967,11 +967,16 @@ export class AlertsClient {
     updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
+    // Not the prettiest code here, but if we want to use most of the
+    // alert fields from the rawAlert using `...rawAlert` kind of access, we
+    // need to specifically delete the executionStatus as it's a different type
+    // in RawAlert and Alert.  Probably next time we need to do something similar
+    // here, we should look at redesigning the implementation of this method.
     const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
       ...rawAlert,
     };
     delete rawAlertWithoutExecutionStatus.executionStatus;
-    const executionStatus = alertExecutionStatusFromRaw(rawAlert.executionStatus);
+    const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
     return {
       id,
       ...rawAlertWithoutExecutionStatus,

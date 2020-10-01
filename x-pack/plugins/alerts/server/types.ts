@@ -117,9 +117,12 @@ export interface AlertMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
 }
 
+// note that the `error` property is "null-able", as we're doing a partial
+// update on the alert when we update this data, but need to ensure we
+// delete any previous error if the current status has no error
 export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
-  date: string;
+  lastExecutionDate: string;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

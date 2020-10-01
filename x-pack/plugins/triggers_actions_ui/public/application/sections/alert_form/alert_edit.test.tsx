@@ -108,7 +108,7 @@ describe('alert_edit', () => {
       updatedAt: new Date(),
       executionStatus: {
         status: 'unknown',
-        date: new Date('2020-08-20T19:23:38Z'),
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);

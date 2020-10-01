@@ -394,8 +394,8 @@ describe('create()', () => {
         "createdBy": "elastic",
         "enabled": true,
         "executionStatus": Object {
-          "date": "2019-02-12T21:01:22.479Z",
           "error": null,
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "waiting",
         },
         "meta": Object {
@@ -1035,7 +1035,7 @@ describe('create()', () => {
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
-          date: '2019-02-12T21:01:22.479Z',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'waiting',
           error: null,
         },
@@ -1156,7 +1156,7 @@ describe('create()', () => {
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
-          date: '2019-02-12T21:01:22.479Z',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'waiting',
           error: null,
         },
@@ -2513,7 +2513,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     mutedInstanceIds: [],
     executionStatus: {
       status: 'unknown',
-      date: '2020-08-20T19:23:38Z',
+      lastExecutionDate: '2020-08-20T19:23:38Z',
       error: null,
     },
   },

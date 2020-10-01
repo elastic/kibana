@@ -124,7 +124,7 @@ function initializeExecutionStatus(
       ...attributes,
       executionStatus: {
         status: 'waiting',
-        date: new Date().toISOString(),
+        lastExecutionDate: new Date().toISOString(),
         error: null,
       },
     },

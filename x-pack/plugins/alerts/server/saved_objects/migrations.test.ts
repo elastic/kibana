@@ -206,7 +206,9 @@ describe('7.10.0', () => {
     const dateStart = Date.now();
     const migratedAlert = migration710(alert, { log });
     const dateStop = Date.now();
-    const dateExecutionStatus = Date.parse(migratedAlert.attributes.executionStatus.date);
+    const dateExecutionStatus = Date.parse(
+      migratedAlert.attributes.executionStatus.lastExecutionDate
+    );
 
     expect(dateStart).toBeLessThanOrEqual(dateExecutionStatus);
     expect(dateStop).toBeGreaterThanOrEqual(dateExecutionStatus);
@@ -216,7 +218,7 @@ describe('7.10.0', () => {
       attributes: {
         ...alert.attributes,
         executionStatus: {
-          date: migratedAlert.attributes.executionStatus.date,
+          lastExecutionDate: migratedAlert.attributes.executionStatus.lastExecutionDate,
           status: 'waiting',
           error: null,
         },

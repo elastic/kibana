@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from 'src/core/server';
 import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
 import { getReasonFromError } from './error_with_reason';
 
 export function executionStatusFromState(state: AlertTaskState): AlertExecutionStatus {
   const instanceIds = Object.keys(state.alertInstances ?? {});
   return {
-    date: new Date(),
+    lastExecutionDate: new Date(),
     status: instanceIds.length === 0 ? 'ok' : 'active',
   };
 }
 
 export function executionStatusFromError(error: Error): AlertExecutionStatus {
   return {
-    date: new Date(),
+    lastExecutionDate: new Date(),
     status: 'error',
     error: {
       reason: getReasonFromError(error),
@@ -27,34 +28,39 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
 }
 
 export function alertExecutionStatusToRaw({
-  date,
+  lastExecutionDate,
   status,
   error,
 }: AlertExecutionStatus): RawAlertExecutionStatus {
   return {
-    date: date.toISOString(),
+    lastExecutionDate: lastExecutionDate.toISOString(),
     status,
+    // explicitly setting to null (in case undefined) due to partial update concerns
     error: error ?? null,
   };
 }
 
 export function alertExecutionStatusFromRaw(
+  logger: Logger,
+  alertId: string,
   rawAlertExecutionStatus?: Partial<RawAlertExecutionStatus> | null | undefined
 ): AlertExecutionStatus | undefined {
   if (!rawAlertExecutionStatus) return undefined;
 
-  const { date, status = 'unknown', error } = rawAlertExecutionStatus;
+  const { lastExecutionDate, status = 'unknown', error } = rawAlertExecutionStatus;
 
-  let parsedDateMillis = date ? Date.parse(date) : Date.now();
+  let parsedDateMillis = lastExecutionDate ? Date.parse(lastExecutionDate) : Date.now();
   if (isNaN(parsedDateMillis)) {
-    // TODO: log a message?
+    logger.debug(
+      `invalid alertExecutionStatus lastExecutionDate "${lastExecutionDate}" in raw alert ${alertId}`
+    );
     parsedDateMillis = Date.now();
   }
 
   const parsedDate = new Date(parsedDateMillis);
   if (error) {
-    return { date: parsedDate, status, error };
+    return { lastExecutionDate: parsedDate, status, error };
   } else {
-    return { date: parsedDate, status };
+    return { lastExecutionDate: parsedDate, status };
   }
 }

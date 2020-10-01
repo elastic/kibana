@@ -107,7 +107,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     mutedInstanceIds: [],
     executionStatus: {
       status: 'unknown',
-      date: new Date('2020-08-20T19:23:38Z'),
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     ...overloads,
   };

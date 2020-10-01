@@ -63,12 +63,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      dates.push(response.body.executionStatus.date);
+      dates.push(response.body.executionStatus.lastExecutionDate);
       dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['ok']));
-      dates.push(executionStatus.date);
+      dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
 
@@ -98,12 +98,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      dates.push(response.body.executionStatus.date);
+      dates.push(response.body.executionStatus.lastExecutionDate);
       dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['active']));
-      dates.push(executionStatus.date);
+      dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
 
@@ -130,12 +130,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      dates.push(response.body.executionStatus.date);
+      dates.push(response.body.executionStatus.lastExecutionDate);
       dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
-      dates.push(executionStatus.date);
+      dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
 
@@ -311,7 +311,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 function expectErrorExecutionStatus(executionStatus: Record<string, any>, startDate: number) {
   expect(executionStatus.status).to.equal('error');
 
-  const statusDate = Date.parse(executionStatus.date);
+  const statusDate = Date.parse(executionStatus.lastExecutionDate);
   const stopDate = Date.now();
   expect(startDate).to.be.lessThan(statusDate);
   expect(stopDate).to.be.greaterThan(statusDate);
@@ -325,14 +325,7 @@ function getFindUri(filter: string) {
 }
 
 function trues(length: number): boolean[] {
-  return booleans(length, true);
-}
-
-function booleans(length: number, value: boolean): boolean[] {
-  return ''
-    .padStart(length)
-    .split('')
-    .map((e) => value);
+  return new Array(length).fill(true);
 }
 
 async function delay(millis: number): Promise<void> {

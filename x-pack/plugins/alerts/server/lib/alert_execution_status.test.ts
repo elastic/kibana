@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { AlertExecutionStatusErrorReasons } from '../types';
 import {
   executionStatusFromState,
@@ -13,25 +14,31 @@ import {
 } from './alert_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 
+const MockLogger = loggingSystemMock.create().get();
+
 describe('AlertExecutionStatus', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
       const status = executionStatusFromState({});
-      checkDateIsNearNow(status.date);
+      checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
 
     test('task state with no instances', () => {
       const status = executionStatusFromState({ alertInstances: {} });
-      checkDateIsNearNow(status.date);
+      checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
 
     test('task state with one instance', () => {
       const status = executionStatusFromState({ alertInstances: { a: {} } });
-      checkDateIsNearNow(status.date);
+      checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
     });
@@ -68,23 +75,24 @@ describe('AlertExecutionStatus', () => {
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
-      expect(alertExecutionStatusToRaw({ date, status })).toMatchInlineSnapshot(`
+      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status })).toMatchInlineSnapshot(`
         Object {
-          "date": "2020-09-03T16:26:58.000Z",
           "error": null,
+          "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
       `);
     });
 
     test('status with an error', () => {
-      expect(alertExecutionStatusToRaw({ date, status, error })).toMatchInlineSnapshot(`
+      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status, error }))
+        .toMatchInlineSnapshot(`
         Object {
-          "date": "2020-09-03T16:26:58.000Z",
           "error": Object {
             "message": "wops",
             "reason": "decrypt",
           },
+          "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
         }
       `);
@@ -98,56 +106,70 @@ describe('AlertExecutionStatus', () => {
     const error = { reason, message: 'wops' };
 
     test('no input', () => {
-      const result = alertExecutionStatusFromRaw();
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id');
       expect(result).toBe(undefined);
     });
 
     test('undefined input', () => {
-      const result = alertExecutionStatusFromRaw(undefined);
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', undefined);
       expect(result).toBe(undefined);
     });
 
     test('null input', () => {
-      const result = alertExecutionStatusFromRaw(null);
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', null);
       expect(result).toBe(undefined);
     });
 
     test('invalid date', () => {
-      const result = alertExecutionStatusFromRaw({ date: 'an invalid date' })!;
-      checkDateIsNearNow(result.date);
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        lastExecutionDate: 'an invalid date',
+      })!;
+      checkDateIsNearNow(result.lastExecutionDate);
       expect(result.status).toBe('unknown');
       expect(result.error).toBe(undefined);
+      expect(MockLogger.debug).toBeCalledWith(
+        'invalid alertExecutionStatus lastExecutionDate "an invalid date" in raw alert alert-id'
+      );
     });
 
     test('valid date', () => {
-      const result = alertExecutionStatusFromRaw({ date });
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        lastExecutionDate: date,
+      });
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "date": 2020-09-03T16:26:58.000Z,
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
           "status": "unknown",
         }
       `);
     });
 
     test('valid status and date', () => {
-      const result = alertExecutionStatusFromRaw({ status, date });
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        status,
+        lastExecutionDate: date,
+      });
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "date": 2020-09-03T16:26:58.000Z,
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
           "status": "active",
         }
       `);
     });
 
     test('valid status, date and error', () => {
-      const result = alertExecutionStatusFromRaw({ status, date, error });
+      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+        status,
+        lastExecutionDate: date,
+        error,
+      });
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "date": 2020-09-03T16:26:58.000Z,
           "error": Object {
             "message": "wops",
             "reason": "execute",
           },
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
           "status": "active",
         }
       `);

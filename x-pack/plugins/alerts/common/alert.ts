@@ -30,7 +30,7 @@ export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorR
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
-  date: Date;
+  lastExecutionDate: Date;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
     message: string;
