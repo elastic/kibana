@@ -13,7 +13,7 @@ import {
   BaseSignalHit,
   SignalSource,
 } from './types';
-import { buildRule, buildRuleWithoutOverrides } from './build_rule';
+import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -97,7 +97,7 @@ export const buildSignalGroupFromSequence = (
 ): BaseSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO);
+      const signal = buildSignalFromEvent(event, ruleSO, false);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -147,9 +147,12 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  ruleSO: SavedObject<RuleAlertAttributes>
+  ruleSO: SavedObject<RuleAlertAttributes>,
+  applyOverrides: boolean
 ): SignalHit => {
-  const rule = buildRuleWithoutOverrides(ruleSO);
+  const rule = applyOverrides
+    ? buildRuleWithOverrides(ruleSO, event._source)
+    : buildRuleWithoutOverrides(ruleSO);
   const signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
