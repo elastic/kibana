@@ -6,9 +6,9 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { EmailActionParams, EmailActionConnector } from '../types';
+import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
-export function getActionType(): ActionTypeModel<EmailActionConnector, EmailActionParams> {
+export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
   return {
     id: '.email',
