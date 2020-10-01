@@ -6,20 +6,36 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { BrowserExpandedRowComponent } from '../script_expanded_row';
+import { BrowserExpandedRowComponent } from '../browser_expanded_row';
+import { Ping } from '../../../../../common/runtime_types';
 
 describe('BrowserExpandedRowComponent', () => {
+  let defStep: Ping;
+  beforeEach(() => {
+    defStep = {
+      docId: 'doc-id',
+      timestamp: '123',
+      monitor: {
+        duration: {
+          us: 100,
+        },
+        id: 'mon-id',
+        status: 'up',
+        type: 'browser',
+      },
+    };
+  });
+
   it('returns empty step state when no journey', () => {
-    expect(
-      shallowWithIntl(<BrowserExpandedRowComponent fetchScreenshot={jest.fn()} />)
-    ).toMatchInlineSnapshot(`<EmptyStepState />`);
+    expect(shallowWithIntl(<BrowserExpandedRowComponent />)).toMatchInlineSnapshot(
+      `<EmptyStepState />`
+    );
   });
 
   it('returns empty step state when journey has no steps', () => {
     expect(
       shallowWithIntl(
         <BrowserExpandedRowComponent
-          fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
             loading: false,
@@ -34,7 +50,6 @@ describe('BrowserExpandedRowComponent', () => {
     expect(
       shallowWithIntl(
         <BrowserExpandedRowComponent
-          fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
             loading: true,
@@ -53,12 +68,12 @@ describe('BrowserExpandedRowComponent', () => {
     expect(
       shallowWithIntl(
         <BrowserExpandedRowComponent
-          fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
             loading: false,
             steps: [
               {
+                ...defStep,
                 synthetics: {
                   type: 'step/end',
                 },
@@ -91,12 +106,12 @@ describe('BrowserExpandedRowComponent', () => {
     expect(
       shallowWithIntl(
         <BrowserExpandedRowComponent
-          fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
             loading: false,
             steps: [
               {
+                ...defStep,
                 synthetics: {
                   type: 'stderr',
                 },
@@ -128,12 +143,12 @@ describe('BrowserExpandedRowComponent', () => {
     expect(
       shallowWithIntl(
         <BrowserExpandedRowComponent
-          fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
             loading: false,
             steps: [
               {
+                ...defStep,
                 synthetics: {
                   type: 'some other type',
                 },

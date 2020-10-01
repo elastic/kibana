@@ -5,18 +5,14 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, takeLatest } from 'redux-saga/effects';
 import {
   getJourneySteps,
   getJourneyStepsSuccess,
   getJourneyStepsFail,
   FetchJourneyStepsParams,
-  getStepScreenshot,
-  FetchStepScreenshot,
-  getStepScreenshotSuccess,
-  getStepScreenshotFail,
 } from '../actions/journey';
-import { fetchJourneySteps, fetchStepScreenshot } from '../api/journey';
+import { fetchJourneySteps } from '../api/journey';
 
 export function* fetchJourneyStepsEffect() {
   yield takeLatest(getJourneySteps, function* (action: Action<FetchJourneyStepsParams>) {

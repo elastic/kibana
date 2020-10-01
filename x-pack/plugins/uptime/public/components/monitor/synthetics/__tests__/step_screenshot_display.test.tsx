@@ -11,15 +11,9 @@ import { StepScreenshotDisplay } from '../step_screenshot_display';
 describe('StepScreenshotDisplayProps', () => {
   it('displays loading spinner when loading', () => {
     expect(
-      shallowWithIntl(
-        <StepScreenshotDisplay
-          isLoading={true}
-          screenshot="SCREENSHOT_STRING"
-          stepIndex={1}
-          fetchScreenshot={jest.fn()}
-          stepName="STEP_NAME"
-        />
-      ).find('EuiLoadingSpinner')
+      shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />).find(
+        'EuiLoadingSpinner'
+      )
     ).toMatchInlineSnapshot(`
       <EuiLoadingSpinner
         size="xl"
@@ -28,15 +22,7 @@ describe('StepScreenshotDisplayProps', () => {
   });
 
   it('displays screenshot thumbnail when present', () => {
-    const wrapper = shallowWithIntl(
-      <StepScreenshotDisplay
-        isLoading={false}
-        screenshot="SCREENSHOT_STRING"
-        stepIndex={1}
-        fetchScreenshot={jest.fn()}
-        stepName="STEP_NAME"
-      />
-    );
+    const wrapper = shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />);
     expect(wrapper.find('img')).toMatchInlineSnapshot(`
       <img
         alt="Thumbnail screenshot for step with name STEP_NAME"
@@ -96,15 +82,7 @@ describe('StepScreenshotDisplayProps', () => {
 
   it('displays No Image message when screenshot does not exist', () => {
     expect(
-      shallowWithIntl(
-        <StepScreenshotDisplay
-          isLoading={false}
-          screenshot=""
-          stepIndex={1}
-          fetchScreenshot={jest.fn()}
-          stepName="STEP_NAME"
-        />
-      ).find('EuiText')
+      shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />).find('EuiText')
     ).toMatchInlineSnapshot(`
       <EuiText>
         <strong>

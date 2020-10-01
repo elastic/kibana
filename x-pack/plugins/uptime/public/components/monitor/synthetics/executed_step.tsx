@@ -71,7 +71,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
               language="html"
               overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
             >
-              {step.synthetics?.payload?.error?.message}
+              {step.synthetics?.error?.message}
             </CodeBlockAccordion>
             <CodeBlockAccordion
               id={`${step.synthetics?.step?.name}_stack`}
@@ -81,7 +81,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
               language="html"
               overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
             >
-              {step.synthetics?.payload?.error?.stack}
+              {step.synthetics?.error?.stack}
             </CodeBlockAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -34,11 +34,8 @@ describe('ExecutedStep', () => {
   });
 
   it('renders correct step heading', () => {
-    expect(
-      mountWithIntl(<ExecutedStep fetchScreenshot={jest.fn()} index={3} step={step} />).find(
-        'EuiText'
-      )
-    ).toMatchInlineSnapshot(`
+    expect(mountWithIntl(<ExecutedStep index={3} step={step} />).find('EuiText'))
+      .toMatchInlineSnapshot(`
       <EuiText>
         <div
           className="euiText euiText--medium"
@@ -64,11 +61,8 @@ describe('ExecutedStep', () => {
 
   it('supplies status badge correct status', () => {
     step.synthetics.payload = { status: 'THE_STATUS' };
-    expect(
-      shallowWithIntl(<ExecutedStep fetchScreenshot={jest.fn()} index={3} step={step} />).find(
-        'StatusBadge'
-      )
-    ).toMatchInlineSnapshot(`
+    expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('StatusBadge'))
+      .toMatchInlineSnapshot(`
       <StatusBadge
         status="THE_STATUS"
       />
@@ -76,18 +70,16 @@ describe('ExecutedStep', () => {
   });
 
   it('renders accordions for step, error message, and error stack script', () => {
+    step.synthetics.error = {
+      message: 'There was an error executing the step.',
+      stack: 'some.stack.trace.string',
+    };
     step.synthetics.payload = {
-      error: {
-        message: 'There was an error executing the step.',
-        stack: 'some.stack.trace.string',
-      },
       source: 'const someVar = "the var"',
     };
-    expect(
-      shallowWithIntl(<ExecutedStep fetchScreenshot={jest.fn()} index={3} step={step} />).find(
-        'Accordion'
-      )
-    ).toMatchInlineSnapshot(`
+
+    expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('Accordion'))
+      .toMatchInlineSnapshot(`
       Array [
         <Accordion
           buttonContent="Step script"

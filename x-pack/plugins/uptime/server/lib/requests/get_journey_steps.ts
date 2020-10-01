@@ -43,10 +43,10 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
   };
   const result = await callES('search', params);
   const screenshotIndexes: number[] = result.hits.hits
-    .filter((h) => h?._source?.synthetics?.type === 'step/screenshot')
-    .map((h) => h?._source?.synthetics?.step?.index);
+    .filter((h: any) => h?._source?.synthetics?.type === 'step/screenshot')
+    .map((h: any) => h?._source?.synthetics?.step?.index);
   return result.hits.hits
-    .filter((h) => h?._source?.synthetics?.type !== 'step/screenshot')
+    .filter((h: any) => h?._source?.synthetics?.type !== 'step/screenshot')
     .map(
       ({ _id, _source, _source: { synthetics } }: any): Ping => ({
         ..._source,
