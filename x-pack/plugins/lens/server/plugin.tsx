@@ -31,7 +31,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
   }
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
