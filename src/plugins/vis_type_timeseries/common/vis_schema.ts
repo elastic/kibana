@@ -111,7 +111,7 @@ export const metricsItems = schema.object({
         field: stringOptionalNullable,
         mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
         shade: schema.oneOf([numberOptional, stringOptionalNullable]),
-        value: schema.oneOf([numberOptional, stringOptionalNullable]),
+        value: schema.maybe(schema.oneOf([numberOptional, stringOptionalNullable])),
         percentile: stringOptionalNullable,
       })
     )
