@@ -52,6 +52,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="dashboardApp"
                 />
@@ -71,6 +72,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="discoverApp"
                 />
@@ -90,6 +92,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="canvasApp"
                 />
@@ -109,6 +112,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="gisApp"
                 />
@@ -128,6 +132,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="machineLearningApp"
                 />
@@ -147,6 +152,7 @@ exports[`GettingStarted dark mode on 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="graphApp"
                 />
@@ -241,6 +247,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="dashboardApp"
                 />
@@ -260,6 +267,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="discoverApp"
                 />
@@ -279,6 +287,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="canvasApp"
                 />
@@ -298,6 +307,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="gisApp"
                 />
@@ -317,6 +327,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="machineLearningApp"
                 />
@@ -336,6 +347,7 @@ exports[`GettingStarted render 1`] = `
               display="plain"
               icon={
                 <EuiIcon
+                  color="text"
                   size="l"
                   type="graphApp"
                 />
