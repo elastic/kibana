@@ -3,38 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
-import { getTrustedAppsListPath } from '../../../common/routing';
-import { useTrustedAppsSelector } from './hooks';
+import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { getCurrentLocation } from '../store/selectors';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 export const TrustedAppsPage = memo(() => {
-  const history = useHistory();
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
-  const handleAddButtonClick = useCallback(() => {
-    history.push(
-      getTrustedAppsListPath({
-        ...location,
-        show: 'create',
-      })
-    );
-  }, [history, location]);
-  const handleAddFlyoutClose = useCallback(() => {
-    const { show, ...paginationParamsOnly } = location;
-    history.push(getTrustedAppsListPath(paginationParamsOnly));
-  }, [history, location]);
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
+    ...location,
+    show: 'create',
+  }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
+    ...location,
+    show: undefined,
+  }));
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {

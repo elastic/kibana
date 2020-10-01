@@ -5,7 +5,9 @@
  */
 
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
+import { useCallback } from 'react';
 import { State } from '../../../../common/store';
 
 import {
@@ -13,10 +15,18 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE as GLOBAL_NS,
 } from '../../../common/constants';
 
-import { TrustedAppsListPageState } from '../state';
+import { TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state';
+import { getTrustedAppsListPath } from '../../../common/routing';
 
 export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageState) => R): R {
   return useSelector((state: State) =>
     selector(state[GLOBAL_NS][TRUSTED_APPS_NS] as TrustedAppsListPageState)
   );
+}
+
+export function useTrustedAppsNavigateCallback(callback: () => TrustedAppsListPageLocation) {
+  const history = useHistory();
+  const location = callback();
+
+  return useCallback(() => history.push(getTrustedAppsListPath(location)), [history, location]);
 }
