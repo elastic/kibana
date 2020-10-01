@@ -4714,7 +4714,6 @@
     "xpack.apm.license.betaTooltipMessage": "此功能当前为公测版。如果遇到任何错误或有任何反馈，请报告问题或访问我们的论坛。",
     "xpack.apm.license.button": "开始试用",
     "xpack.apm.license.title": "开始为期 30 天的免费试用",
-    "xpack.apm.loadingServiceMap": "正在加载服务地图......这可能需要一会儿时间。",
     "xpack.apm.localFilters.titles.agentName": "代理名称",
     "xpack.apm.localFilters.titles.browser": "浏览器",
     "xpack.apm.localFilters.titles.containerId": "容器 ID",

@@ -4712,7 +4712,6 @@
     "xpack.apm.license.betaTooltipMessage": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.license.button": "トライアルを開始",
     "xpack.apm.license.title": "無料の 30 日トライアルを開始",
-    "xpack.apm.loadingServiceMap": "サービスマップを読み込み中...多少時間がかかる場合があります。",
     "xpack.apm.localFilters.titles.agentName": "エージェント名",
     "xpack.apm.localFilters.titles.browser": "ブラウザー",
     "xpack.apm.localFilters.titles.containerId": "コンテナー ID",
