@@ -6,7 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "kbn": "node ../scripts/kbn",
-    "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
+    "kbn:bootstrap": "node ../scripts/build_ts_refs --project tsconfig.refs.json && node plugins/canvas/scripts/storybook --clean",
     "start": "node ../scripts/kibana --dev",
     "build": "gulp build",
     "testonly": "echo 'Deprecated, use `yarn test`' && gulp test",
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^4.1.0",
-    "@elastic/apm-rum-react": "^1.2.4",
+    "@elastic/apm-rum-react": "^1.2.5",
     "@elastic/maki": "6.3.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
