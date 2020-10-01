@@ -1623,6 +1623,751 @@
         }
       }
     },
+    "ui_metric": {
+      "properties": {
+        "console": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "DashboardPanelVersionInUrl": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "Kibana_home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "visualize": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "canvas": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "cross_cluster_replication": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_lifecycle_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingest_pipelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "apm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "stack_monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "remote_clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "rollup_jobs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "snapshot_restore": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboards": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dev_tools": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "discover": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "kibana": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "short_url_redirect": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "timelion": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "csm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboard_mode": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "enterpriseSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "appSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "workplaceSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "graph": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingestManager": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "lens": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "maps": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ml": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "observability-overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_account": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_access_agreement": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_capture_url": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logged_out": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_login": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logout": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_overwritten_session": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:detections": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:hosts": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:network": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:timelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:case": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:administration": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "siem": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "space_selector": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "uptime": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      }
+    },
     "telemetry": {
       "properties": {
         "opt_in_status": {

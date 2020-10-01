@@ -53,7 +53,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
         }
       >
         <div className="euiFilterSelect__items">
-          {AlertExecutionStatusValues.map((item: string) => {
+          {[...AlertExecutionStatusValues].sort().map((item: string) => {
             const healthColor = getHealthColor(item);
             return (
               <EuiFilterSelectItem
@@ -82,14 +82,13 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
 export function getHealthColor(status: string) {
   switch (status) {
     case 'active':
-      return 'success';
-      break;
+      return 'primary';
     case 'error':
       return 'danger';
-      break;
     case 'ok':
       return 'subdued';
-      break;
+    case 'pending':
+      return 'success';
     default:
       return 'warning';
   }

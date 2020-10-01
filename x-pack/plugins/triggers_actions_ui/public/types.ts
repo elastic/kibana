@@ -64,15 +64,19 @@ export interface Pagination {
   size: number;
 }
 
-export interface ActionTypeModel<ActionConnector = any, ActionParams = any> {
+export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: string;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (connector: any) => ValidationResult;
+  validateConnector: (
+    connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
+  ) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps<ActionConnector>>
+    ComponentType<
+      ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
+    >
   > | null;
   actionParamsFields: React.LazyExoticComponent<
     ComponentType<ActionParamsProps<ActionParams>>
@@ -83,21 +87,42 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export interface ActionConnector {
-  secrets: Record<string, any>;
+interface ActionConnectorProps<Config, Secrets> {
+  secrets: Secrets;
   id: string;
   actionTypeId: string;
   name: string;
   referencedByCount?: number;
-  config: Record<string, any>;
+  config: Config;
   isPreconfigured: boolean;
 }
 
-export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
+export type PreConfiguredActionConnector = Omit<
+  ActionConnectorProps<never, never>,
+  'config' | 'secrets'
+> & {
+  isPreconfigured: true;
+};
 
-export interface ActionConnectorTableItem extends ActionConnector {
+export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProps<
+  Config,
+  Secrets
+> & {
+  isPreconfigured: false;
+};
+
+export type ActionConnector<Config = Record<string, any>, Secrets = Record<string, any>> =
+  | PreConfiguredActionConnector
+  | UserConfiguredActionConnector<Config, Secrets>;
+
+export type ActionConnectorWithoutId<
+  Config = Record<string, any>,
+  Secrets = Record<string, any>
+> = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
+
+export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
-}
+};
 
 export interface ActionVariable {
   name: string;

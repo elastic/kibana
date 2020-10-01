@@ -148,8 +148,10 @@ export const FIRED_ACTIONS = {
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {
   const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
-  if (value == null) {
-    return '';
+  if (isNaN(value)) {
+    return i18n.translate('xpack.infra.metrics.alerting.inventory.noDataFormattedValue', {
+      defaultMessage: '[NO DATA]',
+    });
   }
   const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
   return formatter(value);

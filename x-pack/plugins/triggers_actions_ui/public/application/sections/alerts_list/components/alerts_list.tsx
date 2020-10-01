@@ -474,6 +474,26 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiHealth color="primary">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
+              defaultMessage="Active: {totalStausesActive}"
+              values={{
+                totalStausesActive: alertsStatusesTotal[AlertExecutionStatusValues[1]],
+              }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="danger">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
+              defaultMessage="Errors: {totalStausesError}"
+              values={{ totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]] }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiHealth color="subdued">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
@@ -485,10 +505,10 @@ export const AlertsList: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiHealth color="success">
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
-              defaultMessage="Active: {totalStausesActive}"
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
+              defaultMessage="Pending: {totalStausesPending}"
               values={{
-                totalStausesActive: alertsStatusesTotal[AlertExecutionStatusValues[1]],
+                totalStausesPending: alertsStatusesTotal[AlertExecutionStatusValues[3]],
               }}
             />
           </EuiHealth>
@@ -496,20 +516,11 @@ export const AlertsList: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiHealth color="warning">
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.totalStausesNoDataDescription"
-              defaultMessage="No data: {totalStausesNoData}"
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
+              defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
-                totalStausesNoData: alertsStatusesTotal[AlertExecutionStatusValues[3]],
+                totalStausesUnknown: alertsStatusesTotal[AlertExecutionStatusValues[4]],
               }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="danger">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
-              defaultMessage="Errors: {totalStausesError}"
-              values={{ totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]] }}
             />
           </EuiHealth>
         </EuiFlexItem>

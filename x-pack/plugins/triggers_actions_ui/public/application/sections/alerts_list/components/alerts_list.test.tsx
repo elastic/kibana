@@ -170,7 +170,7 @@ describe('alerts_list component with items', () => {
           mutedInstanceIds: [],
           executionStatus: {
             status: 'active',
-            date: new Date('2020-08-20T19:23:38Z'),
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: null,
           },
         },
@@ -192,7 +192,7 @@ describe('alerts_list component with items', () => {
           mutedInstanceIds: [],
           executionStatus: {
             status: 'error',
-            date: new Date('2020-08-20T19:23:38Z'),
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: {
               reason: 'unknown',
               message: 'test',
@@ -367,7 +367,7 @@ describe('alerts_list with show only capability', () => {
           mutedInstanceIds: [],
           executionStatus: {
             status: 'active',
-            date: new Date('2020-08-20T19:23:38Z'),
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: null,
           },
         },
@@ -389,7 +389,7 @@ describe('alerts_list with show only capability', () => {
           mutedInstanceIds: [],
           executionStatus: {
             status: 'active',
-            date: new Date('2020-08-20T19:23:38Z'),
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: null,
           },
         },

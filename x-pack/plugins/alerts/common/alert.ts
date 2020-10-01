@@ -17,7 +17,7 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'unknown'] as const;
+export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
 export const AlertExecutionStatusErrorReasonValues = [
@@ -27,6 +27,15 @@ export const AlertExecutionStatusErrorReasonValues = [
   'unknown',
 ] as const;
 export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+
+export interface AlertExecutionStatus {
+  status: AlertExecutionStatuses;
+  lastExecutionDate: Date;
+  error?: {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+}
 
 export type AlertActionParams = SavedObjectAttributes;
 
@@ -57,6 +66,7 @@ export interface Alert {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  executionStatus: AlertExecutionStatus;
 }
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;
