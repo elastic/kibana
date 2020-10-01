@@ -13,7 +13,7 @@ export const JiraCaseFieldsRt = rt.union([
 ]);
 
 export const JiraFieldsRT = rt.type({
-  issueType: rt.string,
+  issueType: rt.union([rt.string, rt.null]),
   priority: rt.union([rt.string, rt.null]),
   parent: rt.union([rt.string, rt.null]),
 });

@@ -26,7 +26,7 @@ import { ResilientFieldsType } from '../../../../../../case/common/api/connector
 const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ResilientFieldsType
 >> = ({ fields, connector, onChange }) => {
-  const { incidentTypes, severityCode } = fields || {};
+  const { incidentTypes = null, severityCode = null } = fields || {};
 
   const [firstLoad, setFirstLoad] = useState(false);
   const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
@@ -43,6 +43,8 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
 
   useEffect(() => {
     setFirstLoad(true);
+    onChange({ incidentTypes: null, severityCode: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
@@ -78,8 +80,8 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
     setIncidentTypesComboBoxOptions([]);
     setSelectedIncidentTypesComboBoxOptions([]);
     setSeveritySelectOptions([]);
-    onChange('incidentTypes', null);
-    onChange('severityCode', null);
+
+    onChange({ incidentTypes: null, severityCode: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
@@ -129,14 +131,16 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
               }))
             );
 
-            onChange(
-              'incidentTypes',
-              selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
-            );
+            onChange({
+              ...fields,
+              incidentTypes: selectedOptions.map(
+                (selectedOption) => selectedOption.value ?? selectedOption.label
+              ),
+            });
           }}
           onBlur={() => {
             if (!incidentTypes) {
-              onChange('incidentTypes', []);
+              onChange({ ...fields, incidentTypes: [] });
             }
           }}
           isClearable={true}
@@ -153,7 +157,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
           options={severitySelectOptions}
           value={severityCode ?? undefined}
           onChange={(e) => {
-            onChange('severityCode', e.target.value);
+            onChange({ ...fields, severityCode: e.target.value });
           }}
         />
       </EuiFormRow>

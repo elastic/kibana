@@ -28,7 +28,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   connector,
   onChange,
 }) => {
-  const { issueType, priority, parent } = fields || {};
+  const { issueType = null, priority = null, parent = null } = fields || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
@@ -37,6 +37,8 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   useEffect(() => {
     setFirstLoad(true);
+    onChange({ issueType: null, priority: null, parent: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
@@ -92,8 +94,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     }
 
     setIssueTypesSelectOptions([]);
-    onChange('issueType', null);
-    onChange('priority', null);
+    onChange({ issueType: null, priority: null, parent: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
@@ -104,17 +105,16 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     }
 
     setPrioritiesSelectOptions([]);
-    onChange('issueType', issueType);
-    onChange('priority', null);
+    onChange({ issueType, priority: null, parent: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueType]);
 
   // Set default issue type
   useEffect(() => {
     if (!issueType && issueTypesSelectOptions.length > 0) {
-      onChange('issueType', issueTypesSelectOptions[0].value as string);
+      onChange({ ...fields, issueType: issueTypesSelectOptions[0].value as string });
     }
-  }, [issueTypes, issueType, issueTypesSelectOptions, onChange]);
+  }, [issueTypes, issueType, issueTypesSelectOptions, onChange, fields]);
 
   return (
     <>
@@ -133,9 +133,9 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           disabled={isLoadingIssueTypes || isLoadingFields}
           data-test-subj="issueTypeSelect"
           options={issueTypesSelectOptions}
-          value={issueType}
+          value={issueType ?? ''}
           onChange={(e) => {
-            onChange('issueType', e.target.value);
+            onChange({ ...fields, issueType: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -160,7 +160,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
                     toastNotifications={notifications.toasts}
                     actionConnector={connector}
                     onChange={(parentIssueKey) => {
-                      onChange('parent', parentIssueKey);
+                      onChange({ ...fields, parent: parentIssueKey });
                     }}
                   />
                 </EuiFormRow>
@@ -188,10 +188,10 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
                     disabled={isLoadingIssueTypes || isLoadingFields}
                     data-test-subj="prioritySelect"
                     options={prioritiesSelectOptions}
-                    value={priority ?? undefined}
+                    value={priority ?? ''}
                     hasNoInitialSelection
                     onChange={(e) => {
-                      onChange('priority', e.target.value);
+                      onChange({ ...fields, priority: e.target.value });
                     }}
                   />
                 </EuiFormRow>

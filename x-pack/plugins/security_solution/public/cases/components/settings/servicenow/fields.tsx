@@ -44,12 +44,14 @@ const selectOptions = [
 const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ServiceNowFieldsType
 >> = ({ fields, connector, onChange }) => {
-  const { severity, urgency, impact } = fields || {};
+  const { severity = null, urgency = null, impact = null } = fields || {};
 
   const [firstLoad, setFirstLoad] = useState(false);
 
   useEffect(() => {
+    onChange({ severity: null, urgency: null, impact: null });
     setFirstLoad(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reset parameters when changing connector
@@ -58,9 +60,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
       return;
     }
 
-    onChange('severity', null);
-    onChange('urgency', null);
-    onChange('impact', null);
+    onChange({ severity: null, urgency: null, impact: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
@@ -82,7 +82,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           value={urgency ?? undefined}
           hasNoInitialSelection
           onChange={(e) => {
-            onChange('urgency', e.target.value);
+            onChange({ ...fields, urgency: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -105,7 +105,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               value={severity ?? undefined}
               hasNoInitialSelection
               onChange={(e) => {
-                onChange('severity', e.target.value);
+                onChange({ ...fields, severity: e.target.value });
               }}
             />
           </EuiFormRow>
@@ -127,7 +127,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               value={impact ?? undefined}
               hasNoInitialSelection
               onChange={(e) => {
-                onChange('impact', e.target.value);
+                onChange({ ...fields, impact: e.target.value });
               }}
             />
           </EuiFormRow>
