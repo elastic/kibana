@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
-import { Subscription, Subject, merge } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -28,12 +27,11 @@ import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
+  connectToQueryState,
   esFilters,
   indexPatterns as indexPatternsUtils,
-  connectToQueryState,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
@@ -42,17 +40,33 @@ import { showOpenSearchPanel } from '../components/top_nav/show_open_search_pane
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
+  getAngularModule,
+  getHeaderActionMenuMounter,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getHeaderActionMenuMounter,
   getUrlTracker,
-  unhashUrl,
+  redirectWhenMissing,
   subscribeWithScope,
   tabifyAggResponse,
-  getAngularModule,
-  redirectWhenMissing,
+  unhashUrl,
 } from '../../kibana_services';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { validateTimeRange } from '../helpers/validate_time_range';
+import { popularizeField } from '../helpers/popularize_field';
+
+import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../kibana_legacy/public';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../common';
+import { resolveIndexPatternLoading } from './helpers/resolve_index_pattern';
+import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
+import { onSaveSearch } from '../components/top_nav/on_save_search';
+import { getSharingData } from '../helpers/get_sharing_data';
 
 const {
   core,
@@ -67,20 +81,6 @@ const {
   uiSettings: config,
   visualizations,
 } = getServices();
-
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { validateTimeRange } from '../helpers/validate_time_range';
-import { popularizeField } from '../helpers/popularize_field';
-
-import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { addFatalError } from '../../../../kibana_legacy/public';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-} from '../../../common';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -196,7 +196,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   let inspectorRequest;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
-  $scope.indexPattern = resolveIndexPatternLoading();
+  $scope.indexPattern = resolveIndexPatternLoading(
+    $route.current.locals.savedObjects.ip,
+    $scope.searchSource,
+    toastNotifications
+  );
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -323,145 +327,73 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     unlistenHistoryBasePath();
   });
 
-  const getTopNavLinks = () => {
-    const newSearch = {
-      id: 'new',
-      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
-        defaultMessage: 'New',
-      }),
-      description: i18n.translate('discover.localMenu.newSearchDescription', {
-        defaultMessage: 'New Search',
-      }),
-      run: function () {
-        $scope.$evalAsync(() => {
-          history.push('/');
-        });
-      },
-      testId: 'discoverNewButton',
-    };
+  const getFieldCounts = async () => {
+    // the field counts aren't set until we have the data back,
+    // so we wait for the fetch to be done before proceeding
+    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
+      return $scope.fieldCounts;
+    }
 
-    const saveSearch = {
-      id: 'save',
-      label: i18n.translate('discover.localMenu.saveTitle', {
-        defaultMessage: 'Save',
-      }),
-      description: i18n.translate('discover.localMenu.saveSearchDescription', {
-        defaultMessage: 'Save Search',
-      }),
-      testId: 'discoverSaveButton',
-      run: async () => {
-        const onSave = ({
-          newTitle,
-          newCopyOnSave,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        }) => {
-          const currentTitle = savedSearch.title;
-          savedSearch.title = newTitle;
-          savedSearch.copyOnSave = newCopyOnSave;
-          const saveOptions = {
-            confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          };
-          return saveDataSource(saveOptions).then((response) => {
-            // If the save wasn't successful, put the original values back.
-            if (!response.id || response.error) {
-              savedSearch.title = currentTitle;
-            } else {
-              resetInitialAppState();
-            }
-            return response;
-          });
-        };
-
-        const saveModal = (
-          <SavedObjectSaveModal
-            onSave={onSave}
-            onClose={() => {}}
-            title={savedSearch.title}
-            showCopyOnSave={!!savedSearch.id}
-            objectType="search"
-            description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
-              defaultMessage:
-                'Save your Discover search so you can use it in visualizations and dashboards',
-            })}
-            showDescription={false}
-          />
-        );
-        showSaveModal(saveModal, core.i18n.Context);
-      },
-    };
-
-    const openSearch = {
-      id: 'open',
-      label: i18n.translate('discover.localMenu.openTitle', {
-        defaultMessage: 'Open',
-      }),
-      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
-        defaultMessage: 'Open Saved Search',
-      }),
-      testId: 'discoverOpenButton',
-      run: () => {
-        showOpenSearchPanel({
-          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
-          I18nContext: core.i18n.Context,
-        });
-      },
-    };
-
-    const shareSearch = {
-      id: 'share',
-      label: i18n.translate('discover.localMenu.shareTitle', {
-        defaultMessage: 'Share',
-      }),
-      description: i18n.translate('discover.localMenu.shareSearchDescription', {
-        defaultMessage: 'Share Search',
-      }),
-      testId: 'shareTopNavButton',
-      run: async (anchorElement) => {
-        const sharingData = await this.getSharingData();
-        share.toggleShareContextMenu({
-          anchorElement,
-          allowEmbed: false,
-          allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
-          objectId: savedSearch.id,
-          objectType: 'search',
-          sharingData: {
-            ...sharingData,
-            title: savedSearch.title,
-          },
-          isDirty: !savedSearch.id || isAppStateDirty(),
-        });
-      },
-    };
-
-    const inspectSearch = {
-      id: 'inspect',
-      label: i18n.translate('discover.localMenu.inspectTitle', {
-        defaultMessage: 'Inspect',
-      }),
-      description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
-        defaultMessage: 'Open Inspector for search',
-      }),
-      testId: 'openInspectorButton',
-      run() {
-        getServices().inspector.open(inspectorAdapters, {
-          title: savedSearch.title,
-        });
-      },
-    };
-
-    return [
-      newSearch,
-      ...(uiCapabilities.discover.save ? [saveSearch] : []),
-      openSearch,
-      shareSearch,
-      inspectSearch,
-    ];
+    return await new Promise((resolve) => {
+      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
+        if (newValue === fetchStatuses.COMPLETE) {
+          unwatch();
+          resolve($scope.fieldCounts);
+        }
+      });
+    });
   };
-  $scope.topNavMenu = getTopNavLinks();
+
+  const onNewSearch = function () {
+    $scope.$evalAsync(() => {
+      history.push('/');
+    });
+  };
+
+  const onOpenSearch = () => {
+    showOpenSearchPanel({
+      makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
+      I18nContext: core.i18n.Context,
+    });
+  };
+
+  const onShareSearch = async (anchorElement) => {
+    const sharingData = await getSharingData(
+      $scope.searchSource,
+      $scope.state,
+      $scope.indexPattern,
+      config,
+      getFieldCounts
+    );
+    share.toggleShareContextMenu({
+      anchorElement,
+      allowEmbed: false,
+      allowShortUrl: uiCapabilities.discover.createShortUrl,
+      shareableUrl: unhashUrl(window.location.href),
+      objectId: savedSearch.id,
+      objectType: 'search',
+      sharingData: {
+        ...sharingData,
+        title: savedSearch.title,
+      },
+      isDirty: !savedSearch.id || isAppStateDirty(),
+    });
+  };
+
+  const onInspectSearch = () => {
+    getServices().inspector.open(inspectorAdapters, {
+      title: savedSearch.title,
+    });
+  };
+
+  $scope.topNavMenu = getTopNavLinks(
+    onNewSearch,
+    () => onSaveSearch(savedSearch, saveDataSource, resetInitialAppState, core.i18n),
+    onOpenSearch,
+    onShareSearch,
+    onInspectSearch,
+    uiCapabilities
+  );
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)
@@ -504,77 +436,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       },
     ]);
   }
-
-  const getFieldCounts = async () => {
-    // the field counts aren't set until we have the data back,
-    // so we wait for the fetch to be done before proceeding
-    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
-      return $scope.fieldCounts;
-    }
-
-    return await new Promise((resolve) => {
-      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
-        if (newValue === fetchStatuses.COMPLETE) {
-          unwatch();
-          resolve($scope.fieldCounts);
-        }
-      });
-    });
-  };
-
-  const getSharingDataFields = async (selectedFields, timeFieldName, hideTimeColumn) => {
-    if (selectedFields.length === 1 && selectedFields[0] === '_source') {
-      const fieldCounts = await getFieldCounts();
-      return {
-        searchFields: null,
-        selectFields: _.keys(fieldCounts).sort(),
-      };
-    }
-
-    const fields =
-      timeFieldName && !hideTimeColumn ? [timeFieldName, ...selectedFields] : selectedFields;
-    return {
-      searchFields: fields,
-      selectFields: fields,
-    };
-  };
-
-  this.getSharingData = async () => {
-    const searchSource = $scope.searchSource.createCopy();
-
-    const { searchFields, selectFields } = await getSharingDataFields(
-      $scope.state.columns,
-      $scope.indexPattern.timeFieldName,
-      config.get(DOC_HIDE_TIME_COLUMN_SETTING)
-    );
-    searchSource.setField('fields', searchFields);
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        $scope.state.sort,
-        $scope.indexPattern,
-        config.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    searchSource.setField('highlight', null);
-    searchSource.setField('highlightAll', null);
-    searchSource.setField('aggs', null);
-    searchSource.setField('size', null);
-
-    const body = await searchSource.getSearchRequestBody();
-    return {
-      searchRequest: {
-        index: searchSource.getField('index').title,
-        body,
-      },
-      fields: selectFields,
-      metaFields: $scope.indexPattern.metaFields,
-      conflictedTypesFields: $scope.indexPattern.fields
-        .filter((f) => f.type === 'conflict')
-        .map((f) => f.name),
-      indexPatternId: searchSource.getField('index').id,
-    };
-  };
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
@@ -1039,62 +900,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       if (!$scope.vis) return;
       return $scope.vis.data.aggs.toDsl();
     });
-  }
-
-  function getIndexPatternWarning(index) {
-    return i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{stateVal} is not a configured index pattern ID',
-      values: {
-        stateVal: `"${index}"`,
-      },
-    });
-  }
-
-  function resolveIndexPatternLoading() {
-    const {
-      loaded: loadedIndexPattern,
-      stateVal,
-      stateValFound,
-    } = $route.current.locals.savedObjects.ip;
-
-    const ownIndexPattern = $scope.searchSource.getOwnField('index');
-
-    if (ownIndexPattern && !stateVal) {
-      return ownIndexPattern;
-    }
-
-    if (stateVal && !stateValFound) {
-      const warningTitle = getIndexPatternWarning();
-
-      if (ownIndexPattern) {
-        toastNotifications.addWarning({
-          title: warningTitle,
-          text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
-            defaultMessage:
-              'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
-            values: {
-              ownIndexPatternTitle: ownIndexPattern.title,
-              ownIndexPatternId: ownIndexPattern.id,
-            },
-          }),
-        });
-        return ownIndexPattern;
-      }
-
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
-          defaultMessage:
-            'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
-          values: {
-            loadedIndexPatternTitle: loadedIndexPattern.title,
-            loadedIndexPatternId: loadedIndexPattern.id,
-          },
-        }),
-      });
-    }
-
-    return loadedIndexPattern;
   }
 
   addHelpMenuToAppChrome(chrome);

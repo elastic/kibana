@@ -29,6 +29,7 @@ export interface SavedSearch {
   sort: SortOrder[];
   destroy: () => void;
   lastSavedTitle?: string;
+  copyOnSave?: boolean;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;
