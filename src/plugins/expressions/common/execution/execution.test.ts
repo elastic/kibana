@@ -491,7 +491,7 @@ describe('Execution', () => {
         await execution.result;
 
         for (const node of execution.state.get().ast.chain) {
-          expect(node.debug?.fn.name).toBe('add');
+          expect(node.debug?.fn).toBe('add');
         }
       });
 
@@ -667,7 +667,7 @@ describe('Execution', () => {
 
         expect(node2.debug).toMatchObject({
           success: false,
-          fn: expect.any(Object),
+          fn: 'throws',
           input: expect.any(Object),
           args: expect.any(Object),
           error: expect.any(Object),
