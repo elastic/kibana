@@ -14,6 +14,7 @@ import {
   getMetricsK8sAnomaliesSuccessReponsePayloadRT,
   getMetricsK8sAnomaliesRequestPayloadRT,
   MetricsK8sAnomaly,
+  Metric,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -170,7 +171,7 @@ export const useMetricsK8sAnomaliesResults = ({
   const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async () => {
+      createPromise: async (metric: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -183,6 +184,7 @@ export const useMetricsK8sAnomaliesResults = ({
             sourceId,
             startTime: queryStartTime,
             endTime: queryEndTime,
+            metric,
             sort: sortOptions,
             pagination: {
               ...paginationOptions,
@@ -256,10 +258,6 @@ export const useMetricsK8sAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  useEffect(() => {
-    getMetricsK8sAnomalies();
-  }, [getMetricsK8sAnomalies]);
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
@@ -301,6 +299,7 @@ interface RequestArgs {
   sourceId: string;
   startTime: number;
   endTime: number;
+  metric: Metric;
   sort: Sort;
   pagination: Pagination;
   datasets?: string[];
@@ -310,7 +309,7 @@ export const callGetMetricsK8sAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, sort, pagination, datasets } = requestArgs;
+  const { sourceId, startTime, endTime, metric, sort, pagination, datasets } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
@@ -321,6 +320,7 @@ export const callGetMetricsK8sAnomaliesAPI = async (
             startTime,
             endTime,
           },
+          metric,
           sort,
           pagination,
           datasets,

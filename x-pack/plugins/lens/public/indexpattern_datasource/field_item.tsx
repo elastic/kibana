@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './field_item.scss';
+
 import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
@@ -196,7 +198,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   return (
     <EuiPopover
       ownFocus
-      id="lnsFieldListPanel__field"
       className="lnsFieldItem__popoverAnchor"
       display="block"
       container={document.querySelector<HTMLElement>('.application') || undefined}

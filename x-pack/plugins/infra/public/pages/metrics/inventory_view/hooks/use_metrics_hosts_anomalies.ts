@@ -8,6 +8,7 @@ import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import { HttpHandler } from 'src/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
+  Metric,
   Sort,
   Pagination,
   PaginationCursor,
@@ -170,7 +171,7 @@ export const useMetricsHostsAnomaliesResults = ({
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async () => {
+      createPromise: async (metric: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -182,6 +183,7 @@ export const useMetricsHostsAnomaliesResults = ({
             sourceId,
             startTime: queryStartTime,
             endTime: queryEndTime,
+            metric,
             sort: sortOptions,
             pagination: {
               ...paginationOptions,
@@ -254,10 +256,6 @@ export const useMetricsHostsAnomaliesResults = ({
     });
   }, [filteredDatasets]);
 
-  useEffect(() => {
-    getMetricsHostsAnomalies();
-  }, [getMetricsHostsAnomalies]); // TODO: FIgure out the deps here.
-
   const handleFetchNextPage = useCallback(() => {
     if (reducerState.lastReceivedCursors) {
       dispatch({ type: 'fetchNextPage' });
@@ -299,6 +297,7 @@ interface RequestArgs {
   sourceId: string;
   startTime: number;
   endTime: number;
+  metric: Metric;
   sort: Sort;
   pagination: Pagination;
 }
@@ -307,7 +306,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, sort, pagination } = requestArgs;
+  const { sourceId, startTime, endTime, metric, sort, pagination } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
@@ -318,6 +317,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
             startTime,
             endTime,
           },
+          metric,
           sort,
           pagination,
         },

@@ -14,10 +14,7 @@ import {
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../projections/typings';
-import {
-  localUIFilterNames,
-  LocalUIFilterName,
-} from '../lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
 import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../projections/services';
@@ -32,6 +29,7 @@ import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { APMRequestHandlerContext } from './typings';
+import { LocalUIFilterName } from '../../common/ui_filter';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',

@@ -54,6 +54,17 @@ const jobStateRT = rt.keyof({
   opening: null,
 });
 
+const jobAnalysisConfigRT = rt.partial({
+  per_partition_categorization: rt.intersection([
+    rt.type({
+      enabled: rt.boolean,
+    }),
+    rt.partial({
+      stop_on_warn: rt.boolean,
+    }),
+  ]),
+});
+
 const jobCategorizationStatusRT = rt.keyof({
   ok: null,
   warn: null,
@@ -64,6 +75,7 @@ const jobModelSizeStatsRT = rt.type({
   categorized_doc_count: rt.number,
   dead_category_count: rt.number,
   frequent_category_count: rt.number,
+  log_time: rt.number,
   rare_category_count: rt.number,
   total_category_count: rt.number,
 });
@@ -79,6 +91,8 @@ export const jobSummaryRT = rt.intersection([
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({
+      analysis_config: jobAnalysisConfigRT,
+      create_time: rt.number,
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
       model_size_stats: jobModelSizeStatsRT,
