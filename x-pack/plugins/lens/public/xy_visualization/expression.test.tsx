@@ -918,16 +918,14 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
     });
 
-    test('it does not apply histogram mode to more than one the series for unstacked bar chart', () => {
+    test('it does not apply histogram mode to more than one bar series for unstacked bar chart', () => {
       const { data, args } = sampleArgs();
       const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
       delete firstLayer.splitAccessor;
-      const secondLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
-      delete secondLayer.splitAccessor;
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, layers: [firstLayer, secondLayer] }}
+          args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
