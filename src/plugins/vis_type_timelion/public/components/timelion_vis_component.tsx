@@ -21,7 +21,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
+import { useResizeObserver } from '@elastic/eui';
 
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
 import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
@@ -38,18 +40,19 @@ import { Series, Sheet } from '../helpers/timelion_request_handler';
 import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
-import { ExprVisAPIEvents } from '../../../visualizations/public';
+
+import './index.scss';
 
 interface CrosshairPlot extends jquery.flot.plot {
   setCrosshair: (pos: Position) => void;
   clearCrosshair: () => void;
 }
 
-interface PanelProps {
-  applyFilter: ExprVisAPIEvents['applyFilter'];
+interface TimelionVisComponentProps {
+  fireEvent: IInterpreterRenderHandlers['event'];
   interval: string;
   seriesList: Sheet;
-  renderComplete(): void;
+  renderComplete: IInterpreterRenderHandlers['done'];
 }
 
 interface Position {
@@ -75,11 +78,16 @@ const DEBOUNCE_DELAY = 50;
 // ensure legend is the same height with or without a caption so legend items do not move around
 const emptyCaption = '<br>';
 
-function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps) {
+function TimelionVisComponent({
+  interval,
+  seriesList,
+  renderComplete,
+  fireEvent,
+}: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
-  const [chartElem, setChartElem] = useState<HTMLDivElement>();
+  const [chartElem, setChartElem] = useState<HTMLDivElement | null>(null);
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
@@ -191,7 +199,7 @@ function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps
           interval,
           kibana.services.timefilter,
           kibana.services.uiSettings,
-          chartElem && chartElem.clientWidth,
+          chartElem?.clientWidth,
           grid
         );
         const updatedSeries = buildSeriesData(chartValue, options);
@@ -216,12 +224,14 @@ function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps
         updateCaption(newPlot.getData());
       }
     },
-    [canvasElem, chartElem, renderComplete, kibana.services, interval, updateCaption]
+    [canvasElem, chartElem?.clientWidth, renderComplete, kibana.services, interval, updateCaption]
   );
+
+  const dimensions = useResizeObserver(chartElem);
 
   useEffect(() => {
     updatePlot(chart, seriesList.render && seriesList.render.grid);
-  }, [chart, updatePlot, seriesList.render]);
+  }, [chart, updatePlot, seriesList.render, dimensions]);
 
   useEffect(() => {
     const colorsSet: Array<[Series, string]> = [];
@@ -349,21 +359,24 @@ function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps
 
   const plotSelectedHandler = useCallback(
     (event: JQuery.TriggeredEvent, ranges: Ranges) => {
-      applyFilter({
-        timeFieldName: '*',
-        filters: [
-          {
-            range: {
-              '*': {
-                gte: ranges.xaxis.from,
-                lte: ranges.xaxis.to,
+      fireEvent({
+        name: 'applyFilter',
+        data: {
+          timeFieldName: '*',
+          filters: [
+            {
+              range: {
+                '*': {
+                  gte: ranges.xaxis.from,
+                  lte: ranges.xaxis.to,
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       });
     },
-    [applyFilter]
+    [fireEvent]
   );
 
   useEffect(() => {
@@ -396,4 +409,6 @@ function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps
   );
 }
 
-export { Panel };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimelionVisComponent as default };
