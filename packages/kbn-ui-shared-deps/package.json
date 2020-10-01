@@ -17,7 +17,7 @@
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.8.0",
     "compression-webpack-plugin": "^4.0.0",
-    "core-js": "^3.2.1",
+    "core-js": "^3.6.4",
     "custom-event-polyfill": "^0.3.0",
     "jquery": "^3.5.0",
     "lodash": "^4.17.20",
