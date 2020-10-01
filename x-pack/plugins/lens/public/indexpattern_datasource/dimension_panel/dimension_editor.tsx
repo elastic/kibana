@@ -17,7 +17,7 @@ import {
   EuiFormLabel,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
-import { IndexPatternColumn, OperationType, uniqueLabels } from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,

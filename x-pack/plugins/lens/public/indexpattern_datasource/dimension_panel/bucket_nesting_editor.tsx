@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { IndexPatternColumn } from '../operations';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -29,13 +29,11 @@ export function BucketNestingEditor({
   layer,
   setColumns,
   fieldMap,
-  columnLabelMap,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
   fieldMap: Record<string, IndexPatternField>;
-  columnLabelMap: Record<string, string>;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -61,6 +59,7 @@ export function BucketNestingEditor({
         <EuiHorizontalRule margin="m" />
         <EuiFormRow>
           <EuiSwitch
+            data-test-subj="indexPattern-nesting-switch"
             label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
               defaultMessage: 'Use as top level aggregation',
             })}
