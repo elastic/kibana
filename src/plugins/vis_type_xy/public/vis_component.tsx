@@ -214,7 +214,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
   }
 
   return (
-    <div className="xyChart__container">
+    <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
         onClick={toggleLegend}
         showLegend={showLegend}

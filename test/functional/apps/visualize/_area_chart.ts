@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const find = getService('find');
   const inspector = getService('inspector');
@@ -36,9 +38,13 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('area charts', function indexPatternCreation() {
-    const vizName1 = 'Visualization AreaChart Name Test';
+  const getVizName = async () =>
+    await PageObjects.visChart.getExpectedValue(
+      'Visualization AreaChart Name Test',
+      'Visualization AreaChart Name Test - New chart UI'
+    );
 
+  describe('area charts', function indexPatternCreation() {
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
@@ -58,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
       const intervalValue = await PageObjects.visEditor.getInterval();
       log.debug('intervalValue = ' + intervalValue);
       expect(intervalValue[0]).to.be('Auto');
-      return PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo();
     };
 
     before(async function () {
@@ -75,22 +81,22 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should save and load with special characters', async function () {
-      const vizNamewithSpecialChars = vizName1 + '/?&=%';
+      const vizNamewithSpecialChars = (await getVizName()) + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
     it('should save and load with non-ascii characters', async function () {
-      const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
+      const vizNamewithSpecialChars = `${await getVizName()} with Umlaut ä`;
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(await getVizName());
+      await PageObjects.visualize.loadSavedVisualization(await getVizName());
       await PageObjects.visChart.waitForVisualization();
     });
 
@@ -99,13 +105,23 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct chart', async function () {
-      const xAxisLabels = [
-        '2015-09-20 00:00',
-        '2015-09-21 00:00',
-        '2015-09-22 00:00',
-        '2015-09-23 00:00',
-      ];
-      const yAxisLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'];
+      const xAxisLabels = await PageObjects.visChart.getExpectedValue(
+        ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00'],
+        [
+          '2015-09-19 12:00',
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+        ]
+      );
+      const yAxisLabels = await PageObjects.visChart.getExpectedValue(
+        ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
+        ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+      );
       const expectedAreaChartData = [
         37,
         202,
@@ -292,8 +308,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after(async () => {
-        const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize#').pop().replace('embed=true', '');
+        const url = (await browser.getCurrentUrl()) ?? '';
+        const lastValue = url.split('/visualize#').pop() ?? '';
+        const embedUrl = lastValue.replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
       });
     });
@@ -309,8 +326,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -321,8 +338,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -334,17 +351,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '0',
-          '200',
-          '400',
-          '600',
-          '800',
-          '1,000',
-          '1,200',
-          '1,400',
-          '1,600',
-        ];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -352,7 +362,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -362,17 +375,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
-        const expectedLabels = [
-          '0',
-          '200',
-          '400',
-          '600',
-          '800',
-          '1,000',
-          '1,200',
-          '1,400',
-          '1,600',
-        ];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -380,7 +386,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
     });
@@ -388,6 +397,7 @@ export default function ({ getService, getPageObjects }) {
       // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
       const fromTime = 'Jan 1, 2013 @ 00:00:00.000';
       const toTime = 'Jan 1, 2020 @ 00:00:00.000';
+
       it('should render a yearly area with 12 svg paths', async () => {
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();

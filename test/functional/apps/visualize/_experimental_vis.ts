@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default ({ getService, getPageObjects }) => {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['visualize']);
 
@@ -44,7 +46,7 @@ export default ({ getService, getPageObjects }) => {
         // Select a index-pattern/search if this vis requires it
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the beta banner is there and state that this is beta
-        const info = await PageObjects.visualize.getBetaInfo();
+        const info = await PageObjects.visualize.getExperimentalInfo();
         expect(await info.getVisibleText()).to.contain('beta');
       });
 
@@ -73,4 +75,4 @@ export default ({ getService, getPageObjects }) => {
       });
     });
   });
-};
+}

@@ -19,13 +19,21 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'timePicker', 'visEditor', 'visChart']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'timePicker',
+    'visEditor',
+    'visChart',
+    'common',
+  ]);
 
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
@@ -158,11 +166,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Metric', 'metrics');
       await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', 'buckets');
-      await PageObjects.visEditor.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
+      await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
-      log.debug(data.split('\n'));
+      log.debug('-- table data', data.trim().split('\n'));
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
@@ -177,7 +185,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
-      log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20',
         '4,757',

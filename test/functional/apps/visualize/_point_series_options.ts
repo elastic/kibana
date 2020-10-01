@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -31,6 +33,7 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
     'visEditor',
     'visChart',
+    'common',
   ]);
   const inspector = getService('inspector');
 
@@ -154,7 +157,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await PageObjects.visChart.getRightValueAxes();
+        const length = await PageObjects.visChart.getRightValueAxesCount();
         expect(length).to.be(1);
       });
     });
@@ -163,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
       it('should change average series type to histogram', async function () {
         await PageObjects.visEditor.setSeriesType(1, 'histogram');
         await PageObjects.visEditor.clickGo();
-        const length = await PageObjects.visChart.getHistogramSeries();
+        const length = await PageObjects.visChart.getHistogramSeriesCount();
         expect(length).to.be(1);
       });
     });
@@ -177,7 +180,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        expect(gridLines.length).to.be(9);
+        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 5);
+        expect(gridLines.length).to.be(expectedCount);
         gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
         });
@@ -188,7 +192,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        expect(gridLines.length).to.be(9);
+        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 8);
+        expect(gridLines.length).to.be(expectedCount);
         gridLines.forEach((gridLine) => {
           expect(gridLine.x).to.be(0);
         });
@@ -269,17 +274,30 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('timezones', function () {
-      const expectedLabels = ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'];
-
+    describe('timezones', async function () {
       it('should show round labels in default timezone', async function () {
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
+          ['2015-09-19 12:00', '2015-09-20 12:00', '2015-09-21 12:00', '2015-09-22 12:00']
+        );
         await initChart();
         const labels = await PageObjects.visChart.getXAxisLabels();
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
       it('should show round labels in different timezone', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
+          [
+            '2015-09-19 12:00',
+            '2015-09-20 06:00',
+            '2015-09-21 00:00',
+            '2015-09-21 18:00',
+            '2015-09-22 12:00',
+          ]
+        );
+
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
         await initChart();
@@ -296,13 +314,34 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visChart.waitForRenderingCount();
 
-        await retry.waitFor('wait for x-axis labels to match expected for Phoenix', async () => {
-          const labels = await PageObjects.visChart.getXAxisLabels();
-          log.debug(`Labels: ${labels}`);
-          return (
-            labels.toString() === ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'].toString()
-          );
-        });
+        await retry.waitForWithTimeout(
+          'wait for x-axis labels to match expected for Phoenix',
+          5000,
+          async () => {
+            const labels = (await PageObjects.visChart.getXAxisLabels()) ?? '';
+            log.debug(`Labels: ${labels}`);
+
+            const xLabels = await PageObjects.visChart.getExpectedValue(
+              ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+              [
+                '09:30',
+                '10:00',
+                '10:30',
+                '11:00',
+                '11:30',
+                '12:00',
+                '12:30',
+                '13:00',
+                '13:30',
+                '14:00',
+                '14:30',
+                '15:00',
+                '15:30',
+              ]
+            );
+            return labels.toString() === xLabels.toString();
+          }
+        );
 
         const expectedTableData = [
           ['09:05', '13', '13,463,070,562.462'],
@@ -330,7 +369,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
         log.debug("set 'dateFormat:tz': 'UTC'");
-        await kibanaServer.uiSettings.replace({
+        await kibanaServer.uiSettings.update({
           'dateFormat:tz': 'UTC',
           defaultIndex: 'logstash-*',
         });
@@ -339,16 +378,38 @@ export default function ({ getService, getPageObjects }) {
         await browser.refresh();
         // wait some time before trying to check for rendering count
         await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.visualize.clickRefresh();
         await PageObjects.visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
-        await retry.waitFor('wait for x-axis labels to match expected for UTC', async () => {
-          const labels2 = await PageObjects.visChart.getXAxisLabels();
-          log.debug(`Labels: ${labels2}`);
-          return (
-            labels2.toString() === ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'].toString()
-          );
-        });
+        await retry.waitForWithTimeout(
+          'wait for x-axis labels to match expected for UTC',
+          5000,
+          async () => {
+            const labels2 = (await PageObjects.visChart.getXAxisLabels()) ?? '';
+            log.debug(`Labels: ${labels2}`);
+
+            const xLabels2 = await PageObjects.visChart.getExpectedValue(
+              ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'],
+              [
+                '16:30',
+                '17:00',
+                '17:30',
+                '18:00',
+                '18:30',
+                '19:00',
+                '19:30',
+                '20:00',
+                '20:30',
+                '21:00',
+                '21:30',
+                '22:00',
+                '22:30',
+              ]
+            );
+            return labels2.toString() === xLabels2.toString();
+          }
+        );
 
         // the expected inspector data is the same but with timestamps shifted +7 hours
         const expectedTableData2 = [
@@ -386,7 +447,7 @@ export default function ({ getService, getPageObjects }) {
         // for details see https://github.com/elastic/kibana/issues/63037
         if (timezone !== 'UTC') {
           log.debug("set 'dateFormat:tz': 'UTC'");
-          await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+          await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
         }
       });
     });

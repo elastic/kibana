@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -140,8 +142,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -152,8 +154,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -165,17 +167,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '0',
-          '200',
-          '400',
-          '600',
-          '800',
-          '1,000',
-          '1,200',
-          '1,400',
-          '1,600',
-        ];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -183,7 +178,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -193,17 +191,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
-        const expectedLabels = [
-          '0',
-          '200',
-          '400',
-          '600',
-          '800',
-          '1,000',
-          '1,200',
-          '1,400',
-          '1,600',
-        ];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -211,7 +202,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
+          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
+        );
         expect(labels).to.eql(expectedLabels);
       });
     });

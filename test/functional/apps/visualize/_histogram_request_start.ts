@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -68,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
         await PageObjects.visEditor.clickGo();
-        await PageObjects.common.sleep(1000); //fix this
+        await PageObjects.common.sleep(1000); // fix this
         await retry.try(async () => {
           const data = await PageObjects.visChart.getTableVisData();
           const dataArray = data.replace(/,/g, '').split('\n');

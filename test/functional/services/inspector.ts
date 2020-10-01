@@ -90,7 +90,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param expectedData
      */
     public async expectTableData(expectedData: string[][]): Promise<void> {
-      await log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
+      log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
       const data = await this.getTableData();
       expect(data).to.eql(expectedData);
     }
@@ -169,7 +169,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterForTableCell(column: string, row: string): Promise<void> {
+    public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(
@@ -187,7 +187,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterOutTableCell(column: string, row: string): Promise<void> {
+    public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(

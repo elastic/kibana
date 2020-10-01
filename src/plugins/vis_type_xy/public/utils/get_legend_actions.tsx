@@ -85,6 +85,7 @@ export const getLegendActions = (
           marginLeft: 4,
           marginRight: 4,
         }}
+        data-test-subj={`legend-${name}`}
         onKeyPress={() => undefined}
         onClick={() => setPopoverOpen(!popoverOpen)}
       >

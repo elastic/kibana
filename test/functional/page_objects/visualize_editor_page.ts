@@ -27,6 +27,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const elasticChart = getService('elasticChart');
   const { common, header, visChart } = getPageObjects(['common', 'header', 'visChart']);
 
   interface IntervalOptions {
@@ -73,6 +74,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickGo() {
+      if (await visChart.isNewChartUiEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+
       const prevRenderingCount = await visChart.getVisualizationRenderingCount();
       log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
@@ -130,7 +135,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
-    public async setCustomRangeByIndex(index: string, from: string, to: string) {
+    public async setCustomRangeByIndex(index: string | number, from: string, to: string) {
       await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
       await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
@@ -157,14 +162,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectField(
       fieldValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       log.debug(`selectField ${fieldValue}`);
       const selector = `
           [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
           [data-test-subj="visAggEditorParams"]
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="visDefaultEditorField"]
         `;
       const fieldEl = await find.byCssSelector(selector);
@@ -186,12 +191,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectAggregation(
       aggValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       const comboBoxElement = await find.byCssSelector(`
           [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="defaultEditorAggSelect"]
         `);
 
@@ -272,7 +277,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       });
     }
 
-    public async setCustomLabel(label: string, index = 1) {
+    public async setCustomLabel(label: string, index: number | string = 1) {
       const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
@@ -309,7 +314,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
 
-    public async toggleDisabledAgg(agg: string) {
+    public async toggleDisabledAgg(agg: string | number) {
       await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await header.waitUntilLoadingHasFinished();
     }
@@ -393,7 +398,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       }
     }
 
-    public async setSize(newValue: string, aggId: string) {
+    public async setSize(newValue: string | number, aggId?: string | number) {
       const dataTestSubj = aggId
         ? `visEditorAggAccordion${aggId} > sizeParamEditor`
         : 'sizeParamEditor';
@@ -437,13 +442,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
-    public async setInterval(newValue: string, options: IntervalOptions = {}) {
+    public async setInterval(newValue: string | number, options: IntervalOptions = {}) {
+      const newValueString = `${newValue}`;
       const { type = 'default', aggNth = 2, append = false } = options;
-      log.debug(`visEditor.setInterval(${newValue}, {${type}, ${aggNth}, ${append}})`);
+      log.debug(`visEditor.setInterval(${newValueString}, {${type}, ${aggNth}, ${append}})`);
       if (type === 'default') {
-        await comboBox.set('visEditorInterval', newValue);
+        await comboBox.set('visEditorInterval', newValueString);
       } else if (type === 'custom') {
-        await comboBox.setCustom('visEditorInterval', newValue);
+        await comboBox.setCustom('visEditorInterval', newValueString);
       } else {
         if (type === 'numeric') {
           const autoMode = await testSubjects.getAttribute(
@@ -455,9 +461,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
           }
         }
         if (append) {
-          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValueString));
         } else {
-          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValueString));
         }
       }
     }

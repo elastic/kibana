@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor']);
   const listingTable = getService('listingTable');
 

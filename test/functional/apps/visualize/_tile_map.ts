@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -46,11 +48,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        //do not configure aggs
+        // do not configure aggs
       });
 
       it('should be able to zoom in twice', async () => {
-        //should not throw
+        // should not throw
         await PageObjects.tileMap.clickMapZoomIn();
         await PageObjects.tileMap.clickMapZoomIn();
       });
@@ -77,21 +79,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
       });
 
+      type SampleTableData = Array<string | { lat: number; lon: number }>;
+
       /**
        * manually compare data due to possible small difference in numbers. This is browser dependent.
        */
-      function compareTableData(actual, expected) {
+      function compareTableData(actual: string[][], expected: SampleTableData[]) {
         log.debug('comparing expected: ', expected);
         log.debug('with actual: ', actual);
 
         const roundedValues = actual.map((row) => {
           // Parse last element in each row as JSON and floor the lat/long value
           const coords = JSON.parse(row[row.length - 1]);
-          row[row.length - 1] = {
-            lat: Math.floor(parseFloat(coords.lat)),
-            lon: Math.floor(parseFloat(coords.lon)),
-          };
-          return row;
+          return [
+            ...row.slice(0, -1),
+            {
+              lat: Math.floor(parseFloat(coords.lat)),
+              lon: Math.floor(parseFloat(coords.lon)),
+            },
+          ];
         });
 
         expect(roundedValues).to.eql(expected);
@@ -111,9 +117,9 @@ export default function ({ getService, getPageObjects }) {
             ['-', 'f', '187', { lat: 45, lon: -83 }],
             ['-', '8', '108', { lat: 18, lon: -157 }],
           ];
-          //level 1
+          // level 1
           await PageObjects.tileMap.clickMapZoomOut();
-          //level 0
+          // level 0
           await PageObjects.tileMap.clickMapZoomOut();
 
           await inspector.open();

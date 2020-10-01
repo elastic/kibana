@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('vector map', function () {
     const inspector = getService('inspector');
     const log = getService('log');
@@ -67,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
           'World Countries'
         );
 
-        //ensure all fields are there
+        // ensure all fields are there
         await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectJoinField',
           'ISO 3166-1 alpha-2 code'

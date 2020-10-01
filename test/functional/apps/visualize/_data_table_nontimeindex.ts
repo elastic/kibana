@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -104,8 +106,8 @@ export default function ({ getService, getPageObjects }) {
       );
       await PageObjects.visEditor.clickBucket('Metric', 'metrics');
       await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', 'buckets');
-      await PageObjects.visEditor.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
+      await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));

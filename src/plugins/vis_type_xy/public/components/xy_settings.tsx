@@ -38,6 +38,15 @@ import { renderEndzoneTooltip } from '../../../charts/public';
 import { getThemeService } from '../services';
 import { VisConfig } from '../types';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _ecDebugStateFlag?: boolean;
+  }
+}
+
 type XYSettingsProps = Pick<
   VisConfig,
   | 'markSizeRatio'
@@ -111,6 +120,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
     <Settings
       // @ts-ignore
       enableVislibSeriesSort
+      debugState={window._ecDebugStateFlag ?? false}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}

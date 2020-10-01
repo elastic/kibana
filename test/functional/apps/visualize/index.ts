@@ -42,6 +42,31 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       isOss = await PageObjects.common.isOss();
     });
 
+    // TODO: Remove when vislib is removed
+    describe('newChartUi', function () {
+      this.tags('ciGroup8');
+
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': true,
+        });
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': false,
+        });
+        await browser.refresh();
+      });
+
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+    });
+
     describe('', function () {
       this.tags('ciGroup9');
 

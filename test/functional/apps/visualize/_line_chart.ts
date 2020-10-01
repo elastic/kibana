@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -70,19 +72,18 @@ export default function ({ getService, getPageObjects }) {
       log.debug('data=' + data);
       const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
       for (let x = 0; x < data.length; x++) {
+        const expected = Number(expectedChartData[x].split(' ')[1].replace(',', ''));
         log.debug(
           'x=' +
             x +
             " expectedChartData[x].split(' ')[1] = " +
-            expectedChartData[x].split(' ')[1].replace(',', '') +
+            expected +
             '  data[x]=' +
             data[x] +
             ' diff=' +
-            Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x])
+            Math.abs(expected - data[x])
         );
-        expect(
-          Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance
-        ).to.be.ok();
+        expect(Math.abs(expected - data[x]) < tolerance).to.be.ok();
       }
       log.debug('Done');
     });
@@ -104,19 +105,18 @@ export default function ({ getService, getPageObjects }) {
         log.debug('data=' + data);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
+          const expected = Number(expectedChartData[x].split(' ')[1].replace(',', ''));
           log.debug(
             'x=' +
               x +
               " expectedChartData[x].split(' ')[1] = " +
-              expectedChartData[x].split(' ')[1].replace(',', '') +
+              expected +
               '  data[x]=' +
               data[x] +
               ' diff=' +
-              Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x])
+              Math.abs(expected - data[x])
           );
-          expect(
-            Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance
-          ).to.be.ok();
+          expect(Math.abs(expected - data[x]) < tolerance).to.be.ok();
         }
         log.debug('Done');
       });
@@ -192,8 +192,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -204,8 +204,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
+        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
+        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -217,7 +217,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
+          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -225,7 +228,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['2,000', '4,000', '6,000', '8,000'],
+          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -235,7 +241,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
-        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
+          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
+        );
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -243,7 +252,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
+        const expectedLabels = await PageObjects.visChart.getExpectedValue(
+          ['2,000', '4,000', '6,000', '8,000'],
+          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
+        );
         expect(labels).to.eql(expectedLabels);
       });
     });

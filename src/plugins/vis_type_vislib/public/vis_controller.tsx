@@ -62,6 +62,8 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
       // chart mount point
       this.chartEl = document.createElement('div');
       this.chartEl.className = 'visLib__chart';
+      // Used in functional tests to know when chart is loaded by type
+      this.chartEl.dataset.vislibChartType = this.vis.type.name;
       this.container.appendChild(this.chartEl);
 
       // legend mount point
