@@ -207,8 +207,8 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
   // Count up the number of entries that are NOT undefined in the intersection
   // If there are no keys OR all entries are undefined, return undefined
   if (
-    Object.entries(intersection).reduce(
-      (acc, [_, value]) => (value !== undefined ? acc + 1 : acc),
+    Object.values(intersection).reduce(
+      (acc: number, value) => (value !== undefined ? acc + 1 : acc),
       0
     ) === 0
   ) {
