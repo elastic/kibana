@@ -80,6 +80,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
 
 const fetchStatuses = {
@@ -285,10 +286,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const nextIndexPattern = await indexPatterns.get(id);
     if (nextIndexPattern) {
       const nextAppState = getSwitchIndexPatternAppState(
-        nextIndexPattern,
         $scope.indexPattern,
+        nextIndexPattern,
         $scope.state.columns,
-        $scope.state.sort
+        $scope.state.sort,
+        config.get(MODIFY_COLUMNS_ON_SWITCH)
       );
       await replaceUrlAppState(nextAppState);
       $route.reload();

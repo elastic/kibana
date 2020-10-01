@@ -25,15 +25,18 @@ import { IndexPattern } from '../../kibana_services';
  * index pattern, returns a new state object
  */
 export function getSwitchIndexPatternAppState(
+  currentIndexPattern: IndexPattern,
   nextIndexPattern: IndexPattern,
-  prevIndexPattern: IndexPattern,
   currentColumns: string[],
-  currentSort: SortPairArr[]
+  currentSort: SortPairArr[],
+  modifyColumns: boolean = true
 ) {
-  const nextColumns = currentColumns.filter(
-    (column) =>
-      nextIndexPattern.fields.getByName(column) || !prevIndexPattern.fields.getByName(column)
-  );
+  const nextColumns = modifyColumns
+    ? currentColumns.filter(
+        (column) =>
+          nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
+      )
+    : currentColumns;
   const nextSort = getSortArray(currentSort, nextIndexPattern);
   return {
     index: nextIndexPattern.id,

@@ -32,6 +32,7 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -162,5 +163,18 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [MODIFY_COLUMNS_ON_SWITCH]: {
+    name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
+      defaultMessage: 'Switch index pattern behavior',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
+      defaultMessage:
+        'When switching index patterns, selected columns, that are not available in the ' +
+        'next index pattern, are removed.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 };

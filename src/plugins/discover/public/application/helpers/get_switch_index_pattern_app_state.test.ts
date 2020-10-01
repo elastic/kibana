@@ -20,7 +20,7 @@
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
 import { IIndexPatternFieldList, IndexPattern } from '../../../../data/common/index_patterns';
 
-const indexPatternPrev: IndexPattern = {
+const currentIndexPattern: IndexPattern = {
   id: 'prev',
   getFieldByName(name) {
     return this.fields.getByName(name);
@@ -36,7 +36,7 @@ const indexPatternPrev: IndexPattern = {
   },
 } as IndexPattern;
 
-const indexPatternNext = {
+const nextIndexPattern = {
   id: 'next',
   getFieldByName(name) {
     return this.fields.getByName(name);
@@ -52,50 +52,39 @@ const indexPatternNext = {
 describe('Discover getSwitchIndexPatternAppState', () => {
   test('removing fields that are not part of the next index pattern, keeping unknown fields ', async () => {
     const result = getSwitchIndexPatternAppState(
-      indexPatternNext,
-      indexPatternPrev,
+      currentIndexPattern,
+      nextIndexPattern,
       ['category', 'name', 'unknown'],
       [['category', 'desc']]
     );
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          "category",
-          "unknown",
-        ],
-        "index": "next",
-        "sort": Array [
-          Array [
-            "category",
-            "desc",
-          ],
-        ],
-      }
-    `);
+    expect(result.columns).toEqual(['category', 'unknown']);
+    expect(result.sort).toEqual([['category', 'desc']]);
   });
   test('removing sorted by fields that are not part of the next index pattern', async () => {
     const result = getSwitchIndexPatternAppState(
-      indexPatternNext,
-      indexPatternPrev,
+      currentIndexPattern,
+      nextIndexPattern,
       ['name'],
       [
         ['category', 'desc'],
         ['name', 'asc'],
       ]
     );
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          "_source",
-        ],
-        "index": "next",
-        "sort": Array [
-          Array [
-            "category",
-            "desc",
-          ],
-        ],
-      }
-    `);
+    expect(result.columns).toEqual(['_source']);
+    expect(result.sort).toEqual([['category', 'desc']]);
+  });
+  test('removing sorted by fields that without modifying columns', async () => {
+    const result = getSwitchIndexPatternAppState(
+      currentIndexPattern,
+      nextIndexPattern,
+      ['name'],
+      [
+        ['category', 'desc'],
+        ['name', 'asc'],
+      ],
+      false
+    );
+    expect(result.columns).toEqual(['name']);
+    expect(result.sort).toEqual([['category', 'desc']]);
   });
 });
