@@ -132,58 +132,54 @@ export function getPreviewTransformRequestBody(
 
 export const getCreateTransformSettingsRequestBody = (
   transformDetailsState: Partial<StepDetailsExposedState>
-): { settings: PutTransformsRequestSchema['settings'] } => {
-  // have to use Record<> here because typeof schema is readonly
-  const tempSettings = {} as Record<string, number | null | undefined>;
-
-  if (transformDetailsState.transformSettingsMaxPageSearchSize) {
-    tempSettings.max_page_search_size = transformDetailsState.transformSettingsMaxPageSearchSize;
-  }
-  if (transformDetailsState.transformSettingsDocsPerSecond) {
-    tempSettings.docs_per_second = transformDetailsState.transformSettingsDocsPerSecond;
-  }
-
-  return { settings: tempSettings };
+): { settings?: PutTransformsRequestSchema['settings'] } => {
+  const settings: PutTransformsRequestSchema['settings'] = {
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+      ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
+      : {}),
+    ...(transformDetailsState.transformSettingsDocsPerSecond
+      ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
+      : {}),
+  };
+  return Object.keys(settings).length > 0 ? { settings } : {};
 };
 
 export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
-): PutTransformsRequestSchema => {
-  return {
-    ...getPreviewTransformRequestBody(
-      indexPatternTitle,
-      getPivotQuery(pivotState.searchQuery),
-      dictionaryToArray(pivotState.groupByList),
-      dictionaryToArray(pivotState.aggList)
-    ),
-    // conditionally add optional description
-    ...(transformDetailsState.transformDescription !== ''
-      ? { description: transformDetailsState.transformDescription }
-      : {}),
-    // conditionally add optional frequency
-    ...(transformDetailsState.transformFrequency !== ''
-      ? { frequency: transformDetailsState.transformFrequency }
-      : {}),
-    dest: {
-      index: transformDetailsState.destinationIndex,
-    },
-    // conditionally add continuous mode config
-    ...(transformDetailsState.isContinuousModeEnabled
-      ? {
-          sync: {
-            time: {
-              field: transformDetailsState.continuousModeDateField,
-              delay: transformDetailsState.continuousModeDelay,
-            },
+): PutTransformsRequestSchema => ({
+  ...getPreviewTransformRequestBody(
+    indexPatternTitle,
+    getPivotQuery(pivotState.searchQuery),
+    dictionaryToArray(pivotState.groupByList),
+    dictionaryToArray(pivotState.aggList)
+  ),
+  // conditionally add optional description
+  ...(transformDetailsState.transformDescription !== ''
+    ? { description: transformDetailsState.transformDescription }
+    : {}),
+  // conditionally add optional frequency
+  ...(transformDetailsState.transformFrequency !== ''
+    ? { frequency: transformDetailsState.transformFrequency }
+    : {}),
+  dest: {
+    index: transformDetailsState.destinationIndex,
+  },
+  // conditionally add continuous mode config
+  ...(transformDetailsState.isContinuousModeEnabled
+    ? {
+        sync: {
+          time: {
+            field: transformDetailsState.continuousModeDateField,
+            delay: transformDetailsState.continuousModeDelay,
           },
-        }
-      : {}),
-    // conditionally add additional settings
-    ...getCreateTransformSettingsRequestBody(transformDetailsState),
-  };
-};
+        },
+      }
+    : {}),
+  // conditionally add additional settings
+  ...getCreateTransformSettingsRequestBody(transformDetailsState),
+});
 
 export function isHttpFetchError(error: any): error is HttpFetchError {
   return (
