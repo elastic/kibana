@@ -6,6 +6,7 @@
 
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -30,6 +31,8 @@ import {
   SharedGlobalConfig,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
+  StatusServiceSetup,
+  ServiceStatus,
 } from '../../../../src/core/server';
 
 import {
@@ -61,6 +64,7 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
+import { healthStatus$ } from './health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -88,6 +92,7 @@ export interface AlertingPluginsSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
+  statusService: StatusServiceSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -184,6 +189,20 @@ export class AlertingPlugin {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
       });
     }
+
+    core.getStartServices().then(async ([, startPlugins]) => {
+      core.status.set(
+        combineLatest([core.status.derivedStatus$, healthStatus$(startPlugins.taskManager)]).pipe(
+          map(([derivedStatus, healthStatus]) => {
+            if ((healthStatus as ServiceStatus).level > derivedStatus.level) {
+              return healthStatus as ServiceStatus;
+            } else {
+              return derivedStatus;
+            }
+          })
+        )
+      );
+    });
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
