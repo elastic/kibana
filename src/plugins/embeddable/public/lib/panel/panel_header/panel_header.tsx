@@ -99,14 +99,25 @@ function renderNotifications(
   });
 }
 
-function renderTooltip(description: string) {
-  return (
-    description !== '' && (
-      <EuiToolTip content={description} delay="regular" position="right">
-        <EuiIcon type="iInCircle" />
-      </EuiToolTip>
-    )
-  );
+function renderTitle(description?: string, title?: string, placeholderTitle?: string) {
+  const titleComponent = title ? (
+    <span
+      className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
+      aria-hidden="true"
+    >
+      {title || placeholderTitle}
+    </span>
+  ) : undefined;
+  return description
+    ? description !== '' && (
+        <EuiToolTip content={description} delay="regular" position="right">
+          <>
+            {titleComponent}
+            <EuiIcon type="iInCircle" size="s" color="subdued" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      )
+    : titleComponent;
 }
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
@@ -181,19 +192,11 @@ export function PanelHeader({
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
       <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-        {showTitle ? (
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {showTitle && (
           <span className="embPanel__titleInner">
-            <span
-              className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
-              aria-hidden="true"
-            >
-              {title || placeholderTitle}
-            </span>
-            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-            {renderTooltip(viewDescription)}
+            {renderTitle(viewDescription, title, placeholderTitle)}
           </span>
-        ) : (
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         )}
         {renderBadges(badges, embeddable)}
       </h2>
