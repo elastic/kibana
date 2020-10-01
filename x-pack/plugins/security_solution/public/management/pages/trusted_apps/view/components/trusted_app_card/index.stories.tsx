@@ -24,7 +24,7 @@ addDecorator((storyFn) => (
   </KibanaContextProvider>
 ));
 
-storiesOf('TrustedApps|TrustedAppCard', module)
+storiesOf('TrustedApps/TrustedAppCard', module)
   .add('default', () => {
     const trustedApp: TrustedApp = createSampleTrustedApp(5);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
