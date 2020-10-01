@@ -21,8 +21,9 @@ import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');

@@ -19,6 +19,8 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
  * dashboard with the visualizations already on it), as well as conducts a rough type of snapshot testing by checking
@@ -27,7 +29,7 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -44,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
     'discover',
     'timePicker',
   ]);
-  let visNames = [];
+  let visNames: string[] = [];
 
   const expectAllDataRenders = async () => {
     await pieChart.expectPieSliceCount(16);

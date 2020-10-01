@@ -19,15 +19,16 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const pieChart = getService('pieChart');
-  const queryBar = getService('queryBar');
-  const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('dashboard query bar', () => {
+  describe('dashboard grid', function () {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -35,17 +36,25 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.switchToEditMode();
     });
 
-    it('causes panels to reload when refresh is clicked', async () => {
-      await esArchiver.unload('dashboard/current/data');
+    describe('move panel', () => {
+      // Specific test after https://github.com/elastic/kibana/issues/14764 fix
+      it('Can move panel from bottom to top row', async () => {
+        const lastVisTitle = 'Rendering Test: datatable';
+        const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
+        const position1 = await panelTitleBeforeMove.getPosition();
+        await browser.dragAndDrop(
+          { location: panelTitleBeforeMove },
+          { location: { x: -20, y: -450 } }
+        );
 
-      await queryBar.clickQuerySubmitButton();
-      await retry.tryForTime(5000, async () => {
-        const headers = await PageObjects.discover.getColumnHeaders();
-        expect(headers.length).to.be(0);
-        await pieChart.expectPieSliceCount(0);
+        const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
+        const position2 = await panelTitleAfterMove.getPosition();
+
+        expect(position1.y).to.be.greaterThan(position2.y);
       });
     });
   });

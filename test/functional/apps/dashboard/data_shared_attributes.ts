@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -27,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
-    let originalPanelTitles;
+    let originalPanelTitles: string[];
 
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');

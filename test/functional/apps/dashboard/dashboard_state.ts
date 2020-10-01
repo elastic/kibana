@@ -20,10 +20,10 @@
 import expect from '@kbn/expect';
 
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
-
 import { DEFAULT_PANEL_WIDTH } from '../../../../src/plugins/dashboard/public/application/embeddable/dashboard_constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'dashboard',
     'visualize',

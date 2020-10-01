@@ -19,15 +19,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const pieChart = getService('pieChart');
+  const queryBar = getService('queryBar');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
-  describe('dashboard data-shared attributes', () => {
-    let originalTitles = [];
-
+  describe('dashboard query bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -35,24 +37,17 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      originalTitles = await PageObjects.dashboard.getPanelTitles();
+      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });
 
-    it('should be able to hide all panel titles', async () => {
-      await PageObjects.dashboard.checkHideTitle();
-      await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql('');
-      });
-    });
+    it('causes panels to reload when refresh is clicked', async () => {
+      await esArchiver.unload('dashboard/current/data');
 
-    it('should be able to unhide all panel titles', async () => {
-      await PageObjects.dashboard.checkHideTitle();
-      await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql(originalTitles[0]);
+      await queryBar.clickQuerySubmitButton();
+      await retry.tryForTime(5000, async () => {
+        const headers = await PageObjects.discover.getColumnHeaders();
+        expect(headers.length).to.be(0);
+        await pieChart.expectPieSliceCount(0);
       });
     });
   });

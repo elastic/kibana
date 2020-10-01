@@ -19,9 +19,11 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+
 const dashboardName = 'Dashboard Test Time';
 
-export default function ({ getPageObjects, getService }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 

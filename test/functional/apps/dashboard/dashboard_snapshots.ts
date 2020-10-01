@@ -19,7 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects, updateBaselines }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');

@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
@@ -27,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  let kibanaLegacyBaseUrl;
+  let kibanaLegacyBaseUrl: string;
 
   const urlQuery =
     `` +

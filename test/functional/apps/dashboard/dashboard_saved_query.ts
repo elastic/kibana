@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
@@ -82,12 +84,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
         await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'OkResponse',
-          '404 responses',
-          false,
-          false
-        );
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');

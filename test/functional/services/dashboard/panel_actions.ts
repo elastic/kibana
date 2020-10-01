@@ -163,7 +163,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await this.openInspector(header);
     }
 
-    async openInspector(parent: WebElementWrapper) {
+    async openInspector(parent?: WebElementWrapper) {
       await this.openContextMenu(parent);
       const exists = await testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
       if (!exists) {
@@ -247,7 +247,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('customizePanelHideTitle');
     }
 
-    async toggleHidePanelTitle(originalTitle: string) {
+    async toggleHidePanelTitle(originalTitle?: string) {
       log.debug(`hidePanelTitle(${originalTitle})`);
       if (originalTitle) {
         const panelOptions = await this.getPanelHeading(originalTitle);
@@ -277,7 +277,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('saveNewTitleButton');
     }
 
-    async resetCustomPanelTitle(panel: WebElementWrapper) {
+    async resetCustomPanelTitle(panel?: WebElementWrapper) {
       log.debug('resetCustomPanelTitle');
       await this.customizePanel(panel);
       await testSubjects.click('resetCustomEmbeddablePanelTitle');

@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');

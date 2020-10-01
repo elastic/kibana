@@ -20,7 +20,9 @@
 import path from 'path';
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');

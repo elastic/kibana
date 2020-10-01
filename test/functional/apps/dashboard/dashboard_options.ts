@@ -19,14 +19,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
-  const browser = getService('browser');
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('dashboard grid', function () {
+  describe('dashboard data-shared attributes', () => {
+    let originalTitles: string[] = [];
+
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -36,23 +39,22 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
+      originalTitles = await PageObjects.dashboard.getPanelTitles();
     });
 
-    describe('move panel', () => {
-      // Specific test after https://github.com/elastic/kibana/issues/14764 fix
-      it('Can move panel from bottom to top row', async () => {
-        const lastVisTitle = 'Rendering Test: datatable';
-        const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
-        const position1 = await panelTitleBeforeMove.getPosition();
-        await browser.dragAndDrop(
-          { location: panelTitleBeforeMove },
-          { location: { x: -20, y: -450 } }
-        );
+    it('should be able to hide all panel titles', async () => {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.try(async () => {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('');
+      });
+    });
 
-        const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
-        const position2 = await panelTitleAfterMove.getPosition();
-
-        expect(position1.y).to.be.greaterThan(position2.y);
+    it('should be able to unhide all panel titles', async () => {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.try(async () => {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql(originalTitles[0]);
       });
     });
   });

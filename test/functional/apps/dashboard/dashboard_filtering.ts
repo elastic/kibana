@@ -19,11 +19,13 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
  * with nested queries and filters on the visualizations themselves.
  */
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');

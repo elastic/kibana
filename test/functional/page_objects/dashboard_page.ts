@@ -38,7 +38,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -286,10 +289,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * @param dashboardName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
      */
-    public async saveDashboard(
-      dashboardName: string,
-      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
-    ) {
+    public async saveDashboard(dashboardName: string, saveOptions: SaveDashboardOptions = {}) {
       await retry.try(async () => {
         await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
@@ -325,7 +325,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async enterDashboardTitleAndClickSave(
       dashboardTitle: string,
-      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+      saveOptions: SaveDashboardOptions = {}
     ) {
       await testSubjects.click('dashboardSaveMenuItem');
       const modalDialog = await testSubjects.find('savedObjectSaveModal');
@@ -342,7 +342,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
 
       await this.clickSave();
-      if (saveOptions.waitDialogIsClosed) {
+      if (saveOptions.waitDialogIsClosed ?? true) {
         await testSubjects.waitForDeleted(modalDialog);
       }
     }

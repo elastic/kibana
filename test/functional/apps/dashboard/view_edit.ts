@@ -19,7 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -173,7 +175,7 @@ export default function ({ getService, getPageObjects }) {
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.saveDashboard(dashboardName, true);
+          await PageObjects.dashboard.saveDashboard(dashboardName);
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2015 @ 06:31:44.000',
@@ -200,7 +202,7 @@ export default function ({ getService, getPageObjects }) {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, true);
+        await PageObjects.dashboard.saveDashboard(dashboardName);
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
