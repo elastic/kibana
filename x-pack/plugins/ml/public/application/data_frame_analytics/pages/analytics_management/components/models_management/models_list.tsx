@@ -271,12 +271,12 @@ export const ModelsList: FC = () => {
   const actions: Array<Action<ModelItem>> = [
     {
       name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
-        defaultMessage: 'View training data',
+        defaultMessage: 'View',
       }),
       description: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
-        defaultMessage: 'View training data',
+        defaultMessage: 'View',
       }),
-      icon: 'list',
+      icon: 'visTable',
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
