@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,7 +27,7 @@ import { SelectOption, SwitchOption } from '../../../../../../charts/public';
 
 import { VisParams, ValueAxis } from '../../../../types';
 
-function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<VisParams>) {
+function GridPanel({ stateParams, setValue }: VisOptionsProps<VisParams>) {
   const setGrid = useCallback(
     <T extends keyof VisParams['grid']>(paramName: T, value: VisParams['grid'][T]) =>
       setValue('grid', { ...stateParams.grid, [paramName]: value }),
@@ -50,12 +50,6 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<V
     [stateParams.valueAxes]
   );
 
-  useEffect(() => {
-    if (hasHistogramAgg) {
-      setGrid('categoryLines', false);
-    }
-  }, [hasHistogramAgg, setGrid]);
-
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -70,18 +64,10 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<V
       <EuiSpacer size="m" />
 
       <SwitchOption
-        disabled={hasHistogramAgg}
         label={i18n.translate('visTypeXy.controls.pointSeries.gridAxis.xAxisLinesLabel', {
           defaultMessage: 'Show X-axis lines',
         })}
         paramName="categoryLines"
-        tooltip={
-          hasHistogramAgg
-            ? i18n.translate('visTypeXy.controls.pointSeries.gridAxis.yAxisLinesDisabledTooltip', {
-                defaultMessage: "X-axis lines can't show for histograms.",
-              })
-            : undefined
-        }
         value={stateParams.grid.categoryLines}
         setValue={setGrid}
         data-test-subj="showCategoryLines"
@@ -94,7 +80,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<V
         })}
         options={options}
         paramName="valueAxis"
-        value={stateParams.grid.valueAxis || ''}
+        value={stateParams.grid.valueAxis ?? ''}
         setValue={setGrid}
       />
     </EuiPanel>
