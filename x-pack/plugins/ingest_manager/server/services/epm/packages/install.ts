@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
+import { BulkInstallPackageInfo } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -21,10 +21,15 @@ import {
   ElasticsearchAssetType,
   InstallType,
 } from '../../../types';
-import { appContextService } from '../../index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
-import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
+import {
+  getInstallation,
+  getInstallationObject,
+  isRequiredPackage,
+  bulkInstallPackages,
+  isBulkInstallError,
+} from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
@@ -37,13 +42,10 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import {
-  IngestManagerError,
-  PackageOutdatedError,
-  ingestErrorToResponseOptions,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
-import { installTransformForDataset } from '../elasticsearch/transform/install';
+import { installTransform } from '../elasticsearch/transform/install';
+import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -68,17 +70,27 @@ export async function ensureInstalledDefaultPackages(
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
   const installations = [];
-  for (const pkgName in DefaultPackages) {
-    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    const installation = ensureInstalledPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    installations.push(installation);
+  const bulkResponse = await bulkInstallPackages({
+    savedObjectsClient,
+    packagesToUpgrade: Object.values(DefaultPackages),
+    callCluster,
+  });
+
+  for (const resp of bulkResponse) {
+    if (isBulkInstallError(resp)) {
+      throw resp.error;
+    } else {
+      installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
+    }
   }
 
-  return Promise.all(installations);
+  const retrievedInstallations = await Promise.all(installations);
+  return retrievedInstallations.map((installation, index) => {
+    if (!installation) {
+      throw new Error(`could not get installation ${bulkResponse[index].name}`);
+    }
+    return installation;
+  });
 }
 
 export async function ensureInstalledPackage(options: {
@@ -154,21 +166,11 @@ export async function handleInstallPackageFailure({
   }
 }
 
-type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
-function bulkInstallErrorToOptions({
-  pkgToUpgrade,
-  error,
-}: {
-  pkgToUpgrade: string;
+export interface IBulkInstallPackageError {
+  name: string;
   error: Error;
-}): IBulkInstallPackageError {
-  const { statusCode, body } = ingestErrorToResponseOptions(error);
-  return {
-    name: pkgToUpgrade,
-    statusCode,
-    error: body.message,
-  };
 }
+export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
 interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -177,7 +179,7 @@ interface UpgradePackageParams {
   latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
 }
-async function upgradePackage({
+export async function upgradePackage({
   savedObjectsClient,
   callCluster,
   installedPkg,
@@ -207,7 +209,7 @@ async function upgradePackage({
         installedPkg,
         callCluster,
       });
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: installFailed });
+      return { name: pkgToUpgrade, error: installFailed };
     }
   } else {
     // package was already at the latest version
@@ -221,51 +223,6 @@ async function upgradePackage({
       ],
     };
   }
-}
-
-interface BulkInstallPackagesParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  packagesToUpgrade: string[];
-  callCluster: CallESAsCurrentUser;
-}
-export async function bulkInstallPackages({
-  savedObjectsClient,
-  packagesToUpgrade,
-  callCluster,
-}: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
-  const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
-    Promise.all([
-      getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
-      Registry.fetchFindLatestPackage(pkgToUpgrade),
-    ])
-  );
-  const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
-  const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      const [installedPkg, latestPkg] = result.value;
-      return upgradePackage({
-        savedObjectsClient,
-        callCluster,
-        installedPkg,
-        latestPkg,
-        pkgToUpgrade,
-      });
-    } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
-    }
-  });
-  const installResults = await Promise.allSettled(installResponsePromises);
-  const installResponses = installResults.map((result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      return result.value;
-    } else {
-      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
-    }
-  });
-
-  return installResponses;
 }
 
 interface InstallPackageParams {
@@ -368,7 +325,7 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
-  const installedTransforms = await installTransformForDataset(
+  const installedTransforms = await installTransform(
     registryPackageInfo,
     paths,
     callCluster,

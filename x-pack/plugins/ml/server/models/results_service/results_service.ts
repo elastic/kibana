@@ -144,9 +144,8 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       });
     }
 
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
+    const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
-      rest_total_hits_as_int: true,
       size: maxRecords,
       body: {
         query: {
@@ -178,9 +177,9 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       anomalies: [],
       interval: 'second',
     };
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       let records: AnomalyRecordDoc[] = [];
-      body.hits.hits.forEach((hit) => {
+      body.hits.hits.forEach((hit: any) => {
         records.push(hit._source);
       });
 
@@ -382,7 +381,6 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
     const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
-      rest_total_hits_as_int: true,
       size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
       body: {
         query: {
@@ -394,7 +392,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     });
 
     const examplesByCategoryId: { [key: string]: any } = {};
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
           examplesByCategoryId[hit._source.category_id] = slice(
@@ -417,7 +415,6 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   async function getCategoryDefinition(jobId: string, categoryId: string) {
     const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
-      rest_total_hits_as_int: true,
       size: 1,
       body: {
         query: {
@@ -429,7 +426,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     });
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       const source = body.hits.hits[0]._source;
       definition.categoryId = source.category_id;
       definition.regex = source.regex;

@@ -284,7 +284,7 @@ export async function saveTemplate(template: TemplateDeserialized, isClone?: boo
 }
 
 export async function updateTemplate(template: TemplateDeserialized) {
-  const includeTypeName = doMappingsHaveType(template.template.mappings);
+  const includeTypeName = doMappingsHaveType(template.template?.mappings);
   const { name } = template;
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,

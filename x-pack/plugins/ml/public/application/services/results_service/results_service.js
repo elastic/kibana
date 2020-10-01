@@ -730,7 +730,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
               query: {
@@ -754,7 +753,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -862,7 +861,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               query: {
                 bool: {
@@ -885,7 +883,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -987,7 +985,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               query: {
                 bool: {
@@ -1010,7 +1007,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -1063,7 +1060,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices
           .esSearch({
             index,
-            rest_total_hits_as_int: true,
             size: 0,
             body: {
               query: {
@@ -1095,7 +1091,7 @@ export function resultsServiceProvider(mlApiServices) {
               const time = dataForTime.key;
               obj.results[time] = dataForTime.doc_count;
             });
-            obj.total = resp.hits.total;
+            obj.total = resp.hits.total.value;
 
             resolve(obj);
           })
@@ -1232,13 +1228,13 @@ export function resultsServiceProvider(mlApiServices) {
           .esSearch({
             index,
             body,
-            rest_total_hits_as_int: true,
+            track_total_hits: true,
           })
           .then((resp) => {
             // Because of the sampling, results of metricFunctions which use sum or count
             // can be significantly skewed. Taking into account totalHits we calculate a
             // a factor to normalize results for these metricFunctions.
-            const totalHits = get(resp, ['hits', 'total'], 0);
+            const totalHits = resp.hits.total.value;
             const successfulShards = get(resp, ['_shards', 'successful'], 0);
 
             let normalizeFactor = 1;

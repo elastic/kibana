@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './visualization_container.scss';
+
 import React from 'react';
 import classNames from 'classnames';
-
-import './visualization_container.scss';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   isReady?: boolean;
