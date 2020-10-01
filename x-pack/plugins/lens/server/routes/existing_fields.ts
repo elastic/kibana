@@ -9,11 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsFetcher,
-  IndexPatternAttributes,
-  UI_SETTINGS,
-} from '../../../../../src/plugins/data/server';
+import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 /**
  * The number of docs to sample to determine field empty status.
@@ -24,7 +20,6 @@ export interface Field {
   name: string;
   isScript: boolean;
   isMeta: boolean;
-  path: string;
   lang?: string;
   script?: string;
 }
@@ -139,7 +134,6 @@ export function buildFieldList(
       return {
         name: field.name,
         isScript: !!field.scripted,
-        path: field.name,
         lang: field.lang,
         script: field.script,
         // id is a special case - it doesn't show up in the meta field list,
@@ -230,7 +224,7 @@ export function existingFields(
       if (field.isMeta) {
         fieldStore = doc;
       }
-      const value = fieldStore[field.path];
+      const value = fieldStore[field.name];
       if (Array.isArray(value) && value.length) {
         missingFields.delete(field);
       } else if (!Array.isArray(value) && value) {

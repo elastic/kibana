@@ -15,7 +15,6 @@ describe('existingFields', () => {
       name,
       isScript: false,
       isMeta: false,
-      path: name,
       ...obj,
     };
   }
@@ -51,28 +50,19 @@ describe('existingFields', () => {
     expect(result).toEqual(['geo.country_name']);
   });
 
-  it('should use path, not name', () => {
-    const result = existingFields(
-      [searchResults({ 'stuff.foo': ['bar'] })],
-      [field({ name: 'goober', path: 'stuff.foo' })]
-    );
-
-    expect(result).toEqual(['goober']);
-  });
-
   it('supports scripted fields', () => {
     const result = existingFields(
       [searchResults({ bar: ['scriptvalue'] })],
-      [field({ name: 'baz', isScript: true, path: 'bar' })]
+      [field({ name: 'bar', isScript: true })]
     );
 
-    expect(result).toEqual(['baz']);
+    expect(result).toEqual(['bar']);
   });
 
   it('supports meta fields', () => {
     const result = existingFields(
       [{ _mymeta: 'abc', ...searchResults({ bar: ['scriptvalue'] }) }],
-      [field({ name: '_mymeta', isMeta: true, path: '_mymeta' })]
+      [field({ name: '_mymeta', isMeta: true })]
     );
 
     expect(result).toEqual(['_mymeta']);
@@ -103,7 +93,6 @@ describe('buildFieldList', () => {
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isScript: true,
       name: 'foo',
-      path: 'foo',
       lang: 'painless',
       script: '2+2',
     });
@@ -115,7 +104,6 @@ describe('buildFieldList', () => {
       isScript: false,
       isMeta: true,
       name: '_mymeta',
-      path: '_mymeta',
     });
   });
 });
