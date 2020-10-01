@@ -229,14 +229,21 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
     };
-    const createdAlert = await this.unsecuredSavedObjectsClient.create(
-      'alert',
-      this.updateMeta(rawAlert),
-      {
-        ...options,
-        references,
-      }
-    );
+    let createdAlert: SavedObject<RawAlert>;
+    try {
+      createdAlert = await this.unsecuredSavedObjectsClient.create(
+        'alert',
+        this.updateMeta(rawAlert),
+        {
+          ...options,
+          references,
+        }
+      );
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: rawAlert.apiKey });
+      throw e;
+    }
     if (data.enabled) {
       let scheduledTask;
       try {
@@ -498,23 +505,31 @@ export class AlertsClient {
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
-    const updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
-      'alert',
-      this.updateMeta({
-        ...attributes,
-        ...data,
-        ...apiKeyAttributes,
-        params: validatedAlertTypeParams as RawAlert['params'],
-        actions,
-        updatedBy: username,
-      }),
-      {
-        id,
-        overwrite: true,
-        version,
-        references,
-      }
-    );
+    let updatedObject: SavedObject<RawAlert>;
+    const createAttributes = this.updateMeta({
+      ...attributes,
+      ...data,
+      ...apiKeyAttributes,
+      params: validatedAlertTypeParams as RawAlert['params'],
+      actions,
+      updatedBy: username,
+    });
+    try {
+      updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
+        'alert',
+        createAttributes,
+        {
+          id,
+          overwrite: true,
+          version,
+          references,
+        }
+      );
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: createAttributes.apiKey });
+      throw e;
+    }
 
     return this.getPartialAlertFromRaw(
       id,
@@ -580,19 +595,21 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
-    await this.unsecuredSavedObjectsClient.update(
-      'alert',
-      id,
-      this.updateMeta({
-        ...attributes,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
-        updatedBy: username,
-      }),
-      { version }
-    );
+    const updateAttributes = this.updateMeta({
+      ...attributes,
+      ...this.apiKeyAsAlertAttributes(
+        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+        username
+      ),
+      updatedBy: username,
+    });
+    try {
+      await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+      throw e;
+    }
 
     if (apiKeyToInvalidate) {
       await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
@@ -658,22 +675,22 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        id,
-        this.updateMeta({
-          ...attributes,
-          enabled: true,
-          ...this.apiKeyAsAlertAttributes(
-            await this.createAPIKey(
-              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-            ),
-            username
-          ),
-          updatedBy: username,
-        }),
-        { version }
-      );
+      const updateAttributes = this.updateMeta({
+        ...attributes,
+        enabled: true,
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
+        updatedBy: username,
+      });
+      try {
+        await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+      } catch (e) {
+        // Avoid unused API key
+        this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+        throw e;
+      }
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
