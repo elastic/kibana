@@ -21,16 +21,33 @@ import {
   EuiFlexGroup,
   EuiTextColor,
   EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { ModelItemFull } from './models_list';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { timeFormatter } from '../../../../../../../common/util/time_formatter';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
+
+const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> = {
+  tags: (tags: string[]) => {
+    if (tags.length === 0) return;
+    return (
+      <div>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="hollow">
+            {tag}
+          </EuiBadge>
+        ))}
+      </div>
+    );
+  },
+  create_time: timeFormatter,
+  timestamp: timeFormatter,
+};
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const {
@@ -59,13 +76,32 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   };
 
-  function formatToListItems(items: Record<string, any>) {
+  function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
     return Object.entries(items)
       .map(([title, value]) => {
-        if (title.includes('timestamp')) {
-          value = formatDate(value, TIME_FORMAT);
+        if (title in formatterDictionary) {
+          return {
+            title,
+            description: formatterDictionary[title](value),
+          };
         }
-        return { title, description: typeof value === 'object' ? JSON.stringify(value) : value };
+        return {
+          title,
+          description:
+            typeof value === 'object' ? (
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="s"
+                overflowHeight={300}
+                isCopyable={false}
+              >
+                {JSON.stringify(value, null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              value
+            ),
+        };
       })
       .filter(({ description }) => {
         return description !== undefined;
