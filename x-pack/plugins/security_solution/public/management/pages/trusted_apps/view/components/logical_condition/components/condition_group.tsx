@@ -23,11 +23,15 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
     }};
   }
 
-  .group-entries > * {
+  .group-entries {
     margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 
-    &:last-child {
-      margin-bottom: 0;
+    & > * {
+      margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -79,20 +83,22 @@ export const ConditionGroup = memo<ConditionGroupProps>(
             </EuiFlexItem>
           </EuiHideFor>
         )}
-        <EuiFlexItem grow={1} data-test-subj={getTestId('entries')} className="group-entries">
-          {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
-            <ConditionEntry
-              key={index}
-              os={os}
-              entry={entry}
-              showLabels={index === 0}
-              isRemoveDisabled={index === 0 && entries.length <= 1}
-              onRemove={onEntryRemove}
-              onChange={onEntryChange}
-              onVisited={onVisited}
-              data-test-subj={getTestId(`entry${index}`)}
-            />
-          ))}
+        <EuiFlexItem grow={1}>
+          <div data-test-subj={getTestId('entries')} className="group-entries">
+            {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
+              <ConditionEntry
+                key={index}
+                os={os}
+                entry={entry}
+                showLabels={index === 0}
+                isRemoveDisabled={index === 0 && entries.length <= 1}
+                onRemove={onEntryRemove}
+                onChange={onEntryChange}
+                onVisited={onVisited}
+                data-test-subj={getTestId(`entry${index}`)}
+              />
+            ))}
+          </div>
           <div>
             <EuiSpacer size="s" />
             <EuiButton
