@@ -161,9 +161,7 @@ export const TemplateDetailsContent = ({
     }
 
     if (templateDetails) {
-      const {
-        template: { settings, mappings, aliases },
-      } = templateDetails;
+      const { template: { settings, mappings, aliases } = {} } = templateDetails;
 
       const tabToComponentMap: Record<string, React.ReactNode> = {
         [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,
