@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
