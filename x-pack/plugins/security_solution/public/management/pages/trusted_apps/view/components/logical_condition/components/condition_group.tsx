@@ -5,15 +5,22 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoint/types';
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
 import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
+  // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it
+  // the amount of padding used to space out each of the entries (times 2 because a spacer is also
+  // used above the Button), and then we adjust it with 3px
   .and-badge {
     padding-top: 20px;
+    padding-bottom: ${({ theme }) => {
+      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.paddingSizes.s} * 2) + 3px);`;
+    }};
   }
 
   .group-entries > * {
@@ -23,6 +30,10 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
       margin-bottom: 0;
     }
   }
+
+  .and-button {
+    min-width: 95px;
+  }
 `;
 
 export interface ConditionGroupProps {
@@ -30,12 +41,23 @@ export interface ConditionGroupProps {
   entries: TrustedApp['entries'];
   onEntryRemove: ConditionEntryProps['onRemove'];
   onEntryChange: ConditionEntryProps['onChange'];
+  onAndClicked: () => void;
+  isAndDisabled?: boolean;
   /** called when any of the entries is visited (triggered via `onBlur` DOM event) */
   onVisited?: ConditionEntryProps['onVisited'];
   'data-test-subj'?: string;
 }
 export const ConditionGroup = memo<ConditionGroupProps>(
-  ({ os, entries, onEntryRemove, onEntryChange, onVisited, 'data-test-subj': dataTestSubj }) => {
+  ({
+    os,
+    entries,
+    onEntryRemove,
+    onEntryChange,
+    onAndClicked,
+    isAndDisabled,
+    onVisited,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
         if (dataTestSubj) {
@@ -71,6 +93,23 @@ export const ConditionGroup = memo<ConditionGroupProps>(
               data-test-subj={getTestId(`entry${index}`)}
             />
           ))}
+          <div>
+            <EuiSpacer size="s" />
+            <EuiButton
+              fill
+              size="s"
+              iconType="plusInCircle"
+              onClick={onAndClicked}
+              data-test-subj={getTestId('AndButton')}
+              isDisabled={isAndDisabled}
+              className="and-button"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.trustedapps.logicalConditionBuilder.group.andOperator"
+                defaultMessage="AND"
+              />
+            </EuiButton>
+          </div>
         </EuiFlexItem>
       </ConditionGroupFlexGroup>
     );
