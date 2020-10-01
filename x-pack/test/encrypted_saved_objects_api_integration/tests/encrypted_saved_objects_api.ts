@@ -437,15 +437,15 @@ export default function ({ getService }: FtrProviderContext) {
       }:${id}`;
     }
 
-    afterEach(async () => {
-      await es.deleteByQuery({
-        index: '.kibana',
-        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
-        refresh: true,
-      });
-    });
-
     describe('within a default space', () => {
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: '.kibana',
+          q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
+          refresh: true,
+        });
+      });
+
       describe('with `single` namespace saved object', () => {
         runTests(
           SAVED_OBJECT_WITH_SECRET_TYPE,
@@ -484,6 +484,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await supertest.delete(`/api/spaces/space/${SPACE_ID}`).set('kbn-xsrf', 'xxx').expect(204);
+      });
+
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: '.kibana',
+          q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
+          refresh: true,
+        });
       });
 
       describe('with `single` namespace saved object', () => {
@@ -527,6 +535,105 @@ export default function ({ getService }: FtrProviderContext) {
           // ensures the non-encrypted field has been migrated into a new encrypted field in 7.9.0
           additionalEncryptedAttribute: 'elastic-migrated-encrypted',
         });
+      });
+    });
+
+    describe('key rotation', () => {
+      const savedObjectsEncryptedWithLegacyKeys: Array<[string, string, string[], boolean]> = [
+        [SAVED_OBJECT_WITH_SECRET_TYPE, 'cd9272b2-6a15-4295-bb7b-15f6347e267b', ['default'], false],
+        [
+          SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE,
+          '6b388d9b-6d8f-4e20-ba38-d9477370729d',
+          ['a', 'default'],
+          false,
+        ],
+        [
+          HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE,
+          '8d90daef-f992-443c-ab78-053c6a7b0e9c',
+          ['default'],
+          true,
+        ],
+        [SAVED_OBJECT_WITH_SECRET_TYPE, '4336f782-450f-4142-aecd-b46ed092af52', ['default'], false],
+        [
+          SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE,
+          '2ee1bede-400d-4767-b3f0-09a7064bec14',
+          ['a', 'default'],
+          false,
+        ],
+        [
+          HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE,
+          '506038a1-ec71-42b5-bce2-99661b29c62b',
+          ['default'],
+          true,
+        ],
+      ];
+
+      before(async () => {
+        await esArchiver.load('key_rotation');
+      });
+
+      after(async () => {
+        await esArchiver.unload('key_rotation');
+      });
+
+      it('#get can properly retrieve objects encrypted with the legacy keys', async () => {
+        // Hidden objects cannot be retrieved with standard Saved Objects APIs.
+        for (const [type, id, namespaces, hidden] of savedObjectsEncryptedWithLegacyKeys.filter(
+          ([, , , hiddenSavedObject]) => !hiddenSavedObject
+        )) {
+          const url = hidden
+            ? `/api/saved_objects/${type}/${id}`
+            : `/api/saved_objects/${type}/${id}`;
+          const { body: decryptedResponse } = await supertest.get(url).expect(200);
+
+          expect(decryptedResponse.namespaces.sort()).to.eql(namespaces);
+          expect(decryptedResponse.attributes).to.eql({
+            publicProperty: 'some-public-property-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
+            publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
+          });
+        }
+      });
+
+      it('#get-decrypted-as-internal-user can properly retrieve objects encrypted with the legacy keys', async () => {
+        for (const [type, id, namespaces, hidden] of savedObjectsEncryptedWithLegacyKeys) {
+          const url = hidden
+            ? `/api/hidden_saved_objects/get-decrypted-as-internal-user/${type}/${id}`
+            : `/api/saved_objects/get-decrypted-as-internal-user/${type}/${id}`;
+          const { body: decryptedResponse } = await supertest.get(url).expect(200);
+
+          expect(decryptedResponse.namespaces.sort()).to.eql(namespaces);
+          expect(decryptedResponse.attributes).to.eql({
+            privateProperty: 'some-private-property-0',
+            publicProperty: 'some-public-property-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
+            publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
+          });
+        }
+      });
+
+      // Since this test re-encrypts objects it should always go last in this suite.
+      it('saved objects can be properly re-encrypted', async () => {
+        await supertest
+          .post('/api/encrypted_saved_objects/rotate_key')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200, { total: 6, successful: 6, failed: 0 });
+
+        for (const [type, id, namespaces, hidden] of savedObjectsEncryptedWithLegacyKeys) {
+          const url = hidden
+            ? `/api/hidden_saved_objects/get-decrypted-as-internal-user/${type}/${id}`
+            : `/api/saved_objects/get-decrypted-as-internal-user/${type}/${id}`;
+          const { body: decryptedResponse } = await supertest.get(url).expect(200);
+
+          expect(decryptedResponse.namespaces.sort()).to.eql(namespaces);
+          expect(decryptedResponse.attributes).to.eql({
+            privateProperty: 'some-private-property-0',
+            publicProperty: 'some-public-property-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
+            publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
+          });
+        }
       });
     });
   });
