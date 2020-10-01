@@ -99,16 +99,6 @@ function renderNotifications(
   });
 }
 
-function renderTooltip(description: string) {
-  return (
-    description !== '' && (
-      <EuiToolTip content={description} delay="regular" position="right">
-        <EuiIcon type="iInCircle" />
-      </EuiToolTip>
-    )
-  );
-}
-
 type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
 
 function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
@@ -185,8 +175,8 @@ export function PanelHeader({
       <EuiToolTip
         content={description}
         delay="regular"
-        position="right"
-        anchorClassName="embPanel__maxWidth"
+        position="top"
+        anchorClassName="embPanel__titleTooltipAnchor"
       >
         <span className="embPanel__titleInner">
           {titleComponent} <EuiIcon type="iInCircle" color="subdued" />
