@@ -102,7 +102,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           movingProcessor={movingProcessor}
         />
         <DropZoneButton
-          isLast={level === 1 && idx + 1 === processors.length}
+          compressed={level === 1 && idx + 1 === processors.length}
           data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
           isVisible={Boolean(movingProcessor)}
           isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}

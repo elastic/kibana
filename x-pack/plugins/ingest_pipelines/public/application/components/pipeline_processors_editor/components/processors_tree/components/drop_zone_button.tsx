@@ -12,7 +12,10 @@ import { EuiButtonIcon } from '@elastic/eui';
 export interface Props {
   isVisible: boolean;
   isDisabled: boolean;
-  isLast?: boolean;
+  /**
+   * Useful for buttons at the very top or bottom of lists to avoid any overflow.
+   */
+  compressed?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   'data-test-subj'?: string;
 }
@@ -30,7 +33,7 @@ const cannotMoveHereLabel = i18n.translate(
 );
 
 export const DropZoneButton: FunctionComponent<Props> = (props) => {
-  const { onClick, isDisabled, isVisible, isLast } = props;
+  const { onClick, isDisabled, isVisible, compressed } = props;
   const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -42,7 +45,7 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneButton--visible': isVisible,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    'pipelineProcessorsEditor__tree__dropZoneButton--last': isLast,
+    'pipelineProcessorsEditor__tree__dropZoneButton--compressed': compressed,
   });
 
   return (
