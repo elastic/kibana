@@ -11,6 +11,7 @@ import { coreMock } from 'src/core/public/mocks';
 
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { ActionConnector } from '../../../../types';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
@@ -31,9 +32,11 @@ const actionParams = {
     priority: 'High',
     savedObjectId: '123',
     externalId: null,
+    parent: null,
   },
 };
-const connector = {
+
+const connector: ActionConnector = {
   secrets: {},
   config: {},
   id: 'test',
@@ -237,5 +240,6 @@ describe('JiraParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="search-parent-issues"]').exists()).toBeFalsy();
   });
 });
