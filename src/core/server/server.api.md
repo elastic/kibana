@@ -439,7 +439,7 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
-    coreTelemetry: CoreTelemetryStart;
+    coreUsageData: CoreUsageDataStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -460,26 +460,26 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
-// Warning: (ae-missing-release-tag) "CoreTelemetry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "CoreUsageData" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface CoreTelemetry {
-    // Warning: (ae-forgotten-export) The symbol "CoreConfigTelemetry" needs to be exported by the entry point index.d.ts
+export interface CoreUsageData {
+    // Warning: (ae-forgotten-export) The symbol "CoreConfigUsageData" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    config: CoreConfigTelemetry;
-    // Warning: (ae-forgotten-export) The symbol "CoreEnvironmentTelemetry" needs to be exported by the entry point index.d.ts
+    config: CoreConfigUsageData;
+    // Warning: (ae-forgotten-export) The symbol "CoreEnvironmentUsageData" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    environment: CoreEnvironmentTelemetry;
+    environment: CoreEnvironmentUsageData;
 }
 
-// Warning: (ae-missing-release-tag) "CoreTelemetryStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "CoreUsageDataStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface CoreTelemetryStart {
+export interface CoreUsageDataStart {
     // @internal
-    getCoreTelemetry(): CoreTelemetry | null;
+    getCoreUsageData(): CoreUsageData | null;
 }
 
 // @public (undocumented)

@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { CoreTelemetry, CoreTelemetryStart } from 'src/core/server';
+import { CoreUsageData, CoreUsageDataStart } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getCoreTelemetry: () => CoreTelemetryStart
+  getCoreUsageData: () => CoreUsageDataStart
 ) {
-  return usageCollection.makeUsageCollector<CoreTelemetry, { core: CoreTelemetry }>({
+  return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
     type: 'core',
     isReady: () => true,
     schema: {
@@ -111,7 +111,7 @@ export function getCoreUsageCollector(
     },
     fetch() {
       return new Promise((resolve, reject) => {
-        const result = getCoreTelemetry().getCoreTelemetry();
+        const result = getCoreUsageData().getCoreUsageData();
         if (result == null) {
           reject(new Error('Unable to collect Core telemetry'));
         } else {
@@ -138,7 +138,7 @@ export function getCoreUsageCollector(
 
 export function registerCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getCoreTelemetry: () => CoreTelemetryStart
+  getCoreUsageData: () => CoreUsageDataStart
 ) {
-  usageCollection.registerCollector(getCoreUsageCollector(usageCollection, getCoreTelemetry));
+  usageCollection.registerCollector(getCoreUsageCollector(usageCollection, getCoreUsageData));
 }

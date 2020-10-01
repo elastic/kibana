@@ -217,9 +217,9 @@ export class LegacyService implements CoreService {
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
       auditTrail: startDeps.core.auditTrail,
-      coreTelemetry: {
-        getCoreTelemetry: () => {
-          throw new Error('core.start.coreTelemetry.getCoreTelemetry is unsupported in legacy');
+      coreUsageData: {
+        getCoreUsageData: () => {
+          throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
         },
       },
     };

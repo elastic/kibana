@@ -31,7 +31,7 @@ import {
   SavedObjectsServiceSetup,
   OpsMetrics,
   Logger,
-  CoreTelemetryStart,
+  CoreUsageDataStart,
 } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
@@ -55,7 +55,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
-  private coreTelemetry?: CoreTelemetryStart;
+  private coreUsageData?: CoreUsageDataStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -75,7 +75,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
-    this.coreTelemetry = core.coreTelemetry;
+    this.coreUsageData = core.coreUsageData;
   }
 
   public stop() {
@@ -90,7 +90,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
-    const getCoreTelemetry = () => this.coreTelemetry!;
+    const getcoreUsageData = () => this.coreUsageData!;
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
@@ -103,6 +103,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       getSavedObjectsClient
     );
     registerCspCollector(usageCollection, coreSetup.http);
-    registerCoreUsageCollector(usageCollection, getCoreTelemetry);
+    registerCoreUsageCollector(usageCollection, getcoreUsageData);
   }
 }

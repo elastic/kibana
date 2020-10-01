@@ -23,8 +23,8 @@ import {
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerCoreUsageCollector } from '.';
-import { coreTelemetryServiceMock } from '../../../../../core/server/mocks';
-import { CoreTelemetry } from 'src/core/server';
+import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';
+import { CoreUsageData } from 'src/core/server';
 
 describe('telemetry_core', () => {
   let collector: CollectorOptions;
@@ -36,11 +36,11 @@ describe('telemetry_core', () => {
   });
 
   const callCluster = jest.fn().mockImplementation(() => ({}));
-  const coreTelemetryStart = coreTelemetryServiceMock.createStartContract();
-  const getCoreTelemetryReturnValue = (Symbol('core telemetry') as any) as CoreTelemetry;
-  coreTelemetryStart.getCoreTelemetry.mockReturnValue(getCoreTelemetryReturnValue);
+  const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
+  const getCoreUsageDataReturnValue = (Symbol('core telemetry') as any) as CoreUsageData;
+  coreUsageDataStart.getCoreUsageData.mockReturnValue(getCoreUsageDataReturnValue);
 
-  beforeAll(() => registerCoreUsageCollector(usageCollectionMock, () => coreTelemetryStart));
+  beforeAll(() => registerCoreUsageCollector(usageCollectionMock, () => coreUsageDataStart));
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();
@@ -48,14 +48,14 @@ describe('telemetry_core', () => {
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(callCluster)).toEqual(getCoreTelemetryReturnValue);
+    expect(await collector.fetch(callCluster)).toEqual(getCoreUsageDataReturnValue);
   });
 
   test('formatForBulkUpload', async () => {
-    expect(collector.formatForBulkUpload!(getCoreTelemetryReturnValue)).toStrictEqual({
+    expect(collector.formatForBulkUpload!(getCoreUsageDataReturnValue)).toStrictEqual({
       type: 'kibana_stats',
       payload: {
-        core: getCoreTelemetryReturnValue,
+        core: getCoreUsageDataReturnValue,
       },
     });
   });

@@ -26,7 +26,7 @@ import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType } from '../http';
 import { Logger, LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreTelemetry, CoreTelemetryStart } from './types';
+import { CoreUsageData, CoreUsageDataStart } from './types';
 import { SavedObjectsService } from '../saved_objects';
 import { isConfigured } from './is_configured';
 import { MetricsServiceSetup, OpsMetrics } from '..';
@@ -39,7 +39,7 @@ export interface StartDeps {
   savedObjectsService: SavedObjectsService;
 }
 
-export class CoreTelemetryService implements CoreService<void, CoreTelemetryStart> {
+export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
   private readonly log: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
@@ -50,12 +50,12 @@ export class CoreTelemetryService implements CoreService<void, CoreTelemetryStar
   private opsMetrics?: OpsMetrics;
 
   constructor(core: CoreContext) {
-    this.log = core.logger.get('core_telemetry');
+    this.log = core.logger.get('core_usage_data');
     this.configService = core.configService;
     this.stop$ = new Subject();
   }
 
-  private getCoreTelemetry(): CoreTelemetry {
+  private getCoreUsageData(): CoreUsageData {
     if (
       this.elasticsearchConfig == null ||
       this.httpConfig == null ||
@@ -200,11 +200,11 @@ export class CoreTelemetryService implements CoreService<void, CoreTelemetryStar
 
   start() {
     return {
-      getCoreTelemetry: () => {
+      getCoreUsageData: () => {
         try {
-          return this.getCoreTelemetry();
+          return this.getCoreUsageData();
         } catch (e) {
-          this.log.error('Error collecting core telemetry', e);
+          this.log.error('Error collecting core usage data', e);
           return null;
         }
       },

@@ -30,15 +30,15 @@ import { config as RawLoggingConfig } from '../logging/logging_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 
-import { CoreTelemetryService } from './telemetry_service';
+import { CoreUsageDataService } from './core_usage_data_service';
 
-describe('CoreTelemetryService', () => {
+describe('CoreUsageDataService', () => {
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
-  let service: CoreTelemetryService;
+  let service: CoreUsageDataService;
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
     if (path === 'elasticsearch') {
@@ -55,24 +55,24 @@ describe('CoreTelemetryService', () => {
   const coreContext = mockCoreContext.create({ configService });
 
   beforeEach(() => {
-    service = new CoreTelemetryService(coreContext);
+    service = new CoreUsageDataService(coreContext);
   });
 
   describe('start', () => {
-    describe('getCoreTelemetry', () => {
+    describe('getCoreUsageData', () => {
       it('returns null if an exception occurs', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         metrics.getOpsMetrics$.mockReturnValueOnce(new BehaviorSubject({} as any));
         service.setup({ metrics });
-        const { getCoreTelemetry } = service.start();
-        expect(getCoreTelemetry()).toEqual(null);
+        const { getCoreUsageData } = service.start();
+        expect(getCoreUsageData()).toEqual(null);
       });
 
       it('returns core metrics for default config', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         service.setup({ metrics });
-        const { getCoreTelemetry } = service.start();
-        expect(getCoreTelemetry()).toMatchInlineSnapshot(`
+        const { getCoreUsageData } = service.start();
+        expect(getCoreUsageData()).toMatchInlineSnapshot(`
           Object {
             "config": Object {
               "elasticsearch": Object {

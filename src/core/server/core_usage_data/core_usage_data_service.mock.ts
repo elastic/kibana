@@ -19,13 +19,13 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTelemetryService } from './telemetry_service';
-import { CoreTelemetry, CoreTelemetryStart } from './types';
+import { CoreUsageDataService } from './core_usage_data_service';
+import { CoreUsageData, CoreUsageDataStart } from './types';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<CoreTelemetryStart> = {
-    getCoreTelemetry: jest.fn().mockReturnValue(
-      new BehaviorSubject<CoreTelemetry>({
+  const startContract: jest.Mocked<CoreUsageDataStart> = {
+    getCoreUsageData: jest.fn().mockReturnValue(
+      new BehaviorSubject<CoreUsageData>({
         config: {
           elasticsearch: {
             apiVersion: 'master',
@@ -130,7 +130,7 @@ const createStartContractMock = () => {
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<CoreTelemetryService>> = {
+  const mocked: jest.Mocked<PublicMethodsOf<CoreUsageDataService>> = {
     setup: jest.fn(),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
@@ -138,7 +138,7 @@ const createMock = () => {
   return mocked;
 };
 
-export const coreTelemetryServiceMock = {
+export const coreUsageDataServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

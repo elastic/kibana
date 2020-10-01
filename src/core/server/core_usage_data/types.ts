@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export interface CoreTelemetry {
-  config: CoreConfigTelemetry;
-  // usage: CoreUsageTelemetry;
-  environment: CoreEnvironmentTelemetry;
+export interface CoreUsageData {
+  config: CoreConfigUsageData;
+  // services: CoreServicesUsageData;
+  environment: CoreEnvironmentUsageData;
 }
 
 /**
- * Telemetry data on this cluster's usage of Core features
+ * Usage data from Core services
  */
-export interface CoreUsageTelemetry {
+export interface CoreServicesUsageData {
   savedObjects: {
     totalCount: number;
     typesCount: number;
@@ -34,9 +34,9 @@ export interface CoreUsageTelemetry {
 }
 
 /**
- * Telemetry data on this Kibana node's runtime environment.
+ * Usage data on this Kibana node's runtime environment.
  */
-export interface CoreEnvironmentTelemetry {
+export interface CoreEnvironmentUsageData {
   memory: {
     heapTotalBytes: number;
     heapUsedBytes: number;
@@ -52,9 +52,9 @@ export interface CoreEnvironmentTelemetry {
 }
 
 /**
- * Telemetry data on this cluster's configuration of Core features
+ * Usage data on this cluster's configuration of Core features
  */
-export interface CoreConfigTelemetry {
+export interface CoreConfigUsageData {
   elasticsearch: {
     sniffOnStart: boolean;
     sniffIntervalMs?: number;
@@ -132,10 +132,10 @@ export interface CoreConfigTelemetry {
   // };
 }
 
-export interface CoreTelemetryStart {
+export interface CoreUsageDataStart {
   /**
-   * Internal API for collecting Core telemetry data
+   * Internal API for collecting Core usage data
    * @internal
    * */
-  getCoreTelemetry(): CoreTelemetry | null;
+  getCoreUsageData(): CoreUsageData | null;
 }

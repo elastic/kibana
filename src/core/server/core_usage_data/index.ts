@@ -16,5 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { CoreTelemetryStart, CoreTelemetry } from './types';
-export { CoreTelemetryService } from './telemetry_service';
+export { CoreUsageDataStart, CoreUsageData } from './types';
+export { CoreUsageDataService } from './core_usage_data_service';

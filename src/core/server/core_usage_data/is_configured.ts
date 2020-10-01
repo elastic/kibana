@@ -24,7 +24,7 @@ import { isEqual } from 'lodash';
  * Our configuration schema and code often accept and ignore empty values like
  * `elasticsearch.customHeaders: {}`. However, for telemetry purposes, we're
  * only interested when these values have been set to something that will
- * change the behaivour of Kibana.
+ * change the behaviour of Kibana.
  */
 export const isConfigured = {
   /**
