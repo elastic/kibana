@@ -67,10 +67,13 @@ export function categorizationExamplesProvider({
       },
     });
 
+    // hit.fields can be undefined if value is originally null
     const tempExamples = body.hits.hits.map(({ fields }) =>
-      Array.isArray(fields[categorizationFieldName]) && fields[categorizationFieldName].length > 0
+      fields &&
+      Array.isArray(fields[categorizationFieldName]) &&
+      fields[categorizationFieldName].length > 0
         ? fields[categorizationFieldName][0]
-        : undefined
+        : null
     );
 
     validationResults.createNullValueResult(tempExamples);
