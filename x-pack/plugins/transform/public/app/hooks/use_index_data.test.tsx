@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { render, wait } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from 'src/core/public';
@@ -30,7 +30,7 @@ const query: SimpleQuery = {
 };
 
 describe('Transform: useIndexData()', () => {
-  test('indexPattern set triggers loading', async (done) => {
+  test('indexPattern set triggers loading', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useIndexData(
         ({
@@ -48,13 +48,11 @@ describe('Transform: useIndexData()', () => {
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
     expect(IndexObj.tableItems).toEqual([]);
-    done();
   });
 });
 
 describe('Transform: <DataGrid /> with useIndexData()', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async (done) => {
+  test('Minimal initialization', async () => {
     // Arrange
     const indexPattern = {
       title: 'the-index-pattern-title',
@@ -78,7 +76,5 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     // Act
     // Assert
     expect(getByText('the-index-preview-title')).toBeInTheDocument();
-    await wait();
-    done();
   });
 });
