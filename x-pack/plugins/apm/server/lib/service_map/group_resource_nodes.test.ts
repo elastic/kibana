@@ -10,6 +10,7 @@ import expectedGroupedData from './mock_responses/group_resource_nodes_grouped.j
 
 describe('groupResourceNodes', () => {
   it('should group external nodes', () => {
+    // @ts-expect-error invalid json mock
     const responseWithGroups = groupResourceNodes(preGroupedData);
     expect(responseWithGroups.elements).toHaveLength(
       expectedGroupedData.elements.length
@@ -17,7 +18,7 @@ describe('groupResourceNodes', () => {
     for (const element of responseWithGroups.elements) {
       const expectedElement = expectedGroupedData.elements.find(
         ({ data: { id } }: { data: { id: string } }) => id === element.data.id
-      );
+      )!;
       expect(element).toMatchObject(expectedElement);
     }
   });
