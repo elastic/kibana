@@ -24,9 +24,12 @@ import {
   EuiSpacer,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiButton,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertExecutionStatusValues } from '../../../../../../alerts/common';
 import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
@@ -105,6 +108,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
@@ -275,6 +279,42 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {!dissmissAlertErrors &&
+            alert.executionStatus.status === AlertExecutionStatusValues[2] ? (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    color="danger"
+                    size="s"
+                    title={
+                      <FormattedMessage
+                        id="core.ui.overlays.banner.attentionTitle"
+                        defaultMessage="This alert has an error caused by the {errorReason} reason."
+                        values={{
+                          errorReason: alert.executionStatus.error?.reason,
+                        }}
+                      />
+                    }
+                    iconType="alert"
+                  >
+                    <EuiTitle size="m">
+                      <h3>
+                        <EuiTextColor color="danger">
+                          <FormattedMessage id="alertErrorTitle" defaultMessage="Error message:" />
+                        </EuiTextColor>
+                      </h3>
+                    </EuiTitle>
+                    <EuiText size="s" color="danger">
+                      {alert.executionStatus.error?.message}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                      <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
+                    </EuiButton>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (
