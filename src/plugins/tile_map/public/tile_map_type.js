@@ -33,7 +33,6 @@ export function createTileMapTypeDefinition(dependencies) {
 
   return {
     name: 'tile_map',
-    isDeprecated: true,
     getDeprecationMessage,
     title: i18n.translate('tileMap.vis.mapTitle', {
       defaultMessage: 'Coordinate Map',
