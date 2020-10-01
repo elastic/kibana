@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,9 +24,10 @@ describe('useMatrixHistogram', () => {
   };
 
   it('should update request when props has changed', async () => {
-    const { rerender } = renderHook(() => useMatrixHistogram(props));
+    const localProps = { ...props };
+    const { rerender } = renderHook(() => useMatrixHistogram(localProps));
 
-    props.stackByField = 'event.action';
+    localProps.stackByField = 'event.action';
 
     rerender();
 
