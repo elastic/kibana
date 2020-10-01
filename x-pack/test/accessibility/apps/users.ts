@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  describe('Kibana users page meets a11y validations', () => {
+  describe('Kibana users page a11y tests', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await PageObjects.security.clickElasticsearchUsers();
@@ -63,7 +63,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for roles drop down', async () => {
+    // https://github.com/elastic/eui/issues/2841
+    it.skip('a11y test for roles drop down', async () => {
+      await testSubjects.setValue('userFormUserNameInput', 'a11y');
+      await testSubjects.setValue('passwordInput', 'password');
+      await testSubjects.setValue('passwordConfirmationInput', 'password');
+      await testSubjects.setValue('userFormFullNameInput', 'a11y user');
+      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await testSubjects.click('rolesDropdown');
+      await a11y.testAppSnapshot();
+    });
+
+    // logging bugs
+
+    it('a11y test for display of delete button on users page ', async () => {
+      await testSubjects.setValue('userFormUserNameInput', 'deleteA11y');
+      await testSubjects.setValue('passwordInput', 'password');
+      await testSubjects.setValue('passwordConfirmationInput', 'password');
+      await testSubjects.setValue('userFormFullNameInput', 'DeleteA11y user');
+      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await testSubjects.click('rolesDropdown');
+      await testSubjects.setValue('rolesDropdown', 'roleOption-apm_user');
+      await testSubjects.click('userFormSaveButton');
+      await testSubjects.click('checkboxSelectRow-deleteA11y');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for delete user panel ', async () => {
+      await testSubjects.click('deleteUserButton');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for edit user panel', async () => {
+      await testSubjects.click('confirmModalCancelButton');
+      await PageObjects.settings.clickLinkText('deleteA11y');
+      await a11y.testAppSnapshot();
+    });
+
+    // https://github.com/elastic/eui/issues/2841
+    it.skip('a11y test for Change password screen', async () => {
+      await PageObjects.settings.clickLinkText('deleteA11y');
+      await testSubjects.click('changePassword');
       await a11y.testAppSnapshot();
     });
   });
