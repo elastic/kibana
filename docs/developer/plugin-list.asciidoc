@@ -16,7 +16,7 @@ NOTE:
 [discrete]
 === src/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -259,7 +259,7 @@ which will load the visualization's editor.
 [discrete]
 === x-pack/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
