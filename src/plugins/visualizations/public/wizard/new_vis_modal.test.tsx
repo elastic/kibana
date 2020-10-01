@@ -53,11 +53,11 @@ describe('NewVisModal', () => {
     },
   ];
   const visTypes: TypesStart = {
-    get: (id: string) => {
-      return _visTypes.find((vis) => vis.name === id) as VisType;
+    get<T>(id: string): VisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
     },
     all: () => {
-      return _visTypes as VisType[];
+      return (_visTypes as unknown) as VisType[];
     },
     getAliases: () => [],
   };

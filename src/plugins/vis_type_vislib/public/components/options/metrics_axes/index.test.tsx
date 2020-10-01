@@ -137,7 +137,7 @@ describe('MetricsAxisOptions component', () => {
 
     it('should update visType when one seriesParam', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
+      expect((defaultProps.vis.type as any).type).toBe(ChartTypes.AREA);
 
       comp.setProps({
         stateParams: {
@@ -151,7 +151,7 @@ describe('MetricsAxisOptions component', () => {
 
     it('should set histogram visType when multiple seriesParam', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
+      expect((defaultProps.vis.type as any).type).toBe(ChartTypes.AREA);
 
       comp.setProps({
         stateParams: {
