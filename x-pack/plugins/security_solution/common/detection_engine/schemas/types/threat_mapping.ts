@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
+import { language } from '../common/schemas';
 import { NonEmptyString } from './non_empty_string';
 
 export const threat_query = t.string;
@@ -50,10 +51,7 @@ export type ThreatIndex = t.TypeOf<typeof threat_index>;
 export const threatIndexOrUndefined = t.union([threat_index, t.undefined]);
 export type ThreatIndexOrUndefined = t.TypeOf<typeof threatIndexOrUndefined>;
 
-export const threat_language = t.union([
-  t.keyof({ eql: null, kuery: null, lucene: null }),
-  t.undefined,
-]);
+export const threat_language = t.union([language, t.undefined]);
 export type ThreatLanguage = t.TypeOf<typeof threat_language>;
 export const threatLanguageOrUndefined = t.union([threat_language, t.undefined]);
 export type ThreatLanguageOrUndefined = t.TypeOf<typeof threatLanguageOrUndefined>;
