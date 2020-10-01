@@ -61,7 +61,7 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
           defaultMessage: 'Created by',
         }
       ),
-      description: annotation.create_username,
+      description: annotation.create_username ?? '',
     });
     listItems.push({
       title: i18n.translate(
@@ -79,7 +79,7 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
           defaultMessage: 'Modified by',
         }
       ),
-      description: annotation.modified_username,
+      description: annotation.modified_username ?? '',
     });
   }
   if (detectorDescription !== undefined) {
@@ -94,19 +94,19 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
   if (annotation.partition_field_name !== undefined) {
     listItems.push({
       title: annotation.partition_field_name,
-      description: annotation.partition_field_value,
+      description: annotation.partition_field_value ?? '',
     });
   }
   if (annotation.over_field_name !== undefined) {
     listItems.push({
       title: annotation.over_field_name,
-      description: annotation.over_field_value,
+      description: annotation.over_field_value ?? '',
     });
   }
   if (annotation.by_field_name !== undefined) {
     listItems.push({
       title: annotation.by_field_name,
-      description: annotation.by_field_value,
+      description: annotation.by_field_value ?? '',
     });
   }
 
