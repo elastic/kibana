@@ -557,6 +557,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             }}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
+            existFieldsInIndex={!!allFields.length}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
