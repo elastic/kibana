@@ -215,27 +215,6 @@ export class SpacesClient {
     await repository.delete('space', id);
   }
 
-  public async hasGlobalAllPrivilegesForObjectType(type: string) {
-    if (this.useRbac()) {
-      const kibanaPrivileges = ['create', 'get', 'update', 'delete'].map((operation) =>
-        this.authorization!.actions.savedObject.get(type, operation)
-      );
-      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { hasAllRequested } = await checkPrivileges.globally({ kibana: kibanaPrivileges });
-      // we do not audit the outcome of this privilege check, because it is called automatically to determine UI capabilities
-      this.debugLogger(
-        `SpacesClient.hasGlobalAllPrivilegesForObjectType, using RBAC. Result: ${hasAllRequested}`
-      );
-      return hasAllRequested;
-    }
-
-    // If not RBAC, then security isn't enabled and we can enumerate all spaces
-    this.debugLogger(
-      `SpacesClient.hasGlobalAllPrivilegesForObjectType, NOT USING RBAC. Result: true`
-    );
-    return true;
-  }
-
   private useRbac(): boolean {
     return this.authorization != null && this.authorization.mode.useRbacForRequest(this.request);
   }
