@@ -16,19 +16,15 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
-  let mockIndex: string[];
 
   beforeEach(() => {
-    mockIndex = ['index-123*'];
     mockField = useFormFieldMock({
       value: mockQueryBar,
     });
   });
 
   it('renders correctly', () => {
-    const wrapper = shallow(
-      <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
-    );
+    const wrapper = shallow(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
 
     expect(wrapper.find('[data-test-subj="myQueryBar"]')).toHaveLength(1);
   });
@@ -36,7 +32,7 @@ describe('EqlQueryBar', () => {
   it('sets the field value on input change', () => {
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
       </TestProviders>
     );
 
@@ -59,7 +55,7 @@ describe('EqlQueryBar', () => {
   it('does not render errors for a valid query', () => {
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
       </TestProviders>
     );
 
@@ -75,7 +71,7 @@ describe('EqlQueryBar', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={invalidMockField} />
+        <EqlQueryBar dataTestSubj="myQueryBar" field={invalidMockField} />
       </TestProviders>
     );
 
