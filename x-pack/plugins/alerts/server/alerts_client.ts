@@ -230,7 +230,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       executionStatus: {
-        status: 'waiting',
+        status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
       },

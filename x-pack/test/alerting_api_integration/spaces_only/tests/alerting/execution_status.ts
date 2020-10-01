@@ -24,7 +24,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     after(async () => await objectRemover.removeAll());
 
-    it('should be "waiting" for newly created alert', async () => {
+    it('should be "pending" for newly created alert', async () => {
       const dateStart = Date.now();
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
@@ -35,9 +35,9 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
 
       expect(response.body.executionStatus).to.be.ok();
-      const { status, date, error } = response.body.executionStatus;
-      expect(status).to.be('waiting');
-      ensureDatetimesAreOrdered([dateStart, date, dateEnd]);
+      const { status, lastExecutionDate, error } = response.body.executionStatus;
+      expect(status).to.be('pending');
+      ensureDatetimesAreOrdered([dateStart, lastExecutionDate, dateEnd]);
       expect(error).not.to.be.ok();
 
       // Ensure AAD isn't broken
@@ -226,7 +226,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       await waitForStatus(alertId, new Set(['error']));
 
-      let filter = `date>${startDate}`;
+      let filter = `lastExecutionDate>${startDate}`;
       let executionStatus = await waitForFindStatus(alertId, new Set(['error']), filter);
       expectErrorExecutionStatus(executionStatus, startDate);
 

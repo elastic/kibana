@@ -89,7 +89,7 @@
           "status": {
             "type": "keyword"
           },
-          "date": {
+          "lastExecutionDate": {
             "type": "date"
           },
           "error": {
