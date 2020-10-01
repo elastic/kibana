@@ -43,6 +43,7 @@ export const getCreateExceptionListItemMinimalSchemaMock = (): CreateExceptionLi
   item_id: ITEM_ID,
   list_id: LIST_ID,
   name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });
 
@@ -54,5 +55,6 @@ export const getCreateExceptionListItemMinimalSchemaMockWithoutId = (): CreateEx
   entries: ENTRIES,
   list_id: LIST_ID,
   name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });
