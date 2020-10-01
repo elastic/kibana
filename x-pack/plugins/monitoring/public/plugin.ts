@@ -24,6 +24,7 @@ import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -71,6 +72,7 @@ export class MonitoringPlugin
     }
 
     plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    plugins.triggers_actions_ui.alertTypeRegistry.register(createDiskUsageAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);

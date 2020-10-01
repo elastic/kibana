@@ -16,7 +16,11 @@ import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UrlGeneratorContract,
+} from 'src/plugins/share/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
@@ -34,6 +38,8 @@ import type { SecurityPluginSetup } from '../../security/public';
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 import { setDependencyCache } from './application/util/dependency_cache';
+import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
+import { registerUrlGenerator } from './ml_url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -59,6 +65,7 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -98,6 +105,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
+    if (pluginsSetup.share) {
+      this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -109,7 +120,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerFeature,
         registerManagementSection,
         registerMlUiActions,
-        registerUrlGenerator,
         MlCardState,
       } = await import('./register_helper');
 
@@ -118,11 +128,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-
-        // the mlUrlGenerator should be registered even without full license
-        // for other plugins to access ML links
-        registerUrlGenerator(pluginsSetup.share, core);
-
         const { capabilities } = coreStart.application;
 
         // register ML for the index pattern management no data screen.
@@ -149,7 +154,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }
     });
 
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   start(core: CoreStart, deps: any) {
@@ -159,7 +166,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   public stop() {}
