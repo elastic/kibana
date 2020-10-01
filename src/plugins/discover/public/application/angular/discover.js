@@ -32,7 +32,7 @@ import {
   indexPatterns as indexPatternsUtils,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { getSortArray, getSortForSearchSource } from './doc_table';
+import { getSortArray } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
@@ -61,12 +61,12 @@ import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { resolveIndexPatternLoading } from './helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { onSaveSearch } from '../components/top_nav/on_save_search';
 import { getSharingData } from '../helpers/get_sharing_data';
+import { updateSearchSource } from '../helpers/update_search_source';
 
 const {
   core,
@@ -791,20 +791,12 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource } = $scope;
-    searchSource
-      .setField('index', $scope.indexPattern)
-      .setField('size', $scope.opts.sampleSize)
-      .setField(
-        'sort',
-        getSortForSearchSource(
-          $scope.state.sort,
-          indexPattern,
-          config.get(SORT_DEFAULT_ORDER_SETTING)
-        )
-      )
-      .setField('query', data.query.queryString.getQuery() || null)
-      .setField('filter', filterManager.getFilters());
+    updateSearchSource($scope.searchSource, {
+      indexPattern: $scope.indexPattern,
+      config,
+      state: $scope.state,
+      data,
+    });
     return Promise.resolve();
   };
 
