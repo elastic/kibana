@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -161,26 +162,37 @@ export const ActionConnectorForm = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <FieldsComponent
-            action={connector}
-            errors={errors}
-            readOnly={!canSave}
-            editActionConfig={setActionConfigProperty}
-            editActionSecrets={setActionSecretsProperty}
-            http={http}
-            docLinks={docLinks}
-            consumer={consumer}
-          />
-        </Suspense>
+        <>
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"
+                defaultMessage="Connector settings"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <FieldsComponent
+              action={connector}
+              errors={errors}
+              readOnly={!canSave}
+              editActionConfig={setActionConfigProperty}
+              editActionSecrets={setActionSecretsProperty}
+              http={http}
+              docLinks={docLinks}
+              consumer={consumer}
+            />
+          </Suspense>
+        </>
       ) : null}
     </EuiForm>
   );
