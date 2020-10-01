@@ -99,29 +99,6 @@ function renderNotifications(
   });
 }
 
-function renderTitle(description?: string, title?: string, placeholderTitle?: string) {
-  const titleComponent = title ? (
-    <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
-      {title || placeholderTitle}
-    </span>
-  ) : undefined;
-  return description ? (
-    <EuiToolTip
-      content={description}
-      delay="regular"
-      position="right"
-      anchorClassName="embPanel__maxWidth"
-    >
-      <span className="embPanel__titleInner">
-        {titleComponent}
-        <EuiIcon type="iInCircle" color="subdued" className="embPanel__icon" />
-      </span>
-    </EuiToolTip>
-  ) : (
-    titleComponent
-  );
-}
-
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 type VisualizeEmbeddable = any;
 
@@ -148,18 +125,16 @@ export function PanelHeader({
   embeddable,
   headerId,
 }: PanelHeaderProps) {
-  const viewDescription = getViewDescription(embeddable);
+  const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
-  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
+  const showPanelBar = !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
-  const placeholderTitle = !isViewMode
-    ? i18n.translate('embeddableApi.panel.placeholderTitle', {
-        defaultMessage: '[No Title]',
-      })
-    : '';
+  const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
+    defaultMessage: '[No Title]',
+  });
 
   const getAriaLabel = () => {
     return (
@@ -190,6 +165,28 @@ export function PanelHeader({
     );
   }
 
+  const renderTitle = () => {
+    const titleComponent = showTitle ? (
+      <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
+        {title || placeholderTitle}
+      </span>
+    ) : undefined;
+    return description ? (
+      <EuiToolTip
+        content={description}
+        delay="regular"
+        position="right"
+        anchorClassName="embPanel__maxWidth"
+      >
+        <span className="embPanel__titleInner">
+          {titleComponent} <EuiIcon type="iInCircle" color="subdued" />
+        </span>
+      </EuiToolTip>
+    ) : (
+      titleComponent
+    );
+  };
+
   return (
     <figcaption
       className={classes}
@@ -197,7 +194,7 @@ export function PanelHeader({
     >
       <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-        {showTitle && renderTitle(viewDescription, title, placeholderTitle)}
+        {renderTitle()}
         {renderBadges(badges, embeddable)}
       </h2>
       {renderNotifications(notifications, embeddable)}
