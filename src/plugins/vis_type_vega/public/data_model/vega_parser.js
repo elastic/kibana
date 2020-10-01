@@ -93,9 +93,9 @@ export class VegaParser {
     this._parseControlPlacement(this._config);
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
-    } else if (this.spec.autosize === undefined) {
-      // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
-      this.spec.autosize = { type: 'fit', contains: 'padding' };
+      this.useResize = false;
+    } else if (this.spec) {
+      this._compileWithAutosize();
     }
 
     await this._resolveDataUrls();
@@ -103,8 +103,6 @@ export class VegaParser {
     if (this.isVegaLite) {
       this._compileVegaLite();
     }
-
-    this._calcSizing();
   }
 
   /**
@@ -163,56 +161,74 @@ export class VegaParser {
   }
 
   /**
-   * Process graph size and padding
-   * @private
+   * Ensure that Vega and Vega-Lite will take the full width of the container unless
+   * the user has explicitly disabled this setting by setting it to "none".
+   * Also sets the default width to include the padding. This creates the least configuration
+   * needed for most cases, with the option to do more.
    */
-  _calcSizing() {
-    this.useResize = false;
-    if (!this.useMap) {
-      // when useResize is true, vega's canvas size will be set based on the size of the container,
-      // and will be automatically updated on resize events.
-      // We delete width & height if the autosize is set to "fit"
-      // We also set useResize=true in case autosize=none, and width & height are not set
-      const autosize = this.spec.autosize.type || this.spec.autosize;
-      if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
-        this.useResize = true;
-      }
+  _compileWithAutosize() {
+    const defaultAutosize = {
+      type: 'fit',
+      contains: 'padding',
+    };
+
+    let autosize = this.spec.autosize;
+    let useResize = true;
+
+    if (!this.isVegaLite && autosize && typeof autosize === 'object' && 'signal' in autosize) {
+      // Vega supports dynamic autosize information, so we ignore it
+      return;
     }
 
-    // Padding is not included in the width/height by default
-    this.paddingWidth = 0;
-    this.paddingHeight = 0;
-    if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
-      if (typeof this.spec.padding === 'object') {
-        this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
-        this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
-      } else {
-        this.paddingWidth += 2 * (+this.spec.padding || 0);
-        this.paddingHeight += 2 * (+this.spec.padding || 0);
-      }
+    if (!autosize && typeof autosize !== 'undefined') {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.autoSizeDoesNotAllowFalse', {
+          defaultMessage:
+            '{autoSizeParam} is enabled, it can only be disabled by setting {autoSizeParam} to {noneParam}',
+          values: {
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
     }
 
-    if (this.useResize && (this.spec.width || this.spec.height)) {
-      if (this.isVegaLite) {
-        delete this.spec.width;
-        delete this.spec.height;
-      } else {
-        this._onWarning(
-          i18n.translate(
-            'visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage',
-            {
-              defaultMessage:
-                'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
-              values: {
-                autosizeParam: 'autosize=fit',
-                widthParam: '"width"',
-                heightParam: '"height"',
-              },
-            }
-          )
-        );
-      }
+    if (typeof autosize === 'string') {
+      useResize = autosize !== 'none';
+      autosize = { ...defaultAutosize, type: autosize };
+    } else if (typeof autosize === 'object') {
+      autosize = { ...defaultAutosize, ...autosize };
+      useResize = Boolean(autosize?.type && autosize?.type !== 'none');
+    } else {
+      autosize = defaultAutosize;
     }
+
+    if (
+      useResize &&
+      ((this.spec.width && this.spec.width !== 'container') ||
+        (this.spec.height && this.spec.height !== 'container'))
+    ) {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreIgnored', {
+          defaultMessage:
+            '{widthParam} and {heightParam} params are ignored because {autoSizeParam} is enabled. Set {autoSizeParam}: {noneParam} to disable',
+          values: {
+            widthParam: '"width"',
+            heightParam: '"height"',
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
+    }
+
+    if (useResize) {
+      this.spec.width = 'container';
+      this.spec.height = 'container';
+    }
+
+    this.spec.autosize = autosize;
+    this.useResize = useResize;
   }
 
   /**
