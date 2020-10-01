@@ -29,7 +29,7 @@ export function getTransactionsProjection({
   transactionType?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -47,7 +47,7 @@ export function getTransactionsProjection({
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,
-      ...uiFiltersES,
+      ...esFilter,
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),

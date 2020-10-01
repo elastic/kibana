@@ -22,7 +22,7 @@ export function getRumPageLoadTransactionsProjection({
   setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const bool = {
     filter: [
@@ -46,7 +46,7 @@ export function getRumPageLoadTransactionsProjection({
             },
           ]
         : []),
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 
@@ -67,13 +67,13 @@ export function getRumLongTasksProjection({
 }: {
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter: esFilter } = setup;
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [SPAN_TYPE]: 'longtask' } },
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 
@@ -94,7 +94,7 @@ export function getRumErrorsProjection({
 }: {
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter: esFilter } = setup;
 
   const bool = {
     filter: [
@@ -106,7 +106,7 @@ export function getRumErrorsProjection({
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 

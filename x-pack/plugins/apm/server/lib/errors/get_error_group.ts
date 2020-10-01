@@ -27,7 +27,7 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -41,7 +41,7 @@ export async function getErrorGroup({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES,
+            ...esFilter,
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },

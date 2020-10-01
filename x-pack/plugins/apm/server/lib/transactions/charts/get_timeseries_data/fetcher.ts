@@ -44,7 +44,7 @@ export function timeseriesFetcher({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.uiFiltersES,
+    ...setup.esFilter,
   ];
 
   if (transactionName) {

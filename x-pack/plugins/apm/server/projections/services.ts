@@ -17,7 +17,7 @@ export function getServicesProjection({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   return {
     apm: {
@@ -33,7 +33,7 @@ export function getServicesProjection({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }, ...uiFiltersES],
+          filter: [{ range: rangeFilter(start, end) }, ...esFilter],
         },
       },
       aggs: {

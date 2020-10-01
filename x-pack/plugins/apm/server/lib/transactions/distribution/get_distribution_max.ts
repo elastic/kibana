@@ -28,7 +28,7 @@ export async function getDistributionMax({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -55,7 +55,7 @@ export async function getDistributionMax({
                 },
               },
             },
-            ...uiFiltersES,
+            ...esFilter,
           ],
         },
       },

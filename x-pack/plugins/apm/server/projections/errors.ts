@@ -19,7 +19,7 @@ export function getErrorGroupsProjection({
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   return {
     apm: {
@@ -31,7 +31,7 @@ export function getErrorGroupsProjection({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES,
+            ...esFilter,
           ],
         },
       },

@@ -44,63 +44,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('with environment selected', () => {
-          describe('without uiFilters', () => {
-            const environment = 'production';
-            before(async () => {
-              response = await supertest.get(
-                `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&environment=${environment}`
-              );
-            });
-            it('should have a successful response', () => {
-              expect(response.status).to.eql(200);
-            });
+        describe('without uiFilters', () => {
+          before(async () => {
+            response = await supertest.get(
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}`
+            );
+          });
+          it('should return an error response', () => {
+            expect(response.status).to.eql(400);
+          });
+        });
 
-            it('should return the ML job id for anomalies of the selected environment', () => {
-              expect(response.body).to.have.property('anomalyTimeseries');
-              expect(response.body.anomalyTimeseries).to.have.property('jobId');
-              expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
-                `"apm-production-229a-high_mean_transaction_duration"`
-              );
-            });
-
-            it('should return a non-empty anomaly series', () => {
-              expect(response.body).to.have.property('anomalyTimeseries');
-              expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(
-                0
-              );
-              expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
-            });
+        describe('with environment selected in uiFilters', () => {
+          const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
+          before(async () => {
+            response = await supertest.get(
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+            );
           });
 
-          describe('with uiFilters', () => {
-            const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
-            const environment = 'production';
-            before(async () => {
-              response = await supertest.get(
-                `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&environment=${environment}`
-              );
-            });
+          it('should have a successful response', () => {
+            expect(response.status).to.eql(200);
+          });
 
-            it('should have a successful response', () => {
-              expect(response.status).to.eql(200);
-            });
+          it('should return the ML job id for anomalies of the selected environment', () => {
+            expect(response.body).to.have.property('anomalyTimeseries');
+            expect(response.body.anomalyTimeseries).to.have.property('jobId');
+            expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
+              `"apm-production-229a-high_mean_transaction_duration"`
+            );
+          });
 
-            it('should return the ML job id for anomalies of the selected environment', () => {
-              expect(response.body).to.have.property('anomalyTimeseries');
-              expect(response.body.anomalyTimeseries).to.have.property('jobId');
-              expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
-                `"apm-production-229a-high_mean_transaction_duration"`
-              );
-            });
-
-            it('should return a non-empty anomaly series', () => {
-              expect(response.body).to.have.property('anomalyTimeseries');
-              expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(
-                0
-              );
-              expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
-            });
+          it('should return a non-empty anomaly series', () => {
+            expect(response.body).to.have.property('anomalyTimeseries');
+            expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(0);
+            expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
           });
         });
 
@@ -108,10 +86,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(
             JSON.stringify({ environment: 'ENVIRONMENT_NOT_DEFINED' })
           );
-          const environment = 'ENVIRONMENT_NOT_DEFINED';
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&environment=${environment}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -135,10 +112,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('with all environments selected', () => {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'ENVIRONMENT_ALL' }));
-          const environment = 'ENVIRONMENT_ALL';
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&environment=${environment}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -155,10 +131,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(
             JSON.stringify({ kuery: '', environment: 'production' })
           );
-          const environment = 'production';
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&environment=${environment}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 

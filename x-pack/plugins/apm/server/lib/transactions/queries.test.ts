@@ -56,8 +56,6 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
-        environment: 'test',
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -72,8 +70,6 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
-        environment: 'test',
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -88,8 +84,6 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
-        environment: 'test',
       })
     );
 

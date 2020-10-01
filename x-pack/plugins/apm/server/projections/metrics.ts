@@ -34,13 +34,13 @@ export function getMetricsProjection({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...getServiceNodeNameFilters(serviceNodeName),
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   return {

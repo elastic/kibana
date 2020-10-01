@@ -12,7 +12,6 @@ import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
 import { anomalySeriesTransform } from './transform';
 import { getMLJobIds } from '../../../service_map/get_service_anomalies';
-import { UIFilters } from '../../../../../typings/ui_filters';
 
 export async function getAnomalySeries({
   serviceName,
@@ -21,8 +20,6 @@ export async function getAnomalySeries({
   timeSeriesDates,
   setup,
   logger,
-  uiFilters,
-  environment,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -30,8 +27,6 @@ export async function getAnomalySeries({
   timeSeriesDates: number[];
   setup: Setup & SetupTimeRange;
   logger: Logger;
-  uiFilters?: UIFilters;
-  environment: string;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
@@ -43,6 +38,9 @@ export async function getAnomalySeries({
     return;
   }
 
+  const { uiFilters, start, end } = setup;
+  const { environment } = uiFilters;
+
   // don't fetch anomalies when no specific environment is selected
   if (environment === ENVIRONMENT_ALL.value) {
     return;
@@ -50,12 +48,10 @@ export async function getAnomalySeries({
 
   // don't fetch anomalies if unknown uiFilters are applied
   const knownFilters = ['environment', 'serviceName'];
-  const hasUnknownFiltersApplied =
-    uiFilters &&
-    Object.entries(uiFilters)
-      .filter(([key, value]) => !!value)
-      .map(([key]) => key)
-      .some((uiFilterName) => !knownFilters.includes(uiFilterName));
+  const hasUnknownFiltersApplied = Object.entries(setup.uiFilters)
+    .filter(([key, value]) => !!value)
+    .map(([key]) => key)
+    .some((uiFilterName) => !knownFilters.includes(uiFilterName));
 
   if (hasUnknownFiltersApplied) {
     return;
@@ -81,7 +77,6 @@ export async function getAnomalySeries({
     return;
   }
 
-  const { start, end } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end);
 
   const esResponse = await anomalySeriesFetcher({

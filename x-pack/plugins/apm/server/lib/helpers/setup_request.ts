@@ -25,14 +25,8 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
+import { UIFilters } from '../../../typings/ui_filters';
 
-function decodeUiFilters(uiFiltersEncoded?: string) {
-  if (!uiFiltersEncoded) {
-    return [];
-  }
-  const uiFilters = JSON.parse(uiFiltersEncoded);
-  return getUiFiltersES(uiFilters);
-}
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
 
@@ -42,7 +36,8 @@ export interface Setup {
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
 }
 
 export interface SetupTimeRange {
@@ -68,7 +63,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
   request: KibanaRequest
 ): Promise<InferSetup<TParams>> {
-  const { config } = context;
+  const { config, logger } = context;
   const { query } = context.params;
 
   const [indices, includeFrozen] = await Promise.all([
@@ -78,6 +73,15 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     }),
     context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
   ]);
+
+  const uiFilters: UIFilters = {};
+  if (query.uiFilters) {
+    try {
+      Object.assign(uiFilters, JSON.parse(query.uiFilters));
+    } catch (error) {
+      logger.error(error);
+    }
+  }
 
   const coreSetupRequest = {
     indices,
@@ -100,7 +104,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
           )
         : undefined,
     config,
-    uiFiltersES: decodeUiFilters(query.uiFilters),
+    uiFilters,
+    esFilter: getUiFiltersES(uiFilters),
   };
 
   return {

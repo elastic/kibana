@@ -23,7 +23,7 @@ export async function getTransactionSampleForGroup({
   transactionName: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { apmEventClient, start, end, uiFiltersES } = setup;
+  const { apmEventClient, start, end, esFilter } = setup;
 
   const filter = [
     {
@@ -39,7 +39,7 @@ export async function getTransactionSampleForGroup({
         [TRANSACTION_NAME]: transactionName,
       },
     },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   const getSampledTransaction = async () => {

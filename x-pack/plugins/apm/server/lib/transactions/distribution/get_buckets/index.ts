@@ -65,14 +65,14 @@ export async function getBuckets({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const commonFilters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { term: { [TRANSACTION_NAME]: transactionName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   async function getSamplesForDistributionBuckets() {

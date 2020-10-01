@@ -10,7 +10,6 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
 import { getApmTimeseriesData } from './get_timeseries_data';
 import { ApmTimeSeriesResponse } from './get_timeseries_data/transform';
-import { UIFilters } from '../../../../typings/ui_filters';
 
 function getDates(apmTimeseries: ApmTimeSeriesResponse) {
   return apmTimeseries.responseTimes.avg.map((p) => p.x);
@@ -26,8 +25,6 @@ export async function getTransactionCharts(options: {
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
-  uiFilters?: UIFilters;
-  environment: string;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

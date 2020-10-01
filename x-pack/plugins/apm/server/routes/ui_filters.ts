@@ -107,7 +107,7 @@ function createLocalFiltersRoute<
         context,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
+          esFilter: getUiFiltersES(omit(parsedUiFilters, filterNames)),
         },
       });
 

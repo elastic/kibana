@@ -33,7 +33,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, apmEventClient, start, end, config } = setup;
+  const { esFilter, apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -80,7 +80,7 @@ export async function getTransactionBreakdown({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   if (transactionName) {

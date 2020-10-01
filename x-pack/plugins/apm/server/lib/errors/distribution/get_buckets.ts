@@ -24,11 +24,11 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   if (groupId) {
