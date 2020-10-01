@@ -45,14 +45,6 @@ discover-app {
   }
 }
 
-.dscApp__sidebar {
-  flex-grow: 0;
-  flex-basis: auto;
-  min-width: 250px;
-  display: flex;
-  flex-direction: column;
-}
-
 .dscApp__content {
   flex-grow: 1;
   flex-direction: column;
@@ -63,7 +55,7 @@ discover-app {
 
 .dscHistogram {
   display: flex;
-  height: 200px;
+  height: $euiSize * 12.5;
   padding: $euiSizeS;
 }
 // new slimmer layout for data grid
@@ -154,10 +146,9 @@ discover-app {
   }
 }
 
-// SASSTODO: replace the padding value with a variable
 .dscTable__footer {
   background-color: $euiColorLightShade;
-  padding: 5px 10px;
+  padding: $euiSizeXS $euiSizeS;
   text-align: center;
 }
 
@@ -166,10 +157,6 @@ discover-app {
   flex-direction: column;
   display: flex;
   overflow: hidden;
-  h3 {
-    margin: -20px 0 10px 0;
-    text-align: center;
-  }
 }
 
 .dscResults__interval {
@@ -212,28 +199,22 @@ discover-app {
   }
 }
 
+.dscCollapsibleSidebar__collapseButton {
+  align-self: flex-start;
+  &:not(.closed) {
+    position: relative;
+    left: -$euiSizeS;
+  }
+}
+
 .dscCollapsibleSidebar {
   position: relative;
   z-index: $euiZLevel1;
-
-  .dscCollapsibleSidebar__collapseButton {
-    position: absolute;
-    top: 0;
-    right: -$euiSizeXL + 4;
-    cursor: pointer;
-    z-index: -1;
-    min-height: $euiSizeM;
-    min-width: $euiSizeM;
-    padding: $euiSizeXS * 0.5;
-  }
 
   &.closed {
     width: 0 !important;
     border-right-width: 0;
     border-left-width: 0;
-    .dscCollapsibleSidebar__collapseButton {
-      right: -$euiSizeL + 4;
-    }
   }
 }
 
