@@ -15,6 +15,7 @@ import {
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import { EncryptionError } from './encryption_error';
 
 interface EncryptionKeyRotationServiceOptions {
   logger: Logger;
@@ -138,6 +139,7 @@ export class EncryptionKeyRotationService {
     // so that unprocessed objects may get into the first page and we'll miss them. We can of course oscillate between
     // the first and the second pages or do multiple rotation passes, but it'd complicate code significantly.
     let batch = 0;
+    let maxBatches = 0;
     while (true) {
       this.options.logger.debug(`Fetching ${batchSize} objects (batch #${batch}).`);
       const savedObjectsToDecrypt = await retrieveClient.find({
@@ -153,6 +155,11 @@ export class EncryptionKeyRotationService {
       if (batch === 0) {
         this.options.logger.debug(`Found ${savedObjectsToDecrypt.total} objects.`);
         result.total = savedObjectsToDecrypt.total;
+        // Since we process live data there is a theoretical chance that we may be getting new
+        // objects in every batch effectively making this loop infinite. To prevent this we want to
+        // limit a number of batches we process during single rotation request giving enough room
+        // for the Saved Objects occasionally created during rotation.
+        maxBatches = Math.ceil((savedObjectsToDecrypt.total * 2) / batchSize);
       }
 
       this.options.logger.debug(
@@ -189,11 +196,9 @@ export class EncryptionKeyRotationService {
         result.failed += savedObjectsToEncrypt.length;
       }
 
-      if (savedObjectsToDecrypt.total <= batchSize) {
+      if (savedObjectsToDecrypt.total <= batchSize || ++batch >= maxBatches) {
         break;
       }
-
-      batch++;
     }
 
     this.options.logger.debug(
@@ -227,24 +232,35 @@ export class EncryptionKeyRotationService {
         processedObjectIDs.add(savedObject.id);
       }
 
-      const namespace = savedObject.namespaces?.[0];
       let decryptedAttributes;
       try {
         decryptedAttributes = await this.options.service.decryptAttributes(
           {
             type: savedObject.type,
             id: savedObject.id,
-            namespace: getDescriptorNamespace(typeRegistry, savedObject.type, namespace),
+            namespace: getDescriptorNamespace(
+              typeRegistry,
+              savedObject.type,
+              savedObject.namespaces
+            ),
           },
           savedObject.attributes as Record<string, unknown>,
-          { useDecryptionOnlyKeys: true, user }
+          { omitPrimaryEncryptionKey: true, user }
         );
-      } catch {
-        // Just skip object if we couldn't decrypt it with the decryption-only keys.
+      } catch (err) {
+        if (!(err instanceof EncryptionError)) {
+          throw err;
+        }
+
         continue;
       }
 
-      decryptedSavedObjects.push({ ...savedObject, attributes: decryptedAttributes, namespace });
+      decryptedSavedObjects.push({
+        ...savedObject,
+        attributes: decryptedAttributes,
+        // `bulkUpdate` expects objects with a single `namespace`.
+        namespace: savedObject.namespaces?.[0],
+      });
     }
 
     return decryptedSavedObjects;

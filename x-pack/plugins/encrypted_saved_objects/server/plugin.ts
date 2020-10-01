@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
 import nodeCrypto from '@elastic/node-crypto';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { TypeOf } from '@kbn/config-schema';
 import { SecurityPluginSetup } from '../../security/server';
-import { createConfig$ } from './config';
+import { createConfig, ConfigSchema } from './config';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
@@ -50,21 +51,29 @@ export class Plugin {
     core: CoreSetup,
     deps: PluginsSetup
   ): Promise<EncryptedSavedObjectsPluginSetup> {
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    const config = await this.initializerContext.config
+      .create<TypeOf<typeof ConfigSchema>>()
+      .pipe(
+        map((rawConfig) => createConfig(rawConfig, this.initializerContext.logger.get('config')))
+      )
+      .pipe(first())
+      .toPromise();
     const auditLogger = new EncryptedSavedObjectsAuditLogger(
       deps.security?.audit.getLogger('encryptedSavedObjects')
     );
 
-    // This list of cryptos consists of the primary crypto that is used for both encryption and
-    // decryption, and the optional secondary cryptos that are used for decryption only.
-    const cryptos = [
-      nodeCrypto({ encryptionKey: config.encryptionKey }),
-      ...config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
-        nodeCrypto({ encryptionKey: decryptionKey })
-      ),
-    ];
+    const primaryCrypto = nodeCrypto({ encryptionKey: config.encryptionKey });
+    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+      nodeCrypto({ encryptionKey: decryptionKey })
+    );
+
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(cryptos, this.logger, auditLogger)
+      new EncryptedSavedObjectsService({
+        primaryCrypto,
+        decryptionOnlyCryptos,
+        logger: this.logger,
+        audit: auditLogger,
+      })
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -95,11 +104,12 @@ export class Plugin {
       createMigration: getCreateMigration(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
-          const serviceForMigration = new EncryptedSavedObjectsService(
-            cryptos,
-            this.logger,
-            auditLogger
-          );
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+            audit: auditLogger,
+          });
           serviceForMigration.registerType(typeRegistration);
           return serviceForMigration;
         }

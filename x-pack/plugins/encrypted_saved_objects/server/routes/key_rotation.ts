@@ -20,7 +20,9 @@ export function defineKeyRotationRoutes({
   encryptionKeyRotationService,
   router,
   logger,
+  config,
 }: RouteDefinitionParams) {
+  let rotationInProgress = false;
   router.post(
     {
       path: '/api/encrypted_saved_objects/rotate_key',
@@ -39,6 +41,22 @@ export function defineKeyRotationRoutes({
       },
     },
     async (context, request, response) => {
+      if (config.keyRotation.decryptionOnlyKeys.length === 0) {
+        return response.badRequest({
+          body:
+            'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
+        });
+      }
+
+      if (rotationInProgress) {
+        return response.customError({
+          body:
+            'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
+          statusCode: 429,
+        });
+      }
+
+      rotationInProgress = true;
       try {
         return response.ok({
           body: await encryptionKeyRotationService.rotate(request, {
@@ -48,7 +66,9 @@ export function defineKeyRotationRoutes({
         });
       } catch (err) {
         logger.error(err);
-        return response.internalError();
+        return response.customError({ body: err, statusCode: 500 });
+      } finally {
+        rotationInProgress = false;
       }
     }
   );

@@ -21,7 +21,5 @@ export interface RouteDefinitionParams {
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  if (params.config.keyRotation.decryptionOnlyKeys.length > 0) {
-    defineKeyRotationRoutes(params);
-  }
+  defineKeyRotationRoutes(params);
 }
