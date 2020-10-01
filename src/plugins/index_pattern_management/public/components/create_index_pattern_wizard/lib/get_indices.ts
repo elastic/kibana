@@ -39,9 +39,10 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
-const searchResponseToArray = (getIndexTags: IndexPatternCreationConfig['getIndexTags']) => (
-  response: IEsSearchResponse<any>
-) => {
+const searchResponseToArray = (
+  getIndexTags: IndexPatternCreationConfig['getIndexTags'],
+  showAllIndices: boolean
+) => (response: IEsSearchResponse<any>) => {
   const { rawResponse } = response;
   if (!rawResponse.aggregations) {
     return [];
@@ -49,6 +50,13 @@ const searchResponseToArray = (getIndexTags: IndexPatternCreationConfig['getInde
     return rawResponse.aggregations.indices.buckets
       .map((bucket: { key: string }) => {
         return bucket.key;
+      })
+      .filter((indexName: string) => {
+        if (showAllIndices) {
+          return true;
+        } else {
+          return !indexName.startsWith('.');
+        }
       })
       .map((indexName: string) => {
         return {
@@ -89,7 +97,7 @@ const getIndicesViaSearch = async ({
       },
     },
   })
-    .pipe(map(searchResponseToArray(getIndexTags)))
+    .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
     .pipe(scan((accumulator = [], value) => accumulator.join(value)))
     .toPromise();
 
