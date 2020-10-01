@@ -70,20 +70,24 @@ export async function getVisitorBreakdown({
     name: bucket.key as string,
   }));
 
-  browserItems.push({
-    count: totalItems - browserTotal,
-    name: 'Others',
-  });
+  if (totalItems > 0) {
+    browserItems.push({
+      count: totalItems - browserTotal,
+      name: 'Others',
+    });
+  }
 
   const osItems = os.buckets.map((bucket) => ({
     count: bucket.doc_count,
     name: bucket.key as string,
   }));
 
-  osItems.push({
-    count: totalItems - osTotal,
-    name: 'Others',
-  });
+  if (totalItems > 0) {
+    osItems.push({
+      count: totalItems - osTotal,
+      name: 'Others',
+    });
+  }
 
   return {
     os: osItems,

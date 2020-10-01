@@ -11,6 +11,7 @@ import { BreakdownItem } from '../../../typings/ui_filters';
 export async function getPageViewTrends({
   setup,
   breakdowns,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange;
   breakdowns?: string;
@@ -18,6 +19,7 @@ export async function getPageViewTrends({
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
