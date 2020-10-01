@@ -12,6 +12,8 @@ import {
   Settings,
   timeFormatter,
   BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,7 +81,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       />
     );
   } else {
-    const { histogram } = data;
+    const { histogram, minInterval } = data;
 
     const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
       defaultMessage: 'Down',
@@ -97,6 +99,15 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       updateUrlParams({
         dateRangeStart: moment(min).toISOString(),
         dateRangeEnd: moment(max).toISOString(),
+      });
+    };
+
+    const onBarClicked: ElementClickListener = ([elementData]) => {
+      const startRange = (elementData as XYChartElementEvent)[0].x;
+
+      updateUrlParams({
+        dateRangeStart: moment(startRange).toISOString(),
+        dateRangeEnd: moment(startRange).add(minInterval, 'ms').toISOString(),
       });
     };
 
@@ -125,11 +136,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         <Chart>
           <Settings
             xDomain={{
+              minInterval,
               min: absoluteStartDate,
               max: absoluteEndDate,
             }}
             showLegend={false}
             onBrushEnd={onBrushEnd}
+            onElementClick={onBarClicked}
             {...chartTheme}
           />
           <Axis
