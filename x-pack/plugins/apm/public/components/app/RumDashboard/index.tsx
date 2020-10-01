@@ -23,8 +23,8 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ServiceNameFilter } from './URLFilter/ServiceNameFilter';
 
 export function RumOverview() {
-  useTrackPageview({ app: 'apm', path: 'rum_overview' });
-  useTrackPageview({ app: 'apm', path: 'rum_overview', delay: 15000 });
+  useTrackPageview({ app: 'ux', path: 'home' });
+  useTrackPageview({ app: 'ux', path: 'home', delay: 15000 });
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {

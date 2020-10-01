@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-server.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)({ spec, fieldFormats, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-server.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -54,8 +54,11 @@ export declare class IndexPattern implements IIndexPattern
 |  [getTimeField()](./kibana-plugin-plugins-data-server.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
+<<<<<<< HEAD
 |  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-server.indexpattern.isunsupportedtimepattern.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-server.indexpattern.popularizefield.md) |  |  |
+=======
+>>>>>>> cdb922f2a2... Move indexPattern.popularizeField into discover (#77668)
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-server.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  |  |
 

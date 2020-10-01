@@ -39,8 +39,8 @@ import { getTimelionVisDefinition } from './timelion_vis_type';
 import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_services';
 import { ConfigSchema } from '../config';
 
-import './index.scss';
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
+import { getTimelionVisRenderer } from './timelion_vis_renderer';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {
@@ -93,7 +93,8 @@ export class TimelionVisPlugin
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.createReactVisualization(getTimelionVisDefinition(dependencies));
+    expressions.registerRenderer(getTimelionVisRenderer(dependencies));
+    visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
 
     return {
       isUiEnabled: this.initializerContext.config.get().ui.enabled,

@@ -8,6 +8,7 @@ import {
   ResolverRelatedEvents,
   ResolverTree,
   SafeEndpointEvent,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { TreeFetcherParameters } from '../../types';
 
@@ -78,10 +79,25 @@ interface ServerReturnedNodeEventsInCategory {
     eventCategory: string;
   };
 }
+interface AppRequestedCurrentRelatedEventData {
+  type: 'appRequestedCurrentRelatedEventData';
+}
+
+interface ServerFailedToReturnCurrentRelatedEventData {
+  type: 'serverFailedToReturnCurrentRelatedEventData';
+}
+
+interface ServerReturnedCurrentRelatedEventData {
+  readonly type: 'serverReturnedCurrentRelatedEventData';
+  readonly payload: SafeResolverEvent;
+}
 
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
+  | AppRequestedCurrentRelatedEventData
+  | ServerReturnedCurrentRelatedEventData
+  | ServerFailedToReturnCurrentRelatedEventData
   | ServerReturnedRelatedEventData
   | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
