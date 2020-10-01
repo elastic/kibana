@@ -64,8 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -85,8 +84,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 100000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -94,8 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(100000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -212,7 +210,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
