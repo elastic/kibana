@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   description,
   anomaly_threshold,
@@ -47,9 +46,9 @@ import {
   timestamp_override,
   risk_score_mapping,
   severity_mapping,
+  event_category_override,
 } from '../common/schemas';
 import { listArrayOrUndefined } from '../types/lists';
-/* eslint-enable @typescript-eslint/camelcase */
 
 /**
  * All of the patch elements should default to undefined if not set
@@ -67,6 +66,7 @@ export const patchRulesSchema = t.exact(
     actions,
     anomaly_threshold,
     enabled,
+    event_category_override,
     false_positives,
     filters,
     from,

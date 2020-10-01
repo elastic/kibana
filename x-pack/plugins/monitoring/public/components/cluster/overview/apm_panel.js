@@ -27,6 +27,8 @@ import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export function ApmPanel(props) {
   const { setupMode } = props;
@@ -38,21 +40,22 @@ export function ApmPanel(props) {
 
   const goToInstances = () => getSafeForExternalLink('#/apm/instances');
   const setupModeData = get(setupMode.data, 'apm');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        badgeClickLink={goToInstances()}
-        productName={APM_SYSTEM_ID}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      badgeClickLink={goToInstances()}
+      productName={APM_SYSTEM_ID}
+    />
+  ) : null;
 
   return (
     <ClusterItemContainer
       {...props}
       url="apm"
       title={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
-        defaultMessage: 'APM',
+        defaultMessage: 'APM server',
       })}
     >
       <EuiFlexGrid columns={4}>
@@ -67,21 +70,21 @@ export function ApmPanel(props) {
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel',
                     {
-                      defaultMessage: 'APM Overview',
+                      defaultMessage: 'APM server overview',
                     }
                   )}
                   data-test-subj="apmOverview"
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
-                    defaultMessage="Overview"
+                    defaultMessage="APM server overview"
                   />
                 </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel"
                   defaultMessage="Processed Events"
@@ -90,7 +93,7 @@ export function ApmPanel(props) {
               <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.lastEventLabel"
                   defaultMessage="Last Event"
@@ -122,7 +125,7 @@ export function ApmPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                         {
-                          defaultMessage: 'APM Instances: {apmsTotal}',
+                          defaultMessage: 'APM server instances: {apmsTotal}',
                           values: { apmsTotal },
                         }
                       )}
@@ -130,18 +133,18 @@ export function ApmPanel(props) {
                     >
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-                        defaultMessage="APM Servers: {apmsTotal}"
+                        defaultMessage="APM servers: {apmsTotal}"
                         values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
                       />
                     </EuiLink>
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              {setupModeMetricbeatMigrationTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
                   defaultMessage="Memory Usage"

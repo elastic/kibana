@@ -10,6 +10,7 @@ import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
+import packageJSON from '../../../../../package.json';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
@@ -22,8 +23,9 @@ class AppContextService {
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
-  private isProductionMode: boolean = false;
-  private kibanaVersion: string | undefined;
+  private isProductionMode: IngestManagerAppContext['isProductionMode'] = false;
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] = packageJSON.version;
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] = packageJSON.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -38,6 +40,7 @@ class AppContextService {
     this.cloud = appContext.cloud;
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
+    this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
 
     if (appContext.config$) {
@@ -119,10 +122,11 @@ class AppContextService {
   }
 
   public getKibanaVersion() {
-    if (!this.kibanaVersion) {
-      throw new Error('Kibana version is not set.');
-    }
     return this.kibanaVersion;
+  }
+
+  public getKibanaBranch() {
+    return this.kibanaBranch;
   }
 
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {

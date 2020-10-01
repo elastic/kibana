@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -11,7 +10,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { reportErrors, ManifestConstants } from './common';
+import { reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export const ManifestTaskConstants = {
@@ -45,7 +44,23 @@ export class ManifestTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
+              const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
               await this.runTask(taskInstance.id);
+              const nextRun = new Date();
+              if (taskInterval.endsWith('s')) {
+                const seconds = parseInt(taskInterval.slice(0, -1), 10);
+                nextRun.setSeconds(nextRun.getSeconds() + seconds);
+              } else if (taskInterval.endsWith('m')) {
+                const minutes = parseInt(taskInterval.slice(0, -1), 10);
+                nextRun.setMinutes(nextRun.getMinutes() + minutes);
+              } else {
+                this.logger.error(`Invalid task interval: ${taskInterval}`);
+                return;
+              }
+              return {
+                state: {},
+                runAt: nextRun,
+              };
             },
             cancel: async () => {},
           };
@@ -61,7 +76,7 @@ export class ManifestTask {
         taskType: ManifestTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          interval: '60s',
+          interval: (await this.endpointAppContext.config()).packagerTaskInterval,
         },
         state: {},
         params: { version: ManifestTaskConstants.VERSION },
@@ -92,19 +107,14 @@ export class ManifestTask {
 
     try {
       // Last manifest we computed, which was saved to ES
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
       if (oldManifest == null) {
         this.logger.debug('User manifest not available yet.');
         return;
       }
 
       // New computed manifest based on current state of exception list
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest
-      );
+      const newManifest = await manifestManager.buildNewManifest(oldManifest);
       const diffs = newManifest.diff(oldManifest);
 
       // Compress new artifacts
@@ -131,13 +141,14 @@ export class ManifestTask {
 
       // Commit latest manifest state, if different
       if (diffs.length) {
+        newManifest.bumpSemanticVersion();
         const error = await manifestManager.commit(newManifest);
         if (error) {
           throw error;
         }
       }
 
-      // Try dispatching to ingest-manager package configs
+      // Try dispatching to ingest-manager package policies
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);

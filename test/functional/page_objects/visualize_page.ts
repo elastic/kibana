@@ -70,6 +70,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
     }
@@ -351,6 +352,16 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
+    }
+
+    public async linkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async notLinkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('visualizesaveAndReturnButton');
     }
   }
 

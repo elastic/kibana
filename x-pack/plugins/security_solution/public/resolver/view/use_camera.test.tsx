@@ -5,20 +5,22 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { render, act, RenderResult, fireEvent } from '@testing-library/react';
-import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { render, waitFor, RenderResult, fireEvent } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { storeFactory } from '../store';
 import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
-import { sideEffectSimulator } from './side_effect_simulator';
+import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
 import { mockProcessEvent } from '../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
+import { createStore } from 'redux';
+import { resolverReducer } from '../store/reducer';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -29,16 +31,16 @@ describe('useCamera on an unpainted element', () => {
   let simulator: SideEffectSimulator;
 
   beforeEach(async () => {
-    store = storeFactory();
+    store = createStore(resolverReducer);
 
-    const Test = function Test() {
+    const Test = function () {
       const camera = useCamera();
       const { ref, onMouseDown } = camera;
       projectionMatrix = camera.projectionMatrix;
       return <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
-    simulator = sideEffectSimulator();
+    simulator = sideEffectSimulatorFactory();
 
     reactRenderResult = render(
       <Provider store={store}>
@@ -67,8 +69,8 @@ describe('useCamera on an unpainted element', () => {
     const topMargin = 20;
     const centerX = width / 2 + leftMargin;
     const centerY = height / 2 + topMargin;
-    beforeEach(() => {
-      act(() => {
+    beforeEach(async () => {
+      await waitFor(() => {
         simulator.controls.simulateElementResize(element, {
           width,
           height,
@@ -95,11 +97,11 @@ describe('useCamera on an unpainted element', () => {
       const resizeObserverSpy = jest.spyOn(simulator.mock.ResizeObserver.prototype, 'observe');
 
       let [rect, ref] = result.current;
-      hooksAct(() => ref(element));
+      act(() => ref(element));
       expect(resizeObserverSpy).toHaveBeenCalledWith(element);
 
       const div = document.createElement('div');
-      hooksAct(() => ref(div));
+      act(() => ref(div));
       expect(resizeObserverSpy).toHaveBeenCalledWith(div);
 
       [rect, ref] = result.current;
@@ -158,9 +160,9 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: ResolverEvent;
-      beforeEach(() => {
-        const events: ResolverEvent[] = [];
+      let process: SafeResolverEvent;
+      beforeEach(async () => {
+        const events: SafeResolverEvent[] = [];
         const numberOfEvents: number = 10;
 
         for (let index = 0; index < numberOfEvents; index++) {
@@ -180,15 +182,15 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, databaseDocumentID: '' },
+            payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
-          act(() => {
+          await waitFor(() => {
             store.dispatch(serverResponseAction);
           });
         } else {
           throw new Error('failed to create tree');
         }
-        const processes: ResolverEvent[] = [
+        const processes: SafeResolverEvent[] = [
           ...selectors.layout(store.getState()).processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
@@ -203,7 +205,7 @@ describe('useCamera on an unpainted element', () => {
             process,
           },
         };
-        act(() => {
+        await waitFor(() => {
           store.dispatch(cameraAction);
         });
       });

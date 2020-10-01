@@ -22,14 +22,15 @@ import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 export interface SourceFiltersTableState {
@@ -104,7 +105,7 @@ export class SourceFiltersTable extends Component<
   };
 
   deleteFilter = async () => {
-    const { indexPattern, onAddOrRemoveFilter } = this.props;
+    const { indexPattern, onAddOrRemoveFilter, saveIndexPattern } = this.props;
     const { filterToDelete, filters } = this.state;
 
     indexPattern.sourceFilters = filters.filter((filter) => {
@@ -112,7 +113,7 @@ export class SourceFiltersTable extends Component<
     });
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await saveIndexPattern(indexPattern);
 
     if (onAddOrRemoveFilter) {
       onAddOrRemoveFilter();
@@ -124,12 +125,12 @@ export class SourceFiltersTable extends Component<
   };
 
   onAddFilter = async (value: string) => {
-    const { indexPattern, onAddOrRemoveFilter } = this.props;
+    const { indexPattern, onAddOrRemoveFilter, saveIndexPattern } = this.props;
 
     indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await saveIndexPattern(indexPattern);
 
     if (onAddOrRemoveFilter) {
       onAddOrRemoveFilter();
@@ -140,7 +141,7 @@ export class SourceFiltersTable extends Component<
   };
 
   saveFilter = async ({ clientId, value }: SourceFiltersTableFilter) => {
-    const { indexPattern } = this.props;
+    const { indexPattern, saveIndexPattern } = this.props;
     const { filters } = this.state;
 
     indexPattern.sourceFilters = filters.map((filter) => {
@@ -155,7 +156,7 @@ export class SourceFiltersTable extends Component<
     });
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await saveIndexPattern(indexPattern);
     this.updateFilters();
     this.setState({ isSaving: false });
   };

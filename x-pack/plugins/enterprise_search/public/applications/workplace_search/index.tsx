@@ -4,26 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Redirect, Switch } from 'react-router-dom';
+import { useActions, useValues } from 'kea';
 
-import { KibanaContext, IKibanaContext } from '../index';
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+import { IInitialAppData } from '../../../common/types';
+import { KibanaLogic } from '../shared/kibana';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
+import { Layout } from '../shared/layout';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 
 import { SETUP_GUIDE_PATH } from './routes';
 
-import { SetupGuide } from './components/setup_guide';
-import { Overview } from './components/overview';
+import { SetupGuide } from './views/setup_guide';
+import { ErrorState } from './views/error_state';
+import { NotFound } from '../shared/not_found';
+import { Overview } from './views/overview';
 
-export const WorkplaceSearch: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
+  const { config } = useValues(KibanaLogic);
+  return !config.host ? <WorkplaceSearchUnconfigured /> : <WorkplaceSearchConfigured {...props} />;
+};
+
+export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
+
+  useEffect(() => {
+    if (!hasInitialized) {
+      initializeAppData(props);
+      renderHeaderActions(WorkplaceSearchHeaderActions);
+    }
+  }, [hasInitialized]);
+
   return (
-    <>
-      <Route exact path="/">
-        {!enterpriseSearchUrl ? <Redirect to={SETUP_GUIDE_PATH} /> : <Overview />}
-      </Route>
+    <Switch>
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-    </>
+      <Route exact path="/">
+        {errorConnecting ? <ErrorState /> : <Overview />}
+      </Route>
+      <Route>
+        <Layout navigation={<WorkplaceSearchNav />} readOnlyMode={readOnlyMode}>
+          {errorConnecting ? (
+            <ErrorState />
+          ) : (
+            <Switch>
+              <Route exact path="/groups">
+                {/* Will replace with groups component subsequent PR */}
+                <div />
+              </Route>
+              <Route>
+                <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
+              </Route>
+            </Switch>
+          )}
+        </Layout>
+      </Route>
+    </Switch>
   );
 };
+
+export const WorkplaceSearchUnconfigured: React.FC = () => (
+  <Switch>
+    <Route exact path={SETUP_GUIDE_PATH}>
+      <SetupGuide />
+    </Route>
+    <Route>
+      <Redirect to={SETUP_GUIDE_PATH} />
+    </Route>
+  </Switch>
+);

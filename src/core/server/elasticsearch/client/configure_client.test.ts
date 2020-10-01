@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Buffer } from 'buffer';
+import { Readable } from 'stream';
 
 import { RequestEvent, errors } from '@elastic/elasticsearch';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/Transport';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -118,65 +120,261 @@ describe('configureClient', () => {
   });
 
   describe('Client logging', () => {
-    it('logs error when the client emits an error', () => {
+    it('logs error when the client emits an @elastic/elasticsearch error', () => {
       const client = configureClient(config, { logger, scoped: false });
 
-      const response = createApiResponse({
-        body: {
-          error: {
-            type: 'error message',
-          },
-        },
-      });
-      client.emit('response', new errors.ResponseError(response), null);
-      client.emit('response', new Error('some error'), null);
+      const response = createApiResponse({ body: {} });
+      client.emit('response', new errors.TimeoutError('message', response), response);
 
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "ResponseError: error message",
-          ],
-          Array [
-            "Error: some error",
+            "[TimeoutError]: message",
           ],
         ]
       `);
     });
 
-    it('logs each queries if `logQueries` is true', () => {
-      const client = configureClient(
-        createFakeConfig({
-          logQueries: true,
-        }),
-        { logger, scoped: false }
-      );
+    it('logs error when the client emits an ResponseError returned by elasticsearch', () => {
+      const client = configureClient(config, { logger, scoped: false });
 
       const response = createApiResponse({
-        body: {},
-        statusCode: 200,
-        params: {
-          method: 'GET',
-          path: '/foo',
-          querystring: { hello: 'dolly' },
+        statusCode: 400,
+        headers: {},
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+            reason: 'request [/_path] contains unrecognized parameter: [name]',
+          },
         },
       });
+      client.emit('response', new errors.ResponseError(response), response);
 
-      client.emit('response', null, response);
-
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "200
-        GET /foo
-        hello=dolly",
-            Object {
-              "tags": Array [
-                "query",
-              ],
-            },
+            "[illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
           ],
         ]
       `);
+    });
+
+    it('logs default error info when the error response body is empty', () => {
+      const client = configureClient(config, { logger, scoped: false });
+
+      let response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {
+          error: {},
+        },
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
+          ],
+        ]
+      `);
+
+      logger.error.mockClear();
+
+      response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {} as any,
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
+          ],
+        ]
+      `);
+    });
+
+    describe('logs each queries if `logQueries` is true', () => {
+      function createResponseWithBody(body?: RequestBody) {
+        return createApiResponse({
+          body: {},
+          statusCode: 200,
+          params: {
+            method: 'GET',
+            path: '/foo',
+            querystring: { hello: 'dolly' },
+            body,
+          },
+        });
+      }
+
+      it('when request body is an object', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody({
+          seq_no_primary_term: true,
+          query: {
+            term: { user: 'kimchy' },
+          },
+        });
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+                  Array [
+                    Array [
+                      "200
+                  GET /foo?hello=dolly
+                  {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      Object {
+                        "tags": Array [
+                          "query",
+                        ],
+                      },
+                    ],
+                  ]
+              `);
+      });
+
+      it('when request body is a string', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody(
+          JSON.stringify({
+            seq_no_primary_term: true,
+            query: {
+              term: { user: 'kimchy' },
+            },
+          })
+        );
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+                  Array [
+                    Array [
+                      "200
+                  GET /foo?hello=dolly
+                  {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      Object {
+                        "tags": Array [
+                          "query",
+                        ],
+                      },
+                    ],
+                  ]
+              `);
+      });
+
+      it('when request body is a buffer', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody(
+          Buffer.from(
+            JSON.stringify({
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            })
+          )
+        );
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "200
+          GET /foo?hello=dolly
+          [buffer]",
+              Object {
+                "tags": Array [
+                  "query",
+                ],
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('when request body is a readable stream', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody(
+          // @ts-expect-error definition doesn't know about from
+          Readable.from(
+            JSON.stringify({
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            })
+          )
+        );
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "200
+          GET /foo?hello=dolly
+          [stream]",
+              Object {
+                "tags": Array [
+                  "query",
+                ],
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('when request body is not defined', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody();
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "200
+          GET /foo?hello=dolly",
+              Object {
+                "tags": Array [
+                  "query",
+                ],
+              },
+            ],
+          ]
+        `);
+      });
     });
 
     it('properly encode queries', () => {
@@ -203,8 +401,7 @@ describe('configureClient', () => {
         Array [
           Array [
             "200
-        GET /foo
-        city=M%C3%BCnich",
+        GET /foo?city=M%C3%BCnich",
             Object {
               "tags": Array [
                 "query",
@@ -234,6 +431,12 @@ describe('configureClient', () => {
           method: 'GET',
           path: '/foo',
           querystring: { hello: 'dolly' },
+          body: {
+            seq_no_primary_term: true,
+            query: {
+              term: { user: 'kimchy' },
+            },
+          },
         },
       });
       client.emit('response', new errors.ResponseError(response), response);
@@ -242,8 +445,8 @@ describe('configureClient', () => {
         Array [
           Array [
             "500
-        GET /foo
-        hello=dolly",
+        GET /foo?hello=dolly
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
             Object {
               "tags": Array [
                 "query",

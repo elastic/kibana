@@ -87,6 +87,7 @@ export const createMetricsFetchData = (
     groupBy: [],
     nodeType: 'host',
     includeTimeseries: true,
+    overrideCompositeSize: 5,
     timerange: {
       from: start,
       to: end,

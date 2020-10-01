@@ -9,12 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { Header } from '../header/index';
 
-const getPaddingSize = (props: EuiPageProps) => (props.restrictWidth ? 0 : '24px');
-
 const Page = styled(EuiPage)<EuiPageProps>`
   background: transparent;
-  padding-right: ${getPaddingSize};
-  padding-left: ${getPaddingSize};
 `;
 
 const Container = styled.div<{ color?: string }>`
@@ -32,23 +28,25 @@ interface Props {
   showGiveFeedback?: boolean;
 }
 
-export const WithHeaderLayout = ({
+export function WithHeaderLayout({
   headerColor,
   bodyColor,
   children,
   restrictWidth,
   showAddData,
   showGiveFeedback,
-}: Props) => (
-  <Container color={bodyColor}>
-    <Header
-      color={headerColor}
-      restrictWidth={restrictWidth}
-      showAddData={showAddData}
-      showGiveFeedback={showGiveFeedback}
-    />
-    <Page restrictWidth={restrictWidth}>
-      <EuiPageBody>{children}</EuiPageBody>
-    </Page>
-  </Container>
-);
+}: Props) {
+  return (
+    <Container color={bodyColor}>
+      <Header
+        color={headerColor}
+        restrictWidth={restrictWidth}
+        showAddData={showAddData}
+        showGiveFeedback={showGiveFeedback}
+      />
+      <Page restrictWidth={restrictWidth}>
+        <EuiPageBody>{children}</EuiPageBody>
+      </Page>
+    </Container>
+  );
+}

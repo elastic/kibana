@@ -19,7 +19,8 @@
 
 import Path from 'path';
 
-import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
 
 import { getFailures, TestFailure } from './get_failures';
@@ -72,6 +73,7 @@ export function runFailedTestsReporterCli() {
       }
 
       const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      log.info('Searching for reports at', patterns);
       const reportPaths = await globby(patterns, {
         absolute: true,
       });
@@ -80,6 +82,7 @@ export function runFailedTestsReporterCli() {
         throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
       }
 
+      log.info('found', reportPaths.length, 'junit reports', reportPaths);
       const newlyCreatedIssues: Array<{
         failure: TestFailure;
         newIssue: GithubIssueMini;

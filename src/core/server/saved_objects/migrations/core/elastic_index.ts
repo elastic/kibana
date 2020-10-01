@@ -23,9 +23,12 @@
  */
 
 import _ from 'lodash';
+import { MigrationEsClient } from './migration_es_client';
+import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
+import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
+import { SavedObjectsRawDocSource } from '../../serialization';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 
@@ -40,13 +43,10 @@ export interface FullIndexInfo {
  * A slight enhancement to indices.get, that adds indexName, and validates that the
  * index mappings are somewhat what we expect.
  */
-export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', {
-    ignore: [404],
-    index,
-  });
+export async function fetchInfo(client: MigrationEsClient, index: string): Promise<FullIndexInfo> {
+  const { body, statusCode } = await client.indices.get({ index }, { ignore: [404] });
 
-  if ((result as NotFound).status === 404) {
+  if (statusCode === 404) {
     return {
       aliases: {},
       exists: false,
@@ -55,7 +55,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
     };
   }
 
-  const [indexName, indexInfo] = Object.entries(result)[0];
+  const [indexName, indexInfo] = Object.entries(body)[0];
 
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
@@ -71,7 +71,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
  * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
  */
 export function reader(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   index: string,
   { batchSize = 10, scrollDuration = '15m' }: { batchSize: number; scrollDuration: string }
 ) {
@@ -80,19 +80,24 @@ export function reader(
 
   const nextBatch = () =>
     scrollId !== undefined
-      ? callCluster('scroll', { scroll, scrollId })
-      : callCluster('search', { body: { size: batchSize }, index, scroll });
+      ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+          scroll,
+          scroll_id: scrollId,
+        })
+      : client.search<SearchResponse<SavedObjectsRawDocSource>>({
+          body: { size: batchSize },
+          index,
+          scroll,
+        });
 
-  const close = async () => scrollId && (await callCluster('clearScroll', { scrollId }));
+  const close = async () => scrollId && (await client.clearScroll({ scroll_id: scrollId }));
 
   return async function read() {
     const result = await nextBatch();
-    assertResponseIncludeAllShards(result);
+    assertResponseIncludeAllShards(result.body);
 
-    const docs = result.hits.hits;
-
-    scrollId = result._scroll_id;
-
+    scrollId = result.body._scroll_id;
+    const docs = result.body.hits.hits;
     if (!docs.length) {
       await close();
     }
@@ -109,8 +114,8 @@ export function reader(
  * @param {string} index
  * @param {RawDoc[]} docs
  */
-export async function write(callCluster: CallCluster, index: string, docs: RawDoc[]) {
-  const result = await callCluster('bulk', {
+export async function write(client: MigrationEsClient, index: string, docs: RawDoc[]) {
+  const { body } = await client.bulk({
     body: docs.reduce((acc: object[], doc: RawDoc) => {
       acc.push({
         index: {
@@ -125,7 +130,7 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
     }, []),
   });
 
-  const err = _.find(result.items, 'index.error.reason');
+  const err = _.find(body.items, 'index.error.reason');
 
   if (!err) {
     return;
@@ -150,15 +155,15 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
  * @param {SavedObjectsMigrationVersion} migrationVersion - The latest versions of the migrations
  */
 export async function migrationsUpToDate(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   index: string,
   migrationVersion: SavedObjectsMigrationVersion,
   retryCount: number = 10
 ): Promise<boolean> {
   try {
-    const indexInfo = await fetchInfo(callCluster, index);
+    const indexInfo = await fetchInfo(client, index);
 
-    if (!_.get(indexInfo, 'mappings.properties.migrationVersion')) {
+    if (!indexInfo.mappings.properties?.migrationVersion) {
       return false;
     }
 
@@ -167,7 +172,7 @@ export async function migrationsUpToDate(
       return true;
     }
 
-    const response = await callCluster('count', {
+    const { body } = await client.count<CountResponse>({
       body: {
         query: {
           bool: {
@@ -175,7 +180,11 @@ export async function migrationsUpToDate(
               bool: {
                 must: [
                   { exists: { field: type } },
-                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
+                  {
+                    bool: {
+                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                    },
+                  },
                 ],
               },
             })),
@@ -185,9 +194,9 @@ export async function migrationsUpToDate(
       index,
     });
 
-    assertResponseIncludeAllShards(response);
+    assertResponseIncludeAllShards(body);
 
-    return response.count === 0;
+    return body.count === 0;
   } catch (e) {
     // retry for Service Unavailable
     if (e.status !== 503 || retryCount === 0) {
@@ -196,23 +205,23 @@ export async function migrationsUpToDate(
 
     await new Promise((r) => setTimeout(r, 1000));
 
-    return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
+    return await migrationsUpToDate(client, index, migrationVersion, retryCount - 1);
   }
 }
 
 export async function createIndex(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', {
+  await client.indices.create({
     body: { mappings, settings },
     index,
   });
 }
 
-export async function deleteIndex(callCluster: CallCluster, index: string) {
-  await callCluster('indices.delete', { index });
+export async function deleteIndex(client: MigrationEsClient, index: string) {
+  await client.indices.delete({ index });
 }
 
 /**
@@ -225,20 +234,20 @@ export async function deleteIndex(callCluster: CallCluster, index: string) {
  * @param {string} alias - The name of the index being converted to an alias
  */
 export async function convertToAlias(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   info: FullIndexInfo,
   alias: string,
   batchSize: number,
   script?: string
 ) {
-  await callCluster('indices.create', {
+  await client.indices.create({
     body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
 
-  await reindex(callCluster, alias, info.indexName, batchSize, script);
+  await reindex(client, alias, info.indexName, batchSize, script);
 
-  await claimAlias(callCluster, info.indexName, alias, [{ remove_index: { index: alias } }]);
+  await claimAlias(client, info.indexName, alias, [{ remove_index: { index: alias } }]);
 }
 
 /**
@@ -252,22 +261,22 @@ export async function convertToAlias(
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call
  */
 export async function claimAlias(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   index: string,
   alias: string,
   aliasActions: AliasAction[] = []
 ) {
-  const result = await callCluster('indices.getAlias', { ignore: [404], name: alias });
-  const aliasInfo = (result as NotFound).status === 404 ? {} : result;
+  const { body, statusCode } = await client.indices.getAlias({ name: alias }, { ignore: [404] });
+  const aliasInfo = statusCode === 404 ? {} : body;
   const removeActions = Object.keys(aliasInfo).map((key) => ({ remove: { index: key, alias } }));
 
-  await callCluster('indices.updateAliases', {
+  await client.indices.updateAliases({
     body: {
       actions: aliasActions.concat(removeActions).concat({ add: { index, alias } }),
     },
   });
 
-  await callCluster('indices.refresh', { index });
+  await client.indices.refresh({ index });
 }
 
 /**
@@ -318,7 +327,7 @@ function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
  * Reindexes from source to dest, polling for the reindex completion.
  */
 async function reindex(
-  callCluster: CallCluster,
+  client: MigrationEsClient,
   source: string,
   dest: string,
   batchSize: number,
@@ -329,7 +338,7 @@ async function reindex(
   // polling interval, as the request is fairly efficent, and we don't
   // want to block index migrations for too long on this.
   const pollInterval = 250;
-  const { task } = await callCluster('reindex', {
+  const { body: reindexBody } = await client.reindex({
     body: {
       dest: { index: dest },
       source: { index: source, size: batchSize },
@@ -341,23 +350,25 @@ async function reindex(
         : undefined,
     },
     refresh: true,
-    waitForCompletion: false,
+    wait_for_completion: false,
   });
+
+  const task = reindexBody.task;
 
   let completed = false;
 
   while (!completed) {
     await new Promise((r) => setTimeout(r, pollInterval));
 
-    completed = await callCluster('tasks.get', {
-      taskId: task,
-    }).then((result) => {
-      if (result.error) {
-        const e = result.error;
-        throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
-      }
-
-      return result.completed;
+    const { body } = await client.tasks.get({
+      task_id: task,
     });
+
+    if (body.error) {
+      const e = body.error;
+      throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
+    }
+
+    completed = body.completed;
   }
 }

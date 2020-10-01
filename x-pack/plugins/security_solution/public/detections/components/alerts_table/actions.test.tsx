@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { get } from 'lodash/fp';
 import sinon from 'sinon';
 import moment from 'moment';
 
@@ -12,10 +14,13 @@ import {
   defaultTimelineProps,
   apolloClient,
   mockTimelineApolloResult,
+  mockTimelineDetailsApollo,
+  mockTimelineDetails,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
-import { Ecs } from '../../../graphql/types';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { Ecs } from '../../../../common/ecs';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('apollo-client');
 
@@ -24,6 +29,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
+  let searchStrategyClient: ISearchStart;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -36,8 +42,20 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+    searchStrategyClient = {
+      aggs: {} as ISearchStart['aggs'],
+      showError: jest.fn(),
+      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      searchSource: {} as ISearchStart['searchSource'],
+    };
 
-    jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResult);
+    jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
+      const id = get('variables.id', obj);
+      if (id != null) {
+        return Promise.resolve(mockTimelineApolloResult);
+      }
+      return Promise.resolve(mockTimelineDetailsApollo);
+    });
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -55,10 +73,14 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
       });
 
       test('it invokes createTimeline with designated timeline template if "timelineTemplate" exists', async () => {
@@ -68,9 +90,11 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
         const expected = {
           from: '2018-11-05T18:58:25.937Z',
+          notes: null,
           timeline: {
             columns: [
               {
@@ -184,6 +208,7 @@ describe('alert actions', () => {
             highlightedDropAndProviderId: '',
             historyIds: [],
             id: '',
+            indexNames: [],
             isFavorite: false,
             isLive: false,
             isLoading: false,
@@ -254,9 +279,9 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
@@ -284,9 +309,9 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQueryDraft.kind).toEqual('kuery');
@@ -303,11 +328,15 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: 'timeline-1',
+          id: TimelineId.active,
+          isLoading: true,
+        });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
@@ -322,6 +351,7 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              // @ts-expect-error
               timeline_id: null,
             },
           },
@@ -333,6 +363,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
@@ -358,6 +389,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();

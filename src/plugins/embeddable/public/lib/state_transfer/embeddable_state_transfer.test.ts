@@ -19,7 +19,7 @@
 
 import { coreMock, scopedHistoryMock } from '../../../../../core/public/mocks';
 import { EmbeddableStateTransfer } from '.';
-import { ApplicationStart } from '../../../../../core/public';
+import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 
 function mockHistoryState(state: unknown) {
   return scopedHistoryMock.create({ state });
@@ -35,6 +35,29 @@ describe('embeddable state transfer', () => {
     const core = coreMock.createStart();
     application = core.application;
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp);
+  });
+
+  it('cannot fetch app name when given no app list', async () => {
+    expect(stateTransfer.getAppNameFromId('test')).toBeUndefined();
+  });
+
+  it('cannot fetch app name when app id is not in given app list', async () => {
+    const appsList = new Map<string, PublicAppInfo>([
+      ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
+      ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
+    ]);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, appsList);
+    expect(stateTransfer.getAppNameFromId('kibanana')).toBeUndefined();
+  });
+
+  it('can fetch app titles when given app list', async () => {
+    const appsList = new Map<string, PublicAppInfo>([
+      ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
+      ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
+    ]);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, appsList);
+    expect(stateTransfer.getAppNameFromId('testId')).toBe('State Transfer Test App Hello');
+    expect(stateTransfer.getAppNameFromId('testId2')).toBe('State Transfer Test App Goodbye');
   });
 
   it('can send an outgoing originating app state', async () => {
@@ -62,10 +85,10 @@ describe('embeddable state transfer', () => {
 
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
-      state: { type: 'coolestType', id: '150' },
+      state: { type: 'coolestType', input: { savedObjectId: '150' } },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
-      state: { type: 'coolestType', id: '150' },
+      state: { type: 'coolestType', input: { savedObjectId: '150' } },
     });
   });
 
@@ -73,12 +96,16 @@ describe('embeddable state transfer', () => {
     const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
-      state: { type: 'coolestType', id: '150' },
+      state: { type: 'coolestType', input: { savedObjectId: '150' } },
       appendToExistingState: true,
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       path: undefined,
-      state: { kibanaIsNowForSports: 'extremeSportsKibana', type: 'coolestType', id: '150' },
+      state: {
+        kibanaIsNowForSports: 'extremeSportsKibana',
+        type: 'coolestType',
+        input: { savedObjectId: '150' },
+      },
     });
   });
 
@@ -97,10 +124,13 @@ describe('embeddable state transfer', () => {
   });
 
   it('can fetch an incoming embeddable package state', async () => {
-    const historyMock = mockHistoryState({ type: 'skisEmbeddable', id: '123' });
+    const historyMock = mockHistoryState({
+      type: 'skisEmbeddable',
+      input: { savedObjectId: '123' },
+    });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage();
-    expect(fetchedState).toEqual({ type: 'skisEmbeddable', id: '123' });
+    expect(fetchedState).toEqual({ type: 'skisEmbeddable', input: { savedObjectId: '123' } });
   });
 
   it('returns undefined when embeddable package is not in the right shape', async () => {
@@ -113,12 +143,12 @@ describe('embeddable state transfer', () => {
   it('removes all keys in the keysToRemoveAfterFetch array', async () => {
     const historyMock = mockHistoryState({
       type: 'skisEmbeddable',
-      id: '123',
+      input: { savedObjectId: '123' },
       test1: 'test1',
       test2: 'test2',
     });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
-    stateTransfer.getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['type', 'id'] });
+    stateTransfer.getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['type', 'input'] });
     expect(historyMock.replace).toHaveBeenCalledWith(
       expect.objectContaining({ state: { test1: 'test1', test2: 'test2' } })
     );
@@ -127,7 +157,7 @@ describe('embeddable state transfer', () => {
   it('leaves state as is when no keysToRemove are supplied', async () => {
     const historyMock = mockHistoryState({
       type: 'skisEmbeddable',
-      id: '123',
+      input: { savedObjectId: '123' },
       test1: 'test1',
       test2: 'test2',
     });
@@ -135,7 +165,7 @@ describe('embeddable state transfer', () => {
     stateTransfer.getIncomingEmbeddablePackage();
     expect(historyMock.location.state).toEqual({
       type: 'skisEmbeddable',
-      id: '123',
+      input: { savedObjectId: '123' },
       test1: 'test1',
       test2: 'test2',
     });

@@ -20,6 +20,8 @@ export {
   UseField,
   UseMultiFields,
   useForm,
+  useFormContext,
+  useFormData,
   ValidationFunc,
   VALIDATION_TYPES,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
@@ -32,6 +34,7 @@ export {
   useIsMounted,
   useCursor,
   useApi,
+  useAsync,
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
@@ -50,4 +53,5 @@ export {
   Pagination,
   UseExceptionListSuccess,
   addEndpointExceptionList,
+  withOptionalSignal,
 } from '../../lists/public';

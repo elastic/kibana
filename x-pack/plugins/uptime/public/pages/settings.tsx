@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual } from 'lodash';
-import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -35,6 +33,8 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
+import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -80,6 +80,15 @@ const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldEr
   return null;
 };
 
+const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSettings) => {
+  return (
+    settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
+    settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
+    settings?.heartbeatIndices !== formFields?.heartbeatIndices ||
+    JSON.stringify(settings?.defaultConnectors) !== JSON.stringify(formFields?.defaultConnectors)
+  );
+};
+
 export const SettingsPage: React.FC = () => {
   const dss = useSelector(selectDynamicSettings);
 
@@ -121,7 +130,8 @@ export const SettingsPage: React.FC = () => {
 
   const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
-  const isFormDirty = !isEqual(dss.settings, formFields);
+  const isFormDirty = isDirtyForm(formFields, dss.settings);
+
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
   const isFormDisabled = dss.loading || !canEdit;
@@ -137,11 +147,15 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {Translations.settings.returnToOverviewLinkLabel}
-        </EuiButtonEmpty>
-      </Link>
+      <ReactRouterEuiButtonEmpty
+        color="primary"
+        data-test-subj="uptimeSettingsToOverviewLink"
+        iconType="arrowLeft"
+        to={OVERVIEW_ROUTE}
+        size="s"
+      >
+        {Translations.settings.returnToOverviewLinkLabel}
+      </ReactRouterEuiButtonEmpty>
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>
@@ -149,12 +163,19 @@ export const SettingsPage: React.FC = () => {
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <form onSubmit={onApply}>
+            <div id="settings-form">
               <EuiForm>
                 <IndicesForm
                   loading={dss.loading}
                   onChange={onChangeFormField}
                   formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
+                <AlertDefaultsForm
+                  loading={dss.loading}
+                  formFields={formFields}
+                  onChange={onChangeFormField}
                   fieldErrors={fieldErrors}
                   isDisabled={isFormDisabled}
                 />
@@ -185,7 +206,7 @@ export const SettingsPage: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="apply-settings-button"
-                      type="submit"
+                      onClick={onApply}
                       color="primary"
                       isDisabled={!isFormDirty || !isFormValid || isFormDisabled}
                       fill
@@ -198,7 +219,7 @@ export const SettingsPage: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiForm>
-            </form>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

@@ -3,17 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
-  Comments,
   CommentsArray,
-  CommentsArrayOrUndefined,
-  CreateComments,
-  CreateCommentsArrayOrUndefined,
+  CreateComment,
+  CreateCommentsArray,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
@@ -21,7 +18,6 @@ import {
   FoundExceptionListSchema,
   NamespaceType,
   UpdateCommentsArrayOrUndefined,
-  comments as commentsSchema,
   exceptionListItemType,
   exceptionListType,
 } from '../../../common/schemas';
@@ -74,6 +70,7 @@ export const transformSavedObjectToExceptionList = ({
   const {
     version: _version,
     attributes: {
+      /* eslint-disable @typescript-eslint/naming-convention */
       _tags,
       created_at,
       created_by,
@@ -87,6 +84,7 @@ export const transformSavedObjectToExceptionList = ({
       type,
       updated_by,
       version,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -172,6 +170,7 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
+      /* eslint-disable @typescript-eslint/naming-convention */
       _tags,
       comments,
       created_at,
@@ -186,6 +185,7 @@ export const transformSavedObjectToExceptionListItem = ({
       tie_breaker_id,
       type,
       updated_by,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -296,17 +296,6 @@ export const transformSavedObjectsToFoundExceptionList = ({
   };
 };
 
-/*
- * Determines whether two comments are equal, this is a very
- * naive implementation, not meant to be used for deep equality of complex objects
- */
-export const isCommentEqual = (commentA: Comments, commentB: Comments): boolean => {
-  const a = Object.values(commentA).sort().join();
-  const b = Object.values(commentB).sort().join();
-
-  return a === b;
-};
-
 export const transformUpdateCommentsToComments = ({
   comments,
   existingComments,
@@ -316,90 +305,28 @@ export const transformUpdateCommentsToComments = ({
   existingComments: CommentsArray;
   user: string;
 }): CommentsArray => {
-  const newComments = comments ?? [];
+  const incomingComments = comments ?? [];
+  const newComments = incomingComments.filter((comment) => comment.id == null);
+  const newCommentsFormatted = transformCreateCommentsToComments({
+    incomingComments: newComments,
+    user,
+  });
 
-  if (newComments.length < existingComments.length) {
-    throw new ErrorWithStatusCode(
-      'Comments cannot be deleted, only new comments may be added',
-      403
-    );
-  } else {
-    return newComments.flatMap((c, index) => {
-      const existingComment = existingComments[index];
-
-      if (commentsSchema.is(existingComment) && !commentsSchema.is(c)) {
-        throw new ErrorWithStatusCode(
-          'When trying to update a comment, "created_at" and "created_by" must be present',
-          403
-        );
-      } else if (existingComment == null && commentsSchema.is(c)) {
-        throw new ErrorWithStatusCode('Only new comments may be added', 403);
-      } else if (
-        commentsSchema.is(c) &&
-        existingComment != null &&
-        isCommentEqual(c, existingComment)
-      ) {
-        return existingComment;
-      } else if (commentsSchema.is(c) && existingComment != null) {
-        return transformUpdateComments({ comment: c, existingComment, user });
-      } else {
-        return transformCreateCommentsToComments({ comments: [c], user }) ?? [];
-      }
-    });
-  }
-};
-
-export const transformUpdateComments = ({
-  comment,
-  existingComment,
-  user,
-}: {
-  comment: Comments;
-  existingComment: Comments;
-  user: string;
-}): Comments => {
-  if (comment.created_by !== user) {
-    // existing comment is being edited, can only be edited by author
-    throw new ErrorWithStatusCode('Not authorized to edit others comments', 401);
-  } else if (existingComment.created_at !== comment.created_at) {
-    throw new ErrorWithStatusCode('Unable to update comment', 403);
-  } else if (comment.comment.trim().length === 0) {
-    throw new ErrorWithStatusCode('Empty comments not allowed', 403);
-  } else if (comment.comment.trim() !== existingComment.comment) {
-    const dateNow = new Date().toISOString();
-
-    return {
-      ...existingComment,
-      comment: comment.comment,
-      updated_at: dateNow,
-      updated_by: user,
-    };
-  } else {
-    return existingComment;
-  }
+  return [...existingComments, ...newCommentsFormatted];
 };
 
 export const transformCreateCommentsToComments = ({
-  comments,
+  incomingComments,
   user,
 }: {
-  comments: CreateCommentsArrayOrUndefined;
+  incomingComments: CreateCommentsArray;
   user: string;
-}): CommentsArrayOrUndefined => {
+}): CommentsArray => {
   const dateNow = new Date().toISOString();
-  if (comments != null) {
-    return comments.map((c: CreateComments) => {
-      if (c.comment.trim().length === 0) {
-        throw new ErrorWithStatusCode('Empty comments not allowed', 403);
-      } else {
-        return {
-          comment: c.comment,
-          created_at: dateNow,
-          created_by: user,
-        };
-      }
-    });
-  } else {
-    return comments;
-  }
+  return incomingComments.map((comment: CreateComment) => ({
+    comment: comment.comment,
+    created_at: dateNow,
+    created_by: user,
+    id: uuid.v4(),
+  }));
 };

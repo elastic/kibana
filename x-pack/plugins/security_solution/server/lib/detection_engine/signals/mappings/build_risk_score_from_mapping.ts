@@ -9,11 +9,10 @@ import {
   RiskScore,
   RiskScoreMappingOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SignalSourceHit } from '../types';
-import { RiskScore as RiskScoreIOTS } from '../../../../../common/detection_engine/schemas/types';
+import { SignalSource } from '../types';
 
 interface BuildRiskScoreFromMappingProps {
-  doc: SignalSourceHit;
+  eventSource: SignalSource;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMappingOrUndefined;
 }
@@ -24,7 +23,7 @@ interface BuildRiskScoreFromMappingReturn {
 }
 
 export const buildRiskScoreFromMapping = ({
-  doc,
+  eventSource,
   riskScore,
   riskScoreMapping,
 }: BuildRiskScoreFromMappingProps): BuildRiskScoreFromMappingReturn => {
@@ -32,9 +31,13 @@ export const buildRiskScoreFromMapping = ({
   if (riskScoreMapping != null && riskScoreMapping.length > 0) {
     const mappedField = riskScoreMapping[0].field;
     // TODO: Expand by verifying fieldType from index via  doc._index
-    const mappedValue = get(mappedField, doc._source);
-    // TODO: This doesn't seem to validate...identified riskScore > 100 😬
-    if (RiskScoreIOTS.is(mappedValue)) {
+    const mappedValue = get(mappedField, eventSource);
+    if (
+      typeof mappedValue === 'number' &&
+      Number.isSafeInteger(mappedValue) &&
+      mappedValue >= 0 &&
+      mappedValue <= 100
+    ) {
       return { riskScore: mappedValue, riskScoreMeta: { riskScoreOverridden: true } };
     }
   }

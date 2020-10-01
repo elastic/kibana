@@ -30,8 +30,14 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
+  contextMenuTrigger,
 } from '../triggers';
-import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
+import {
+  IEmbeddable,
+  EmbeddableOutput,
+  EmbeddableError,
+  EmbeddableInput,
+} from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -54,7 +60,7 @@ const removeById = (disabledActions: string[]) => ({ id }: { id: string }) =>
   disabledActions.indexOf(id) === -1;
 
 interface Props {
-  embeddable: IEmbeddable<any, any>;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
@@ -71,7 +77,7 @@ interface State {
   panels: EuiContextMenuPanelDescriptor[];
   focusedPanelIndex?: string;
   viewMode: ViewMode;
-  hidePanelTitles: boolean;
+  hidePanelTitle: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -89,17 +95,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
-    const viewMode = embeddable.getInput().viewMode
-      ? embeddable.getInput().viewMode
-      : ViewMode.EDIT;
-    const hidePanelTitles = embeddable.parent
-      ? Boolean(embeddable.parent.getInput().hidePanelTitles)
-      : false;
+    const viewMode = embeddable.getInput().viewMode ?? ViewMode.EDIT;
+    const hidePanelTitle =
+      Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
+      Boolean(embeddable.getInput()?.hidePanelTitles);
 
     this.state = {
       panels: [],
       viewMode,
-      hidePanelTitles,
+      hidePanelTitle,
       closeContextMenu: false,
       badges: [],
       notifications: [],
@@ -149,9 +153,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       embeddable.getInput$().subscribe(async () => {
         if (this.mounted) {
           this.setState({
-            viewMode: embeddable.getInput().viewMode
-              ? embeddable.getInput().viewMode
-              : ViewMode.EDIT,
+            viewMode: embeddable.getInput().viewMode ?? ViewMode.EDIT,
           });
 
           this.refreshBadges();
@@ -164,7 +166,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       this.parentSubscription = parent.getInput$().subscribe(async () => {
         if (this.mounted && parent) {
           this.setState({
-            hidePanelTitles: Boolean(parent.getInput().hidePanelTitles),
+            hidePanelTitle:
+              Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
+              Boolean(embeddable.getInput()?.hidePanelTitles),
           });
 
           this.refreshBadges();
@@ -210,6 +214,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       <EuiPanel
         className={classes}
         data-test-subj="embeddablePanel"
+        data-test-embeddable-id={this.props.embeddable.id}
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
@@ -217,7 +222,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
-            hidePanelTitles={this.state.hidePanelTitles}
+            hidePanelTitle={this.state.hidePanelTitle}
             isViewMode={viewOnlyMode}
             closeContextMenu={this.state.closeContextMenu}
             title={title}
@@ -270,15 +275,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined }>((resolve) => {
+        return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
           const session = overlays.openModal(
             toMountPoint(
               <CustomizePanelModal
                 embeddable={context.embeddable}
-                updateTitle={(title) => {
+                updateTitle={(title, hideTitle) => {
                   session.close();
-                  resolve({ title });
+                  resolve({ title, hideTitle });
                 }}
+                cancel={() => session.close()}
               />
             ),
             {
@@ -311,7 +317,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions: sortedActions.map((action) => [action, { embeddable: this.props.embeddable }]),
+      actions: sortedActions.map((action) => ({
+        action,
+        context: { embeddable: this.props.embeddable },
+        trigger: contextMenuTrigger,
+      })),
       closeMenu: this.closeMyContextMenuPanel,
     });
   };

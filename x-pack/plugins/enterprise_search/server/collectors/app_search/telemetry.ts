@@ -17,6 +17,7 @@ interface ITelemetry {
   };
   ui_error: {
     cannot_connect: number;
+    not_found: number;
   };
   ui_clicked: {
     create_first_engine_button: number;
@@ -47,6 +48,7 @@ export const registerTelemetryUsageCollector = (
       },
       ui_error: {
         cannot_connect: { type: 'long' },
+        not_found: { type: 'long' },
       },
       ui_clicked: {
         create_first_engine_button: { type: 'long' },
@@ -77,6 +79,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     },
     ui_error: {
       cannot_connect: 0,
+      not_found: 0,
     },
     ui_clicked: {
       create_first_engine_button: 0,
@@ -97,6 +100,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     },
     ui_error: {
       cannot_connect: get(savedObjectAttributes, 'ui_error.cannot_connect', 0),
+      not_found: get(savedObjectAttributes, 'ui_error.not_found', 0),
     },
     ui_clicked: {
       create_first_engine_button: get(

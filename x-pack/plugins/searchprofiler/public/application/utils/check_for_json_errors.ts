@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { collapseLiteralStrings } from '../../../../../../src/plugins/es_ui_shared/public';
+import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
+
+const { collapseLiteralStrings } = XJson;
 
 export function checkForParseErrors(json: string) {
   const sanitizedJson = collapseLiteralStrings(json);

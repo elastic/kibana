@@ -18,18 +18,22 @@
  */
 
 import _ from 'lodash';
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
+import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
-  let testOpts: any;
+  let testOpts: jest.Mocked<MigrationOpts> & {
+    client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  };
 
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
-      callCluster: jest.fn(),
+      client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
@@ -44,15 +48,15 @@ describe('IndexMigrator', () => {
   });
 
   test('creates the index if it does not exist', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    testOpts.mappingProperties = { foo: { type: 'long' } };
+    testOpts.mappingProperties = { foo: { type: 'long' } as any };
 
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', {
+    expect(client.indices.create).toHaveBeenCalledWith({
       body: {
         mappings: {
           dynamic: 'strict',
@@ -62,6 +66,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -72,6 +77,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -91,9 +97,9 @@ describe('IndexMigrator', () => {
   });
 
   test('returns stats about the migration', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
     const result = await new IndexMigrator(testOpts).migrate();
 
@@ -105,9 +111,9 @@ describe('IndexMigrator', () => {
   });
 
   test('fails if there are multiple root doc types', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    withIndex(callCluster, {
+    withIndex(client, {
       index: {
         '.kibana_1': {
           aliases: {},
@@ -129,9 +135,9 @@ describe('IndexMigrator', () => {
   });
 
   test('fails if root doc type is not "doc"', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    withIndex(callCluster, {
+    withIndex(client, {
       index: {
         '.kibana_1': {
           aliases: {},
@@ -152,11 +158,11 @@ describe('IndexMigrator', () => {
   });
 
   test('retains unknown core field mappings from the previous index', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    testOpts.mappingProperties = { foo: { type: 'text' } };
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
 
-    withIndex(callCluster, {
+    withIndex(client, {
       index: {
         '.kibana_1': {
           aliases: {},
@@ -171,7 +177,7 @@ describe('IndexMigrator', () => {
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', {
+    expect(client.indices.create).toHaveBeenCalledWith({
       body: {
         mappings: {
           dynamic: 'strict',
@@ -181,6 +187,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -192,6 +199,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -211,11 +219,11 @@ describe('IndexMigrator', () => {
   });
 
   test('disables complex field mappings from unknown types in the previous index', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    testOpts.mappingProperties = { foo: { type: 'text' } };
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
 
-    withIndex(callCluster, {
+    withIndex(client, {
       index: {
         '.kibana_1': {
           aliases: {},
@@ -230,7 +238,7 @@ describe('IndexMigrator', () => {
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', {
+    expect(client.indices.create).toHaveBeenCalledWith({
       body: {
         mappings: {
           dynamic: 'strict',
@@ -240,6 +248,7 @@ describe('IndexMigrator', () => {
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -251,6 +260,7 @@ describe('IndexMigrator', () => {
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -270,31 +280,31 @@ describe('IndexMigrator', () => {
   });
 
   test('points the alias at the dest index', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', expect.any(Object));
-    expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
+    expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
+    expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
     });
   });
 
   test('removes previous indices from the alias', async () => {
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
 
     testOpts.documentMigrator.migrationVersion = {
       dashboard: '2.4.5',
     };
 
-    withIndex(callCluster, { numOutOfDate: 1 });
+    withIndex(client, { numOutOfDate: 1 });
 
     await new IndexMigrator(testOpts).migrate();
 
-    expect(callCluster).toHaveBeenCalledWith('indices.create', expect.any(Object));
-    expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
+    expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
+    expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
           { remove: { alias: '.kibana', index: '.kibana_1' } },
@@ -306,7 +316,7 @@ describe('IndexMigrator', () => {
 
   test('transforms all docs from the original index', async () => {
     let count = 0;
-    const { callCluster } = testOpts;
+    const { client } = testOpts;
     const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       return {
         ...doc,
@@ -319,7 +329,7 @@ describe('IndexMigrator', () => {
       migrate: migrateDoc,
     };
 
-    withIndex(callCluster, {
+    withIndex(client, {
       numOutOfDate: 1,
       docs: [
         [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
@@ -344,30 +354,51 @@ describe('IndexMigrator', () => {
       migrationVersion: {},
       references: [],
     });
-    const bulkCalls = callCluster.mock.calls.filter(([action]: any) => action === 'bulk');
-    expect(bulkCalls.length).toEqual(2);
-    expect(bulkCalls[0]).toEqual([
-      'bulk',
-      {
-        body: [
-          { index: { _id: 'foo:1', _index: '.kibana_2' } },
-          { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
-        ],
-      },
-    ]);
-    expect(bulkCalls[1]).toEqual([
-      'bulk',
-      {
-        body: [
-          { index: { _id: 'foo:2', _index: '.kibana_2' } },
-          { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
-        ],
-      },
-    ]);
+
+    expect(client.bulk).toHaveBeenCalledTimes(2);
+    expect(client.bulk).toHaveBeenNthCalledWith(1, {
+      body: [
+        { index: { _id: 'foo:1', _index: '.kibana_2' } },
+        { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
+      ],
+    });
+    expect(client.bulk).toHaveBeenNthCalledWith(2, {
+      body: [
+        { index: { _id: 'foo:2', _index: '.kibana_2' } },
+        { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
+      ],
+    });
+  });
+
+  test('rejects when the migration function throws an error', async () => {
+    const { client } = testOpts;
+    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+      throw new Error('error migrating document');
+    });
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: migrateDoc,
+    };
+
+    withIndex(client, {
+      numOutOfDate: 1,
+      docs: [
+        [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
+        [{ _id: 'foo:2', _source: { type: 'foo', foo: { name: 'Baz' } } }],
+      ],
+    });
+
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error migrating document"`
+    );
   });
 });
 
-function withIndex(callCluster: jest.Mock, opts: any = {}) {
+function withIndex(
+  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>,
+  opts: any = {}
+) {
   const defaultIndex = {
     '.kibana_1': {
       aliases: { '.kibana': {} },
@@ -386,39 +417,56 @@ function withIndex(callCluster: jest.Mock, opts: any = {}) {
   const { alias = defaultAlias } = opts;
   const { index = defaultIndex } = opts;
   const { docs = [] } = opts;
-  const searchResult = (i: number) =>
-    Promise.resolve({
-      _scroll_id: i,
-      _shards: {
-        successful: 1,
-        total: 1,
-      },
-      hits: {
-        hits: docs[i] || [],
-      },
-    });
+  const searchResult = (i: number) => ({
+    _scroll_id: i,
+    _shards: {
+      successful: 1,
+      total: 1,
+    },
+    hits: {
+      hits: docs[i] || [],
+    },
+  });
 
   let scrollCallCounter = 1;
 
-  callCluster.mockImplementation((method) => {
-    if (method === 'indices.get') {
-      return Promise.resolve(index);
-    } else if (method === 'indices.getAlias') {
-      return Promise.resolve(alias);
-    } else if (method === 'reindex') {
-      return Promise.resolve({ task: 'zeid', _shards: { successful: 1, total: 1 } });
-    } else if (method === 'tasks.get') {
-      return Promise.resolve({ completed: true });
-    } else if (method === 'search') {
-      return searchResult(0);
-    } else if (method === 'bulk') {
-      return Promise.resolve({ items: [] });
-    } else if (method === 'count') {
-      return Promise.resolve({ count: numOutOfDate, _shards: { successful: 1, total: 1 } });
-    } else if (method === 'scroll' && scrollCallCounter <= docs.length) {
+  client.indices.get.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(index, {
+      statusCode: index.statusCode,
+    })
+  );
+  client.indices.getAlias.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(alias, {
+      statusCode: index.statusCode,
+    })
+  );
+  client.reindex.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      task: 'zeid',
+      _shards: { successful: 1, total: 1 },
+    })
+  );
+  client.tasks.get.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+  );
+  client.search.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+  );
+  client.bulk.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+  );
+  client.count.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      count: numOutOfDate,
+      _shards: { successful: 1, total: 1 },
+    })
+  );
+  client.scroll.mockImplementation(() => {
+    if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);
       scrollCallCounter++;
-      return result;
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(result);
     }
+    return elasticsearchClientMock.createSuccessTransportRequestPromise({});
   });
 }

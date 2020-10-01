@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 export const mockDuplicateIdErrors = [];
 
@@ -332,8 +332,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
             value: '3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509`,
           enabled: true,
         },
       ],
@@ -496,8 +495,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
             value: '30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d`,
           enabled: true,
         },
       ],
@@ -675,8 +673,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
             value: '590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde`,
           enabled: true,
         },
       ],
@@ -848,8 +845,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
             value: '30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-30d47c8a1b179ae435058e5b23b96118125a451fe58efd77be288f00456ff77d`,
           enabled: true,
         },
       ],
@@ -1031,8 +1027,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
             value: '590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-590eb946a7fdbacaa587ed0f6b1a16f5ad3d659ec47ef35ad0826c47af133bde`,
           enabled: true,
         },
       ],
@@ -1152,8 +1147,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
             value: '3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
+          id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509`,
           enabled: true,
         },
       ],
@@ -1197,4 +1191,22 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
       pinnedEventsSaveObject: [],
     },
   ],
+};
+
+export const mockSavedObject = {
+  type: 'siem-ui-timeline',
+  id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  attributes: {
+    savedQueryId: null,
+
+    status: 'immutable',
+
+    excludedRowRendererIds: [],
+    ...mockGetTemplateTimelineValue,
+  },
+  references: [],
+  updated_at: '2020-07-21T12:03:08.901Z',
+  version: 'WzAsMV0=',
+  namespaces: ['default'],
+  score: 0.9444616,
 };

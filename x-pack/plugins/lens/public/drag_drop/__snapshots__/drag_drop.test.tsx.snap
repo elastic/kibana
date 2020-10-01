@@ -9,6 +9,20 @@ exports[`DragDrop droppable is reflected in the className 1`] = `
 </div>
 `;
 
+exports[`DragDrop items that have droppable=false get special styling when another item is dragged 1`] = `
+<div
+  className="lnsDragDrop lnsDragDrop-isNotDroppable"
+  data-test-subj="lnsDragDrop"
+  onDragEnd={[Function]}
+  onDragLeave={[Function]}
+  onDragOver={[Function]}
+  onDragStart={[Function]}
+  onDrop={[Function]}
+>
+  Hello!
+</div>
+`;
+
 exports[`DragDrop renders if nothing is being dragged 1`] = `
 <div
   class="lnsDragDrop"

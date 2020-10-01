@@ -19,7 +19,6 @@ import { stampLogger } from '../shared/stamp-logger';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
 import { readKibanaConfig } from '../shared/read-kibana-config';
@@ -84,16 +83,18 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return client.search(body as any).then((res) => res.body);
+        return client.search(body as any).then((res) => res.body as any);
       },
       indicesStats: (body) => {
-        return client.indices.stats(body as any);
+        return client.indices.stats(body as any).then((res) => res.body);
       },
       transportRequest: ((params) => {
-        return client.transport.request({
-          method: params.method,
-          path: params.path,
-        });
+        return client.transport
+          .request({
+            method: params.method,
+            path: params.path,
+          })
+          .then((res) => res.body);
       }) as CollectTelemetryParams['transportRequest'],
     },
   });

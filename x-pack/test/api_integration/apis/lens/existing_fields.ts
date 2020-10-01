@@ -20,6 +20,9 @@ const fieldsWithData = [
   '@tags',
   '@tags.raw',
   '@timestamp',
+  '_id',
+  '_index',
+  '_source',
   'agent',
   'agent.raw',
   'bytes',
@@ -96,6 +99,9 @@ const fieldsWithData = [
 
 const metricBeatData = [
   '@timestamp',
+  '_id',
+  '_index',
+  '_source',
   'agent.ephemeral_id',
   'agent.hostname',
   'agent.id',
@@ -129,7 +135,6 @@ const metricBeatData = [
   'system.cpu.user.pct',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -186,6 +191,9 @@ export default ({ getService }: FtrProviderContext) => {
           '@tags',
           '@tags.raw',
           '@timestamp',
+          '_id',
+          '_index',
+          '_source',
           'agent',
           'agent.raw',
           'bytes',

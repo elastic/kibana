@@ -207,7 +207,7 @@ There are a number of options for the build script:
 
 ### Prerequisite
 
-Before testing or running this PR locally, you **must** run `node scripts/runtime` from `/canvas` _after_ `yarn kbn bootstrap` and _before_ starting Kibana. It is only built automatically when Kibana is built to avoid slowing down other development activities.
+Before testing or running this PR locally, you **must** run `node scripts/shareable_runtime` from `/canvas` _after_ `yarn kbn bootstrap` and _before_ starting Kibana. It is only built automatically when Kibana is built to avoid slowing down other development activities.
 
 ### Webpack Dev Server
 

@@ -32,7 +32,7 @@ const Wrapper = styled.div<{ isSelected: boolean }>`
   }
 `;
 
-const EuiTabLink = (props: Props) => {
+function EuiTabLink(props: Props) {
   const { isSelected, children } = props;
 
   const className = cls('euiTab', {
@@ -44,6 +44,6 @@ const EuiTabLink = (props: Props) => {
       <span className={'euiTab__content'}>{children}</span>
     </Wrapper>
   );
-};
+}
 
 export { EuiTabLink };

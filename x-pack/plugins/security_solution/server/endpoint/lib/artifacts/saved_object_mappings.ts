@@ -55,7 +55,13 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
       index: false,
     },
-    // array of doc ids
+    schemaVersion: {
+      type: 'keyword',
+    },
+    semanticVersion: {
+      type: 'keyword',
+      index: false,
+    },
     ids: {
       type: 'keyword',
       index: false,

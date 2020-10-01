@@ -7,28 +7,31 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
-import { ML_BREADCRUMB, DATA_FRAME_ANALYTICS_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  DATA_FRAME_ANALYTICS_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameListLabel', {
-      defaultMessage: 'Job Management',
-    }),
-    href: '',
-  },
-];
-
-export const analyticsJobsListRoute: MlRoute = {
+export const analyticsJobsListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/data_frame_analytics',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameListLabel', {
+        defaultMessage: 'Job Management',
+      }),
+      href: '',
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
 import { BUILT_IN_ALERTS_FEATURE_ID } from '../common';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const BUILT_IN_ALERTS_FEATURE = {
   id: BUILT_IN_ALERTS_FEATURE_ID,
@@ -15,11 +16,18 @@ export const BUILT_IN_ALERTS_FEATURE = {
   }),
   icon: 'bell',
   app: [],
+  category: DEFAULT_APP_CATEGORIES.management,
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [IndexThreshold],
   privileges: {
     all: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [IndexThreshold],
         read: [],
@@ -29,11 +37,14 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
     read: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [],
         read: [IndexThreshold],
@@ -43,7 +54,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
   },
 };

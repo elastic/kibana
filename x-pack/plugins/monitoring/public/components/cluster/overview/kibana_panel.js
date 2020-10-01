@@ -32,6 +32,8 @@ import { KIBANA_SYSTEM_ID, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../com
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
 
@@ -50,14 +52,15 @@ export function KibanaPanel(props) {
   const goToInstances = () => getSafeForExternalLink('#/kibana/instances');
 
   const setupModeData = get(setupMode.data, 'kibana');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={KIBANA_SYSTEM_ID}
-        badgeClickLink={goToInstances()}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={KIBANA_SYSTEM_ID}
+      badgeClickLink={goToInstances()}
+    />
+  ) : null;
 
   let instancesAlertStatus = null;
   if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS)) {
@@ -108,7 +111,7 @@ export function KibanaPanel(props) {
               data-test-subj="kibana_overview"
               data-overview-status={props.status}
             >
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel"
                   defaultMessage="Requests"
@@ -117,7 +120,7 @@ export function KibanaPanel(props) {
               <EuiDescriptionListDescription data-test-subj="kbnRequests">
                 {props.requests_total}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeLabel"
                   defaultMessage="Max. Response Time"
@@ -165,14 +168,14 @@ export function KibanaPanel(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {setupModeTooltip}
+                  {setupModeMetricbeatMigrationTooltip}
                   {instancesAlertStatus}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.connectionsLabel"
                   defaultMessage="Connections"
@@ -181,7 +184,7 @@ export function KibanaPanel(props) {
               <EuiDescriptionListDescription data-test-subj="kbnConnections">
                 {formatNumber(props.concurrent_connections, 'int_commas')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.kibanaPanel.memoryUsageLabel"
                   defaultMessage="Memory Usage"

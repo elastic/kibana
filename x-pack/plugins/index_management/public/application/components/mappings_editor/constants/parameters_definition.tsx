@@ -20,6 +20,7 @@ import {
 import {
   AliasOption,
   DataType,
+  RuntimeType,
   ComboBoxOption,
   ParameterName,
   ParameterDefinition,
@@ -27,9 +28,10 @@ import {
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
+import { RUNTIME_FIELD_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
-const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
+const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;
 
 const commonErrorMessages = {
   smallerThanZero: i18n.translate(
@@ -177,6 +179,52 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
               'xpack.idxMgmt.mappingsEditor.parameters.validations.typeIsRequiredErrorMessage',
               {
                 defaultMessage: 'Specify a field type.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
+  runtime_type: {
+    fieldConfig: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
+        defaultMessage: 'Type',
+      }),
+      defaultValue: 'keyword',
+      deserializer: (fieldType: RuntimeType | undefined) => {
+        if (typeof fieldType === 'string' && Boolean(fieldType)) {
+          const label =
+            RUNTIME_FIELD_OPTIONS.find(({ value }) => value === fieldType)?.label ?? fieldType;
+          return [
+            {
+              label,
+              value: fieldType,
+            },
+          ];
+        }
+        return [];
+      },
+      serializer: (value: ComboBoxOption[]) => (value.length === 0 ? '' : value[0].value),
+    },
+    schema: t.string,
+  },
+  script: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.painlessScriptLabel', {
+        defaultMessage: 'Script',
+      }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scriptIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Script must emit() a value.',
               }
             )
           ),
@@ -382,6 +430,50 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.any,
   },
+  null_value_point: {
+    fieldConfig: {
+      defaultValue: '',
+      label: nullValueLabel,
+      helpText: () => (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.pointNullValueHelpText"
+          defaultMessage="Points can be expressed as an object, string, array or {docsLink} POINT."
+          values={{
+            docsLink: (
+              <EuiLink href={documentationService.getWellKnownTextLink()} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.pointWellKnownTextDocumentationLink',
+                  {
+                    defaultMessage: 'Well-Known Text',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value);
+      },
+      serializer: (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
+    schema: t.any,
+  },
   copy_to: {
     fieldConfig: {
       defaultValue: '',
@@ -403,6 +495,98 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       ],
     },
     schema: t.string,
+  },
+  value: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.valueLabel', {
+        defaultMessage: 'Value',
+      }),
+    },
+    schema: t.string,
+  },
+  meta: {
+    fieldConfig: {
+      defaultValue: '',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.metaHelpText"
+          defaultMessage="Use JSON format: {code}"
+          values={{
+            code: <EuiCode>{JSON.stringify({ arbitrary_key: 'anything_goes' })}</EuiCode>,
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorJsonError', {
+              defaultMessage: 'Invalid JSON.',
+            }),
+            { allowEmptyString: true }
+          ),
+        },
+        {
+          validator: ({ value }: ValidationFuncArg<any, string>) => {
+            if (typeof value !== 'string' || value.trim() === '') {
+              return;
+            }
+
+            const json = JSON.parse(value);
+            const valuesAreNotString = Object.values(json).some((v) => typeof v !== 'string');
+
+            if (Array.isArray(json)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorArraysNotAllowedError',
+                  {
+                    defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            } else if (valuesAreNotString) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorOnlyStringValuesAllowedError',
+                  {
+                    defaultMessage: 'Values must be a string.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        // Strip out empty strings
+        if (value.trim() === '') {
+          return undefined;
+        }
+
+        try {
+          const parsed = JSON.parse(value);
+          // If an empty object was passed, strip out this value entirely.
+          if (!Object.keys(parsed).length) {
+            return undefined;
+          }
+          return parsed;
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
+    schema: t.any,
   },
   max_input_length: {
     fieldConfig: {
@@ -689,6 +873,12 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
+    },
+    schema: t.boolean,
+  },
+  positive_score_impact: {
+    fieldConfig: {
+      defaultValue: true,
     },
     schema: t.boolean,
   },

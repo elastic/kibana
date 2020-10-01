@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { partial } from 'lodash';
+import { get, partial } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
@@ -18,7 +18,11 @@ import { Node } from '../../../components/elasticsearch/node/node';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+  ALERT_DISK_USAGE,
+} from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -42,6 +46,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             nodeName,
           },
         }),
+        telemetryPageViewTitle: 'elasticsearch_node',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',
@@ -50,7 +55,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [ALERT_CPU_USAGE, ALERT_DISK_USAGE],
             filters: [
               {
                 nodeUuid: nodeName,
@@ -81,6 +86,24 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           if (!data || !data.shards) {
             return;
           }
+
+          this.setTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+              defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+              values: {
+                nodeName: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
+              defaultMessage: 'Elasticsearch node: {node}',
+              values: {
+                node: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
 
           const shards = data.shards;
           $scope.totalCount = shards.length;

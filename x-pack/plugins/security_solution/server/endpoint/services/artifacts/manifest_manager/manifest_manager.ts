@@ -3,22 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import semver from 'semver';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
-import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
+import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
 
 import {
   ArtifactConstants,
-  ManifestConstants,
-  Manifest,
   buildArtifact,
-  getFullEndpointExceptionList,
-  ManifestDiff,
   getArtifactId,
+  getFullEndpointExceptionList,
+  Manifest,
+  ManifestDiff,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -26,12 +25,14 @@ import {
 } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: ArtifactClient;
   exceptionListClient: ExceptionListClient;
-  packageConfigService: PackageConfigServiceInterface;
+  packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
 }
@@ -48,53 +49,86 @@ export interface ManifestSnapshot {
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
   protected exceptionListClient: ExceptionListClient;
-  protected packageConfigService: PackageConfigServiceInterface;
+  protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
+  protected schemaVersion: ManifestSchemaVersion;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
-    this.packageConfigService = context.packageConfigService;
+    this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
     this.cache = context.cache;
+    this.schemaVersion = 'v1';
   }
 
   /**
-   * Gets a ManifestClient for the provided schemaVersion.
+   * Gets a ManifestClient for this manager's schemaVersion.
    *
-   * @param schemaVersion The schema version of the manifest.
-   * @returns {ManifestClient} A ManifestClient scoped to the provided schemaVersion.
+   * @returns {ManifestClient} A ManifestClient scoped to the appropriate schemaVersion.
    */
-  protected getManifestClient(schemaVersion: string): ManifestClient {
-    return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
+  protected getManifestClient(): ManifestClient {
+    return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
   }
 
   /**
    * Builds an array of artifacts (one per supported OS) based on the current
    * state of exception-list-agnostic SOs.
    *
-   * @param schemaVersion The schema version of the artifact
    * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
-    schemaVersion: string
+    artifactSchemaVersion?: string
   ): Promise<InternalArtifactCompleteSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
-      Promise<InternalArtifactCompleteSchema[]>
-    >(async (acc, os) => {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptionList = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
-        schemaVersion
+        artifactSchemaVersion ?? 'v1',
+        ENDPOINT_LIST_ID
       );
-      const artifacts = await acc;
-      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-      return Promise.resolve([...artifacts, artifact]);
-    }, Promise.resolve([]));
+      const artifact = await buildArtifact(
+        exceptionList,
+        os,
+        artifactSchemaVersion ?? 'v1',
+        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+      );
+      artifacts.push(artifact);
+    }
+    return artifacts;
+  }
+
+  /**
+   * Builds an array of artifacts (one per supported OS) based on the current state of the
+   * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
+   * @param artifactSchemaVersion
+   */
+  protected async buildTrustedAppsArtifacts(
+    artifactSchemaVersion?: string
+  ): Promise<InternalArtifactCompleteSchema[]> {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
+      const trustedApps = await getFullEndpointExceptionList(
+        this.exceptionListClient,
+        os,
+        artifactSchemaVersion ?? 'v1',
+        ENDPOINT_TRUSTED_APPS_LIST_ID
+      );
+      const artifact = await buildArtifact(
+        trustedApps,
+        os,
+        'v1',
+        ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
+      );
+      artifacts.push(artifact);
+    }
+    return artifacts;
   }
 
   /**
@@ -112,7 +146,7 @@ export class ManifestManager {
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
     } catch (err) {
-      if (err.status === 409) {
+      if (this.savedObjectsClient.errors.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
         return err;
@@ -168,20 +202,23 @@ export class ManifestManager {
    * Returns the last computed manifest based on the state of the
    * user-artifact-manifest SO.
    *
-   * @param schemaVersion The schema version of the manifest.
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
-  public async getLastComputedManifest(schemaVersion: string): Promise<Manifest | null> {
+  public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestClient = this.getManifestClient(schemaVersion);
+      const manifestClient = this.getManifestClient();
       const manifestSo = await manifestClient.getManifest();
 
       if (manifestSo.version === undefined) {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest(schemaVersion, manifestSo.version);
+      const manifest = new Manifest({
+        schemaVersion: this.schemaVersion,
+        semanticVersion: manifestSo.attributes.semanticVersion,
+        soVersion: manifestSo.version,
+      });
 
       for (const id of manifestSo.attributes.ids) {
         const artifactSo = await this.artifactClient.getArtifact(id);
@@ -199,29 +236,26 @@ export class ManifestManager {
   /**
    * Builds a new manifest based on the current user exception list.
    *
-   * @param schemaVersion The schema version of the manifest.
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async buildNewManifest(
-    schemaVersion: string,
-    baselineManifest?: Manifest
-  ): Promise<Manifest> {
+  public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
     // Build new exception list artifacts
-    const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
+    const artifacts = (
+      await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
+    ).flat();
 
     // Build new manifest
     const manifest = Manifest.fromArtifacts(
       artifacts,
-      ManifestConstants.SCHEMA_VERSION,
-      baselineManifest ?? Manifest.getDefault(schemaVersion)
+      baselineManifest ?? Manifest.getDefault(this.schemaVersion)
     );
 
     return manifest;
   }
 
   /**
-   * Dispatches the manifest by writing it to the endpoint package config, if different
+   * Dispatches the manifest by writing it to the endpoint package policy, if different
    * from the manifest already in the config.
    *
    * @param manifest The Manifest to dispatch.
@@ -238,44 +272,42 @@ export class ManifestManager {
     const errors: Error[] = [];
 
     while (paging) {
-      const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
+      const { items, total } = await this.packagePolicyService.list(this.savedObjectsClient, {
         page,
         perPage: 20,
-        kuery: 'ingest-package-configs.package.name:endpoint',
+        kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
-      for (const packageConfig of items) {
-        const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
-        if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
-          const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
+      for (const packagePolicy of items) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
+        if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
+          const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
             value: {},
           };
 
-          const oldManifest =
-            Manifest.fromPkgConfig(artifactManifest.value) ??
-            Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
-          if (!manifest.equals(oldManifest)) {
-            newPackageConfig.inputs[0].config.artifact_manifest = {
+          const newManifestVersion = manifest.getSemanticVersion();
+          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+            newPackagePolicy.inputs[0].config.artifact_manifest = {
               value: serializedManifest,
             };
 
             try {
-              await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+              await this.packagePolicyService.update(this.savedObjectsClient, id, newPackagePolicy);
               this.logger.debug(
-                `Updated package config ${id} with manifest version ${manifest.getSha256()}`
+                `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
               );
             } catch (err) {
               errors.push(err);
             }
           } else {
-            this.logger.debug(`No change in package config: ${id}`);
+            this.logger.debug(`No change in package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package config ${id} has no config.`));
+          errors.push(new Error(`Package Policy ${id} has no config.`));
         }
       }
-
-      paging = page * items.length < total;
+      paging = (page - 1) * 20 + items.length < total;
       page++;
     }
 
@@ -290,11 +322,11 @@ export class ManifestManager {
    */
   public async commit(manifest: Manifest): Promise<Error | null> {
     try {
-      const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
+      const manifestClient = this.getManifestClient();
 
       // Commit the new manifest
       const manifestSo = manifest.toSavedObject();
-      const version = manifest.getSoVersion();
+      const version = manifest.getSavedObjectVersion();
 
       if (version == null) {
         await manifestClient.createManifest(manifestSo);
@@ -304,7 +336,7 @@ export class ManifestManager {
         });
       }
 
-      this.logger.info(`Committed manifest ${manifest.getSha256()}`);
+      this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
     } catch (err) {
       return err;
     }

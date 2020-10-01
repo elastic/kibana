@@ -4,11 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IFlashMessagesProps {
-  info?: string[];
-  warning?: string[];
-  error?: string[];
-  success?: string[];
-  isWrapped?: boolean;
-  children?: React.ReactNode;
-}
+export { IFlashMessage } from './flash_messages';

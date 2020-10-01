@@ -22,13 +22,16 @@ const AgentEventBase = {
   ]),
   subtype: schema.oneOf([
     // State
-    schema.literal('RUNNING'),
-    schema.literal('STARTING'),
-    schema.literal('IN_PROGRESS'),
-    schema.literal('CONFIG'),
-    schema.literal('FAILED'),
-    schema.literal('STOPPING'),
-    schema.literal('STOPPED'),
+    schema.oneOf([
+      schema.literal('RUNNING'),
+      schema.literal('STARTING'),
+      schema.literal('IN_PROGRESS'),
+      schema.literal('CONFIG'),
+      schema.literal('FAILED'),
+      schema.literal('STOPPING'),
+      schema.literal('STOPPED'),
+      schema.literal('DEGRADED'),
+    ]),
     // Action results
     schema.literal('DATA_DUMP'),
     // Actions
@@ -40,7 +43,7 @@ const AgentEventBase = {
   payload: schema.maybe(schema.any()),
   agent_id: schema.string(),
   action_id: schema.maybe(schema.string()),
-  config_id: schema.maybe(schema.string()),
+  policy_id: schema.maybe(schema.string()),
   stream_id: schema.maybe(schema.string()),
 };
 
@@ -60,11 +63,11 @@ export const AgentEventSchema = schema.object({
 
 export const NewAgentActionSchema = schema.object({
   type: schema.oneOf([
-    schema.literal('CONFIG_CHANGE'),
-    schema.literal('DATA_DUMP'),
-    schema.literal('RESUME'),
-    schema.literal('PAUSE'),
+    schema.literal('POLICY_CHANGE'),
+    schema.literal('UNENROLL'),
+    schema.literal('UPGRADE'),
   ]),
   data: schema.maybe(schema.any()),
+  ack_data: schema.maybe(schema.any()),
   sent_at: schema.maybe(schema.string()),
 });

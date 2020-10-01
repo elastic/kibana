@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable no-console */
-
 import { ToolingLog } from '@kbn/dev-utils';
 import {
   Extractor,
@@ -34,6 +32,11 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
+
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 /*
  * Step 1: execute build:types
@@ -92,13 +95,13 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       },
     },
   };
-  const con = ExtractorConfig.prepare({
+  const cfg = ExtractorConfig.prepare({
     configObject: config,
     configObjectFullPath: undefined,
     packageJsonFullPath: path.resolve('package.json'),
   });
 
-  return con;
+  return cfg;
 };
 
 const runBuildTypes = async () => {
@@ -108,7 +111,7 @@ const runBuildTypes = async () => {
 const runApiDocumenter = async (folder: string) => {
   const sourceFolder = `./build/${folder}`;
   const targetFolder = `./docs/development/${folder}`;
-  console.log(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
+  log.info(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
   await execa('api-documenter', ['generate', '-i', sourceFolder, '-o', targetFolder], {
     preferLocal: true,
   });
@@ -117,7 +120,7 @@ const runApiDocumenter = async (folder: string) => {
 const renameExtractedApiPackageName = async (folder: string) => {
   const fname = getReportFileName(folder);
   const jsonApiFile = `build/${folder}/${fname}.api.json`;
-  console.log(`Updating ${jsonApiFile}...`);
+  log.info(`Updating ${jsonApiFile}...`);
   const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
   json.name = json.canonicalReference = `kibana-plugin-${folder.replace(/\//g, '-')}`;
   fs.writeFileSync(jsonApiFile, JSON.stringify(json, null, 2));
@@ -127,11 +130,7 @@ const renameExtractedApiPackageName = async (folder: string) => {
  * Runs api-extractor with a custom logger in order to extract results from the process
  *
  */
-const runApiExtractor = (
-  log: ToolingLog,
-  folder: string,
-  acceptChanges: boolean = false
-): ExtractorResult => {
+const runApiExtractor = (folder: string, acceptChanges: boolean = false): ExtractorResult => {
   const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
@@ -177,13 +176,10 @@ interface Options {
   filter: string;
 }
 
-async function run(
-  folder: string,
-  { log, opts }: { log: ToolingLog; opts: Options }
-): Promise<boolean> {
+async function run(folder: string, { opts }: { opts: Options }): Promise<boolean> {
   log.info(`${folder} API: checking for changes in API signature...`);
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+  const { apiReportChanged, succeeded } = runApiExtractor(folder, opts.accept);
 
   // If we're not accepting changes and there's a failure, exit.
   if (!opts.accept && !succeeded) {
@@ -209,11 +205,6 @@ async function run(
 }
 
 (async () => {
-  const log = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
-
   const extraFlags: string[] = [];
   const opts = (getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
@@ -239,6 +230,11 @@ async function run(
   const plugins = [
     'plugins/data/server',
     'plugins/data/public',
+    'plugins/expressions/server',
+    'plugins/expressions/public',
+    'plugins/ui_actions/public',
+    'plugins/embeddable/server',
+    'plugins/embeddable/public',
     'plugins/kibana_utils/common/state_containers',
     'plugins/kibana_utils/public/state_sync',
   ];
@@ -276,26 +272,22 @@ async function run(
     return !(extraFlags.length > 0);
   }
 
-  try {
-    log.info(`Building types for api extractor...`);
-    await runBuildTypes();
-  } catch (e) {
-    log.error(e);
-    return false;
-  }
+  log.info('Building types for api extractor...');
+  await runBuildTypes();
+  log.info('Types for api extractor has been built');
 
   const filteredFolders = folders.filter((folder) =>
     opts.filter.length ? folder.match(opts.filter) : true
   );
   const results = [];
   for (const folder of filteredFolders) {
-    results.push(await run(folder, { log, opts }));
+    results.push(await run(folder, { opts }));
   }
 
   if (results.includes(false)) {
     process.exitCode = 1;
   }
 })().catch((e) => {
-  console.log(e);
+  log.error(e);
   process.exitCode = 1;
 });

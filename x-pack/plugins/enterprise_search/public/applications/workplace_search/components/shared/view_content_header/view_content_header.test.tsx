@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/shallow_usecontext.mock';
-
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -26,9 +24,10 @@ describe('ViewContentHeader', () => {
   });
 
   it('shows description, when present', () => {
-    const wrapper = shallow(<ViewContentHeader {...props} description="Hello World" />);
+    const wrapper = shallow(<ViewContentHeader title="Header" description="Hello World" />);
 
     expect(wrapper.find('p').text()).toEqual('Hello World');
+    expect(wrapper.find(EuiFlexGroup).prop('alignItems')).toEqual('center');
   });
 
   it('shows action, when present', () => {

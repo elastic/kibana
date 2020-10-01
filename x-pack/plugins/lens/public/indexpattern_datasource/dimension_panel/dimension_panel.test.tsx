@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -22,8 +22,10 @@ import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/e
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
+import { IndexPatternColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
+import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -42,9 +44,11 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasExistence: true,
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -52,6 +56,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -59,6 +64,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -66,6 +72,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -76,11 +83,38 @@ const expectedIndexPatterns = {
   },
 };
 
+const bytesColumn: IndexPatternColumn = {
+  label: 'Max of bytes',
+  dataType: 'number',
+  isBucketed: false,
+
+  // Private
+  operationType: 'max',
+  sourceField: 'bytes',
+  params: { format: { id: 'bytes' } },
+};
+
+/**
+ * The datasource exposes four main pieces of code which are tested at
+ * an integration test level. The main reason for this fairly high level
+ * of testing is that there is a lot of UI logic that isn't easily
+ * unit tested, such as the transient invalid state.
+ *
+ * - Dimension trigger: Not tested here
+ * - Dimension editor component: First half of the tests
+ *
+ * - canHandleDrop: Tests for dropping of fields or other dimensions
+ * - onDrop: Correct application of drop logic
+ */
 describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
   let dragDropContext: DragContextState;
+
+  function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
+    return { ...state, layers: { first: { ...state.layers.first, columns } } };
+  }
 
   beforeEach(() => {
     state = {
@@ -174,12 +208,35 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(filterOperations).toBeCalled();
     });
 
-    it('should show field select combo box on click', () => {
+    it('should show field select', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       expect(
         wrapper.find(EuiComboBox).filter('[data-test-subj="indexPattern-dimension-field"]')
       ).toHaveLength(1);
+    });
+
+    it('should not show field select on fieldless operation', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={getStateWithColumns({
+            col1: {
+              label: 'Filters',
+              dataType: 'string',
+              isBucketed: false,
+
+              // Private
+              operationType: 'filters',
+              params: { filters: [] },
+            },
+          })}
+        />
+      );
+
+      expect(
+        wrapper.find(EuiComboBox).filter('[data-test-subj="indexPattern-dimension-field"]')
+      ).toHaveLength(0);
     });
 
     it('should not show any choices if the filter returns false', () => {
@@ -210,9 +267,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options).toHaveLength(2);
 
       expect(options![0].label).toEqual('Records');
-
       expect(options![1].options!.map(({ label }) => label)).toEqual([
-        'timestamp',
+        'timestampLabel',
         'bytes',
         'memory',
         'source',
@@ -239,33 +295,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .filter('[data-test-subj="indexPattern-dimension-field"]')
         .prop('options');
 
-      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
+      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
     });
 
     it('should indicate fields which are incompatible for the operation of the current column', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    label: 'Max of bytes',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'max',
-                    sourceField: 'bytes',
-                  },
-                },
-              },
-            },
-          }}
+          state={getStateWithColumns({ col1: bytesColumn })}
         />
       );
 
@@ -277,7 +314,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
@@ -288,26 +325,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    label: 'Max of bytes',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'max',
-                    sourceField: 'bytes',
-                  },
-                },
-              },
-            },
-          }}
+          state={getStateWithColumns({ col1: bytesColumn })}
         />
       );
 
@@ -320,30 +338,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
         'incompatible'
       );
+
+      // Fieldless operation is compatible with field
+      expect(items.find(({ label }) => label === 'Filters')!['data-test-subj']).toContain(
+        'compatible'
+      );
     });
 
     it('should keep the operation when switching to another field compatible with this operation', () => {
-      const initialState: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                label: 'Max of bytes',
-                dataType: 'number',
-                isBucketed: false,
-
-                // Private
-                operationType: 'max',
-                sourceField: 'bytes',
-                params: { format: { id: 'bytes' } },
-              },
-            },
-          },
-        },
-      };
+      const initialState: IndexPatternPrivateState = getStateWithColumns({ col1: bytesColumn });
 
       wrapper = mount(
         <IndexPatternDimensionEditorComponent {...defaultProps} state={initialState} />
@@ -411,27 +414,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    label: 'Max of bytes',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'max',
-                    sourceField: 'bytes',
-                    params: { format: { id: 'bytes' } },
-                  },
-                },
-              },
-            },
-          }}
+          state={getStateWithColumns({ col1: bytesColumn })}
         />
       );
 
@@ -501,27 +484,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    label: 'Max of bytes',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'max',
-                    sourceField: 'bytes',
-                    params: { format: { id: 'bytes' } },
-                  },
-                },
-              },
-            },
-          }}
+          state={getStateWithColumns({ col1: bytesColumn })}
         />
       );
 
@@ -549,28 +512,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    label: 'Custom label',
-                    customLabel: true,
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'max',
-                    sourceField: 'bytes',
-                    params: { format: { id: 'bytes' } },
-                  },
-                },
-              },
+          state={getStateWithColumns({
+            col1: {
+              ...bytesColumn,
+              label: 'Custom label',
+              customLabel: true,
             },
-          }}
+          })}
         />
       );
 
@@ -615,9 +563,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
-        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
-          0
-        );
+        expect(
+          wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+        ).toBeDefined();
 
         expect(setState).not.toHaveBeenCalled();
       });
@@ -631,6 +579,62 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         wrapper
           .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
+          .simulate('click');
+
+        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
+      });
+
+      it('should leave error state if the original operation is re-selected', () => {
+        wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
+          .simulate('click');
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
+          .simulate('click');
+
+        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
+      });
+
+      it('should leave error state when switching from incomplete state to fieldless operation', () => {
+        wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
+          .simulate('click');
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-filters incompatible"]')
+          .simulate('click');
+
+        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
+      });
+
+      it('should leave error state when re-selecting the original fieldless function', () => {
+        wrapper = mount(
+          <IndexPatternDimensionEditorComponent
+            {...defaultProps}
+            state={getStateWithColumns({
+              col1: {
+                label: 'Filter',
+                dataType: 'string',
+                isBucketed: true,
+                // Private
+                operationType: 'filters',
+                params: { filters: [] },
+              },
+            })}
+          />
+        );
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
+          .simulate('click');
+
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-filters"]')
           .simulate('click');
 
         expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
@@ -651,7 +655,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -695,28 +701,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       it('should select the Records field when count is selected', () => {
-        const initialState: IndexPatternPrivateState = {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col2: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: '',
-                  operationType: 'avg',
-                  sourceField: 'bytes',
-                },
-              },
-            },
-          },
-        };
         wrapper = mount(
           <IndexPatternDimensionEditorComponent
             {...defaultProps}
-            state={initialState}
+            state={getStateWithColumns({
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'avg',
+                sourceField: 'bytes',
+              },
+            })}
             columnId="col2"
           />
         );
@@ -731,28 +727,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       it('should indicate document and field compatibility with selected document operation', () => {
-        const initialState: IndexPatternPrivateState = {
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col2: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: '',
-                  operationType: 'count',
-                  sourceField: 'Records',
-                },
-              },
-            },
-          },
-        };
         wrapper = mount(
           <IndexPatternDimensionEditorComponent
             {...defaultProps}
-            state={initialState}
+            state={getStateWithColumns({
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'count',
+                sourceField: 'Records',
+              },
+            })}
             columnId="col2"
           />
         );
@@ -769,7 +755,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -812,6 +800,35 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         });
       });
+    });
+
+    it('should render invalid field if field reference is broken', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...defaultProps.state,
+            layers: {
+              first: {
+                ...defaultProps.state.layers.first,
+                columns: {
+                  col1: {
+                    ...defaultProps.state.layers.first.columns.col1,
+                    sourceField: 'nonexistent',
+                  } as DateHistogramIndexPatternColumn,
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
+        {
+          label: 'nonexistent',
+          value: { type: 'field', field: 'nonexistent' },
+        },
+      ]);
     });
 
     it('should support selecting the operation before the field', () => {
@@ -923,7 +940,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
@@ -934,28 +951,18 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should indicate document compatibility when document operation is selected', () => {
-      const initialState: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: {
-                dataType: 'number',
-                isBucketed: false,
-                label: '',
-                operationType: 'count',
-                sourceField: 'Records',
-              },
-            },
-          },
-        },
-      };
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={initialState}
+          state={getStateWithColumns({
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'count',
+              sourceField: 'Records',
+            },
+          })}
           columnId={'col2'}
         />
       );
@@ -983,12 +990,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
       expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-        'Unique count',
         'Average',
         'Count',
         'Maximum',
         'Minimum',
         'Sum',
+        'Unique count',
       ]);
     });
 
@@ -1023,26 +1030,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should use helper function when changing the function', () => {
-      const initialState: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                label: 'Max of bytes',
-                dataType: 'number',
-                isBucketed: false,
-
-                // Private
-                operationType: 'max',
-                sourceField: 'bytes',
-              },
-            },
-          },
-        },
-      };
+      const initialState: IndexPatternPrivateState = getStateWithColumns({
+        col1: bytesColumn,
+      });
       wrapper = mount(
         <IndexPatternDimensionEditorComponent {...defaultProps} state={initialState} />
       );
@@ -1087,25 +1077,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('allows custom format', () => {
-      const stateWithNumberCol: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'Average of bar',
-                dataType: 'number',
-                isBucketed: false,
-                // Private
-                operationType: 'avg',
-                sourceField: 'bar',
-              },
-            },
-          },
+      const stateWithNumberCol: IndexPatternPrivateState = getStateWithColumns({
+        col1: {
+          label: 'Average of memory',
+          dataType: 'number',
+          isBucketed: false,
+          // Private
+          operationType: 'avg',
+          sourceField: 'memory',
         },
-      };
+      });
 
       wrapper = mount(
         <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
@@ -1137,29 +1118,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('keeps decimal places while switching', () => {
-      const stateWithNumberCol: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'Average of bar',
-                dataType: 'number',
-                isBucketed: false,
-                // Private
-                operationType: 'avg',
-                sourceField: 'bar',
-                params: {
-                  format: { id: 'bytes', params: { decimals: 0 } },
-                },
-              },
-            },
+      const stateWithNumberCol: IndexPatternPrivateState = getStateWithColumns({
+        col1: {
+          label: 'Average of memory',
+          dataType: 'number',
+          isBucketed: false,
+          // Private
+          operationType: 'avg',
+          sourceField: 'memory',
+          params: {
+            format: { id: 'bytes', params: { decimals: 0 } },
           },
         },
-      };
-
+      });
       wrapper = mount(
         <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
       );
@@ -1180,35 +1151,26 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
           .prop('value')
       ).toEqual(0);
     });
 
     it('allows custom format with number of decimal places', () => {
-      const stateWithNumberCol: IndexPatternPrivateState = {
-        ...state,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'Average of bar',
-                dataType: 'number',
-                isBucketed: false,
-                // Private
-                operationType: 'avg',
-                sourceField: 'bar',
-                params: {
-                  format: { id: 'bytes', params: { decimals: 2 } },
-                },
-              },
-            },
+      const stateWithNumberCol: IndexPatternPrivateState = getStateWithColumns({
+        col1: {
+          label: 'Average of memory',
+          dataType: 'number',
+          isBucketed: false,
+          // Private
+          operationType: 'avg',
+          sourceField: 'memory',
+          params: {
+            format: { id: 'bytes', params: { decimals: 2 } },
           },
         },
-      };
+      });
 
       wrapper = mount(
         <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
@@ -1216,9 +1178,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       act(() => {
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .prop('onChange')!({ target: { value: '0' } });
+          .prop('onChange')!({ currentTarget: { value: '0' } });
       });
 
       expect(setState).toHaveBeenCalledWith({
@@ -1249,16 +1211,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
+            hasRestrictions: false,
             fields: [
               {
                 aggregatable: true,
                 name: 'bar',
+                displayName: 'bar',
                 searchable: true,
                 type: 'number',
               },
               {
                 aggregatable: true,
                 name: 'mystring',
+                displayName: 'mystring',
                 searchable: true,
                 type: 'string',
               },
@@ -1361,6 +1326,66 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
           state: dragDropState(),
+          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+          layerId: 'myLayer',
+        })
+      ).toBe(false);
+    });
+
+    it('is droppable if the dragged column is compatible', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col2',
+          filterOperations: (op: OperationMetadata) => true,
+          layerId: 'myLayer',
+        })
+      ).toBe(true);
+    });
+
+    it('is not droppable if the dragged column is the same as the current column', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col1',
+          filterOperations: (op: OperationMetadata) => true,
+          layerId: 'myLayer',
+        })
+      ).toBe(false);
+    });
+
+    it('is not droppable if the dragged column is incompatible', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col2',
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
           layerId: 'myLayer',
         })
@@ -1510,6 +1535,110 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 operationType: 'terms',
                 params: expect.objectContaining({ size: 3 }),
               }),
+            },
+          },
+        },
+      });
+    });
+
+    it('updates the column id when moving an operation to an empty dimension', () => {
+      const dragging = {
+        columnId: 'col1',
+        groupId: 'a',
+        layerId: 'myLayer',
+      };
+      const testState = dragDropState();
+
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col2',
+        filterOperations: (op: OperationMetadata) => true,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col2'],
+            columns: {
+              col2: testState.layers.myLayer.columns.col1,
+            },
+          },
+        },
+      });
+    });
+
+    it('replaces an operation when moving to a populated dimension', () => {
+      const dragging = {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+      };
+      const testState = dragDropState();
+      testState.layers.myLayer = {
+        indexPatternId: 'foo',
+        columnOrder: ['col1', 'col2', 'col3'],
+        columns: {
+          col1: testState.layers.myLayer.columns.col1,
+
+          col2: {
+            label: 'Top values of src',
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'column', columnId: 'col3' },
+              orderDirection: 'desc',
+              size: 10,
+            },
+            sourceField: 'src',
+          },
+          col3: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        },
+      };
+
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col1',
+        filterOperations: (op: OperationMetadata) => true,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col3'],
+            columns: {
+              col1: testState.layers.myLayer.columns.col2,
+              col3: testState.layers.myLayer.columns.col3,
             },
           },
         },

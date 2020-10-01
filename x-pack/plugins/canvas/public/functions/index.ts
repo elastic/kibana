@@ -12,7 +12,7 @@ import { CanvasSetupDeps, CoreSetup } from '../plugin';
 
 export interface InitializeArguments {
   prependBasePath: CoreSetup['http']['basePath']['prepend'];
-  typesRegistry: CanvasSetupDeps['expressions']['__LEGACY']['types'];
+  types: ReturnType<CanvasSetupDeps['expressions']['getTypes']>;
   timefilter: CanvasSetupDeps['data']['query']['timefilter']['timefilter'];
 }
 

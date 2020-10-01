@@ -18,7 +18,7 @@
  */
 
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
-import { IAggConfig } from '../../aggs';
+import { IAggConfig } from '../../../../common';
 import { IndexPattern } from '../../../index_patterns';
 import { getSearchService } from '../../../../public/services';
 

@@ -18,7 +18,7 @@ import {
 } from './operations';
 import { operationDefinitions } from './operations/definitions';
 import { TermsIndexPatternColumn } from './operations/definitions/terms';
-import { hasField } from './utils';
+import { hasField, hasInvalidReference } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -90,6 +90,7 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): IndexPatternSugestion[] {
+  if (hasInvalidReference(state)) return [];
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
@@ -380,6 +381,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  if (hasInvalidReference(state)) return [];
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
@@ -481,11 +483,23 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const layer = state.layers[layerId];
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
+  const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const firstBucketLabel =
+    currentFields.find((field) => {
+      const column = layer.columns[firstBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
+  const secondBucketLabel =
+    currentFields.find((field) => {
+      const column = layer.columns[secondBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
+
   return buildSuggestion({
     state,
     layerId,
     updatedLayer,
-    label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
+    label: getNestedTitle([secondBucketLabel, firstBucketLabel]),
     changeType: 'reorder',
   });
 }
@@ -544,12 +558,12 @@ function createMetricSuggestion(
   });
 }
 
-function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
+function getNestedTitle([outerBucketLabel, innerBucketLabel]: string[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
     defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.sourceField,
-      outerOperation: outerBucket.sourceField,
+      innerOperation: innerBucketLabel,
+      outerOperation: outerBucketLabel,
     },
   });
 }

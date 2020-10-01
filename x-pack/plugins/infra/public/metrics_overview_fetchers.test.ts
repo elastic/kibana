@@ -75,6 +75,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
           groupBy: [],
           nodeType: 'host',
           includeTimeseries: true,
+          overrideCompositeSize: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

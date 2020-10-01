@@ -41,7 +41,7 @@ const fetchTransaction = debounce(
 
 const getTextColor = (value?: string) => (value ? 'default' : 'subdued');
 
-export const LinkPreview = ({ label, url, filters }: Props) => {
+export function LinkPreview({ label, url, filters }: Props) {
   const [transaction, setTransaction] = useState<Transaction | undefined>();
 
   useEffect(() => {
@@ -128,4 +128,4 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}

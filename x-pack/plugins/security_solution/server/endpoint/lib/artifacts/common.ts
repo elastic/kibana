@@ -13,13 +13,13 @@ import {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['linux', 'macos', 'windows'],
-  SCHEMA_VERSION: 'v1',
+  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
+  SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
 };
 
 export const ManifestConstants = {
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact-manifest',
-  SCHEMA_VERSION: 'v1',
 };
 
 export const getArtifactId = (artifact: InternalArtifactSchema) => {

@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS RDS Instance/Cluster Stoppage",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:(StopDBCluster or StopDBInstance) and event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/stop-db-cluster.html",
@@ -26,7 +27,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Asset Visibility",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

@@ -20,9 +20,10 @@ export function ifFn(): ExpressionFunctionDefinition<'if', unknown, Arguments, u
     help,
     args: {
       condition: {
-        types: ['boolean', 'null'],
+        types: ['boolean'],
         aliases: ['_'],
         help: argHelp.condition,
+        required: true,
       },
       then: {
         resolve: false,

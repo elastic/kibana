@@ -71,8 +71,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
-          "url",
           "query",
+          "url",
         ],
         "read": Array [
           "index-pattern",
@@ -111,6 +111,7 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",
@@ -323,6 +324,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",

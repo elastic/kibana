@@ -26,3 +26,6 @@ export {
 } from './hooks/use_track_metric';
 
 export * from './typings';
+
+export { useChartTheme } from './hooks/use_chart_theme';
+export { useTheme } from './hooks/use_theme';

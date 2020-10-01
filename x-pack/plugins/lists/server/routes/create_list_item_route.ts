@@ -9,7 +9,7 @@ import { IRouter } from 'kibana/server';
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { createListItemSchema, listItemSchema } from '../../common/schemas';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 
 import { getListClient } from '.';
 
@@ -36,6 +36,15 @@ export const createListItemRoute = (router: IRouter): void => {
             statusCode: 404,
           });
         } else {
+          if (id != null) {
+            const listItem = await lists.getListItem({ id });
+            if (listItem != null) {
+              return siemResponse.error({
+                body: `list item id: "${id}" already exists`,
+                statusCode: 409,
+              });
+            }
+          }
           const createdListItem = await lists.createListItem({
             deserializer: list.deserializer,
             id,

@@ -19,6 +19,7 @@ import {
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
+  Id,
   IdOrUndefined,
   Immutable,
   ItemId,
@@ -90,6 +91,11 @@ export interface DeleteExceptionListOptions {
 export interface DeleteExceptionListItemOptions {
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface DeleteExceptionListItemByIdOptions {
+  id: Id;
   namespaceType: NamespaceType;
 }
 

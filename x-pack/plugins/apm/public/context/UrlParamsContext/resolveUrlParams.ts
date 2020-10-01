@@ -7,7 +7,6 @@
 import { Location } from 'history';
 import { IUrlParams } from './types';
 import {
-  getPathParams,
   removeUndefinedProps,
   getStart,
   getEnd,
@@ -26,14 +25,6 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const {
-    processorEvent,
-    serviceName,
-    serviceNodeName,
-    errorGroupId,
-    traceId: traceIdLink,
-  } = getPathParams(location.pathname);
-
   const query = toQuery(location.search);
 
   const {
@@ -56,6 +47,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeTo,
     environment,
     searchTerm,
+    percentile,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -84,15 +76,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
-
-    // path params
-    processorEvent,
-    serviceName,
-    traceIdLink,
-    errorGroupId,
-    serviceNodeName: serviceNodeName
-      ? decodeURIComponent(serviceNodeName)
-      : serviceNodeName,
+    percentile: toNumber(percentile),
 
     // ui filters
     environment,

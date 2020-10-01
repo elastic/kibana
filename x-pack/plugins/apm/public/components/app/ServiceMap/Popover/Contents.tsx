@@ -31,23 +31,24 @@ interface ContentsProps {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-const FlexColumnGroup = (props: {
+function FlexColumnGroup(props: {
   children: React.ReactNode;
   style: React.CSSProperties;
   direction: 'column';
   gutterSize: 's';
-}) => {
+}) {
   if (isIE11) {
     const { direction, gutterSize, ...rest } = props;
     return <div {...rest} />;
   }
   return <EuiFlexGroup {...props} />;
-};
-const FlexColumnItem = (props: { children: React.ReactNode }) =>
-  isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
+function FlexColumnItem(props: { children: React.ReactNode }) {
+  return isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
 
 export function Contents({
   selectedNodeData,

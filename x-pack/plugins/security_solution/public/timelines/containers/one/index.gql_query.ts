@@ -107,6 +107,7 @@ export const oneTimelineQuery = gql`
           serializedQuery
         }
       }
+      indexNames
       notes {
         eventId
         note

@@ -1,6 +1,7 @@
 files:
   include:
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
+    - 'src/plugins/index_pattern_management/**/*.s+(a|c)ss'
     - 'src/plugins/timelion/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_vislib/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_vega/**/*.s+(a|c)ss'

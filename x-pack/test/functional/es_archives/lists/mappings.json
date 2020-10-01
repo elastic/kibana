@@ -61,7 +61,7 @@
           "siem-ui-timeline": "94bc38c7a421d15fbfe8ea565370a421",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
-          "ingest-agent-configs": "9326f99c977fd2ef5ab24b6336a0675c",
+          "ingest-agent-policies": "9326f99c977fd2ef5ab24b6336a0675c",
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
           "endpoint:user-artifact-manifest": "67c28185da541c1404e7852d30498cd6",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
@@ -70,7 +70,7 @@
           "maps-telemetry": "5ef305b18111b77789afefbd36b66171",
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
-          "ingest-package-configs": "48e8bd97e488008e21c0b5a2367b83ad",
+          "ingest-package-policies": "48e8bd97e488008e21c0b5a2367b83ad",
           "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "config": "c63748b75f39d0c54de12d12c1ccbc20",
@@ -958,7 +958,7 @@
             "agent_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "data": {
@@ -992,10 +992,10 @@
             "active": {
               "type": "boolean"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
-            "config_revision": {
+            "policy_revision": {
               "type": "integer"
             },
             "current_error_events": {
@@ -1060,7 +1060,7 @@
             "api_key_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1210,7 +1210,7 @@
             }
           }
         },
-        "ingest-agent-configs": {
+        "ingest-agent-policies": {
           "properties": {
             "description": {
               "type": "text"
@@ -1228,7 +1228,7 @@
             "namespace": {
               "type": "keyword"
             },
-            "package_configs": {
+            "package_policies": {
               "type": "keyword"
             },
             "revision": {
@@ -1274,9 +1274,9 @@
             }
           }
         },
-        "ingest-package-configs": {
+        "ingest-package-policies": {
           "properties": {
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1310,9 +1310,9 @@
                     "config": {
                       "type": "flattened"
                     },
-                    "dataset": {
+                    "data_stream": {
                       "properties": {
-                        "name": {
+                        "dataset": {
                           "type": "keyword"
                         },
                         "type": {

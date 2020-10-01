@@ -79,6 +79,7 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1000}
         hideWriteControls={false}
+        initialPageSize={10}
         initialFilter="my dashboard"
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
@@ -101,6 +102,7 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1000}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
@@ -123,6 +125,7 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
@@ -145,6 +148,7 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={true}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
@@ -167,6 +171,7 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />

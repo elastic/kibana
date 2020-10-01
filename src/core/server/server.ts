@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Type } from '@kbn/config-schema';
-
-import {
-  ConfigService,
-  Env,
-  ConfigPath,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-} from './config';
+import apm from 'elastic-apm-node';
+import { config as pathConfig } from '@kbn/utils';
+import { mapToObject } from '@kbn/std';
+import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { AuditTrailService } from './audit_trail';
 import { ElasticsearchService } from './elasticsearch';
@@ -39,7 +33,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { UuidService } from './uuid';
+import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -47,14 +41,13 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
-import { mapToObject } from '../utils';
+import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
-import { InternalCoreSetup, InternalCoreStart } from './internal_types';
+import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -71,7 +64,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
-  private readonly uuid: UuidService;
+  private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -102,7 +95,7 @@ export class Server {
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
-    this.uuid = new UuidService(core);
+    this.environment = new EnvironmentService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
@@ -113,25 +106,33 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
+    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+
+    const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover();
-    const legacyPlugins = await this.legacy.discoverPlugins();
+    const { pluginTree, uiPlugins } = await this.plugins.discover({
+      environment: environmentSetup,
+    });
+    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
     await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyPlugins);
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any NP plugin
+      // 1) Can access context from any KP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
+      pluginDependencies: new Map([
+        ...pluginTree.asOpaqueIds,
+        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
+      ]),
     });
 
     const auditTrailSetup = this.auditTrail.setup();
-    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -146,7 +147,6 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -154,22 +154,26 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
+    const statusSetup = await this.status.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      pluginDependencies: pluginTree.asNames,
+      savedObjects: savedObjectsSetup,
+      environment: environmentSetup,
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
-      legacyPlugins,
+      status: statusSetup,
       uiPlugins,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
-    });
-
-    const statusSetup = this.status.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      savedObjects: savedObjectsSetup,
     });
 
     const loggingSetup = this.logging.setup({
@@ -180,15 +184,16 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
+      environment: environmentSetup,
       http: httpSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
-      uuid: uuidSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -203,20 +208,25 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
+    setupTransaction?.end();
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
+    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+
     const auditTrailStart = this.auditTrail.start();
 
     const elasticsearchStart = await this.elasticsearch.start({
       auditTrail: auditTrailStart,
     });
+    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
@@ -244,10 +254,7 @@ export class Server {
 
     await this.http.start();
 
-    await this.rendering.start({
-      legacy: this.legacy,
-    });
-
+    startTransaction?.end();
     return this.coreStart;
   }
 
@@ -281,6 +288,7 @@ export class Server {
             typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
+            client: coreStart.elasticsearch.client.asScoped(req),
             legacy: {
               client: coreStart.elasticsearch.legacy.client.asScoped(req),
             },
@@ -295,33 +303,29 @@ export class Server {
   }
 
   public async setupCoreConfig() {
-    const schemas: Array<[ConfigPath, Type<unknown>]> = [
-      [pathConfig.path, pathConfig.schema],
-      [cspConfig.path, cspConfig.schema],
-      [elasticsearchConfig.path, elasticsearchConfig.schema],
-      [loggingConfig.path, loggingConfig.schema],
-      [httpConfig.path, httpConfig.schema],
-      [pluginsConfig.path, pluginsConfig.schema],
-      [devConfig.path, devConfig.schema],
-      [kibanaConfig.path, kibanaConfig.schema],
-      [savedObjectsConfig.path, savedObjectsConfig.schema],
-      [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
-      [uiSettingsConfig.path, uiSettingsConfig.schema],
-      [opsConfig.path, opsConfig.schema],
+    const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+      pathConfig,
+      cspConfig,
+      elasticsearchConfig,
+      loggingConfig,
+      httpConfig,
+      pluginsConfig,
+      devConfig,
+      kibanaConfig,
+      savedObjectsConfig,
+      savedObjectsMigrationConfig,
+      uiSettingsConfig,
+      opsConfig,
+      statusConfig,
+      pidConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
-    this.configService.addDeprecationProvider(
-      elasticsearchConfig.path,
-      elasticsearchConfig.deprecations!
-    );
-    this.configService.addDeprecationProvider(
-      uiSettingsConfig.path,
-      uiSettingsConfig.deprecations!
-    );
-
-    for (const [path, schema] of schemas) {
-      await this.configService.setSchema(path, schema);
+    for (const descriptor of configDescriptors) {
+      if (descriptor.deprecations) {
+        this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
+      }
+      await this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

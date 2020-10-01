@@ -45,6 +45,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         },
       },
       validate: {
+        query: schema.object({
+          createNewCopies: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.object({
           file: schema.stream(),
           retries: schema.arrayOf(
@@ -52,6 +55,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
               type: schema.string(),
               id: schema.string(),
               overwrite: schema.boolean({ defaultValue: false }),
+              destinationId: schema.maybe(schema.string()),
               replaceReferences: schema.arrayOf(
                 schema.object({
                   type: schema.string(),
@@ -60,6 +64,8 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
                 }),
                 { defaultValue: [] }
               ),
+              createNewCopy: schema.maybe(schema.boolean()),
+              ignoreMissingReferences: schema.maybe(schema.boolean()),
             })
           ),
         }),
@@ -72,16 +78,13 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((type) => type.name);
-
       const result = await resolveSavedObjectsImportErrors({
-        supportedTypes,
+        typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
+        createNewCopies: req.query.createNewCopies,
       });
 
       return res.ok({ body: result });

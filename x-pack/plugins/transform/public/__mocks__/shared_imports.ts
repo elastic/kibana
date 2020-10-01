@@ -14,18 +14,4 @@ export const useRequest = jest.fn(() => ({
 }));
 
 // just passing through the reimports
-export {
-  getErrorMessage,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  multiColumnSortFactory,
-  useDataGrid,
-  useRenderCellValue,
-  DataGrid,
-  EsSorting,
-  RenderCellValue,
-  SearchResponse7,
-  UseDataGridReturnType,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../../ml/public';
+export { getMlSharedImports } from '../../../ml/public';

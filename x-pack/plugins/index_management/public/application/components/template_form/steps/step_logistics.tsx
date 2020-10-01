@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,13 +17,13 @@ import { i18n } from '@kbn/i18n';
 
 import {
   useForm,
+  useFormData,
   Form,
   getUseField,
   getFormRow,
   Field,
   Forms,
   JsonEditorField,
-  FormDataProvider,
 } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
@@ -118,9 +118,7 @@ interface LogisticsForm {
 }
 
 interface LogisticsFormInternal extends LogisticsForm {
-  __internal__: {
-    addMeta: boolean;
-  };
+  addMeta: boolean;
 }
 
 interface Props {
@@ -133,14 +131,12 @@ interface Props {
 function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
   return {
     ...formData,
-    __internal__: {
-      addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
-    },
+    addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
   };
 }
 
 function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  const { __internal__, ...rest } = formData;
+  const { addMeta, ...rest } = formData;
   return rest;
 }
 
@@ -153,33 +149,34 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       serializer: formSerializer,
       deserializer: formDeserializer,
     });
+    const {
+      submit,
+      isSubmitted,
+      isValid: isFormValid,
+      getErrors: getFormErrors,
+      getFormData,
+    } = form;
+
+    const [{ addMeta }] = useFormData({
+      form,
+      watch: 'addMeta',
+    });
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
      * and we can display the form errors on top of the forms if there are any.
      */
-    const validate = async () => {
-      return (await form.submit()).isValid;
-    };
+    const validate = useCallback(async () => {
+      return (await submit()).isValid;
+    }, [submit]);
 
     useEffect(() => {
       onChange({
-        isValid: form.isValid,
+        isValid: isFormValid,
+        getData: getFormData,
         validate,
-        getData: form.getFormData,
       });
-    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-      const subscription = form.subscribe(({ data, isValid }) => {
-        onChange({
-          isValid,
-          validate,
-          getData: data.format,
-        });
-      });
-      return subscription.unsubscribe;
-    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [onChange, isFormValid, validate, getFormData]);
 
     const { name, indexPatterns, dataStream, order, priority, version } = getFieldsMeta(
       documentationService.getEsDocsBase()
@@ -204,7 +201,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationService.getTemplatesDocumentationLink()}
+              href={documentationService.getTemplatesDocumentationLink(isLegacy)}
               target="_blank"
               iconType="help"
             >
@@ -220,8 +217,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
         <Form
           form={form}
-          isInvalid={form.isSubmitted && !form.isValid}
-          error={form.getErrors()}
+          isInvalid={isSubmitted && !isFormValid}
+          error={getFormErrors()}
           data-test-subj="stepLogistics"
         >
           {/* Name */}
@@ -303,34 +300,28 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                     defaultMessage="Use the _meta field to store any metadata you want."
                   />
                   <EuiSpacer size="m" />
-                  <UseField path="__internal__.addMeta" data-test-subj="metaToggle" />
+                  <UseField path="addMeta" data-test-subj="metaToggle" />
                 </>
               }
             >
-              <FormDataProvider pathsToWatch="__internal__.addMeta">
-                {({ '__internal__.addMeta': addMeta }) => {
-                  return (
-                    addMeta && (
-                      <UseField
-                        path="_meta"
-                        component={JsonEditorField}
-                        componentProps={{
-                          euiCodeEditorProps: {
-                            height: '280px',
-                            'aria-label': i18n.translate(
-                              'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
-                              {
-                                defaultMessage: '_meta field data editor',
-                              }
-                            ),
-                            'data-test-subj': 'metaField',
-                          },
-                        }}
-                      />
-                    )
-                  );
-                }}
-              </FormDataProvider>
+              {addMeta && (
+                <UseField
+                  path="_meta"
+                  component={JsonEditorField}
+                  componentProps={{
+                    euiCodeEditorProps: {
+                      height: '280px',
+                      'aria-label': i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
+                        {
+                          defaultMessage: '_meta field data editor',
+                        }
+                      ),
+                      'data-test-subj': 'metaField',
+                    },
+                  }}
+                />
+              )}
             </FormRow>
           )}
         </Form>

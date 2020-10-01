@@ -6,9 +6,9 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import {
   canDeleteMLJobSelector,
   hasMLJobSelector,
@@ -22,7 +22,12 @@ import { useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
 import { ConfirmAlertDeletion } from './confirm_alert_delete';
-import { deleteAlertAction } from '../../../state/actions/alerts';
+import {
+  deleteAnomalyAlertAction,
+  getAnomalyAlertAction,
+  isAnomalyAlertDeleting,
+} from '../../../state/alerts/alerts';
+import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
 
 interface Props {
   hasMLJob: boolean;
@@ -33,11 +38,14 @@ interface Props {
 export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Props) => {
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
 
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
   const { basePath } = useContext(UptimeSettingsContext);
 
   const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+  const isAlertDeleting = useSelector(isAnomalyAlertDeleting);
 
   const { loading: isMLJobLoading } = useSelector(hasMLJobSelector);
 
@@ -52,19 +60,23 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const [isConfirmAlertDeleteOpen, setIsConfirmAlertDeleteOpen] = useState(false);
 
   const deleteAnomalyAlert = () =>
-    dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
+    dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
+
+  const showLoading = isMLJobCreating || isMLJobLoading || isAlertDeleting;
+
+  const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
-      iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
-      isLoading={isMLJobCreating || isMLJobLoading}
+      isLoading={showLoading}
+      size="s"
+      aria-label={labels.ENABLE_MANAGE_JOB}
     >
-      {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
-    </EuiButtonEmpty>
+      {showLoading ? '' : btnText}
+    </EuiButton>
   );
 
   const panels = [
@@ -80,23 +92,28 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
             monitorId,
             dateRange: { from: dateRangeStart, to: dateRangeEnd },
           }),
-          target: '_blank',
         },
-        {
-          name: anomalyAlert ? labels.DISABLE_ANOMALY_ALERT : labels.ENABLE_ANOMALY_ALERT,
-          'data-test-subj': anomalyAlert
-            ? 'uptimeDisableAnomalyAlertBtn'
-            : 'uptimeEnableAnomalyAlertBtn',
-          icon: <EuiIcon type={anomalyAlert ? 'bellSlash' : 'bell'} size="m" />,
-          onClick: () => {
-            if (anomalyAlert) {
-              setIsConfirmAlertDeleteOpen(true);
-            } else {
-              dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
-              dispatch(setAlertFlyoutVisible(true));
-            }
-          },
-        },
+        ...(anomalyAlert
+          ? [
+              {
+                name: 'Anomaly alert',
+                icon: 'bell',
+                'data-test-subj': 'uptimeManageAnomalyAlertBtn',
+                panel: 1,
+              },
+            ]
+          : [
+              {
+                name: labels.ENABLE_ANOMALY_ALERT,
+                'data-test-subj': 'uptimeEnableAnomalyAlertBtn',
+                icon: 'bell',
+                onClick: () => {
+                  dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
+                  dispatch(setAlertFlyoutVisible(true));
+                  setIsPopOverOpen(false);
+                },
+              },
+            ]),
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
           'data-test-subj': 'uptimeDeleteMLJobBtn',
@@ -104,6 +121,27 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           onClick: () => {
             setIsPopOverOpen(false);
             onJobDelete();
+          },
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: 'Anomaly alert',
+      items: [
+        {
+          name: 'Edit',
+          'data-test-subj': 'uptimeEditAnomalyAlertBtn',
+          onClick: () => {
+            setIsFlyoutOpen(true);
+            setIsPopOverOpen(false);
+          },
+        },
+        {
+          name: 'Disable',
+          'data-test-subj': 'uptimeDisableAnomalyAlertBtn',
+          onClick: () => {
+            setIsConfirmAlertDeleteOpen(true);
           },
         },
       ],
@@ -116,6 +154,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         button={button}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
+        panelPaddingSize="none"
       >
         <EuiContextMenu
           initialPanelId={0}
@@ -134,6 +173,14 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           }}
         />
       )}
+      <UptimeEditAlertFlyoutComponent
+        initialAlert={anomalyAlert!}
+        alertFlyoutVisible={isFlyoutOpen}
+        setAlertFlyoutVisibility={() => {
+          setIsFlyoutOpen(false);
+          dispatch(getAnomalyAlertAction.get({ monitorId }));
+        }}
+      />
     </>
   );
 };

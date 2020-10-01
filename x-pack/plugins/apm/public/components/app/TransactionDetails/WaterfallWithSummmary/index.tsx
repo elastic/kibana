@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
@@ -34,17 +34,18 @@ interface Props {
   waterfall: IWaterfall;
   exceedsMax: boolean;
   isLoading: boolean;
-  traceSamples: IBucket['samples'];
+  traceSamples: DistributionBucket['samples'];
 }
 
-export const WaterfallWithSummmary: React.FC<Props> = ({
+export function WaterfallWithSummmary({
   urlParams,
   location,
   waterfall,
   exceedsMax,
   isLoading,
   traceSamples,
-}) => {
+}: Props) {
+  const history = useHistory();
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
   useEffect(() => {
@@ -64,8 +65,8 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
     });
   };
 
-  const { entryTransaction } = waterfall;
-  if (!entryTransaction) {
+  const { entryWaterfallTransaction } = waterfall;
+  if (!entryWaterfallTransaction) {
     const content = isLoading ? (
       <LoadingStatePrompt />
     ) : (
@@ -83,6 +84,8 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
 
     return <EuiPanel paddingSize="m">{content}</EuiPanel>;
   }
+
+  const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
     <EuiPanel paddingSize="m">
@@ -135,4 +138,4 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       />
     </EuiPanel>
   );
-};
+}

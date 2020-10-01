@@ -5,18 +5,19 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
   Direction,
   FlowTarget,
-  UsersEdges,
-  UsersFields,
-  UsersSortField,
-} from '../../../graphql/types';
-import { State } from '../../../common/store';
+  NetworkUsersEdges,
+  NetworkUsersFields,
+  SortField,
+} from '../../../../common/search_strategy';
 import {
   Criteria,
   ItemsPerRow,
@@ -26,11 +27,10 @@ import {
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
-import { assertUnreachable } from '../../../common/lib/helpers';
-const tableType = networkModel.IpDetailsTableType.users;
+const tableType = networkModel.NetworkDetailsTableType.users;
 
-interface OwnProps {
-  data: UsersEdges[];
+interface UsersTableProps {
+  data: NetworkUsersEdges[];
   flowTarget: FlowTarget;
   fakeTotalCount: number;
   id: string;
@@ -41,8 +41,6 @@ interface OwnProps {
   totalCount: number;
   type: networkModel.NetworkType;
 }
-
-type UsersTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -57,122 +55,110 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-const UsersTableComponent = React.memo<UsersTableProps>(
-  ({
-    activePage,
-    data,
-    fakeTotalCount,
-    flowTarget,
-    id,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    totalCount,
-    type,
-    updateNetworkTable,
-    sort,
-  }) => {
-    const updateLimitPagination = useCallback(
-      (newLimit) =>
-        updateNetworkTable({
+const UsersTableComponent: React.FC<UsersTableProps> = ({
+  data,
+  fakeTotalCount,
+  flowTarget,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}) => {
+  const dispatch = useDispatch();
+  const getUsersSelector = networkSelectors.usersSelector();
+  const { activePage, sort, limit } = useShallowEqualSelector(getUsersSelector);
+  const updateLimitPagination = useCallback(
+    (newLimit) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { limit: newLimit },
-        }),
-      [type, updateNetworkTable]
-    );
+        })
+      ),
+    [dispatch, type]
+  );
 
-    const updateActivePage = useCallback(
-      (newPage) =>
-        updateNetworkTable({
+  const updateActivePage = useCallback(
+    (newPage) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { activePage: newPage },
-        }),
-      [type, updateNetworkTable]
-    );
+        })
+      ),
+    [dispatch, type]
+  );
 
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null) {
-          const splitField = criteria.sort.field.split('.');
-          const newUsersSort: UsersSortField = {
-            field: getSortFromString(splitField[splitField.length - 1]),
-            direction: criteria.sort.direction as Direction,
-          };
-          if (!deepEqual(newUsersSort, sort)) {
-            updateNetworkTable({
+  const onChange = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const splitField = criteria.sort.field.split('.');
+        const newUsersSort: SortField<NetworkUsersFields> = {
+          field: getSortFromString(splitField[splitField.length - 1]),
+          direction: criteria.sort.direction as Direction,
+        };
+        if (!deepEqual(newUsersSort, sort)) {
+          dispatch(
+            networkActions.updateNetworkTable({
               networkType: type,
               tableType,
               updates: { sort: newUsersSort },
-            });
-          }
+            })
+          );
         }
-      },
-      [sort, type, updateNetworkTable]
-    );
+      }
+    },
+    [dispatch, sort, type]
+  );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
-      flowTarget,
-      usersTableId,
-    ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
+    flowTarget,
+    usersTableId,
+  ]);
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={columns}
-        dataTestSubj={`table-${tableType}`}
-        showMorePagesIndicator={showMorePagesIndicator}
-        headerCount={totalCount}
-        headerTitle={i18n.USERS}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        isInspect={isInspect}
-        itemsPerRow={rowItems}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        onChange={onChange}
-        pageOfItems={data}
-        sorting={getSortField(sort)}
-        totalCount={fakeTotalCount}
-        updateActivePage={updateActivePage}
-        updateLimitPagination={updateLimitPagination}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={columns}
+      dataTestSubj={`table-${tableType}`}
+      showMorePagesIndicator={showMorePagesIndicator}
+      headerCount={totalCount}
+      headerTitle={i18n.USERS}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      isInspect={isInspect}
+      itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      onChange={onChange}
+      pageOfItems={data}
+      sorting={getSortField(sort)}
+      totalCount={fakeTotalCount}
+      updateActivePage={updateActivePage}
+      updateLimitPagination={updateLimitPagination}
+    />
+  );
+};
 
 UsersTableComponent.displayName = 'UsersTableComponent';
 
-const makeMapStateToProps = () => {
-  const getUsersSelector = networkSelectors.usersSelector();
-  return (state: State) => ({
-    ...getUsersSelector(state),
-  });
-};
+export const UsersTable = React.memo(UsersTableComponent);
 
-const mapDispatchToProps = {
-  updateNetworkTable: networkActions.updateNetworkTable,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const UsersTable = connector(UsersTableComponent);
-
-const getSortField = (sortField: UsersSortField): SortingBasicTable => {
+const getSortField = (sortField: SortField<NetworkUsersFields>): SortingBasicTable => {
   switch (sortField.field) {
-    case UsersFields.name:
+    case NetworkUsersFields.name:
       return {
         field: `node.user.${sortField.field}`,
         direction: sortField.direction,
       };
-    case UsersFields.count:
+    case NetworkUsersFields.count:
       return {
         field: `node.user.${sortField.field}`,
         direction: sortField.direction,
@@ -181,13 +167,13 @@ const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   return assertUnreachable(sortField.field);
 };
 
-const getSortFromString = (sortField: string): UsersFields => {
+const getSortFromString = (sortField: string): NetworkUsersFields => {
   switch (sortField) {
-    case UsersFields.name.valueOf():
-      return UsersFields.name;
-    case UsersFields.count.valueOf():
-      return UsersFields.count;
+    case NetworkUsersFields.name.valueOf():
+      return NetworkUsersFields.name;
+    case NetworkUsersFields.count.valueOf():
+      return NetworkUsersFields.count;
     default:
-      return UsersFields.name;
+      return NetworkUsersFields.name;
   }
 };

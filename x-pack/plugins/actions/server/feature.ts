@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const ACTIONS_FEATURE = {
   id: 'actions',
@@ -14,12 +15,19 @@ export const ACTIONS_FEATURE = {
   }),
   icon: 'bell',
   navLinkId: 'actions',
+  category: DEFAULT_APP_CATEGORIES.management,
   app: [],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   privileges: {
     all: {
       app: [],
       api: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       savedObject: {
         all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
         read: [],
@@ -30,6 +38,9 @@ export const ACTIONS_FEATURE = {
       app: [],
       api: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
         all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],

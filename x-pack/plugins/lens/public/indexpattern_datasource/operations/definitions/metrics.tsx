@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-type MetricColumn<T> = FormattedIndexPatternColumn & {
-  operationType: T;
-};
+type MetricColumn<T> = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: T;
+  };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -27,6 +28,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     type,
     priority,
     displayName,
+    input: 'field',
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -51,7 +53,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
     buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
       suggestedPriority,
@@ -64,11 +66,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {
         ...oldColumn,
-        label: ofName(field.name),
+        label: ofName(field.displayName),
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId) => ({
+    toEsAggsConfig: (column, columnId, _indexPattern) => ({
       id: columnId,
       enabled: true,
       type: column.operationType,
@@ -78,7 +80,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
-  } as OperationDefinition<T>;
+  } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;

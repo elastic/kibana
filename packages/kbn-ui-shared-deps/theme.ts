@@ -24,7 +24,7 @@ const globals: any = typeof window === 'undefined' ? {} : window;
 export type Theme = typeof LightTheme;
 
 // in the Kibana app we can rely on this global being defined, but in
-// some cases (like jest, or karma tests) the global is undefined
+// some cases (like jest) the global is undefined
 export const tag: string = globals.__kbnThemeTag__ || 'v7light';
 export const version = tag.startsWith('v7') ? 7 : 8;
 export const darkMode = tag.endsWith('dark');

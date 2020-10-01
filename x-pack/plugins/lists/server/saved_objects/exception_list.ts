@@ -83,6 +83,9 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
         created_by: {
           type: 'keyword',
         },
+        id: {
+          type: 'keyword',
+        },
         updated_at: {
           type: 'keyword',
         },

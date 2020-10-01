@@ -12,7 +12,7 @@ import { setPageAction } from '../../context/actions';
 
 import css from './page_preview.module.scss';
 
-type onClickFn = (index: number) => void;
+type OnClickFn = (index: number) => void;
 
 export interface Props {
   /**
@@ -28,7 +28,7 @@ export interface Props {
   /**
    * The handler to invoke if the preview is clicked.
    */
-  onClick: onClickFn;
+  onClick: OnClickFn;
 
   /**
    * An object describing the page.

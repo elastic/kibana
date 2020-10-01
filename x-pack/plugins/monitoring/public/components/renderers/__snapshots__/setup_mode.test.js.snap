@@ -37,6 +37,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
   <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
+      data-test-subj="monitoringSetupModeBottomBar"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
@@ -134,6 +135,7 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
   <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
+      data-test-subj="monitoringSetupModeBottomBar"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem

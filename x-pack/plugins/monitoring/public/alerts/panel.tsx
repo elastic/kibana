@@ -18,22 +18,23 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { CommonAlertStatus } from '../../common/types';
+import { CommonAlertStatus, CommonAlertState } from '../../common/types';
 import { AlertMessage } from '../../server/alerts/types';
 import { Legacy } from '../legacy_shims';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { isInSetupMode, hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';
 
 interface Props {
   alert: CommonAlertStatus;
+  alertState?: CommonAlertState;
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
-    alert: { states, alert },
+    alert: { alert },
+    alertState,
   } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
   const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
@@ -190,20 +191,14 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     </Fragment>
   );
 
-  if (inSetupMode) {
+  if (inSetupMode || !alertState) {
     return <div style={{ padding: '1rem' }}>{configurationUi}</div>;
   }
 
-  const firingStates = states.filter((state) => state.firing);
-  if (!firingStates.length) {
-    return <div style={{ padding: '1rem' }}>{configurationUi}</div>;
-  }
-
-  const firingState = firingStates[0];
   const nextStepsUi =
-    firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
+    alertState.state.ui.message.nextSteps && alertState.state.ui.message.nextSteps.length ? (
       <EuiListGroup>
-        {firingState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
+        {alertState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
           <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
         ))}
       </EuiListGroup>
@@ -213,7 +208,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     <Fragment>
       <div style={{ padding: '1rem' }}>
         <EuiTitle size="xs">
-          <h5>{replaceTokens(firingState.state.ui.message)}</h5>
+          <h5>{replaceTokens(alertState.state.ui.message)}</h5>
         </EuiTitle>
         {nextStepsUi ? <EuiSpacer size="s" /> : null}
         {nextStepsUi}

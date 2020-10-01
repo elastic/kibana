@@ -35,7 +35,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         .expect(200);
 
       // pattern of when the alert should fire
-      const pattern = [false, true, true];
+      const pattern = {
+        instance: [false, true, true],
+      };
 
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
@@ -70,7 +72,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute', 'execute-action', 'new-instance', 'resolved-instance'],
+          actions: [
+            'execute',
+            'execute-action',
+            'new-instance',
+            'active-instance',
+            'resolved-instance',
+          ],
         });
       });
 
@@ -120,23 +128,26 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
             break;
           case 'new-instance':
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-              message: `test.patternFiring:${alertId}: 'abc' created new instance: 'instance'`,
-            });
+            validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
           case 'resolved-instance':
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-              message: `test.patternFiring:${alertId}: 'abc' resolved instance: 'instance'`,
-            });
+            validateInstanceEvent(event, `resolved instance: 'instance'`);
+            break;
+          case 'active-instance':
+            validateInstanceEvent(event, `active instance: 'instance'`);
             break;
           // this will get triggered as we add new event actions
           default:
             throw new Error(`unexpected event action "${event?.event?.action}"`);
         }
+      }
+
+      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+        validateEvent(event, {
+          spaceId: Spaces.space1.id,
+          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+          message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
+        });
       }
     });
 

@@ -74,7 +74,7 @@ export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta:
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
 /** Invoked when a user clicks to load more item */
-export type OnLoadMore = (cursor: string, tieBreaker: string) => void;
+export type OnChangePage = (nextPage: number) => void;
 
 export type OnChangeDroppableAndProvider = (providerId: string) => void;
 

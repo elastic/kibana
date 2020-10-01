@@ -24,11 +24,11 @@ import {
 } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
-interface AlertsUtilityBarProps {
+export interface AlertsUtilityBarProps {
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
   areEventsLoading: boolean;
@@ -223,5 +223,6 @@ export const AlertsUtilityBar = React.memo(
     prevProps.areEventsLoading === nextProps.areEventsLoading &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.totalCount === nextProps.totalCount &&
-    prevProps.showClearSelection === nextProps.showClearSelection
+    prevProps.showClearSelection === nextProps.showClearSelection &&
+    prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts
 );

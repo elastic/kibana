@@ -55,9 +55,10 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
+    fieldCapsOptions?: { allowNoIndices: boolean };
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
+    const { pattern, metaFields, fieldCapsOptions } = options;
+    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields, fieldCapsOptions);
   }
 
   /**

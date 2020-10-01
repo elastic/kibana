@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchPingHistogram, fetchSnapshotCount } from '../state/api';
+import { CoreStart } from 'kibana/public';
 import { UptimeFetchDataResponse, FetchDataParams } from '../../../observability/public';
+import { fetchIndexStatus, fetchPingHistogram, fetchSnapshotCount } from '../state/api';
+import { kibanaService } from '../state/kibana_service';
 
-export async function fetchUptimeOverviewData({
+async function fetchUptimeOverviewData({
   absoluteTime,
   relativeTime,
   bucketSize,
@@ -22,7 +24,7 @@ export async function fetchUptimeOverviewData({
   const pings = await fetchPingHistogram({ dateStart: start, dateEnd: end, bucketSize });
 
   const response: UptimeFetchDataResponse = {
-    appLink: `/app/uptime#/?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,
+    appLink: `/app/uptime?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,
     stats: {
       monitors: {
         type: 'number',
@@ -51,4 +53,13 @@ export async function fetchUptimeOverviewData({
     },
   };
   return response;
+}
+
+export function UptimeDataHelper(coreStart: CoreStart | null) {
+  kibanaService.core = coreStart!;
+
+  return {
+    indexStatus: fetchIndexStatus,
+    overviewData: fetchUptimeOverviewData,
+  };
 }

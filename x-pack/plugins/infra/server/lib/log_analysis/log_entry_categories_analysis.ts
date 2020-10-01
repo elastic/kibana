@@ -15,11 +15,7 @@ import {
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
-import {
-  InsufficientLogAnalysisMlJobConfigurationError,
-  NoLogAnalysisResultsIndexError,
-  UnknownCategoryError,
-} from './errors';
+import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import {
   createLogEntryCategoriesQuery,
   logEntryCategoriesResponseRT,
@@ -27,6 +23,7 @@ import {
 } from './queries/log_entry_categories';
 import {
   createLogEntryCategoryExamplesQuery,
+  LogEntryCategoryExampleHit,
   logEntryCategoryExamplesResponseRT,
 } from './queries/log_entry_category_examples';
 import {
@@ -235,38 +232,33 @@ async function fetchTopLogEntryCategories(
 
   const esSearchSpan = finalizeEsSearchSpan();
 
-  if (topLogEntryCategoriesResponse._shards.total === 0) {
-    throw new NoLogAnalysisResultsIndexError(
-      `Failed to find ml result index for job ${logEntryCategoriesCountJobId}.`
-    );
-  }
+  const topLogEntryCategories =
+    topLogEntryCategoriesResponse.aggregations?.terms_category_id.buckets.map(
+      (topCategoryBucket) => {
+        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
+          Record<string, number>
+        >(
+          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+            ...accumulatedMaximumAnomalyScores,
+            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+          }),
+          {}
+        );
 
-  const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
-    (topCategoryBucket) => {
-      const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
-        Record<string, number>
-      >(
-        (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
-          ...accumulatedMaximumAnomalyScores,
-          [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
-        }),
-        {}
-      );
-
-      return {
-        categoryId: parseCategoryId(topCategoryBucket.key),
-        logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
-        datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
-          .map((datasetBucket) => ({
-            name: datasetBucket.key,
-            maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
-          }))
-          .sort(compareDatasetsByMaximumAnomalyScore)
-          .reverse(),
-        maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
-      };
-    }
-  );
+        return {
+          categoryId: parseCategoryId(topCategoryBucket.key),
+          logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
+          datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
+            .map((datasetBucket) => ({
+              name: datasetBucket.key,
+              maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
+            }))
+            .sort(compareDatasetsByMaximumAnomalyScore)
+            .reverse(),
+          maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
+        };
+      }
+    ) ?? [];
 
   return {
     topLogEntryCategories,
@@ -432,11 +424,11 @@ async function fetchLogEntryCategoryExamples(
   return {
     examples: hits.map((hit) => ({
       id: hit._id,
-      dataset: hit._source.event?.dataset ?? '',
-      message: hit._source.message ?? '',
+      dataset: hit.fields['event.dataset']?.[0] ?? '',
+      message: hit.fields.message?.[0] ?? '',
       timestamp: hit.sort[0],
       tiebreaker: hit.sort[1],
-      context: getContextFromSource(hit._source),
+      context: getContextFromFields(hit.fields),
     })),
     timing: {
       spans: [esSearchSpan],
@@ -446,10 +438,10 @@ async function fetchLogEntryCategoryExamples(
 
 const parseCategoryId = (rawCategoryId: string) => parseInt(rawCategoryId, 10);
 
-const getContextFromSource = (source: any): LogEntryContext => {
-  const containerId = source.container?.id;
-  const hostName = source.host?.name;
-  const logFilePath = source.log?.file?.path;
+const getContextFromFields = (fields: LogEntryCategoryExampleHit['fields']): LogEntryContext => {
+  const containerId = fields['container.id']?.[0];
+  const hostName = fields['host.name']?.[0];
+  const logFilePath = fields['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };

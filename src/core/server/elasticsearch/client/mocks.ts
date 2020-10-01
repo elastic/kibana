@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { ElasticsearchClient } from './types';
@@ -32,6 +31,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     '_events',
     '_eventsCount',
     '_maxListeners',
+    'constructor',
     'name',
     'serializer',
     'connectionPool',
@@ -39,45 +39,67 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     'helpers',
   ];
 
+  const getAllPropertyDescriptors = (obj: Record<string, any>) => {
+    const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));
+    let prototype = Object.getPrototypeOf(obj);
+    while (prototype != null && prototype !== Object.prototype) {
+      descriptors.push(...Object.entries(Object.getOwnPropertyDescriptors(prototype)));
+      prototype = Object.getPrototypeOf(prototype);
+    }
+    return descriptors;
+  };
+
   const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
-    Object.keys(obj)
-      .filter((key) => !omitted.includes(key))
-      .forEach((key) => {
-        const propType = typeof obj[key];
-        if (propType === 'function') {
-          obj[key] = jest.fn();
-        } else if (propType === 'object' && obj[key] != null) {
-          mockify(obj[key]);
+    // the @elastic/elasticsearch::Client uses prototypical inheritance
+    // so we have to crawl up the prototype chain and get all descriptors
+    // to find everything that we should be mocking
+    const descriptors = getAllPropertyDescriptors(obj);
+    descriptors
+      .filter(([key]) => !omitted.includes(key))
+      .forEach(([key, descriptor]) => {
+        if (typeof descriptor.value === 'function') {
+          obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
+        } else if (typeof obj[key] === 'object' && obj[key] != null) {
+          mockify(obj[key], omitted);
         }
       });
   };
 
   mockify(client, omittedProps);
 
-  // client got some read-only (getter) properties
-  // so we need to extend it to override the getter-only props.
-  const mock: any = { ...client };
+  client.close = jest.fn().mockReturnValue(Promise.resolve());
+  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
 
-  mock.transport = {
+  const mockGetter = (obj: Record<string, any>, propertyName: string) => {
+    Object.defineProperty(obj, propertyName, {
+      configurable: true,
+      enumerable: false,
+      get: () => jest.fn(),
+      set: undefined,
+    });
+  };
+
+  // `on`, `off`, and `once` are properties without a setter.
+  // We can't `client.on = jest.fn()` because the following error will be thrown:
+  // TypeError: Cannot set property on of #<Client> which has only a getter
+  mockGetter(client, 'on');
+  mockGetter(client, 'off');
+  mockGetter(client, 'once');
+  client.transport = {
     request: jest.fn(),
   };
-  mock.close = jest.fn().mockReturnValue(Promise.resolve());
-  mock.child = jest.fn().mockImplementation(() => createInternalClientMock());
-  mock.on = jest.fn();
-  mock.off = jest.fn();
-  mock.once = jest.fn();
 
-  return (mock as unknown) as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<Client>;
 };
 
-export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
+export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (): ElasticSearchClientMock =>
-  (createInternalClientMock() as unknown) as ElasticSearchClientMock;
+const createClientMock = (): ElasticsearchClientMock =>
+  (createInternalClientMock() as unknown) as ElasticsearchClientMock;
 
-interface ScopedClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
-  asCurrentUser: ElasticSearchClientMock;
+export interface ScopedClusterClientMock {
+  asInternalUser: ElasticsearchClientMock;
+  asCurrentUser: ElasticsearchClientMock;
 }
 
 const createScopedClusterClientMock = () => {
@@ -90,7 +112,7 @@ const createScopedClusterClientMock = () => {
 };
 
 export interface ClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
+  asInternalUser: ElasticsearchClientMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
@@ -124,32 +146,41 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
-const createMockedClientResponse = <T>(body: T): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response: ApiResponse<T> = {
-    body,
-    statusCode: 200,
-    warnings: [],
-    headers: {},
-    meta: {} as any,
-  };
+const createSuccessTransportRequestPromise = <T>(
+  body: T,
+  { statusCode = 200 }: { statusCode?: number } = {}
+): MockedTransportRequestPromise<ApiResponse<T>> => {
+  const response = createApiResponse({ body, statusCode });
   const promise = Promise.resolve(response);
   (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
 
   return promise as MockedTransportRequestPromise<ApiResponse<T>>;
 };
 
-const createMockedClientError = (err: any): MockedTransportRequestPromise<never> => {
+const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
   const promise = Promise.reject(err);
   (promise as MockedTransportRequestPromise<never>).abort = jest.fn();
   return promise as MockedTransportRequestPromise<never>;
 };
 
+function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+  return {
+    body: {},
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+    ...opts,
+  };
+}
+
 export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
-  createElasticSearchClient: createClientMock,
+  createElasticsearchClient: createClientMock,
   createInternalClient: createInternalClientMock,
-  createClientResponse: createMockedClientResponse,
-  createClientError: createMockedClientError,
+  createSuccessTransportRequestPromise,
+  createErrorTransportRequestPromise,
+  createApiResponse,
 };

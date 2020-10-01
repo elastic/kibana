@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,
@@ -31,7 +31,7 @@ import { ManagementSetup } from '../../management/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -62,7 +62,7 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management, kibanaLegacy }: IndexPatternManagementSetupDependencies
+    { management, urlForwarding }: IndexPatternManagementSetupDependencies
   ) {
     const kibanaSection = management.sections.section.kibana;
 
@@ -73,8 +73,8 @@ export class IndexPatternManagementPlugin
     const newAppPath = `management/kibana/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/kibana/index_patterns';
 
-    kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
-    kibanaLegacy.forwardApp(legacyPatternsPath, newAppPath, (path) => {
+    urlForwarding.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
+    urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
     });
@@ -86,7 +86,9 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, () =>
+          this.indexPatternManagementService.environmentService.getEnvironment().ml()
+        );
       },
     });
 

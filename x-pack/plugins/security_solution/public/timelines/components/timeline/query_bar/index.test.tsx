@@ -7,11 +7,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
@@ -19,27 +19,11 @@ import { buildGlobalQuery } from '../helpers';
 
 import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  // We are doing that because we need to wrapped this component with redux
-  // and redux does not like to be updated and since we need to update our
-  // child component (BODY) and we do not want to scare anyone with this error
-  // we are hiding it!!!
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
   const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
   const mockSetKqlFilterQueryDraft = jest.fn();

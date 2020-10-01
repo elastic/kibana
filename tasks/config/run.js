@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
 import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const { version } = require('../../package.json');
@@ -25,44 +24,7 @@ const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
   `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function (grunt) {
-  function createKbnServerTask({ runBuild, flags = [] }) {
-    return {
-      options: {
-        wait: false,
-        ready: /http server running/,
-        quiet: false,
-        failOnError: false,
-      },
-      cmd: runBuild ? `./build/${runBuild}/bin/kibana` : process.execPath,
-      args: [
-        ...(runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss']),
-
-        '--logging.json=false',
-
-        ...flags,
-
-        // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function (flags, flag) {
-          if (flag.startsWith('--kbnServer.')) {
-            flags.push(`--${flag.slice(12)}`);
-          }
-
-          return flags;
-        }, []),
-      ],
-    };
-  }
-
-  const karmaTestServerFlags = [
-    '--env.name=development',
-    '--plugins.initialize=false',
-    '--optimize.bundleFilter=tests',
-    '--optimize.validateSyntaxOfNodeModules=false',
-    '--server.port=5610',
-    '--migrations.skip=true',
-  ];
-
+module.exports = function () {
   const NODE = 'node';
   const YARN = 'yarn';
   const scriptWithGithubChecks = ({ title, options, cmd, args }) =>
@@ -177,37 +139,6 @@ module.exports = function (grunt) {
       ],
     }),
 
-    // used by the test:karma task
-    //    runs the kibana server to serve the browser test bundle
-    karmaTestServer: createKbnServerTask({
-      flags: [...karmaTestServerFlags],
-    }),
-    browserSCSS: createKbnServerTask({
-      flags: [...karmaTestServerFlags, '--optimize', '--optimize.enabled=false'],
-    }),
-
-    // used by the test:coverage task
-    //    runs the kibana server to serve the instrumented version of the browser test bundle
-    karmaTestCoverageServer: createKbnServerTask({
-      flags: [...karmaTestServerFlags, '--tests_bundle.instrument=true'],
-    }),
-
-    // used by the test:karma:debug task
-    //    runs the kibana server to serve the browser test bundle, but listens for changes
-    //    to the public/browser code and rebuilds the test bundle on changes
-    karmaTestDebugServer: createKbnServerTask({
-      flags: [
-        ...karmaTestServerFlags,
-        '--dev',
-        '--no-dev-config',
-        '--no-watch',
-        '--no-base-path',
-        '--optimize.watchPort=5611',
-        '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../data/optimize/testdev'),
-      ],
-    }),
-
     verifyNotice: scriptWithGithubChecks({
       title: 'Verify NOTICE.txt',
       options: {
@@ -221,12 +152,6 @@ module.exports = function (grunt) {
       title: 'Node.js hardening tests',
       cmd: NODE,
       args: ['scripts/test_hardening.js'],
-    }),
-
-    test_package_safer_lodash_set: scriptWithGithubChecks({
-      title: '@elastic/safer-lodash-set tests',
-      cmd: YARN,
-      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({
@@ -279,7 +204,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config',
-        'test/plugin_functional/config.js',
+        'test/plugin_functional/config.ts',
         '--bail',
         '--debug',
       ],
@@ -325,7 +250,6 @@ module.exports = function (grunt) {
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-    test_karma_ci: gruntTaskWithGithubChecks('Browser tests', 'test:karma-ci'),
 
     ...getFunctionalTestGroupRunConfigs({
       kibanaInstallDir: KIBANA_INSTALL_DIR,

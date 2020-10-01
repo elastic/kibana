@@ -6,6 +6,7 @@
 
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
+import { mockLogger } from '../test_utils';
 
 interface TaskInstance extends Entity {
   attempts: number;
@@ -66,8 +67,6 @@ describe('Bulk Operation Buffer', () => {
       const task2 = createTask();
       const task3 = createTask();
       const task4 = createTask();
-      const task5 = createTask();
-      const task6 = createTask();
 
       return new Promise((resolve) => {
         Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
@@ -78,22 +77,18 @@ describe('Bulk Operation Buffer', () => {
 
         setTimeout(() => {
           // on next tick
-          setTimeout(() => {
-            // on next tick
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            Promise.all([bufferedUpdate(task5), bufferedUpdate(task6)]).then((_) => {
-              expect(bulkUpdate).toHaveBeenCalledTimes(3);
-              expect(bulkUpdate).toHaveBeenCalledWith([task5, task6]);
-              resolve();
-            });
-          }, bufferMaxDuration + 1);
-
           expect(bulkUpdate).toHaveBeenCalledTimes(1);
           Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]).then((_) => {
             expect(bulkUpdate).toHaveBeenCalledTimes(2);
             expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
           });
-        }, bufferMaxDuration + 1);
+
+          setTimeout(() => {
+            // on next tick
+            expect(bulkUpdate).toHaveBeenCalledTimes(2);
+            resolve();
+          }, bufferMaxDuration * 1.1);
+        }, bufferMaxDuration * 1.1);
       });
     });
 
@@ -102,8 +97,9 @@ describe('Bulk Operation Buffer', () => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
+      const bufferMaxDuration = 1000;
       const bufferedUpdate = createBuffer(bulkUpdate, {
-        bufferMaxDuration: 100,
+        bufferMaxDuration,
         bufferMaxOperations: 2,
       });
 
@@ -113,26 +109,19 @@ describe('Bulk Operation Buffer', () => {
       const task4 = createTask();
       const task5 = createTask();
 
-      return new Promise((resolve) => {
-        bufferedUpdate(task1);
-        bufferedUpdate(task2);
-        bufferedUpdate(task3);
-        bufferedUpdate(task4);
-
-        setTimeout(() => {
-          expect(bulkUpdate).toHaveBeenCalledTimes(2);
-          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-          expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
-
-          setTimeout(() => {
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            bufferedUpdate(task5).then((_) => {
-              expect(bulkUpdate).toHaveBeenCalledTimes(3);
-              expect(bulkUpdate).toHaveBeenCalledWith([task5]);
-              resolve();
-            });
-          }, 50);
-        }, 50);
+      return Promise.all([
+        bufferedUpdate(task1),
+        bufferedUpdate(task2),
+        bufferedUpdate(task3),
+        bufferedUpdate(task4),
+      ]).then(() => {
+        expect(bulkUpdate).toHaveBeenCalledTimes(2);
+        expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+        expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
+        return bufferedUpdate(task5).then((_) => {
+          expect(bulkUpdate).toHaveBeenCalledTimes(3);
+          expect(bulkUpdate).toHaveBeenCalledWith([task5]);
+        });
       });
     });
 
@@ -152,29 +141,26 @@ describe('Bulk Operation Buffer', () => {
       const task3 = createTask();
       const task4 = createTask();
 
-      return new Promise((resolve) => {
-        bufferedUpdate(task1);
-        bufferedUpdate(task2);
+      return Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then(() => {
+        expect(bulkUpdate).toHaveBeenCalledTimes(1);
+        expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
 
-        setTimeout(() => {
-          expect(bulkUpdate).toHaveBeenCalledTimes(1);
-          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-
-          bufferedUpdate(task3);
-          bufferedUpdate(task4);
+        return new Promise((resolve) => {
+          const futureUpdates = Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
 
           setTimeout(() => {
             expect(bulkUpdate).toHaveBeenCalledTimes(1);
 
-            setTimeout(() => {
+            futureUpdates.then(() => {
               expect(bulkUpdate).toHaveBeenCalledTimes(2);
               expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
               resolve();
-            }, bufferMaxDuration / 2);
+            });
           }, bufferMaxDuration / 2);
-        }, bufferMaxDuration + 1);
+        });
       });
     });
+
     test('handles both resolutions and rejections at individual task level', async (done) => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
         ([task1, task2, task3]) => {
@@ -239,6 +225,39 @@ describe('Bulk Operation Buffer', () => {
           `),
       ]).then(() => {
         expect(bulkUpdate).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    test('logs unknown bulk operation results', async (done) => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+        ([task1, task2, task3]) => {
+          return Promise.resolve([
+            incrementAttempts(task1),
+            errorAttempts(createTask()),
+            incrementAttempts(createTask()),
+          ]);
+        }
+      );
+
+      const logger = mockLogger();
+
+      const bufferedUpdate = createBuffer(bulkUpdate, { logger });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+
+      return Promise.all([
+        expect(bufferedUpdate(task1)).resolves.toMatchObject(incrementAttempts(task1)),
+        expect(bufferedUpdate(task2)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task2.id}`))
+        ),
+        expect(bufferedUpdate(task3)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task3.id}`))
+        ),
+      ]).then(() => {
+        expect(logger.warn).toHaveBeenCalledTimes(2);
         done();
       });
     });

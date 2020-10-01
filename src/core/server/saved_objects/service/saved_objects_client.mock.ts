@@ -25,6 +25,7 @@ const create = () =>
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
+    checkConflicts: jest.fn(),
     bulkUpdate: jest.fn(),
     delete: jest.fn(),
     bulkGet: jest.fn(),

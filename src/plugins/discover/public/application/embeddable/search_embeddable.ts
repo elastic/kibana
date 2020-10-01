@@ -78,7 +78,8 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
@@ -220,7 +221,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       if (!searchScope.columns) {
         return;
       }
-      indexPattern.popularizeField(columnName, 1);
       const columns = columnActions.addColumn(searchScope.columns, columnName);
       this.updateInput({ columns });
     };

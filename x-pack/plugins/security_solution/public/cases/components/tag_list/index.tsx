@@ -10,7 +10,6 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -23,6 +22,8 @@ import { Form, FormDataProvider, useForm } from '../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 import { useGetTags } from '../../containers/use_get_tags';
+
+import { Tags } from './tags';
 
 interface TagListProps {
   disabled?: boolean;
@@ -98,15 +99,7 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {tags.length > 0 &&
-            !isEditTags &&
-            tags.map((tag, key) => (
-              <EuiFlexItem grow={false} key={`${tag}${key}`}>
-                <EuiBadge data-test-subj="case-tag" color="hollow">
-                  {tag}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
+          {!isEditTags && <Tags tags={tags} color="hollow" />}
           {isEditTags && (
             <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>

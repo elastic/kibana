@@ -6,11 +6,12 @@
 
 import _ from 'lodash';
 import {
+  SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import { IFieldType, IndexPatternAttributes } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,
@@ -23,7 +24,6 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
-  SourceDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
@@ -65,7 +65,9 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
+function getIndexPatternsWithGeoFieldCount(
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
+) {
   const fieldLists = indexPatterns.map((indexPattern) =>
     indexPattern.attributes && indexPattern.attributes.fields
       ? JSON.parse(indexPattern.attributes.fields)
@@ -113,7 +115,7 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
 }
 
 function isFieldGeoShape(
-  indexPatterns: IIndexPattern[],
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
   indexPatternId: string,
   geoField: string | undefined
 ): boolean {
@@ -121,9 +123,11 @@ function isFieldGeoShape(
     return false;
   }
 
-  const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
-    return indexPattern.id === indexPatternId;
-  });
+  const matchIndexPattern = indexPatterns.find(
+    (indexPattern: SavedObject<IndexPatternAttributes>) => {
+      return indexPattern.id === indexPatternId;
+    }
+  );
 
   if (!matchIndexPattern) {
     return false;
@@ -141,7 +145,10 @@ function isFieldGeoShape(
   return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
 }
 
-function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
+function isGeoShapeAggLayer(
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
+  layer: LayerDescriptor
+): boolean {
   if (layer.sourceDescriptor === null) {
     return false;
   }
@@ -154,7 +161,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
     return false;
   }
 
-  const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
+  const sourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
     return isFieldGeoShape(
       indexPatterns,
@@ -177,7 +184,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
 
 function getGeoShapeAggCount(
   layerLists: LayerDescriptor[][],
-  indexPatterns: IIndexPattern[]
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
 ): number {
   const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
     const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
@@ -205,7 +212,7 @@ export function buildMapsTelemetry({
   settings,
 }: {
   mapSavedObjects: MapSavedObject[];
-  indexPatternSavedObjects: IIndexPattern[];
+  indexPatternSavedObjects: Array<SavedObject<IndexPatternAttributes>>;
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
   const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
@@ -284,10 +291,12 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
   // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: IIndexPattern[] = (await getIndexPatternSavedObjects(
+  const indexPatternSavedObjects: Array<SavedObject<
+    IndexPatternAttributes
+  >> = (await getIndexPatternSavedObjects(
     // @ts-ignore
     savedObjectsClient
-  )) as IIndexPattern[];
+  )) as Array<SavedObject<IndexPatternAttributes>>;
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };

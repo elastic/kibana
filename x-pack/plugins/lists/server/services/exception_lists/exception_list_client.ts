@@ -20,6 +20,7 @@ import {
   CreateExceptionListItemOptions,
   CreateExceptionListOptions,
   DeleteEndpointListItemOptions,
+  DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
   FindEndpointListItemOptions,
@@ -40,11 +41,12 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
-import { deleteExceptionListItem } from './delete_exception_list_item';
+import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
+import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -83,6 +85,18 @@ export class ExceptionListClient {
   public createEndpointList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointList({
+      savedObjectsClient,
+      user,
+      version: 1,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return createEndpointTrustedAppsList({
       savedObjectsClient,
       user,
       version: 1,
@@ -321,6 +335,18 @@ export class ExceptionListClient {
     return deleteExceptionListItem({
       id,
       itemId,
+      namespaceType,
+      savedObjectsClient,
+    });
+  };
+
+  public deleteExceptionListItemById = async ({
+    id,
+    namespaceType,
+  }: DeleteExceptionListItemByIdOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return deleteExceptionListItemById({
+      id,
       namespaceType,
       savedObjectsClient,
     });

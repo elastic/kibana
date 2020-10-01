@@ -7,6 +7,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { CasesConfigureRequest, CasesConfigureResponse } from '../../../../plugins/case/common/api';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const getConfiguration = (connector_id: string = 'connector-1'): CasesConfigureRequest => {
   return {
     connector_id,
@@ -32,7 +33,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -51,6 +52,7 @@ export const getServiceNowConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 
@@ -64,7 +66,7 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -83,12 +85,47 @@ export const getJiraConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
+  },
+});
+
+export const getResilientConnector = () => ({
+  name: 'Resilient Connector',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
+    incidentConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'summary',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+    isCaseOwned: true,
   },
 });
 
 export const removeServerGeneratedPropertiesFromConfigure = (
   config: Partial<CasesConfigureResponse>
 ): Partial<CasesConfigureResponse> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...rest } = config;
   return rest;
 };

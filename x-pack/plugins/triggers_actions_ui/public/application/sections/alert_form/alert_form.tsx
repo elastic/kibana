@@ -244,18 +244,11 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
+        <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
             alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
             errors={errors}
             setAlertParams={setAlertParams}
             setAlertProperty={setAlertProperty}
@@ -269,8 +262,8 @@ export const AlertForm = ({
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
-              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).map(
-                  (av) => av.name
+              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>
+                  a.name.toUpperCase().localeCompare(b.name.toUpperCase())
                 )
               : undefined
           }
@@ -509,12 +502,22 @@ export const AlertForm = ({
             {alertTypeNodes}
           </EuiFlexGroup>
         </Fragment>
-      ) : (
+      ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
+      ) : (
+        <CenterJustifiedSpinner />
       )}
     </EuiForm>
   );
 };
+
+const CenterJustifiedSpinner = () => (
+  <EuiFlexGroup justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="m" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
   <EuiEmptyPrompt

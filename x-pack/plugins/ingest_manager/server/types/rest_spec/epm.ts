@@ -32,10 +32,25 @@ export const GetInfoRequestSchema = {
   }),
 };
 
-export const InstallPackageRequestSchema = {
+export const InstallPackageFromRegistryRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
+};
+
+export const BulkUpgradePackagesFromRegistryRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+  }),
+};
+
+export const InstallPackageByUploadRequestSchema = {
+  body: schema.buffer(),
 };
 
 export const DeletePackageRequestSchema = {

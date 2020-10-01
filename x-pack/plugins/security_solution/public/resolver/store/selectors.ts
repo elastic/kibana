@@ -9,8 +9,8 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -54,13 +54,26 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
+ * Whether or not a given entity id is in the set of termination events.
+ */
+export const isProcessTerminated = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isProcessTerminated
+);
+
+/**
+ * Retrieve an event from memory using the event's ID.
+ */
+export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
  */
 export const processEventForID: (
   state: ResolverState
-) => (nodeID: string) => ResolverEvent | null = composeSelectors(
+) => (nodeID: string) => SafeResolverEvent | null = composeSelectors(
   dataStateSelector,
   dataSelectors.processEventForID
 );
@@ -76,14 +89,14 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseDocumentIDToFetch = composeSelectors(
+export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToFetch
+  dataSelectors.treeParametersToFetch
 );
 
-export const databaseDocumentIDToAbort = composeSelectors(
+export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToAbort
+  dataSelectors.treeRequestParametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(
@@ -107,7 +120,43 @@ export const relatedEventsStats: (
 );
 
 /**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventTotalCount: (
+  state: ResolverState
+) => (nodeID: string) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalCount
+);
+
+export const relatedEventCountByCategory: (
+  state: ResolverState
+) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountByCategory
+);
+
+/**
+ * the loading state of the current related event data for the `event_detail` view
+ */
+export const isCurrentRelatedEventLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isCurrentRelatedEventLoading
+);
+
+/**
+ * the current related event data for the `event_detail` view
+ */
+export const currentRelatedEventData = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventData
+);
+
+/**
  * Map of related events... by entity id
+ * @deprecated
  */
 export const relatedEventsByEntityId = composeSelectors(
   dataStateSelector,
@@ -117,28 +166,11 @@ export const relatedEventsByEntityId = composeSelectors(
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
 export const relatedEventsByCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsByCategory
-);
-
-/**
- * Entity ids to booleans for waiting status
- */
-export const relatedEventsReady = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsReady
-);
-
-/**
- * Business logic lookup functions by ECS category by entity id.
- * Example usage:
- * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
- */
-export const relatedEventInfoByEntityId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
@@ -178,12 +210,15 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+export const hadErrorLoadingTree = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingTree
+);
 
 /**
  * True if the children cursor is not null
@@ -209,6 +244,7 @@ const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.node
 
 /**
  * Total count of related events for a process.
+ * @deprecated
  */
 export const relatedEventTotalForProcess = composeSelectors(
   dataStateSelector,
@@ -263,9 +299,14 @@ export const ariaFlowtoNodeID: (
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       // get a `Set` containing their node IDs
-      const nodesVisibleAtTime: Set<string> = new Set(
-        [...processNodePositions.keys()].map(uniquePidForProcess)
-      );
+      const nodesVisibleAtTime: Set<string> = new Set();
+      // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
+      for (const visibleEvent of processNodePositions.keys()) {
+        const nodeID = entityIDSafeVersion(visibleEvent);
+        if (nodeID !== undefined) {
+          nodesVisibleAtTime.add(nodeID);
+        }
+      }
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {
@@ -277,6 +318,50 @@ export const ariaFlowtoNodeID: (
       };
     });
   }
+);
+
+export const panelViewAndParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.panelViewAndParameters
+);
+
+export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
+
+/**
+ * @deprecated use `useLinkProps`
+ */
+export const relatedEventsRelativeHrefs = composeSelectors(
+  uiStateSelector,
+  uiSelectors.relatedEventsRelativeHrefs
+);
+
+/**
+ * Total count of events related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.totalRelatedEventCountForNode
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ */
+export const relatedEventCountOfTypeForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountOfTypeForNode
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
+ */
+export const nodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategory
 );
 
 /**

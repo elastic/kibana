@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { WithAppDependencies } from './setup_environment';
-import { ComponentTemplateDetailsFlyout } from '../../../component_template_details';
+import { ComponentTemplateDetailsFlyoutContent } from '../../../component_template_details';
 
 export type ComponentTemplateDetailsTestBed = TestBed<ComponentTemplateDetailsTestSubjects> & {
   actions: ReturnType<typeof createActions>;
@@ -44,7 +44,7 @@ const createActions = (testBed: TestBed<ComponentTemplateDetailsTestSubjects>) =
 
 export const setup = (props: any): ComponentTemplateDetailsTestBed => {
   const setupTestBed = registerTestBed<ComponentTemplateDetailsTestSubjects>(
-    WithAppDependencies(ComponentTemplateDetailsFlyout),
+    WithAppDependencies(ComponentTemplateDetailsFlyoutContent),
     {
       memoryRouter: {
         wrapComponent: false,
@@ -65,6 +65,8 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'componentTemplateDetails'
   | 'componentTemplateDetails.title'
   | 'componentTemplateDetails.footer'
+  | 'title'
+  | 'footer'
   | 'summaryTab'
   | 'mappingsTab'
   | 'settingsTab'

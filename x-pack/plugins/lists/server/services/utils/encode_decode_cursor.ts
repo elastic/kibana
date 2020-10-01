@@ -9,7 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { CursorOrUndefined, SortFieldOrUndefined } from '../../../common/schemas';
-import { exactCheck } from '../../../common/siem_common_deps';
+import { exactCheck } from '../../../common/shared_imports';
 
 /**
  * Used only internally for this ad-hoc opaque cursor structure to keep track of the

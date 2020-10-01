@@ -10,24 +10,26 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  getFormattedEntries,
-  formatEntry,
   getOperatingSystems,
   getTagsInclude,
-  getDescriptionListContent,
   getFormattedComments,
   filterExceptionItems,
   getNewExceptionItem,
   formatOperatingSystems,
   getEntryValue,
   formatExceptionItemForUpdate,
-  enrichExceptionItemsWithComments,
+  enrichNewExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
   entryHasListType,
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
+  lowercaseHashValues,
+  getPrepopulatedItem,
+  getCodeSignatureValue,
+  defaultEndpointExceptionItems,
 } from './helpers';
-import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
+import { EmptyEntry } from './types';
 import {
   isOperator,
   isNotOperator,
@@ -38,15 +40,14 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../lists_plugin_deps';
+import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../shared_imports';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
-import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
-import { getEntriesArrayMock } from '../../../../../lists/common/schemas/types/entries.mock';
-import { ENTRIES } from '../../../../../lists/common/constants.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -155,112 +156,6 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#getFormattedEntries', () => {
-    test('it returns empty array if no entries passed', () => {
-      const result = getFormattedEntries([]);
-
-      expect(result).toEqual([]);
-    });
-
-    test('it formats nested entries as expected', () => {
-      const payload = [getEntryMatchMock()];
-      const result = getFormattedEntries(payload);
-      const expected: FormattedEntry[] = [
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is',
-          value: 'some host name',
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-
-    test('it formats "exists" entries as expected', () => {
-      const payload = [getEntryExistsMock()];
-      const result = getFormattedEntries(payload);
-      const expected: FormattedEntry[] = [
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'exists',
-          value: undefined,
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-
-    test('it formats non-nested entries as expected', () => {
-      const payload = [getEntryMatchAnyMock(), getEntryMatchMock()];
-      const result = getFormattedEntries(payload);
-      const expected: FormattedEntry[] = [
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is one of',
-          value: ['some host name'],
-        },
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is',
-          value: 'some host name',
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-
-    test('it formats a mix of nested and non-nested entries as expected', () => {
-      const payload = getEntriesArrayMock();
-      const result = getFormattedEntries(payload);
-      const expected: FormattedEntry[] = [
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is',
-          value: 'some host name',
-        },
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is one of',
-          value: ['some host name'],
-        },
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'is in list',
-          value: 'some-list-id',
-        },
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: 'exists',
-          value: undefined,
-        },
-        {
-          fieldName: 'host.name',
-          isNested: false,
-          operator: undefined,
-          value: undefined,
-        },
-        {
-          fieldName: 'host.name.host.name',
-          isNested: true,
-          operator: 'is',
-          value: 'some host name',
-        },
-        {
-          fieldName: 'host.name.host.name',
-          isNested: true,
-          operator: 'is one of',
-          value: ['some host name'],
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-  });
-
   describe('#getEntryValue', () => {
     it('returns "match" entry value', () => {
       const payload = getEntryMatchMock();
@@ -288,34 +183,6 @@ describe('Exception helpers', () => {
       const result = getEntryValue(payload);
       const expected = 'some-list-id';
       expect(result).toEqual(expected);
-    });
-  });
-
-  describe('#formatEntry', () => {
-    test('it formats an entry', () => {
-      const payload = getEntryMatchMock();
-      const formattedEntry = formatEntry({ isNested: false, item: payload });
-      const expected: FormattedEntry = {
-        fieldName: 'host.name',
-        isNested: false,
-        operator: 'is',
-        value: 'some host name',
-      };
-
-      expect(formattedEntry).toEqual(expected);
-    });
-
-    test('it formats as expected when "isNested" is "true"', () => {
-      const payload = getEntryMatchMock();
-      const formattedEntry = formatEntry({ isNested: true, parent: 'parent', item: payload });
-      const expected: FormattedEntry = {
-        fieldName: 'parent.host.name',
-        isNested: true,
-        operator: 'is',
-        value: 'some host name',
-      };
-
-      expect(formattedEntry).toEqual(expected);
     });
   });
 
@@ -386,72 +253,6 @@ describe('Exception helpers', () => {
       const result = getTagsInclude({ tags: ['some', 'tags', 'here'], regex: /(some)/ });
 
       expect(result).toEqual([true, 'some']);
-    });
-  });
-
-  describe('#getDescriptionListContent', () => {
-    test('it returns formatted description list with os if one is specified', () => {
-      const payload = getExceptionListItemSchemaMock();
-      payload.description = '';
-      const result = getDescriptionListContent(payload);
-      const expected: DescriptionListItem[] = [
-        {
-          description: 'Linux',
-          title: 'OS',
-        },
-        {
-          description: 'April 20th 2020 @ 15:25:31',
-          title: 'Date created',
-        },
-        {
-          description: 'some user',
-          title: 'Created by',
-        },
-      ];
-
-      expect(result).toEqual(expected);
-    });
-
-    test('it returns formatted description list with a description if one specified', () => {
-      const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
-      payload.description = 'Im a description';
-      const result = getDescriptionListContent(payload);
-      const expected: DescriptionListItem[] = [
-        {
-          description: 'April 20th 2020 @ 15:25:31',
-          title: 'Date created',
-        },
-        {
-          description: 'some user',
-          title: 'Created by',
-        },
-        {
-          description: 'Im a description',
-          title: 'Comment',
-        },
-      ];
-
-      expect(result).toEqual(expected);
-    });
-
-    test('it returns just user and date created if no other fields specified', () => {
-      const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
-      payload.description = '';
-      const result = getDescriptionListContent(payload);
-      const expected: DescriptionListItem[] = [
-        {
-          description: 'April 20th 2020 @ 15:25:31',
-          title: 'Date created',
-        },
-        {
-          description: 'some user',
-          title: 'Created by',
-        },
-      ];
-
-      expect(result).toEqual(expected);
     });
   });
 
@@ -567,7 +368,7 @@ describe('Exception helpers', () => {
       const mockEmptyException: EntryNested = {
         field: '',
         type: OperatorTypeEnum.NESTED,
-        entries: [{ ...getEntryMatchMock() }],
+        entries: [getEntryMatchMock()],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -614,12 +415,52 @@ describe('Exception helpers', () => {
       expect(result).toEqual(expected);
     });
   });
+  describe('#enrichExistingExceptionItemWithComments', () => {
+    test('it should return exception item with comments stripped of "created_by", "created_at", "updated_by", "updated_at" fields', () => {
+      const payload = getExceptionListItemSchemaMock();
+      const comments = [
+        {
+          comment: 'Im an existing comment',
+          created_at: OLD_DATE_RELATIVE_TO_DATE_NOW,
+          created_by: 'lily',
+          id: '1',
+        },
+        {
+          comment: 'Im another existing comment',
+          created_at: OLD_DATE_RELATIVE_TO_DATE_NOW,
+          created_by: 'lily',
+          id: '2',
+        },
+        {
+          comment: 'Im a new comment',
+        },
+      ];
+      const result = enrichExistingExceptionItemWithComments(payload, comments);
+      const expected = {
+        ...getExceptionListItemSchemaMock(),
+        comments: [
+          {
+            comment: 'Im an existing comment',
+            id: '1',
+          },
+          {
+            comment: 'Im another existing comment',
+            id: '2',
+          },
+          {
+            comment: 'Im a new comment',
+          },
+        ],
+      };
+      expect(result).toEqual(expected);
+    });
+  });
 
-  describe('#enrichExceptionItemsWithComments', () => {
+  describe('#enrichNewExceptionItemsWithComments', () => {
     test('it should add comments to an exception item', () => {
       const payload = [getExceptionListItemSchemaMock()];
       const comments = getCommentsArrayMock();
-      const result = enrichExceptionItemsWithComments(payload, comments);
+      const result = enrichNewExceptionItemsWithComments(payload, comments);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
@@ -632,7 +473,7 @@ describe('Exception helpers', () => {
     test('it should add comments to multiple exception items', () => {
       const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
       const comments = getCommentsArrayMock();
-      const result = enrichExceptionItemsWithComments(payload, comments);
+      const result = enrichNewExceptionItemsWithComments(payload, comments);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
@@ -824,6 +665,253 @@ describe('Exception helpers', () => {
       ];
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#lowercaseHashValues', () => {
+    test('it should return an empty array with an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([]);
+    });
+
+    test('it should return all list items with entry hashes lowercased', () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'DDDFFF' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'DDDFFF'] },
+          ] as EntriesArray,
+        },
+      ];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'dddfff' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'dddfff'] },
+          ] as EntriesArray,
+        },
+      ]);
+    });
+  });
+
+  describe('getPrepopulatedItem', () => {
+    test('it returns prepopulated items', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: { subjectName: '', trusted: '' },
+        filePath: '',
+        sha256Hash: '',
+        eventCode: '',
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: '' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+      ]);
+    });
+
+    test('it returns prepopulated items with values', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
+        filePath: 'some-file-path',
+        sha256Hash: 'some-hash',
+        eventCode: 'some-event-code',
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'someSubjectName',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: 'some-file-path' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+      ]);
+    });
+  });
+
+  describe('getCodeSignatureValue', () => {
+    test('it works when file.Ext.code_signature is an object', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: {
+              subject_name: ['some_subject'],
+              trusted: ['false'],
+            },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+    });
+
+    test('it works when file.Ext.code_signature is nested type', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        { subjectName: 'some_subject', trusted: 'false' },
+        {
+          subjectName: 'some_subject_2',
+          trusted: 'true',
+        },
+      ]);
+    });
+
+    test('it returns default when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: { subject_name: [], trusted: [] },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getCodeSignatureValue({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+  });
+
+  describe('defaultEndpointExceptionItems', () => {
+    test('it should return pre-populated items', () => {
+      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', {
+        _id: '123',
+        file: {
+          Ext: {
+            code_signature: [
+              { subject_name: ['some_subject'], trusted: ['false'] },
+              { subject_name: ['some_subject_2'], trusted: ['true'] },
+            ],
+          },
+          path: ['some file path'],
+          hash: {
+            sha256: ['some hash'],
+          },
+        },
+        event: {
+          code: ['some event code'],
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
+      expect(defaultItems[1].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
     });
   });
 });

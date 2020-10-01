@@ -29,7 +29,8 @@ export const help: FunctionHelp<FunctionFactory<typeof date>> = {
       },
     }),
     format: i18n.translate('xpack.canvas.functions.date.args.formatHelpText', {
-      defaultMessage: 'The {MOMENTJS} format used to parse the specified date string. See {url}.',
+      defaultMessage:
+        'The {MOMENTJS} format used to parse the specified date string. For more information, see {url}.',
       values: {
         MOMENTJS,
         url: 'https://momentjs.com/docs/#/displaying/',

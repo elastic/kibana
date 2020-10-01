@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { Client } from '@elastic/elasticsearch';
+import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
@@ -35,24 +37,24 @@ export const configureClient = (
 };
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
-  client.on('response', (err, event) => {
-    if (err) {
-      logger.error(`${err.name}: ${err.message}`);
+  client.on('response', (error, event) => {
+    if (error) {
+      const errorMessage =
+        // error details for response errors provided by elasticsearch, defaults to error name/message
+        `[${event.body?.error?.type ?? error.name}]: ${event.body?.error?.reason ?? error.message}`;
+
+      logger.error(errorMessage);
     }
     if (event && logQueries) {
       const params = event.meta.request.params;
 
       // definition is wrong, `params.querystring` can be either a string or an object
       const querystring = convertQueryString(params.querystring);
-
-      logger.debug(
-        `${event.statusCode}\n${params.method} ${params.path}${
-          querystring ? `\n${querystring}` : ''
-        }`,
-        {
-          tags: ['query'],
-        }
-      );
+      const url = `${params.path}${querystring ? `?${querystring}` : ''}`;
+      const body = params.body ? `\n${ensureString(params.body)}` : '';
+      logger.debug(`${event.statusCode}\n${params.method} ${url}${body}`, {
+        tags: ['query'],
+      });
     }
   });
 };
@@ -63,3 +65,10 @@ const convertQueryString = (qs: string | Record<string, any> | undefined): strin
   }
   return stringify(qs);
 };
+
+function ensureString(body: RequestBody): string {
+  if (typeof body === 'string') return body;
+  if (Buffer.isBuffer(body)) return '[buffer]';
+  if ('readable' in body && body.readable && typeof body._read === 'function') return '[stream]';
+  return JSON.stringify(body);
+}

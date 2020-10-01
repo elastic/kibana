@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS S3 Bucket Configuration Deletion",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:(DeleteBucketPolicy or DeleteBucketReplication or DeleteBucketCors or DeleteBucketEncryption or DeleteBucketLifecycle) and event.dataset:aws.cloudtrail and event.provider:s3.amazonaws.com and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html",
@@ -27,7 +28,10 @@
   "severity": "low",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Asset Visibility",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

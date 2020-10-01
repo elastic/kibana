@@ -46,13 +46,7 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  | 'browserFields'
-  | 'isEventViewer'
-  | 'height'
-  | 'onFieldSelected'
-  | 'onUpdateColumns'
-  | 'timelineId'
-  | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -106,7 +100,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   browserFields,
   columnHeaders,
   filteredBrowserFields,
-  isEventViewer,
   isSearching,
   onCategorySelected,
   onFieldSelected,
@@ -193,7 +186,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
         <Header
           data-test-subj="header"
           filteredBrowserFields={filteredBrowserFields}
-          isEventViewer={isEventViewer}
           isSearching={isSearching}
           onOutsideClick={onOutsideClick}
           onSearchInputChange={onInputChange}

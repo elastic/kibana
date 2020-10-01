@@ -8,7 +8,7 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
+import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold/log_threshold_alert_type';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import {
@@ -25,7 +25,9 @@ export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
-    registerFeatures(pluginsSetup.home);
+    if (pluginsSetup.home) {
+      registerFeatures(pluginsSetup.home);
+    }
 
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
@@ -50,7 +52,7 @@ export class Plugin implements InfraClientPluginClass {
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
         defaultMessage: 'Logs',
       }),
-      euiIconType: 'logsApp',
+      euiIconType: 'logoObservability',
       order: 8100,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -68,7 +70,7 @@ export class Plugin implements InfraClientPluginClass {
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
         defaultMessage: 'Metrics',
       }),
-      euiIconType: 'metricsApp',
+      euiIconType: 'logoObservability',
       order: 8200,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,

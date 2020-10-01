@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/shallow_usecontext.mock';
-
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
@@ -15,12 +13,11 @@ import { ContentSection } from './';
 const props = {
   children: <div className="children" />,
   testSubj: 'contentSection',
-  className: 'test',
 };
 
 describe('ContentSection', () => {
   it('renders', () => {
-    const wrapper = shallow(<ContentSection {...props} />);
+    const wrapper = shallow(<ContentSection {...props} className="test" />);
 
     expect(wrapper.prop('data-test-subj')).toEqual('contentSection');
     expect(wrapper.prop('className')).toEqual('test');

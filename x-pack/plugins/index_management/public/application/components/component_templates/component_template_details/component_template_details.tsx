@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -28,14 +27,19 @@ import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
 import { attemptToDecodeURI } from '../lib';
 
-interface Props {
+export interface Props {
   componentTemplateName: string;
   onClose: () => void;
   actions?: ManageAction[];
   showSummaryCallToAction?: boolean;
 }
 
-export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
+export const defaultFlyoutProps = {
+  'data-test-subj': 'componentTemplateDetails',
+  'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
+};
+
+export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Props> = ({
   componentTemplateName,
   onClose,
   actions,
@@ -109,13 +113,7 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      data-test-subj="componentTemplateDetails"
-      aria-labelledby="componentTemplateDetailsFlyoutTitle"
-      size="m"
-      maxWidth={500}
-    >
+    <>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -172,6 +170,6 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}
-    </EuiFlyout>
+    </>
   );
 };
