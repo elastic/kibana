@@ -65,7 +65,7 @@ describe('xy_visualization', () => {
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('H. bar');
+      expect(desc.label).toEqual('H. Bar');
     });
 
     it('should show the chart description if not mixed', () => {
