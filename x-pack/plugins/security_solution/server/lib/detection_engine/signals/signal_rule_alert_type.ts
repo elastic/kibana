@@ -56,6 +56,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
@@ -63,11 +64,13 @@ import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
   logger,
+  eventsTelemetry,
   version,
   ml,
   lists,
 }: {
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
@@ -369,6 +372,7 @@ export const signalRulesAlertType = ({
             previousStartedAt,
             listClient,
             logger,
+            eventsTelemetry,
             alertId,
             outputIndex,
             params,
@@ -409,6 +413,7 @@ export const signalRulesAlertType = ({
             ruleParams: params,
             services,
             logger,
+            eventsTelemetry,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
@@ -455,7 +460,7 @@ export const signalRulesAlertType = ({
             );
           } else if (response.hits.events !== undefined) {
             newSignals = response.hits.events.map((event) =>
-              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
+              wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
             );
           } else {
             throw new Error(
