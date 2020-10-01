@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FormEvent, useRef, useState } from 'react';
+import React, { FormEvent, SetStateAction, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -33,6 +33,8 @@ interface Props {
   onChange: (updatedOptions: UrlOption[]) => void;
   searchValue: string;
   onClose: () => void;
+  popoverIsOpen: boolean;
+  setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
 }
 
 export function SelectableUrlList({
@@ -43,8 +45,9 @@ export function SelectableUrlList({
   onChange,
   searchValue,
   onClose,
+  popoverIsOpen,
+  setPopoverIsOpen,
 }: Props) {
-  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
