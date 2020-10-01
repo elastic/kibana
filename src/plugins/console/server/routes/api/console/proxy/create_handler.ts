@@ -74,17 +74,18 @@ function getRequestConfig(
 ): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
+  const newNewHeaders = setHeaders(newHeaders, { 'X-Kibana': 'false' });
 
   if (proxyConfigCollection.hasConfig()) {
     return {
       ...proxyConfigCollection.configForUri(uri),
-      headers: newHeaders,
+      headers: newNewHeaders,
     } as any;
   }
 
   return {
     ...getElasticsearchProxyConfig(esConfig),
-    headers: newHeaders,
+    headers: newNewHeaders,
   };
 }
 
