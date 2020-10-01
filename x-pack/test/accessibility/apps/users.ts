@@ -72,8 +72,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // logging bugs
-
     it('a11y test for display of delete button on users page ', async () => {
       await testSubjects.setValue('userFormUserNameInput', 'deleteA11y');
       await testSubjects.setValue('passwordInput', 'password');
