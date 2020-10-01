@@ -19,8 +19,12 @@ import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { createStore, createInitialState } from './common/store';
+import { SubPluginClasses } from './types';
 
-const subpluginClasses: SubPluginClasses = {
+/**
+ * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
+ */
+const subPluginClasses: SubPluginClasses = {
   Detections,
   Cases,
   Hosts,
@@ -29,4 +33,4 @@ const subpluginClasses: SubPluginClasses = {
   Timelines,
   Management,
 };
-export { renderApp, composeLibs, createStore, createInitialState, subpluginClasses };
+export { renderApp, composeLibs, createStore, createInitialState, subPluginClasses };

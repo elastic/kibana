@@ -6,9 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 import { Store, Action } from 'redux';
-
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { Detections } from './detections';
+import { Cases } from './cases';
+import { Hosts } from './hosts';
+import { Network } from './network';
+import { Overview } from './overview';
+import { Timelines } from './timelines';
+import { Management } from './management';
+
+import {
+  LazyApplicationDependencies,
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins,
+  StartServices,
+  AppObservableLibs,
+} from './types';
 import {
   AppMountParameters,
   CoreSetup,
@@ -21,14 +37,6 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import {
-  PluginSetup,
-  PluginStart,
-  SetupPlugins,
-  StartPlugins,
-  StartServices,
-  AppObservableLibs,
-} from './types';
 
 import {
   APP_ID,
@@ -47,7 +55,7 @@ import {
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
 import { State } from './common/store';
-import { RenderAppProps, SecurityPageName } from './app/types';
+import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -62,7 +70,6 @@ import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
-import { AppFrontendLibs } from './common/lib/lib';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -72,6 +79,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
+  /**
+   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
+   */
   private get lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
@@ -108,6 +118,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
+    const startServices: Promise<StartServices> = (async () => {
+      const storage = new Storage(localStorage);
+      const [coreStart, startPlugins] = await core.getStartServices();
+
+      const services: StartServices = {
+        ...coreStart,
+        ...startPlugins,
+        storage,
+        security: plugins.security,
+      };
+      return services;
+    })();
+
     /**
      * Lazily get the dependencies needed to mount any of the applications defined in this plugin.
      * This is done lazily so that we can dynamically import code only when the applications are being mounted.
@@ -119,19 +142,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         await this.buildStore(coreStart, startPlugins, storage);
       }
 
-      const services: StartServices = {
-        ...coreStart,
-        ...startPlugins,
-        storage,
-        security: plugins.security,
-      };
       return {
         coreStart,
         startPlugins,
-        services,
         store: this.store,
         storage,
-        ...(await this.downloadAssets()),
+        ...(await this.lazyApplicationDependencies),
       };
     };
 
@@ -157,14 +173,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, renderApp, composeLibs },
-          { overviewSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, renderApp, composeLibs },
+          { overview: overviewSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
 
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: overviewSubPlugin.start().SubPluginRoutes,
         });
@@ -180,13 +196,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage, renderApp, composeLibs },
-          { detectionsSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, storage, renderApp, composeLibs },
+          { detections: detectionsSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: detectionsSubPlugin.start(storage).SubPluginRoutes,
         });
@@ -202,13 +218,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage, renderApp, composeLibs },
-          { hostsSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, storage, renderApp, composeLibs },
+          { hosts: hostsSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: hostsSubPlugin.start(storage).SubPluginRoutes,
         });
@@ -224,13 +240,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, storage, renderApp, composeLibs },
-          { networkSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, storage, renderApp, composeLibs },
+          { network: networkSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: networkSubPlugin.start(storage).SubPluginRoutes,
         });
@@ -246,13 +262,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, renderApp, composeLibs },
-          { timelinesSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, renderApp, composeLibs },
+          { timelines: timelinesSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: timelinesSubPlugin.start().SubPluginRoutes,
         });
@@ -268,13 +284,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services, renderApp, composeLibs },
-          { casesSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, store, renderApp, composeLibs },
+          { cases: casesSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: casesSubPlugin.start().SubPluginRoutes,
         });
@@ -290,13 +306,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, startPlugins, store, services, renderApp, composeLibs },
-          { managementSubPlugin },
-        ] = await Promise.all([applicationMountDependencies(), this.downloadSubPlugins()]);
+          { coreStart, startPlugins, store, renderApp, composeLibs },
+          { management: managementSubPlugin },
+        ] = await Promise.all([applicationMountDependencies(), this.subPlugins()]);
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
-          services,
+          services: await startServices,
           store,
           SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
         });
@@ -345,38 +361,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {};
   }
 
-  private async downloadAssets(): Promise<{
-    composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
-    renderApp: (props: RenderAppProps) => () => void;
-  }> {
-    const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
+  /**
+   * Lazily instantiated subPlugins. see `subPlugins`.
+   */
+  private _subPlugins?: SubPlugins;
 
-    return {
-      renderApp,
-      composeLibs,
-    };
-  }
-
-  private async downloadSubPlugins() {
-    const {
-      detectionsSubPlugin,
-      casesSubPlugin,
-      hostsSubPlugin,
-      networkSubPlugin,
-      overviewSubPlugin,
-      timelinesSubPlugin,
-      managementSubPlugin,
-    } = await this.lazyApplicationDependencies;
-
-    return {
-      detectionsSubPlugin,
-      casesSubPlugin,
-      hostsSubPlugin,
-      networkSubPlugin,
-      overviewSubPlugin,
-      timelinesSubPlugin,
-      managementSubPlugin,
-    };
+  /**
+   * Lazily instantiated subPlugins.
+   */
+  private async subPlugins(): Promise<SubPlugins> {
+    if (!this._subPlugins) {
+      const { subPluginClasses } = await this.lazyApplicationDependencies;
+      this._subPlugins = {
+        detections: new subPluginClasses.Detections(),
+        cases: new subPluginClasses.Cases(),
+        hosts: new subPluginClasses.Hosts(),
+        network: new subPluginClasses.Network(),
+        overview: new subPluginClasses.Overview(),
+        timelines: new subPluginClasses.Timelines(),
+        management: new subPluginClasses.Management(),
+      };
+    }
+    return this._subPlugins;
   }
 
   private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins, storage: Storage) {
@@ -385,18 +391,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       { composeLibs },
       kibanaIndexPatterns,
       {
-        detectionsSubPlugin,
-        hostsSubPlugin,
-        networkSubPlugin,
-        timelinesSubPlugin,
-        managementSubPlugin,
+        detections: detectionsSubPlugin,
+        hosts: hostsSubPlugin,
+        network: networkSubPlugin,
+        timelines: timelinesSubPlugin,
+        management: managementSubPlugin,
       },
       configIndexPatterns,
       { createStore, createInitialState },
     ] = await Promise.all([
-      this.downloadAssets(),
+      this.lazyApplicationDependencies,
       startPlugins.data.indexPatterns.getIdsWithTitle(),
-      this.downloadSubPlugins(),
+      this.subPlugins(),
       startPlugins.data.search
         .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
           { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
@@ -461,3 +467,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
   defaultMessage: 'Security',
 });
+
+interface SubPlugins {
+  detections: Detections;
+  cases: Cases;
+  hosts: Hosts;
+  network: Network;
+  overview: Overview;
+  timelines: Timelines;
+  management: Management;
+}
