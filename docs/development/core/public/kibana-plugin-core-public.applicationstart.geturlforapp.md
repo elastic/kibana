@@ -6,9 +6,9 @@
 
 Returns the absolute path (or URL) to a given app, including the global base path.
 
-By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`<!-- -->). Use the `absolute` option to generate a full url instead (e.g `http://host:port/basePath/app/my-app`<!-- -->)
+By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`<!-- -->). Use the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`<!-- -->)
 
-Note that when generating full urls, the origin (protocol, host and port) are determined from the browser's current location.
+Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.
 
 <b>Signature:</b>
 

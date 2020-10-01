@@ -710,15 +710,15 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
-   * Navigate to given url in a SPA friendly way when possible (when the url will redirect to a valid application
+   * Navigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application
    * within the current basePath).
    *
-   * The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided url can be:
-   * - an absolute url
+   * The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:
+   * - an absolute URL
    * - an absolute path
-   * - a path relative to the current url (window.location.href)
+   * - a path relative to the current URL (window.location.href)
    *
-   * If all these criteria are true for the given url:
+   * If all these criteria are true for the given URL:
    * - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
    * - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
@@ -743,7 +743,7 @@ export interface ApplicationStart {
    * application.navigateToUrl('../../other-space/discover') // resolve to `/base-path/s/other-space/discover` which is not within the current basePath.
    * ```
    *
-   * @param url - an absolute url, or a relative path, to navigate to.
+   * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
    */
   navigateToUrl(url: string): Promise<void>;
 
@@ -751,9 +751,9 @@ export interface ApplicationStart {
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *
    * By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).
-   * Use the `absolute` option to generate a full url instead (e.g `http://host:port/basePath/app/my-app`)
+   * Use the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)
    *
-   * Note that when generating full urls, the origin (protocol, host and port) are determined from the browser's current location.
+   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to

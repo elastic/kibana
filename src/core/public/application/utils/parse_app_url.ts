@@ -23,13 +23,13 @@ import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
 
 /**
- * Parse given url and return the associated app id and path if any app matches, or undefined if none do.
+ * Parse given URL and return the associated app id and path if any app matches, or undefined if none do.
  * Input can either be:
  *
- * - a absolute path containing the basePath,
+ * - an absolute path containing the basePath,
  *   e.g `/base-path/app/my-app/some-path`
  *
- * - an absolute url matching the `origin` of the kibana instance (as seen by the browser),
+ * - an absolute URL matching the `origin` of the Kibana instance (as seen by the browser),
  *   e.g `https://kibana:8080/base-path/app/my-app/some-path`
  *
  * - a path relative to the provided `currentUrl`.

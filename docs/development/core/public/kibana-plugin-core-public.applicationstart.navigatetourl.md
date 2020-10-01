@@ -4,11 +4,11 @@
 
 ## ApplicationStart.navigateToUrl() method
 
-Navigate to given url in a SPA friendly way when possible (when the url will redirect to a valid application within the current basePath).
+Navigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application within the current basePath).
 
-The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided url can be: - an absolute url - an absolute path - a path relative to the current url (window.location.href)
+The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be: - an absolute URL - an absolute path - a path relative to the current URL (window.location.href)
 
-If all these criteria are true for the given url: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
+If all these criteria are true for the given URL: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
 Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
 
@@ -22,7 +22,7 @@ navigateToUrl(url: string): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  url | <code>string</code> | an absolute url, or a relative path, to navigate to. |
+|  url | <code>string</code> | an absolute URL, an absolute path or a relative path, to navigate to. |
 
 <b>Returns:</b>
 
