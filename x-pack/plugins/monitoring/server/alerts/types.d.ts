@@ -11,13 +11,14 @@ export interface AlertEnableAction {
   config: { [key: string]: any };
 }
 
-export interface AlertInstanceState extends BaseAlertInstanceState {
-  alertStates: AlertState[];
+export interface AlertInstanceState {
+  alertStates: Array<AlertState | AlertCpuUsageState | AlertDiskUsageState>;
+  [x: string]: unknown;
 }
 
 export interface AlertState {
   cluster: AlertCluster;
-  ccs: string | null;
+  ccs?: string;
   ui: AlertUiState;
 }
 
@@ -25,6 +26,12 @@ export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
   nodeId: string;
   nodeName: string;
+}
+
+export interface AlertDiskUsageState extends AlertState {
+  diskUsage: number;
+  nodeId: string;
+  nodeName?: string;
 }
 
 export interface AlertUiState {
@@ -75,13 +82,21 @@ export interface AlertCpuUsageNodeStats {
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
-  ccs: string | null;
+  ccs?: string;
+}
+
+export interface AlertDiskUsageNodeStats {
+  clusterUuid: string;
+  nodeId: string;
+  nodeName: string;
+  diskUsage: number;
+  ccs?: string;
 }
 
 export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
-  ccs: string | null;
+  ccs?: string;
   shouldFire: boolean;
   severity: AlertSeverity;
   meta: any;

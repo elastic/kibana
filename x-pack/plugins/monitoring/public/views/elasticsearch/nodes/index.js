@@ -19,6 +19,7 @@ import {
   ELASTICSEARCH_SYSTEM_ID,
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_DISK_USAGE,
 } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
@@ -86,7 +87,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [ALERT_CPU_USAGE, ALERT_DISK_USAGE],
           },
         },
       });
