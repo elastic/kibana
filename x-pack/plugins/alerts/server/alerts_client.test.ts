@@ -396,7 +396,7 @@ describe('create()', () => {
         "executionStatus": Object {
           "date": "2019-02-12T21:01:22.479Z",
           "error": null,
-          "status": "unknown",
+          "status": "waiting",
         },
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
@@ -1036,7 +1036,7 @@ describe('create()', () => {
         tags: ['foo'],
         executionStatus: {
           date: '2019-02-12T21:01:22.479Z',
-          status: 'unknown',
+          status: 'waiting',
           error: null,
         },
       },
@@ -1157,7 +1157,7 @@ describe('create()', () => {
         tags: ['foo'],
         executionStatus: {
           date: '2019-02-12T21:01:22.479Z',
-          status: 'unknown',
+          status: 'waiting',
           error: null,
         },
       },

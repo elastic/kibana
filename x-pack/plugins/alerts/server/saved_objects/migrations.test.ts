@@ -217,7 +217,7 @@ describe('7.10.0', () => {
         ...alert.attributes,
         executionStatus: {
           date: migratedAlert.attributes.executionStatus.date,
-          status: 'unknown',
+          status: 'waiting',
           error: null,
         },
       },

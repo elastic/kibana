@@ -17,7 +17,7 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'unknown'] as const;
+export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'waiting', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
 export const AlertExecutionStatusErrorReasonValues = [

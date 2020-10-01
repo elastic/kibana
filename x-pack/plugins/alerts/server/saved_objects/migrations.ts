@@ -123,7 +123,7 @@ function initializeExecutionStatus(
     attributes: {
       ...attributes,
       executionStatus: {
-        status: 'unknown',
+        status: 'waiting',
         date: new Date().toISOString(),
         error: null,
       },

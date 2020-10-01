@@ -24,7 +24,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     after(async () => await objectRemover.removeAll());
 
-    it('should be "unknown" for newly created alert', async () => {
+    it('should be "waiting" for newly created alert', async () => {
       const dateStart = Date.now();
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
@@ -36,7 +36,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       expect(response.body.executionStatus).to.be.ok();
       const { status, date, error } = response.body.executionStatus;
-      expect(status).to.be('unknown');
+      expect(status).to.be('waiting');
       ensureDatetimesAreOrdered([dateStart, date, dateEnd]);
       expect(error).not.to.be.ok();
 
