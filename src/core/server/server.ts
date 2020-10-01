@@ -208,9 +208,7 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
-    if (setupTransaction) {
-      setupTransaction.end();
-    }
+    setupTransaction?.end();
     return coreSetup;
   }
 
@@ -223,11 +221,12 @@ export class Server {
     const elasticsearchStart = await this.elasticsearch.start({
       auditTrail: auditTrailStart,
     });
-
+    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
@@ -255,9 +254,7 @@ export class Server {
 
     await this.http.start();
 
-    if (startTransaction) {
-      startTransaction.end();
-    }
+    startTransaction?.end();
     return this.coreStart;
   }
 
