@@ -25,4 +25,5 @@ export {
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   isValidNamespace,
+  LicenseService,
 } from '../../../../common';

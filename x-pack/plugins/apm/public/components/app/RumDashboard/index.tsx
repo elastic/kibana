@@ -12,22 +12,23 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
-import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { RUM_AGENTS } from '../../../../common/agent_name';
+import { RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { URLFilter } from './URLFilter';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { ServiceNameFilter } from './URLFilter/ServiceNameFilter';
 
 export function RumOverview() {
-  useTrackPageview({ app: 'apm', path: 'rum_overview' });
-  useTrackPageview({ app: 'apm', path: 'rum_overview', delay: 15000 });
+  useTrackPageview({ app: 'ux', path: 'home' });
+  useTrackPageview({ app: 'ux', path: 'home', delay: 15000 });
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
+      filterNames: ['location', 'device', 'os', 'browser'],
       projection: Projection.rumOverview,
     };
 
@@ -47,7 +48,7 @@ export function RumOverview() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENTS }),
+              uiFilters: JSON.stringify({ agentName: RUM_AGENT_NAMES }),
             },
           },
         });
@@ -63,6 +64,7 @@ export function RumOverview() {
         <EuiFlexItem grow={1}>
           <EnvironmentFilter />
           <EuiSpacer />
+
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
             <>
               <ServiceNameFilter
@@ -70,6 +72,7 @@ export function RumOverview() {
                 serviceNames={data ?? []}
               />
               <EuiSpacer size="xl" />
+              <URLFilter />
               <EuiHorizontalRule margin="none" />{' '}
             </>
           </LocalUIFilters>

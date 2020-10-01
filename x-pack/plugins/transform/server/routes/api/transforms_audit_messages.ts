@@ -6,13 +6,12 @@
 
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
 import { AuditMessage, TransformMessage } from '../../../common/types/messages';
-import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
-import { wrapError } from './error_utils';
+import { wrapError, wrapEsError } from './error_utils';
 
 const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;
@@ -81,7 +80,6 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
         const resp = await ctx.transform!.dataClient.callAsCurrentUser('search', {
           index: ML_DF_NOTIFICATION_INDEX_PATTERN,
           ignore_unavailable: true,
-          rest_total_hits_as_int: true,
           size: SIZE,
           body: {
             sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
@@ -90,7 +88,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
         });
 
         let messages: TransformMessage[] = [];
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
           messages.reverse();
         }
