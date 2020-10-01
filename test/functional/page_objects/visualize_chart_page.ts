@@ -40,6 +40,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return await elasticChart.getChartDebugData(elasticChartSelector);
     }
 
+    /**
+     * Is newChartUi advanced setting enabled
+     */
     public async isNewChartUiEnabled(): Promise<boolean> {
       const enabled =
         Boolean(await kibanaServer.uiSettings.get('visualization.visualize:newChartUi')) ?? false;
@@ -48,6 +51,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return enabled;
     }
 
+    /**
+     * Is newChartUi enabled and an area, line or histogram chart is available
+     */
     private async isVisTypeXYChart() {
       const enabled = await this.isNewChartUiEnabled();
 
@@ -322,6 +328,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async doesSelectedLegendColorExist(color: string) {
+      if (await this.isVisTypeXYChart()) {
+        const items = (await this.getDebugState())?.legend?.items ?? [];
+        return items.some(({ color: c }) => c === color);
+      }
+
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
 
@@ -387,13 +398,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    public async openLegendOptionColors(name: string) {
+    public async openLegendOptionColors(name: string, chartSelector = elasticChartSelector) {
       await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
         if (await this.isVisTypeXYChart()) {
-          const chart = await testSubjects.find(elasticChartSelector);
+          const chart = await find.byCssSelector(chartSelector);
           const legendItemColor = await chart.findByCssSelector(
-            '.echLegend .echLegendItem__color ~ .echLegendItem__label[title="false"]'
+            `[data-ech-series-name="${name}"] .echLegendItem__color`
           );
           legendItemColor.click();
         } else {

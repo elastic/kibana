@@ -39,13 +39,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
   const retry = getService('retry');
+  const elasticChart = getService('elasticChart');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard state', function describeIndexTests() {
+    // Used to track flag before and after reset
+    let isNewChartUiEnabled = false;
+
     before(async function () {
+      isNewChartUiEnabled = await PageObjects.visChart.isNewChartUiEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+
+      if (isNewChartUiEnabled) {
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': true,
+        });
+        await browser.refresh();
+      }
     });
 
     after(async function () {
@@ -58,18 +71,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setHistoricalDataRange();
 
-      await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
+      const visName = await PageObjects.visChart.getExpectedValue(
+        AREA_CHART_VIS_NAME,
+        `${AREA_CHART_VIS_NAME} - newChartUi`
+      );
+      await dashboardAddPanel.addVisualization(visName);
+      const dashboarName = await PageObjects.visChart.getExpectedValue(
+        'Overridden colors',
+        'Overridden colors - newChartUi'
+      );
+      await PageObjects.dashboard.saveDashboard(dashboarName);
 
       await PageObjects.dashboard.switchToEditMode();
+      await queryBar.clickQuerySubmitButton();
 
-      await PageObjects.visChart.openLegendOptionColors('Count');
+      await PageObjects.visChart.openLegendOptionColors('Count', `[data-title="${visName}"]`);
       await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
 
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
+      await PageObjects.dashboard.saveDashboard(dashboarName);
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
+      await PageObjects.dashboard.loadSavedDashboard(dashboarName);
+
+      if (await PageObjects.visChart.isNewChartUiEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+        await queryBar.submitQuery();
+      }
+
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
         '#EA6460'
       );
@@ -231,7 +259,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-          await PageObjects.visChart.openLegendOptionColors('80,000');
+          await PageObjects.visChart.openLegendOptionColors(
+            '80,000',
+            `[data-title="${PIE_CHART_VIS_NAME}"]`
+          );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');

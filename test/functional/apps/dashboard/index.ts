@@ -22,6 +22,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
@@ -113,6 +114,29 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_time'));
       loadTestFile(require.resolve('./dashboard_listing'));
       loadTestFile(require.resolve('./dashboard_clone'));
+    });
+
+    // TODO: Remove when vislib is removed
+    describe('newChartUi', function () {
+      this.tags('ciGroup6');
+
+      before(async () => {
+        await loadLogstash();
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': true,
+        });
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await unloadLogstash();
+        await kibanaServer.uiSettings.update({
+          'visualization.visualize:newChartUi': false,
+        });
+        await browser.refresh();
+      });
+
+      loadTestFile(require.resolve('./dashboard_state'));
     });
   });
 }
