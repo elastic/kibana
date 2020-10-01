@@ -19,15 +19,15 @@ import {
 } from '../../../../shared_imports';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
   threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
-  threatIndexPatterns: IIndexPattern;
-  indexPatterns: IIndexPattern;
+  threatIndexPatterns: IndexPattern;
+  indexPatterns: IndexPattern;
   threatIndexPatternsLoading: boolean;
 }
 

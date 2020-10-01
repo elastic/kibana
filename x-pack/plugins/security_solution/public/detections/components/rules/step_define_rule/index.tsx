@@ -11,6 +11,7 @@ import styled from 'styled-components';
 // eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -208,8 +209,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ threatMapping }) => (
       <ThreatMatchInput
         threatBrowserFields={threatBrowserFields}
-        indexPatterns={indexPatterns}
-        threatIndexPatterns={threatIndexPatterns}
+        indexPatterns={indexPatterns as IndexPattern}
+        threatIndexPatterns={threatIndexPatterns as IndexPattern}
         threatMapping={threatMapping}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
       />

@@ -10,18 +10,18 @@ import {
   ThreatMapping,
 } from '../../../../common/detection_engine/schemas/types';
 
-import { IIndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
  *
- * @param patterns IIndexPattern containing available fields on rule index
+ * @param patterns IndexPattern containing available fields on rule index
  * @param item item entry
  * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   item: Entry,
   itemIndex: number
 ): FormattedEntry => {
@@ -43,11 +43,11 @@ export const getFormattedEntry = (
 /**
  * Formats the entries to be easily usable for the UI
  *
- * @param patterns IIndexPattern containing available fields on rule index
+ * @param patterns IndexPattern containing available fields on rule index
  * @param entries item entries
  */
 export const getFormattedEntries = (
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   entries: Entry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {

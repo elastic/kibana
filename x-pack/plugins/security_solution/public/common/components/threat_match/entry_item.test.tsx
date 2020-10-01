@@ -13,6 +13,7 @@ import {
   fields,
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -26,18 +27,22 @@ describe('EntryItem', () => {
           type: 'mapping',
           entryIndex: 0,
         }}
-        indexPattern={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
         showLabel={true}
         onChange={jest.fn()}
-        threatIndexPatterns={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
       />
     );
 
@@ -54,16 +59,20 @@ describe('EntryItem', () => {
           value: getField('ip'),
           entryIndex: 0,
         }}
-        indexPattern={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
-        threatIndexPatterns={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
         showLabel={false}
         onChange={mockOnChange}
       />
@@ -93,16 +102,20 @@ describe('EntryItem', () => {
           value: getField('ip'),
           entryIndex: 0,
         }}
-        indexPattern={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
-        threatIndexPatterns={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as IndexPattern
+        }
         showLabel={false}
         onChange={mockOnChange}
       />

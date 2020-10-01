@@ -8,7 +8,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedEntry, ThreatMapEntries, Entry } from './types';
 import { EntryItem } from './entry_item';
@@ -24,8 +24,8 @@ interface ListItemProps {
   listItem: ThreatMapEntries;
   listId: string;
   listItemIndex: number;
-  indexPattern: IIndexPattern;
-  threatIndexPatterns: IIndexPattern;
+  indexPattern: IndexPattern;
+  threatIndexPatterns: IndexPattern;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   onDeleteEntryItem: (item: ThreatMapEntries, index: number) => void;

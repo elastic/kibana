@@ -16,6 +16,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 import { ThreatMatchComponent } from './';
 import { ThreatMapEntries } from './types';
+import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -52,16 +53,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -77,16 +82,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={getPayLoad()}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -102,16 +111,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -126,16 +139,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -159,16 +176,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -192,16 +213,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={getDoublePayLoad()}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -218,16 +243,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -245,16 +274,20 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           onChange={jest.fn()}
         />
       </ThemeProvider>

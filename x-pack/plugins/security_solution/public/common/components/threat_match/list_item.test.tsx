@@ -14,6 +14,7 @@ import { fields } from '../../../../../../../src/plugins/data/common/index_patte
 
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';
+import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -69,16 +70,20 @@ describe('ListItemComponent', () => {
             listItem={doublePayload()}
             listId={'123'}
             listItemIndex={0}
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            threatIndexPatterns={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
+            indexPattern={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
+            threatIndexPatterns={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -99,20 +104,24 @@ describe('ListItemComponent', () => {
             listItem={doublePayload()}
             listId={'123'}
             listItemIndex={1}
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
+            indexPattern={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
             onChangeEntryItem={jest.fn()}
-            threatIndexPatterns={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
+            threatIndexPatterns={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
           />
         </ThemeProvider>
       );
@@ -127,16 +136,20 @@ describe('ListItemComponent', () => {
             listItem={singlePayload()}
             listId={'123'}
             listItemIndex={1}
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            threatIndexPatterns={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
+            indexPattern={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
+            threatIndexPatterns={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -157,16 +170,20 @@ describe('ListItemComponent', () => {
             listItem={singlePayload()}
             listId={'123'}
             listItemIndex={1}
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            threatIndexPatterns={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
+            indexPattern={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
+            threatIndexPatterns={
+              {
+                id: '1234',
+                title: 'logstash-*',
+                fields,
+              } as IndexPattern
+            }
             andLogicIncluded={false}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -195,16 +212,20 @@ describe('ListItemComponent', () => {
           listItem={item}
           listId={'123'}
           listItemIndex={0}
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPattern={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={jest.fn()}
@@ -223,16 +244,20 @@ describe('ListItemComponent', () => {
           listItem={singlePayload()}
           listId={'123'}
           listItemIndex={0}
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPattern={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           andLogicIncluded={false}
           isOnlyItem={false}
           onDeleteEntryItem={jest.fn()}
@@ -251,16 +276,20 @@ describe('ListItemComponent', () => {
           listItem={singlePayload()}
           listId={'123'}
           listItemIndex={1}
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPattern={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           andLogicIncluded={false}
           // if entryItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
@@ -281,16 +310,20 @@ describe('ListItemComponent', () => {
           listItem={doublePayload()}
           listId={'123'}
           listItemIndex={0}
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPattern={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={jest.fn()}
@@ -310,16 +343,20 @@ describe('ListItemComponent', () => {
           listItem={doublePayload()}
           listId={'123'}
           listItemIndex={0}
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          threatIndexPatterns={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
+          indexPattern={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
+          threatIndexPatterns={
+            {
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            } as IndexPattern
+          }
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={mockOnDeleteEntryItem}

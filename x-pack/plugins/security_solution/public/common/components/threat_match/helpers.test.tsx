@@ -9,7 +9,7 @@ import {
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';
 
 import {
@@ -21,11 +21,12 @@ import {
 } from './helpers';
 import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
 
-const getMockIndexPattern = (): IIndexPattern => ({
-  id: '1234',
-  title: 'logstash-*',
-  fields,
-});
+const getMockIndexPattern = (): IndexPattern =>
+  ({
+    id: '1234',
+    title: 'logstash-*',
+    fields,
+  } as IndexPattern);
 
 const getMockEntry = (): FormattedEntry => ({
   field: getField('ip'),
@@ -45,7 +46,7 @@ describe('Helpers', () => {
 
   describe('#getFormattedEntry', () => {
     test('it returns entry with a value when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: IIndexPattern = {
+      const payloadIndexPattern: IndexPattern = {
         ...getMockIndexPattern(),
         fields: [
           ...fields,
@@ -60,7 +61,7 @@ describe('Helpers', () => {
             readFromDocValues: true,
           },
         ],
-      };
+      } as IndexPattern;
       const payloadItem: Entry = {
         field: 'machine.os.raw.text',
         type: 'mapping',
@@ -88,7 +89,7 @@ describe('Helpers', () => {
 
   describe('#getFormattedEntries', () => {
     test('it returns formatted entry with fields undefined if it unable to find a matching index pattern field', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+      const payloadIndexPattern: IndexPattern = getMockIndexPattern();
       const payloadItems: Entry[] = [{ field: 'field.one', type: 'mapping', value: 'field.one' }];
       const output = getFormattedEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
@@ -103,7 +104,7 @@ describe('Helpers', () => {
     });
 
     test('it returns formatted entries', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+      const payloadIndexPattern: IndexPattern = getMockIndexPattern();
       const payloadItems: Entry[] = [
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },

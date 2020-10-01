@@ -7,7 +7,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../autocomplete/field';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
@@ -15,8 +15,8 @@ import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;
-  indexPattern: IIndexPattern;
-  threatIndexPatterns: IIndexPattern;
+  indexPattern: IndexPattern;
+  threatIndexPatterns: IndexPattern;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
 }

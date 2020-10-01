@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import { ThreatMapping } from '../../../../common/detection_engine/schemas/types';
 import { ListItemComponent } from './list_item';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
 import { ThreatMapEntries } from './types';
@@ -43,8 +43,8 @@ interface OnChangeProps {
 
 interface ThreatMatchComponentProps {
   listItems: ThreatMapEntries[];
-  indexPatterns: IIndexPattern;
-  threatIndexPatterns: IIndexPattern;
+  indexPatterns: IndexPattern;
+  threatIndexPatterns: IndexPattern;
   onChange: (arg: OnChangeProps) => void;
 }
 
