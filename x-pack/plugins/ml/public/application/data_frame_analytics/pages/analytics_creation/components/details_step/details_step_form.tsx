@@ -25,6 +25,8 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
+const DEFAULT_RESULTS_FIELD = 'ml';
+
 const indexNameExistsMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.create.destinationIndexHelpText',
   {
@@ -65,7 +67,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     cloneJob === undefined && hasSwitchedToEditor === false
   );
   const [useResultsFieldDefault, setUseResultsFieldDefault] = useState<boolean>(
-    cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined
+    (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
+      (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
 
   const forceInput = useRef<HTMLInputElement | null>(null);
@@ -275,7 +278,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           name="mlDataFrameAnalyticsUseResultsFieldDefault"
           label={i18n.translate('xpack.ml.dataframe.analytics.create.UseResultsFieldDefaultLabel', {
             defaultMessage: 'Use results field default value "{defaultValue}"',
-            values: { defaultValue: 'ml' },
+            values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
           onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
