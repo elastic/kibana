@@ -635,7 +635,6 @@ describe('Exception helpers', () => {
   describe('getPrepopulatedItem', () => {
     test('it returns prepopulated items', () => {
       const prepopulatedItem = getPrepopulatedItem({
-        listType: 'endpoint',
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
@@ -653,7 +652,7 @@ describe('Exception helpers', () => {
           field: 'file.Ext.code_signature',
           type: 'nested',
         },
-        { field: 'file.path.text', operator: 'included', type: 'match', value: '' },
+        { field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
         { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
         { field: 'event.code', operator: 'included', type: 'match', value: '' },
       ]);
@@ -661,7 +660,6 @@ describe('Exception helpers', () => {
 
     test('it returns prepopulated items with values', () => {
       const prepopulatedItem = getPrepopulatedItem({
-        listType: 'endpoint',
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
@@ -684,7 +682,12 @@ describe('Exception helpers', () => {
           field: 'file.Ext.code_signature',
           type: 'nested',
         },
-        { field: 'file.path.text', operator: 'included', type: 'match', value: 'some-file-path' },
+        {
+          field: 'file.path.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some-file-path',
+        },
         { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
         { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
       ]);
@@ -767,7 +770,7 @@ describe('Exception helpers', () => {
 
   describe('defaultEndpointExceptionItems', () => {
     test('it should return pre-populated items', () => {
-      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         file: {
           Ext: {
@@ -801,7 +804,7 @@ describe('Exception helpers', () => {
           type: 'nested',
         },
         {
-          field: 'file.path.text',
+          field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
@@ -824,7 +827,7 @@ describe('Exception helpers', () => {
           type: 'nested',
         },
         {
-          field: 'file.path.text',
+          field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',

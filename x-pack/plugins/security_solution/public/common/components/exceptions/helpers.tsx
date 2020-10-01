@@ -429,7 +429,7 @@ export const getPrepopulatedItem = ({
         ],
       },
       {
-        field: 'file.path.lower',
+        field: 'file.path.caseless',
         operator: 'included',
         type: 'match',
         value: filePath ?? '',
