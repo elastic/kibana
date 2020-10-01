@@ -15,7 +15,6 @@
     "plugins/licensing/**/*"
   ],
   "compilerOptions": {
-    "outDir": ".",
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
