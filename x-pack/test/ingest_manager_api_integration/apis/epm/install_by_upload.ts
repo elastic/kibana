@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('installs packages from direct upload', async () => {
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       if (server.enabled) {
         const buf = fs.readFileSync(testPkgArchiveTgz);
         const res = await supertest
-          .post(`/api/ingest_manager/epm/packages`)
+          .post(`/api/fleet/epm/packages`)
           .set('kbn-xsrf', 'xxxx')
           .type('application/gzip')
           .send(buf)

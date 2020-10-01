@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       if (server.enabled) {
         const fetchPackageList = async () => {
           const response = await supertest
-            .get('/api/ingest_manager/epm/packages')
+            .get('/api/fleet/epm/packages')
             .set('kbn-xsrf', 'xxx')
             .expect(200);
           return response.body;
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       if (server.enabled) {
         const fetchLimitedPackageList = async () => {
           const response = await supertest
-            .get('/api/ingest_manager/epm/packages/limited')
+            .get('/api/fleet/epm/packages/limited')
             .set('kbn-xsrf', 'xxx')
             .expect(200);
           return response.body;

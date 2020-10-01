@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // Base API paths
-export const API_ROOT = `/api/ingest_manager`;
+
+export const API_ROOT = `/api/fleet`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
+export const FLEET_API_ROOT_7_9 = `/api/ingest_manager/fleet`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -91,6 +93,11 @@ export const AGENT_API_ROUTES = {
   BULK_REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/bulk_reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/upgrade`,
+};
+export const AGENT_API_ROUTES_7_9 = {
+  CHECKIN_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/checkin`,
+  ACKS_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/acks`,
+  ENROLL_PATTERN: `${FLEET_API_ROOT_7_9}/agents/enroll`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

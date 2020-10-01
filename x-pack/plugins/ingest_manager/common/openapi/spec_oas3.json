@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/ingest_manager",
+      "url": "http://localhost:5601/api/fleet",
       "description": "local"
     }
   ],

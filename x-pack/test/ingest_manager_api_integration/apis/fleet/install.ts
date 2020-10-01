@@ -16,12 +16,12 @@ export default function (providerContext: FtrProviderContext) {
     setupIngest(providerContext);
 
     it('should return a 400 if we try download an install script for a not supported OS', async () => {
-      await supertest.get(`/api/ingest_manager/fleet/install/gameboy`).expect(400);
+      await supertest.get(`/api/fleet/fleet/install/gameboy`).expect(400);
     });
 
     it('should return an install script for a supported OS', async () => {
       const { text: apiResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/install/macos`)
+        .get(`/api/fleet/fleet/install/macos`)
         .expect(200);
       expect(apiResponse).match(/^#!\/bin\/sh/);
     });

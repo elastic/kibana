@@ -19,7 +19,7 @@ import {
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
-const INGEST_API_ROOT = `/api/ingest_manager`;
+const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;

@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
       const kibanaVersionAccessor = kibanaServer.version;
       const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .post(`/api/fleet/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
           version: kibanaVersion,
@@ -45,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should respond 400 if trying to upgrade to a version that does not match installed kibana version', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .post(`/api/fleet/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
           version: '8.0.1',
