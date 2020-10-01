@@ -62,30 +62,3 @@ export interface AppObservableLibs extends AppFrontendLibs {
 }
 
 export type InspectResponse = Inspect & { response: string[] };
-
-/**
- * The subplugin classes. These are grouped into an object so they can be dynamically imported together for the sake of improved bundle size.
- */
-export interface SubPluginClasses {
-  Detections: Detections;
-  Cases: Cases;
-  Hosts: Hosts;
-  Network: Network;
-  Overview: Overview;
-  Timelines: Timelines;
-  Management: Management;
-}
-
-/**
- */
-export interface LazyApplicationDependencies {
-  subPluginClasses: SubPluginClasses;
-  renderApp: (props: RenderAppProps) => () => void;
-  composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
-  createStore: () => Store<>;
-  createInitialState: unknown;
-}
-
-/**
- * The Redux store type for the Security app.
- */

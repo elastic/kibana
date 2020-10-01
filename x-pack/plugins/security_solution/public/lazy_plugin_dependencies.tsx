@@ -11,25 +11,27 @@
 
 import { renderApp } from './app';
 import { composeLibs } from './common/lib/compose/kibana_compose';
-
-import { Detections } from './detections';
-import { Cases } from './cases';
-import { Hosts } from './hosts';
-import { Network } from './network';
-import { Overview } from './overview';
-import { Timelines } from './timelines';
-import { Management } from './management';
-
+import {
+  detectionsSubPlugin,
+  casesSubPlugin,
+  hostsSubPlugin,
+  networkSubPlugin,
+  overviewSubPlugin,
+  timelinesSubPlugin,
+  managementSubPlugin,
+} from './sub_plugins';
 import { createStore, createInitialState } from './common/store';
 
-const subPluginClasses: SubPluginClasses = {
-  Detections,
-  Cases,
-  Hosts,
-  Network,
-  Overview,
-  Timelines,
-  Management,
+export {
+  renderApp,
+  composeLibs,
+  detectionsSubPlugin,
+  casesSubPlugin,
+  hostsSubPlugin,
+  networkSubPlugin,
+  overviewSubPlugin,
+  timelinesSubPlugin,
+  managementSubPlugin,
+  createStore,
+  createInitialState,
 };
-
-export { renderApp, composeLibs, subPluginClasses, createStore, createInitialState };

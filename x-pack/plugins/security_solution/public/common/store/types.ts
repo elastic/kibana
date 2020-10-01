@@ -35,7 +35,6 @@ export type StoreState = HostsPluginState &
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
 export type State = CombinedState<StoreState>;
-export type SecurityAppStore = Store<State, Action>;
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
 

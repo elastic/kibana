@@ -39,7 +39,10 @@ declare global {
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
   }
 }
-
+/**
+ * The Redux store type for the Security app.
+ */
+export type SecurityAppStore = Store<State, Action>;
 let store: Store<State, Action> | null = null;
 
 /**
