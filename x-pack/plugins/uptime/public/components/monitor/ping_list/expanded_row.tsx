@@ -55,7 +55,7 @@ const BodyExcerpt = ({ content }: { content: string }) =>
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
 
-  if (ping.monitor.type === 'suitejourney' || ping.monitor.type === 'browser') {
+  if (ping.monitor.type === 'browser') {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

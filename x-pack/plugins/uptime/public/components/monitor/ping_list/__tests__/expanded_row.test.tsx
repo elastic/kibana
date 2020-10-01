@@ -90,7 +90,7 @@ describe('PingListExpandedRow', () => {
   });
 
   it('renders a synthetics expanded row for synth monitor', () => {
-    ping.monitor.type = 'suitejourney';
+    ping.monitor.type = 'browser';
     expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchInlineSnapshot(`
       <EuiFlexGroup
         direction="column"

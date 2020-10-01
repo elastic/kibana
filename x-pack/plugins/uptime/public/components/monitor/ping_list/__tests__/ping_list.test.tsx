@@ -276,9 +276,9 @@ describe('PingList component', () => {
 
     describe('rowShouldExpand', () => {
       // TODO: expand for all cases
-      it('returns true for suitejourney monitors', () => {
+      it('returns true for browser monitors', () => {
         const ping = pings[0];
-        ping.monitor.type = 'suitejourney';
+        ping.monitor.type = 'browser';
         expect(rowShouldExpand(ping)).toBe(true);
       });
     });
