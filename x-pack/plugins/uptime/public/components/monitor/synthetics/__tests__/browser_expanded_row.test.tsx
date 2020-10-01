@@ -6,19 +6,19 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { ScriptExpandedRowComponent } from '../script_expanded_row';
+import { BrowserExpandedRowComponent } from '../script_expanded_row';
 
-describe('ScriptExpandedRowComponent', () => {
+describe('BrowserExpandedRowComponent', () => {
   it('returns empty step state when no journey', () => {
     expect(
-      shallowWithIntl(<ScriptExpandedRowComponent fetchScreenshot={jest.fn()} />)
+      shallowWithIntl(<BrowserExpandedRowComponent fetchScreenshot={jest.fn()} />)
     ).toMatchInlineSnapshot(`<EmptyStepState />`);
   });
 
   it('returns empty step state when journey has no steps', () => {
     expect(
       shallowWithIntl(
-        <ScriptExpandedRowComponent
+        <BrowserExpandedRowComponent
           fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
@@ -33,7 +33,7 @@ describe('ScriptExpandedRowComponent', () => {
   it('displays loading spinner when loading', () => {
     expect(
       shallowWithIntl(
-        <ScriptExpandedRowComponent
+        <BrowserExpandedRowComponent
           fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
@@ -52,7 +52,7 @@ describe('ScriptExpandedRowComponent', () => {
   it('renders executed journey when step/end is present', () => {
     expect(
       shallowWithIntl(
-        <ScriptExpandedRowComponent
+        <BrowserExpandedRowComponent
           fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
@@ -90,7 +90,7 @@ describe('ScriptExpandedRowComponent', () => {
   it('renders console output step list when only console steps are present', () => {
     expect(
       shallowWithIntl(
-        <ScriptExpandedRowComponent
+        <BrowserExpandedRowComponent
           fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',
@@ -127,7 +127,7 @@ describe('ScriptExpandedRowComponent', () => {
   it('renders null when only unsupported steps are present', () => {
     expect(
       shallowWithIntl(
-        <ScriptExpandedRowComponent
+        <BrowserExpandedRowComponent
           fetchScreenshot={jest.fn()}
           journey={{
             checkGroup: 'check_group',

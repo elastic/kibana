@@ -15,11 +15,11 @@ import { EmptyStepState } from './empty_journey';
 import { ExecutedJourney } from './executed_journey';
 import { ConsoleOutputStepList } from './console_output_steps';
 
-interface ScriptExpandedRowProps {
+interface BrowserExpandedRowProps {
   checkGroup?: string;
 }
 
-export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup }) => {
+export const BrowserExpandedRow: React.FC<BrowserExpandedRowProps> = ({ checkGroup }) => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (checkGroup) {
@@ -30,10 +30,10 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
   const journeys = useSelector(journeySelector);
   const journey = journeys.find((j) => j.checkGroup === checkGroup);
 
-  return <ScriptExpandedRowComponent checkGroup={checkGroup} journey={journey} />;
+  return <BrowserExpandedRowComponent checkGroup={checkGroup} journey={journey} />;
 };
 
-type ComponentProps = ScriptExpandedRowProps & {
+type ComponentProps = BrowserExpandedRowProps & {
   journey?: JourneyState;
 };
 
@@ -41,7 +41,7 @@ const someStepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
 const someStepConsole = (step: Ping) =>
   ['stderr', 'cmd/status'].indexOf(step.synthetics?.type ?? '') !== -1;
 
-export const ScriptExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, journey }) => {
+export const BrowserExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, journey }) => {
   if (!!journey && journey.loading) {
     return (
       <div>

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
-import { ScriptExpandedRow } from '../synthetics/script_expanded_row';
+import { BrowserExpandedRow } from '../synthetics/script_expanded_row';
 
 interface Props {
   ping: Ping;
@@ -67,7 +67,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ScriptExpandedRow checkGroup={ping.monitor.check_group} />
+          <BrowserExpandedRow checkGroup={ping.monitor.check_group} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
