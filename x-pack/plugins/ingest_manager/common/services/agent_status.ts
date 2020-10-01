@@ -30,7 +30,7 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (agent.last_checkin_status === 'degraded') {
     return 'degraded';
   }
-  if (agent.last_checkin_status === 'updating') {
+  if (agent.upgrade_started_at && !agent.upgraded_at) {
     return 'updating';
   }
   if (intervalsSinceLastCheckIn >= 4) {
@@ -63,5 +63,5 @@ export function buildKueryForOfflineAgents() {
 }
 
 export function buildKueryForUpdatingAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:updating`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
 }
