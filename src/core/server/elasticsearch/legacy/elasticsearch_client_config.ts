@@ -131,7 +131,7 @@ export function parseElasticsearchClientConfig(
         path: uri.pathname,
         query: uri.query,
         headers: {
-          'user-agent': 'kibana',
+          'User-Agent': 'Kibana',
           ...config.customHeaders,
         },
       };

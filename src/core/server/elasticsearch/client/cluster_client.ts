@@ -108,7 +108,7 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     return {
-      'user-agent': 'kibana',
+      'User-Agent': 'Kibana',
       ...this.config.customHeaders,
       ...scopedHeaders,
     };
