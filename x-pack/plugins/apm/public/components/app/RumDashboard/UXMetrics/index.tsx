@@ -59,7 +59,7 @@ export function UXMetrics() {
 
   return (
     <EuiPanel>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="s">
             <h2>{I18LABELS.userExperienceMetrics}</h2>
@@ -70,7 +70,7 @@ export function UXMetrics() {
       </EuiFlexGroup>
       <EuiHorizontalRule />
 
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="xs">
             <h3>

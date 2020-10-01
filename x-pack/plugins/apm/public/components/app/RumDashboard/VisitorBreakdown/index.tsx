@@ -44,7 +44,7 @@ export function VisitorBreakdown() {
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ height: 'calc(100% - 32px)' }}>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.browser}</h4>
