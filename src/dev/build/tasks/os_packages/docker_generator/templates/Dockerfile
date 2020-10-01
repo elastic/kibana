@@ -85,7 +85,6 @@ RUN groupadd --gid 1000 kibana && \
     useradd --uid 1000 --gid 1000 \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
-USER kibana
 
 LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.label-schema.license="{{license}}" \
@@ -115,7 +114,12 @@ LABEL name="Kibana" \
   release="1" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
+
+RUN mkdir /licenses && \
+    cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
+
+USER kibana
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 

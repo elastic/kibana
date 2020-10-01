@@ -16,7 +16,6 @@ import { render, waitForElement } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
-import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { EuiThemeProvider } from '../../../observability/public';
 import {
@@ -25,6 +24,7 @@ import {
   ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -68,9 +68,9 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
     <MockApmPluginContextWrapper>
       <MemoryRouter initialEntries={[location]}>
-        <LocationProvider>
+        <UrlParamsProvider>
           <Component />
-        </LocationProvider>
+        </UrlParamsProvider>
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );

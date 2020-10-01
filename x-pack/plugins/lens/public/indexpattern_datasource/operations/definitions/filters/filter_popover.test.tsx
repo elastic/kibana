@@ -9,7 +9,8 @@ import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
-import { FilterPopover, QueryInput, LabelInput } from './filter_popover';
+import { FilterPopover, QueryInput } from './filter_popover';
+import { LabelInput } from '../shared_components';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,

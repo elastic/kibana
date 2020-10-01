@@ -26,18 +26,60 @@ export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
   defaultMessage: 'Total blocking time',
 });
 
-export const POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
+export const NO_OF_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.noOfLongTasks',
+  {
+    defaultMessage: 'No. of long tasks',
+  }
+);
+
+export const LONGEST_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.longestLongTasks',
+  {
+    defaultMessage: 'Longest long task duration',
+  }
+);
+
+export const SUM_LONG_TASKS = i18n.translate(
+  'xpack.apm.rum.uxMetrics.sumLongTasks',
+  {
+    defaultMessage: 'Total long tasks duration',
+  }
+);
+
+export const CV_POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
   defaultMessage: 'a poor',
 });
 
-export const GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
+export const CV_GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
   defaultMessage: 'a good',
 });
 
-export const AVERAGE_LABEL = i18n.translate(
+export const CV_AVERAGE_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.average',
   {
     defaultMessage: 'an average',
+  }
+);
+
+export const LEGEND_POOR_LABEL = i18n.translate(
+  'xpack.apm.rum.coreVitals.legends.poor',
+  {
+    defaultMessage: 'Poor',
+  }
+);
+
+export const LEGEND_GOOD_LABEL = i18n.translate(
+  'xpack.apm.rum.coreVitals.legends.good',
+  {
+    defaultMessage: 'Good',
+  }
+);
+
+export const LEGEND_NEEDS_IMPROVEMENT_LABEL = i18n.translate(
+  'xpack.apm.rum.coreVitals.legends.needsImprovement',
+  {
+    defaultMessage: 'Needs improvement',
   }
 );
 

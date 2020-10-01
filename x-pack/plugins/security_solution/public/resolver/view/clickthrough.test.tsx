@@ -177,7 +177,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         );
         // Click the second child node's primary button
         if (button) {
-          button.simulate('click');
+          button.simulate('click', { button: 0 });
         }
       });
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
@@ -194,7 +194,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         ).toYieldEqualTo({
           // Just the second child should be marked as selected in the query string
           search: urlSearch(resolverComponentInstanceID, {
-            selectedEntityID: entityIDs.secondChild,
+            panelParameters: { nodeID: entityIDs.secondChild },
+            panelView: 'nodeDetail',
           }),
           // The second child is rendered and has `[aria-selected]`
           selectedSecondChildNodeCount: 1,
@@ -275,48 +276,12 @@ describe('Resolver, when analyzing a tree that has two related events for the or
       );
       expect(edgesThatTerminateUnderneathSecondChild).toHaveLength(1);
     });
-
-    it('should render a related events button', async () => {
+    it('should show exactly one option with the correct count', async () => {
       await expect(
-        simulator.map(() => ({
-          relatedEventButtons: simulator.processNodeSubmenuButton(entityIDs.origin).length,
-        }))
-      ).toYieldEqualTo({
-        relatedEventButtons: 1,
-      });
-    });
-    describe('when the related events button is clicked', () => {
-      beforeEach(async () => {
-        const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeSubmenuButton(entityIDs.origin)
-        );
-        if (button) {
-          button.simulate('click');
-        }
-      });
-      it('should open the submenu and display exactly one option with the correct count', async () => {
-        await expect(
-          simulator.map(() =>
-            simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
-          )
-        ).toYieldEqualTo(['2 registry']);
-      });
-    });
-    describe('and when the related events button is clicked again', () => {
-      beforeEach(async () => {
-        const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeSubmenuButton(entityIDs.origin)
-        );
-        if (button) {
-          button.simulate('click');
-          button.simulate('click'); // The first click opened the menu, this second click closes it
-        }
-      });
-      it('should close the submenu', async () => {
-        await expect(
-          simulator.map(() => simulator.testSubject('resolver:map:node-submenu-item').length)
-        ).toYieldEqualTo(0);
-      });
+        simulator.map(() =>
+          simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
+        )
+      ).toYieldEqualTo(['2 registry']);
     });
   });
 });

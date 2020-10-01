@@ -37,6 +37,18 @@ export const I18LABELS = {
       defaultMessage: 'Page load distribution',
     }
   ),
+  jsErrors: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
+    {
+      defaultMessage: 'JavaScript errors',
+    }
+  ),
+  highTrafficPages: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages',
+    {
+      defaultMessage: 'High traffic pages',
+    }
+  ),
   resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -64,6 +76,9 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
+  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
+    defaultMessage: 'User experience metrics',
+  }),
   avgPageLoadDuration: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
     {
@@ -76,6 +91,68 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region',
     }
   ),
+  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
+    defaultMessage: 'Search by url',
+  }),
+  getSearchResultsLabel: (total: number) =>
+    i18n.translate('xpack.apm.rum.filters.searchResults', {
+      defaultMessage: '{total} Search results',
+      values: { total },
+    }),
+  topPages: i18n.translate('xpack.apm.rum.filters.topPages', {
+    defaultMessage: 'Top pages',
+  }),
+  select: i18n.translate('xpack.apm.rum.filters.select', {
+    defaultMessage: 'Select',
+  }),
+  url: i18n.translate('xpack.apm.rum.filters.url', {
+    defaultMessage: 'Url',
+  }),
+  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
+    defaultMessage: 'Match this query',
+  }),
+  loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
+    defaultMessage: 'Loading results',
+  }),
+  noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
+    defaultMessage: 'No results available',
+  }),
+  totalErrors: i18n.translate('xpack.apm.rum.jsErrors.totalErrors', {
+    defaultMessage: 'Total errors',
+  }),
+  errorRate: i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+    defaultMessage: 'Error rate',
+  }),
+  errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
+    defaultMessage: 'Error message',
+  }),
+  impactedPageLoads: i18n.translate(
+    'xpack.apm.rum.jsErrors.impactedPageLoads',
+    {
+      defaultMessage: 'Impacted page loads',
+    }
+  ),
+  percentile: i18n.translate('xpack.apm.ux.percentile.label', {
+    defaultMessage: 'Percentile',
+  }),
+  percentile50thMedian: i18n.translate('xpack.apm.ux.percentile.50thMedian', {
+    defaultMessage: '50th (Median)',
+  }),
+  percentile75th: i18n.translate('xpack.apm.ux.percentile.75th', {
+    defaultMessage: '75th',
+  }),
+  percentile90th: i18n.translate('xpack.apm.ux.percentile.90th', {
+    defaultMessage: '90th',
+  }),
+  percentile95th: i18n.translate('xpack.apm.ux.percentile.95th', {
+    defaultMessage: '95th',
+  }),
+  percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
+    defaultMessage: '99th',
+  }),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

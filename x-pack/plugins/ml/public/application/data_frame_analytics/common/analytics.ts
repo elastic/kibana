@@ -15,8 +15,8 @@ import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
   ClassificationAnalysis,
+  DataFrameAnalysisConfigType,
   RegressionAnalysis,
-  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/types/data_frame_analytics';
 import {
   isOutlierAnalysis,
@@ -26,6 +26,7 @@ import {
   getDependentVar,
   getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
@@ -65,6 +66,17 @@ export const NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN = 0;
 export const defaultSearchQuery = {
   match_all: {},
 };
+
+export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: boolean) => ({
+  bool: {
+    minimum_should_match: 1,
+    should: [
+      {
+        match: { [`${resultsField}.is_training`]: isTraining },
+      },
+    ],
+  },
+});
 
 export interface SearchQuery {
   track_total_hits?: boolean;
@@ -429,7 +441,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
 }
 
@@ -550,7 +562,7 @@ export {
   isRegressionAnalysis,
   isClassificationAnalysis,
   getPredictionFieldName,
-  ANALYSIS_CONFIG_TYPE,
   getDependentVar,
   getPredictedFieldName,
+  ANALYSIS_CONFIG_TYPE,
 };

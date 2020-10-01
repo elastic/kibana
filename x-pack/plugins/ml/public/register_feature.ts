@@ -41,7 +41,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
       defaultMessage: 'Import your own CSV, NDJSON, or log file.',
     }),
     icon: 'document',
-    path: '/app/ml#/filedatavisualizer',
+    path: '/app/ml/filedatavisualizer',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
     order: 520,

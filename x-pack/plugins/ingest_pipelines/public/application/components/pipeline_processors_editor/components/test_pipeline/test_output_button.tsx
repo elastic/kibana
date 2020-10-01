@@ -5,7 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 const i18nTexts = {
   buttonLabel: i18n.translate(
@@ -14,46 +15,15 @@ const i18nTexts = {
       defaultMessage: 'View output',
     }
   ),
-  disabledButtonTooltipLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.outputButtonTooltipLabel',
-    {
-      defaultMessage: 'Add documents to view the output',
-    }
-  ),
 };
 
 interface Props {
-  isDisabled: boolean;
-  openTestPipelineFlyout: () => void;
+  openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const TestOutputButton: FunctionComponent<Props> = ({
-  isDisabled,
-  openTestPipelineFlyout,
-}) => {
-  if (isDisabled) {
-    return (
-      <EuiToolTip position="top" content={<p>{i18nTexts.disabledButtonTooltipLabel}</p>}>
-        <EuiButton
-          size="s"
-          onClick={openTestPipelineFlyout}
-          data-test-subj="viewOutputButton"
-          iconType="crossInACircleFilled"
-          isDisabled={isDisabled}
-        >
-          {i18nTexts.buttonLabel}
-        </EuiButton>
-      </EuiToolTip>
-    );
-  }
-
+export const TestOutputButton: FunctionComponent<Props> = ({ openFlyout }) => {
   return (
-    <EuiButton
-      size="s"
-      onClick={openTestPipelineFlyout}
-      data-test-subj="viewOutputButton"
-      iconType="checkInCircleFilled"
-    >
+    <EuiButton size="s" onClick={() => openFlyout('output')} data-test-subj="viewOutputButton">
       {i18nTexts.buttonLabel}
     </EuiButton>
   );

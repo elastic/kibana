@@ -26,6 +26,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({
@@ -52,7 +53,12 @@ describe('getServiceMapServiceNodeInfo', () => {
         apmEventClient: {
           search: () =>
             Promise.resolve({
-              hits: { total: { value: 1 } },
+              aggregations: {
+                count: { value: 1 },
+                duration: { value: null },
+                avgCpuUsage: { value: null },
+                avgMemoryUsage: { value: null },
+              },
             }),
         },
         indices: {},
@@ -68,6 +74,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({

@@ -35,7 +35,15 @@ describe('POST /diagnose/config', () => {
     } as unknown) as any;
 
     config = {
-      get: jest.fn(),
+      get: jest.fn().mockImplementation((...keys) => {
+        const key = keys.join('.');
+        switch (key) {
+          case 'queue.timeout':
+            return 120000;
+          case 'csv.maxSizeBytes':
+            return 1024;
+        }
+      }),
       kbnConfig: { get: jest.fn() },
     };
 

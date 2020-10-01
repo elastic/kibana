@@ -52,7 +52,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   severity: 'high',
   severity_mapping: [],
   updated_by: 'elastic_kibana',
-  tags: [],
+  tags: ['some fake tag 1', 'some fake tag 2'],
   to: 'now',
   type: 'query',
   threat: [],
@@ -61,7 +61,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   status_date: '2020-02-22T16:47:50.047Z',
   last_success_at: '2020-02-22T16:47:50.047Z',
   last_success_message: 'succeeded',
-  output_index: '.siem-signals-hassanabad-frank-default',
+  output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 55,
   risk_score_mapping: [],
@@ -80,5 +80,42 @@ export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSch
     type: 'machine_learning',
     anomaly_threshold: 59,
     machine_learning_job_id: 'some_machine_learning_job_id',
+  };
+};
+
+export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  return {
+    ...getRulesSchemaMock(anchorDate),
+    type: 'threat_match',
+    threat_index: 'index-123',
+    threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
+    threat_query: '*:*',
+    threat_filters: [
+      {
+        bool: {
+          must: [
+            {
+              query_string: {
+                query: 'host.name: linux',
+                analyze_wildcard: true,
+                time_zone: 'Zulu',
+              },
+            },
+          ],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+    ],
+  };
+};
+
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  return {
+    ...getRulesSchemaMock(anchorDate),
+    language: 'eql',
+    type: 'eql',
+    query: 'process where true',
   };
 };

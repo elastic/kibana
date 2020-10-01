@@ -12,17 +12,20 @@ import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { FULL_HEIGHT } from '../RumDashboard';
 
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-view-trends',
           params: {
@@ -30,6 +33,7 @@ export function PageViewsTrend() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              urlQuery: searchTerm,
               ...(breakdown
                 ? {
                     breakdowns: JSON.stringify(breakdown),
@@ -41,11 +45,11 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdown]
+    [end, start, uiFilters, breakdown, searchTerm]
   );
 
   return (
-    <div>
+    <div style={FULL_HEIGHT}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -56,6 +60,7 @@ export function PageViewsTrend() {
           <BreakdownFilter
             selectedBreakdown={breakdown}
             onBreakdownChange={setBreakdown}
+            dataTestSubj={'pvBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

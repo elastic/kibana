@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deepFreeze } from '../../../../../src/core/server';
+import { deepFreeze } from '@kbn/std';
 
 export const SpacesSavedObjectMappings = deepFreeze({
   properties: {

@@ -7,7 +7,6 @@
     "stripInternal": true,
     "declarationMap": true,
     "types": [
-      "jest",
       "node"
     ]
   },

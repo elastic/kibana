@@ -22,7 +22,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 
-const indexPattern = {
+const indexPattern = ({
   fields: {
     getAll: () => [
       {
@@ -60,7 +60,7 @@ const indexPattern = {
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
-} as IndexPattern;
+} as unknown) as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);

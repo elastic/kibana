@@ -117,12 +117,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles timelion function', () => {
-      const params = { expression: 'foo', interval: 'bar' };
-      const actual = buildPipelineVisFunction.timelion(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };
@@ -197,28 +191,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           bucket: [0, 3],
         };
         const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-    });
-
-    describe('handles tagcloud function', () => {
-      it('without buckets', () => {
-        const actual = buildPipelineVisFunction.tagcloud({}, schemasDef, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const schemas = {
-          ...schemasDef,
-          segment: [{ accessor: 1 }],
-        };
-        const actual = buildPipelineVisFunction.tagcloud({}, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with boolean param showLabel', () => {
-        const params = { showLabel: false };
-        const actual = buildPipelineVisFunction.tagcloud(params, schemasDef, uiState);
         expect(actual).toMatchSnapshot();
       });
     });

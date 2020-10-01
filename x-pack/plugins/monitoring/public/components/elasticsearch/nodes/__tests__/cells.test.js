@@ -27,6 +27,7 @@ describe('Node Listing Metric Cell', () => {
         },
         summary: { minVal: 0, maxVal: 2, lastVal: 0, slope: -1 },
       },
+      'data-test-subj': 'testCell',
     };
     expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });
@@ -54,6 +55,7 @@ describe('Node Listing Metric Cell', () => {
           slope: -1,
         },
       },
+      'data-test-subj': 'testCell2',
     };
     expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });

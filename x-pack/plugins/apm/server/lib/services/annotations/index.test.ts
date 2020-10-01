@@ -28,8 +28,10 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
+            searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => noVersions,
         }
       );
@@ -46,8 +48,10 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
+            searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => oneVersion,
         }
       );
@@ -69,8 +73,10 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
+            searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => responses.shift(),
         }
       );
