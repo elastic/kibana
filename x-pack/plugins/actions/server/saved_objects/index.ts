@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
-import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
