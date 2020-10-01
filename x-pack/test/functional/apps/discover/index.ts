@@ -13,5 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./preserve_url'));
     loadTestFile(require.resolve('./async_scripted_fields'));
     loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./error_handling'));
+    loadTestFile(require.resolve('./value_suggestions'));
   });
 }

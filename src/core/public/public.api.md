@@ -42,7 +42,7 @@ import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
-export function __kbnBootstrap__(): void;
+export function __kbnBootstrap__(): Promise<void>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> {
@@ -1079,6 +1079,7 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 // @public

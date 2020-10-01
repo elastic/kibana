@@ -177,7 +177,6 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'transaction_max_spans',
     type: 'integer',
     min: 0,
-    max: 32000,
     defaultValue: '500',
     label: i18n.translate('xpack.apm.agentConfig.transactionMaxSpans.label', {
       defaultMessage: 'Transaction max spans',

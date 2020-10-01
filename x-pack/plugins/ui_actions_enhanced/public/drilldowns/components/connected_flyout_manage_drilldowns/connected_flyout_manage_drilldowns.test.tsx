@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
+import { fireEvent, render, wait, cleanup } from '@testing-library/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   mockGetTriggerInfo,
@@ -30,9 +30,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   getTrigger: mockGetTriggerInfo,
 });
 
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
-
 beforeEach(() => {
   storage.clear();
   mockDynamicActionManager.state.set({ ...mockDynamicActionManager.state.get(), events: [] });
@@ -56,7 +53,8 @@ test('Allows to manage drilldowns', async () => {
 
   fireEvent.click(screen.getByText(/Create new/i));
 
-  let [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  let [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  let createButton = screen.getByRole('button', { name: /Create Drilldown/i });
   expect(createHeading).toBeVisible();
   expect(screen.getByLabelText(/Back/i)).toBeVisible();
 
@@ -77,7 +75,8 @@ test('Allows to manage drilldowns', async () => {
     target: { value: URL },
   });
 
-  [createHeading, createButton] = screen.getAllByText(/Create Drilldown/i);
+  [createHeading] = screen.getAllByText(/Create Drilldown/i);
+  createButton = screen.getByRole('button', { name: /Create Drilldown/i });
 
   expect(createButton).toBeEnabled();
   fireEvent.click(createButton);

@@ -7,8 +7,8 @@
 import { processFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 
 import {
-  UncommonProcessesEdges,
-  UncommonProcessHit,
+  HostsUncommonProcessesEdges,
+  HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy';
 
 import { formatUncommonProcessesData, getHosts, UncommonProcessBucket } from './helpers';
@@ -183,7 +183,7 @@ describe('helpers', () => {
   });
 
   describe('#formatUncommonProcessesData', () => {
-    const hit: UncommonProcessHit = {
+    const hit: HostsUncommonProcessHit = {
       _index: 'index-123',
       _type: 'type-123',
       _id: 'id-123',
@@ -210,7 +210,7 @@ describe('helpers', () => {
     test('it formats a uncommon process data with a source of name correctly', () => {
       const fields: readonly string[] = ['process.name'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      const expected: UncommonProcessesEdges = {
+      const expected: HostsUncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
           _id: 'id-123',
@@ -230,7 +230,7 @@ describe('helpers', () => {
     test('it formats a uncommon process data with a source of name and title correctly', () => {
       const fields: readonly string[] = ['process.name', 'process.title'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      const expected: UncommonProcessesEdges = {
+      const expected: HostsUncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
           _id: 'id-123',
@@ -251,7 +251,7 @@ describe('helpers', () => {
     test('it formats a uncommon process data without any data if fields is empty', () => {
       const fields: readonly string[] = [];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      const expected: UncommonProcessesEdges = {
+      const expected: HostsUncommonProcessesEdges = {
         cursor: {
           tiebreaker: null,
           value: '',

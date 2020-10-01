@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 
 import { EuiButton, EuiButtonProps, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../../index';
+import { HttpLogic } from '../../../../shared/http';
+import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const ProductButton: React.FC = () => {
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
 
   const buttonProps = {
     fill: true,

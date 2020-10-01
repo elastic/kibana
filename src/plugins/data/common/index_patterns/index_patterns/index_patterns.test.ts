@@ -18,7 +18,7 @@
  */
 
 import { defaults } from 'lodash';
-import { IndexPatternsService } from '.';
+import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
@@ -31,7 +31,6 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 }));
 
 const fieldFormats = fieldFormatsMock;
-
 let object: any = {};
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
@@ -43,16 +42,18 @@ describe('IndexPatterns', () => {
   let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
+    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
-      () =>
-        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
-          Array<SavedObject<any>>
-        >
+      () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
-    savedObjectsClient.get = jest.fn().mockImplementation(() => object);
     savedObjectsClient.create = jest.fn();
+    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
+      id: object.id,
+      version: object.version,
+      attributes: object.attributes,
+    }));
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
@@ -141,30 +142,73 @@ describe('IndexPatterns', () => {
     });
 
     // Create a normal index patterns
-    const pattern = await indexPatterns.make('foo');
+    const pattern = await indexPatterns.get('foo');
 
     expect(pattern.version).toBe('fooa');
+    indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = await indexPatterns.make('foo');
+    const samePattern = await indexPatterns.get('foo');
 
     expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
     pattern.title = 'foo2';
-    await indexPatterns.save(pattern);
+    await indexPatterns.updateSavedObject(pattern);
 
     // This should not be able to recover
     samePattern.title = 'foo3';
 
     let result;
     try {
-      await indexPatterns.save(samePattern);
+      await indexPatterns.updateSavedObject(samePattern);
     } catch (err) {
       result = err;
     }
 
     expect(result.res.status).toBe(409);
+  });
+
+  test('create', async () => {
+    const title = 'kibana-*';
+    indexPatterns.refreshFields = jest.fn();
+
+    const indexPattern = await indexPatterns.create({ title }, true);
+    expect(indexPattern).toBeInstanceOf(IndexPattern);
+    expect(indexPattern.title).toBe(title);
+    expect(indexPatterns.refreshFields).not.toBeCalled();
+
+    await indexPatterns.create({ title });
+    expect(indexPatterns.refreshFields).toBeCalled();
+  });
+
+  test('createAndSave', async () => {
+    const title = 'kibana-*';
+    indexPatterns.createSavedObject = jest.fn();
+    indexPatterns.setDefault = jest.fn();
+    await indexPatterns.createAndSave({ title });
+    expect(indexPatterns.createSavedObject).toBeCalled();
+    expect(indexPatterns.setDefault).toBeCalled();
+  });
+
+  test('savedObjectToSpec', () => {
+    const savedObject = {
+      id: 'id',
+      version: 'version',
+      attributes: {
+        title: 'kibana-*',
+        timeFieldName: '@timestamp',
+        fields: '[]',
+        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+        fieldFormatMap: '{"field":{}}',
+        typeMeta: '{}',
+        type: '',
+      },
+      type: 'index-pattern',
+      references: [],
+    };
+
+    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
 });
