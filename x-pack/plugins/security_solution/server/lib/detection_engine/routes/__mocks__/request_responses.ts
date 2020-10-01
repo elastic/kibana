@@ -399,6 +399,7 @@ export const getResult = (): RuleAlertType => ({
     timestampOverride: undefined,
     threatFilters: undefined,
     threatMapping: undefined,
+    threatLanguage: undefined,
     threatIndex: undefined,
     threatQuery: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
