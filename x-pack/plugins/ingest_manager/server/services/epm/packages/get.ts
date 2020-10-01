@@ -58,7 +58,7 @@ export async function getLimitedPackages(options: {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   const installedPackages = allPackages.filter(
-    (pkg) => (pkg.status = InstallationStatus.installed)
+    (pkg) => pkg.status === InstallationStatus.installed
   );
   const installedPackagesInfo = await Promise.all(
     installedPackages.map((pkgInstall) => {
