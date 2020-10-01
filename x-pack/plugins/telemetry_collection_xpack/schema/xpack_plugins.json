@@ -242,6 +242,30 @@
         }
       }
     },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "ingest_manager": {
       "properties": {
         "fleet_enabled": {
@@ -655,6 +679,99 @@
         }
       }
     },
+    "maps": {
+      "properties": {
+        "settings": {
+          "properties": {
+            "showMapVisualizationTypes": {
+              "type": "boolean"
+            }
+          }
+        },
+        "indexPatternsWithGeoFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoPointFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoShapeFieldCount": {
+          "type": "long"
+        },
+        "geoShapeAggLayersCount": {
+          "type": "long"
+        },
+        "mapsTotalCount": {
+          "type": "long"
+        },
+        "timeCaptured": {
+          "type": "date"
+        },
+        "attributesPerMap": {
+          "properties": {
+            "dataSourcesCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layersCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layerTypesCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "emsVectorLayersCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "mlTelemetry": {
       "properties": {
         "file_data_visualizer": {
@@ -746,6 +863,703 @@
                   },
                   "metricbeatUsed": {
                     "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "reporting": {
+      "properties": {
+        "csv": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "PNG": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "printable_pdf": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "_all": {
+          "type": "long"
+        },
+        "status": {
+          "properties": {
+            "cancelled": {
+              "type": "long"
+            },
+            "completed": {
+              "type": "long"
+            },
+            "completed_with_warnings": {
+              "type": "long"
+            },
+            "failed": {
+              "type": "long"
+            },
+            "pending": {
+              "type": "long"
+            },
+            "processing": {
+              "type": "long"
+            }
+          }
+        },
+        "statuses": {
+          "properties": {
+            "cancelled": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "completed": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "completed_with_warnings": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "failed": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "pending": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "processing": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "browser_type": {
+          "type": "keyword"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "last7Days": {
+          "properties": {
+            "csv": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "PNG": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "printable_pdf": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "_all": {
+              "type": "long"
+            },
+            "status": {
+              "properties": {
+                "cancelled": {
+                  "type": "long"
+                },
+                "completed": {
+                  "type": "long"
+                },
+                "completed_with_warnings": {
+                  "type": "long"
+                },
+                "failed": {
+                  "type": "long"
+                },
+                "pending": {
+                  "type": "long"
+                },
+                "processing": {
+                  "type": "long"
+                }
+              }
+            },
+            "statuses": {
+              "properties": {
+                "cancelled": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "completed": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "completed_with_warnings": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "failed": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "pending": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "processing": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
                   }
                 }
               }

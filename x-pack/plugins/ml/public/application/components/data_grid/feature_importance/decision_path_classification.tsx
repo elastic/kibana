@@ -99,6 +99,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
         predictionFieldName={predictionFieldName}
         minDomain={domain.minDomain}
         maxDomain={domain.maxDomain}
+        showValues={false}
       />
     </>
   );
