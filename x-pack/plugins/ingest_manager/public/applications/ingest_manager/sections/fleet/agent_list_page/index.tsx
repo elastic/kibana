@@ -173,8 +173,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
-  const [showUpgradeAvailable, setShowUpgradeAvailable] = useState<boolean>(false);
-
   // Table and search states
   const [search, setSearch] = useState<string>(defaultKuery);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
@@ -579,17 +577,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     ))}
                   </div>
                 </EuiPopover>
-                <EuiFilterButton
-                  hasActiveFilters={showUpgradeAvailable}
-                  onClick={() => {
-                    setShowUpgradeAvailable(!showUpgradeAvailable);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.showUpgradeableFilterLabel"
-                    defaultMessage="Upgrade available"
-                  />
-                </EuiFilterButton>
                 <EuiFilterButton
                   hasActiveFilters={showInactive}
                   onClick={() => setShowInactive(!showInactive)}
