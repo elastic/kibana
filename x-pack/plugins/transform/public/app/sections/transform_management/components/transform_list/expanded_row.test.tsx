@@ -27,6 +27,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', async () => {
+    // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
     const { getByText, getByTestId } = render(<ExpandedRow item={item} />);
