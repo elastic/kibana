@@ -10,15 +10,12 @@ import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import { callValidateIndicesAPI } from '../../../logs/log_analysis/api/validate_indices';
-import { callValidateDatasetsAPI } from '../../../logs/log_analysis/api/validate_datasets';
 import {
   metricsHostsJobTypes,
   getJobId,
   MetricsHostsJobType,
   DatasetFilter,
   bucketSpan,
-  partitionField,
 } from '../../../../../common/infra_ml';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
@@ -67,7 +64,7 @@ const setUpModule = async (
   end: number | undefined,
   datasetFilter: DatasetFilter,
   { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
-  pField?: string
+  partitionField?: string
 ) => {
   const indexNamePattern = indices.join(',');
   const jobIds: JobType[] = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
@@ -80,10 +77,10 @@ const setUpModule = async (
       ...defaultJobConfig.analysis_config,
     };
 
-    if (pField) {
-      analysis_config.detectors[0].partition_field_name = pField;
-      if (analysis_config.influencers.indexOf(pField) === -1) {
-        analysis_config.influencers.push(pField);
+    if (partitionField) {
+      analysis_config.detectors[0].partition_field_name = partitionField;
+      if (analysis_config.influencers.indexOf(partitionField) === -1) {
+        analysis_config.influencers.push(partitionField);
       }
     }
 
@@ -106,16 +103,16 @@ const setUpModule = async (
   const datafeedOverrides = jobIds.map((id) => {
     const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
 
-    if (!pField || id === 'hosts_memory_usage') {
+    if (!partitionField || id === 'hosts_memory_usage') {
       // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
       return defaultDatafeedConfig;
     }
 
     // If we have a partition field, we need to change the aggregation to do a terms agg at the top level
     const aggregations = {
-      [pField]: {
+      [partitionField]: {
         terms: {
-          field: pField,
+          field: partitionField,
         },
         aggregations: {
           ...defaultDatafeedConfig.aggregations,
@@ -166,28 +163,6 @@ const cleanUpModule = async (spaceId: string, sourceId: string) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes);
 };
 
-const validateSetupIndices = async (indices: string[], timestampField: string) => {
-  return await callValidateIndicesAPI(indices, [
-    {
-      name: timestampField,
-      validTypes: ['date'],
-    },
-    {
-      name: partitionField,
-      validTypes: ['keyword'],
-    },
-  ]);
-};
-
-const validateSetupDatasets = async (
-  indices: string[],
-  timestampField: string,
-  startTime: number,
-  endTime: number
-) => {
-  return await callValidateDatasetsAPI(indices, timestampField, startTime, endTime);
-};
-
 export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {
   moduleId,
   moduleName,
@@ -199,6 +174,4 @@ export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {
   getModuleDefinition,
   setUpModule,
   cleanUpModule,
-  validateSetupDatasets,
-  validateSetupIndices,
 };
