@@ -135,9 +135,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     private readonly getAuditorFactory: () => AuditorFactory,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.client = new Client(
-      parseElasticsearchClientConfig(config, log, { includeSystemHeaders: true })
-    );
+    this.client = new Client(parseElasticsearchClientConfig(config, log));
   }
 
   /**

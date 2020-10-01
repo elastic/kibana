@@ -61,7 +61,10 @@ export function parseClientOptions(
   const clientOptions: ClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
-    headers: config.customHeaders,
+    headers: {
+      'X-Kibana': 'true',
+      ...config.customHeaders,
+    },
   };
 
   if (config.pingTimeout != null) {

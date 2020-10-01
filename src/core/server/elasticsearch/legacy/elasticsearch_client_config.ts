@@ -66,8 +66,6 @@ interface LegacyElasticsearchClientConfigOverrides {
    * be used to connect to Elasticsearch.
    */
   ignoreCertAndKey?: boolean;
-
-  includeSystemHeaders?: boolean;
 }
 
 // Original `ConfigOptions` defines `ssl: object` so we need something more specific.
@@ -88,11 +86,7 @@ type ExtendedConfigOptions = ConfigOptions &
 export function parseElasticsearchClientConfig(
   config: LegacyElasticsearchClientConfig,
   log: Logger,
-  {
-    ignoreCertAndKey = false,
-    auth = true,
-    includeSystemHeaders = true,
-  }: LegacyElasticsearchClientConfigOverrides = {}
+  { ignoreCertAndKey = false, auth = true }: LegacyElasticsearchClientConfigOverrides = {}
 ) {
   const esClientConfig: ExtendedConfigOptions = {
     keepAlive: true,
@@ -130,17 +124,18 @@ export function parseElasticsearchClientConfig(
       const httpsURI = uri.protocol === 'https:';
       const httpURI = uri.protocol === 'http:';
 
-      const headers = includeSystemHeaders
-        ? { ...config.customHeaders, 'X-Kibana': 'true' }
-        : config.customHeaders;
-
       const host: Record<string, unknown> = {
         host: uri.hostname,
         port: uri.port || (httpsURI && '443') || (httpURI && '80'),
         protocol: uri.protocol,
         path: uri.pathname,
         query: uri.query,
-        headers,
+        headers: {
+          // the X-Kibana header allows ES to identify that this request is coming from Kibana
+          // so that Elasticsearch can ignore these calls for the System Index deprecations
+          'X-Kibana': 'true',
+          ...config.customHeaders,
+        },
       };
 
       if (needsAuth) {
