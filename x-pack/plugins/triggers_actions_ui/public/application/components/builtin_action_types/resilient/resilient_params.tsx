@@ -229,7 +229,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldLabel',
               {
                 defaultMessage: 'Referenced Saved Object ID (optional)',
               }

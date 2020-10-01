@@ -186,7 +186,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldLabel',
               {
                 defaultMessage: 'Referenced Saved Object ID (optional)',
               }
