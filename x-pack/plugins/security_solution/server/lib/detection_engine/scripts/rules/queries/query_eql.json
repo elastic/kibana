@@ -25,6 +25,7 @@
   "from": "now-300m",
   "severity": "high",
   "type": "eql",
+  "language": "eql",
   "threat": [
     {
       "framework": "MITRE ATT&CK",
