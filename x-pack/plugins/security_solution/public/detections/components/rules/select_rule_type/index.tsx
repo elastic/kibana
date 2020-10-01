@@ -21,19 +21,19 @@ import { MlCardDescription } from './ml_card_description';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface SelectRuleTypeProps {
-  describedByIds?: string[];
+  describedByIds: string[];
   field: FieldHook;
-  hasValidLicense?: boolean;
-  isMlAdmin?: boolean;
-  isReadOnly?: boolean;
+  hasValidLicense: boolean;
+  isMlAdmin: boolean;
+  isUpdateView: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
-  isReadOnly = false,
-  hasValidLicense = false,
-  isMlAdmin = false,
+  isUpdateView,
+  hasValidLicense,
+  isMlAdmin,
 }) => {
   const ruleType = field.value as Type;
   const setType = useCallback(
@@ -47,54 +47,54 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
-  const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
   });
 
   const eqlSelectableConfig = useMemo(
     () => ({
-      isDisabled: isReadOnly,
       onClick: setEql,
       isSelected: isEqlRule(ruleType),
+      isVisible: !isUpdateView || isEqlRule(ruleType),
     }),
-    [isReadOnly, ruleType, setEql]
+    [ruleType, setEql, isUpdateView]
   );
 
   const querySelectableConfig = useMemo(
     () => ({
-      isDisabled: isReadOnly,
       onClick: setQuery,
       isSelected: isQueryRule(ruleType),
+      isVisible: !isUpdateView || isQueryRule(ruleType),
     }),
-    [isReadOnly, ruleType, setQuery]
+    [ruleType, setQuery, isUpdateView]
   );
 
   const mlSelectableConfig = useMemo(
     () => ({
-      isDisabled: mlCardDisabled,
+      isDisabled: !hasValidLicense || !isMlAdmin,
       onClick: setMl,
       isSelected: isMlRule(ruleType),
+      isVisible: !isUpdateView || isMlRule(ruleType),
     }),
-    [mlCardDisabled, ruleType, setMl]
+    [ruleType, setMl, isUpdateView, hasValidLicense, isMlAdmin]
   );
 
   const thresholdSelectableConfig = useMemo(
     () => ({
-      isDisabled: isReadOnly,
       onClick: setThreshold,
       isSelected: isThresholdRule(ruleType),
+      isVisible: !isUpdateView || isThresholdRule(ruleType),
     }),
-    [isReadOnly, ruleType, setThreshold]
+    [ruleType, setThreshold, isUpdateView]
   );
 
   const threatMatchSelectableConfig = useMemo(
     () => ({
-      isDisabled: isReadOnly,
       onClick: setThreatMatch,
       isSelected: isThreatMatchRule(ruleType),
+      isVisible: !isUpdateView || isThreatMatchRule(ruleType),
     }),
-    [isReadOnly, ruleType, setThreatMatch]
+    [ruleType, setThreatMatch, isUpdateView]
   );
 
   return (
@@ -105,62 +105,67 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       label={field.label}
     >
       <EuiFlexGrid columns={4}>
-        <EuiFlexItem>
-          <EuiCard
-            data-test-subj="customRuleType"
-            title={i18n.QUERY_TYPE_TITLE}
-            description={i18n.QUERY_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="search" />}
-            isDisabled={querySelectableConfig.isDisabled && !querySelectableConfig.isSelected}
-            selectable={querySelectableConfig}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            data-test-subj="machineLearningRuleType"
-            title={i18n.ML_TYPE_TITLE}
-            description={
-              <MlCardDescription subscriptionUrl={licensingUrl} hasValidLicense={hasValidLicense} />
-            }
-            icon={<EuiIcon size="l" type="machineLearningApp" />}
-            isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
-            selectable={mlSelectableConfig}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            data-test-subj="thresholdRuleType"
-            title={i18n.THRESHOLD_TYPE_TITLE}
-            description={i18n.THRESHOLD_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="indexFlush" />}
-            isDisabled={
-              thresholdSelectableConfig.isDisabled && !thresholdSelectableConfig.isSelected
-            }
-            selectable={thresholdSelectableConfig}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            data-test-subj="eqlRuleType"
-            title={i18n.EQL_TYPE_TITLE}
-            description={i18n.EQL_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="bullseye" />}
-            isDisabled={eqlSelectableConfig.isDisabled && !eqlSelectableConfig.isSelected}
-            selectable={eqlSelectableConfig}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            data-test-subj="threatMatchRuleType"
-            title={i18n.THREAT_MATCH_TYPE_TITLE}
-            description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="list" />}
-            isDisabled={
-              threatMatchSelectableConfig.isDisabled && !threatMatchSelectableConfig.isSelected
-            }
-            selectable={threatMatchSelectableConfig}
-          />
-        </EuiFlexItem>
+        {querySelectableConfig.isVisible && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="customRuleType"
+              title={i18n.QUERY_TYPE_TITLE}
+              description={i18n.QUERY_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="search" />}
+              selectable={querySelectableConfig}
+            />
+          </EuiFlexItem>
+        )}
+        {mlSelectableConfig.isVisible && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="machineLearningRuleType"
+              title={i18n.ML_TYPE_TITLE}
+              description={
+                <MlCardDescription
+                  subscriptionUrl={licensingUrl}
+                  hasValidLicense={hasValidLicense}
+                />
+              }
+              icon={<EuiIcon size="l" type="machineLearningApp" />}
+              isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
+              selectable={mlSelectableConfig}
+            />
+          </EuiFlexItem>
+        )}
+        {thresholdSelectableConfig.isVisible && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="thresholdRuleType"
+              title={i18n.THRESHOLD_TYPE_TITLE}
+              description={i18n.THRESHOLD_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="indexFlush" />}
+              selectable={thresholdSelectableConfig}
+            />
+          </EuiFlexItem>
+        )}
+        {eqlSelectableConfig.isVisible && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="eqlRuleType"
+              title={i18n.EQL_TYPE_TITLE}
+              description={i18n.EQL_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="bullseye" />}
+              selectable={eqlSelectableConfig}
+            />
+          </EuiFlexItem>
+        )}
+        {threatMatchSelectableConfig.isVisible && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="threatMatchRuleType"
+              title={i18n.THREAT_MATCH_TYPE_TITLE}
+              description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="list" />}
+              selectable={threatMatchSelectableConfig}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGrid>
     </EuiFormRow>
   );

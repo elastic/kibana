@@ -236,7 +236,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
-              isReadOnly: isUpdateView,
+              isUpdateView,
               hasValidLicense: hasMlLicense(mlCapabilities),
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
