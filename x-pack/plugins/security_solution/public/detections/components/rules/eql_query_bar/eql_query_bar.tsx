@@ -27,10 +27,9 @@ export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
-  index: string[];
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, index }) => {
+export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { setValue } = field;

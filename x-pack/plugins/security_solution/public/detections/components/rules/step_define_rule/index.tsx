@@ -238,7 +238,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
-                    index,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}
                   config={{
