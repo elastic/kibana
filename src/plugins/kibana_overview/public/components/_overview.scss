@@ -39,10 +39,6 @@
   }
 }
 
-.kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
-  fill: $euiColorDarkestShade;
-}
-
 .kbnOverviewApps__item {
   .kbnOverviewApps__group--primary & {
     @include euiBreakpoint('m', 'l', 'xl') {
@@ -115,13 +111,6 @@
 // Accounting for no `flush="both"` prop on EuiButtonEmpty
 .kbnOverviewDataAdd__actionButton {
   margin-right: 0;
-}
-
-.kbnOverviewDataAdd__content,
-.kbnOverviewDataManage__content {
-  & .euiIcon__fillSecondary {
-    fill: $euiColorDarkestShade;
-  }
 }
 
 .kbnOverviewDataManage__item:not(:only-child) {
