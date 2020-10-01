@@ -11,8 +11,8 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { formatNumber } from '../../../../../common/formatters/number';
-import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../../common/http_api';
+import { formatNumber } from '../../../../common/formatters/number';
+import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api';
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 

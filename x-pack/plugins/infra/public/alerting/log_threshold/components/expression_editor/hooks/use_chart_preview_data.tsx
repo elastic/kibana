@@ -5,15 +5,15 @@
  */
 import { useState, useMemo } from 'react';
 import { AlertsContext } from '../editor';
-import { useTrackedPromise } from '../../../../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
   getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
   getLogAlertsChartPreviewDataRequestPayloadRT,
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
-} from '../../../../../../../common/http_api';
-import { decodeOrThrow } from '../../../../../../../common/runtime_types';
-import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../../common/http_api/log_alerts/';
+} from '../../../../../../common/http_api';
+import { decodeOrThrow } from '../../../../../../common/runtime_types';
+import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts/';
 
 interface Options {
   sourceId: string;

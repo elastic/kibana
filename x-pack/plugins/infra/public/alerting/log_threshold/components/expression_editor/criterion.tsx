@@ -21,12 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { isNumber, isFinite } from 'lodash';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
   Comparator,
   Criterion as CriterionType,
   ComparatorToi18nMap,
-} from '../../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../../common/alerting/logs/log_threshold/types';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
