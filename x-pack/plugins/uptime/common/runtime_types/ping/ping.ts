@@ -186,6 +186,11 @@ export const PingType = t.intersection([
         id: t.string,
         name: t.string,
       }),
+      error: t.partial({
+        message: t.string,
+        name: t.string,
+        stack: t.string,
+      }),
       package_version: t.string,
       step: t.type({
         index: t.number,
@@ -200,11 +205,6 @@ export const PingType = t.intersection([
       blob_mime: t.string,
       payload: t.partial({
         duration: t.number,
-        error: t.partial({
-          message: t.string,
-          name: t.string,
-          stack: t.string,
-        }),
         index: t.number,
         is_navigation_request: t.boolean,
         message: t.string,
