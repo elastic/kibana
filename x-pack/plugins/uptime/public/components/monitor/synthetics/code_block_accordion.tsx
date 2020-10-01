@@ -14,7 +14,17 @@ interface Props {
   overflowHeight: number;
 }
 
-export const Accordion: FC<Props> = ({ buttonContent, children, id, language, overflowHeight }) => {
+/**
+ * Utility for showing `EuiAccordions` with code blocks which we use frequently in synthetics to display
+ * stack traces, long error messages, and synthetics journey code.
+ */
+export const CodeBlockAccordion: FC<Props> = ({
+  buttonContent,
+  children,
+  id,
+  language,
+  overflowHeight,
+}) => {
   return children && id ? (
     <EuiAccordion id={id} buttonContent={buttonContent}>
       <EuiCodeBlock isCopyable={true} overflowHeight={overflowHeight} language={language}>

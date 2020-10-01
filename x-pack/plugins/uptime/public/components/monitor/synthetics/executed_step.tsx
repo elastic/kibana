@@ -8,7 +8,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Accordion } from './accordion';
+import { CodeBlockAccordion } from './code_block_accordion';
 import { StepScreenshotDisplay } from './step_screenshot_display';
 import { StatusBadge } from './status_badge';
 import { Ping } from '../../../../common/runtime_types';
@@ -53,7 +53,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Accordion
+            <CodeBlockAccordion
               id={step.synthetics?.step?.name + String(index)}
               buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.scriptHeading', {
                 defaultMessage: 'Step script',
@@ -62,8 +62,8 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
               language="javascript"
             >
               {step.synthetics?.payload?.source}
-            </Accordion>
-            <Accordion
+            </CodeBlockAccordion>
+            <CodeBlockAccordion
               id={`${step.synthetics?.step?.name}_error`}
               buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
                 defaultMessage: 'Error',
@@ -72,8 +72,8 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
               overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
             >
               {step.synthetics?.payload?.error?.message}
-            </Accordion>
-            <Accordion
+            </CodeBlockAccordion>
+            <CodeBlockAccordion
               id={`${step.synthetics?.step?.name}_stack`}
               buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
                 defaultMessage: 'Stack trace',
@@ -82,7 +82,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
               overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
             >
               {step.synthetics?.payload?.error?.stack}
-            </Accordion>
+            </CodeBlockAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
