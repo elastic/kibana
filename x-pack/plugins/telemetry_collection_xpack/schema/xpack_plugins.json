@@ -1,5 +1,128 @@
 {
   "properties": {
+    "canvas": {
+      "properties": {
+        "workpads": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "pages": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "elements": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "per_page": {
+              "properties": {
+                "avg": {
+                  "type": "float"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "functions": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "per_element": {
+              "properties": {
+                "avg": {
+                  "type": "float"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "variables": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "custom_elements": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "elements": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "functions_in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud": {
       "properties": {
         "isCloudEnabled": {
@@ -119,6 +242,30 @@
         }
       }
     },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "ingest_manager": {
       "properties": {
         "fleet_enabled": {
@@ -141,15 +288,18 @@
           }
         },
         "packages": {
-          "properties": {
-            "name": {
-              "type": "keyword"
-            },
-            "version": {
-              "type": "keyword"
-            },
-            "enabled": {
-              "type": "boolean"
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
             }
           }
         }
@@ -540,6 +690,791 @@
         }
       }
     },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "license": {
+                "type": "keyword"
+              },
+              "clusterUuid": {
+                "type": "keyword"
+              },
+              "metricbeatUsed": {
+                "type": "boolean"
+              },
+              "elasticsearch": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "kibana": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "logstash": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "beats": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "apm": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "reporting": {
+      "properties": {
+        "csv": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "PNG": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "printable_pdf": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "_all": {
+          "type": "long"
+        },
+        "status": {
+          "properties": {
+            "cancelled": {
+              "type": "long"
+            },
+            "completed": {
+              "type": "long"
+            },
+            "completed_with_warnings": {
+              "type": "long"
+            },
+            "failed": {
+              "type": "long"
+            },
+            "pending": {
+              "type": "long"
+            },
+            "processing": {
+              "type": "long"
+            }
+          }
+        },
+        "statuses": {
+          "properties": {
+            "cancelled": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "completed": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "completed_with_warnings": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "failed": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "pending": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "processing": {
+              "properties": {
+                "csv": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNG": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "browser_type": {
+          "type": "keyword"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "last7Days": {
+          "properties": {
+            "csv": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "PNG": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "printable_pdf": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "_all": {
+              "type": "long"
+            },
+            "status": {
+              "properties": {
+                "cancelled": {
+                  "type": "long"
+                },
+                "completed": {
+                  "type": "long"
+                },
+                "completed_with_warnings": {
+                  "type": "long"
+                },
+                "failed": {
+                  "type": "long"
+                },
+                "pending": {
+                  "type": "long"
+                },
+                "processing": {
+                  "type": "long"
+                }
+              }
+            },
+            "statuses": {
+              "properties": {
+                "cancelled": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "completed": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "completed_with_warnings": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "failed": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "pending": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "processing": {
+                  "properties": {
+                    "csv": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNG": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "rollups": {
       "properties": {
         "index_patterns": {
@@ -635,18 +1570,21 @@
               "type": "long"
             },
             "os": {
-              "properties": {
-                "full_name": {
-                  "type": "keyword"
-                },
-                "platform": {
-                  "type": "keyword"
-                },
-                "version": {
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "long"
+              "type": "array",
+              "items": {
+                "properties": {
+                  "full_name": {
+                    "type": "keyword"
+                  },
+                  "platform": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "long"
+                  }
                 }
               }
             },
@@ -686,10 +1624,16 @@
           "type": "number"
         },
         "enabledAuthProviders": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "httpAuthSchemes": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },
@@ -821,16 +1765,28 @@
                   "type": "boolean"
                 },
                 "autorefreshInterval": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "dateRangeEnd": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "dateRangeStart": {
-                  "type": "date"
+                  "type": "array",
+                  "items": {
+                    "type": "date"
+                  }
                 },
                 "monitor_frequency": {
-                  "type": "long"
+                  "type": "array",
+                  "items": {
+                    "type": "long"
+                  }
                 },
                 "monitor_name_stats": {
                   "properties": {

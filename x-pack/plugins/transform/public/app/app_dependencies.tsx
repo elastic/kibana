@@ -11,6 +11,8 @@ import { ScopedHistory } from 'kibana/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
+import type { GetMlSharedImportsReturnType } from '../shared_imports';
+
 export interface AppDependencies {
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
@@ -23,6 +25,7 @@ export interface AppDependencies {
   storage: Storage;
   overlays: CoreStart['overlays'];
   history: ScopedHistory;
+  ml: GetMlSharedImportsReturnType;
 }
 
 export const useAppDependencies = () => {

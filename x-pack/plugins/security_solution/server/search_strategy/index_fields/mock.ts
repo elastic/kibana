@@ -48,6 +48,22 @@ export const mockAuditbeatIndexField: FieldDescriptor[] = [
     readFromDocValues: false,
     esTypes: [],
   },
+  {
+    name: 'agent.user.name',
+    searchable: true,
+    type: 'string',
+    aggregatable: true,
+    readFromDocValues: false,
+    esTypes: [],
+  },
+  {
+    name: 'client.as.number.text',
+    searchable: true,
+    type: 'string',
+    aggregatable: true,
+    readFromDocValues: false,
+    esTypes: [],
+  },
 ];
 
 export const mockFilebeatIndexField: FieldDescriptor[] = [
