@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../../saved_objects/public';
 import { SavedSearch } from '../../../saved_searches';
 
-export const onSaveSearch = async (
+export async function onSaveSearch(
   savedSearch: SavedSearch,
   saveDataSource: (args: {
     confirmOverwrite: boolean;
@@ -32,8 +32,8 @@ export const onSaveSearch = async (
   }) => Promise<{ id: string; error: string }>,
   onSaveDataSourceSuccess: () => void,
   i18nStart: I18nStart
-) => {
-  const onSave = ({
+) {
+  const onSave = async ({
     newTitle,
     newCopyOnSave,
     isTitleDuplicateConfirmed,
@@ -77,4 +77,4 @@ export const onSaveSearch = async (
     />
   );
   showSaveModal(saveModal, i18nStart.Context);
-};
+}
