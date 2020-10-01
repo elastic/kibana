@@ -224,10 +224,9 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       state.prevLocationArr,
       params.trackingEvent
     );
-    const tempMovedEntities = movedEntities[0];
 
     // Create alert instances
-    [tempMovedEntities].forEach(({ entityName, currLocation, prevLocation }) => {
+    movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
       const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || '';
       const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || '';
       services
