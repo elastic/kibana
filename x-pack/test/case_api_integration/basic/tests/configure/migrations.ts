@@ -31,7 +31,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         id: 'connector-1',
         name: 'Connector 1',
         type: '',
-        fields: {},
+        fields: null,
       });
     });
   });

@@ -22,7 +22,7 @@ interface SanitizedCase {
     id: string;
     name: string | null;
     type: string | null;
-    fields: Array<Record<string, unknown>>;
+    fields: null;
   };
 }
 
@@ -31,7 +31,7 @@ interface SanitizedConfigure {
     id: string;
     name: string | null;
     type: string | null;
-    fields: Array<Record<string, unknown>>;
+    fields: null;
   };
 }
 
@@ -49,7 +49,7 @@ export const caseMigrations = {
           id: connector_id ?? 'none',
           name: connector_id ? null : 'none',
           type: connector_id ? null : '.none',
-          fields: [],
+          fields: null,
         },
       },
       references: doc.references || [],
@@ -71,7 +71,7 @@ export const configureMigrations = {
           id: connector_id ?? 'none',
           name: connector_name ?? 'none',
           type: connector_id ? null : '.none',
-          fields: [],
+          fields: null,
         },
       },
       references: doc.references || [],
