@@ -192,16 +192,11 @@ export class VegaBaseView {
     // This might be due to https://github.com/jquery/jquery/issues/3808
     // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
-    const height =
-      Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
-    // Somehow the `height` signal in vega becomes zero if the height is set exactly to
-    // an even number. This is a dirty workaround for this.
-    // when vega itself is updated again, it should be checked whether this is still
-    // necessary.
-    const adjustedHeight = height + 0.00000001;
-    if (view.width() !== width || view.height() !== adjustedHeight) {
-      view.width(width).height(adjustedHeight);
+    const width = Math.max(0, this._$container.width());
+    const height = Math.max(0, this._$container.height()) - heightExtraPadding;
+
+    if (view.width() !== width || view.height() !== height) {
+      view.width(width).height(height);
       return true;
     }
     return false;
