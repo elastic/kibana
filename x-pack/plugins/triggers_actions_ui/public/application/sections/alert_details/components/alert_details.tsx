@@ -288,7 +288,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     size="s"
                     title={
                       <FormattedMessage
-                        id="core.ui.overlays.banner.attentionTitle"
+                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.attentionBannerTitle"
                         defaultMessage="This alert has an error caused by the {errorReason} reason."
                         values={{
                           errorReason: alert.executionStatus.error?.reason,
@@ -300,7 +300,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiTitle size="m">
                       <h3>
                         <EuiTextColor color="danger">
-                          <FormattedMessage id="alertErrorTitle" defaultMessage="Error message:" />
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.alertErrorMessageTitle"
+                            defaultMessage="Error message:"
+                          />
                         </EuiTextColor>
                       </h3>
                     </EuiTitle>
@@ -309,7 +312,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     </EuiText>
                     <EuiSpacer size="s" />
                     <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
-                      <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.dismissButtonTitle"
+                        defaultMessage="Dismiss"
+                      />
                     </EuiButton>
                   </EuiCallOut>
                 </EuiFlexItem>

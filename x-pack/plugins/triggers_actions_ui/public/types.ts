@@ -122,7 +122,7 @@ export interface AlertType {
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
 
-export type AlertWithoutId = Omit<Alert, 'id'>;
+export type AlertWithoutId = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];

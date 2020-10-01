@@ -430,7 +430,7 @@ export const AlertsList: React.FunctionComponent = () => {
               size="s"
               title={
                 <FormattedMessage
-                  id="core.ui.overlays.banner.attentionTitle"
+                  id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
                   defaultMessage="There is {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}} with an error."
                   values={{
                     totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]],
@@ -447,10 +447,16 @@ export const AlertsList: React.FunctionComponent = () => {
                 color="danger"
                 onClick={() => setAlertStatusesFilter([AlertExecutionStatusValues[2]])}
               >
-                <FormattedMessage id="banner.closeButtonLabel" defaultMessage="View" />
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.viewBunnerButtonLabel"
+                  defaultMessage="View"
+                />
               </EuiButton>
               <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
-                <FormattedMessage id="alertErrorMessage" defaultMessage="Dismiss" />
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.dismissBunnerButtonLabel"
+                  defaultMessage="Dismiss"
+                />
               </EuiButtonEmpty>
             </EuiCallOut>
           </EuiFlexItem>

@@ -168,6 +168,11 @@ describe('alerts_list component with items', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            date: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
         },
         {
           id: '2',
@@ -185,6 +190,14 @@ describe('alerts_list component with items', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'error',
+            date: new Date('2020-08-20T19:23:38Z'),
+            error: {
+              reason: 'unknown',
+              message: 'test',
+            },
+          },
         },
       ],
     });
@@ -246,6 +259,7 @@ describe('alerts_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="alertsTableCell-status"]')).toHaveLength(4);
   });
 });
 
@@ -351,6 +365,11 @@ describe('alerts_list with show only capability', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            date: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
         },
         {
           id: '2',
@@ -368,6 +387,11 @@ describe('alerts_list with show only capability', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            date: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
         },
       ],
     });
