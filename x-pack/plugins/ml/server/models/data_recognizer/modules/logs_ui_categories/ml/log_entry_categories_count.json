@@ -1,7 +1,9 @@
 {
   "job_type": "anomaly_detector",
   "description": "Logs UI: Detects anomalies in count of log entries by category",
-  "groups": ["logs-ui"],
+  "groups": [
+    "logs-ui"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "categorization_field_name": "message",
@@ -14,7 +16,10 @@
         "use_null": true
       }
     ],
-    "influencers": ["event.dataset", "mlcategory"],
+    "influencers": [
+      "event.dataset",
+      "mlcategory"
+    ],
     "per_partition_categorization": {
       "enabled": true,
       "stop_on_warn": false
