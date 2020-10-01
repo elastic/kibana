@@ -35,4 +35,4 @@ export const IndexPatternSelect = (props: IndexPatternSelectProps) => (
 );
 
 export * from './create_index_pattern_select';
-export { IndexPatternSelectProps } from './index_pattern_select';
+export type { IndexPatternSelectProps } from './index_pattern_select';
