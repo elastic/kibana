@@ -109,10 +109,8 @@ export interface AgentEvent extends NewAgentEvent {
 
 export type AgentEventSOAttributes = NewAgentEvent;
 
-type MetadataValue = string | AgentMetadata;
-
 export interface AgentMetadata {
-  [x: string]: MetadataValue;
+  [x: string]: any;
 }
 interface AgentBase {
   type: AgentType;

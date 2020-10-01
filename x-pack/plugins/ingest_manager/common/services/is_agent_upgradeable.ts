@@ -21,5 +21,6 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   const kibanaVersionParsed = semver.parse(kibanaVersion);
   const agentVersionParsed = semver.parse(agentVersion);
   if (!agentVersionParsed || !kibanaVersionParsed) return false;
+  if (!agent.local_metadata.elastic.agent.upgradeable) return false;
   return semver.lt(agentVersionParsed, kibanaVersionParsed);
 }
