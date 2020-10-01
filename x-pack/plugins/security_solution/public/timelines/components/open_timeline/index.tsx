@@ -6,11 +6,12 @@
 
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, shallowEqual, useSelector } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
 import { sourcererSelectors, State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -114,10 +115,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       () => sourcererSelectors.getAllExistingIndexNamesSelector(),
       []
     );
-    const existingIndexNames = useSelector<State, string[]>(
-      existingIndexNamesSelector,
-      shallowEqual
-    );
+    const existingIndexNames = useShallowEqualSelector<string[]>(existingIndexNamesSelector);
 
     const {
       customTemplateTimelineCount,
