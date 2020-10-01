@@ -272,7 +272,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         </EuiFormRow>
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow>
+      <EuiFormRow fullWidth>
         <EuiFormRow
           {...inputs.additionalYamlConfig.formRowProps}
           label={i18n.translate('xpack.ingestManager.settings.additionalYamlConfig', {
