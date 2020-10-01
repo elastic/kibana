@@ -16,6 +16,7 @@ import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
+import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();
 
@@ -195,8 +196,14 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    fleet: {
+      alias: 'f',
+      describe: 'enroll fleet agents for hosts',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
-  const kbnClient = new KbnClient(new ToolingLog(), { url: argv.kibana });
+  const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
 
   try {
     await doIngestSetup(kbnClient);
@@ -232,6 +239,7 @@ async function main() {
     argv.eventIndex,
     argv.alertIndex,
     argv.alertsPerHost,
+    argv.fleet,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,

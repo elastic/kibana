@@ -67,7 +67,7 @@ const Windows: OSFields[] = [
     full: 'Windows 10',
     version: '10.0',
     platform: 'Windows',
-    family: 'Windows',
+    family: 'windows',
     Ext: {
       variant: 'Windows Pro',
     },
@@ -77,7 +77,7 @@ const Windows: OSFields[] = [
     full: 'Windows Server 2016',
     version: '10.0',
     platform: 'Windows',
-    family: 'Windows',
+    family: 'windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -87,7 +87,7 @@ const Windows: OSFields[] = [
     full: 'Windows Server 2012',
     version: '6.2',
     platform: 'Windows',
-    family: 'Windows',
+    family: 'windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -97,7 +97,7 @@ const Windows: OSFields[] = [
     full: 'Windows Server 2012R2',
     version: '6.3',
     platform: 'Windows',
-    family: 'Windows',
+    family: 'windows',
     Ext: {
       variant: 'Windows Server Release 2',
     },

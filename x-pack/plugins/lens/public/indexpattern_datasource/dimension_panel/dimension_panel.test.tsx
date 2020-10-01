@@ -25,6 +25,7 @@ import { IndexPatternPrivateState } from '../types';
 import { IndexPatternColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
+import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -801,6 +802,35 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
+    it('should render invalid field if field reference is broken', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...defaultProps.state,
+            layers: {
+              first: {
+                ...defaultProps.state.layers.first,
+                columns: {
+                  col1: {
+                    ...defaultProps.state.layers.first.columns.col1,
+                    sourceField: 'nonexistent',
+                  } as DateHistogramIndexPatternColumn,
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
+        {
+          label: 'nonexistent',
+          value: { type: 'field', field: 'nonexistent' },
+        },
+      ]);
+    });
+
     it('should support selecting the operation before the field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
@@ -960,12 +990,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
       expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-        'Unique count',
         'Average',
         'Count',
         'Maximum',
         'Minimum',
         'Sum',
+        'Unique count',
       ]);
     });
 

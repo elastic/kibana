@@ -8,8 +8,8 @@ import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
-import fetch from 'node-fetch';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
+import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -32,11 +32,11 @@ import {
 } from '../../../ingest_manager/common';
 import { factory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
-import { firstNonNullValue } from './models/ecs_safety_helpers';
+import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 
 export async function indexHostsAndAlerts(
   client: Client,
-  kbnClient: KbnClient,
+  kbnClient: KbnClientWithApiKeySupport,
   seed: string,
   numHosts: number,
   numDocs: number,
@@ -45,6 +45,7 @@ export async function indexHostsAndAlerts(
   eventIndex: string,
   alertIndex: string,
   alertsPerHost: number,
+  fleet: boolean,
   options: TreeOptions = {}
 ) {
   const random = seedrandom(seed);
@@ -62,6 +63,7 @@ export async function indexHostsAndAlerts(
       epmEndpointPackage,
       metadataIndex,
       policyResponseIndex,
+      fleet,
       generator
     );
     await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
@@ -82,11 +84,12 @@ function delay(ms: number) {
 async function indexHostDocs(
   numDocs: number,
   client: Client,
-  kbnClient: KbnClient,
+  kbnClient: KbnClientWithApiKeySupport,
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>,
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
   policyResponseIndex: string,
+  enrollFleet: boolean,
   generator: EndpointDocGenerator
 ) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -100,49 +103,51 @@ async function indexHostDocs(
     generator.updateHostPolicyData();
 
     hostMetadata = generator.generateHostMetadata(timestamp - timeBetweenDocs * (numDocs - j - 1));
-    const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
 
-    // If we don't yet have a "real" policy record, then create it now in ingest (package config)
-    if (!realPolicies[appliedPolicyId]) {
-      // eslint-disable-next-line require-atomic-updates
-      realPolicies[appliedPolicyId] = await createPolicy(
-        kbnClient,
-        appliedPolicyName,
-        epmEndpointPackage.version
-      );
-    }
+    if (enrollFleet) {
+      const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
 
-    // If we did not yet enroll an agent for this Host, do it now that we have good policy id
-    if (!wasAgentEnrolled) {
-      wasAgentEnrolled = true;
-      enrolledAgent = await fleetEnrollAgentForHost(
-        kbnClient,
-        hostMetadata!,
-        realPolicies[appliedPolicyId].policy_id
-      );
-    }
+      // If we don't yet have a "real" policy record, then create it now in ingest (package config)
+      if (!realPolicies[appliedPolicyId]) {
+        // eslint-disable-next-line require-atomic-updates
+        realPolicies[appliedPolicyId] = await createPolicy(
+          kbnClient,
+          appliedPolicyName,
+          epmEndpointPackage.version
+        );
+      }
 
-    // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
-    hostMetadata = {
-      ...hostMetadata,
-      elastic: {
-        ...hostMetadata.elastic,
-        agent: {
-          ...hostMetadata.elastic.agent,
-          id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
-        },
-      },
-      Endpoint: {
-        ...hostMetadata.Endpoint,
-        policy: {
-          ...hostMetadata.Endpoint.policy,
-          applied: {
-            ...hostMetadata.Endpoint.policy.applied,
-            id: realPolicies[appliedPolicyId].id,
+      // If we did not yet enroll an agent for this Host, do it now that we have good policy id
+      if (!wasAgentEnrolled) {
+        wasAgentEnrolled = true;
+        enrolledAgent = await fleetEnrollAgentForHost(
+          kbnClient,
+          hostMetadata!,
+          realPolicies[appliedPolicyId].policy_id
+        );
+      }
+      // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
+      hostMetadata = {
+        ...hostMetadata,
+        elastic: {
+          ...hostMetadata.elastic,
+          agent: {
+            ...hostMetadata.elastic.agent,
+            id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
           },
         },
-      },
-    };
+        Endpoint: {
+          ...hostMetadata.Endpoint,
+          policy: {
+            ...hostMetadata.Endpoint.policy,
+            applied: {
+              ...hostMetadata.Endpoint.policy.applied,
+              id: realPolicies[appliedPolicyId].id,
+            },
+          },
+        },
+      };
+    }
 
     await client.index({
       index: metadataIndex,
@@ -265,7 +270,7 @@ const getEndpointPackageInfo = async (
 };
 
 const fleetEnrollAgentForHost = async (
-  kbnClient: KbnClient,
+  kbnClient: KbnClientWithApiKeySupport,
   endpointHost: HostMetadata,
   agentPolicyId: string
 ): Promise<undefined | PostAgentEnrollResponse['item']> => {
@@ -283,14 +288,20 @@ const fleetEnrollAgentForHost = async (
 
       if (!apiKey) {
         return Promise.reject(
-          new Error(`no API enrolment key found for agent policy id ${agentPolicyId}`)
+          new Error(`no API enrollment key found for agent policy id ${agentPolicyId}`)
         );
       }
 
-      return kbnClient.request<GetOneEnrollmentAPIKeyResponse>({
-        path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', apiKey.id),
-        method: 'GET',
-      });
+      return kbnClient
+        .request<GetOneEnrollmentAPIKeyResponse>({
+          path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', apiKey.id),
+          method: 'GET',
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.log('unable to retrieve enrollment api key for policy');
+          return Promise.reject(error);
+        });
     })
     .then((apiKeyDetailsResponse) => {
       return apiKeyDetailsResponse.data.item.api_key;
@@ -305,16 +316,43 @@ const fleetEnrollAgentForHost = async (
     return;
   }
 
+  const fetchKibanaVersion = async () => {
+    const version = ((await kbnClient.request({
+      path: '/api/status',
+      method: 'GET',
+    })) as AxiosResponse).data.version.number;
+    if (!version) {
+      // eslint-disable-next-line no-console
+      console.log('failed to retrieve kibana version');
+    }
+    return version;
+  };
+
   // Enroll an agent for the Host
   const body: PostAgentEnrollRequest['body'] = {
     type: 'PERMANENT',
     metadata: {
       local: {
-        host: endpointHost.host,
         elastic: {
           agent: {
-            version: '8.0.0',
+            version: await fetchKibanaVersion(),
           },
+        },
+        host: {
+          architecture: 'x86_64',
+          hostname: endpointHost.host,
+          name: endpointHost.host,
+          id: '1c032ec0-3a94-4d54-9ad2-c5610c0eaba4',
+          ip: ['fe80::703b:b9e6:887d:7f5/64', '10.0.2.15/24', '::1/128', '127.0.0.1/8'],
+          mac: ['08:00:27:d8:c5:c0'],
+        },
+        os: {
+          family: 'windows',
+          kernel: '10.0.19041.388 (WinBuild.160101.0800)',
+          platform: 'windows',
+          version: '10.0',
+          name: 'Windows 10 Pro',
+          full: 'Windows 10 Pro(10.0)',
         },
       },
       user_provided: {
@@ -325,12 +363,8 @@ const fleetEnrollAgentForHost = async (
   };
 
   try {
-    // FIXME: should we use `fetch()` in this module?
-    // FIXME: need way to get kibana URL without auth in it
-
-    // ------------------------------------------------
     // First enroll the agent
-    const res = await fetch(`http://localhost:5601${AGENT_API_ROUTES.ENROLL_PATTERN}`, {
+    const res = await kbnClient.requestWithApiKey(AGENT_API_ROUTES.ENROLL_PATTERN, {
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
@@ -342,12 +376,11 @@ const fleetEnrollAgentForHost = async (
 
     if (res) {
       const enrollObj: PostAgentEnrollResponse = await res.json();
-      if (!enrollObj.success) {
+      if (!res.ok) {
         // eslint-disable-next-line no-console
-        console.error(enrollObj);
+        console.error('unable to enroll agent', enrollObj);
         return;
       }
-
       // ------------------------------------------------
       // now check the agent in so that it can complete enrollment
       const checkinBody: PostAgentCheckinRequest['body'] = {
@@ -366,21 +399,22 @@ const fleetEnrollAgentForHost = async (
           },
         ],
       };
-      const checkinRes = await fetch(
-        `http://localhost:5601${AGENT_API_ROUTES.CHECKIN_PATTERN.replace(
-          '{agentId}',
-          enrollObj.item.id
-        )}`,
-        {
-          method: 'POST',
-          body: JSON.stringify(checkinBody),
-          headers: {
-            'kbn-xsrf': 'xxx',
-            Authorization: `ApiKey ${enrollObj.item.access_api_key}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const checkinRes = await kbnClient
+        .requestWithApiKey(
+          AGENT_API_ROUTES.CHECKIN_PATTERN.replace('{agentId}', enrollObj.item.id),
+          {
+            method: 'POST',
+            body: JSON.stringify(checkinBody),
+            headers: {
+              'kbn-xsrf': 'xxx',
+              Authorization: `ApiKey ${enrollObj.item.access_api_key}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        )
+        .catch((error) => {
+          return Promise.reject(error);
+        });
 
       // Agent unenrolling?
       if (checkinRes.status === 403) {
@@ -388,7 +422,7 @@ const fleetEnrollAgentForHost = async (
       }
 
       const checkinObj: PostAgentCheckinResponse = await checkinRes.json();
-      if (!checkinObj.success) {
+      if (!checkinRes.ok) {
         // eslint-disable-next-line no-console
         console.error(
           `failed to checkin agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`
@@ -413,11 +447,8 @@ const fleetEnrollAgentForHost = async (
             };
           }),
         };
-        const ackActionResp = await fetch(
-          `http://localhost:5601${AGENT_API_ROUTES.ACKS_PATTERN.replace(
-            '{agentId}',
-            enrollObj.item.id
-          )}`,
+        const ackActionResp = await kbnClient.requestWithApiKey(
+          AGENT_API_ROUTES.ACKS_PATTERN.replace('{agentId}', enrollObj.item.id),
           {
             method: 'POST',
             body: JSON.stringify(ackActionBody),
@@ -430,7 +461,7 @@ const fleetEnrollAgentForHost = async (
         );
 
         const ackActionObj: PostAgentAcksResponse = await ackActionResp.json();
-        if (!ackActionObj.success) {
+        if (!ackActionResp.ok) {
           // eslint-disable-next-line no-console
           console.error(
             `failed to ACK Actions provided to agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`
