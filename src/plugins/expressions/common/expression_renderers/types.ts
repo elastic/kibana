@@ -28,7 +28,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * A user friendly name of the renderer as will be displayed to user in UI.
    */
-  displayName: string;
+  displayName?: string;
 
   /**
    * Help text as will be displayed to user. A sentence or few about what this
