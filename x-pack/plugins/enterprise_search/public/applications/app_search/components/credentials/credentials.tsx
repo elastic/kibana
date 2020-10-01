@@ -31,13 +31,16 @@ import {
 } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
 import { CredentialsList } from './credentials_list';
+import { CredentialsFlyout } from './credentials_flyout';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   ) as ICredentialsLogicActions;
 
-  const { dataLoading } = useValues(CredentialsLogic) as ICredentialsLogicValues;
+  const { dataLoading, shouldShowCredentialsForm } = useValues(
+    CredentialsLogic
+  ) as ICredentialsLogicValues;
 
   useEffect(() => {
     initializeCredentialsData();
@@ -73,6 +76,7 @@ export const Credentials: React.FC = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContentBody>
+        {shouldShowCredentialsForm && <CredentialsFlyout />}
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiPanel style={{ textAlign: 'center' }}>
