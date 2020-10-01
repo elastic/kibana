@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
+import { Map as MbMap } from 'mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -44,7 +45,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
-  supportsMbFeatureState(): boolean;
   getMbLookupFunction(): MB_LOOKUP_FUNCTION;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
@@ -58,6 +58,12 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
   getMbPropertyName(): string;
   getMbPropertyValue(value: RawValue): RawValue;
+
+  enrichGeoJsonAndMbFeatureState(
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ): boolean;
 }
 
 export class DynamicStyleProperty<T>
@@ -384,6 +390,35 @@ export class DynamicStyleProperty<T>
     // `supportsMbFeatureState` will only return true when the mb-style rule does a feature-state lookup on a numerical value
     // Calling `isOrdinal` would be equivalent.
     return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
+  }
+
+  enrichGeoJsonAndMbFeatureState(
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ): boolean {
+    const supportsFeatureState = this.supportsMbFeatureState();
+    const featureIdentifier = {
+      source: mbSourceId,
+      id: undefined,
+    };
+    const featureState: Record<string, null | undefined | number | boolean | string> = {};
+    const targetMbName = this.getMbPropertyName();
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      const rawValue = feature.properties ? feature.properties[this.getFieldName()] : undefined;
+      const targetMbValue = this.getMbPropertyValue(rawValue);
+      if (supportsFeatureState) {
+        featureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
+        featureIdentifier.id = feature.id;
+        mbMap.setFeatureState(featureIdentifier, featureState);
+      } else {
+        if (feature.properties) {
+          feature.properties[targetMbName] = targetMbValue;
+        }
+      }
+    }
+    return supportsFeatureState;
   }
 }
 
