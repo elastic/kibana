@@ -37,8 +37,8 @@ type ComponentProps = BrowserExpandedRowProps & {
   journey?: JourneyState;
 };
 
-const someStepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
-const someStepConsole = (step: Ping) =>
+const stepEnd = (step: Ping) => step.synthetics?.type === 'step/end';
+const stepConsole = (step: Ping) =>
   ['stderr', 'cmd/status'].indexOf(step.synthetics?.type ?? '') !== -1;
 
 export const BrowserExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, journey }) => {
@@ -54,9 +54,9 @@ export const BrowserExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, jo
     return <EmptyStepState checkGroup={checkGroup} />;
   }
 
-  if (journey.steps.some(someStepEnd)) return <ExecutedJourney journey={journey} />;
+  if (journey.steps.some(stepEnd)) return <ExecutedJourney journey={journey} />;
 
-  if (journey.steps.some(someStepConsole)) return <ConsoleOutputEventList journey={journey} />;
+  if (journey.steps.some(stepConsole)) return <ConsoleOutputEventList journey={journey} />;
 
   // TODO: should not happen, this means that the journey has no step/end and no console logs, but some other steps; filmstrip, screenshot, etc.
   // we should probably create an error prompt letting the user know this step is not supported yet
