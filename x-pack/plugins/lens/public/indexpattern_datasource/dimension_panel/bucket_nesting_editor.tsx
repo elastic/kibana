@@ -6,12 +6,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
-
-const generator = htmlIdGenerator('lens-nesting');
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -54,58 +52,33 @@ export function BucketNestingEditor({
     return null;
   }
 
-  const fieldName = getFieldName(fieldMap, column);
-
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 
-  const operationDefinition = operationDefinitionMap[column.operationType];
-
   const [target] = aggColumns;
+  const operationDefinition = operationDefinitionMap[column.operationType];
 
   const canAggOrderChangeResult =
     operationDefinition.canAggOrderChangeResult ||
     operationDefinitionMap[target.operationType].canAggOrderChangeResult;
 
-  if (aggColumns.length === 1 && canAggOrderChangeResult && operationDefinition.getAggOrderCopy) {
-    function toggleNesting() {
-      if (prevColumn) {
-        setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-      } else {
-        setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-      }
-    }
-
-    const copy = operationDefinition.getAggOrderCopy(
-      fieldName,
-      target.fieldName,
-      target.operationType
-    );
-
+  if (aggColumns.length === 1 && canAggOrderChangeResult) {
     return (
       <>
         <EuiHorizontalRule margin="m" />
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.groupingControlLabel', {
-            defaultMessage: 'Grouping',
-          })}
-          labelType="legend"
-        >
-          <>
-            <EuiRadio
-              id={generator('topCopy')}
-              data-test-subj="indexPattern-nesting-topCopy"
-              label={copy.topCopy}
-              checked={!prevColumn}
-              onChange={toggleNesting}
-            />
-            <EuiRadio
-              id={generator('bottomCopy')}
-              data-test-subj="indexPattern-nesting-bottomCopy"
-              label={copy.bottomCopy}
-              checked={!!prevColumn}
-              onChange={toggleNesting}
-            />
-          </>
+        <EuiFormRow>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
+              defaultMessage: 'Use as top level aggregation',
+            })}
+            checked={!prevColumn}
+            onChange={() => {
+              if (prevColumn) {
+                setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+              } else {
+                setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+              }
+            }}
+          />
         </EuiFormRow>
       </>
     );

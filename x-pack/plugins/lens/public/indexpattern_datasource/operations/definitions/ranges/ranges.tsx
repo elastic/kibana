@@ -84,17 +84,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
   canAggOrderChangeResult: false,
-  getAggOrderCopy: (fieldName, otherFieldName) => {
-    return {
-      topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallRanges', {
-        defaultMessage: 'Top values for each range',
-      }),
-      bottomCopy: i18n.translate('xpack.lens.indexPattern.groupingSecondRanges', {
-        defaultMessage: 'Overall top {otherFieldName}',
-        values: { otherFieldName },
-      }),
-    };
-  },
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&

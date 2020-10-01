@@ -136,14 +136,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * can change the data coming from es
    */
   canAggOrderChangeResult: boolean;
-  /**
-   * copy for bucketNestingEditor in case of two nested aggregations
-   */
-  getAggOrderCopy?: (
-    fieldName: string,
-    otherFieldName: string,
-    operationType: OperationType
-  ) => { topCopy: string; bottomCopy: string };
 }
 
 interface BaseBuildColumnArgs {

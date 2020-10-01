@@ -116,18 +116,6 @@ export const dateHistogramOperation: OperationDefinition<
 
     return column;
   },
-  getAggOrderCopy: (fieldName, otherFieldName) => {
-    return {
-      topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
-        defaultMessage: 'Top values for each {field}',
-        values: { field: fieldName },
-      }),
-      bottomCopy: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-        defaultMessage: 'Overall top {target}',
-        values: { target: otherFieldName },
-      }),
-    };
-  },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,

@@ -64,23 +64,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );
   },
-  getAggOrderCopy: (fieldName, otherFieldName, otherOperationType) => {
-    return {
-      topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
-        defaultMessage: 'Overall top {field}',
-        values: { field: fieldName },
-      }),
-      bottomCopy:
-        otherOperationType === 'filters'
-          ? i18n.translate('xpack.lens.indexPattern.groupingSecondTermsWithFilters', {
-              defaultMessage: 'Top values for each custom query',
-            })
-          : i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
-              defaultMessage: 'Top values for each {target}',
-              values: { target: otherFieldName },
-            }),
-    };
-  },
   buildColumn({ suggestedPriority, columns, field }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))

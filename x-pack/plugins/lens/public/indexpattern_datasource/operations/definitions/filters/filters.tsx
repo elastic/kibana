@@ -73,18 +73,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   canAggOrderChangeResult: false,
-  getAggOrderCopy: (fieldName, otherFieldName) => {
-    return {
-      topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallFilters', {
-        defaultMessage: 'Top values for each custom query',
-      }),
-      bottomCopy: i18n.translate('xpack.lens.indexPattern.groupingSecondFilters', {
-        defaultMessage: 'Overall top {target}',
-        values: { target: otherFieldName },
-      }),
-    };
-  },
-
   input: 'none',
   isTransferable: () => true,
 
