@@ -116,7 +116,7 @@ export const getDetailedTooltip = (aspects: Aspects) => (
     return (
       <div className="detailedTooltip">
         {headerFormatter && header && (
-          <div className="visTooltip__header">{headerFormatter(header)}</div>
+          <div className="detailedTooltip__header">{headerFormatter(header)}</div>
         )}
         <table>
           <tbody>{tooltipData.map(renderData)}</tbody>

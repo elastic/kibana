@@ -3,15 +3,7 @@
   pointer-events: none;
   max-width: $euiSizeXL * 10;
   overflow: hidden;
-  padding: 0;
-
-  > :last-child {
-    margin-bottom: $euiSizeS;
-  }
-
-  > * {
-    margin: $euiSizeS $euiSizeS 0;
-  }
+  padding: $euiSizeS;
 
   table {
     td,
@@ -25,8 +17,9 @@
 }
 
 .detailedTooltip__header {
-  margin: 0 0 $euiSizeS;
-  padding: $euiSizeXS $euiSizeS;
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
 }
 
 .detailedTooltip__labelContainer,
