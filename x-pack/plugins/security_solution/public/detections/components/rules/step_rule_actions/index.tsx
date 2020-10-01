@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
@@ -125,11 +126,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   }, [getData, setForm]);
 
   const throttleOptions = useMemo(() => {
-    if (application.capabilities.actions.show) {
-      return getThrottleOptions(throttle);
-    }
-    return [{ value: DEFAULT_THROTTLE_OPTION.value, text: I18n.NO_ACTIONS_READ_PERMISSIONS }];
-  }, [throttle, application.capabilities.actions.show]);
+    return getThrottleOptions(throttle);
+  }, [throttle]);
 
   const throttleFieldComponentProps = useMemo(
     () => ({
@@ -151,7 +149,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepRuleActions">
+        <Form
+          form={form}
+          style={{ display: application.capabilities.actions.show ? 'block' : 'none' }}
+          data-test-subj="stepRuleActions"
+        >
           <EuiForm>
             <UseField
               path="throttle"
@@ -176,6 +178,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             <UseField path="enabled" component={GhostFormField} />
           </EuiForm>
         </Form>
+        {!application.capabilities.actions.show && (
+          <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
