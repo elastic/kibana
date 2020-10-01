@@ -3,6 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { PreloadedState } from 'redux';
+import { SecuritySubPlugins, RenderAppProps } from './app/types';
+
+import { Detections } from './detections';
+import { Cases } from './cases';
+import { Hosts } from './hosts';
+import { Network } from './network';
+import { Overview } from './overview';
+import { Timelines } from './timelines';
+import { Management } from './management';
+
 import { CoreStart } from '../../../../src/core/public';
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -24,6 +36,8 @@ import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { State } from './common/store/types';
+import { KibanaIndexPatterns } from './common/store/sourcerer/model';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -62,3 +76,29 @@ export interface AppObservableLibs extends AppFrontendLibs {
 }
 
 export type InspectResponse = Inspect & { response: string[] };
+
+/**
+ * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
+ */
+export interface SubPluginClasses {
+  Detections: Detections;
+  Cases: Cases;
+  Hosts: Hosts;
+  Network: Network;
+  Overview: Overview;
+  Timelines: Timelines;
+  Management: Management;
+}
+
+/**
+ * These dependencies are needed to mount the applications registered by this plugin. They are grouped into a single object for the sake of bundling the in a single Webpack chunk.
+ */
+export interface LazyApplicationDependencies {
+  subpluginClasses: SubPluginClasses;
+  renderApp: (renderAppProps: RenderAppProps) => () => void;
+  composeLibs: (core: CoreStart) => AppFrontendLibs;
+  createInitialState: (
+    pluginsInitState: SecuritySubPlugins['store']['initialState'],
+    patterns: { kibanaIndexPatterns: KibanaIndexPatterns; configIndexPatterns: string[] }
+  ) => PreloadedState<State>;
+}

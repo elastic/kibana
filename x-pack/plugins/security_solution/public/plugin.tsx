@@ -72,6 +72,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
+  private get lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    /* webpackChunkName: "lazyApplicationDependencies" */ './lazy_application_dependencies';
+    return import('./lazy_application_dependencies');
+  }
+
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     initTelemetry(plugins.usageCollection, APP_ID);
 
@@ -340,13 +349,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     composeLibs: (coreStart: CoreStart) => AppFrontendLibs;
     renderApp: (props: RenderAppProps) => () => void;
   }> {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    const { renderApp, composeLibs } = await import(
-      /* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'
-    );
+    const { renderApp, composeLibs } = await this.lazyApplicationDependencies;
 
     return {
       renderApp,
@@ -363,11 +366,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overviewSubPlugin,
       timelinesSubPlugin,
       managementSubPlugin,
-      /**
-       * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-       * See https://webpack.js.org/api/module-methods/#magic-comments
-       */
-    } = await import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies');
+    } = await this.lazyApplicationDependencies;
 
     return {
       detectionsSubPlugin,
@@ -407,11 +406,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         )
         .toPromise(),
 
-      /**
-       * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-       * See https://webpack.js.org/api/module-methods/#magic-comments
-       */
-      import(/* webpackChunkName: "lazyPluginDependencies" */ './lazy_plugin_dependencies'),
+      this.lazyApplicationDependencies,
     ]);
 
     const { apolloClient } = composeLibs(coreStart);
