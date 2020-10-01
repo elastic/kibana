@@ -6,8 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isNumber, isFinite } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../../triggers_actions_ui/public/types';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   AlertParams,
   Criteria,
@@ -15,7 +14,7 @@ import {
   isRatioAlert,
   getNumerator,
   getDenominator,
-} from '../../../../../common/alerting/logs/log_threshold/types';
+} from '../../../common/alerting/logs/log_threshold/types';
 
 export interface CriterionErrors {
   [id: string]: {

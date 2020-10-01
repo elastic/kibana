@@ -5,9 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../../../triggers_actions_ui/public/types';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../../common/alerting/logs/log_threshold/types';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../common/alerting/logs/log_threshold/types';
 import { validateExpression } from './validation';
 
 export function getAlertType(): AlertTypeModel {
@@ -17,7 +16,7 @@ export function getAlertType(): AlertTypeModel {
       defaultMessage: 'Log threshold',
     }),
     iconClass: 'bell',
-    alertParamsExpression: React.lazy(() => import('./expression_editor/editor')),
+    alertParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
