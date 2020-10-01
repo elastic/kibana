@@ -32,8 +32,10 @@
 
   // Ensure card heights are stretched equally when wrapped with this element
   .kbnRedirectCrossAppLinks {
+    align-items: flex-start;
     display: flex;
-    height: 100%;
+    flex: 1;
+    flex-direction: column;
   }
 }
 
