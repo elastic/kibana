@@ -285,6 +285,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 <EuiFlexItem>
                   <EuiCallOut
                     color="danger"
+                    data-test-subj="alertErrorBanner"
                     size="s"
                     title={
                       <FormattedMessage
@@ -307,7 +308,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         </EuiTextColor>
                       </h3>
                     </EuiTitle>
-                    <EuiText size="s" color="danger">
+                    <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
                       {alert.executionStatus.error?.message}
                     </EuiText>
                     <EuiSpacer size="s" />
