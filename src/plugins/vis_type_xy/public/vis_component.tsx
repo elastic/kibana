@@ -27,6 +27,7 @@ import {
   Position,
   XYChartSeriesIdentifier,
   BrushEndListener,
+  RenderChangeListener,
 } from '@elastic/charts';
 
 import { ExprVis } from '../../visualizations/public';
@@ -81,6 +82,15 @@ export const VisComponent = memo((props: VisComponentProps) => {
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.vis.getUiState().get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
+
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        props.renderComplete();
+      }
+    },
+    [props]
+  );
 
   const handleFilterClick = useCallback(
     (visData: KibanaDatatable, xAccessor: string | number | null): ElementClickListener => (
@@ -220,6 +230,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
           legendColorPicker={getColorPicker(legendPosition, setColor, getSeriesName)}
           onElementClick={handleFilterClick(visData, config.aspects.x.accessor)}
           onBrushEnd={handleBrush(visData, config.aspects.x.accessor)}
+          onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(

@@ -27,6 +27,7 @@ import {
   PartialTheme,
   ElementClickListener,
   BrushEndListener,
+  RenderChangeListener,
   LegendAction,
   LegendColorPicker,
   TooltipProps,
@@ -52,6 +53,7 @@ type XYSettingsProps = Pick<
   showLegend: boolean;
   onElementClick: ElementClickListener;
   onBrushEnd: BrushEndListener;
+  onRenderChange: RenderChangeListener;
   legendAction?: LegendAction;
   legendColorPicker: LegendColorPicker;
   legendPosition: Position;
@@ -70,6 +72,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   showLegend,
   onElementClick,
   onBrushEnd,
+  onRenderChange,
   legendAction,
   legendColorPicker,
   legendPosition,
@@ -119,6 +122,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       legendColorPicker={legendColorPicker}
       onElementClick={onElementClick}
       onBrushEnd={onBrushEnd}
+      onRenderChange={onRenderChange}
       legendAction={legendAction}
       tooltip={tooltipProps}
       orderOrdinalBinsBy={
