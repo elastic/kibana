@@ -141,9 +141,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
   );
 
-  const [expandedRowItem, setExpandedRowItem] = useState<DataFrameAnalyticsListRow | undefined>(
-    undefined
-  );
+  const [expandedRowItem, setExpandedRowItem] = useState<DataFrameAnalyticsListRow | undefined>();
 
   const fetchStats = async () => {
     const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
