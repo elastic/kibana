@@ -16,6 +16,7 @@ import { InternalArtifactCompleteSchema } from './schemas/artifacts';
 import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
+import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -92,9 +93,10 @@ export const getPackagePolicyCreateCallback = (
 
     // get most recent manifest
     // while creating detection index & rules (if necessary)
-    const [manifest, _] = await Promise.all([
+    const [manifest] = await Promise.all([
       getManifest(logger, manifestManager),
       createDetectionIndex(context, appClient),
+      createPrepackagedRules(context, appClient),
     ]);
 
     const serializedManifest = manifest.toEndpointFormat();
