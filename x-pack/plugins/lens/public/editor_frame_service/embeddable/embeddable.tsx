@@ -296,7 +296,7 @@ export class Embeddable
   };
 
   // same API as Visualize
-  public getVisualizationDescription() {
+  public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
   }
