@@ -6,18 +6,21 @@
 
 import React from 'react';
 import styled from 'styled-components';
-
 import { EuiLink, EuiText } from '@elastic/eui';
-import { EQL_OVERVIEW_LINK_TEXT } from './translations';
 
-const EQL_OVERVIEW_URL = 'https://eql.readthedocs.io/en/latest/query-guide/index.html';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EQL_OVERVIEW_LINK_TEXT } from './translations';
 
 const InlineText = styled(EuiText)`
   display: inline-block;
 `;
 
-export const EqlOverviewLink = () => (
-  <EuiLink external href={EQL_OVERVIEW_URL} target="_blank">
-    <InlineText size="xs">{EQL_OVERVIEW_LINK_TEXT}</InlineText>
-  </EuiLink>
-);
+export const EqlOverviewLink = () => {
+  const overviewUrl = useKibana().services.docLinks.links.query.eql;
+
+  return (
+    <EuiLink external href={overviewUrl} target="_blank">
+      <InlineText size="xs">{EQL_OVERVIEW_LINK_TEXT}</InlineText>
+    </EuiLink>
+  );
+};
