@@ -19,6 +19,7 @@ import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 import { UXMetrics } from './UXMetrics';
 import { VisitorBreakdownMap } from './VisitorBreakdownMap';
+import { ImpactfulMetrics } from './ImpactfulMetrics';
 
 export function RumDashboard() {
   return (
@@ -65,6 +66,9 @@ export function RumDashboard() {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ImpactfulMetrics />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
