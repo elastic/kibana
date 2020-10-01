@@ -5,6 +5,10 @@
  */
 import expect from '@kbn/expect';
 import { SearchResponse } from 'elasticsearch';
+import {
+  ResolverPaginatedEvents,
+  SafeEndpointEvent,
+} from '../../../plugins/security_solution/common/endpoint/types';
 import { eventsIndexPattern } from '../../../plugins/security_solution/common/endpoint/constants';
 import {
   EndpointDocGenerator,
@@ -12,6 +16,7 @@ import {
 } from '../../../plugins/security_solution/common/endpoint/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
+import { deleteEventsStream } from './data_stream_helper';
 
 interface EventIngested {
   event: {
@@ -35,6 +40,8 @@ interface NetworkEvent {
 const networkIndex = 'logs-endpoint.events.network-default';
 
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
   const es = getService('es');
   const generator = new EndpointDocGenerator('data');
@@ -59,6 +66,47 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Endpoint package', () => {
+    describe('dns processor', () => {
+      before(async () => {
+        await esArchiver.load('endpoint/pipeline/dns', { useCreate: true });
+      });
+
+      after(async () => {
+        await deleteEventsStream(getService);
+      });
+
+      it('does not set dns.question.type if it is already populated', async () => {
+        // this id comes from the es archive file endpoint/pipeline/dns
+        const id = 'LrLSOVHVsFY94TAi++++++eF';
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
+          .post(`/api/endpoint/resolver/events?limit=1`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `event.id:"${id}"`,
+          })
+          .expect(200);
+        expect(body.events.length).to.eql(1);
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.name).to.eql('www.google.com');
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.type).to.eql('INVALID_VALUE');
+      });
+
+      it('sets dns.question.type if it is not populated', async () => {
+        // this id comes from the es archive file endpoint/pipeline/dns
+        const id = 'LrLSOVHVsFY94TAi++++++eP';
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
+          .post(`/api/endpoint/resolver/events?limit=1`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `event.id:"${id}"`,
+          })
+          .expect(200);
+        expect(body.events.length).to.eql(1);
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.name).to.eql('www.aol.com');
+        // This value is parsed out of the message field in the event. type 28 = AAAA
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.type).to.eql('AAAA');
+      });
+    });
+
     describe('ingested processor', () => {
       let event: Event;
       let genData: InsertedEvents;
