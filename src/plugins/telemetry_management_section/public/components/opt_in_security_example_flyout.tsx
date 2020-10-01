@@ -68,7 +68,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
     }
   }
 
-  renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
+  renderBody({ isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
