@@ -65,7 +65,7 @@ Contains the dashboard application.
 
 - {kib-repo}blob/{branch}/src/plugins/data/README.md[data]
 
-data plugin provides common data access services.
+The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
 - {kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
@@ -86,9 +86,9 @@ Contains the Discover application and the saved search embeddable.
 Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable containers.
 
 
-- {kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
+- {kib-repo}blob/{branch}/src/plugins/es_ui_shared[esUiShared]
 
-This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
+WARNING: Missing README.
 
 
 - {kib-repo}blob/{branch}/src/plugins/expressions/README.md[expressions]
@@ -122,7 +122,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 - {kib-repo}blob/{branch}/src/plugins/kibana_legacy/README.md[kibanaLegacy]
 
-This plugin will contain several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
+This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
 
 - {kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
@@ -217,10 +217,22 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 An API for:
 
 
+- {kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
+
+This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
+
+
 - {kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]
 
 Usage Collection allows collecting usage data for other services to consume (telemetry and monitoring).
 To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
+
+
+- {kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
+
+The default editor is used in most primary visualizations, e.x. Area, Data table, Pie, etc.
+It acts as a container for a particular visualization and options tabs. Contains the default "Data" tab in public/components/sidebar/data_tab.tsx.
+The plugin exposes the static DefaultEditorController class to consume.
 
 
 - {kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
@@ -349,9 +361,9 @@ WARNING: Missing README.
 You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/dashboard_enhanced/README.md[dashboardEnhanced]
+- {kib-repo}blob/{branch}/x-pack/plugins/dashboard_enhanced[dashboardEnhanced]
 
-Contains the enhancements to the OSS dashboard app.
+WARNING: Missing README.
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode/README.md[dashboardMode]
@@ -423,7 +435,10 @@ WARNING: Missing README.
 This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/grokdebugger/README.md[grokdebugger]
+- {kib-repo}blob/{branch}/x-pack/plugins/grokdebugger[grokdebugger]
+
+WARNING: Missing README.
+
 
 - {kib-repo}blob/{branch}/x-pack/plugins/index_lifecycle_management/README.md[indexLifecycleManagement]
 
@@ -431,9 +446,9 @@ You can test that the Frozen badge, phase filtering, and lifecycle information i
 Index Management by running this series of requests in Console:
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/index_management[indexManagement]
+- {kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
 
-WARNING: Missing README.
+Create a data stream using Console and you'll be able to view it in the UI:
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
@@ -501,11 +516,6 @@ WARNING: Missing README.
 - {kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 
 This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
-
-
-- {kib-repo}blob/{branch}/x-pack/plugins/oss_telemetry[ossTelemetry]
-
-WARNING: Missing README.
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/painless_lab[painlessLab]
@@ -581,6 +591,9 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 - {kib-repo}blob/{branch}/x-pack/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
 
+Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
+
 - {kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant[upgradeAssistant]
 
 WARNING: Missing README.
@@ -595,4 +608,14 @@ in their infrastructure.
 - {kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 
 This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
+
+
+- {kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
+
+Contains HTTP endpoints and UiSettings that are slated for removal.
+
+
+- {kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+
+NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
