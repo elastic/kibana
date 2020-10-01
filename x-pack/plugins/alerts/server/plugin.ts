@@ -117,7 +117,7 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndex = initializerContext.config.legacy.globalConfig$
       .pipe(
         first(),

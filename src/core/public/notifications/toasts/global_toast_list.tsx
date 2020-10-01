@@ -20,6 +20,7 @@
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
 
 import { MountWrapper } from '../../utils';
 import { Toast } from './toasts_api';
@@ -61,6 +62,9 @@ export class GlobalToastList extends React.Component<Props, State> {
   public render() {
     return (
       <EuiGlobalToastList
+        aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
+          defaultMessage: 'Notification message list',
+        })}
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
         dismissToast={({ id }) => this.props.dismissToast(id)}
