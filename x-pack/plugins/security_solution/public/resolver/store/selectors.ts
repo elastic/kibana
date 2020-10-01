@@ -139,6 +139,22 @@ export const relatedEventCountByCategory: (
 );
 
 /**
+ * the loading state of the current related event data for the `event_detail` view
+ */
+export const isCurrentRelatedEventLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isCurrentRelatedEventLoading
+);
+
+/**
+ * the current related event data for the `event_detail` view
+ */
+export const currentRelatedEventData = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventData
+);
+
+/**
  * Map of related events... by entity id
  * @deprecated
  */
