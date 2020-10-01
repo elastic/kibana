@@ -26,7 +26,10 @@ interface MonitoringStats {
       timestamp: string;
       value: {
         drift: Record<string, object>;
-        duration: Record<string, Record<string, object>>;
+        execution: {
+          duration: Record<string, Record<string, object>>;
+          resultFrequency: Record<string, Record<string, object>>;
+        };
         polling: {
           lastSuccessfulPoll: string;
           resultFrequency: Record<string, number>;
@@ -130,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         runtime: {
-          value: { drift, polling, duration },
+          value: { drift, polling, execution },
         },
       } = (await getHealth()).stats;
 
@@ -142,8 +145,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof drift.mean).to.eql('number');
       expect(typeof drift.median).to.eql('number');
 
-      expect(typeof duration.sampleTask.mean).to.eql('number');
-      expect(typeof duration.sampleTask.median).to.eql('number');
+      expect(typeof execution.duration.sampleTask.mean).to.eql('number');
+      expect(typeof execution.duration.sampleTask.median).to.eql('number');
+
+      expect(typeof execution.resultFrequency.sampleTask.Success).to.eql('number');
+      expect(typeof execution.resultFrequency.sampleTask.RetryScheduled).to.eql('number');
+      expect(typeof execution.resultFrequency.sampleTask.Failed).to.eql('number');
     });
   });
 }

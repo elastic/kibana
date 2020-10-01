@@ -110,7 +110,7 @@ describe('Task Run Statistics', () => {
       windows: Record<string, number[]>
     ) {
       for (const [type, window] of Object.entries(windows)) {
-        expect(taskStat.value.duration[type]).toMatchObject({
+        expect(taskStat.value.execution.duration[type]).toMatchObject({
           mean: Math.round(stats.mean(window)),
           median: stats.median(window),
         });
@@ -230,7 +230,9 @@ describe('Task Run Statistics', () => {
              * At any given time we only keep track of the last X Polling Results
              * In the tests this is ocnfiugured to a window size of 5
              */
-            expect(taskStats.map((taskStat) => taskStat.value.taskRunResultFrequency)).toEqual([
+            expect(
+              taskStats.map((taskStat) => taskStat.value.execution.resultFrequency['alerting:test'])
+            ).toEqual([
               // Success
               { Success: 100, RetryScheduled: 0, Failed: 0 },
               // Success, Success,
