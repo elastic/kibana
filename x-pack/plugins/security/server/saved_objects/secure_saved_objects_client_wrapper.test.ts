@@ -283,8 +283,7 @@ describe('#addToNamespaces', () => {
   const newNs2 = 'bar-namespace';
   const namespaces = [newNs1, newNs2];
   const currentNs = 'default';
-  const privilege1 = `mock-saved_object:${type}/create`;
-  const privilege2 = `mock-saved_object:${type}/update`;
+  const privilege = `mock-saved_object:${type}/share_to_space`;
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.addToNamespaces, { type, id, namespaces });
@@ -306,7 +305,7 @@ describe('#addToNamespaces', () => {
       'addToNamespacesCreate',
       [type],
       namespaces.sort(),
-      [{ privilege: privilege1, spaceId: newNs1 }],
+      [{ privilege, spaceId: newNs1 }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -333,7 +332,7 @@ describe('#addToNamespaces', () => {
       'addToNamespacesUpdate',
       [type],
       [currentNs],
-      [{ privilege: privilege2, spaceId: currentNs }],
+      [{ privilege, spaceId: currentNs }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
@@ -351,7 +350,7 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       1,
       USERNAME,
-      'addToNamespacesCreate', // action for privilege check is 'create', but auditAction is 'addToNamespacesCreate'
+      'addToNamespacesCreate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesCreate'
       [type],
       namespaces.sort(),
       { type, id, namespaces, options: {} }
@@ -359,7 +358,7 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       2,
       USERNAME,
-      'addToNamespacesUpdate', // action for privilege check is 'update', but auditAction is 'addToNamespacesUpdate'
+      'addToNamespacesUpdate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesUpdate'
       [type],
       [currentNs],
       { type, id, namespaces, options: {} }
@@ -379,12 +378,12 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       1,
-      [privilege1],
+      [privilege],
       namespaces
     );
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       2,
-      [privilege2],
+      [privilege],
       undefined // default namespace
     );
   });
@@ -802,7 +801,7 @@ describe('#deleteFromNamespaces', () => {
   const namespace1 = 'foo-namespace';
   const namespace2 = 'bar-namespace';
   const namespaces = [namespace1, namespace2];
-  const privilege = `mock-saved_object:${type}/delete`;
+  const privilege = `mock-saved_object:${type}/share_to_space`;
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.deleteFromNamespaces, { type, id, namespaces });
@@ -821,7 +820,7 @@ describe('#deleteFromNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
       USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'delete', but auditAction is 'deleteFromNamespaces'
+      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
       namespaces.sort(),
       [{ privilege, spaceId: namespace1 }],
@@ -841,7 +840,7 @@ describe('#deleteFromNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
       USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'delete', but auditAction is 'deleteFromNamespaces'
+      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
       namespaces.sort(),
       { type, id, namespaces, options: {} }

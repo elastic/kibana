@@ -213,17 +213,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const args = { type, id, namespaces, options };
     const { namespace } = options;
-    // To share an object, the user must have the "create" permission in each of the destination namespaces.
-    await this.ensureAuthorized(type, 'create', namespaces, {
+    // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
+    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
       args,
       auditAction: 'addToNamespacesCreate',
     });
 
-    // To share an object, the user must also have the "update" permission in one or more of the source namespaces. Because the
-    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "update" permission in the
-    // current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation will
-    // result in a 404 error.
-    await this.ensureAuthorized(type, 'update', namespace, {
+    // To share an object, the user must also have the "share_to_space" permission in one or more of the source namespaces. Because the
+    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
+    // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
+    // will result in a 404 error.
+    await this.ensureAuthorized(type, 'share_to_space', namespace, {
       args,
       auditAction: 'addToNamespacesUpdate',
     });
@@ -239,8 +239,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsDeleteFromNamespacesOptions = {}
   ) {
     const args = { type, id, namespaces, options };
-    // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
-    await this.ensureAuthorized(type, 'delete', namespaces, {
+    // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
+    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
       args,
       auditAction: 'deleteFromNamespaces',
     });
