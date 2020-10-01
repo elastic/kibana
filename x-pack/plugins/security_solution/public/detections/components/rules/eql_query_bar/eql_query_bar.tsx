@@ -37,9 +37,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
   const fieldValue = field.value.query.query as string;
 
   useEffect(() => {
-    if (messages && messages.length > 0) {
-      setErrorMessages(messages);
-    }
+    setErrorMessages(messages ?? []);
   }, [messages]);
 
   useEffect(() => {

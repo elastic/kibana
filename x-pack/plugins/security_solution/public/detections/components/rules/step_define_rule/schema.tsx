@@ -25,6 +25,7 @@ import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
+    fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
