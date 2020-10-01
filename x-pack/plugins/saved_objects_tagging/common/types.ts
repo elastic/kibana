@@ -29,4 +29,4 @@ export interface ITagsClient {
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 
-export type TagSavedObjectWithRelations = TagSavedObject;
+export type TagWithRelations = Tag;

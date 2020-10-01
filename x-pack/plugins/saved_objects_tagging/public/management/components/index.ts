@@ -5,6 +5,5 @@
  */
 
 export { Header } from './header';
-export { SearchBar } from './search_bar';
 export { CreateOrEditModal } from './create_or_edit_modal';
 export { TagTable } from './table';

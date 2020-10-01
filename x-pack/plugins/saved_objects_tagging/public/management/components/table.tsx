@@ -4,81 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, FC } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { TagSavedObjectWithRelations } from '../../../common/types';
+import React, { useRef, useEffect, FC } from 'react';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { TagWithRelations } from '../../../common/types';
 import { TagBadge } from '../../components';
-import { PaginationState } from '../types';
 
 interface TagTableProps {
   loading: boolean;
-  tags: TagSavedObjectWithRelations[];
-  totalTags: number;
-  pagination: PaginationState;
-  onPaginationChange: (pagination: PaginationState) => void;
-
-  // TODO: fix type
-  onSelectionChange: (selection: any[]) => void;
+  tags: TagWithRelations[];
+  selectedTags: TagWithRelations[];
+  onSelectionChange: (selection: TagWithRelations[]) => void;
+  onEdit: (tag: TagWithRelations) => void;
 }
+
+const tablePagination = {
+  initialPageSize: 20,
+  pageSizeOptions: [5, 10, 20, 50],
+};
 
 export const TagTable: FC<TagTableProps> = ({
   loading,
-  pagination,
   tags,
-  totalTags,
-  onPaginationChange,
   onSelectionChange,
+  selectedTags,
+  onEdit,
 }) => {
-  const tableRef = useRef<EuiBasicTable>();
+  const tableRef = useRef<EuiInMemoryTable<any>>();
 
-  // tableRef.current!.setSelection()
-
-  const onTableChange = (criteria: Criteria<any>) => {
-    if (criteria.page) {
-      onPaginationChange({ pageNumber: criteria.page.index, pageSize: criteria.page.size });
+  useEffect(() => {
+    if (tableRef.current) {
+      tableRef.current.setSelection(selectedTags);
     }
-  };
-
-  // TODO column
-  // TODO pagination
-
-  const tablePagination = {
-    pageIndex: pagination.pageNumber,
-    pageSize: pagination.pageSize,
-    totalItemCount: totalTags,
-    pageSizeOptions: [5, 10, 20, 50],
-  };
+  }, [selectedTags]);
 
   const columns = [
     {
-      field: 'attributes.name',
+      field: 'name',
       name: 'Name',
       sortable: true,
       'data-test-subj': 'tagsTableRowName',
-      render: (name: string, tag: TagSavedObjectWithRelations) => {
-        return <TagBadge tag={tag.attributes} />;
+      render: (name: string, tag: TagWithRelations) => {
+        return <TagBadge tag={tag} />;
       },
     },
     {
-      field: 'attributes.description',
+      field: 'description',
       name: 'Description',
       sortable: true,
       'data-test-subj': 'tagsTableRowDescription',
     },
+    {
+      name: 'Actions',
+      width: '100px',
+      actions: [
+        {
+          name: 'Edit',
+          description: 'Edit this tag',
+          type: 'icon',
+          icon: 'pencil',
+          onClick: (object: TagWithRelations) => onEdit(object),
+          'data-test-subj': 'tagsTableAction-edit',
+        },
+      ],
+    },
   ] as any[]; // TODO fix type
 
   return (
-    <EuiBasicTable
+    <EuiInMemoryTable
       ref={tableRef as any}
       loading={loading}
       itemId={'id'}
       columns={columns}
       items={tags}
       pagination={tablePagination}
-      onChange={onTableChange}
       selection={{
+        initialSelected: selectedTags,
         onSelectionChange,
+      }}
+      search={{
+        box: {
+          incremental: true,
+          schema: {
+            fields: {
+              name: { type: 'string' },
+              description: { type: 'string' },
+            },
+          },
+        },
       }}
       rowProps={(item) => ({
         'data-test-subj': `tagsTableRow row-${item.id}`,

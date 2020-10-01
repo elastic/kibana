@@ -5,14 +5,14 @@
  */
 
 import React, { useEffect, useCallback, useState, FC } from 'react';
-import { EuiPageContent, Query } from '@elastic/eui';
+import useMount from 'react-use/lib/useMount';
+import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, OverlayStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { TagSavedObjectWithRelations } from '../../common/types';
+import { TagWithRelations } from '../../common/types';
 import { ITagInternalClient } from '../tags';
-import { Header, SearchBar, TagTable, CreateOrEditModal } from './components';
-import { PaginationState } from './types';
+import { Header, TagTable, CreateOrEditModal } from './components';
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -26,10 +26,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   tagClient,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [pagination, setPagination] = useState<PaginationState>({ pageNumber: 0, pageSize: 50 });
-  const [displayedTags, setDisplayedTags] = useState<TagSavedObjectWithRelations[]>([]);
-  const [totalTags, setTotalTags] = useState<number>(0);
-  const [selectedTags, setSelectedTags] = useState<TagSavedObjectWithRelations[]>([]);
+  const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
+  const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -42,30 +40,19 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     ]);
   }, [setBreadcrumbs]);
 
-  const fetchTags = async () => {
-    // TODO: cancel pending request if any.
+  const fetchTags = useCallback(async () => {
     setLoading(true);
-    const { tags, total } = await tagClient.find({
-      page: pagination.pageNumber + 1,
-      perPage: pagination.pageSize,
-      search: '', // TODO: wire,
+    const { tags } = await tagClient.find({
+      page: 1,
+      perPage: 10000,
     });
-    setDisplayedTags(tags);
-    setTotalTags(total);
-
+    setAllTags(tags);
     setLoading(false);
-  };
+  }, [tagClient]);
 
-  useEffect(() => {
+  useMount(() => {
     fetchTags();
-  }, [pagination, tagClient]); // eslint-disable-line
-
-  const onQueryChange = useCallback((query: Query) => {}, []);
-
-  const onPaginationChange = useCallback((newPagination: PaginationState) => {
-    setPagination(newPagination);
-    setSelectedTags([]);
-  }, []);
+  });
 
   const openCreateModal = useCallback(() => {
     const modal = overlays.openModal(
@@ -75,25 +62,37 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
             modal.close();
           }}
           onCreate={(tag) => {
+            fetchTags();
             modal.close();
           }}
           tagClient={tagClient}
         />
       )
     );
-  }, [overlays, tagClient]);
+  }, [overlays, tagClient, fetchTags]);
+
+  const openEditModal = useCallback(
+    (tag: TagWithRelations) => {
+      // console.log('openEditModal', tag);
+    },
+    [
+      /* overlays, tagClient */
+    ]
+  );
 
   return (
     <EuiPageContent horizontalPosition="center">
       <Header onCreate={openCreateModal} />
-      <SearchBar onChange={onQueryChange} />
       <TagTable
         loading={loading}
-        totalTags={totalTags}
-        tags={displayedTags}
-        pagination={pagination}
-        onPaginationChange={onPaginationChange}
-        onSelectionChange={setSelectedTags}
+        tags={allTags}
+        selectedTags={selectedTags}
+        onSelectionChange={(tags) => {
+          setSelectedTags(tags);
+        }}
+        onEdit={(tag) => {
+          openEditModal(tag);
+        }}
       />
     </EuiPageContent>
   );

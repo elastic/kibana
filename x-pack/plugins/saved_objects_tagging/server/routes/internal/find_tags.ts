@@ -37,7 +37,10 @@ export const registerInternalFindTagsRoute = (router: IRouter) => {
 
       return res.ok({
         body: {
-          tags: findResponse.saved_objects,
+          tags: findResponse.saved_objects.map((tag) => ({
+            id: tag.id,
+            ...tag.attributes,
+          })),
           total: findResponse.total,
         },
       });

@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'src/core/public';
 import { tagsApiPrefix, tagsInternalApiPrefix } from '../../common/constants';
-import { Tag, TagAttributes, ITagsClient, TagSavedObjectWithRelations } from '../../common/types';
+import { Tag, TagAttributes, ITagsClient, TagWithRelations } from '../../common/types';
 
 interface TagsClientOptions {
   http: HttpSetup;
@@ -19,7 +19,7 @@ interface FindTagsOptions {
 }
 
 interface FindTagsResponse {
-  tags: TagSavedObjectWithRelations[];
+  tags: TagWithRelations[];
   total: number;
 }
 
