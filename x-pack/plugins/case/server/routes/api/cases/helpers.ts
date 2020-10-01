@@ -133,16 +133,13 @@ export const transformCaseConnectorToEsConnector = (connector: CaseConnector): E
   type: connector?.type ?? '.none',
   fields: connector?.fields
     ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-        (acc, [key, value]) =>
-          value == null
-            ? acc
-            : [
-                ...acc,
-                {
-                  key,
-                  value,
-                },
-              ],
+        (acc, [key, value]) => [
+          ...acc,
+          {
+            key,
+            value,
+          },
+        ],
         []
       )
     : [],
