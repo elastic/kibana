@@ -272,6 +272,7 @@ describe('execute()', () => {
               "message": "a message to you",
               "subject": "the subject",
             },
+            "hasAuth": true,
             "proxySettings": undefined,
             "routing": Object {
               "bcc": Array [
@@ -331,6 +332,7 @@ describe('execute()', () => {
           "message": "a message to you",
           "subject": "the subject",
         },
+        "hasAuth": false,
         "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [

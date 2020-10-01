@@ -186,6 +186,7 @@ async function executor(
       message: params.message,
     },
     proxySettings: execOptions.proxySettings,
+    hasAuth: config.hasAuth,
   };
 
   let result;
