@@ -233,7 +233,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
   }
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={460} data-test-subj="share-to-space-flyout">
+    <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>

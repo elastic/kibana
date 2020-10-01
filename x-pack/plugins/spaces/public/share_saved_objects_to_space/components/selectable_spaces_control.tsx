@@ -84,7 +84,7 @@ export const SelectableSpacesControl = (props: Props) => {
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.unknownSpacesLabel.text"
-            defaultMessage="To view all spaces, you need {additionalPrivilegesLink}."
+            defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
             values={{
               additionalPrivilegesLink: (
                 <EuiLink href={kibanaPrivilegesUrl}>
@@ -120,7 +120,7 @@ export const SelectableSpacesControl = (props: Props) => {
   );
   const hiddenSpacesLabel = i18n.translate(
     'xpack.spaces.management.shareToSpace.shareModeControl.hiddenCountLabel',
-    { defaultMessage: '({hiddenCount} hidden)', values: { hiddenCount } }
+    { defaultMessage: '+{hiddenCount} hidden', values: { hiddenCount } }
   );
   const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
   return (
