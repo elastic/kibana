@@ -111,10 +111,11 @@ export const XYSettings: FC<XYSettingsProps> = ({
     : undefined;
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
+        ...tooltip,
         customTooltip: tooltip.detailedTooltip(headerFormatter),
         headerFormatter: undefined,
       }
-    : { headerFormatter };
+    : { ...tooltip, headerFormatter };
 
   return (
     <Settings
