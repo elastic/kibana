@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Agent from 'elastic-apm-node';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -51,7 +52,9 @@ export const BootstrapCommand: ICommand = {
         }
 
         if (project.hasDependencies()) {
+          const span = Agent.startSpan('install dependencies');
           await project.installDependencies({ extraArgs });
+          if (span) span.end();
         }
       }
     }
@@ -72,11 +75,13 @@ export const BootstrapCommand: ICommand = {
     const checksums = await getAllChecksums(kbn, log, yarnLock);
     const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
     let cachedProjectCount = 0;
+    let totalProjectCount = 0;
 
     for (const project of projects.values()) {
       if (project.hasScript('kbn:bootstrap')) {
         const file = new BootstrapCacheFile(kbn, project, checksums);
         const valid = options.cache && file.isValid();
+        totalProjectCount += 1;
 
         if (valid) {
           log.debug(`[${project.name}] cache up to date`);
@@ -91,15 +96,28 @@ export const BootstrapCommand: ICommand = {
       log.success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
+    Agent.addLabels({
+      projects_count: totalProjectCount,
+      projects_cache_count: cachedProjectCount,
+      projects_cache_pct: Math.round((cachedProjectCount / totalProjectCount) * 100),
+    });
+
+    const buildPackagesSpan = Agent.startSpan('build packages');
     await parallelizeBatches(batchedProjects, async (project) => {
       const cache = caches.get(project);
       if (cache && !cache.valid) {
         log.info(`[${project.name}] running [kbn:bootstrap] script`);
         cache.file.delete();
+
+        const buildPackageSpan = Agent.startSpan(`[${project.name}] kbn:bootstrap`);
         await project.runScriptStreaming('kbn:bootstrap');
+        if (buildPackageSpan) buildPackageSpan.end();
+
         cache.file.write();
         log.success(`[${project.name}] bootstrap complete`);
       }
     });
+
+    if (buildPackagesSpan) buildPackagesSpan.end();
   },
 };

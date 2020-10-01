@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { join } from 'path';
+import os from 'os';
+import { resolve, join } from 'path';
 import { merge, get } from 'lodash';
 import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
@@ -33,15 +34,21 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     };
   }
   return {
-    active: false,
-    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    active: true,
+    serverUrl: 'https://b60e8f2199cf4713b3a11b3fce770101.apm.us-west1.gcp.cloud.es.io:443',
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
     // the data is transmitted to, but due to how it's being hosted, it's easier,
     // for now, to simply leave it in.
-    secretToken: 'R0Gjg46pE9K9wGestd',
-    globalLabels: {},
+    secretToken: 'VCRNqoV777Vs3mJ1VF',
+    globalLabels: {
+      os_kernel: os.release(),
+      system_cpu_cores: os.cpus().length,
+      system_cpu_name: os.cpus()[0].model,
+      system_cpu_speed: os.cpus()[0].speed,
+    },
+    environment: process.env.ELASTIC_APM_ENVIRONMENT || 'development',
     breakdownMetrics: true,
     centralConfig: false,
     logUncaughtExceptions: true,
@@ -58,8 +65,9 @@ export class ApmConfiguration {
     private readonly rawKibanaConfig: Record<string, any>,
     private readonly isDistributable: boolean
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { version, build } = require(join(this.rootDir, 'package.json'));
+    const { version, build } = JSON.parse(
+      readFileSync(resolve(rootDir, 'package.json')).toString()
+    );
     this.kibanaVersion = version.replace(/\./g, '_');
     this.pkgBuild = build;
   }
@@ -68,6 +76,7 @@ export class ApmConfiguration {
     return {
       ...this.getBaseConfig(),
       serviceName: `${serviceName}-${this.kibanaVersion}`,
+      serviceVersion: this.kibanaVersion,
     };
   }
 

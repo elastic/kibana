@@ -19,7 +19,19 @@
 
 import 'source-map-support/register';
 
-import Path from 'path';
+import path from 'path';
+import { loadConfiguration } from '@kbn/apm-config-loader';
+import Agent from 'elastic-apm-node';
+
+const rootPath = path.resolve(__dirname, '../../../');
+const apmConfig = loadConfiguration(process.argv, rootPath, false);
+const conf = apmConfig.getConfig('kibana');
+
+// start APM before any other imports
+Agent.start({
+  ...conf,
+  ...{ metricsInterval: '1', metricsLimit: '1' },
+});
 
 import { REPO_ROOT } from '@kbn/utils';
 import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
@@ -27,7 +39,10 @@ import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
 import { reportOptimizerStats } from './report_optimizer_stats';
+import { apmOptimizerStats } from './apm_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
+
+const flushAPM = () => new Promise((resolve) => Agent.flush(resolve));
 
 run(
   async ({ log, flags }) => {
@@ -78,7 +93,7 @@ run(
 
     const extraPluginScanDirs = ([] as string[])
       .concat((flags['scan-dir'] as string | string[]) || [])
-      .map((p) => Path.resolve(p));
+      .map((p) => path.resolve(p));
     if (!extraPluginScanDirs.every((s) => typeof s === 'string')) {
       throw createFlagError('expected --scan-dir to be a string');
     }
@@ -120,7 +135,10 @@ run(
       update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
+    update$ = update$.pipe(apmOptimizerStats(config));
     await update$.pipe(logOptimizerState(log, config)).toPromise();
+
+    await flushAPM();
   },
   {
     flags: {
