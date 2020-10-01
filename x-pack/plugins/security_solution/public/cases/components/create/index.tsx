@@ -20,11 +20,11 @@ import { isEqual } from 'lodash/fp';
 import {
   Field,
   Form,
-  getUseField,
-  useForm,
-  UseField,
-  useFormData,
   FormDataProvider,
+  getUseField,
+  UseField,
+  useForm,
+  useFormData,
 } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema, FormProps } from './schema';
@@ -40,9 +40,9 @@ import { ConnectorSelector } from '../connector_selector/form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import {
   normalizeCaseConnector,
-  normalizeActionConnector,
   getConnectorById,
   getNoneConnector,
+  normalizeActionConnector,
 } from '../configure_cases/utils';
 import { ActionConnector } from '../../containers/types';
 import { ConnectorFields } from '../../../../../case/common/api/connectors';
@@ -274,9 +274,9 @@ export const Create = React.memo(() => {
                 componentProps={{
                   connectors,
                   dataTestSubj: 'caseConnectors',
+                  disabled: isLoadingConnectors,
                   idAria: 'caseConnectors',
                   isLoading,
-                  disabled: isLoadingConnectors,
                 }}
               />
             </Container>

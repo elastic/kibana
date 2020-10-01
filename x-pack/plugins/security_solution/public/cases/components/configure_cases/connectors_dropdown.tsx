@@ -96,6 +96,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
+      aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
       data-test-subj="dropdown-connectors"
       disabled={disabled}
       fullWidth

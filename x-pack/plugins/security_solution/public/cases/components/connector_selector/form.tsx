@@ -56,10 +56,10 @@ export const ConnectorSelector = ({
     >
       <ConnectorsDropdown
         connectors={connectors}
-        selectedConnector={(field.value as string) ?? 'none'}
         disabled={disabled}
         isLoading={isLoading}
         onChange={handleContentChange}
+        selectedConnector={(field.value as string) ?? 'none'}
       />
     </EuiFormRow>
   );

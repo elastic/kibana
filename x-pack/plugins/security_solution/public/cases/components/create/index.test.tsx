@@ -19,6 +19,8 @@ import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/fo
 import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
 
 import { waitFor } from '@testing-library/react';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { connectorsMock } from '../../containers/configure/mock';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -40,6 +42,7 @@ jest.mock(
 );
 
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/configure/use_connectors');
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
   () => ({
@@ -47,7 +50,7 @@ jest.mock(
       children({ tags: ['rad', 'dude'] }),
   })
 );
-
+const useConnectorsMock = useConnectors as jest.Mock;
 const useFormMock = useForm as jest.Mock;
 const useFormDataMock = useFormData as jest.Mock;
 
@@ -85,6 +88,7 @@ const defaultPostCase = {
   caseData: null,
   postCase,
 };
+const sampleConnectorData = { loading: false, connectors: [] };
 describe('Create case', () => {
   const fetchTags = jest.fn();
   const formHookMock = getFormMock(sampleData);
@@ -93,7 +97,14 @@ describe('Create case', () => {
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ description: sampleData.description }]);
+    useFormDataMock.mockImplementation(() => [
+      {
+        description: sampleData.description,
+        tags: sampleData.tags,
+        connectorId: sampleData.connector.id,
+      },
+    ]);
+    useConnectorsMock.mockReturnValue(sampleConnectorData);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -101,67 +112,132 @@ describe('Create case', () => {
     }));
   });
 
-  it('should post case on submit click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
-  });
+  describe('Step 1 - Case Fields', () => {
+    it('should post case on submit click', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+    });
 
-  it('should redirect to all cases on cancel click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
-  });
-  it('should redirect to new case when caseData is there', async () => {
-    const sampleId = '777777';
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, caseData: { id: sampleId } }));
-    mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777'));
-  });
+    it('should redirect to all cases on cancel click', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+      await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
+    });
+    it('should redirect to new case when caseData is there', async () => {
+      const sampleId = '777777';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+      mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777'));
+    });
 
-  it('should render spinner when loading', async () => {
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    await waitFor(() =>
-      expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy()
-    );
+    it('should render spinner when loading', async () => {
+      usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() =>
+        expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy()
+      );
+    });
+    it('Tag options render with new tags added', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() =>
+        expect(
+          wrapper
+            .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
+            .first()
+            .prop('options')
+        ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }])
+      );
+    });
   });
-  it('Tag options render with new tags added', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    await waitFor(() =>
-      expect(
-        wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
-      ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }])
-    );
+  describe('Step 2 - Connector Fields', () => {
+    const connectorTypes = [
+      {
+        label: 'Jira',
+        testId: 'jira-1',
+        dataTestSubj: 'connector-settings-jira',
+      },
+      {
+        label: 'Resilient',
+        testId: 'resilient-2',
+        dataTestSubj: 'connector-settings-resilient',
+      },
+      {
+        label: 'ServiceNow',
+        testId: 'servicenow-1',
+        dataTestSubj: 'connector-settings-sn',
+      },
+    ];
+    connectorTypes.forEach(({ label, testId, dataTestSubj }) => {
+      it(`should change from none to ${label} connector fields`, async () => {
+        useConnectorsMock.mockReturnValue({
+          ...sampleConnectorData,
+          connectors: connectorsMock,
+        });
+        useFormDataMock
+          .mockReturnValueOnce([
+            {
+              description: sampleData.description,
+              tags: sampleData.tags,
+              connectorId: sampleData.connector.id,
+            },
+          ])
+          .mockReturnValue([
+            {
+              description: sampleData.description,
+              tags: sampleData.tags,
+              connectorId: testId,
+            },
+          ]);
+        const wrapper = mount(
+          <TestProviders>
+            <Router history={mockHistory}>
+              <Create />
+            </Router>
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeFalsy();
+        });
+        await waitFor(() => {
+          wrapper.update();
+          expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeTruthy();
+        });
+      });
+    });
   });
 });

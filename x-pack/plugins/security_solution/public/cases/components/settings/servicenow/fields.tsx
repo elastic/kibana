@@ -65,7 +65,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
   }, [connector]);
 
   return (
-    <>
+    <span data-test-subj={'connector-settings-sn'}>
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -133,7 +133,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </span>
   );
 };
 

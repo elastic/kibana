@@ -43,31 +43,12 @@ export const connectorsMock: ActionConnector[] = [
     isPreconfigured: false,
   },
   {
-    id: 'servicenow-2',
-    actionTypeId: '.servicenow',
+    id: 'resilient-2',
+    actionTypeId: '.resilient',
     name: 'My Connector 2',
     config: {
-      apiUrl: 'https://instance2.service-now.com',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
-      isCaseOwned: true,
+      apiUrl: 'https://test/',
+      orgId: '201',
     },
     isPreconfigured: false,
   },

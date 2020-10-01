@@ -117,7 +117,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   }, [issueTypes, issueType, issueTypesSelectOptions, onChange, fields]);
 
   return (
-    <>
+    <span data-test-subj={'connector-settings-jira'}>
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -200,7 +200,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           </>
         )}
       </>
-    </>
+    </span>
   );
 };
 

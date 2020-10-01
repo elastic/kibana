@@ -113,7 +113,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   }, [connector, allIncidentTypes, incidentTypes]);
 
   return (
-    <>
+    <span data-test-subj={'connector-settings-resilient'}>
       <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
         <EuiComboBox
           fullWidth
@@ -162,7 +162,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-    </>
+    </span>
   );
 };
 
