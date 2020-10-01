@@ -37,6 +37,7 @@ import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
+import { coreTelemetryServiceMock } from './telemetry/telemetry_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -190,6 +191,7 @@ function createInternalCoreStartMock() {
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     auditTrail: auditTrailServiceMock.createStartContract(),
+    coreTelemetry: coreTelemetryServiceMock.createStartContract(),
   };
   return startDeps;
 }
