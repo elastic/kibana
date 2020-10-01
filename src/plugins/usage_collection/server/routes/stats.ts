@@ -96,12 +96,12 @@ export function registerStatsRoute({
       const isExtended = req.query.extended === '' || req.query.extended;
       const isLegacy = req.query.legacy === '' || req.query.legacy;
       const shouldGetUsage = req.query.exclude_usage === false;
+      const collectorsReady = await collectorSet.areAllCollectorsReady();
 
       let extended;
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const collectorsReady = await collectorSet.areAllCollectorsReady();
 
         if (shouldGetUsage && !collectorsReady) {
           return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
@@ -152,6 +152,9 @@ export function registerStatsRoute({
         }
       }
 
+      if (!collectorsReady) {
+        return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
+      }
       // Guranteed to resolve immediately due to replay effect on getOpsMetrics$
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { collected_at, ...lastMetrics } = await metrics
