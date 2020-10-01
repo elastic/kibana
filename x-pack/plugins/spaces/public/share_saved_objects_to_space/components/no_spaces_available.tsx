@@ -15,7 +15,7 @@ interface Props {
 
 export const NoSpacesAvailable = (props: Props) => {
   const { capabilities, getUrlForApp } = props.application;
-  const canCreateNewSpaces = capabilities.spaces?.manage;
+  const canCreateNewSpaces = capabilities.spaces.manage;
   if (!canCreateNewSpaces) {
     return null;
   }

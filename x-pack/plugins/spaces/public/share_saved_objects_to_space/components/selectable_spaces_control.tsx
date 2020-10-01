@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'src/core/public';
 import { NoSpacesAvailable } from './no_spaces_available';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
+import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
 import { SpaceTarget } from '../types';
 
@@ -33,8 +35,6 @@ interface Props {
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
-const ALL_SPACES_ID = '*';
-const UNKNOWN_SPACE = '?';
 const ROW_HEIGHT = 40;
 const activeSpaceProps = {
   append: <EuiBadge color="hollow">Current</EuiBadge>,
@@ -77,7 +77,9 @@ export const SelectableSpacesControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-privileges.html`;
+    const kibanaPrivilegesUrl = new DocumentationLinksService(
+      docLinks!
+    ).getKibanaPrivilegesDocUrl();
     return (
       <>
         <EuiSpacer size="xs" />
@@ -102,7 +104,7 @@ export const SelectableSpacesControl = (props: Props) => {
   };
   const getNoSpacesAvailable = () => {
     if (spaces.length < 2) {
-      return <NoSpacesAvailable application={application} />;
+      return <NoSpacesAvailable application={application!} />;
     }
     return null;
   };

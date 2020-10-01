@@ -74,7 +74,7 @@ export const getTestTitle = (
 
 export const isUserAuthorizedAtSpace = (user: TestUser | undefined, namespace: string) =>
   !user ||
-  namespace === ALL_SPACES_ID ||
+  (user.authorizedAtSpaces.length > 0 && namespace === ALL_SPACES_ID) ||
   user.authorizedAtSpaces.includes('*') ||
   user.authorizedAtSpaces.includes(namespace);
 

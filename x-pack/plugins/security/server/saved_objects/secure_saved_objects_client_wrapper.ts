@@ -18,6 +18,7 @@ import {
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { CheckPrivilegesResponse } from '../authorization/types';
@@ -54,8 +55,6 @@ interface EnsureAuthorizedTypeResult {
   authorizedSpaces: string[];
   isGloballyAuthorized?: boolean;
 }
-
-const ALL_SPACES_ID = '*';
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
@@ -391,7 +390,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
     return spaceIds
-      .map((x) => (x === ALL_SPACES_ID || privilegeMap[x] ? x : '?'))
+      .map((x) => (x === ALL_SPACES_ID || privilegeMap[x] ? x : UNKNOWN_SPACE))
       .sort(namespaceComparator);
   }
 
@@ -406,7 +405,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return savedObject;
     }
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(savedObject.namespaces);
+    const namespaces = savedObject.namespaces.filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
+    if (namespaces.length === 0) {
+      return savedObject;
+    }
+
+    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
 
     return {
       ...savedObject,
@@ -421,7 +425,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return response;
     }
     const { saved_objects: savedObjects } = response;
-    const namespaces = uniq(savedObjects.flatMap((savedObject) => savedObject.namespaces || []));
+    const namespaces = uniq(
+      savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
+    ).filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
     if (namespaces.length === 0) {
       return response;
     }
@@ -454,9 +460,9 @@ function uniq<T>(arr: T[]): T[] {
 function namespaceComparator(a: string, b: string) {
   const A = a.toUpperCase();
   const B = b.toUpperCase();
-  if (A === '?' && B !== '?') {
+  if (A === UNKNOWN_SPACE && B !== UNKNOWN_SPACE) {
     return 1;
-  } else if (A !== '?' && B === '?') {
+  } else if (A !== UNKNOWN_SPACE && B === UNKNOWN_SPACE) {
     return -1;
   }
   return A > B ? 1 : A < B ? -1 : 0;

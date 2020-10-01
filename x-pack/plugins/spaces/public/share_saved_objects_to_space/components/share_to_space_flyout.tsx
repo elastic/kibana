@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart, StartServicesAccessor, CoreStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
@@ -39,7 +40,6 @@ interface Props {
   getStartServices: StartServicesAccessor<PluginsStart>;
 }
 
-const ALL_SPACES_ID = '*';
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
@@ -98,10 +98,10 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       return { isSelectionChanged: false, spacesToAdd: [], spacesToRemove: [] };
     }
     const initialSelection = currentNamespaces.filter(
-      (spaceId) => spaceId !== activeSpace.id && spaceId !== '?'
+      (spaceId) => spaceId !== activeSpace.id && spaceId !== UNKNOWN_SPACE
     );
     const { selectedSpaceIds } = shareOptions;
-    const filteredSelection = selectedSpaceIds.filter((x) => x !== '?');
+    const filteredSelection = selectedSpaceIds.filter((x) => x !== UNKNOWN_SPACE);
     const isSharedToAllSpaces =
       !initialSelection.includes(ALL_SPACES_ID) && filteredSelection.includes(ALL_SPACES_ID);
     const isUnsharedFromAllSpaces =

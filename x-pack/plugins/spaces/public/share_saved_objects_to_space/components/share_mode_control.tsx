@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { SpaceTarget } from '../types';
 
 interface Props {
@@ -30,8 +31,6 @@ interface Props {
   onChange: (selectedSpaceIds: string[]) => void;
   disabled?: boolean;
 }
-
-const ALL_SPACES_ID = '*';
 
 function createLabel({
   title,

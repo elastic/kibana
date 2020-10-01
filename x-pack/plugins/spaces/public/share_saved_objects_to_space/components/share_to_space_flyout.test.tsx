@@ -86,6 +86,12 @@ const setup = async (opts: SetupOpts = {}) => {
   } as SavedObjectsManagementRecord;
 
   const { getStartServices } = coreMock.createSetup();
+  const startServices = coreMock.createStart();
+  startServices.application.capabilities = {
+    ...startServices.application.capabilities,
+    spaces: { manage: true },
+  };
+  getStartServices.mockResolvedValue([startServices, , ,]);
 
   const wrapper = mountWithIntl(
     <ShareSavedObjectsToSpaceFlyout

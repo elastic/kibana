@@ -13,11 +13,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
 import { SpaceTarget } from './types';
 import { SpacesManager } from '../spaces_manager';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceColor } from '..';
 
 const SPACES_DISPLAY_COUNT = 5;
-const ALL_SPACES_ID = '*';
-const UNKNOWN_SPACE = '?';
 
 type SpaceMap = Map<string, SpaceTarget>;
 interface ColumnDataProps {

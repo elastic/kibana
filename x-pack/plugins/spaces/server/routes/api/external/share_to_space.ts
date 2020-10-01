@@ -39,7 +39,7 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
 
   externalRouter.get(
     {
-      path: '/api/spaces/_share_saved_object_permissions',
+      path: '/internal/spaces/_share_saved_object_permissions',
       validate: { query: schema.object({ type: schema.string() }) },
     },
     createLicensedRouteHandler(async (_context, request, response) => {

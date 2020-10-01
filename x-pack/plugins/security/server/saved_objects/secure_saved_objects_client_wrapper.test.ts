@@ -172,7 +172,7 @@ const expectObjectNamespaceFiltering = async (
   );
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
     'login:',
-    namespaces
+    namespaces.filter((x) => x !== '*') // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
   );
 };
 
