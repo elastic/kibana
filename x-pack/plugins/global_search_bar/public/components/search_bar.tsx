@@ -141,9 +141,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
-      popoverProps={{
-        repositionOnScroll: true,
-      }}
       popoverButton={
         <EuiHeaderSectionItemButton
           aria-label={i18n.translate(

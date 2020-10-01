@@ -99,12 +99,21 @@ function renderNotifications(
   });
 }
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+function renderTooltip(description: string) {
+  return (
+    description !== '' && (
+      <EuiToolTip content={description} delay="regular" position="right">
+        <EuiIcon type="iInCircle" />
+      </EuiToolTip>
+    )
+  );
+}
 
-function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
-  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
-    const description = embeddable.getVisualizationDescription();
+type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
+
+function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
+  if ('getDescription' in embeddable) {
+    const description = embeddable.getDescription();
 
     if (description) {
       return description;
@@ -127,7 +136,8 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
-  const showPanelBar = !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle;
+  const showPanelBar =
+    !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
