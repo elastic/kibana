@@ -320,7 +320,6 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
           headers,
         });
         actions.getSearchResults(true);
-        actions.setNewGroup(response);
 
         const SUCCESS_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.newGroupSavedSuccess',
@@ -331,6 +330,7 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
         );
 
         setSuccessMessage(SUCCESS_MESSAGE);
+        actions.setNewGroup(response);
       } catch (e) {
         flashAPIErrors(e);
       }
