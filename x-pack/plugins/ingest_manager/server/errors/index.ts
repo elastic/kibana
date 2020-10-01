@@ -18,3 +18,5 @@ export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {}
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
+export class AgentPolicyError extends IngestManagerError {}
+export class AgentPolicyNameExistsError extends AgentPolicyError {}

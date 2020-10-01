@@ -20,6 +20,7 @@ import {
   AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
+import { AgentPolicyNameExistsError } from '../errors';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
@@ -96,11 +97,24 @@ class AgentPolicyService {
     };
   }
 
+  public async findByName(soClient: SavedObjectsClientContract, name: NewAgentPolicy['name']) {
+    const results = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      searchFields: ['name'],
+      search: name,
+    });
+    return results;
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    const existingSo = await this.findByName(soClient, agentPolicy.name);
+    if (existingSo.total) {
+      throw new AgentPolicyNameExistsError('Agent Policy with that name aleady exists');
+    }
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -204,6 +218,12 @@ class AgentPolicyService {
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    if (agentPolicy.name) {
+      const existingSo = await this.findByName(soClient, agentPolicy.name);
+      if (existingSo.total) {
+        throw new AgentPolicyNameExistsError('Agent Policy with that name aleady exists');
+      }
+    }
     return this._update(soClient, id, agentPolicy, options?.user);
   }
 
