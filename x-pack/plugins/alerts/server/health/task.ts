@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreSetup } from 'kibana/server';
+import { Logger, KibanaRequest } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
@@ -12,18 +12,28 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { AlertsClient } from '../alerts_client';
+import { GetBasePathFunction } from '../types';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
 export const HEALTH_TASK_ID = `Alerting-${HEALTH_TASK_TYPE}`;
 
-export function initializeAlertingHealth(
+export async function initializeAlertingHealth(
   logger: Logger,
-  core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  alertsClient: AlertsClient
+  getBasePath: GetBasePathFunction,
+  getAlertsClientWithRequest: (
+    request: KibanaRequest
+  ) => Promise<{
+    getAlertsClient: () => AlertsClient;
+  }>
 ) {
-  registerAlertingHealthCheckTask(logger, core, taskManager, alertsClient);
+  const request = getFakeKibanaRequest(getBasePath);
+  registerAlertingHealthCheckTask(
+    logger,
+    taskManager,
+    (await getAlertsClientWithRequest(request)).getAlertsClient()
+  );
 }
 
 export function scheduleAlertingHealthCheck(
@@ -35,9 +45,26 @@ export function scheduleAlertingHealthCheck(
   }
 }
 
+function getFakeKibanaRequest(getBasePath: GetBasePathFunction) {
+  const requestHeaders: Record<string, string> = {};
+  return ({
+    headers: requestHeaders,
+    getBasePath: () => getBasePath(),
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as unknown) as KibanaRequest;
+}
+
 function registerAlertingHealthCheckTask(
   logger: Logger,
-  core: CoreSetup,
   taskManager: TaskManagerSetupContract,
   alertsClient: AlertsClient
 ) {
@@ -46,7 +73,7 @@ function registerAlertingHealthCheckTask(
       title: 'Alerting framework health check task',
       type: HEALTH_TASK_TYPE,
       timeout: '5m',
-      createTaskRunner: healthCheckTaskRunner(logger, core, alertsClient),
+      createTaskRunner: healthCheckTaskRunner(logger, alertsClient),
     },
   });
 }
@@ -64,7 +91,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function healthCheckTaskRunner(logger: Logger, core: CoreSetup, alertsClient: AlertsClient) {
+export function healthCheckTaskRunner(logger: Logger, alertsClient: AlertsClient) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     return {

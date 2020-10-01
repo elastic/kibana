@@ -64,7 +64,7 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
-import { healthStatus$ } from './health';
+import { healthStatus$, scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -204,6 +204,13 @@ export class AlertingPlugin {
       );
     });
 
+    initializeAlertingHealth(
+      this.logger,
+      plugins.taskManager,
+      this.getBasePath,
+      this.createAlertClientHandlerContext(core)
+    );
+
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
@@ -291,6 +298,7 @@ export class AlertingPlugin {
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
@@ -309,6 +317,18 @@ export class AlertingPlugin {
           return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+      };
+    };
+  };
+
+  private createAlertClientHandlerContext = (core: CoreSetup) => {
+    const { alertsClientFactory } = this;
+    return async function alertsFakeContext(request: KibanaRequest) {
+      const [{ savedObjects }] = await core.getStartServices();
+      return {
+        getAlertsClient: () => {
+          return alertsClientFactory!.create(request, savedObjects);
+        },
       };
     };
   };

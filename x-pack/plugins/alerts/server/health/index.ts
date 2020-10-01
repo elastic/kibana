@@ -5,3 +5,4 @@
  */
 
 export { healthStatus$ } from './get_state';
+export { scheduleAlertingHealthCheck, initializeAlertingHealth } from './task';
