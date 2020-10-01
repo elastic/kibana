@@ -235,23 +235,16 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
         .scheduleActions(ActionGroupId, {
           entityId: entityName,
           timeOfDetection: new Date(currIntervalEndTime).getTime(),
-          crossingLine: `LINESTRING (
-            ${prevLocation.location[0]} ${prevLocation.location[1]},
-            ${currLocation.location[0]} ${currLocation.location[1]}
-          )`,
+          crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
 
-          toEntityLocation: `POINT (
-            ${currLocation.location[0]} ${currLocation.location[1]}
-          )`,
+          toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
           toEntityDateTime: currLocation.date,
           toEntityDocumentId: currLocation.docId,
 
           toBoundaryId: currLocation.shapeId,
           toBoundaryName,
 
-          fromEntityLocation: `POINT (
-            ${prevLocation.location[0]} ${prevLocation.location[1]}
-          )`,
+          fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
           fromEntityDateTime: prevLocation.date,
           fromEntityDocumentId: prevLocation.docId,
 
