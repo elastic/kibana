@@ -134,34 +134,6 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
-
-    it('should update visType when one seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
-
-      comp.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [{ ...chart, type: ChartTypes.LINE }],
-        },
-      });
-
-      expect(setValue).toHaveBeenLastCalledWith('type', ChartTypes.LINE);
-    });
-
-    it('should set histogram visType when multiple seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
-
-      comp.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [chart, { ...chart, type: ChartTypes.LINE }],
-        },
-      });
-
-      expect(setValue).toHaveBeenLastCalledWith('type', ChartTypes.HISTOGRAM);
-    });
   });
 
   describe('updateAxisTitle', () => {
@@ -193,10 +165,10 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
 
-      expect(setValue).toHaveBeenCalledTimes(6);
-      expect(setValue).toHaveBeenNthCalledWith(4, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(6, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(5, VALUE_AXES, updatedValues);
+      expect(setValue).toHaveBeenCalledTimes(5);
+      expect(setValue).toHaveBeenNthCalledWith(3, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(5, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(4, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
