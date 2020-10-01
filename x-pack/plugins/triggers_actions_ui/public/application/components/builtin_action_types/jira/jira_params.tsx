@@ -19,6 +19,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { SearchIssues } from './search_issues';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -30,7 +31,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   http,
   toastNotifications,
 }) => {
-  const { title, description, comments, issueType, priority, labels, savedObjectId } =
+  const { title, description, comments, issueType, priority, labels, parent, savedObjectId } =
     actionParams.subActionParams || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
@@ -62,6 +63,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const hasPriority = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'priority'), [
     fields,
   ]);
+  const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
 
   useEffect(() => {
     const options = issueTypes.map((type) => ({
@@ -179,6 +181,34 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           />
         </EuiFormRow>
         <EuiHorizontalRule />
+        {hasParent && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    {
+                      defaultMessage: 'Parent issue',
+                    }
+                  )}
+                >
+                  <SearchIssues
+                    selectedValue={parent}
+                    http={http}
+                    toastNotifications={toastNotifications}
+                    actionConnector={actionConnector}
+                    onChange={(parentIssueKey) => {
+                      editSubActionProperty('parent', parentIssueKey);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <>
           {hasPriority && (
             <>

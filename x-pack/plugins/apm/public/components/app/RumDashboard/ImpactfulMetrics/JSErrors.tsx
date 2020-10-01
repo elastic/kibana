@@ -84,6 +84,11 @@ export function JSErrors() {
     });
   };
 
+  const errorRate =
+    totalPageViews > 0
+      ? ((data?.totalErrorPages ?? 0) / totalPageViews) * 100
+      : 0;
+
   return (
     <>
       <EuiTitle size="xs">
@@ -109,10 +114,7 @@ export function JSErrors() {
             title={i18n.translate('xpack.apm.rum.jsErrors.errorRateValue', {
               defaultMessage: '{errorRate} %',
               values: {
-                errorRate: (
-                  ((data?.totalErrorPages ?? 0) / totalPageViews) *
-                  100
-                ).toFixed(0),
+                errorRate: errorRate.toFixed(0),
               },
             })}
             description={I18LABELS.errorRate}
