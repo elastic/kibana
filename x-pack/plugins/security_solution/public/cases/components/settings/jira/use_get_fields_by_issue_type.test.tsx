@@ -14,8 +14,6 @@ import * as api from './api';
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./api');
 
-const apiMock = api as jest.Mocked<typeof api>;
-
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetFieldsByIssueType', () => {
@@ -24,7 +22,7 @@ describe('useGetFieldsByIssueType', () => {
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
-        useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts })
+        useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts, issueType: null })
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({ isLoading: true, fields: {} });
@@ -36,7 +34,12 @@ describe('useGetFieldsByIssueType', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
-        useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts, connector })
+        useGetFieldsByIssueType({
+          http,
+          toastNotifications: notifications.toasts,
+          connector,
+          issueType: null,
+        })
       );
 
       await waitForNextUpdate();
@@ -84,7 +87,12 @@ describe('useGetFieldsByIssueType', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
-        useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts, connector })
+        useGetFieldsByIssueType({
+          http,
+          toastNotifications: notifications.toasts,
+          connector,
+          issueType: null,
+        })
       );
 
       await waitForNextUpdate();

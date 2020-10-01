@@ -18,7 +18,7 @@ describe('helpers', () => {
     id: '123',
     name: 'Jira',
     type: '.jira',
-    fields: { issueType: 'Task', priority: 'High' },
+    fields: { issueType: 'Task', priority: 'High', parent: null },
   };
 
   const esCaseConnector: ESCaseConnector = {
@@ -28,6 +28,7 @@ describe('helpers', () => {
     fields: [
       { key: 'issueType', value: 'Task' },
       { key: 'priority', value: 'High' },
+      { key: 'parent', value: null },
     ],
   };
 

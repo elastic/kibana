@@ -55,8 +55,8 @@ describe('JiraParamsFields renders', () => {
   };
 
   const fields = {
-    severityCode: 6,
-    incidentTypes: [19],
+    severityCode: '6',
+    incidentTypes: ['19'],
   };
 
   const onChange = jest.fn();
@@ -81,7 +81,7 @@ describe('JiraParamsFields renders', () => {
     ).toEqual([{ label: 'Malware', value: '19' }]);
 
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      6
+      '6'
     );
   });
 
@@ -112,10 +112,10 @@ describe('JiraParamsFields renders', () => {
     await waitFor(() => {
       ((wrapper.find(EuiComboBox).props() as unknown) as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ value: 19, label: 'Denial of Service' }]);
+      }).onChange([{ value: '19', label: 'Denial of Service' }]);
     });
 
-    expect(onChange).toHaveBeenCalledWith('incidentTypes', [19]);
+    expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '6' });
   });
 
   test('it sets severity correctly', async () => {
@@ -128,14 +128,13 @@ describe('JiraParamsFields renders', () => {
         target: { value: '4' },
       });
 
-    expect(onChange).toHaveBeenCalledWith('severityCode', '4');
+    expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '4' });
   });
 
   test('it resets fields when changing connector', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     wrapper.setProps({ connector: {} });
 
-    expect(onChange).toBeCalledWith('incidentTypes', null);
-    expect(onChange).toBeCalledWith('severityCode', null);
+    expect(onChange).toBeCalledWith({ incidentTypes: null, severityCode: null });
   });
 });
