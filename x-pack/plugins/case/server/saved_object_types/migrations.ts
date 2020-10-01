@@ -53,8 +53,8 @@ export const caseMigrations = {
         ...attributesWithoutConnectorId,
         connector: {
           id: connector_id ?? 'none',
-          name: connector_id ? null : 'none',
-          type: connector_id ? null : '.none',
+          name: 'none',
+          type: '.none',
           fields: null,
         },
       },
@@ -76,7 +76,7 @@ export const configureMigrations = {
         connector: {
           id: connector_id ?? 'none',
           name: connector_name ?? 'none',
-          type: connector_id ? null : '.none',
+          type: '.none',
           fields: null,
         },
       },
@@ -106,8 +106,8 @@ export const userActionsMigrations = {
           new_value != null
             ? JSON.stringify({
                 id: new_value,
-                name: new_value === 'none' ? 'none' : null,
-                type: new_value === 'none' ? '.none' : null,
+                name: 'none',
+                type: '.none',
                 fields: null,
               })
             : new_value,
@@ -115,8 +115,8 @@ export const userActionsMigrations = {
           old_value != null
             ? JSON.stringify({
                 id: old_value,
-                name: new_value === 'none' ? 'none' : null,
-                type: new_value === 'none' ? '.none' : null,
+                name: 'none',
+                type: '.none',
                 fields: null,
               })
             : old_value,

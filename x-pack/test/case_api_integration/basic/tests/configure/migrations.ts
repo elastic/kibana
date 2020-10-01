@@ -23,7 +23,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.10.0 migrates configure cases connector', async () => {
-      const { body } = await supertest.get(`${CASE_CONFIGURE_URL}`).set('kbn-xsrf', 'true').send();
+      const { body } = await supertest
+        .get(`${CASE_CONFIGURE_URL}`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
 
       expect(body).key('connector');
       expect(body).not.key('connector_id');

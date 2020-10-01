@@ -103,3 +103,37 @@
     "type": "_doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:a22a7600-017f-11eb-93f8-d161651bf509",
+    "index": ".kibana_1",
+    "source": {
+      "cases-user-actions": {
+        "action": "update",
+        "action_at": "2020-09-28T11:53:52.158Z",
+        "action_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "action_field": [
+          "connector_id"
+        ],
+        "new_value": "b1900ac0-017f-11eb-93f8-d161651bf509",
+        "old_value": "c1900ac0-017f-11eb-93f8-d161651bf509"
+      },
+      "references": [
+        {
+          "id": "e1900ac0-017f-11eb-93f8-d161651bf509",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2020-09-28T11:43:53.184Z"
+    },
+    "type": "_doc"
+  }
+}
