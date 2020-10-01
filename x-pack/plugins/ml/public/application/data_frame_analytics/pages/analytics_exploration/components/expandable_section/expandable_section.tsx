@@ -8,17 +8,36 @@ import './expandable_section.scss';
 
 import React, { useState, FC, ReactNode } from 'react';
 
-import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 
-interface ExpandableSectionProps {
+interface HeaderItem {
+  // id is used as the React key and to construct a data-test-subj
+  id: string;
+  label?: ReactNode;
+  value: ReactNode;
+}
+
+const isHeaderItems = (arg: any): arg is HeaderItem[] => {
+  return Array.isArray(arg);
+};
+
+export interface ExpandableSectionProps {
   content: ReactNode;
-  headerContent: ReactNode;
+  headerItems?: HeaderItem[] | 'loading';
   isExpanded?: boolean;
   title: ReactNode;
 }
 
 export const ExpandableSection: FC<ExpandableSectionProps> = ({
-  headerContent,
+  headerItems,
   // For now we don't have a need for complete external control
   // and just want to pass in a default value. If we wanted
   // full external control we'd also need to add a onToggleExpanded()
@@ -44,7 +63,24 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
         >
           {title}
         </EuiButtonEmpty>
-        {headerContent}
+        {headerItems === 'loading' && <EuiLoadingContent lines={1} />}
+        {isHeaderItems(headerItems) && (
+          <EuiFlexGroup>
+            {headerItems.map(({ label, value, id }) => (
+              <EuiFlexItem grow={false} key={id}>
+                {label !== undefined && value !== undefined && (
+                  <>
+                    <EuiText size="xs" color="subdued">
+                      <p>{label}</p>
+                    </EuiText>
+                    <EuiBadge>{value}</EuiBadge>
+                  </>
+                )}
+                {label === undefined && value}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        )}
       </div>
       {isExpanded && content}
     </EuiPanel>
