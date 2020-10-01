@@ -32,8 +32,10 @@ const actionParams = {
     priority: 'High',
     savedObjectId: '123',
     externalId: null,
+    parent: null,
   },
 };
+
 const connector: ActionConnector = {
   secrets: {},
   config: {},
@@ -238,5 +240,6 @@ describe('JiraParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="search-parent-issues"]').exists()).toBeFalsy();
   });
 });

@@ -20,6 +20,7 @@ export interface JiraActionParams {
     issueType: string;
     priority: string;
     labels: string[];
+    parent: string | null;
   };
 }
 

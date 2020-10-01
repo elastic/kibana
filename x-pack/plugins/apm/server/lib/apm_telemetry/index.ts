@@ -49,7 +49,7 @@ export async function createApmTelemetry({
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
-      title: 'Collect APM telemetry',
+      title: 'Collect APM usage',
       type: APM_TELEMETRY_TASK_NAME,
       createTaskRunner: () => {
         return {
