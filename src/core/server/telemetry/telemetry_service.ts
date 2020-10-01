@@ -177,7 +177,7 @@ export class CoreTelemetryService implements CoreService<void, CoreTelemetryStar
       });
 
     this.configService
-      .atPath<HttpConfigType>('http')
+      .atPath<HttpConfigType>('server')
       .pipe(takeUntil(this.stop$))
       .subscribe((config) => {
         this.httpConfig = config;

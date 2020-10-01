@@ -43,7 +43,7 @@ describe('CoreTelemetryService', () => {
   configService.atPath.mockImplementation((path) => {
     if (path === 'elasticsearch') {
       return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
-    } else if (path === 'http') {
+    } else if (path === 'server') {
       return new BehaviorSubject(RawHttpConfig.schema.validate({}));
     } else if (path === 'logging') {
       return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
