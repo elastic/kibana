@@ -7,12 +7,14 @@ import './layer_panel.scss';
 
 import React, { useContext, useState, useEffect } from 'react';
 import {
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiIcon,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -381,35 +383,40 @@ export function LayerPanel(
                       accessor={newId}
                       groupId={group.groupId}
                       trigger={
-                        <div className="lnsLayerPanel__triggerLink">
-                          <EuiButtonEmpty
-                            iconType="plusInCircleFilled"
-                            data-test-subj="lns-empty-dimension"
-                            aria-label={i18n.translate('xpack.lens.configure.addConfig', {
-                              defaultMessage: 'Add a configuration',
-                            })}
-                            title={i18n.translate('xpack.lens.configure.addConfig', {
-                              defaultMessage: 'Add a configuration',
-                            })}
-                            onClick={() => {
-                              if (dimensionContainerState.isOpen) {
-                                setDimensionContainerState(initialDimensionContainerState);
-                              } else {
-                                setDimensionContainerState({
-                                  isOpen: true,
-                                  openId: newId,
-                                  addingToGroupId: group.groupId,
-                                });
-                              }
-                            }}
-                            size="xs"
-                          >
-                            <FormattedMessage
-                              id="xpack.lens.configure.emptyConfig"
-                              defaultMessage="Drop a field here"
-                            />
-                          </EuiButtonEmpty>
-                        </div>
+                        <EuiLink
+                          className="lnsLayerPanel__triggerLink"
+                          data-test-subj="lns-empty-dimension"
+                          aria-label={i18n.translate('xpack.lens.configure.addConfig', {
+                            defaultMessage: 'Add a configuration',
+                          })}
+                          title={i18n.translate('xpack.lens.configure.addConfig', {
+                            defaultMessage: 'Add a configuration',
+                          })}
+                          onClick={() => {
+                            if (dimensionContainerState.isOpen) {
+                              setDimensionContainerState(initialDimensionContainerState);
+                            } else {
+                              setDimensionContainerState({
+                                isOpen: true,
+                                openId: newId,
+                                addingToGroupId: group.groupId,
+                              });
+                            }
+                          }}
+                        >
+                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                            <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon size="m" type="plusInCircleFilled" />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={true}>
+                              <FormattedMessage
+                                id="xpack.lens.configure.emptyConfig"
+                                defaultMessage="Drop a field here"
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiLink>
                       }
                       panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
                         defaultMessage: '{groupLabel} configuration',
