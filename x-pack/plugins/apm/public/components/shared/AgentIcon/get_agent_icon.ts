@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getNormalizedAgentName } from '../../../../common/agent_name';
+import {
+  OPEN_TELEMETRY_AGENT_NAMES,
+  RUM_AGENT_NAMES,
+} from '../../../../common/agent_name';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import dotNetIcon from './icons/dot-net.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
+import openTelemetryIcon from './icons/opentelemetry.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
@@ -18,14 +23,42 @@ const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
   go: goIcon,
   java: javaIcon,
-  'js-base': rumJsIcon,
   nodejs: nodeJsIcon,
+  opentelemetry: openTelemetryIcon,
   php: phpIcon,
   python: pythonIcon,
   ruby: rubyIcon,
+  rum: rumJsIcon,
 };
 
+// This only needs to be exported for testing purposes, since we stub the SVG
+// import values in test.
+export function getAgentIconKey(agentName: string) {
+  // Ignore case
+  const lowercasedAgentName = agentName.toLowerCase();
+
+  // RUM agent names
+  if (RUM_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
+    return 'rum';
+  }
+
+  // Remove "opentelemetry/" prefix
+  const agentNameWithoutPrefix = lowercasedAgentName.replace(
+    /^opentelemetry\//,
+    ''
+  );
+
+  if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
+    return agentNameWithoutPrefix;
+  }
+
+  // OpenTelemetry-only agents
+  if (OPEN_TELEMETRY_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
+    return 'opentelemetry';
+  }
+}
+
 export function getAgentIcon(agentName?: string) {
-  const normalizedAgentName = getNormalizedAgentName(agentName);
-  return normalizedAgentName && agentIcons[normalizedAgentName];
+  const key = agentName && getAgentIconKey(agentName);
+  return key && agentIcons[key];
 }

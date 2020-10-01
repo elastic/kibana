@@ -10,6 +10,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useMount } from 'react-use';
 
+import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
@@ -23,7 +24,6 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
