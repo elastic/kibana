@@ -17,5 +17,24 @@
  * under the License.
  */
 
-export * from './timelion_expression_input';
-export * from './timelion_interval';
+import { Vis } from 'src/plugins/visualizations/public';
+import { TimelionVisParams } from './timelion_vis_fn';
+import { toExpressionAst } from './to_ast';
+
+describe('timelion vis toExpressionAst function', () => {
+  let vis: Vis<TimelionVisParams>;
+
+  beforeEach(() => {
+    vis = {
+      params: {
+        expression: '.es(*)',
+        interval: 'auto',
+      },
+    } as any;
+  });
+
+  it('should match basic snapshot', () => {
+    const actual = toExpressionAst(vis);
+    expect(actual).toMatchSnapshot();
+  });
+});
