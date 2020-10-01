@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Feature, FeatureCollection } from 'geojson';
-import { Map as MbMap } from 'mapbox-gl';
+import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -45,20 +45,9 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
-  getMbLookupFunction(): MB_LOOKUP_FUNCTION;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
-
-  // Returns the name that should be used for accessing the data from the mb-style rule
-  // Depending on
-  // - whether the field is used for labeling, icon-orientation, or other properties (color, size, ...), `feature-state` and or `get` is used
-  // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
-  // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
-  // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
-  getMbPropertyName(): string;
-  getMbPropertyValue(value: RawValue): RawValue;
-
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
     mbMap: MbMap,
@@ -362,6 +351,12 @@ export class DynamicStyleProperty<T>
     );
   }
 
+  // Returns the name that should be used for accessing the data from the mb-style rule
+  // Depending on
+  // - whether the field is used for labeling, icon-orientation, or other properties (color, size, ...), `feature-state` and or `get` is used
+  // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
+  // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
+  // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
   getMbPropertyName() {
     if (!this._field) {
       return '';
@@ -398,7 +393,7 @@ export class DynamicStyleProperty<T>
     mbSourceId: string
   ): boolean {
     const supportsFeatureState = this.supportsMbFeatureState();
-    const featureIdentifier = {
+    const featureIdentifier: FeatureIdentifier = {
       source: mbSourceId,
       id: undefined,
     };
