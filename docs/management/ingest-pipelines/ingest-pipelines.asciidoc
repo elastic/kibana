@@ -62,37 +62,53 @@ You also want to know where the request is coming from.
 
 . In *Ingest Node Pipelines*, click *Create a pipeline*.
 . Provide a name and description for the pipeline.
-. Define the processors:
+. Click *Add a processor* to define your first processor.
+. Select the *Grok* processor type from the dropdown menu.
++
+Set the field input to `message` and provide the following pattern:
 +
 [source,js]
 ----------------------------------
-[
-    {
-      "grok": {
-        "field": "message",
-        "patterns": ["%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \\[%{HTTPDATE:timestamp}\\] \"%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:httpversion}\" %{NUMBER:response:int} (?:-|%{NUMBER:bytes:int}) %{QS:referrer} %{QS:agent}"]
-      }
-    },
-    {
-      "date": {
-        "field": "timestamp",
-        "formats": [ "dd/MMM/YYYY:HH:mm:ss Z" ]
-      }
-    },
-    {
-      "geoip": {
-        "field": "clientip"
-      }
-    },
-    {
-      "user_agent": {
-        "field": "agent"
-      }
-    }
-  ]
+%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response:int} (?:-|%{NUMBER:bytes:int}) %{QS:referrer} %{QS:agent}
 ----------------------------------
 +
-This code defines four {ref}/ingest-processors.html[processors] that run sequentially:
+Once complete, click *Update*.
+. Add 3 more processors with the following data:
++
+*Date*
++
+|===
+|*Field* |*Value*
+
+|Field
+|`timestamp`
+
+|Formats
+|`dd/MMM/YYYY:HH:mm:ss Z`
+
+|===
++
+*GeoIP*
++
+|===
+|*Field* |*Value*
+
+|Field
+|`clientip`
+
+|===
++
+*User agent*
++
+|===
+|*Field* |*Value*
+
+|Field
+|`agent`
+
+|===
++
+You now have defined 4 {ref}/ingest-processors.html[processors] that run sequentially:
 {ref}/grok-processor.html[grok], {ref}/date-processor.html[date],
 {ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent].
 Your form should look similar to this:
@@ -100,9 +116,9 @@ Your form should look similar to this:
 [role="screenshot"]
 image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
 
-. To verify that the pipeline gives the expected outcome, click *Test pipeline*.
+. To verify that the pipeline gives the expected outcome, click *Add documents*.
 
-. In the *Document* tab, provide the following sample document for testing:
+. In the *Documents* tab, provide the following sample document for testing:
 +
 [source,js]
 ----------------------------------
