@@ -8,8 +8,9 @@ import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
-import { ActionGroupId } from './alert_type';
+import { ActionGroupId, GEO_THRESHOLD_ID } from './alert_type';
 import { Logger } from '../../types';
+import { ID } from '../index_threshold/alert_type';
 
 interface LatestEntityLocation {
   location: number[] | null;
@@ -189,12 +190,15 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
 
-    // Run largest query & grab shape filters on first run capturing anything
-    // up to current interval
+    // Start collecting data only on the first cycle
     if (!currIntervalStartTime) {
+      log.info(`alert ${GEO_THRESHOLD_ID}:${alertId} alert initialized. Collecting data`);
+      // Consider making first time window configurable?
+      const tempPreviousEndTime = new Date(currIntervalEndTime);
+      tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - 5);
       const prevToCurrentIntervalResults:
         | SearchResponse<unknown>
-        | undefined = await executeEsQuery(null, currIntervalEndTime);
+        | undefined = await executeEsQuery(tempPreviousEndTime, currIntervalEndTime);
       return {
         prevLocationArr: transformResults(
           prevToCurrentIntervalResults,
