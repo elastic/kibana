@@ -131,9 +131,7 @@ export function parseElasticsearchClientConfig(
         path: uri.pathname,
         query: uri.query,
         headers: {
-          // the X-Kibana header allows ES to identify that this request is coming from Kibana
-          // so that Elasticsearch can ignore these calls for the System Index deprecations
-          'X-Kibana': 'true',
+          'user-agent': 'kibana',
           ...config.customHeaders,
         },
       };

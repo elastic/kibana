@@ -62,7 +62,7 @@ export function parseClientOptions(
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {
-      'X-Kibana': 'true',
+      'user-agent': 'kibana',
       ...config.customHeaders,
     },
   };

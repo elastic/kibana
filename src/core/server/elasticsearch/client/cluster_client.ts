@@ -108,9 +108,7 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     return {
-      // the X-Kibana header allows ES to identify that this request is coming from Kibana
-      // so that Elasticsearch can ignore these calls for the System Index deprecations
-      'X-Kibana': 'true',
+      'user-agent': 'kibana',
       ...this.config.customHeaders,
       ...scopedHeaders,
     };
