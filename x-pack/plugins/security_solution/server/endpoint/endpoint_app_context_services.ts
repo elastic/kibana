@@ -24,6 +24,7 @@ import {
 } from './routes/metadata/support/query_strategies';
 import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
+import { AppClientFactory } from '../client';
 
 export interface MetadataService {
   queryStrategy(
@@ -70,6 +71,7 @@ export type EndpointAppContextServiceStartContract = Partial<
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
+  appClientFactory: AppClientFactory;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
@@ -93,7 +95,11 @@ export class EndpointAppContextService {
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
         'packagePolicyCreate',
-        getPackagePolicyCreateCallback(dependencies.logger, this.manifestManager)
+        getPackagePolicyCreateCallback(
+          dependencies.logger,
+          this.manifestManager,
+          dependencies.appClientFactory
+        )
       );
     }
   }
