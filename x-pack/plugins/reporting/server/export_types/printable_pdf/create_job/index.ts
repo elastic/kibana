@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cryptoFactory } from '../../../lib';
+import { cryptoFactory, LevelLogger } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, TaskPayloadPDF } from '../types';
@@ -12,7 +12,7 @@ import { JobParamsPDF, TaskPayloadPDF } from '../types';
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsPDF,
   TaskPayloadPDF
->> = function createJobFactoryFn(reporting) {
+>> = function createJobFactoryFn(reporting, logger: LevelLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
@@ -27,7 +27,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
 
     return {
       headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req),
+      spaceId: reporting.getSpaceId(req, logger),
       browserTimezone,
       forceNow: new Date().toISOString(),
       layout,

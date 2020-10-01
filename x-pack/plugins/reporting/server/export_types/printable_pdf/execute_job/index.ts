@@ -37,10 +37,12 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
 
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-      mergeMap((conditionalHeaders) => getCustomLogo(reporting, conditionalHeaders, job.spaceId)),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls(config, job);
 

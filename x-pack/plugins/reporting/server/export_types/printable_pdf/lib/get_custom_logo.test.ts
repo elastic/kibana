@@ -9,6 +9,7 @@ import {
   createMockConfig,
   createMockConfigSchema,
   createMockReportingCore,
+  createMockLevelLogger,
 } from '../../../test_helpers';
 import { getConditionalHeaders } from '../../common';
 import { getCustomLogo } from './get_custom_logo';
@@ -40,7 +41,14 @@ test(`gets logo from uiSettings`, async () => {
 
   const conditionalHeaders = getConditionalHeaders(mockConfig, permittedHeaders);
 
-  const { logo } = await getCustomLogo(mockReportingPlugin, conditionalHeaders);
+  const mockSpaceId = undefined;
+
+  const { logo } = await getCustomLogo(
+    mockReportingPlugin,
+    conditionalHeaders,
+    mockSpaceId,
+    createMockLevelLogger()
+  );
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');

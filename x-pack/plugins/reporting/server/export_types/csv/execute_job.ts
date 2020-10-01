@@ -23,8 +23,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
 
     const encryptionKey = config.get('encryptionKey');
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId);
-    const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
+    const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
+    const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
 
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(fakeRequest);
     const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
