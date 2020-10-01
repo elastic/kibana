@@ -17,13 +17,16 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
+import { removeSlashes } from './remove_slashes';
+
+export const appendAppPath = (appBasePath: string, path: string = '') => {
+  // Only prepend slash if not a hash or query path
+  path = path === '' || path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
+  // Do not remove trailing slash when in hashbang or basePath
+  const removeTrailing = path.indexOf('#') === -1 && appBasePath.indexOf('#') === -1;
+  return removeSlashes(`${appBasePath}${path}`, {
+    trailing: removeTrailing,
+    duplicates: true,
+    leading: false,
+  });
+};

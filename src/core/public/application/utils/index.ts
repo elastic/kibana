@@ -17,13 +17,8 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
+export { appendAppPath } from './append_app_path';
+export { getAppInfo } from './get_app_info';
+export { parseAppUrl } from './parse_app_url';
+export { relativeToAbsolute } from './relative_to_absolute';
+export { removeSlashes } from './remove_slashes';

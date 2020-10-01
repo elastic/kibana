@@ -17,13 +17,26 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
+/**
+ * Utility to remove trailing, leading or duplicate slashes.
+ * By default will only remove duplicates.
+ */
+export const removeSlashes = (
+  url: string,
+  {
+    trailing = false,
+    leading = false,
+    duplicates = true,
+  }: { trailing?: boolean; leading?: boolean; duplicates?: boolean } = {}
+): string => {
+  if (duplicates) {
+    url = url.replace(/\/{2,}/g, '/');
+  }
+  if (trailing) {
+    url = url.replace(/\/$/, '');
+  }
+  if (leading) {
+    url = url.replace(/^\//, '');
+  }
+  return url;
+};

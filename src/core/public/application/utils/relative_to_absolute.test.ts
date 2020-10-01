@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
+import { relativeToAbsolute } from './relative_to_absolute';
+
+describe('relativeToAbsolute', () => {
+  it('converts a relative path to an absolute url', () => {
+    const origin = window.location.origin;
+    expect(relativeToAbsolute('path')).toEqual(`${origin}/path`);
+    expect(relativeToAbsolute('/path#hash')).toEqual(`${origin}/path#hash`);
+    expect(relativeToAbsolute('/path?query=foo')).toEqual(`${origin}/path?query=foo`);
+  });
+});

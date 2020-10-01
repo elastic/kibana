@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl, isRelativeUrl } from './url';
+import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
@@ -81,5 +81,29 @@ describe('isRelativeUrl()', () => {
     expect(isRelativeUrl('//evil.com')).toBe(false);
     expect(isRelativeUrl('///evil.com')).toBe(false);
     expect(isRelativeUrl(' //evil.com')).toBe(false);
+  });
+});
+
+describe('getOrigin', () => {
+  describe('when passing an absolute url', () => {
+    it('return origin without port when the url does not have a port', () => {
+      expect(getUrlOrigin('https://example.com/file/to/path?example')).toEqual(
+        'https://example.com'
+      );
+    });
+    it('return origin with port when the url does have a port', () => {
+      expect(getUrlOrigin('http://example.com:80/path/to/file')).toEqual('http://example.com:80');
+    });
+  });
+  describe('when passing a non absolute url', () => {
+    it('returns null for relative url', () => {
+      expect(getUrlOrigin('./path/to/file')).toBeNull();
+    });
+    it('returns null for absolute path', () => {
+      expect(getUrlOrigin('/path/to/file')).toBeNull();
+    });
+    it('returns null for empty url', () => {
+      expect(getUrlOrigin('')).toBeNull();
+    });
   });
 });
