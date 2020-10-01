@@ -166,7 +166,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
-      defaultMessage: 'Switch index pattern behavior',
+      defaultMessage: 'Modify columns when index pattern is switched',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
