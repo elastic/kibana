@@ -9,7 +9,38 @@ export const ADMIN = 'admin';
 export const PRIVATE = 'private';
 export const SEARCH = 'search';
 
-export const TOKEN_TYPE_DESCRIPTION = {
+export const SEARCH_DISPLAY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.tokens.permissions.display.search',
+  {
+    defaultMessage: 'search',
+  }
+);
+export const ALL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.tokens.permissions.display.all',
+  {
+    defaultMessage: 'all',
+  }
+);
+export const READ_WRITE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.tokens.permissions.display.readwrite',
+  {
+    defaultMessage: 'read/write',
+  }
+);
+export const READ_ONLY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.tokens.permissions.display.readonly',
+  {
+    defaultMessage: 'read-only',
+  }
+);
+export const WRITE_ONLY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.tokens.permissions.display.writeonly',
+  {
+    defaultMessage: 'write-only',
+  }
+);
+
+export const TOKEN_TYPE_DESCRIPTION: { [key: string]: string } = {
   [SEARCH]: i18n.translate('xpack.enterpriseSearch.appSearch.tokens.search.description', {
     defaultMessage: 'Public Search Keys are used for search endpoints only.',
   }),
@@ -22,7 +53,7 @@ export const TOKEN_TYPE_DESCRIPTION = {
   }),
 };
 
-export const TOKEN_TYPE_DISPLAY_NAMES = {
+export const TOKEN_TYPE_DISPLAY_NAMES: { [key: string]: string } = {
   [SEARCH]: i18n.translate('xpack.enterpriseSearch.appSearch.tokens.search.name', {
     defaultMessage: 'Public Search Key',
   }),

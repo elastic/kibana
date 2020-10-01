@@ -29,6 +29,7 @@ import {
   ICredentialsLogicValues,
 } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { CredentialsList } from './credentials_list';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
@@ -134,7 +135,9 @@ export const Credentials: React.FC = () => {
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiPanel />
+            <EuiPanel>
+              <CredentialsList />
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>
