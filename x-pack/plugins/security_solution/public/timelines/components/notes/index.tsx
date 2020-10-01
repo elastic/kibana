@@ -10,7 +10,6 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
@@ -21,10 +20,6 @@ import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
 import { TimelineStatusLiteral, TimelineStatus } from '../../../../common/types/timeline';
-import { Loader } from '../../../common/components/loader';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineSelectors } from '../../store/timeline';
-import { SAVE_NOTE_HINT } from './translations';
 
 interface Props {
   associateNote: AssociateNote;
@@ -32,7 +27,6 @@ interface Props {
   getNewNoteId: GetNewNoteId;
   noteIds: string[];
   status: TimelineStatusLiteral;
-  timelineId: string;
   updateNote: UpdateNote;
 }
 
@@ -48,14 +42,9 @@ InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
 export const Notes = React.memo<Props>(
-  ({ associateNote, getNotesByIds, getNewNoteId, noteIds, status, timelineId, updateNote }) => {
+  ({ associateNote, getNotesByIds, getNewNoteId, noteIds, status, updateNote }) => {
     const [newNote, setNewNote] = useState('');
     const isImmutable = status === TimelineStatus.immutable;
-
-    const currentTimeline = useShallowEqualSelector((state) =>
-      timelineSelectors.selectTimeline(state, timelineId)
-    );
-    const showAddNote = !isImmutable && currentTimeline.savedObjectId != null;
 
     return (
       <>
@@ -64,7 +53,7 @@ export const Notes = React.memo<Props>(
         </EuiModalHeader>
 
         <EuiModalBody>
-          {showAddNote && (
+          {!isImmutable && (
             <AddNote
               associateNote={associateNote}
               getNewNoteId={getNewNoteId}
@@ -73,10 +62,6 @@ export const Notes = React.memo<Props>(
               updateNote={updateNote}
             />
           )}
-          {!showAddNote && currentTimeline.isSaving && (
-            <Loader data-test-subj="loading-spinner" size="xl" />
-          )}
-          {!showAddNote && !currentTimeline.isSaving && <EuiCallOut title={SAVE_NOTE_HINT} />}
           <EuiSpacer size="s" />
           <InMemoryTable
             data-test-subj="notes-table"

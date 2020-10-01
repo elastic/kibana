@@ -137,7 +137,6 @@ export const PropertiesLeft = React.memo<Props>(
             toolTip={i18n.NOTES_TOOL_TIP}
             updateNote={updateNote}
             timelineType={timelineType}
-            timelineId={timelineId}
           />
         </EuiFlexItem>
       ) : null}
