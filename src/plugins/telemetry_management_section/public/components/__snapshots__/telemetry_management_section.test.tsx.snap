@@ -88,12 +88,20 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                       "clusterData": <EuiLink
                         onClick={[Function]}
                       >
-                        cluster data
+                        <FormattedMessage
+                          defaultMessage="cluster data"
+                          id="telemetry.clusterData"
+                          values={Object {}}
+                        />
                       </EuiLink>,
                       "endpointSecurityData": <EuiLink
                         onClick={[Function]}
                       >
-                        endpoint security data
+                        <FormattedMessage
+                          defaultMessage="endpoint security data"
+                          id="telemetry.securityData"
+                          values={Object {}}
+                        />
                       </EuiLink>,
                     }
                   }
