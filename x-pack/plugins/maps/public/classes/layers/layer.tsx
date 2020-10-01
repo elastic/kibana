@@ -115,7 +115,6 @@ export interface ILayerArguments {
 export class AbstractLayer implements ILayer {
   protected readonly _descriptor: LayerDescriptor;
   protected readonly _source: ISource;
-  protected _style?: IStyle;
   protected readonly _dataRequests: DataRequest[];
 
   static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
@@ -255,18 +254,15 @@ export class AbstractLayer implements ILayer {
   }
 
   getStyleForEditing(): IStyle {
-    return this.getStyle();
+    throw new Error('Should implement AbstractLayer#getStyleForEditing');
   }
 
-  getStyle() {
-    if (!this._style) {
-      throw new Error('this._style is not provided');
-    }
-    return this._style;
+  getStyle(): IStyle {
+    throw new Error('Should implement AbstractLayer#getStyle');
   }
 
   getCurrentStyle(): IStyle {
-    return this.getStyle();
+    throw new Error('Should implement AbstractLayer#getCurrentStyle');
   }
 
   getLabel(): string {

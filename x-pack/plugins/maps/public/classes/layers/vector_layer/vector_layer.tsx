@@ -90,6 +90,7 @@ export interface IVectorLayer extends ILayer {
 export class VectorLayer extends AbstractLayer {
   static type = LAYER_TYPE.VECTOR;
 
+  protected readonly _style: IVectorStyle;
   private readonly _joins: IJoin[];
 
   static createDescriptor(
@@ -124,8 +125,16 @@ export class VectorLayer extends AbstractLayer {
     return super.getSource() as IVectorSource;
   }
 
+  getStyleForEditing(): IVectorStyle {
+    return this._style;
+  }
+
+  getStyle(): IVectorStyle {
+    return this._style;
+  }
+
   getCurrentStyle(): IVectorStyle {
-    return super.getCurrentStyle() as IVectorStyle;
+    return this._style;
   }
 
   destroy() {

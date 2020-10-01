@@ -25,6 +25,18 @@ export class TileLayer extends AbstractLayer {
     this._style = new TileStyle();
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
+  }
+
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {

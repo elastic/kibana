@@ -37,7 +37,6 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
-import { IStyle } from '../../styles/style';
 import { IVectorSource } from '../../sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
@@ -272,7 +271,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
-  getStyleForEditing(): IStyle {
+  getStyleForEditing(): IVectorStyle {
     return this._documentStyle;
   }
 
