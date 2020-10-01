@@ -58,7 +58,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
 
   // Note: FCP value is in ms unit
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup wrap>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
