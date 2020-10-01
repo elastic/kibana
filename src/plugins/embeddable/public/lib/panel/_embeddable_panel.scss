@@ -54,7 +54,12 @@
   .embPanel__titleInner {
     overflow: hidden;
     display: flex;
+    align-items: center;
     padding-right: $euiSizeS;
+  }
+
+  .embPanel__maxWidth {
+    max-width: 100%;
   }
 
   .embPanel__titleText {
@@ -65,6 +70,10 @@
     @include euiTextTruncate;
     font-weight: $euiFontWeightRegular;
     color: $euiColorMediumShade;
+  }
+
+  .embPanel__icon {
+    margin-left: $euiSizeXS;
   }
 }
 
