@@ -42,7 +42,6 @@ export const useOptionTabs = ({ type: visType }: Vis): [OptionTab[], (name: stri
                 defaultMessage: 'Data',
               }),
               editor: DefaultEditorDataTab,
-              isSelected: true,
             },
           ]
         : []),
