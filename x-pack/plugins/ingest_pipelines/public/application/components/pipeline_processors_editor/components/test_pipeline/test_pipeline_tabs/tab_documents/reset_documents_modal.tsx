@@ -22,7 +22,7 @@ const i18nTexts = {
   modalDescription: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.resetDocumentsModal.description',
     {
-      defaultMessage: 'This will stop pipeline simulation.',
+      defaultMessage: 'This will reset the output.',
     }
   ),
   cancelButtonLabel: i18n.translate(
