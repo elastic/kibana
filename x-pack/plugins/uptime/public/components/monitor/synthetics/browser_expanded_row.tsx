@@ -13,7 +13,7 @@ import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
 import { EmptyStepState } from './empty_journey';
 import { ExecutedJourney } from './executed_journey';
-import { ConsoleOutputStepList } from './console_output_steps';
+import { ConsoleOutputEventList } from './console_output_event_list';
 
 interface BrowserExpandedRowProps {
   checkGroup?: string;
@@ -56,7 +56,7 @@ export const BrowserExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, jo
 
   if (journey.steps.some(someStepEnd)) return <ExecutedJourney journey={journey} />;
 
-  if (journey.steps.some(someStepConsole)) return <ConsoleOutputStepList journey={journey} />;
+  if (journey.steps.some(someStepConsole)) return <ConsoleOutputEventList journey={journey} />;
 
   // TODO: should not happen, this means that the journey has no step/end and no console logs, but some other steps; filmstrip, screenshot, etc.
   // we should probably create an error prompt letting the user know this step is not supported yet

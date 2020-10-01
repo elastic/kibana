@@ -8,13 +8,13 @@ import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { JourneyState } from '../../../state/reducers/journey';
-import { ConsoleStep } from './console_step';
+import { ConsoleEvent } from './console_event';
 
-interface ConsoleOutputStepListProps {
+interface Props {
   journey: JourneyState;
 }
 
-export const ConsoleOutputStepList: FC<ConsoleOutputStepListProps> = ({ journey }) => (
+export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
   <div>
     <EuiTitle>
       <h4>
@@ -33,8 +33,8 @@ export const ConsoleOutputStepList: FC<ConsoleOutputStepListProps> = ({ journey 
     </p>
     <EuiSpacer />
     <EuiCodeBlock>
-      {journey.steps.map((s) => (
-        <ConsoleStep step={s} />
+      {journey.steps.map((consoleEvent) => (
+        <ConsoleEvent event={consoleEvent} />
       ))}
     </EuiCodeBlock>
   </div>

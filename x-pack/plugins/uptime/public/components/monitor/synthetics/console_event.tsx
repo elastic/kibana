@@ -9,17 +9,17 @@ import React, { useContext, FC } from 'react';
 import { Ping } from '../../../../common/runtime_types';
 import { UptimeThemeContext } from '../../../contexts';
 
-interface ConsoleStepProps {
-  step: Ping;
+interface Props {
+  event: Ping;
 }
 
-export const ConsoleStep: FC<ConsoleStepProps> = ({ step }) => {
+export const ConsoleEvent: FC<Props> = ({ event }) => {
   const {
     colors: { danger },
   } = useContext(UptimeThemeContext);
 
   let typeColor: string | undefined;
-  if (step.synthetics?.type === 'stderr') {
+  if (event.synthetics?.type === 'stderr') {
     typeColor = danger;
   } else {
     typeColor = undefined;
@@ -27,11 +27,11 @@ export const ConsoleStep: FC<ConsoleStepProps> = ({ step }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false}>{step.timestamp}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{event.timestamp}</EuiFlexItem>
       <EuiFlexItem grow={false} style={{ color: typeColor }}>
-        {step.synthetics?.type}
+        {event.synthetics?.type}
       </EuiFlexItem>
-      <EuiFlexItem>{step.synthetics?.payload?.message}</EuiFlexItem>
+      <EuiFlexItem>{event.synthetics?.payload?.message}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
