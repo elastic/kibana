@@ -95,8 +95,10 @@ export function getRumLongTasksProjection({
 
 export function getRumErrorsProjection({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
 }) {
   const { start, end, uiFiltersES } = setup;
 
@@ -110,6 +112,17 @@ export function getRumErrorsProjection({
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': {
+                  value: `*${urlQuery}*`,
+                },
+              },
+            },
+          ]
+        : []),
       ...uiFiltersES,
     ],
   };
