@@ -123,8 +123,9 @@ export class Env {
       resolve(this.homeDir, 'src', 'plugins'),
       ...(options.cliArgs.oss ? [] : [resolve(this.homeDir, 'x-pack', 'plugins')]),
       resolve(this.homeDir, 'plugins'),
-      ...(options.cliArgs.runExamples
-        ? [resolve(this.homeDir, 'examples'), resolve(this.homeDir, 'x-pack', 'examples')]
+      ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
+      ...(options.cliArgs.runExamples && !options.cliArgs.oss
+        ? [resolve(this.homeDir, 'x-pack', 'examples')]
         : []),
       resolve(this.homeDir, '..', 'kibana-extra'),
     ];

@@ -20,3 +20,8 @@ export interface IApiToken {
   type: string;
   write?: boolean;
 }
+
+export interface ITokenReadWrite {
+  name: 'read' | 'write';
+  checked: boolean;
+}
