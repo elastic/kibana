@@ -21,66 +21,65 @@ export interface JourneyState {
   error?: Error;
 }
 
-const initialState: JourneyState[] = [];
+interface JourneyKVP {
+  [checkGroup: string]: JourneyState;
+}
+
+const initialState: JourneyKVP = {};
 
 type Payload = FetchJourneyStepsParams & SyntheticsJourneyApiResponse & GetJourneyFailPayload;
 
-function loadJourney(state: JourneyState[], checkGroup: string) {
-  const journeyToLoad: JourneyState | undefined = state.find((j) => j.checkGroup === checkGroup);
-  if (journeyToLoad) {
-    return {
-      ...journeyToLoad,
-      loading: true,
-    };
-  }
-  return {
-    checkGroup,
-    steps: [],
-    loading: true,
-  };
-}
-
-function updateJourneyError(state: JourneyState[], action: Action<GetJourneyFailPayload>) {
-  const journeyToUpdate: JourneyState | undefined = state.find(
-    (j) => j.checkGroup === action.payload.checkGroup
-  );
-  if (journeyToUpdate) {
-    return {
-      ...journeyToUpdate,
-      loading: false,
-      error: action.payload.error,
-    };
-  }
-  return {
-    checkGroup: action.payload.checkGroup,
-    loading: false,
-    steps: [],
-    error: action.payload.error,
-  };
-}
-
-export const journeyReducer = handleActions<JourneyState[], Payload>(
+export const journeyReducer = handleActions<JourneyKVP, Payload>(
   {
-    [String(getJourneySteps)]: (state: JourneyState[], action: Action<FetchJourneyStepsParams>) => [
-      ...state.filter(({ checkGroup }) => checkGroup !== action.payload.checkGroup),
-      loadJourney(state, action.payload.checkGroup),
-    ],
+    [String(getJourneySteps)]: (
+      state: JourneyKVP,
+      { payload: { checkGroup } }: Action<FetchJourneyStepsParams>
+    ) => ({
+      ...state,
+      // add an empty entry while fetching the check group,
+      // or update the previously-loaded entry to a new loading state
+      [checkGroup]: state[checkGroup]
+        ? {
+            ...state[checkGroup],
+            loading: true,
+          }
+        : {
+            checkGroup,
+            steps: [],
+            loading: true,
+          },
+    }),
 
     [String(getJourneyStepsSuccess)]: (
-      state: JourneyState[],
-      action: Action<SyntheticsJourneyApiResponse>
-    ) => [
-      ...state.filter((j) => j.checkGroup !== action.payload.checkGroup),
-      { checkGroup: action.payload.checkGroup, steps: action.payload.steps, loading: false },
-    ],
+      state: JourneyKVP,
+      { payload: { checkGroup, steps } }: Action<SyntheticsJourneyApiResponse>
+    ) => ({
+      ...state,
+      [checkGroup]: {
+        loading: false,
+        checkGroup,
+        steps,
+      },
+    }),
 
     [String(getJourneyStepsFail)]: (
-      state: JourneyState[],
-      action: Action<GetJourneyFailPayload>
-    ) => [
-      ...state.filter((j) => j.checkGroup !== action.payload.checkGroup),
-      updateJourneyError(state, action),
-    ],
+      state: JourneyKVP,
+      { payload: { checkGroup, error } }: Action<GetJourneyFailPayload>
+    ) => ({
+      ...state,
+      [checkGroup]: state[checkGroup]
+        ? {
+            ...state[checkGroup],
+            loading: false,
+            error,
+          }
+        : {
+            checkGroup,
+            loading: false,
+            steps: [],
+            error,
+          },
+    }),
   },
   initialState
 );
