@@ -13,7 +13,7 @@ interface Props {
   name: string;
 }
 
-const SERVICE_LABEL = i18n.translate('xpack.observability.ux.coreWebVitals', {
+const SERVICE_LABEL = i18n.translate('xpack.observability.ux.coreWebVitals.service', {
   defaultMessage: 'Service',
 });
 

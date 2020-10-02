@@ -75,7 +75,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds }: Props)
               <PaletteLegend color={color}>
                 <EuiText size="xs">
                   <FormattedMessage
-                    id="xpack.apm.rum.coreVitals.paletteLegend.rankPercentage"
+                    id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
                     defaultMessage="{labelsInd} ({ranksInd}%)"
                     values={{
                       labelsInd: labels[ind],
