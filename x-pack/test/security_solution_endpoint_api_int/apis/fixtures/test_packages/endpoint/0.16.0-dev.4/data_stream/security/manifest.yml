@@ -1,0 +1,7 @@
+title: Endpoint Security Events
+type: logs
+dataset: endpoint.events.security
+elasticsearch:
+  index_template:
+    mappings:
+      dynamic: false

@@ -1,0 +1,12 @@
+{
+  "description": "Pipeline for setting event.ingested",
+  "processors": [
+    {
+      "set": {
+        "field": "event.ingested",
+        "value": "{{ _ingest.timestamp }}",
+        "ignore_failure": true
+      }
+    }
+  ]
+}

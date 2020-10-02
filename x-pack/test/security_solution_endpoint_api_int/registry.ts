@@ -35,6 +35,8 @@ const defaultRegistryConfigPath = path.join(
   './apis/fixtures/package_registry_config.yml'
 );
 
+const testPackagesPath = path.join(__dirname, './apis/fixtures/test_packages');
+
 export function createEndpointDockerConfig(
   packageRegistryConfig: string = defaultRegistryConfigPath,
   dockerImage: string = ingestDockerImage,
@@ -43,6 +45,8 @@ export function createEndpointDockerConfig(
   const args: string[] = [
     '-v',
     `${packageRegistryConfig}:/package-registry/config.yml`,
+    '-v',
+    `${testPackagesPath}:/packages/test-packages`,
     ...dockerArgs,
   ];
   return defineDockerServersConfig({

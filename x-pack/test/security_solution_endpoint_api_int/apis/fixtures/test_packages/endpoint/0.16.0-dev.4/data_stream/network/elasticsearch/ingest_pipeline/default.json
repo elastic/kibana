@@ -1,0 +1,44 @@
+{
+  "description": "Pipeline for setting event.ingested and geo ip info",
+  "processors": [
+    {
+      "set": {
+        "field": "event.ingested",
+        "value": "{{ _ingest.timestamp }}",
+        "ignore_failure": true
+      }
+    },
+    {
+      "geoip": {
+        "field": "source.ip",
+        "target_field": "source.geo",
+        "properties": [
+          "continent_name",
+          "country_name",
+          "country_iso_code",
+          "region_iso_code",
+          "region_name",
+          "city_name",
+          "location"
+        ],
+        "ignore_missing": true
+      }
+    },
+    {
+      "geoip": {
+        "field": "destination.ip",
+        "target_field": "destination.geo",
+        "properties": [
+          "continent_name",
+          "country_name",
+          "country_iso_code",
+          "region_iso_code",
+          "region_name",
+          "city_name",
+          "location"
+        ],
+        "ignore_missing": true
+      }
+    }
+  ]
+}

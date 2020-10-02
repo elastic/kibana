@@ -1,0 +1,6 @@
+title: Endpoint Metrics
+type: metrics
+elasticsearch:
+  index_template:
+    mappings:
+      dynamic: false

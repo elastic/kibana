@@ -1,0 +1,7 @@
+title: Endpoint Network Events
+type: logs
+dataset: endpoint.events.network
+elasticsearch:
+  index_template:
+    mappings:
+      dynamic: false

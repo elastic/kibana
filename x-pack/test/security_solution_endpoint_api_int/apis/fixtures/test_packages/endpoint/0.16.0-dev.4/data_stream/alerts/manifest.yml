@@ -1,0 +1,6 @@
+title: Endpoint Alerts
+type: logs
+elasticsearch:
+  index_template:
+    mappings:
+      dynamic: false

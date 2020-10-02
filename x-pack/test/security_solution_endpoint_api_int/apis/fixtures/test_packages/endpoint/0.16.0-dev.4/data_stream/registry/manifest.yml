@@ -1,0 +1,7 @@
+title: Endpoint Registry Events
+type: logs
+dataset: endpoint.events.registry
+elasticsearch:
+  index_template:
+    mappings:
+      dynamic: false
