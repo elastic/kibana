@@ -32,13 +32,6 @@ import { transformError, buildSiemResponse } from '../utils';
 import { AlertsClient } from '../../../../../../alerts/server';
 import { FrameworkRequest } from '../../../framework';
 
-export interface ValidatedRules {
-  rules_installed: number;
-  rules_updated: number;
-  timelines_installed: number;
-  timelines_updated: number;
-}
-
 export const addPrepackedRulesRoute = (
   router: IRouter,
   config: ConfigType,
@@ -97,7 +90,7 @@ export const createPrepackagedRules = async (
   alertsClient: AlertsClient,
   frameworkRequest: FrameworkRequest,
   maxTimelineImportExportSize: number
-): Promise<ValidatedRules | null> => {
+): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
   const clusterClient = context.core.elasticsearch.legacy.client;
   const savedObjectsClient = context.core.savedObjects.client;
 
