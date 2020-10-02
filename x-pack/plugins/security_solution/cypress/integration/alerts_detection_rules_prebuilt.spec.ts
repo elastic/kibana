@@ -46,7 +46,7 @@ describe('Alerts rules, prebuilt rules', () => {
     esArchiverUnloadEmptyKibana();
   });
 
-  it('Loads prebuilt rules', async () => {
+  it('Loads prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
@@ -64,15 +64,17 @@ describe('Alerts rules, prebuilt rules', () => {
     waitForRulesToBeLoaded();
 
     cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
-    const firstScreenRules = await cy.get(RULES_TABLE).find(RULES_ROW).promisify();
+    cy.get(RULES_TABLE).then(($table1) => {
+      const firstScreenRules = $table1.find(RULES_ROW).length;
+      paginate();
+      waitForRulesToBeLoaded();
+      cy.get(RULES_TABLE).then(($table2) => {
+        const secondScreenRules = $table2.find(RULES_ROW).length;
+        const totalNumberOfRules = firstScreenRules + secondScreenRules;
 
-    paginate();
-    waitForRulesToBeLoaded();
-
-    const secondScreenRules = await cy.get(RULES_TABLE).find(RULES_ROW).promisify();
-    const totalNumberOfRules = firstScreenRules.length + secondScreenRules.length;
-
-    expect(totalNumberOfRules).to.eql(expectedNumberOfRules);
+        expect(totalNumberOfRules).to.eql(expectedNumberOfRules);
+      });
+    });
   });
 });
 
