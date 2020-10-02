@@ -178,6 +178,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 {...props}
                 fieldFilter={fieldFilter}
                 setFieldFilter={setFieldFilter}
+                mobile={true}
               />
             </EuiFlyoutBody>
           </EuiFlyout>
