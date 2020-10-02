@@ -35,7 +35,7 @@ import {
 
 import { renderEndzoneTooltip } from '../../../charts/public';
 
-import { getThemeService } from '../services';
+import { getThemeService, getUISettings } from '../services';
 import { VisConfig } from '../types';
 
 declare global {
@@ -89,8 +89,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const themeService = getThemeService();
   const theme = themeService.useChartsTheme();
   const baseTheme = themeService.useChartsBaseTheme();
+  const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
+
   const themeOverrides: PartialTheme = {
     markSizeRatio,
+    sharedStyle: {
+      unhighlighted: {
+        opacity: dimmingOpacity,
+      },
+    },
     chartMargins:
       legendPosition === Position.Top || legendPosition === Position.Right
         ? {

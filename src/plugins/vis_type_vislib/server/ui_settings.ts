@@ -24,6 +24,7 @@ import { UiSettingsParams } from 'kibana/server';
 import { DIMMING_OPACITY_SETTING, HEATMAP_MAX_BUCKETS_SETTING } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
+  // TODO: move this to vis_type_xy when vislib is removed
   [DIMMING_OPACITY_SETTING]: {
     name: i18n.translate('visTypeVislib.advancedSettings.visualization.dimmingOpacityTitle', {
       defaultMessage: 'Dimming opacity',
