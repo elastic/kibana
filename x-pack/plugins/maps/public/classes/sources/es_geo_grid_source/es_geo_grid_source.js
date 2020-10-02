@@ -25,13 +25,13 @@ import {
   GEOTILE_GRID_AGG_NAME,
   GEOCENTROID_AGG_NAME,
   ES_GEO_FIELD_TYPE,
-  LICENSED_FEATURES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import rison from 'rison-node';
 import { getHttp } from '../../../kibana_services';

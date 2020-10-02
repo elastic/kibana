@@ -31,13 +31,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import {
-  APP_ICON_SOLUTION,
-  APP_ID,
-  LICENCED_FEATURES_DETAILS,
-  LICENSED_FEATURES,
-  MAP_SAVED_OBJECT_TYPE,
-} from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -59,6 +53,11 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
+import {
+  LICENCED_FEATURES_DETAILS,
+  registerLicensedFeatures,
+  setLicensingPluginStart,
+} from './licensed_features';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -105,10 +104,7 @@ export class MapsPlugin
   }
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    plugins.licensing.featureUsage.register(
-      LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.name,
-      LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.license
-    );
+    registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
     setKibanaCommonConfig(plugins.mapsLegacy.config);
@@ -157,10 +153,7 @@ export class MapsPlugin
         setIsGoldPlus(gold.state === 'valid');
         setLicenseId(license.uid);
       });
-
-      setRegisterFeatureUse((feature: LICENSED_FEATURES) => {
-        plugins.licensing.featureUsage.notifyUsage(LICENCED_FEATURES_DETAILS[feature].name);
-      });
+      setLicensingPluginStart(plugins.licensing);
     }
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);

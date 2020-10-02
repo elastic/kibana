@@ -43,7 +43,7 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
-import { registerFeatureUse } from '../kibana_services';
+import { notifyLicensedFeatureUsage } from '../licensed_features';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -128,7 +128,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
 
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
-    features.forEach(registerFeatureUse);
+    features.forEach(notifyLicensedFeatureUsage);
   };
 }
 

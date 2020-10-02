@@ -81,22 +81,6 @@ export enum SOURCE_TYPES {
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
 }
 
-export enum LICENSED_FEATURES {
-  GEO_SHAPE_AGGS = 'GEO_SHAPE_AGGS',
-}
-
-export interface LicensedFeatureDetail {
-  name: string;
-  license: LicenseType;
-}
-
-export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatureDetail> = {
-  [LICENSED_FEATURES.GEO_SHAPE_AGGS]: {
-    name: 'geo aggs on geo_shape fields',
-    license: 'gold',
-  },
-};
-
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
   JOIN = 'join',

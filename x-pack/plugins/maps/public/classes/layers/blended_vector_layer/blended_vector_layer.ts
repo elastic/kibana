@@ -20,7 +20,6 @@ import {
   VECTOR_STYLES,
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
-  LICENSED_FEATURES,
 } from '../../../../common/constants';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
@@ -39,6 +38,7 @@ import {
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

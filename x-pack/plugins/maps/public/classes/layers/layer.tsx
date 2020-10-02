@@ -16,7 +16,6 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
-  LICENSED_FEATURES,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -35,6 +34,7 @@ import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from 
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;

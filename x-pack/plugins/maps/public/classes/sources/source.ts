@@ -12,9 +12,10 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { copyPersistentState } from '../../reducers/util';
 
 import { IField } from '../fields/field';
-import { FieldFormatter, LICENSED_FEATURES, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;

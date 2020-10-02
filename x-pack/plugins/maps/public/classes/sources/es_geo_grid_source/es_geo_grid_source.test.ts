@@ -9,11 +9,11 @@ import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
   GRID_RESOLUTION,
-  LICENSED_FEATURES,
   RENDER_AS,
   SOURCE_TYPES,
 } from '../../../../common/constants';
 import { SearchSource } from 'src/plugins/data/public';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 jest.mock('../../../kibana_services');
 
