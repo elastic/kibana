@@ -18,6 +18,5 @@
  */
 
 require('../apm')();
-require('../setup_node_env/no_transpilation');
-require('../setup_node_env/babel_register/polyfill');
+require('../setup_node_env');
 require('./cli');
