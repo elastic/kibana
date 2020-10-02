@@ -24,7 +24,7 @@ import {
 
 import { registerCoreUsageCollector } from '.';
 import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';
-import { CoreUsageData } from 'src/core/server';
+import { CoreUsageData } from 'src/core/server/';
 
 describe('telemetry_core', () => {
   let collector: CollectorOptions;
