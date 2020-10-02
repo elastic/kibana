@@ -19,7 +19,7 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
 
 export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
   if (ruleQuery != null) {
-    const parsedQuery = ruleQuery.trim().split(' ');
+    const parsedQuery = ruleQuery.split(' ').filter((word) => word !== '');
     return parsedQuery[0] === 'sequence' && parsedQuery[1] !== 'where';
   }
   return false;
