@@ -8,12 +8,7 @@ import { Agent } from '../types';
 
 export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   let agentVersion: string;
-  if (
-    typeof agent.local_metadata === 'object' &&
-    typeof agent.local_metadata.elastic === 'object' &&
-    typeof agent.local_metadata.elastic.agent === 'object' &&
-    typeof agent.local_metadata.elastic.agent.version === 'string'
-  ) {
+  if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
     agentVersion = agent.local_metadata.elastic.agent.version;
   } else {
     return false;
