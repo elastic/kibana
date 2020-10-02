@@ -17,12 +17,20 @@
  * under the License.
  */
 
+import moment from 'moment-timezone';
 import { labelDateFormatter } from './label_date_formatter';
+
+const dateString = '2020-09-24T18:59:02.000Z';
 
 describe('Label Date Formatter Function', () => {
   it('Should format the date string', () => {
-    const label = labelDateFormatter('2020-09-24T18:59:02.000Z');
-    expect(label).toEqual('Sep 24, 2020 9:59 PM');
+    const label = labelDateFormatter(dateString);
+    expect(label).toEqual(moment(dateString).format('lll'));
+  });
+
+  it('Should format the date string on the given formatter', () => {
+    const label = labelDateFormatter(dateString, 'MM/DD/YYYY');
+    expect(label).toEqual(moment(dateString).format('MM/DD/YYYY'));
   });
 
   it('Returns the label if it is not date string', () => {
