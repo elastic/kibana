@@ -120,6 +120,7 @@ export const CopyablePanelField = memo(
           closePopover={onMouseLeave}
           hasArrow={false}
           isOpen={isOpen}
+          panelPaddingSize="s"
         >
           <EuiToolTip content={COPY_TO_CLIPBOARD}>
             <WithCopyToClipboard
