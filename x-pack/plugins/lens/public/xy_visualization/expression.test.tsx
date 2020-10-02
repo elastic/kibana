@@ -35,6 +35,7 @@ import {
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -721,6 +722,29 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
+    test('it renders regular bar empty placeholder for no results', () => {
+      const { data, args } = sampleArgs();
+
+      // send empty data to the chart
+      data.tables.first.rows = [];
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(BarSeries)).toHaveLength(0);
+      expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+    });
+
     test('onBrushEnd returns correct context data for date histogram data', () => {
       const { args } = sampleArgs();
 
@@ -874,6 +898,36 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('it renders stacked bar empty placeholder for no results', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                xAccessor: undefined,
+                splitAccessor: 'e',
+                seriesType: 'bar_stacked',
+              },
+            ],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(BarSeries)).toHaveLength(0);
+      expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
     });
 
     test('it passes time zone to the series', () => {
