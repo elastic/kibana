@@ -14,7 +14,6 @@ import {
 } from '../../mocks';
 import { ChildDragDropProvider } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
-import { mount } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
