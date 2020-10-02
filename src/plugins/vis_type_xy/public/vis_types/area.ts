@@ -73,6 +73,7 @@ export const areaVisTypeDefinition: XyVisTypeDefinition = {
             show: true,
             filter: true,
             truncate: 100,
+            rotate: LabelRotation.Vertical,
           },
           title: {},
           style: {},

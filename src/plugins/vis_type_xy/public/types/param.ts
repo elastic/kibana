@@ -152,7 +152,6 @@ export interface VisParams {
   valueAxes: ValueAxis[];
   grid: Grid;
   seriesParams: SeriesParam[];
-  // times: TimeMarker[];
   dimensions: Dimensions;
   radiusRatio: number;
   /**
