@@ -81,8 +81,8 @@ export function JSErrors() {
       align: 'right' as const,
       render: (count: number) => (
         <FormattedMessage
-          id={'xpack.apm.ux.jsErrors.percent'}
-          defaultMessage={'{pageLoadPercent} %'}
+          id="xpack.apm.ux.jsErrors.percent"
+          defaultMessage="{pageLoadPercent} %"
           values={{
             pageLoadPercent: ((count / totalPageViews) * 100).toFixed(1),
           }}
