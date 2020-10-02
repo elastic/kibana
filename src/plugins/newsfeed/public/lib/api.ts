@@ -25,9 +25,7 @@ import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import {
   NEWSFEED_DEFAULT_SERVICE_BASE_URL,
-  NEWSFEED_FALLBACK_FETCH_INTERVAL,
   NEWSFEED_FALLBACK_LANGUAGE,
-  NEWSFEED_FALLBACK_MAIN_INTERVAL,
   NEWSFEED_LAST_FETCH_STORAGE_KEY,
   NEWSFEED_HASH_SET_STORAGE_KEY,
 } from '../../common/constants';
@@ -193,8 +191,8 @@ export function getApi(
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
   const userLanguage = i18n.getLocale();
-  const fetchInterval = config.fetchInterval?.asMilliseconds() || NEWSFEED_FALLBACK_FETCH_INTERVAL;
-  const mainInterval = config.mainInterval?.asMilliseconds() || NEWSFEED_FALLBACK_MAIN_INTERVAL;
+  const fetchInterval = config.fetchInterval.asMilliseconds();
+  const mainInterval = config.mainInterval.asMilliseconds();
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
 
   return Rx.timer(0, mainInterval).pipe(

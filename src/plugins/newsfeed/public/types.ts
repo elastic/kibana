@@ -22,11 +22,11 @@ import { Duration, Moment } from 'moment';
 // Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
 export interface NewsfeedPluginBrowserConfig {
   service: {
-    urlRoot?: string;
+    urlRoot: string;
     pathTemplate: string;
   };
-  mainInterval?: Duration; // how often to check last updated time
-  fetchInterval?: Duration; // how often to fetch remote service and set last updated
+  mainInterval: Duration; // how often to check last updated time
+  fetchInterval: Duration; // how often to fetch remote service and set last updated
 }
 
 export interface ApiItem {
