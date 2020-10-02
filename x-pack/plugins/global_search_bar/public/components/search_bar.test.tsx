@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { waitFor, act } from '@testing-library/react';
 import React from 'react';
-import { wait } from '@testing-library/react';
 import { of } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import {
@@ -41,7 +41,11 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
-const getSelectableProps: any = (component: any) => component.find('EuiSelectable').props();
+const getSelectableOptionTitles: any = (component: any) =>
+  component
+    .find('EuiSelectable')
+    .props()
+    .options.map((opt: any) => opt.title);
 const getSearchProps: any = (component: any) => component.find('EuiFieldSearch').props();
 
 describe('SearchBar', () => {
@@ -55,7 +59,6 @@ describe('SearchBar', () => {
   });
 
   it('correctly filters and sorts results', async () => {
-    const navigate = jest.fn();
     findSpy
       .mockReturnValueOnce(
         of(
@@ -66,7 +69,11 @@ describe('SearchBar', () => {
       .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
     const component = mountWithIntl(
-      <SearchBar globalSearch={searchService.find} navigateToUrl={navigate} />
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={jest.fn()}
+        trackUiMetric={jest.fn()}
+      />
     );
 
     expect(findSpy).toHaveBeenCalledTimes(0);
@@ -75,17 +82,23 @@ describe('SearchBar', () => {
     component.update();
     expect(findSpy).toHaveBeenCalledTimes(1);
     expect(findSpy).toHaveBeenCalledWith('', {});
-    expect(getSelectableProps(component).options).toMatchSnapshot();
-    await wait(() => getSearchProps(component).onKeyUpCapture({ currentTarget: { value: 'd' } }));
+    expect(getSelectableOptionTitles(component)).toMatchSnapshot();
+    await act(() => getSearchProps(component).onKeyUpCapture({ currentTarget: { value: 'd' } }));
     jest.runAllTimers();
     component.update();
-    expect(getSelectableProps(component).options).toMatchSnapshot();
-    expect(findSpy).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(findSpy).toHaveBeenCalledTimes(2));
+    expect(getSelectableOptionTitles(component)).toMatchSnapshot();
     expect(findSpy).toHaveBeenCalledWith('d', {});
   });
 
   it('supports keyboard shortcuts', () => {
-    mountWithIntl(<SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />);
+    mountWithIntl(
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={jest.fn()}
+        trackUiMetric={jest.fn()}
+      />
+    );
 
     const searchEvent = new KeyboardEvent('keydown', {
       key: '/',
