@@ -52,13 +52,6 @@ export async function ackAgentUpgraded(
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
     upgrade_started_at: undefined,
-    local_metadata: {
-      elastic: {
-        agent: {
-          version,
-        },
-      },
-    },
   });
 }
 
