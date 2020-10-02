@@ -95,6 +95,14 @@ const fieldsResponse = {
   },
 };
 
+const issueResponse = {
+  id: '10267',
+  key: 'RJ-107',
+  fields: { summary: 'Test title' },
+};
+
+const issuesResponse = [issueResponse];
+
 describe('Jira service', () => {
   let service: ExternalService;
 
@@ -219,6 +227,7 @@ describe('Jira service', () => {
           labels: [],
           issueType: '10006',
           priority: 'High',
+          parent: null,
         },
       });
 
@@ -264,6 +273,7 @@ describe('Jira service', () => {
           labels: [],
           priority: 'High',
           issueType: null,
+          parent: null,
         },
       });
 
@@ -308,6 +318,7 @@ describe('Jira service', () => {
           labels: [],
           issueType: '10006',
           priority: 'High',
+          parent: 'RJ-107',
         },
       });
 
@@ -324,6 +335,7 @@ describe('Jira service', () => {
             issuetype: { id: '10006' },
             labels: [],
             priority: { name: 'High' },
+            parent: { key: 'RJ-107' },
           },
         },
       });
@@ -344,6 +356,7 @@ describe('Jira service', () => {
             labels: [],
             issueType: '10006',
             priority: 'High',
+            parent: null,
           },
         })
       ).rejects.toThrow(
@@ -370,6 +383,7 @@ describe('Jira service', () => {
           labels: [],
           issueType: '10006',
           priority: 'High',
+          parent: null,
         },
       });
 
@@ -398,6 +412,7 @@ describe('Jira service', () => {
           labels: [],
           issueType: '10006',
           priority: 'High',
+          parent: 'RJ-107',
         },
       });
 
@@ -414,6 +429,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
             issuetype: { id: '10006' },
             project: { key: 'CK' },
+            parent: { key: 'RJ-107' },
           },
         },
       });
@@ -435,6 +451,7 @@ describe('Jira service', () => {
             labels: [],
             issueType: '10006',
             priority: 'High',
+            parent: null,
           },
         })
       ).rejects.toThrow(
@@ -914,6 +931,98 @@ describe('Jira service', () => {
           '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
+    });
+  });
+
+  describe('getIssues', () => {
+    test('it should return the issues', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          issues: issuesResponse,
+        },
+      }));
+
+      const res = await service.getIssues('Test title');
+
+      expect(res).toEqual([
+        {
+          id: '10267',
+          key: 'RJ-107',
+          title: 'Test title',
+        },
+      ]);
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          issues: issuesResponse,
+        },
+      }));
+
+      await service.getIssues('Test title');
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        url: `https://siem-kibana.atlassian.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('An error has occurred');
+        error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
+        throw error;
+      });
+
+      expect(service.getIssues('Test title')).rejects.toThrow(
+        '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Could not get issue types'
+      );
+    });
+  });
+
+  describe('getIssue', () => {
+    test('it should return a single issue', async () => {
+      requestMock.mockImplementation(() => ({
+        data: issueResponse,
+      }));
+
+      const res = await service.getIssue('RJ-107');
+
+      expect(res).toEqual({
+        id: '10267',
+        key: 'RJ-107',
+        title: 'Test title',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          issues: issuesResponse,
+        },
+      }));
+
+      await service.getIssue('RJ-107');
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        url: `https://siem-kibana.atlassian.net/rest/api/2/issue/RJ-107`,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('An error has occurred');
+        error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
+        throw error;
+      });
+
+      expect(service.getIssue('RJ-107')).rejects.toThrow(
+        '[Action][Jira]: Unable to get issue with id RJ-107. Error: An error has occurred. Reason: Could not get issue types'
+      );
     });
   });
 });

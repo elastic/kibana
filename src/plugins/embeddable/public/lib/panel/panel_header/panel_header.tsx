@@ -99,22 +99,11 @@ function renderNotifications(
   });
 }
 
-function renderTooltip(description: string) {
-  return (
-    description !== '' && (
-      <EuiToolTip content={description} delay="regular" position="right">
-        <EuiIcon type="iInCircle" />
-      </EuiToolTip>
-    )
-  );
-}
+type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
-
-function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
-  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
-    const description = embeddable.getVisualizationDescription();
+function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
+  if ('getDescription' in embeddable) {
+    const description = embeddable.getDescription();
 
     if (description) {
       return description;
@@ -135,9 +124,10 @@ export function PanelHeader({
   embeddable,
   headerId,
 }: PanelHeaderProps) {
-  const viewDescription = getViewDescription(embeddable);
-  const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
-  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
+  const description = getViewDescription(embeddable);
+  const showTitle = !hidePanelTitle && (!isViewMode || title);
+  const showPanelBar =
+    !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
@@ -175,26 +165,36 @@ export function PanelHeader({
     );
   }
 
+  const renderTitle = () => {
+    const titleComponent = showTitle ? (
+      <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
+        {title || placeholderTitle}
+      </span>
+    ) : undefined;
+    return description ? (
+      <EuiToolTip
+        content={description}
+        delay="regular"
+        position="top"
+        anchorClassName="embPanel__titleTooltipAnchor"
+      >
+        <span className="embPanel__titleInner">
+          {titleComponent} <EuiIcon type="iInCircle" color="subdued" />
+        </span>
+      </EuiToolTip>
+    ) : (
+      titleComponent
+    );
+  };
+
   return (
     <figcaption
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
       <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-        {showTitle ? (
-          <span className="embPanel__titleInner">
-            <span
-              className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
-              aria-hidden="true"
-            >
-              {title || placeholderTitle}
-            </span>
-            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-            {renderTooltip(viewDescription)}
-          </span>
-        ) : (
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-        )}
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {renderTitle()}
         {renderBadges(badges, embeddable)}
       </h2>
       {renderNotifications(notifications, embeddable)}
