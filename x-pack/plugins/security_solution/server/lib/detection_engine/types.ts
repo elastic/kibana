@@ -43,6 +43,7 @@ import {
   ThreatIndexOrUndefined,
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
+  ThreatLanguageOrUndefined,
 } from '../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
@@ -85,6 +86,7 @@ export interface RuleTypeParams {
   threatIndex: ThreatIndexOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
