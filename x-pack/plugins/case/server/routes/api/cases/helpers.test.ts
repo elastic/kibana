@@ -22,14 +22,14 @@ describe('helpers', () => {
   const caseConnector: CaseConnector = {
     id: '123',
     name: 'Jira',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: { issueType: 'Task', priority: 'High', parent: null },
   };
 
   const esCaseConnector: ESCaseConnector = {
     id: '123',
     name: 'Jira',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: [
       { key: 'issueType', value: 'Task' },
       { key: 'priority', value: 'High' },
@@ -81,7 +81,7 @@ describe('helpers', () => {
       expect(getConnectorFromConfiguration(caseConfigure)).toEqual({
         id: '789',
         name: 'My connector 3',
-        type: '.jira',
+        type: ConnectorTypes.jira,
         fields: null,
       });
     });

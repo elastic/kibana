@@ -30,10 +30,11 @@ describe('Utils', () => {
     const connector: ESCaseConnector = {
       id: '123',
       name: 'My connector',
-      type: '.jira',
+      type: ConnectorTypes.jira,
       fields: [
         { key: 'issueType', value: 'Task' },
         { key: 'priority', value: 'High' },
+        { key: 'parent', value: null },
       ],
     };
     it('transform correctly', () => {
@@ -498,7 +499,7 @@ describe('Utils', () => {
         caseConfigureConnector: {
           id: '789',
           name: 'My connector 3',
-          type: '.jira',
+          type: ConnectorTypes.jira,
           fields: {},
         },
       };
@@ -516,7 +517,7 @@ describe('Utils', () => {
         connector: {
           id: '789',
           name: 'My connector 3',
-          type: '.jira',
+          type: ConnectorTypes.jira,
           fields: {},
         },
         created_at: '2019-11-25T21:54:48.952Z',

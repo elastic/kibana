@@ -68,7 +68,7 @@ export const newConfiguration: CasesConfigureRequest = {
   connector: {
     id: '456',
     name: 'My connector 2',
-    type: '.jira',
+    type: ConnectorTypes.jira,
     fields: null,
   },
   closure_type: 'close-by-pushing',
