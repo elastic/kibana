@@ -105,6 +105,7 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
         ? { page_size: location.page_size }
         : {}),
+      ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
     };
   } else {
@@ -144,13 +145,16 @@ export const extractTrustedAppsListPageLocation = (
   query: querystring.ParsedUrlQuery
 ): TrustedAppsListPageLocation => ({
   ...extractListPaginationParams(query),
+  view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
   show: extractFirstParamValue(query, 'show') === 'create' ? 'create' : undefined,
 });
 
-export const getTrustedAppsListPath = (params?: Partial<TrustedAppsListPageLocation>): string => {
+export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLocation>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
 
-  return `${path}${appendSearch(querystring.stringify(normalizeTrustedAppsPageLocation(params)))}`;
+  return `${path}${appendSearch(
+    querystring.stringify(normalizeTrustedAppsPageLocation(location))
+  )}`;
 };
