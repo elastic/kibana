@@ -29,10 +29,16 @@ export class TileJsonUpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _handleChange = (layerName: string) => {
+  _handleChange = (settings: Partial<TileJsonSourceSettings>) => {
     const changes: OnSourceChangeArgs[] = [];
-    if (layerName !== this.props.source.getLayerName()) {
-      changes.push({ propName: 'layerName', value: layerName });
+    if (settings.layerName !== this.props.source.getLayerName()) {
+      changes.push({ propName: 'layerName', value: settings.layerName });
+    }
+    if (settings.minSourceZoom !== this.props.source.getMinZoom()) {
+      changes.push({ propName: 'minSourceZoom', value: settings.minSourceZoom });
+    }
+    if (settings.maxSourceZoom !== this.props.source.getMaxZoom()) {
+      changes.push({ propName: 'maxSourceZoom', value: settings.maxSourceZoom });
     }
     this.props.onChange(...changes);
   };

@@ -12,10 +12,7 @@ import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { FIELD_ORIGIN, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import {
-  TiledSingleLayerVectorSourceDescriptor,
-  TileJsonVectorSourceDescriptor,
-} from '../../../../common/descriptor_types';
+import { TileJsonVectorSourceDescriptor } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { MVTSingleLayerVectorSource } from '../mvt_single_layer_vector_source';
@@ -40,6 +37,8 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
   static createDescriptor({
     url,
     layerName,
+    minSourceZoom,
+    maxSourceZoom,
     tooltipProperties,
   }: Partial<TileJsonVectorSourceDescriptor>): TileJsonVectorSourceDescriptor {
     return {
@@ -47,6 +46,8 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
       id: uuid(),
       url: url ? url : '',
       layerName: layerName ? layerName : '',
+      minSourceZoom: typeof minSourceZoom === 'number' ? minSourceZoom : MIN_ZOOM,
+      maxSourceZoom: typeof maxSourceZoom === 'number' ? maxSourceZoom : MAX_ZOOM,
       tooltipProperties: tooltipProperties ? tooltipProperties : [],
     };
   }
@@ -55,12 +56,9 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
     return tileJsonDoc.vector_layers || [];
   }
 
-  readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+  readonly _descriptor: TileJsonVectorSourceDescriptor;
 
-  constructor(
-    sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: object
-  ) {
+  constructor(sourceDescriptor: TileJsonVectorSourceDescriptor, inspectorAdapters?: object) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = TileJsonSource.createDescriptor(sourceDescriptor);
 
@@ -139,7 +137,9 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
 
   async getUrlTemplateWithMeta() {
     const layer = await this.getLayerConfig();
-    // todo: EMS does not preserve licesing param
+    if (!layer) {
+      return null;
+    }
     const tileJsonDoc = await loadTileJsonDocument(this._descriptor.url);
     const tileUrl = tileJsonDoc.tiles[0];
     return {
@@ -148,29 +148,6 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
       minSourceZoom: layer.minzoom,
       maxSourceZoom: layer.maxzoom,
     };
-  }
-
-  getFeatureProperties(
-    id: string | number | undefined,
-    mbProperties: GeoJsonProperties
-  ): GeoJsonProperties | null {
-    return mbProperties;
-  }
-
-  getMinZoom() {
-    return MIN_ZOOM;
-  }
-
-  getMaxZoom() {
-    return MAX_ZOOM;
-  }
-
-  async filterAndFormatPropertiesToHtml(
-    properties: GeoJsonProperties,
-    featureId?: string | number
-  ): Promise<ITooltipProperty[]> {
-    // todo
-    return [];
   }
 }
 

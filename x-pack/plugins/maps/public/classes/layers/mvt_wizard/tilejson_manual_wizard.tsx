@@ -7,7 +7,11 @@
 import React, { Component } from 'react';
 import { EuiSwitch, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
+import {
+  TiledSingleLayerVectorSourceSettings,
+  TileJsonVectorSourceDescriptor,
+  TileJsonVectorSourceSettings,
+} from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSource } from '../../sources/mvt_single_layer_vector_source';
 import { TiledVectorLayer } from '../tiled_vector_layer/tiled_vector_layer';
 import { MVTSingleLayerVectorSourceEditor } from '../../sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';

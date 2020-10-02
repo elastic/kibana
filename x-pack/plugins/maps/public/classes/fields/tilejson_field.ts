@@ -8,8 +8,9 @@ import { AbstractField, IField } from './field';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { TileJsonSource } from '../sources/tilejson_source/tilejson_source';
+import { MVTField } from './mvt_field';
 
-export class TileJsonField extends AbstractField implements IField {
+export class TileJsonField extends MVTField implements IField {
   private readonly _source: TileJsonSource;
   constructor({
     fieldName,

@@ -10,28 +10,23 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TileJsonVectorSourceSettings } from '../../../../common/descriptor_types';
 import { TileJsonSourceSettings } from './tilejson_source_settings';
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export interface Props {
   onSourceConfigChange: (sourceConfig: TileJsonVectorSourceSettings) => void;
 }
 
-interface State {
-  url: string;
-  layerName: string;
-}
-
-export class TileJsonSourceEditor extends Component<Props, State> {
+export class TileJsonSourceEditor extends Component<Props, TileJsonSourceSettings> {
   state = {
     url: '',
     layerName: '',
+    minSourceZoom: MIN_ZOOM,
+    maxSourceZoom: MAX_ZOOM,
   };
 
   _sourceConfigChange = _.debounce(() => {
     if (this.state.layerName && this.state.url) {
-      this.props.onSourceConfigChange({
-        url: this.state.url,
-        layerName: this.state.layerName,
-      });
+      this.props.onSourceConfigChange(this.state);
     }
   }, 200);
 
@@ -50,11 +45,18 @@ export class TileJsonSourceEditor extends Component<Props, State> {
     );
   };
 
-  _handleLayerNameChange = (layerName: string) => {
-    if (this.state.layerName === layerName) {
+  _handleChange = (settings: TileJsonSourceSettings) => {
+    if (this.state.layerName === settings.layerName) {
       return;
     }
-    this.setState({ layerName }, () => this._sourceConfigChange());
+    this.setState(
+      {
+        layerName: settings.layerName,
+        minSourceZoom: settings.minSourceZoom,
+        maxSourceZoom: settings.maxSourceZoom,
+      },
+      () => this._sourceConfigChange()
+    );
   };
 
   render() {
@@ -75,7 +77,7 @@ export class TileJsonSourceEditor extends Component<Props, State> {
         </EuiFormRow>
 
         <TileJsonSourceSettings
-          handleChange={this._handleLayerNameChange}
+          handleChange={this._handleChange}
           layerName={this.state.layerName}
           url={this.state.url}
         />
