@@ -25,7 +25,7 @@ describe('getSupportedFieldsByMetricType', () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram']);
     });
   const shouldHaveHistogramNumbersAndStrings = (type) =>
-    it(`should return numbers and histogram for ${type}`, () => {
+    it(`should return numbers, histogram and strings for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram', 'string']);
     });
   const shouldHaveOnlyNumbers = (type) =>
