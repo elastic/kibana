@@ -12,6 +12,7 @@ import {
   EuiSelectableTemplateSitewideOption,
   EuiText,
   EuiIcon,
+  EuiImage,
   EuiHeaderSectionItemButton,
   EuiSelectableMessage,
 } from '@elastic/eui';
@@ -27,6 +28,8 @@ import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_sea
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  basePathUrl: string;
+  darkMode: boolean;
 }
 
 const clearField = (field: HTMLInputElement) => {
@@ -42,7 +45,7 @@ const clearField = (field: HTMLInputElement) => {
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 const blurEvent = new FocusEvent('blur');
 
-export function SearchBar({ globalSearch, navigateToUrl }: Props) {
+export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }: Props) {
   const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
@@ -134,6 +137,34 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     }
   };
 
+  const emptyMessage = (
+    <EuiSelectableMessage style={{ minHeight: 300 }}>
+      <EuiImage
+        alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
+          defaultMessage: 'Illustration of black hole',
+        })}
+        size="fullWidth"
+        url={`${basePathUrl}illustration_product_no_search_results_${
+          darkMode ? 'dark' : 'light'
+        }.svg`}
+      />
+      <EuiText size="m">
+        <p>
+          <FormattedMessage
+            id="xpack.globalSearchBar.searchBar.noResultsHeading"
+            defaultMessage="No results found"
+          />
+        </p>
+      </EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.globalSearchBar.searchBar.noResults"
+          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+        />
+      </p>
+    </EuiSelectableMessage>
+  );
+
   useEvent('keydown', onKeyDown);
 
   return (
@@ -164,22 +195,8 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       popoverProps={{
         repositionOnScroll: true,
       }}
-      emptyMessage={
-        <EuiSelectableMessage style={{ minHeight: 300 }}>
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResultsHeading"
-              defaultMessage="No results found"
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResults"
-              defaultMessage="Try searching for applications and saved objects by name."
-            />
-          </p>
-        </EuiSelectableMessage>
-      }
+      emptyMessage={emptyMessage}
+      noMatchesMessage={emptyMessage}
       popoverFooter={
         <EuiText color="subdued" size="xs">
           <EuiFlexGroup
