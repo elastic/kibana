@@ -19,8 +19,8 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 
-import { SecurityOSSPlugin } from './plugin';
+import { SecurityOssPlugin } from './plugin';
 
-export { SecurityOSSPluginSetup, SecurityOSSPluginStart } from './plugin';
+export { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SecurityOSSPlugin(initializerContext);
+  new SecurityOssPlugin(initializerContext);

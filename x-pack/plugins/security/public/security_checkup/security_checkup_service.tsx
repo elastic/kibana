@@ -5,21 +5,21 @@
  */
 
 import {
-  SecurityOSSPluginSetup,
-  SecurityOSSPluginStart,
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
 } from '../../../../../src/plugins/security_oss/public';
 import { insecureClusterAlertTitle, insecureClusterAlertText } from './components';
 
 interface SetupDeps {
-  securityOssSetup: SecurityOSSPluginSetup;
+  securityOssSetup: SecurityOssPluginSetup;
 }
 
 interface StartDeps {
-  securityOssStart: SecurityOSSPluginStart;
+  securityOssStart: SecurityOssPluginStart;
 }
 
 export class SecurityCheckupService {
-  private securityOssStart?: SecurityOSSPluginStart;
+  private securityOssStart?: SecurityOssPluginStart;
 
   public setup({ securityOssSetup }: SetupDeps) {
     securityOssSetup.insecureCluster.setAlertTitle(insecureClusterAlertTitle);

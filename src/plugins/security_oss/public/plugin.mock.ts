@@ -18,17 +18,17 @@
  */
 
 import { mockInsecureClusterService } from './insecure_cluster_service/insecure_cluster_service.mock';
-import { SecurityOSSPluginSetup, SecurityOSSPluginStart } from './plugin';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
 
-export const mockSecurityOSSPlugin = {
+export const mockSecurityOssPlugin = {
   createSetup: () => {
     return {
       insecureCluster: mockInsecureClusterService.createSetup(),
-    } as DeeplyMockedKeys<SecurityOSSPluginSetup>;
+    } as DeeplyMockedKeys<SecurityOssPluginSetup>;
   },
   createStart: () => {
     return {
       insecureCluster: mockInsecureClusterService.createStart(),
-    } as DeeplyMockedKeys<SecurityOSSPluginStart>;
+    } as DeeplyMockedKeys<SecurityOssPluginStart>;
   },
 };

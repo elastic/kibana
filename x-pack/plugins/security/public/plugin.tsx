@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityOSSPluginSetup, SecurityOSSPluginStart } from 'src/plugins/security_oss/public';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
 import {
   CoreSetup,
   CoreStart,
@@ -37,7 +37,7 @@ import { SecurityCheckupService } from './security_checkup';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
-  securityOSS: SecurityOSSPluginSetup;
+  securityOss: SecurityOssPluginSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
 }
@@ -45,7 +45,7 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   data: DataPublicPluginStart;
   features: FeaturesPluginStart;
-  securityOSS: SecurityOSSPluginStart;
+  securityOss: SecurityOssPluginStart;
   management?: ManagementStart;
 }
 
@@ -72,7 +72,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, securityOSS }: PluginSetupDependencies
+    { home, licensing, management, securityOss }: PluginSetupDependencies
   ) {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
@@ -87,7 +87,7 @@ export class SecurityPlugin
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
-    this.securityCheckupService.setup({ securityOssSetup: securityOSS });
+    this.securityCheckupService.setup({ securityOssSetup: securityOss });
 
     this.authc = this.authenticationService.setup({
       application: core.application,
@@ -144,10 +144,10 @@ export class SecurityPlugin
     };
   }
 
-  public start(core: CoreStart, { management, securityOSS }: PluginStartDependencies) {
+  public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
-    this.securityCheckupService.start({ securityOssStart: securityOSS });
+    this.securityCheckupService.start({ securityOssStart: securityOss });
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });
     }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockSecurityOSSPlugin } from '../../../../../src/plugins/security_oss/public/mocks';
+import { mockSecurityOssPlugin } from '../../../../../src/plugins/security_oss/public/mocks';
 import { insecureClusterAlertTitle } from './components';
 import { SecurityCheckupService } from './security_checkup_service';
 
@@ -23,7 +23,7 @@ jest.mock('./components', () => {
 describe('SecurityCheckupService', () => {
   describe('#setup', () => {
     it('configures the alert title and text for the default distribution', async () => {
-      const securityOssSetup = mockSecurityOSSPlugin.createSetup();
+      const securityOssSetup = mockSecurityOssPlugin.createSetup();
       const service = new SecurityCheckupService();
       service.setup({ securityOssSetup });
 
@@ -38,8 +38,8 @@ describe('SecurityCheckupService', () => {
   });
   describe('#start', () => {
     it('onDismiss triggers hiding of the alert', async () => {
-      const securityOssSetup = mockSecurityOSSPlugin.createSetup();
-      const securityOssStart = mockSecurityOSSPlugin.createStart();
+      const securityOssSetup = mockSecurityOssPlugin.createSetup();
+      const securityOssStart = mockSecurityOssPlugin.createStart();
       const service = new SecurityCheckupService();
       service.setup({ securityOssSetup });
       service.start({ securityOssStart });

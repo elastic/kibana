@@ -25,16 +25,16 @@ import {
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';
 
-export interface SecurityOSSPluginSetup {
+export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;
 }
 
-export interface SecurityOSSPluginStart {
+export interface SecurityOssPluginStart {
   insecureCluster: InsecureClusterServiceStart;
 }
 
-export class SecurityOSSPlugin
-  implements Plugin<SecurityOSSPluginSetup, SecurityOSSPluginStart, {}, {}> {
+export class SecurityOssPlugin
+  implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
   private readonly config: ConfigType;
 
   private insecureClusterService: InsecureClusterService;

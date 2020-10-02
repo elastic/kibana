@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { mockSecurityOSSPlugin } from './plugin.mock';
+export { mockSecurityOssPlugin } from './plugin.mock';

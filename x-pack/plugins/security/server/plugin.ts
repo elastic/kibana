@@ -9,7 +9,7 @@ import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SecurityOSSPluginSetup } from 'src/plugins/security_oss/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
   CoreSetup,
   CoreStart,
@@ -85,7 +85,7 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  securityOSS?: SecurityOSSPluginSetup;
+  securityOss?: SecurityOssPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -135,7 +135,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager, usageCollection, securityOSS }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, securityOss }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -155,10 +155,10 @@ export class Plugin {
       license$: licensing.license$,
     });
 
-    if (securityOSS) {
+    if (securityOss) {
       license.features$.subscribe(({ allowRbac }) => {
         const showInsecureClusterWarning = !allowRbac;
-        securityOSS.showInsecureClusterWarning$.next(showInsecureClusterWarning);
+        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
       });
     }
 

@@ -18,13 +18,13 @@
  */
 
 import { coreMock } from '../../../core/server/mocks';
-import { SecurityOSSPlugin } from './plugin';
+import { SecurityOssPlugin } from './plugin';
 
-describe('SecurityOSS Plugin', () => {
+describe('SecurityOss Plugin', () => {
   describe('#setup', () => {
     it('exposes the proper contract', async () => {
       const context = coreMock.createPluginInitializerContext();
-      const plugin = new SecurityOSSPlugin(context);
+      const plugin = new SecurityOssPlugin(context);
       const core = coreMock.createSetup();
       const contract = plugin.setup(core);
       expect(Object.keys(contract)).toMatchInlineSnapshot(`

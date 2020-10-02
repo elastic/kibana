@@ -23,14 +23,14 @@ import { createClusterDataCheck } from './check_cluster_data';
 import { ConfigType } from './config';
 import { setupDisplayInsecureClusterAlertRoute } from './routes';
 
-export interface SecurityOSSPluginSetup {
+export interface SecurityOssPluginSetup {
   /**
    * Allows consumers to show/hide the insecure cluster warning.
    */
   showInsecureClusterWarning$: BehaviorSubject<boolean>;
 }
 
-export class SecurityOSSPlugin implements Plugin<SecurityOSSPluginSetup, void, {}, {}> {
+export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {}, {}> {
   private readonly config$: Observable<ConfigType>;
   private readonly logger: Logger;
 
