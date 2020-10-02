@@ -11,13 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import {
-  Alert,
-  AlertType,
-  AlertWithoutId,
-  AlertTaskState,
-  AlertInstanceSummary,
-} from '../../types';
+import { Alert, AlertType, AlertUpdates, AlertTaskState, AlertInstanceSummary } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
@@ -142,7 +136,7 @@ export async function createAlert({
 }: {
   http: HttpSetup;
   alert: Omit<
-    AlertWithoutId,
+    AlertUpdates,
     'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
   >;
 }): Promise<Alert> {
@@ -157,7 +151,7 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {

@@ -13,7 +13,10 @@ import {
   EuiFilterSelectItem,
   EuiHealth,
 } from '@elastic/eui';
-import { AlertExecutionStatusValues } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatuses,
+  AlertExecutionStatusValues,
+} from '../../../../../../alerts/common';
 
 interface AlertStatusFilterProps {
   selectedStatuses: string[];
@@ -59,7 +62,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
         }
       >
         <div className="euiFilterSelect__items">
-          {[...AlertExecutionStatusValues].sort().map((item: string) => {
+          {[...AlertExecutionStatusValues].sort().map((item: AlertExecutionStatuses) => {
             const healthColor = getHealthColor(item);
             return (
               <EuiFilterSelectItem
@@ -85,7 +88,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
   );
 };
 
-export function getHealthColor(status: string) {
+export function getHealthColor(status: AlertExecutionStatuses) {
   switch (status) {
     case 'active':
       return 'primary';

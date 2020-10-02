@@ -432,7 +432,7 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
-                  defaultMessage="There is {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}} with an error."
+                  defaultMessage="Found {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}} with an error."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
                     singleTitle: 'alert',
