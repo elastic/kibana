@@ -24,8 +24,10 @@ import { REPO_ROOT } from '@kbn/utils';
 
 import { Plugins } from './discover_plugins';
 
+const sortPlugins = (plugins: Plugins) => plugins.sort((a, b) => a.id.localeCompare(b.id));
+
 function* printPlugins(plugins: Plugins, includes: string[]) {
-  for (const plugin of plugins) {
+  for (const plugin of sortPlugins(plugins)) {
     const path = normalizePath(plugin.relativeReadmePath || plugin.relativeDir);
     yield '';
 
