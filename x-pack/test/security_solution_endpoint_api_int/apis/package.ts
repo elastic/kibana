@@ -66,6 +66,31 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Endpoint package', () => {
+    describe('network processors', () => {
+      let networkIndexData: InsertedEvents;
+
+      after(async () => {
+        await resolver.deleteData(networkIndexData);
+      });
+
+      it('handles events without the `network.protocol` field being defined', async () => {
+        const eventWithoutNetworkObject = generator.generateEvent();
+        // ensure that `network.protocol` does not exist in the event to test that the pipeline handles those type of events
+        delete eventWithoutNetworkObject.network;
+
+        // this call will fail if the pipeline fails
+        networkIndexData = await resolver.insertEvents([eventWithoutNetworkObject], networkIndex);
+        const eventWithBothIPs = await searchForID<SafeEndpointEvent>(
+          networkIndexData.eventsInfo[0]._id
+        );
+
+        // ensure that the event was inserted into ES
+        expect(eventWithBothIPs.body.hits.hits[0]._source.event?.id).to.be(
+          eventWithoutNetworkObject.event?.id
+        );
+      });
+    });
+
     describe('dns processor', () => {
       before(async () => {
         await esArchiver.load('endpoint/pipeline/dns', { useCreate: true });
@@ -140,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
         const eventWithSourceOnly = generator.generateEvent({
           extensions: { source: { ip: '8.8.8.8' } },
         });
+
         networkIndexData = await resolver.insertEvents(
           [eventWithBothIPs, eventWithSourceOnly],
           networkIndex
