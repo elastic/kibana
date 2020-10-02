@@ -425,13 +425,15 @@ const validateForm = (state: State): State => {
     dependentVariable === '';
 
   const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);
-  const mmlInvalid = mmlValidationResult !== null && mmlValidationResult.invalidUnits !== undefined;
+  const mmlInvalid =
+    mmlValidationResult !== null &&
+    (mmlValidationResult.invalidUnits !== undefined || mmlValidationResult.required === true);
 
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
     !jobTypeEmpty &&
-    mmlInvalid &&
+    !mmlInvalid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
