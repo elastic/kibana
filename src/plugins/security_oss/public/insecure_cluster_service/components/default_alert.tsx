@@ -67,6 +67,7 @@ export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountP
                 color="primary"
                 fill
                 href="https://www.elastic.co/what-is/elastic-stack-security"
+                target="_blank"
               >
                 {i18n.translate('security.checkup.learnMoreButtonText', {
                   defaultMessage: `Learn more`,

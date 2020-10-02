@@ -53,9 +53,10 @@ export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) 
                   color="primary"
                   fill
                   href="https://www.elastic.co/what-is/elastic-stack-security"
+                  target="_blank"
                 >
-                  {i18n.translate('xpack.security.checkup.learnMoreButtonText', {
-                    defaultMessage: `Learn more`,
+                  {i18n.translate('xpack.security.checkup.enableButtonText', {
+                    defaultMessage: `Enable security`,
                   })}
                 </EuiButton>
               </EuiFlexItem>

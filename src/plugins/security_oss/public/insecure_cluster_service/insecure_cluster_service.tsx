@@ -125,6 +125,7 @@ export class InsecureClusterService {
               text:
                 this.alertText ??
                 defaultAlertText((persist: boolean) => this.setAlertVisibility(false, persist)),
+              iconType: 'alert',
             },
             {
               toastLifeTimeMs: tenDays,
