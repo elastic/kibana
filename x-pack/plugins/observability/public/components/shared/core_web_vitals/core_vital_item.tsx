@@ -40,7 +40,7 @@ export function getCoreVitalTooltipMessage(
   const bad = position === 2;
   const average = !good && !bad;
 
-  return i18n.translate('xpack.apm.csm.dashboard.webVitals.palette.tooltip', {
+  return i18n.translate('xpack.observability.ux.dashboard.webVitals.palette.tooltip', {
     defaultMessage:
       '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
     values: {
@@ -50,7 +50,7 @@ export function getCoreVitalTooltipMessage(
       moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
       value: good || average ? thresholds.good : thresholds.bad,
       averageMessage: average
-        ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
+        ? i18n.translate('xpack.observability.ux.coreVitals.averageMessage', {
             defaultMessage: ' and less than {bad}',
             values: { bad: thresholds.bad },
           })

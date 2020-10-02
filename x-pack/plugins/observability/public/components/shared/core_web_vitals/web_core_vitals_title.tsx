@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiLink, EuiPopover, EuiText, EuiTitle } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const CORE_WEB_VITALS = i18n.translate('xpack.apm.ux.coreWebVitals', {
+const CORE_WEB_VITALS = i18n.translate('xpack.observability.ux.coreWebVitals', {
   defaultMessage: 'Core web vitals',
 });
 
@@ -36,7 +36,7 @@ export function WebCoreVitalsTitle() {
           <div style={{ width: '300px' }}>
             <EuiText>
               <FormattedMessage
-                id="xpack.apm.ux.dashboard.webCoreVitals.help"
+                id="xpack.observability.ux.dashboard.webCoreVitals.help"
                 defaultMessage="Learn more about"
               />
               <EuiLink href="https://web.dev/vitals/" external target="_blank">
