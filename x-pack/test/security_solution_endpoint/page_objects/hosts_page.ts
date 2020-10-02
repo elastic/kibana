@@ -149,14 +149,5 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.click('investigate-in-resolver-button');
       await testSubjects.click('full-screen');
     },
-    /**
-     * Dismiss Banner if available.
-     */
-    async dismissBanner() {
-      if (await testSubjects.exists('global-banner-item')) {
-        const button = await find.byButtonText('Dismiss');
-        await button.click();
-      }
-    },
   };
 }

@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Endpoint Event Resolver', function () {
     before(async () => {
       await pageObjects.hosts.navigateToSecurityHostsPage();
-      await pageObjects.hosts.dismissBanner();
+      await pageObjects.common.dismissBanner();
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'now';
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
