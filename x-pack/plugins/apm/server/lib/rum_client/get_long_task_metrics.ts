@@ -9,11 +9,7 @@ import {
   getRumPageLoadTransactionsProjection,
 } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   SPAN_DURATION,
   TRANSACTION_ID,
@@ -23,7 +19,7 @@ export async function getLongTaskMetrics({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
   const projection = getRumLongTasksProjection({
@@ -94,7 +90,7 @@ async function filterPageLoadTransactions({
   urlQuery,
   transactionIds,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
   transactionIds: string[];
 }) {
