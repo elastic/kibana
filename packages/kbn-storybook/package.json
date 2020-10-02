@@ -14,7 +14,7 @@
     "@storybook/react": "^6.0.16",
     "@storybook/theming": "^6.0.16",
     "@types/loader-utils": "^2.0.1",
-    "@types/webpack": "^4.41.5",
+    "@types/webpack": "^4.41.21",
     "@types/webpack-env": "^1.15.2",
     "@types/webpack-merge": "^4.1.5",
     "@kbn/utils": "1.0.0",
