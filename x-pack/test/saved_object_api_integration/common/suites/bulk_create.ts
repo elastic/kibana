@@ -65,7 +65,7 @@ export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
 const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => ({
   type,
   id,
-  ...(initialNamespaces && { initialNamespaces }),
+  ...(initialNamespaces && { namespaces: initialNamespaces }),
 });
 
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
