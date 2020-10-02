@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import { resolve, relative } from 'path';
+import { resolve } from 'path';
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
-
-function extendNodeOptions(installDir) {
-  if (!installDir) {
-    return {};
-  }
-
-  const testOnlyRegisterPath = relative(
-    installDir,
-    require.resolve('./babel_register_for_test_plugins')
-  );
-
-  return {
-    NODE_OPTIONS: `--require=${testOnlyRegisterPath}${
-      process.env.NODE_OPTIONS ? ` ${process.env.NODE_OPTIONS}` : ''
-    }`,
-  };
-}
 
 export async function runKibanaServer({ procs, config, options }) {
   const { installDir } = options;
@@ -46,7 +29,6 @@ export async function runKibanaServer({ procs, config, options }) {
     env: {
       FORCE_COLOR: 1,
       ...process.env,
-      ...extendNodeOptions(installDir),
     },
     cwd: installDir || KIBANA_ROOT,
     wait: /http server running/,

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('./no_transpilation');
+require('./prebuilt_dev_only_entry');
 require('./babel_register');
