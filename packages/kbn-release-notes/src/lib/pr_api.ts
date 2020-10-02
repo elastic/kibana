@@ -178,7 +178,9 @@ export class PrApi {
       versions: labels
         .map((l) => Version.fromLabel(l))
         .filter((v): v is Version => v instanceof Version),
-      note: getNoteFromDescription(node.bodyHTML),
+      note:
+        getNoteFromDescription(node.bodyHTML, 'release note') ||
+        getNoteFromDescription(node.bodyHTML, 'dev docs'),
     };
   }
 
