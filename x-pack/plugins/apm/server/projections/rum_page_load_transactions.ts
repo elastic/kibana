@@ -6,7 +6,6 @@
 
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
-  SPAN_TYPE,
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
@@ -53,33 +52,6 @@ export function getRumPageLoadTransactionsProjection({
   return {
     apm: {
       events: [ProcessorEvent.transaction],
-    },
-    body: {
-      query: {
-        bool,
-      },
-    },
-  };
-}
-
-export function getRumLongTasksProjection({
-  setup,
-}: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
-}) {
-  const { start, end, uiFiltersES } = setup;
-
-  const bool = {
-    filter: [
-      { range: rangeFilter(start, end) },
-      { term: { [SPAN_TYPE]: 'longtask' } },
-      ...uiFiltersES,
-    ],
-  };
-
-  return {
-    apm: {
-      events: [ProcessorEvent.span],
     },
     body: {
       query: {
