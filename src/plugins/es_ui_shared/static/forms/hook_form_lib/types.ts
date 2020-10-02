@@ -29,12 +29,12 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   readonly isSubmitted: boolean;
   /** Flag that indicates if the form is being submitted. */
   readonly isSubmitting: boolean;
-  /** Flag that indicates if the form is valid. It can have three values: `true | false | undefined`. */
+  /** Flag that indicates if the form is valid. If `undefined` then the form validation has not been checked yet. */
   readonly isValid: boolean | undefined;
   /** The form id. If none was provided, "default" will be returned. */
   readonly id: string;
   /**
-   * This handlers submits the form and returns its data and validity. If the form is not valid, the data will be `null`
+   * This handler submits the form and returns its data and validity. If the form is not valid, the data will be `null`
    * as only valid data is passed through the `serializer(s)` before being returned.
    */
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
