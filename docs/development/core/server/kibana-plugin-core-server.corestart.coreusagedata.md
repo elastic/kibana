@@ -4,7 +4,6 @@
 
 ## CoreStart.coreUsageData property
 
-[CoreUsageDataStart](./kibana-plugin-core-server.coreusagedatastart.md)
 
 <b>Signature:</b>
 

@@ -101,6 +101,12 @@ describe('isConfigured', () => {
     it('returns false for an empty record', () => {
       expect(isConfigured.record({})).toEqual(false);
     });
+    it('returns false for undefined', () => {
+      expect(isConfigured.record(undefined)).toEqual(false);
+    });
+    it('returns false for null', () => {
+      expect(isConfigured.record(null)).toEqual(false);
+    });
   });
 
   describe('number', () => {

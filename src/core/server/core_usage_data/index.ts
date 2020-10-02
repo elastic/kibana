@@ -16,5 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { CoreUsageDataStart, CoreUsageData } from './types';
+export {
+  CoreUsageDataStart,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+} from './types';
 export { CoreUsageDataService } from './core_usage_data_service';

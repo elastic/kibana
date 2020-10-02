@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
 export interface CoreUsageData {
   config: CoreConfigUsageData;
   // services: CoreServicesUsageData;
@@ -132,6 +136,10 @@ export interface CoreConfigUsageData {
   // };
 }
 
+/**
+ * Internal API for getting Core's usage data payload
+ * @internal
+ */
 export interface CoreUsageDataStart {
   /**
    * Internal API for collecting Core usage data

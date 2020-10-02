@@ -438,6 +438,8 @@ export interface CoreStart {
     auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
+    // Warning: (ae-incompatible-release-tags) The symbol "coreUsageData" is marked as @public, but its signature references "CoreUsageDataStart" which is marked as @internal
+    //
     // (undocumented)
     coreUsageData: CoreUsageDataStart;
     // (undocumented)
@@ -460,9 +462,7 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
-// Warning: (ae-missing-release-tag) "CoreUsageData" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @internal
 export interface CoreUsageData {
     // Warning: (ae-forgotten-export) The symbol "CoreConfigUsageData" needs to be exported by the entry point index.d.ts
     //
@@ -474,11 +474,8 @@ export interface CoreUsageData {
     environment: CoreEnvironmentUsageData;
 }
 
-// Warning: (ae-missing-release-tag) "CoreUsageDataStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @internal
 export interface CoreUsageDataStart {
-    // @internal
     getCoreUsageData(): CoreUsageData | null;
 }
 

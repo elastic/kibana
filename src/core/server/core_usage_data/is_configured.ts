@@ -53,7 +53,7 @@ export const isConfigured = {
    * config is a record with at least one key
    */
   record: (config?: Record<string, unknown>): boolean => {
-    return typeof config === 'object' && Object.keys(config).length > 0;
+    return config != null && typeof config === 'object' && Object.keys(config).length > 0;
   },
   /**
    * config is a number
