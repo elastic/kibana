@@ -80,35 +80,39 @@ describe('ExecutedStep', () => {
       payload: {
         source: 'const someVar = "the var"',
       },
+      step: {
+        index: 3,
+        name: 'STEP_NAME',
+      },
     };
 
-    expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('Accordion'))
+    expect(shallowWithIntl(<ExecutedStep index={3} step={step} />).find('CodeBlockAccordion'))
       .toMatchInlineSnapshot(`
       Array [
-        <Accordion
+        <CodeBlockAccordion
           buttonContent="Step script"
           id="STEP_NAME3"
           language="javascript"
           overflowHeight={360}
         >
           const someVar = "the var"
-        </Accordion>,
-        <Accordion
+        </CodeBlockAccordion>,
+        <CodeBlockAccordion
           buttonContent="Error"
           id="STEP_NAME_error"
           language="html"
           overflowHeight={360}
         >
           There was an error executing the step.
-        </Accordion>,
-        <Accordion
+        </CodeBlockAccordion>,
+        <CodeBlockAccordion
           buttonContent="Stack trace"
           id="STEP_NAME_stack"
           language="html"
           overflowHeight={360}
         >
           some.stack.trace.string
-        </Accordion>,
+        </CodeBlockAccordion>,
       ]
     `);
   });
