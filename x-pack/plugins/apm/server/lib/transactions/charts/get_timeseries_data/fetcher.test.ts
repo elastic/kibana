@@ -29,7 +29,10 @@ describe('timeseriesFetcher', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFiltersES: [
+        uiFilters: {
+          environment: 'test',
+        },
+        esFilter: [
           {
             term: { 'service.environment': 'test' },
           },
