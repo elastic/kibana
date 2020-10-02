@@ -89,7 +89,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  RegistryConfigTemplate,
+  RegistryPolicyTemplate,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,

@@ -36,7 +36,7 @@ Then(`breakdown series should appear in chart`, () => {
 
     cy.get('div.echLegendItem__label', DEFAULT_TIMEOUT).should(
       'have.text',
-      'ChromeChrome Mobile WebViewSafariFirefoxMobile SafariChrome MobileChrome Mobile iOSOverall'
+      'OverallChromeChrome Mobile WebViewSafariFirefoxMobile SafariChrome MobileChrome Mobile iOS'
     );
   });
 });

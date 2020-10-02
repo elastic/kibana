@@ -21,6 +21,7 @@ describe('EmailActionConnectorFields renders', () => {
       name: 'email',
       config: {
         from: 'test@test.com',
+        hasAuth: true,
       },
     } as EmailActionConnector;
     const wrapper = mountWithIntl(
@@ -41,5 +42,36 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
+  });
+
+  test('secret connector fields is not rendered when hasAuth false', () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: false,
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
+      'test@test.com'
+    );
+    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
   });
 });
