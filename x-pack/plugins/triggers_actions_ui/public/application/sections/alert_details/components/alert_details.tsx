@@ -25,7 +25,6 @@ import {
   EuiBetaBadge,
   EuiButtonEmpty,
   EuiButton,
-  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -113,11 +112,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
   };
 
-  const getAlertStatusErrorReason = () => {
-    if (alert.executionStatus.error) {
-      return alert.executionStatus.error.reason;
+  const getAlertStatusErrorReasonText = () => {
+    if (alert.executionStatus.error && alert.executionStatus.error.reason !== 'unknown') {
+      return `An error occurred when ${alert.executionStatus.error.reason} the alert.`;
     } else {
-      return 'unknown';
+      return 'An error occurred for unknown reasons.';
     }
   };
 
@@ -293,27 +292,14 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     color="danger"
                     data-test-subj="alertErrorBanner"
                     size="s"
-                    title={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.attentionBannerTitle"
-                        defaultMessage="This alert has an error caused by the {errorReason} reason."
-                        values={{
-                          errorReason: getAlertStatusErrorReason(),
-                        }}
-                      />
-                    }
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertDetails.attentionBannerTitle',
+                      {
+                        defaultMessage: `${getAlertStatusErrorReasonText()}`,
+                      }
+                    )}
                     iconType="alert"
                   >
-                    <EuiTitle size="m">
-                      <h3>
-                        <EuiTextColor color="danger">
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.alertDetails.alertErrorMessageTitle"
-                            defaultMessage="Error message:"
-                          />
-                        </EuiTextColor>
-                      </h3>
-                    </EuiTitle>
                     <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
                       {alert.executionStatus.error?.message}
                     </EuiText>
