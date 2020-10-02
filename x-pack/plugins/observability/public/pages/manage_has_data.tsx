@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { ObsvSharedContext } from '../context/shared_data';
 import { useQueryParams } from '../hooks/use_query_params';
 import {
@@ -28,19 +28,23 @@ export function ManageHasDataFetches() {
   const { data: uptime, status: uptimeStatus } = useUptimeHasData();
   const { data: ux, status: uxStatus } = useUxHasData({ start: absStart, end: absEnd });
 
+  const isOverViewPage = useRouteMatch('/overview');
+
   useEffect(() => {
     const hasAnyData = logs || metrics || apm || uptime || ux;
 
-    if (hasAnyData) {
-      history.push({ pathname: '/overview' });
-    } else if (
-      logsStatus === 'success' &&
-      metricsStatus === 'success' &&
-      apmStatus === 'success' &&
-      uptimeStatus === 'success' &&
-      uxStatus === 'success'
-    ) {
-      history.push({ pathname: '/landing' });
+    if (!isOverViewPage) {
+      if (hasAnyData) {
+        history.push({ pathname: '/overview' });
+      } else if (
+        logsStatus === 'success' &&
+        metricsStatus === 'success' &&
+        apmStatus === 'success' &&
+        uptimeStatus === 'success' &&
+        uxStatus === 'success'
+      ) {
+        history.push({ pathname: '/landing' });
+      }
     }
 
     const hasData = {
