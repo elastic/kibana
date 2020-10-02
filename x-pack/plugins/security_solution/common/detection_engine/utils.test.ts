@@ -129,10 +129,17 @@ describe('#hasEqlSequenceQuery', () => {
     });
   });
 
-  describe('when a sequence query is passed with extra white space', () => {
-    const query = '    sequence   [process    where   process.name = "test.exe"]';
+  describe('when a sequence query is passed with extra white space and new line characters', () => {
+    const query = '    sequence  \n [process    where   process.name = "test.exe"]';
     it('should return true', () => {
       expect(hasEqlSequenceQuery(query)).toEqual(true);
+    });
+  });
+
+  describe('when a non-sequence query is passed using the word sequence', () => {
+    const query = 'sequence \n where true';
+    it('should return false', () => {
+      expect(hasEqlSequenceQuery(query)).toEqual(false);
     });
   });
 });
