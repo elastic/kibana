@@ -63,7 +63,12 @@ export function createAggregators(
 ): AggregatedStatProvider {
   return merge(
     createTaskRunAggregator(taskManager, config.monitored_stats_running_average_window),
-    createWorkloadAggregator(taskManager, config.monitored_aggregated_stats_refresh_rate, logger)
+    createWorkloadAggregator(
+      taskManager,
+      config.monitored_aggregated_stats_refresh_rate,
+      config.poll_interval,
+      logger
+    )
   );
 }
 

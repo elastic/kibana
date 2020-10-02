@@ -12,6 +12,7 @@ import {
   intervalFromDate,
   secondsFromNow,
   secondsFromDate,
+  asInterval,
 } from './intervals';
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -48,6 +49,30 @@ describe('taskIntervals', () => {
       expect(() => parseIntervalAsSecond(`hello`)).toThrow(
         /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
+    });
+  });
+
+  describe('asInterval', () => {
+    test('returns a ms interval when ms duration can only divide by ms', () => {
+      expect(asInterval(500)).toEqual('500ms');
+      expect(asInterval(1500)).toEqual('1500ms');
+      expect(asInterval(1001)).toEqual('1001ms');
+      expect(asInterval(2001)).toEqual('2001ms');
+      expect(asInterval(61001)).toEqual('61001ms');
+      expect(asInterval(90001)).toEqual('90001ms');
+    });
+
+    test('returns a seconds interval when ms duration divides by seconds', () => {
+      expect(asInterval(1000)).toEqual('1s');
+      expect(asInterval(2000)).toEqual('2s');
+      expect(asInterval(61000)).toEqual('61s');
+      expect(asInterval(99000)).toEqual('99s');
+      expect(asInterval(90000)).toEqual('90s');
+    });
+
+    test('returns a minutes interval when ms duration divides by minutes', () => {
+      expect(asInterval(60000)).toEqual('1m');
+      expect(asInterval(120000)).toEqual('2m');
     });
   });
 

@@ -20,6 +20,12 @@ function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadenc
   return VALID_CADENCE.has(cadence as IntervalCadence);
 }
 
+export function asInterval(ms: number): string {
+  const secondsRemainder = ms % 1000;
+  const minutesRemainder = ms % 60000;
+  return secondsRemainder ? `${ms}ms` : minutesRemainder ? `${ms / 1000}s` : `${ms / 60000}m`;
+}
+
 /**
  * Returns a date that is the specified interval from now. Currently,
  * only minute-intervals and second-intervals are supported.

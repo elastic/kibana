@@ -60,7 +60,11 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
-import { AggregationQuery, AggregationResult } from './queries/aggregation_clauses';
+import {
+  AggregationQuery,
+  AggregationSearchResult,
+  AggregationResult,
+} from './queries/aggregation_clauses';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -82,6 +86,7 @@ export interface SearchOpts {
 
 export interface AggregationOpts {
   aggs: AggregationQuery;
+  query?: object;
   size?: number;
 }
 
@@ -467,17 +472,25 @@ export class TaskStore {
   public async aggregate<AggregationName extends string>({
     aggs,
     size = 0,
-  }: AggregationOpts): Promise<AggregationResult<AggregationName>> {
-    const result = await this.callCluster('search', {
+  }: AggregationOpts): Promise<AggregationSearchResult<AggregationName>> {
+    const {
+      aggregations,
+      hits: {
+        total: { value: sum },
+      },
+    } = (await this.callCluster('search', {
       index: this.index,
       ignoreUnavailable: true,
-      body: {
-        aggs: ensureAggregationOnlyReturnsTaskObjects(aggs),
+      body: ensureAggregationOnlyReturnsTaskObjects({
+        aggs,
         size,
-      },
-    });
+      }),
+    })) as {
+      aggregations: AggregationResult<AggregationName>;
+      hits: { total: { value: number } };
+    };
 
-    return (result as { aggregations: AggregationResult<AggregationName> }).aggregations;
+    return { aggregations, sum };
   }
 
   private async updateByQuery(
@@ -559,20 +572,20 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
   };
 }
 
-function ensureAggregationOnlyReturnsTaskObjects(
-  aggs: AggregationOpts['aggs']
-): AggregationOpts['aggs'] {
-  const filteredAgg: AggregationQuery = {
-    task: {
-      filter: {
-        term: {
-          type: 'task',
-        },
-      },
-      aggs,
+function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+  const originalQuery = opts.query;
+  const filterToOnlyTasks = {
+    bool: {
+      filter: [{ term: { type: 'task' } }],
     },
   };
-  return filteredAgg;
+  const query = originalQuery
+    ? { bool: { must: [filterToOnlyTasks, originalQuery] } }
+    : filterToOnlyTasks;
+  return {
+    ...opts,
+    query,
+  };
 }
 
 function isSavedObjectsUpdateResponse(

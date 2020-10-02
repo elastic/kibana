@@ -5,27 +5,48 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { createWorkloadAggregator } from './workload_statistics';
+import { createWorkloadAggregator, padBuckets } from './workload_statistics';
 import { taskManagerMock } from '../task_manager.mock';
-import { AggregationResult } from '../queries/aggregation_clauses';
+import { AggregationSearchResult, KeyedAggregationBucket } from '../queries/aggregation_clauses';
 import { mockLogger } from '../test_utils';
 
 describe('Workload Statistics Aggregator', () => {
   test('queries the Task Store at a fixed interval for the current workload', async () => {
     const taskManager = taskManagerMock.create();
     taskManager.aggregate.mockResolvedValue(({
-      task: {
-        doc_count: 0,
+      sum: 0,
+      aggregations: {
         taskType: {
           buckets: [],
         },
         schedule: {
           buckets: [],
         },
+        idleTasks: {
+          doc_count: 0,
+          overdue: {
+            doc_count: 0,
+          },
+          scheduleDensity: {
+            buckets: [
+              {
+                key: '2020-10-02T15:18:37.274Z-2020-10-02T15:19:36.274Z',
+                from: 1.601651917274e12,
+                from_as_string: '2020-10-02T15:18:37.274Z',
+                to: 1.601651976274e12,
+                to_as_string: '2020-10-02T15:19:36.274Z',
+                doc_count: 0,
+                histogram: {
+                  buckets: [],
+                },
+              },
+            ],
+          },
+        },
       },
-    } as unknown) as AggregationResult<string>);
+    } as unknown) as AggregationSearchResult<string>);
 
-    const workloadAggregator = createWorkloadAggregator(taskManager, 10, mockLogger());
+    const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
     return new Promise((resolve) => {
       workloadAggregator.pipe(first()).subscribe(() => {
@@ -44,6 +65,34 @@ describe('Workload Statistics Aggregator', () => {
                 field: 'task.schedule.interval',
               },
             },
+            idleTasks: {
+              filter: {
+                term: { 'task.status': 'idle' },
+              },
+              aggs: {
+                scheduleDensity: {
+                  range: {
+                    field: 'task.runAt',
+                    ranges: [{ from: 'now', to: 'now+1m' }],
+                  },
+                  aggs: {
+                    histogram: {
+                      date_histogram: {
+                        field: 'task.runAt',
+                        fixed_interval: '3s',
+                      },
+                    },
+                  },
+                },
+                overdue: {
+                  filter: {
+                    range: {
+                      'task.runAt': { lt: 'now' },
+                    },
+                  },
+                },
+              },
+            },
           },
         });
         resolve();
@@ -52,8 +101,8 @@ describe('Workload Statistics Aggregator', () => {
   });
 
   const mockAggregatedResult = ({
-    task: {
-      doc_count: 4,
+    sum: 4,
+    aggregations: {
       schedule: {
         doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
@@ -120,46 +169,36 @@ describe('Workload Statistics Aggregator', () => {
           },
         ],
       },
+      idleTasks: {
+        doc_count: 13,
+        overdue: {
+          doc_count: 6,
+        },
+        scheduleDensity: {
+          buckets: [
+            mockHistogram(Date.now(), Date.now() + 7 * 3000, Date.now() + 60000, 3000, [
+              2,
+              2,
+              5,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+            ]),
+          ],
+        },
+      },
     },
-  } as unknown) as AggregationResult<string>;
-
-  function setTaskTypeCount(
-    result: AggregationResult<string>,
-    taskType: string,
-    status: Record<string, number>
-  ) {
-    const buckets = [
-      ...result.task.taskType.buckets.filter(({ key }) => key !== taskType),
-      {
-        key: taskType,
-        doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),
-        status: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: Object.entries(status).map(([key, count]) => ({
-            key,
-            doc_count: count,
-          })),
-        },
-      },
-    ];
-    return ({
-      task: {
-        doc_count: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
-        taskType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets,
-        },
-      },
-    } as unknown) as AggregationResult<string>;
-  }
+  } as unknown) as AggregationSearchResult<string>;
 
   test('returns a summary of the workload by task type', async () => {
     const taskManager = taskManagerMock.create();
     taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
 
-    const workloadAggregator = createWorkloadAggregator(taskManager, 10, mockLogger());
+    const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
     return new Promise((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
@@ -171,6 +210,45 @@ describe('Workload Statistics Aggregator', () => {
             alerting_telemetry: { sum: 1, status: { idle: 1 } },
             session_cleanup: { sum: 1, status: { idle: 1 } },
           },
+        });
+        resolve();
+      });
+    });
+  });
+
+  test('returns a count of the overdue workload', async () => {
+    const taskManager = taskManagerMock.create();
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+
+    const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
+
+    return new Promise((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+        expect(result.value).toMatchObject({
+          overdue: 6,
+        });
+        resolve();
+      });
+    });
+  });
+
+  test('returns a histogram of the upcoming workload', async () => {
+    const taskManager = taskManagerMock.create();
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+
+    const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
+
+    return new Promise((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+        expect(result.value).toMatchObject({
+          // we have intervals every 3s, so we aggregate buckets 3s apart
+          // in this mock, Elasticsearch found tasks scheduled in 21 (8th bucket), 24, 27 and 48s seconds from now
+          //  0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
+          // [0, 0, 0, 0,  0,  0,  0,  0, 2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0 ]
+          //  Above you see each bucket and the number of scheduled tasks we expect to have in them
+          scheduleDensity: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0],
         });
         resolve();
       });
@@ -193,9 +271,9 @@ describe('Workload Statistics Aggregator', () => {
         })
       );
     const logger = mockLogger();
-    const workloadAggregator = createWorkloadAggregator(taskManager, 10, logger);
+    const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, logger);
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
         expect(results[0].key).toEqual('workload');
         expect(results[0].value).toMatchObject({
@@ -216,7 +294,201 @@ describe('Workload Statistics Aggregator', () => {
           },
         });
         resolve();
-      });
+      }, reject);
     });
   });
 });
+
+describe('padBuckets', () => {
+  test('returns zeroed out bucklets when there are no buckets in the histogram', async () => {
+    expect(
+      padBuckets(10, 3000, {
+        key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
+        from: 1601668048128,
+        from_as_string: '2020-10-02T19:47:28.128Z',
+        to: 1601668108128,
+        to_as_string: '2020-10-02T19:48:28.128Z',
+        doc_count: 0,
+        histogram: {
+          buckets: [],
+        },
+      })
+    ).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  test('pads buckets with zeros to fill out the entire period of time after detected buckets', async () => {
+    expect(
+      padBuckets(10, 3000, {
+        key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
+        from: 1601668048128,
+        from_as_string: '2020-10-02T19:47:28.128Z',
+        to: 1601668077128,
+        to_as_string: '2020-10-02T19:47:57.128Z',
+        doc_count: 3,
+        histogram: {
+          buckets: [
+            {
+              key_as_string: '2020-10-02T19:47:27.000Z',
+              key: 1601668047000,
+              doc_count: 1,
+            },
+            {
+              key_as_string: '2020-10-02T19:47:30.000Z',
+              key: 1601668050000,
+              doc_count: 1,
+            },
+            {
+              key_as_string: '2020-10-02T19:47:33.000Z',
+              key: 1601668053000,
+              doc_count: 0,
+            },
+            {
+              key_as_string: '2020-10-02T19:47:36.000Z',
+              key: 1601668056000,
+              doc_count: 0,
+            },
+            {
+              key_as_string: '2020-10-02T19:47:39.000Z',
+              key: 1601668059000,
+              doc_count: 0,
+            },
+            {
+              key_as_string: '2020-10-02T19:47:42.000Z',
+              key: 1601668062000,
+              doc_count: 1,
+            },
+          ],
+        },
+      })
+    ).toEqual([1, 1, 0, 0, 0, 1, 0, 0, 0, 0]);
+  });
+
+  test('pads buckets with zeros to fill out the entire period of time before detected buckets', async () => {
+    expect(
+      padBuckets(10, 3000, {
+        key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
+        from: 1.601671185793e12,
+        from_as_string: '2020-10-02T20:39:45.793Z',
+        to: 1.601671214793e12,
+        to_as_string: '2020-10-02T20:40:14.793Z',
+        doc_count: 2,
+        histogram: {
+          buckets: [
+            {
+              key_as_string: '2020-10-02T20:40:09.000Z',
+              key: 1601671209000,
+              doc_count: 1,
+            },
+            {
+              key_as_string: '2020-10-02T20:40:12.000Z',
+              key: 1601671212000,
+              doc_count: 1,
+            },
+          ],
+        },
+      })
+    ).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 1, 1]);
+  });
+
+  test('pads buckets with zeros to fill out the entire period surounding the detected buckets', async () => {
+    expect(
+      padBuckets(20, 3000, {
+        key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
+        from: 1.601671185793e12,
+        from_as_string: '2020-10-02T20:39:45.793Z',
+        to: 1.1601671244793,
+        to_as_string: '2020-10-02T20:40:44.793Z',
+        doc_count: 2,
+        histogram: {
+          buckets: [
+            {
+              key_as_string: '2020-10-02T20:40:09.000Z',
+              key: 1601671209000,
+              doc_count: 1,
+            },
+            {
+              key_as_string: '2020-10-02T20:40:12.000Z',
+              key: 1601671212000,
+              doc_count: 1,
+            },
+          ],
+        },
+      })
+    ).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  });
+});
+
+function setTaskTypeCount(
+  { aggregations: { taskType: taskTypeAgg, ...otherAggs } }: AggregationSearchResult<string>,
+  taskType: string,
+  status: Record<string, number>
+) {
+  const buckets = [
+    ...(taskTypeAgg.buckets as KeyedAggregationBucket[]).filter(({ key }) => key !== taskType),
+    {
+      key: taskType,
+      doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),
+      status: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: Object.entries(status).map(([key, count]) => ({
+          key,
+          doc_count: count,
+        })),
+      },
+    },
+  ];
+  return ({
+    sum: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
+    aggregations: {
+      taskType: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets,
+      },
+      ...otherAggs,
+    },
+  } as unknown) as AggregationSearchResult<string>;
+}
+
+/** *
+ * This creates a mock histogram as returned by Elasticsearch
+ *
+ * @param from lower bound of query
+ * @param findFrom the timestamp (key) of the first bucket returned
+ * @param to upper bound of query
+ * @param interval the duration that each bucket coresponds to
+ * @param foundBuckets the buckets identified by ES, any buckets missing before or after which
+ *           are still in the date range are assumed to have 0 results, ES only returns 0 for
+ *           buckets that sit in between buckets which do have results
+ */
+function mockHistogram(
+  from: number,
+  findFrom: number,
+  to: number,
+  interval: number,
+  foundBuckets: Array<number | undefined>
+) {
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  return {
+    from,
+    from_as_string: fromDate.toISOString(),
+    to,
+    to_as_string: toDate.toISOString(),
+    doc_count: foundBuckets.reduce((sum: number, count) => sum + (count ?? 0), 0),
+    histogram: {
+      buckets: foundBuckets.reduce((histogramBuckets, count, index) => {
+        if (typeof count === 'number') {
+          const key = new Date(findFrom + index * interval);
+          histogramBuckets.push({
+            key_as_string: key.toISOString(),
+            key: key.getTime(),
+            doc_count: count,
+          });
+        }
+        return histogramBuckets;
+      }, [] as KeyedAggregationBucket[]),
+    },
+  };
+}
