@@ -154,6 +154,7 @@ export const ParamsSchema = schema.object({
   boundaryIndexId: schema.string({ minLength: 1 }),
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
+  delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
 });
 
 export interface GeoThresholdParams {
@@ -168,6 +169,7 @@ export interface GeoThresholdParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
+  delayOffsetWithUnits?: string;
 }
 
 export function getAlertType(

@@ -5,7 +5,18 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { EuiCallOut, EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFieldNumber,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertTypeParamsExpressionProps } from '../../../../../types';
@@ -16,6 +27,7 @@ import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { getTimeOptions } from '../../../../../common/lib/get_time_options';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -29,12 +41,29 @@ const DEFAULT_VALUES = {
   BOUNDARY_INDEX_ID: '',
   BOUNDARY_GEO_FIELD: '',
   BOUNDARY_NAME_FIELD: '',
+  DELAY_OFFSET_WITH_UNITS: '0m',
 };
 
 const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
   text: (TrackingEvent as any)[key],
   value: (TrackingEvent as any)[key],
 }));
+
+const labelForDelayOffset = (
+  <>
+    <FormattedMessage
+      id="xpack.triggersActionsUI.geoThreshold.delayOffset"
+      defaultMessage="Delayed evaluation offset"
+    />{' '}
+    <EuiIconTip
+      position="right"
+      type="questionInCircle"
+      content={i18n.translate('xpack.triggersActionsUI.geoThreshold.delayOffsetTooltip', {
+        defaultMessage: 'Evaluate alerts on a delayed cycle to adjust for data latency',
+      })}
+    />
+  </>
+);
 
 export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
@@ -52,6 +81,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     boundaryIndexId,
     boundaryGeoField,
     boundaryNameField,
+    delayOffsetWithUnits,
   } = alertParams;
 
   const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
@@ -86,6 +116,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
+  const [delayOffset, _setDelayOffset] = useState<number>(0);
+  function setDelayOffset(_delayOffset: number) {
+    setAlertParams('delayOffsetWithUnits', `${_delayOffset}${delayOffsetUnit}`);
+    _setDelayOffset(_delayOffset);
+  }
+  const [delayOffsetUnit, setDelayOffsetUnit] = useState<string>('m');
 
   const hasExpressionErrors = false;
   const expressionErrorMessage = i18n.translate(
@@ -110,6 +146,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
         boundaryNameField: boundaryNameField ?? DEFAULT_VALUES.BOUNDARY_NAME_FIELD,
+        delayOffsetWithUnits: delayOffsetWithUnits ?? DEFAULT_VALUES.DELAY_OFFSET_WITH_UNITS,
       });
       if (!alertsContext.dataIndexPatterns) {
         return;
@@ -121,6 +158,9 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       if (boundaryIndexId) {
         const _boundaryIndexPattern = await alertsContext.dataIndexPatterns.get(boundaryIndexId);
         setBoundaryIndexPattern(_boundaryIndexPattern);
+      }
+      if (delayOffsetWithUnits) {
+        setDelayOffset(delayOffsetWithUnits.replace(/\D/g, ''));
       }
     };
     initToDefaultParams();
@@ -137,6 +177,54 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.geoThreshold.selectOffset"
+            defaultMessage="Select offset (optional):"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={2}>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            compressed
+            label={labelForDelayOffset}
+            // isInvalid={errors.delayOffset.length > 0}
+            // error={errors.delayOffset}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  fullWidth
+                  min={0}
+                  // isInvalid={errors.delayOffset.length > 0}
+                  compressed
+                  value={delayOffset || 0}
+                  name="delayOffset"
+                  onChange={(e) => {
+                    setDelayOffset(+e.target.value);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  fullWidth
+                  compressed
+                  value={delayOffsetUnit}
+                  options={getTimeOptions(alertInterval ?? 1)}
+                  onChange={(e) => {
+                    setDelayOffsetUnit(e.target.value);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage

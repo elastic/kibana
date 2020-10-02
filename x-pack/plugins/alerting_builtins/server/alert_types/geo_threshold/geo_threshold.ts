@@ -147,10 +147,27 @@ export function getMovedEntities(
   );
 }
 
+function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
+  const timeUnit = delayOffsetWithUnits.slice(-1);
+  const time = delayOffsetWithUnits.slice(0, -1);
+
+  const adjustedDate = new Date(oldTime.getTime());
+  if (timeUnit === 's') {
+    adjustedDate.setSeconds(adjustedDate.getSeconds() - time);
+  } else if (timeUnit === 'm') {
+    adjustedDate.setMinutes(adjustedDate.getMinutes() - time);
+  } else if (timeUnit === 'h') {
+    adjustedDate.setHours(adjustedDate.getHours() - time);
+  } else if (timeUnit === 'd') {
+    adjustedDate.setDate(adjustedDate.getDate() - time);
+  }
+  return adjustedDate;
+}
+
 export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
   async function ({
-    previousStartedAt: currIntervalStartTime,
-    startedAt: currIntervalEndTime,
+    previousStartedAt,
+    startedAt,
     services,
     params,
     alertId,
@@ -171,6 +188,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryIndexId: string;
       boundaryGeoField: string;
       boundaryNameField?: string;
+      delayOffsetWithUnits?: string;
     };
     alertId: string;
     state: AlertTypeState;
@@ -189,9 +207,18 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
 
+    let currIntervalStartTime = previousStartedAt;
+    let currIntervalEndTime = startedAt;
+    if (params.delayOffsetWithUnits) {
+      if (currIntervalStartTime) {
+        currIntervalStartTime = getOffsetTime(params.delayOffsetWithUnits, currIntervalStartTime);
+      }
+      currIntervalEndTime = getOffsetTime(params.delayOffsetWithUnits, currIntervalEndTime);
+    }
+
     // Start collecting data only on the first cycle
     if (!currIntervalStartTime) {
-      log.info(`alert ${GEO_THRESHOLD_ID}:${alertId} alert initialized. Collecting data`);
+      log.debug(`alert ${GEO_THRESHOLD_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
       const tempPreviousEndTime = new Date(currIntervalEndTime);
       tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - 5);
@@ -204,6 +231,8 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
           params.dateField,
           params.geoField
         ),
+        shapesFilters,
+        shapesIdsNamesMap,
       };
     }
 
