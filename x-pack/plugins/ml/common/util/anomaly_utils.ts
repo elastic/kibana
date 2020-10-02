@@ -12,7 +12,7 @@
 import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../constants/anomalies';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
@@ -168,17 +168,17 @@ export function getSeverityWithLow(normalizedScore: number): SeverityType {
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverityColor(normalizedScore: number): string {
   if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
-    return '#fe5050';
+    return SEVERITY_COLORS.CRITICAL;
   } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
-    return '#fba740';
+    return SEVERITY_COLORS.MAJOR;
   } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
-    return '#fdec25';
+    return SEVERITY_COLORS.MINOR;
   } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
-    return '#8bc8fb';
+    return SEVERITY_COLORS.WARNING;
   } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
-    return '#d2e9f7';
+    return SEVERITY_COLORS.LOW;
   } else {
-    return '#ffffff';
+    return SEVERITY_COLORS.BLANK;
   }
 }
 
