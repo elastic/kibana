@@ -25,21 +25,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.removeDimension('lnsDatatable_column');
@@ -50,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'terms',
         field: 'ip',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.save('Afancilenstest');
 
@@ -78,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
 
@@ -110,14 +107,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: '@timestamp',
       });
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.createLayer();
 
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
@@ -132,7 +127,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -142,7 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
 
-      await PageObjects.lens.closeDimensionEditor();
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await testSubjects.click('lnsLayerRemove');
       await testSubjects.click('lnsLayerRemove');
@@ -171,8 +164,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
 
-      await PageObjects.lens.closeDimensionEditor();
-
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
@@ -189,14 +180,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.dest',
       });
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.configureDimension(
@@ -208,7 +197,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -218,7 +206,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
 
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
 
@@ -304,7 +291,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
@@ -312,7 +298,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.closeDimensionEditor();
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
