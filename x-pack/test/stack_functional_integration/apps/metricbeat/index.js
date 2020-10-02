@@ -7,5 +7,6 @@
 export default function ({ loadTestFile }) {
   describe('metricbeat app', function () {
     loadTestFile(require.resolve('./_metricbeat'));
+    loadTestFile(require.resolve('./_metricbeat_dashboard'));
   });
 }

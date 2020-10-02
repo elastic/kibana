@@ -156,7 +156,7 @@ describe('utils', () => {
           ],
         },
       ];
-      threatRule.params.threatIndex = 'index-123';
+      threatRule.params.threatIndex = ['index-123'];
       threatRule.params.threatFilters = threatFilters;
       threatRule.params.threatMapping = threatMapping;
       threatRule.params.threatQuery = '*:*';
@@ -164,7 +164,7 @@ describe('utils', () => {
       const rule = transformAlertToRule(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
-          threat_index: 'index-123',
+          threat_index: ['index-123'],
           threat_filters: threatFilters,
           threat_mapping: threatMapping,
           threat_query: '*:*',
