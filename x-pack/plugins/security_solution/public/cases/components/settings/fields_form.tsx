@@ -7,23 +7,21 @@
 import React, { memo, Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CaseSettingsConnector } from './types';
+import { CaseSettingsConnector, SettingFieldsProps } from './types';
 import { useCaseSettings } from './use_case_settings';
 import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 
-interface Props {
+interface Props extends Omit<SettingFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
   connector: CaseSettingsConnector | null;
-  onFieldsChange: (fields: ConnectorTypeFields['fields']) => void;
-  fields: ConnectorTypeFields['fields'];
 }
 
-const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
+const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
-  const onChange = useCallback(
+  const onFieldsChange = useCallback(
     (newFields) => {
-      onFieldsChange(newFields);
+      onChange(newFields);
     },
-    [onFieldsChange]
+    [onChange]
   );
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
@@ -45,7 +43,12 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange
             </EuiFlexGroup>
           }
         >
-          <FieldsComponent fields={fields} connector={connector} onChange={onChange} />
+          <FieldsComponent
+            isEdit={isEdit}
+            fields={fields}
+            connector={connector}
+            onChange={onFieldsChange}
+          />
         </Suspense>
       ) : null}
     </>

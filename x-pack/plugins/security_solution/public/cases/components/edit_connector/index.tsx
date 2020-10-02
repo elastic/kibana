@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -28,8 +28,6 @@ import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
-import { Connector } from '../settings/connector';
-
 import * as i18n from './translations';
 
 interface EditConnectorProps {
@@ -55,6 +53,51 @@ const MyFlexGroup = styled(EuiFlexGroup)`
     }
   `}
 `;
+const DisappearingFlexItem = styled(EuiFlexItem)`
+  ${({ $isHidden }: { $isHidden: boolean }) =>
+    $isHidden &&
+    css`
+      margin: 0 !important;
+    `}
+`;
+
+interface State {
+  currentConnector: ActionConnector | null;
+  fields: ConnectorTypeFields['fields'];
+  editConnector: boolean;
+}
+
+type Action =
+  | { type: 'SET_CURRENT_CONNECTOR'; payload: State['currentConnector'] }
+  | { type: 'SET_FIELDS'; payload: State['fields'] }
+  | { type: 'SET_EDIT_CONNECTOR'; payload: State['editConnector'] };
+const editConnectorReducer = (state: State, action: Action) => {
+  switch (action.type) {
+    case 'SET_CURRENT_CONNECTOR':
+      return {
+        ...state,
+        currentConnector: action.payload,
+      };
+    case 'SET_FIELDS':
+      return {
+        ...state,
+        fields: action.payload,
+      };
+    case 'SET_EDIT_CONNECTOR':
+      return {
+        ...state,
+        editConnector: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
+const initialState = {
+  currentConnector: null,
+  fields: null,
+  editConnector: false,
+};
 
 export const EditConnector = React.memo(
   ({
@@ -77,67 +120,92 @@ export const EditConnector = React.memo(
       connectorId: string;
     }>({
       form,
-      watch: ['connectorId', 'description'],
+      watch: ['connectorId'],
     });
-
-    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
-    const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
-    const [fields, setFields] = useState<ConnectorTypeFields['fields']>(caseFields);
-    const [editConnector, setEditConnector] = useState(false);
-
-    const onChangeConnector = useCallback(
-      (newConnectorId) => {
-        if (selectedConnector === newConnectorId) {
-          setFields(caseFields);
-        }
-      },
-      [selectedConnector, caseFields]
+    const [{ currentConnector, fields, editConnector }, dispatch] = useReducer(
+      editConnectorReducer,
+      initialState
     );
+
+    const setCurrentConnector = useCallback(() => {
+      const setCurrentConnectorCondition =
+        currentConnector == null || connectorId !== currentConnector.id;
+
+      if (setCurrentConnectorCondition) {
+        dispatch({
+          type: 'SET_CURRENT_CONNECTOR',
+          payload: getConnectorById(connectorId, connectors),
+        });
+      }
+    }, [connectorId, connectors, currentConnector]);
+
+    const setFields = useCallback(() => {
+      // Get fields of the connector from user actions when changing connector
+      if (userActions.length > 0 && currentConnector != null) {
+        dispatch({
+          type: 'SET_FIELDS',
+          payload: getConnectorFieldsFromUserActions(currentConnector.id, userActions),
+        });
+      }
+    }, [currentConnector, userActions]);
+
+    useEffect(() => {
+      setCurrentConnector();
+    }, [connectors, connectorId, setCurrentConnector]);
+    useEffect(() => {
+      setFields();
+    }, [currentConnector, setFields, userActions]);
 
     const onFields = useCallback(
       (newFields) => {
         if (!deepEqual(newFields, caseFields)) {
-          setFields(newFields);
+          dispatch({
+            type: 'SET_FIELDS',
+            payload: newFields,
+          });
         }
       },
-      [caseFields]
+      [caseFields, dispatch]
     );
 
     const onError = useCallback(() => {
       setFieldValue('connectorId', selectedConnector);
-      setEditConnector(false);
-    }, [setFieldValue, selectedConnector]);
+      dispatch({
+        type: 'SET_EDIT_CONNECTOR',
+        payload: false,
+      });
+    }, [dispatch, setFieldValue, selectedConnector]);
 
     const onCancelConnector = useCallback(() => {
       setFieldValue('connectorId', selectedConnector);
-      setFields(caseFields);
-      setEditConnector(false);
-    }, [selectedConnector, setFieldValue, caseFields]);
+      dispatch({
+        type: 'SET_FIELDS',
+        payload: caseFields,
+      });
+      dispatch({
+        type: 'SET_EDIT_CONNECTOR',
+        payload: false,
+      });
+    }, [dispatch, selectedConnector, setFieldValue, caseFields]);
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
       if (isValid && newData.connectorId) {
-        onSubmit(newData.connectorId, fields, onError, noop);
-        setEditConnector(false);
+        onSubmit(newData.connectorId, fields, noop, onError);
+        dispatch({
+          type: 'SET_EDIT_CONNECTOR',
+          payload: false,
+        });
       }
-    }, [submit, fields, onSubmit, onError]);
+    }, [dispatch, submit, fields, onSubmit, onError]);
 
-    useEffect(() => {
-      setActionConnector(getConnectorById(connectorId, connectors) ?? null);
-    }, [connectors, connectorId]);
+    const onEditClick = useCallback(() => {
+      dispatch({
+        type: 'SET_EDIT_CONNECTOR',
+        payload: true,
+      });
+    }, [dispatch]);
 
-    useEffect(() => {
-      setCurrentConnector(getConnectorById(selectedConnector, connectors) ?? null);
-    }, [connectors, selectedConnector]);
-
-    useEffect(() => {
-      // Get fields of the connector from user actions when changing connector
-      if (connectorId && selectedConnector && selectedConnector !== connectorId) {
-        setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
-      }
-    }, [selectedConnector, connectorId, userActions]);
-
-    const onEditClick = useCallback(() => setEditConnector(true), []);
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -145,7 +213,7 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && (
+          {!isLoading && !editConnector && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
@@ -160,43 +228,37 @@ export const EditConnector = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!editConnector && !isLoading && (
-            <Connector
-              name={currentConnector?.name ?? ''}
-              type={currentConnector?.actionTypeId ?? ''}
-              fields={fields}
-            />
-          )}
-          {editConnector && !isLoading && (
-            <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
-              <EuiFlexItem>
-                <Form form={form}>
-                  <EuiFlexGroup gutterSize="none" direction="row">
-                    <EuiFlexItem>
-                      <UseField
-                        path="connectorId"
-                        component={ConnectorSelector}
-                        componentProps={{
-                          connectors,
-                          dataTestSubj: 'caseConnectors',
-                          idAria: 'caseConnectors',
-                          isLoading,
-                          disabled,
-                          defaultValue: selectedConnector,
-                        }}
-                        onChange={onChangeConnector}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </Form>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <SettingFieldsForm
-                  connector={actionConnector}
-                  onFieldsChange={onFields}
-                  fields={fields}
-                />
-              </EuiFlexItem>
+          <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
+            <DisappearingFlexItem $isHidden={!editConnector}>
+              <Form form={form}>
+                <EuiFlexGroup gutterSize="none" direction="row">
+                  <EuiFlexItem>
+                    <UseField
+                      path="connectorId"
+                      component={ConnectorSelector}
+                      componentProps={{
+                        connectors,
+                        dataTestSubj: 'caseConnectors',
+                        defaultValue: selectedConnector,
+                        disabled,
+                        idAria: 'caseConnectors',
+                        isEdit: editConnector,
+                        isLoading,
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Form>
+            </DisappearingFlexItem>
+            <EuiFlexItem>
+              <SettingFieldsForm
+                connector={currentConnector}
+                fields={fields}
+                isEdit={editConnector}
+                onChange={onFields}
+              />
+            </EuiFlexItem>
+            {editConnector && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -223,8 +285,8 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            )}
+          </EuiFlexGroup>
         </MyFlexGroup>
       </EuiText>
     );

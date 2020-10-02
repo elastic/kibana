@@ -9,9 +9,10 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 interface ConnectorCardProps {
-  connectorType: string;
+  connectorType: ConnectorTypes;
   title: string;
   listItems: Array<{ title: string; description: React.ReactNode }>;
 }
@@ -30,8 +31,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   const description = useMemo(
     () => (
       <StyledText>
-        {Array.isArray(listItems) &&
-          listItems.length > 0 &&
+        {listItems.length > 0 &&
           listItems.map((item, i) => (
             <span key={`${item.title}-${i}`}>
               <strong>{`${item.title}: `}</strong>
@@ -48,14 +48,12 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   );
   return (
     <EuiCard
-      data-test-subj="settings-connector-card"
       display="plain"
       description={description}
       icon={icon}
       layout="horizontal"
       title={title}
       titleSize="xs"
-      paddingSize="none"
     />
   );
 };

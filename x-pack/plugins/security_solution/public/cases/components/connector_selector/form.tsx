@@ -14,19 +14,21 @@ import { ActionConnector } from '../../../../../case/common/api/cases';
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
   dataTestSubj: string;
-  field: FieldHook;
-  idAria: string;
   defaultValue?: ActionConnector;
   disabled: boolean;
+  field: FieldHook;
+  idAria: string;
+  isEdit: boolean;
   isLoading: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
   defaultValue,
+  disabled = false,
   field,
   idAria,
-  disabled = false,
+  isEdit = true,
   isLoading = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -43,7 +45,7 @@ export const ConnectorSelector = ({
     [field]
   );
 
-  return (
+  return isEdit ? (
     <EuiFormRow
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -62,5 +64,5 @@ export const ConnectorSelector = ({
         selectedConnector={(field.value as string) ?? 'none'}
       />
     </EuiFormRow>
-  );
+  ) : null;
 };
