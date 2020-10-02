@@ -18,6 +18,19 @@ import { RouteDependencies } from '../../../../../types';
 
 const queryBody = {
   size: 0,
+  query: {
+    bool: {
+      must: [
+        {
+          range: {
+            timestamp: {
+              gte: 'now-12h',
+            },
+          },
+        },
+      ],
+    },
+  },
   aggs: {
     types: {
       terms: {
