@@ -127,7 +127,7 @@ export function MetricChart({
   const column = firstTable.columns[0];
   const row = firstTable.rows[0];
 
-  // NOTE: Count and Sum never receives "null" as value, but always 0, even for empty dataset.
+  // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
   const shouldShowResults = row[accessor] != null;
 
