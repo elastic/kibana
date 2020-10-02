@@ -193,8 +193,8 @@ export const PingListComponent = (props: Props) => {
   useEffect(() => {
     const parsed = JSON.parse(expandedIdsToRemove);
     if (parsed.length) {
-      parsed.forEach((p) => {
-        delete expandedRows[p];
+      parsed.forEach((docId: string) => {
+        delete expandedRows[docId];
       });
       setExpandedRows(expandedRows);
     }

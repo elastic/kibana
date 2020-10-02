@@ -10,13 +10,8 @@ import * as reactUse from 'react-use';
 import { StepScreenshotDisplay } from '../step_screenshot_display';
 
 describe('StepScreenshotDisplayProps', () => {
+  // @ts-ignore missing fields don't matter in this test, the component in question only relies on `isIntersecting`
   jest.spyOn(reactUse, 'useIntersection').mockImplementation(() => ({
-    boundingClientRect: null,
-    intersectionRatio: null,
-    intersectionRect: null,
-    rootBounds: null,
-    target: null,
-    time: null,
     isIntersecting: true,
   }));
 
