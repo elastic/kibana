@@ -29,7 +29,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
 >> = ({ isEdit, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields || {};
 
-  const [firstLoad, setFirstLoad] = useState(false);
+  // const [firstLoad, setFirstLoad] = useState(false);
   const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
@@ -42,11 +42,11 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
 
   const { http, notifications } = useKibana().services;
 
-  useEffect(() => {
-    setFirstLoad(true);
-    onChange({ incidentTypes: null, severityCode: null });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   setFirstLoad(true);
+  //   onChange({ incidentTypes: null, severityCode: null });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const {
     isLoading: isLoadingIncidentTypes,
@@ -73,18 +73,18 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   }, [connector, severity]);
 
   // Reset parameters when changing connector
-  useEffect(() => {
-    if (!firstLoad) {
-      return;
-    }
-
-    setIncidentTypesComboBoxOptions([]);
-    setSelectedIncidentTypesComboBoxOptions([]);
-    setSeveritySelectOptions([]);
-
-    onChange({ incidentTypes: null, severityCode: null });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector]);
+  // useEffect(() => {
+  //   if (!firstLoad) {
+  //     return;
+  //   }
+  //
+  //   setIncidentTypesComboBoxOptions([]);
+  //   setSelectedIncidentTypesComboBoxOptions([]);
+  //   setSeveritySelectOptions([]);
+  //
+  //   onChange({ incidentTypes: null, severityCode: null });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [connector]);
 
   useEffect(() => {
     setIncidentTypesComboBoxOptions(

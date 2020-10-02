@@ -56,8 +56,8 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const DisappearingFlexItem = styled(EuiFlexItem)`
-  ${({ isHidden }: { isHidden: boolean }) =>
-    isHidden &&
+  ${({ $isHidden }: { $isHidden: boolean }) =>
+    $isHidden &&
     css`
       margin: 0 !important;
     `}
@@ -87,7 +87,9 @@ export const EditConnector = React.memo(
       watch: ['connectorId', 'description'],
     });
 
-    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
+    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(
+      getConnectorById(connectorId, connectors)
+    );
     const [fields, setFields] = useState<ConnectorTypeFields['fields']>(caseFields);
     const [editConnector, setEditConnector] = useState(false);
 
@@ -102,6 +104,7 @@ export const EditConnector = React.memo(
 
     const onFields = useCallback(
       (newFields) => {
+        console.log('is this gonna get called edit_connector???', { newFields, caseFields });
         if (!deepEqual(newFields, caseFields)) {
           setFields(newFields);
         }
@@ -128,17 +131,38 @@ export const EditConnector = React.memo(
       }
     }, [submit, fields, onSubmit, onError]);
 
-    useEffect(() => {
-      setActionConnector(getConnectorById(connectorId, connectors) ?? null);
-    }, [connectors, connectorId]);
-
-    useEffect(() => {
-      // Get fields of the connector from user actions when changing connector
-      if (connectorId && selectedConnector && selectedConnector !== connectorId) {
+    const onConnectorChange = useCallback(() => {
+      const condition1 = Object.keys(userActions).length > 0 && connectorId !== selectedConnector;
+      console.log('setFields', {
+        condition1,
+        connectorId,
+        selectedConnector,
+        userActions: getConnectorFieldsFromUserActions(connectorId, userActions),
+      });
+      if (condition1) {
         setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
       }
-    }, [selectedConnector, connectorId, userActions]);
+      const condition =
+        connectorId != null &&
+        connectors.length > 0 &&
+        (actionConnector == null || actionConnector.id !== connectorId);
+      console.log('setActionConnector', {
+        actionConnector,
+        connectorId,
+        connectors,
+        condition,
+        selectedConnector,
+      });
+      if (condition) {
+        setActionConnector(getConnectorById(connectorId, connectors));
+      }
+    }, [actionConnector, connectorId, connectors, selectedConnector, userActions]);
 
+    useEffect(() => {
+      onConnectorChange();
+    }, [connectorId, connectors, selectedConnector, userActions]);
+
+    console.log('edit_connector fields', fields);
     const onEditClick = useCallback(() => setEditConnector(true), []);
     return (
       <EuiText>
@@ -162,7 +186,7 @@ export const EditConnector = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
           <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
-            <DisappearingFlexItem isHidden={!editConnector}>
+            <DisappearingFlexItem $isHidden={!editConnector}>
               <Form form={form}>
                 <EuiFlexGroup gutterSize="none" direction="row">
                   <EuiFlexItem>

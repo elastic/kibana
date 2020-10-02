@@ -30,12 +30,12 @@ const selectOptions = [
 const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ServiceNowFieldsType
 >> = ({ isEdit, fields, connector, onChange }) => {
-  const { severity = null, urgency = null, impact = null } = fields || {};
+  const { severity = null, urgency = null, impact = null } = fields;
 
   const [firstLoad, setFirstLoad] = useState(false);
 
   useEffect(() => {
-    onChange({ severity: null, urgency: null, impact: null });
+    onChange({ severity, urgency, impact });
     setFirstLoad(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -55,7 +55,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
         ? [
             {
               title: i18n.URGENCY,
-              description: urgency,
+              description: selectOptions.find((option) => `${option.value}` === urgency)?.text,
             },
           ]
         : []),
@@ -63,7 +63,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
         ? [
             {
               title: i18n.SEVERITY,
-              description: severity,
+              description: selectOptions.find((option) => `${option.value}` === severity)?.text,
             },
           ]
         : []),
@@ -71,7 +71,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
         ? [
             {
               title: i18n.IMPACT,
-              description: impact,
+              description: selectOptions.find((option) => `${option.value}` === impact)?.text,
             },
           ]
         : []),

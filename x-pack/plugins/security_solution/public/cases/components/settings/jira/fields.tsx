@@ -39,7 +39,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   useEffect(() => {
     setFirstLoad(true);
-    onChange({ issueType: null, priority: null, parent: null });
+    onChange(fields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -146,6 +146,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     ],
     [issueType, issueTypes, hasParent, parent, hasPriority, priority]
   );
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
