@@ -23,13 +23,12 @@ import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, DimensionContainerState } from './types';
+import { ConfigPanelWrapperProps, DimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 
-const initialDimensionContainerState = {
+const initialDimensionState = {
   isOpen: false,
-  openId: null,
-  addingToGroupId: null,
+  isNew: false,
 };
 
 function isConfiguration(
@@ -70,15 +69,13 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [dimensionContainerState, setDimensionContainerState] = useState<DimensionContainerState>(
-    initialDimensionContainerState
-  );
+  const [dimensionState, setDimensionState] = useState<DimensionState>(initialDimensionState);
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
-    setDimensionContainerState(initialDimensionContainerState);
+    setDimensionState(initialDimensionState);
   }, [props.activeVisualizationId]);
 
   if (
@@ -117,7 +114,7 @@ export function LayerPanel(
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
-
+  const { activeId, activeGroup } = dimensionState;
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
@@ -196,31 +193,6 @@ export function LayerPanel(
             >
               <>
                 {group.accessors.map((accessor) => {
-                  const datasourceDimensionEditor = (
-                    <NativeRenderer
-                      render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                      nativeProps={{
-                        ...layerDatasourceConfigProps,
-                        core: props.core,
-                        columnId: accessor,
-                        filterOperations: group.filterOperations,
-                      }}
-                    />
-                  );
-                  const visDimensionEditor =
-                    activeVisualization.renderDimensionEditor && group.enableDimensionEditor ? (
-                      <div key={accessor} className="lnsLayerPanel__styleEditor">
-                        <NativeRenderer
-                          render={activeVisualization.renderDimensionEditor}
-                          nativeProps={{
-                            ...layerVisualizationConfigProps,
-                            groupId: group.groupId,
-                            accessor,
-                            setState: props.updateVisualization,
-                          }}
-                        />
-                      </div>
-                    ) : null;
                   return (
                     <DragDrop
                       key={accessor}
@@ -237,7 +209,7 @@ export function LayerPanel(
                           : 'add'
                       }
                       data-test-subj={group.dataTestSubj}
-                      draggable={!dimensionContainerState.isOpen}
+                      draggable={!dimensionState.isOpen}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
                       isValueEqual={isSameConfiguration}
                       label={group.groupLabel}
@@ -273,48 +245,27 @@ export function LayerPanel(
                       }}
                     >
                       <div className="lnsLayerPanel__dimension">
-                        <DimensionContainer
-                          dimensionContainerState={dimensionContainerState}
-                          setDimensionContainerState={setDimensionContainerState}
-                          groups={groups}
-                          accessor={accessor}
-                          groupId={group.groupId}
-                          trigger={
-                            <NativeRenderer
-                              render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                              nativeProps={{
-                                ...layerDatasourceConfigProps,
-                                columnId: accessor,
-                                filterOperations: group.filterOperations,
-                                suggestedPriority: group.suggestedPriority,
-                                onClick: () => {
-                                  if (dimensionContainerState.isOpen) {
-                                    setDimensionContainerState(initialDimensionContainerState);
-                                  } else {
-                                    setDimensionContainerState({
-                                      isOpen: true,
-                                      openId: accessor,
-                                      addingToGroupId: null, // not set for existing dimension
-                                    });
-                                  }
-                                },
-                              }}
-                            />
-                          }
-                          panel={
-                            <>
-                              {datasourceDimensionEditor}
-                              {visDimensionEditor}
-                            </>
-                          }
-                          panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                            defaultMessage: '{groupLabel} configuration',
-                            values: {
-                              groupLabel: group.groupLabel,
+                        <NativeRenderer
+                          render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                          nativeProps={{
+                            ...layerDatasourceConfigProps,
+                            columnId: accessor,
+                            filterOperations: group.filterOperations,
+                            suggestedPriority: group.suggestedPriority,
+                            onClick: () => {
+                              if (dimensionState.isOpen) {
+                                setDimensionState(initialDimensionState);
+                              } else {
+                                setDimensionState({
+                                  isOpen: true,
+                                  isNew: false,
+                                  activeGroup: group,
+                                  activeId: accessor,
+                                });
+                              }
                             },
-                          })}
+                          }}
                         />
-
                         <EuiButtonIcon
                           data-test-subj="indexPattern-dimension-remove"
                           iconType="cross"
@@ -394,77 +345,33 @@ export function LayerPanel(
                     }}
                   >
                     <div className="lnsLayerPanel__dimension">
-                      <DimensionContainer
-                        dimensionContainerState={dimensionContainerState}
-                        setDimensionContainerState={setDimensionContainerState}
-                        groups={groups}
-                        accessor={newId}
-                        groupId={group.groupId}
-                        trigger={
-                          <EuiButtonEmpty
-                            className="lnsLayerPanel__triggerLink"
-                            color="text"
-                            size="xs"
-                            iconType="plusInCircleFilled"
-                            contentProps={{
-                              className: 'lnsLayerPanel__triggerLinkContent',
-                            }}
-                            data-test-subj="lns-empty-dimension"
-                            onClick={() => {
-                              if (dimensionContainerState.isOpen) {
-                                setDimensionContainerState(initialDimensionContainerState);
-                              } else {
-                                setDimensionContainerState({
-                                  isOpen: true,
-                                  openId: newId,
-                                  addingToGroupId: group.groupId,
-                                });
-                              }
-                            }}
-                          >
-                            <FormattedMessage
-                              id="xpack.lens.configure.emptyConfig"
-                              defaultMessage="Drop a field or click to add"
-                            />
-                          </EuiButtonEmpty>
-                        }
-                        panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                          defaultMessage: '{groupLabel} configuration',
-                          values: {
-                            groupLabel: group.groupLabel,
-                          },
-                        })}
-                        panel={
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              core: props.core,
-                              columnId: newId,
-                              filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
-
-                              setState: (newState: unknown) => {
-                                props.updateAll(
-                                  datasourceId,
-                                  newState,
-                                  activeVisualization.setDimension({
-                                    layerId,
-                                    groupId: group.groupId,
-                                    columnId: newId,
-                                    prevState: props.visualizationState,
-                                  })
-                                );
-                                setDimensionContainerState({
-                                  isOpen: true,
-                                  openId: newId,
-                                  addingToGroupId: null, // clear now that dimension exists
-                                });
-                              },
-                            }}
-                          />
-                        }
-                      />
+                      <EuiButtonEmpty
+                        className="lnsLayerPanel__triggerLink"
+                        color="text"
+                        size="xs"
+                        iconType="plusInCircleFilled"
+                        contentProps={{
+                          className: 'lnsLayerPanel__triggerLinkContent',
+                        }}
+                        data-test-subj="lns-empty-dimension"
+                        onClick={() => {
+                          if (dimensionState.isOpen) {
+                            setDimensionState(initialDimensionState);
+                          } else {
+                            setDimensionState({
+                              isOpen: true,
+                              isNew: true,
+                              activeGroup: group,
+                              activeId: newId,
+                            });
+                          }
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.configure.emptyConfig"
+                          defaultMessage="Drop a field or click to add"
+                        />
+                      </EuiButtonEmpty>
                     </div>
                   </DragDrop>
                 ) : null}
@@ -472,6 +379,60 @@ export function LayerPanel(
             </EuiFormRow>
           );
         })}
+        <DimensionContainer
+          isOpen={dimensionState.isOpen}
+          groupLabel={activeGroup?.groupLabel || ''}
+          close={() => setDimensionState(initialDimensionState)}
+          panel={
+            <>
+              {activeGroup && activeId && (
+                <NativeRenderer
+                  render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                  nativeProps={{
+                    ...layerDatasourceConfigProps,
+                    core: props.core,
+                    columnId: activeId,
+                    filterOperations: activeGroup.filterOperations,
+                    suggestedPriority: activeGroup?.suggestedPriority,
+                    setState: (newState: unknown) => {
+                      props.updateAll(
+                        datasourceId,
+                        newState,
+                        activeVisualization.setDimension({
+                          layerId,
+                          groupId: activeGroup.groupId,
+                          columnId: activeId,
+                          prevState: props.visualizationState,
+                        })
+                      );
+                      setDimensionState({
+                        ...dimensionState,
+                        isNew: false,
+                      });
+                    },
+                  }}
+                />
+              )}
+              {activeGroup &&
+                activeId &&
+                !dimensionState.isNew &&
+                activeVisualization.renderDimensionEditor &&
+                activeGroup?.enableDimensionEditor && (
+                  <div className="lnsLayerPanel__styleEditor">
+                    <NativeRenderer
+                      render={activeVisualization.renderDimensionEditor}
+                      nativeProps={{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        setState: props.updateVisualization,
+                      }}
+                    />
+                  </div>
+                )}
+            </>
+          }
+        />
 
         <EuiSpacer size="s" />
 
