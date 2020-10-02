@@ -22,6 +22,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { ElasticsearchConfig } from '../elasticsearch_config';
+import { HttpAgentFactory } from '../http_agent_factory';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
@@ -56,6 +57,7 @@ export type ElasticsearchClientConfig = Pick<
  */
 export function parseClientOptions(
   config: ElasticsearchClientConfig,
+  httpAgentFactory: HttpAgentFactory,
   scoped: boolean
 ): ClientOptions {
   const clientOptions: ClientOptions = {
@@ -97,6 +99,10 @@ export function parseClientOptions(
       scoped && !config.ssl.alwaysPresentCertificate
     );
   }
+
+  clientOptions.agent = () => {
+    throw new Error(`I don't know what to do here`);
+  };
 
   return clientOptions;
 }

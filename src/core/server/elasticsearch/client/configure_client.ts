@@ -23,12 +23,14 @@ import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
 
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import { HttpAgentFactory } from '../http_agent_factory';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
+  httpAgentFactory: HttpAgentFactory,
   { logger, scoped = false }: { logger: Logger; scoped?: boolean }
 ): Client => {
-  const clientOptions = parseClientOptions(config, scoped);
+  const clientOptions = parseClientOptions(config, httpAgentFactory, scoped);
 
   const client = new Client(clientOptions);
   addLogging(client, logger, config.logQueries);

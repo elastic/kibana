@@ -26,6 +26,7 @@ import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
+import { HttpAgentFactory } from '../http_agent_factory';
 
 const noop = () => undefined;
 
@@ -70,10 +71,11 @@ export class ClusterClient implements ICustomClusterClient {
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    httpAgentFactory: HttpAgentFactory
   ) {
-    this.asInternalUser = configureClient(config, { logger });
-    this.rootScopedClient = configureClient(config, { logger, scoped: true });
+    this.asInternalUser = configureClient(config, httpAgentFactory, { logger });
+    this.rootScopedClient = configureClient(config, httpAgentFactory, { logger, scoped: true });
   }
 
   asScoped(request: ScopeableRequest) {

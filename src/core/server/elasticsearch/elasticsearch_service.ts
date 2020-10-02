@@ -36,6 +36,7 @@ import { AuditTrailStart, AuditorFactory } from '../audit_trail';
 import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { HttpAgentFactory } from './http_agent_factory';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -62,6 +63,8 @@ export class ElasticsearchService
   private legacyClient?: LegacyClusterClient;
 
   private client?: ClusterClient;
+
+  private httpAgentFactory = new HttpAgentFactory();
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -145,7 +148,8 @@ export class ElasticsearchService
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
-      this.getAuthHeaders
+      this.getAuthHeaders,
+      this.httpAgentFactory
     );
   }
 
@@ -154,7 +158,8 @@ export class ElasticsearchService
       config,
       this.coreContext.logger.get('elasticsearch', type),
       this.getAuditorFactory,
-      this.getAuthHeaders
+      this.getAuthHeaders,
+      this.httpAgentFactory
     );
   }
 

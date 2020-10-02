@@ -31,6 +31,7 @@ import {
 } from './elasticsearch_client_config';
 import { LegacyScopedClusterClient, ILegacyScopedClusterClient } from './scoped_cluster_client';
 import { LegacyCallAPIOptions, LegacyAPICaller } from './api_types';
+import { HttpAgentFactory } from '../http_agent_factory';
 
 /**
  * Support Legacy platform request for the period of migration.
@@ -133,9 +134,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
     private readonly getAuditorFactory: () => AuditorFactory,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    private readonly httpAgentFactory: HttpAgentFactory
   ) {
-    this.client = new Client(parseElasticsearchClientConfig(config, log));
+    this.client = new Client(parseElasticsearchClientConfig(config, log, httpAgentFactory));
   }
 
   /**
@@ -197,7 +199,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     // between all scoped client instances.
     if (this.scopedClient === undefined) {
       this.scopedClient = new Client(
-        parseElasticsearchClientConfig(this.config, this.log, {
+        parseElasticsearchClientConfig(this.config, this.log, this.httpAgentFactory, {
           auth: false,
           ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
         })

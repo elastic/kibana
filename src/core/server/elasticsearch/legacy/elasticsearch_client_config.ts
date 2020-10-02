@@ -25,6 +25,7 @@ import url from 'url';
 import { pick } from '@kbn/std';
 import { Logger } from '../../logging';
 import { ElasticsearchConfig } from '../elasticsearch_config';
+import { HttpAgentFactory } from '../http_agent_factory';
 
 /**
  * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
@@ -86,6 +87,7 @@ type ExtendedConfigOptions = ConfigOptions &
 export function parseElasticsearchClientConfig(
   config: LegacyElasticsearchClientConfig,
   log: Logger,
+  httpAgentFactory: HttpAgentFactory,
   { ignoreCertAndKey = false, auth = true }: LegacyElasticsearchClientConfigOverrides = {}
 ) {
   const esClientConfig: ExtendedConfigOptions = {
@@ -173,6 +175,15 @@ export function parseElasticsearchClientConfig(
     esClientConfig.ssl.key = config.ssl.key;
     esClientConfig.ssl.passphrase = config.ssl.keyPassphrase;
   }
+
+  esClientConfig.createNodeAgent = (httpConnector: any) => {
+    const protocol = httpConnector?.host?.protocol;
+    if (protocol !== 'http' && protocol !== 'https') {
+      throw new Error(`Expected a protocol of "http" or "https", received ${protocol}`);
+    }
+
+    return httpAgentFactory.get(protocol);
+  };
 
   // Elasticsearch JS client mutates config object, so all properties that are
   // usually passed by reference should be cloned to avoid any side effects.
