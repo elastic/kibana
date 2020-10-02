@@ -94,20 +94,20 @@ export default function ({ getService }: TestInvoker) {
     const otherSpaceId = spaceId === DEFAULT_SPACE_ID ? SPACE_1_ID : DEFAULT_SPACE_ID;
     const otherSpace = calculateSingleSpaceAuthZ(testCases, otherSpaceId);
     return {
-      unauthorized: createTestDefinitions(testCases, true, { fail403Param: 'create' }),
+      unauthorized: createTestDefinitions(testCases, true),
       authorizedInSpace: [
-        createTestDefinitions(thisSpace.targetsAllSpaces, true, { fail403Param: 'create' }),
-        createTestDefinitions(thisSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
+        createTestDefinitions(thisSpace.targetsAllSpaces, true),
+        createTestDefinitions(thisSpace.targetsOtherSpace, true),
         createTestDefinitions(thisSpace.doesntExistInThisSpace, false),
         createTestDefinitions(thisSpace.existsInThisSpace, false),
       ].flat(),
       authorizedInOtherSpace: [
-        createTestDefinitions(thisSpace.targetsAllSpaces, true, { fail403Param: 'create' }),
-        createTestDefinitions(otherSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
-        // If the preflight GET request fails, it will return a 404 error; users who are authorized to create saved objects in the target
-        // space(s) but are not authorized to update saved objects in this space will see a 403 error instead of 404. This is a safeguard to
+        createTestDefinitions(thisSpace.targetsAllSpaces, true),
+        createTestDefinitions(otherSpace.targetsOtherSpace, true),
+        // If the preflight GET request fails, it will return a 404 error; users who are authorized to share saved objects in the target
+        // space(s) but are not authorized to share saved objects in this space will see a 403 error instead of 404. This is a safeguard to
         // prevent potential information disclosure of the spaces that a given saved object may exist in.
-        createTestDefinitions(otherSpace.doesntExistInThisSpace, true, { fail403Param: 'update' }),
+        createTestDefinitions(otherSpace.doesntExistInThisSpace, true),
         createTestDefinitions(otherSpace.existsInThisSpace, false),
       ].flat(),
       authorized: createTestDefinitions(testCases, false),

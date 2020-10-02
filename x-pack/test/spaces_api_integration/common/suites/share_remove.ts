@@ -36,7 +36,7 @@ const createRequest = ({ id, namespaces }: ShareRemoveTestCase) => ({
 });
 
 export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('delete');
+  const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody = (testCase: ShareRemoveTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
