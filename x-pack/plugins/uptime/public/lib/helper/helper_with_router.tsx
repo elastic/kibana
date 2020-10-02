@@ -20,22 +20,19 @@ const helperWithRouter: <R>(
   wrapReduxStore?: boolean,
   storeState?: AppState
 ) => R = (helper, component, customHistory, wrapReduxStore, storeState) => {
-  if (customHistory) {
-    customHistory.location.key = 'TestKeyForTesting';
-    return helper(<Router history={customHistory}>{component}</Router>);
-  }
-  const history = createMemoryHistory();
+  const history = customHistory ?? createMemoryHistory();
+
   history.location.key = 'TestKeyForTesting';
+
+  const routerWrapper = <Router history={history}>{component}</Router>;
 
   if (wrapReduxStore) {
     return helper(
-      <MountWithReduxProvider store={storeState}>
-        <Router history={history}>{component}</Router>
-      </MountWithReduxProvider>
+      <MountWithReduxProvider store={storeState}>{routerWrapper}</MountWithReduxProvider>
     );
   }
 
-  return helper(<Router history={history}>{component}</Router>);
+  return helper(routerWrapper);
 };
 
 export const renderWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
