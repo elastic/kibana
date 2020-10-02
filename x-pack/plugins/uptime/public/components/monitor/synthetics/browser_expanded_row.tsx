@@ -28,6 +28,7 @@ export const BrowserExpandedRow: React.FC<BrowserExpandedRowProps> = ({ checkGro
   }, [dispatch, checkGroup]);
 
   const journeys = useSelector(journeySelector);
+  console.log(journeys);
   const journey = journeys[checkGroup];
 
   return <BrowserExpandedRowComponent checkGroup={checkGroup} journey={journey} />;

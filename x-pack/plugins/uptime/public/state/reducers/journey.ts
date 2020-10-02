@@ -6,6 +6,7 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { Ping, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
+import { pruneJourneyState } from '../actions/journey';
 import {
   FetchJourneyStepsParams,
   GetJourneyFailPayload,
@@ -80,6 +81,15 @@ export const journeyReducer = handleActions<JourneyKVP, Payload>(
             error,
           },
     }),
+
+    [String(pruneJourneyState)]: (state: JourneyKVP, action: Action<string[]>) =>
+      action.payload.reduce(
+        (prev, cur) => ({
+          ...prev,
+          [cur]: state[cur],
+        }),
+        {}
+      ),
   },
   initialState
 );

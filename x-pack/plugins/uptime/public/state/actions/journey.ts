@@ -21,3 +21,4 @@ export const getJourneyStepsSuccess = createAction<SyntheticsJourneyApiResponse>
   'GET_JOURNEY_STEPS_SUCCESS'
 );
 export const getJourneyStepsFail = createAction<GetJourneyFailPayload>('GET_JOURNEY_STEPS_FAIL');
+export const pruneJourneyState = createAction<string[]>('PRUNE_JOURNEY_STATE');
