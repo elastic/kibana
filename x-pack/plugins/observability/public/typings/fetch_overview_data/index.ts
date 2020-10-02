@@ -24,7 +24,7 @@ export interface Series {
 export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
-  bucketSize?: string;
+  bucketSize: string;
   serviceName?: string;
 }
 
@@ -32,11 +32,18 @@ export interface HasDataParams {
   absoluteTime: { start: number; end: number };
 }
 
+interface UXHasDataResponse {
+  hasData: boolean;
+  serviceName: string | number | undefined;
+}
+
+export type HasDataResponse = UXHasDataResponse | boolean;
+
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = (params?: HasDataParams) => Promise<boolean>;
+export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,

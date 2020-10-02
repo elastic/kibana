@@ -5,11 +5,11 @@
  */
 
 import React, { createContext, useMemo, useState } from 'react';
-import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
+import { HasDataResponse, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 
 interface SharedData {
-  hasData: Record<ObservabilityFetchDataPlugins, boolean | undefined> | null;
-  hasAnyData?: boolean;
+  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse | undefined> | null;
+  hasAnyData?: HasDataResponse;
 }
 
 interface Index {

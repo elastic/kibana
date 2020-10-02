@@ -13,41 +13,27 @@ import { UptimeSection } from '../../components/app/section/uptime';
 import { UXSection } from '../../components/app/section/ux';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  bucketSize?: string;
+  bucketSize: string;
   hasData: any;
 }
 
-export function DataSections({ absoluteTime, relativeTime, bucketSize, hasData }: Props) {
+export function DataSections({ bucketSize, hasData }: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column">
         {hasData?.infra_logs && (
           <EuiFlexItem grow={false}>
-            <LogsSection
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-              bucketSize={bucketSize}
-            />
+            <LogsSection bucketSize={bucketSize} />
           </EuiFlexItem>
         )}
         {hasData?.infra_metrics && (
           <EuiFlexItem grow={false}>
-            <MetricsSection
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-              bucketSize={bucketSize}
-            />
+            <MetricsSection bucketSize={bucketSize} />
           </EuiFlexItem>
         )}
         {hasData?.apm && (
           <EuiFlexItem grow={false}>
-            <APMSection
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-              bucketSize={bucketSize}
-            />
+            <APMSection bucketSize={bucketSize} />
           </EuiFlexItem>
         )}
         {hasData?.uptime && (
@@ -57,11 +43,7 @@ export function DataSections({ absoluteTime, relativeTime, bucketSize, hasData }
         )}
         {hasData?.ux && (
           <EuiFlexItem grow={false}>
-            <UXSection
-              serviceName={hasData.ux.serviceName}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <UXSection serviceName={hasData.ux.serviceName} bucketSize={bucketSize} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -22,7 +22,7 @@ import { onBrushEnd } from '../helper';
 import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: string;
 }
 
 function formatTpm(value?: number) {

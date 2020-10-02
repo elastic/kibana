@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { UXMetrics } from './index';
 import {
   FCP_LABEL,
   LONGEST_LONG_TASK,
@@ -17,6 +16,7 @@ import {
 } from './translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
+import { UXMetrics } from '../../../../../../observability/public';
 
 export function formatToSec(
   value?: number | string,

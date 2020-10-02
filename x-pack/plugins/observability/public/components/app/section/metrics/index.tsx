@@ -19,7 +19,7 @@ import { StyledStat } from '../../styled_stat';
 import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: string;
 }
 
 /**

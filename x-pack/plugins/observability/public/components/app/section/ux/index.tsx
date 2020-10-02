@@ -13,12 +13,11 @@ import { CoreVitals } from '../../../shared/core_web_vitals';
 import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   serviceName: string;
+  bucketSize: string;
 }
 
-export function UXSection({ serviceName }: Props) {
+export function UXSection({ serviceName, bucketSize }: Props) {
   const { absStart, absEnd, start, end } = useQueryParams();
 
   const { data, status } = useFetcher(() => {
@@ -27,6 +26,7 @@ export function UXSection({ serviceName }: Props) {
         absoluteTime: { start: absStart, end: absEnd },
         relativeTime: { start, end },
         serviceName,
+        bucketSize,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

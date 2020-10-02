@@ -4,36 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLink,
   EuiPanel,
-  EuiPopover,
   EuiSpacer,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './KeyUXMetrics';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { CoreVitals } from '../../../../../../observability/public';
-
-export interface UXMetrics {
-  cls: string;
-  fid: number;
-  lcp: number;
-  tbt: number;
-  fcp: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
-}
 
 export function UXMetrics() {
   const uxQuery = useUxQuery();
