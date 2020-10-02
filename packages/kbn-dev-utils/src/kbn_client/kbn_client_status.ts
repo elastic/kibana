@@ -55,6 +55,7 @@ export class KbnClientStatus {
     const { data } = await this.requester.request<ApiResponseStatus>({
       method: 'GET',
       path: 'api/status',
+      retries: 30,
     });
     return data;
   }
