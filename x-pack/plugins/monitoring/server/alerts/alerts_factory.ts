@@ -6,6 +6,7 @@
 
 import {
   CpuUsageAlert,
+  MissingMonitoringDataAlert,
   DiskUsageAlert,
   MemoryUsageAlert,
   NodesChangedAlert,
@@ -20,6 +21,7 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
+  ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
@@ -33,6 +35,7 @@ export const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
+  [ALERT_MISSING_MONITORING_DATA]: MissingMonitoringDataAlert,
   [ALERT_DISK_USAGE]: DiskUsageAlert,
   [ALERT_MEMORY_USAGE]: MemoryUsageAlert,
   [ALERT_NODES_CHANGED]: NodesChangedAlert,

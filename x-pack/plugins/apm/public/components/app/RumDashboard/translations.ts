@@ -150,6 +150,9 @@ export const I18LABELS = {
   percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
     defaultMessage: '99th',
   }),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

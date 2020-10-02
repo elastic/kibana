@@ -26,7 +26,7 @@ import { RawAlertInstance } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import {
   CommonAlertFilter,
-  CommonAlertCpuUsageFilter,
+  CommonAlertNodeUuidFilter,
   CommonAlertParams,
   CommonAlertParamDetail,
 } from '../../common/types';
@@ -129,7 +129,7 @@ export class CpuUsageAlert extends BaseAlert {
     const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
     if (filters && filters.length) {
       for (const _filter of filters) {
-        const filter = _filter as CommonAlertCpuUsageFilter;
+        const filter = _filter as CommonAlertNodeUuidFilter;
         if (filter && filter.nodeUuid) {
           let nodeExistsInStates = false;
           for (const state of alertInstanceState.alertStates) {

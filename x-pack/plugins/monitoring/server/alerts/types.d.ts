@@ -35,6 +35,13 @@ export interface AlertDiskUsageState extends AlertNodeState {
   diskUsage: number;
 }
 
+export interface AlertMissingDataState extends AlertState {
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
+  gapDuration: number;
+}
+
 export interface AlertMemoryUsageState extends AlertNodeState {
   memoryUsage: number;
 }
@@ -99,6 +106,15 @@ export interface AlertDiskUsageNodeStats extends AlertNodeStats {
 
 export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
   memoryUsage: number;
+}
+
+export interface AlertMissingData {
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
+  clusterUuid: string;
+  gapDuration: number;
+  ccs?: string;
 }
 
 export interface AlertData {
