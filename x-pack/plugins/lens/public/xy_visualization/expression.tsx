@@ -248,12 +248,16 @@ export function XYChart({
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
-  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
+  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
     return !(
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      (xAccessor && data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined'))
+      (xAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars may have no xAccessors but splitAccessor with undefined values in them
+      (splitAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
     );
   });
 
