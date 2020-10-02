@@ -59,6 +59,7 @@ export const PostAgentCheckinRequestBodyJSONSchema = {
               'DEGRADED',
               'DATA_DUMP',
               'ACKNOWLEDGED',
+              'UPDATING',
               'UNKNOWN',
             ],
           },
