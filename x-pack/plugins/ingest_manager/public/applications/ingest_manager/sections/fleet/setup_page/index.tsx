@@ -95,7 +95,7 @@ export const SetupPage: React.FunctionComponent<{
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestManager.setupPage.enableText"
-                defaultMessage="Central management for Elastic Agents requires an Elastic user who can create API keys and write to logs-* and metrics-*."
+                defaultMessage="Central management requires an Elastic user who can create API keys and write to logs-* and metrics-*."
               />
             </EuiText>
             <EuiSpacer size="l" />
@@ -127,7 +127,7 @@ export const SetupPage: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.ingestManager.setupPage.missingRequirementsCalloutDescription"
-              defaultMessage="In order to use central management for Elastic Agents, you must enable the following Elasticsearch and Kibana security features."
+              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch and Kibana security features."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
