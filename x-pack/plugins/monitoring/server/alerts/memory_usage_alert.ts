@@ -231,7 +231,13 @@ export class MemoryUsageAlert extends BaseAlert {
         defaultMessage: 'View nodes',
       });
 
-      const action = `[${fullActionText}](elasticsearch/nodes)`;
+      const ccs = alertStates.find((state) => state.ccs)?.ccs;
+      const globalStateLink = this.createGlobalStateLink(
+        'elasticsearch/nodes',
+        cluster.clusterUuid,
+        ccs
+      );
+      const action = `[${fullActionText}](${globalStateLink})`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.memoryUsage.firing.internalShortMessage',
         {

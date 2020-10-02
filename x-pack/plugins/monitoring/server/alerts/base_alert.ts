@@ -377,4 +377,13 @@ export class BaseAlert {
   ) {
     throw new Error('Child classes must implement `executeActions`');
   }
+
+  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
+    const globalState = [`cluster_uuid:${clusterUuid}`];
+    if (ccs) {
+      globalState.push(`ccs:${ccs}`);
+    }
+    globalState.push('refreshInterval:(pause:!f,value:10000),time:(from:now-1h,to:now)');
+    return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+  }
 }
