@@ -84,16 +84,25 @@ describe('BrowserExpandedRowComponent', () => {
       )
     ).toMatchInlineSnapshot(`
       <ExecutedJourney
-        fetchScreenshot={[MockFunction]}
         journey={
           Object {
             "checkGroup": "check_group",
             "loading": false,
             "steps": Array [
               Object {
+                "docId": "doc-id",
+                "monitor": Object {
+                  "duration": Object {
+                    "us": 100,
+                  },
+                  "id": "mon-id",
+                  "status": "up",
+                  "type": "browser",
+                },
                 "synthetics": Object {
                   "type": "step/end",
                 },
+                "timestamp": "123",
               },
             ],
           }
@@ -121,16 +130,26 @@ describe('BrowserExpandedRowComponent', () => {
         />
       )
     ).toMatchInlineSnapshot(`
-      <ConsoleOutputStepList
+      <ConsoleOutputEventList
         journey={
           Object {
             "checkGroup": "check_group",
             "loading": false,
             "steps": Array [
               Object {
+                "docId": "doc-id",
+                "monitor": Object {
+                  "duration": Object {
+                    "us": 100,
+                  },
+                  "id": "mon-id",
+                  "status": "up",
+                  "type": "browser",
+                },
                 "synthetics": Object {
                   "type": "stderr",
                 },
+                "timestamp": "123",
               },
             ],
           }

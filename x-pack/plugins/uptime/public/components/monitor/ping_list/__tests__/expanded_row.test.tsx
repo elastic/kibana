@@ -102,7 +102,7 @@ describe('PingListExpandedRow', () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ScriptExpandedRow
+          <BrowserExpandedRow
             checkGroup="check_group_id"
           />
         </EuiFlexItem>
