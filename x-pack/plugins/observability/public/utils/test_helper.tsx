@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../typings';
 
@@ -15,7 +15,7 @@ export const core = ({
       prepend: jest.fn(),
     },
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 export const render = (component: React.ReactNode) => {
   return testLibRender(
