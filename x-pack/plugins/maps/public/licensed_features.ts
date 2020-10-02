@@ -19,7 +19,7 @@ export interface LicensedFeatureDetail {
 
 export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatureDetail> = {
   [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]: {
-    name: 'geo aggs on geo_shape fields',
+    name: 'geo_tile aggregation on geo_shape field-type',
     license: 'gold',
   },
 };
