@@ -25,6 +25,7 @@ import { RawAlertInstance } from '../../../alerts/common';
 import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
 import { AlertingDefaults, createLink } from './alerts_common';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
+import { parseDuration } from '../../../alerts/common/parse_duration';
 
 interface ParamDetails {
   [key: string]: CommonAlertParamDetail;
@@ -54,7 +55,7 @@ export class MemoryUsageAlert extends BaseAlert {
   public label = MemoryUsageAlert.LABEL;
 
   protected defaultParams = {
-    threshold: 90,
+    threshold: 85,
     duration: '5m',
   };
 
@@ -86,11 +87,16 @@ export class MemoryUsageAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const { duration, threshold } = params;
+    const parsedDuration = parseDuration(duration as string);
+    const endMs = +new Date();
+    const startMs = endMs - parsedDuration;
+
     const stats = await fetchMemoryUsageNodeStats(
       callCluster,
       clusters,
       esIndexPattern,
-      duration as string,
+      startMs,
+      endMs,
       this.config.ui.max_bucket_size
     );
 

@@ -11,7 +11,8 @@ export async function fetchMemoryUsageNodeStats(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
-  duration: string,
+  startMs: number,
+  endMs: number,
   size: number
 ): Promise<AlertMemoryUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
@@ -36,7 +37,9 @@ export async function fetchMemoryUsageNodeStats(
             {
               range: {
                 timestamp: {
-                  gte: `now-${duration}`,
+                  format: 'epoch_millis',
+                  gte: startMs,
+                  lte: endMs,
                 },
               },
             },
