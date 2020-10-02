@@ -1,5 +1,83 @@
 {
   "properties": {
+    "actions": {
+      "properties": {
+        "count_total": {
+          "type": "long"
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "canvas": {
       "properties": {
         "workpads": {
@@ -674,6 +752,99 @@
             },
             "lnsMetric": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "maps": {
+      "properties": {
+        "settings": {
+          "properties": {
+            "showMapVisualizationTypes": {
+              "type": "boolean"
+            }
+          }
+        },
+        "indexPatternsWithGeoFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoPointFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoShapeFieldCount": {
+          "type": "long"
+        },
+        "geoShapeAggLayersCount": {
+          "type": "long"
+        },
+        "mapsTotalCount": {
+          "type": "long"
+        },
+        "timeCaptured": {
+          "type": "date"
+        },
+        "attributesPerMap": {
+          "properties": {
+            "dataSourcesCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layersCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layerTypesCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "emsVectorLayersCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
             }
           }
         }
