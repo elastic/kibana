@@ -43,6 +43,13 @@ export class TagsClient implements ITagInternalClient {
     return tag;
   }
 
+  public async update(id: string, attributes: TagAttributes) {
+    const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/${id}`, {
+      body: JSON.stringify(attributes),
+    });
+    return tag;
+  }
+
   public async get(id: string) {
     const { tag } = await this.http.get<{ tag: Tag }>(`${tagsApiPrefix}/${id}`);
     return tag;

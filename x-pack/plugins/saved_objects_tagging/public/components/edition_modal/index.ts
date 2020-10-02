@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getRandomColor } from './color';
+export { getCreateModalOpener, getEditModalOpener } from './open_modal';

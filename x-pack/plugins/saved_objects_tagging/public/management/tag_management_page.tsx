@@ -4,30 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback, useState, FC } from 'react';
+import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, OverlayStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { ChromeBreadcrumb, OverlayStart, NotificationsStart } from 'src/core/public';
 import { TagWithRelations } from '../../common/types';
+import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
 import { ITagInternalClient } from '../tags';
-import { Header, TagTable, CreateOrEditModal } from './components';
+import { Header, TagTable } from './components';
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   overlays: OverlayStart;
+  notifications: NotificationsStart;
   tagClient: ITagInternalClient;
 }
 
 export const TagManagementPage: FC<TagManagementPageParams> = ({
   setBreadcrumbs,
   overlays,
+  notifications,
   tagClient,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
+
+  const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
+    overlays,
+    tagClient,
+  ]);
+  const editModalOpener = useMemo(() => getEditModalOpener({ overlays, tagClient }), [
+    overlays,
+    tagClient,
+  ]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -55,29 +66,41 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const openCreateModal = useCallback(() => {
-    const modal = overlays.openModal(
-      toMountPoint(
-        <CreateOrEditModal
-          onClose={() => {
-            modal.close();
-          }}
-          onCreate={(tag) => {
-            fetchTags();
-            modal.close();
-          }}
-          tagClient={tagClient}
-        />
-      )
-    );
-  }, [overlays, tagClient, fetchTags]);
+    createModalOpener({
+      onCreate: () => {
+        fetchTags();
+      },
+    });
+  }, [createModalOpener, fetchTags]);
 
   const openEditModal = useCallback(
     (tag: TagWithRelations) => {
-      // console.log('openEditModal', tag);
+      editModalOpener({
+        tagId: tag.id,
+        onUpdate: () => {
+          fetchTags();
+        },
+      });
     },
-    [
-      /* overlays, tagClient */
-    ]
+    [editModalOpener, fetchTags]
+  );
+
+  const deleteTag = useCallback(
+    async (tag: TagWithRelations) => {
+      const confirmed = await overlays.openConfirm('Are you sure?', {
+        title: 'Delete tag',
+        confirmButtonText: 'Delete',
+        buttonColor: 'danger',
+      });
+      if (confirmed) {
+        await tagClient.delete(tag.id);
+        notifications.toasts.addSuccess({
+          title: 'Deleted tag',
+        });
+        fetchTags();
+      }
+    },
+    [overlays, notifications, fetchTags, tagClient]
   );
 
   return (
@@ -92,6 +115,9 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         }}
         onEdit={(tag) => {
           openEditModal(tag);
+        }}
+        onDelete={(tag) => {
+          deleteTag(tag);
         }}
       />
     </EuiPageContent>

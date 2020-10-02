@@ -24,7 +24,7 @@ export interface ITagsClient {
   get(id: string): Promise<Tag>;
   getAll(): Promise<Tag[]>;
   delete(id: string): Promise<void>;
-  // TODO: add update
+  update(id: string, attributes: TagAttributes): Promise<Tag>;
 }
 
 export type TagSavedObject = SavedObject<TagAttributes>;

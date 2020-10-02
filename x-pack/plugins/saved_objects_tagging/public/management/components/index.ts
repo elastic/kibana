@@ -5,5 +5,4 @@
  */
 
 export { Header } from './header';
-export { CreateOrEditModal } from './create_or_edit_modal';
 export { TagTable } from './table';

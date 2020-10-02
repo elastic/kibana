@@ -35,6 +35,12 @@ export class TagsClient implements ITagsClient {
     return savedObjectToTag(raw);
   }
 
+  public async update(id: string, attributes: TagAttributes) {
+    // TODO: validation (title+color)
+    const raw = await this.client.update<TagAttributes>(this.type, id, attributes);
+    return savedObjectToTag(raw as TagSavedObject); // all attributes are updated, this is not a partial
+  }
+
   public async get(id: string) {
     const raw = await this.client.get<TagAttributes>(this.type, id);
     return savedObjectToTag(raw);

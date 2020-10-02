@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -24,84 +24,73 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagAttributes, Tag, ITagsClient } from '../../../common/types';
+import { TagAttributes } from '../../../common/types';
 import { TagBadge } from '../../components';
-import { getRandomColor } from '../utils';
+import { getRandomColor, TagValidation } from './utils';
 
 interface CreateOrEditModalProps {
   onClose: () => void;
-  onCreate: (tag: Tag) => void;
-  tagClient: ITagsClient;
+  onSubmit: () => Promise<TagValidation>;
+  mode: 'create' | 'edit';
+  tag: TagAttributes;
+  validate: (tag: TagAttributes) => TagValidation;
+  setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
-const formDefaults = (): TagAttributes => ({
-  title: '',
-  description: '',
-  color: getRandomColor(),
-});
-
-interface TagValidation {
-  valid: boolean;
-}
-
-export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({ onClose, onCreate, tagClient }) => {
-  // TODO: edition mode
-
-  const [tag, setTag] = useState<TagAttributes>(formDefaults());
+export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
+  onClose,
+  onSubmit,
+  validate,
+  setField,
+  tag,
+  mode,
+}) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [validation, setValidation] = useState<TagValidation>({ valid: false });
 
-  const setField = <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-    setTag({
-      ...tag,
-      [field]: value,
-    });
-  };
-  const setTitle = setField('title');
-  const setColor = setField('color');
-  const setDescription = setField('description');
+  // we don't want this value to change when the user edit the name.
+  // eslint-disable-next-line
+  const initialName = useMemo(() => tag.title, []);
 
-  // TODO: probably move validation to HOC
-  const validateTag = useCallback(() => {
-    let valid = true;
+  const setTitle = useMemo(() => setField('title'), [setField]);
+  const setColor = useMemo(() => setField('color'), [setField]);
+  const setDescription = useMemo(() => setField('description'), [setField]);
 
-    if (!tag.title.trim()) {
-      valid = false;
-    }
-    if (!tag.color) {
-      valid = false;
-    }
-    setValidation({ valid });
-  }, [tag]);
+  const isEdit = useMemo(() => mode === 'edit', [mode]);
 
   useEffect(() => {
-    validateTag();
-  }, [validateTag]);
+    setValidation(validate(tag));
+  }, [tag, validate]);
 
-  const onSubmit = useCallback(async () => {
+  const onFormSubmit = useCallback(async () => {
     if (!validation.valid) {
       return;
     }
 
     setSubmitting(true);
-
-    try {
-      const createdTag = await tagClient.create(tag);
-      onCreate(createdTag);
-    } catch (e) {
-      // TODO: display error from server.
-      setSubmitting(false);
-    }
-  }, [tag, validation, onCreate, tagClient]);
+    const asyncValid = await onSubmit();
+    setValidation(asyncValid);
+    setSubmitting(false);
+  }, [validation, onSubmit]);
 
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.savedObjectsTagging.management.createModal.title"
-            defaultMessage="Create tag"
-          />
+          {isEdit ? (
+            <FormattedMessage
+              id="xpack.savedObjectsTagging.management.editModal.title"
+              defaultMessage="Edit '{name}' tag"
+              values={{
+                name: initialName,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.savedObjectsTagging.management.createModal.title"
+              defaultMessage="Create tag"
+            />
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -189,18 +178,24 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({ onClose, onCreat
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  key="createTag"
-                  iconType="tag"
+                  iconType={isEdit ? 'save' : 'tag'}
                   color="primary"
                   fill
-                  data-test-subj="createModalConfirmButton"
-                  onClick={onSubmit}
+                  data-test-subj={isEdit ? 'editModalConfirmButton' : 'createModalConfirmButton'}
+                  onClick={onFormSubmit}
                   isDisabled={!validation.valid && !submitting}
                 >
-                  <FormattedMessage
-                    id="xpack.savedObjectsTagging.management.actions.createTag"
-                    defaultMessage="Create tag..."
-                  />
+                  {isEdit ? (
+                    <FormattedMessage
+                      id="xpack.savedObjectsTagging.management.createModal.updateTagButtonLabel"
+                      defaultMessage="Save changes"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.savedObjectsTagging.management.createModal.createTagButtonLabel"
+                      defaultMessage="Create tag..."
+                    />
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

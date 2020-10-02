@@ -20,13 +20,14 @@ interface MountSectionParams {
 }
 
 export const mountSection = async ({ tagClient, core, mountParams }: MountSectionParams) => {
-  const [{ overlays }] = await core.getStartServices();
+  const [{ overlays, notifications }] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
   ReactDOM.render(
     <I18nProvider>
       <TagManagementPage
         setBreadcrumbs={setBreadcrumbs}
         overlays={overlays}
+        notifications={notifications}
         tagClient={tagClient}
       />
     </I18nProvider>,

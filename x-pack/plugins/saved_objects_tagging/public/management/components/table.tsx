@@ -15,11 +15,19 @@ interface TagTableProps {
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
   onEdit: (tag: TagWithRelations) => void;
+  onDelete: (tag: TagWithRelations) => void;
 }
 
 const tablePagination = {
   initialPageSize: 20,
   pageSizeOptions: [5, 10, 20, 50],
+};
+
+const sorting = {
+  sort: {
+    field: 'name',
+    direction: 'asc' as const,
+  },
 };
 
 export const TagTable: FC<TagTableProps> = ({
@@ -28,6 +36,7 @@ export const TagTable: FC<TagTableProps> = ({
   onSelectionChange,
   selectedTags,
   onEdit,
+  onDelete,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<any>>();
 
@@ -41,7 +50,7 @@ export const TagTable: FC<TagTableProps> = ({
     {
       field: 'name',
       name: 'Name',
-      sortable: true,
+      sortable: (tag: TagWithRelations) => tag.title,
       'data-test-subj': 'tagsTableRowName',
       render: (name: string, tag: TagWithRelations) => {
         return <TagBadge tag={tag} />;
@@ -53,6 +62,7 @@ export const TagTable: FC<TagTableProps> = ({
       sortable: true,
       'data-test-subj': 'tagsTableRowDescription',
     },
+    // TODO: add permission check on actions
     {
       name: 'Actions',
       width: '100px',
@@ -64,6 +74,14 @@ export const TagTable: FC<TagTableProps> = ({
           icon: 'pencil',
           onClick: (object: TagWithRelations) => onEdit(object),
           'data-test-subj': 'tagsTableAction-edit',
+        },
+        {
+          name: 'Delete',
+          description: 'Delete this tag',
+          type: 'icon',
+          icon: 'trash',
+          onClick: (object: TagWithRelations) => onDelete(object),
+          'data-test-subj': 'tagsTableAction-delete',
         },
       ],
     },
@@ -81,6 +99,7 @@ export const TagTable: FC<TagTableProps> = ({
         initialSelected: selectedTags,
         onSelectionChange,
       }}
+      sorting={sorting}
       search={{
         box: {
           incremental: true,
