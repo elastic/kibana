@@ -11,5 +11,7 @@ export interface State {
 
 export interface MetricConfig extends State {
   title: string;
+  description: string;
+  metricTitle: string;
   mode: 'reduced' | 'full';
 }
