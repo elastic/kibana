@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
@@ -52,6 +52,9 @@ export interface EditorFrameProps {
 
 export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
+  const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
+    props.initialContext
+  );
   const { onError } = props;
   const activeVisualization =
     state.visualization.activeId && props.visualizationMap[state.visualization.activeId];
@@ -70,7 +73,7 @@ export function EditorFrame(props: EditorFrameProps) {
           props.datasourceMap,
           state.datasourceStates,
           props.doc?.references,
-          props.initialContext
+          visualizeTriggerFieldContext
         )
           .then((result) => {
             if (!isUnmounted) {
@@ -189,16 +192,17 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Get suggestions for visualize field when all datasources are ready
   useEffect(() => {
-    if (allLoaded && props.initialContext && !props.doc) {
+    if (allLoaded && visualizeTriggerFieldContext && !props.doc) {
       applyVisualizeFieldSuggestions({
         datasourceMap: props.datasourceMap,
         datasourceStates: state.datasourceStates,
         visualizationMap: props.visualizationMap,
         activeVisualizationId: state.visualization.activeId,
         visualizationState: state.visualization.state,
-        visualizeTriggerFieldContext: props.initialContext,
+        visualizeTriggerFieldContext,
         dispatch,
       });
+      setVisualizeTriggerFieldContext(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allLoaded]);
@@ -298,7 +302,7 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
-              visualizeTriggerFieldContext={props.initialContext}
+              visualizeTriggerFieldContext={visualizeTriggerFieldContext}
             />
           )
         }
