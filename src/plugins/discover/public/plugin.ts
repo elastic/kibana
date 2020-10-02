@@ -162,6 +162,7 @@ export class DiscoverPlugin
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
+  private enhanced: boolean = true;
 
   /**
    * why are those functions public? they are needed for some mocha tests
@@ -277,6 +278,14 @@ export class DiscoverPlugin
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+      const urlParts = path.split('/');
+      // take care of urls containing legacy url, those split in the following way
+      // ["", "context", indexPatternId, _type, id + params]
+      if (urlParts[4]) {
+        // remove _type part
+        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+        return `#${newPath}`;
+      }
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
@@ -294,6 +303,7 @@ export class DiscoverPlugin
     this.registerEmbeddable(core, plugins);
 
     return {
+      setEnhanced: (value: boolean) => (this.enhanced = value),
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
@@ -331,7 +341,8 @@ export class DiscoverPlugin
         core,
         plugins,
         this.initializerContext,
-        this.getEmbeddableInjector
+        this.getEmbeddableInjector,
+        this.enhanced
       );
       setServices(services);
       this.servicesInitialized = true;

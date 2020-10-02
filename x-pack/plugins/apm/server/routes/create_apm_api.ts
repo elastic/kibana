@@ -70,17 +70,6 @@ import {
   customLinkTransactionRoute,
 } from './settings/custom_link';
 import {
-  rumClientMetricsRoute,
-  rumPageViewsTrendRoute,
-  rumPageLoadDistributionRoute,
-  rumPageLoadDistBreakdownRoute,
-  rumServicesRoute,
-  rumVisitorsBreakdownRoute,
-  rumWebCoreVitals,
-  rumUrlSearch,
-  rumLongTaskMetrics,
-} from './rum_client';
-import {
   observabilityOverviewHasDataRoute,
   observabilityOverviewRoute,
 } from './observability_overview';
@@ -89,6 +78,18 @@ import {
   createAnomalyDetectionJobsRoute,
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
+import {
+  rumClientMetricsRoute,
+  rumJSErrors,
+  rumLongTaskMetrics,
+  rumPageLoadDistBreakdownRoute,
+  rumPageLoadDistributionRoute,
+  rumPageViewsTrendRoute,
+  rumServicesRoute,
+  rumUrlSearch,
+  rumVisitorsBreakdownRoute,
+  rumWebCoreVitals,
+} from './rum_client';
 
 const createApmApi = () => {
   const api = createApi()
@@ -165,7 +166,16 @@ const createApmApi = () => {
     .add(listCustomLinksRoute)
     .add(customLinkTransactionRoute)
 
-    // Rum Overview
+    // Observability dashboard
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute)
+
+    // User Experience app api routes
     .add(rumOverviewLocalFiltersRoute)
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
@@ -174,17 +184,9 @@ const createApmApi = () => {
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
+    .add(rumJSErrors)
     .add(rumUrlSearch)
-    .add(rumLongTaskMetrics)
-
-    // Observability dashboard
-    .add(observabilityOverviewHasDataRoute)
-    .add(observabilityOverviewRoute)
-
-    // Anomaly detection
-    .add(anomalyDetectionJobsRoute)
-    .add(createAnomalyDetectionJobsRoute)
-    .add(anomalyDetectionEnvironmentsRoute);
+    .add(rumLongTaskMetrics);
 
   return api;
 };

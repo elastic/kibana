@@ -41,13 +41,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function DiscoverGridFlyoutSelection({
-  indexPattern,
-  rows,
-  selected,
-
-  onClose,
-}: Props) {
+export function DiscoverGridFlyoutSelection({ indexPattern, rows, selected, onClose }: Props) {
   return (
     <EuiPortal>
       <EuiFlyout onClose={() => onClose()} size="m">

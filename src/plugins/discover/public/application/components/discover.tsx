@@ -32,7 +32,6 @@ import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError } from './fetch_error';
 import './discover.scss';
 import { esFilters, search } from '../../../../data/public';
 
@@ -72,6 +71,8 @@ export function Discover({
     return <div>Loading</div>;
   }
   const { TopNavMenu } = getServices().navigation.ui;
+  const enhanced = getServices().enhanced;
+
   const { savedSearch, filterManager, indexPatternList } = opts;
   const bucketAggConfig = vis?.data?.aggs?.aggs[1];
   const bucketInterval =
@@ -161,7 +162,6 @@ export function Discover({
 
                     {resultState === 'loading' && (
                       <>
-                        {fetchError && <DiscoverFetchError fetchError={fetchError} />}
                         {!fetchError && (
                           <div className="dscOverlay">
                             <LoadingSpinner />
@@ -251,6 +251,7 @@ export function Discover({
                                   onSetColumns={onSetColumns}
                                   onSort={onSort}
                                   onResize={onResize}
+                                  useDocSelector={enhanced}
                                 />
                               </div>
                             )}

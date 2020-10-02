@@ -53,6 +53,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
+  enhanced: boolean;
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
@@ -76,7 +77,8 @@ export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  getEmbeddableInjector: any
+  getEmbeddableInjector: any,
+  enhanced: false
 ): Promise<DiscoverServices> {
   const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
@@ -94,6 +96,7 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
+    enhanced,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getEmbeddableInjector,

@@ -30,7 +30,7 @@ export const DiscoverGridToolbarSelection = () => {
       className="euiDataGrid__controlBtn"
       onClick={() => setShowSelected(!showSelected)}
     >
-      {selected.length} {selected.length === 1 ? 'hit' : 'hits'} selected
+      {selected.length} {selected.length === 1 ? 'record' : 'records'} selected
     </EuiButtonEmpty>
   );
 };

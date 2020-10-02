@@ -22,17 +22,15 @@ import './discover_grid.scss';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDataGrid,
-  EuiDataGridCellValueElementProps,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
-import { DiscoverGridPopover } from './discover_grid_popover';
 import {
   getEuiGridColumns,
   getPopoverContents,
@@ -45,6 +43,7 @@ import { DiscoverGridToolbarSelection } from './discover_grid_toolbar_selection'
 import { DiscoverGridContext } from './discover_grid_context';
 import { DiscoverGridSelectButton } from './discover_grid_select_button';
 import { ViewButton } from './discover_grid_view_button';
+import { getRenderCellValueFn } from './get_render_cell_value';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -54,33 +53,26 @@ interface SortObj {
 }
 
 interface Props {
-  rows?: ElasticSearchHit[];
+  ariaLabelledBy: string;
   columns: string[];
   columnsWidth: any;
-  sort: SortArr[];
-  ariaLabelledBy: string;
-  indexPattern: IndexPattern;
-  searchTitle?: string;
-  searchDescription?: string;
-  sampleSize: number;
-  onFilter: DocViewFilterFn;
-  showTimeCol: boolean;
-  onSort: (props: any) => void;
   getContextAppHref: (id: string) => string;
-  onRemoveColumn: (column: string) => void;
+  indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
-  onSetColumns: (columns: string[]) => void;
+  onFilter: DocViewFilterFn;
+  onRemoveColumn: (column: string) => void;
   onResize?: (colSettings: { columnId: string; width: number }) => void;
+  onSetColumns: (columns: string[]) => void;
+  onSort: (props: any) => void;
+  rows?: ElasticSearchHit[];
+  sampleSize: number;
+  searchDescription?: string;
+  searchTitle?: string;
+  showTimeCol: boolean;
+  sort: SortArr[];
+  useDocSelector: boolean;
 }
 
-const toolbarVisibility = {
-  showColumnSelector: {
-    allowHide: false,
-    allowReorder: true,
-  },
-  showStyleSelector: false,
-  additionalControls: <DiscoverGridToolbarSelection />,
-};
 const gridStyle = {
   border: 'horizontal',
   fontSize: 's',
@@ -111,6 +103,7 @@ export const DiscoverGrid = React.memo(
     onAddColumn,
     showTimeCol,
     onSetColumns,
+    useDocSelector,
   }: Props) => {
     const [showSelected, setShowSelected] = useState(false);
     const [selected, setSelected] = useState<number[]>([]);
@@ -164,64 +157,20 @@ export const DiscoverGrid = React.memo(
     /**
      * Cell rendering
      */
-    const renderCellValue = useCallback(
-      ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-        const row = rows ? rows[rowIndex] : undefined;
+    const renderCellValue = useMemo(() => getRenderCellValueFn(indexPattern, rows, onFilter), [
+      rows,
+      indexPattern,
+      onFilter,
+    ]);
 
-        if (typeof row === 'undefined') {
-          return '-';
-        }
-        const field = indexPattern.fields.getByName(columnId);
-        const formatSource = () => {
-          const formatted = indexPattern.formatHit(row);
-
-          return (
-            <dl className="dscFormatSource">
-              {Object.keys(formatted).map((key) => (
-                <span key={key}>
-                  <dt className="dscFormatSource__title">{key}</dt>
-                  <dd
-                    className="dscFormatSource__description"
-                    /* eslint-disable-next-line react/no-danger */
-                    dangerouslySetInnerHTML={{ __html: formatted[key] }}
-                  />
-                </span>
-              ))}
-            </dl>
-          );
-        };
-        // TODO Field formatters need to be fixed
-        const value =
-          field && field.type === '_source' ? (
-            formatSource()
-          ) : (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
-          );
-
-        if (isDetails && indexPattern.fields.getByName(columnId)?.filterable) {
-          const createFilter = (fieldName: string, type: '-' | '+') => {
-            return onFilter(
-              indexPattern.fields.getByName(fieldName),
-              indexPattern.flattenHit(row)[fieldName],
-              type
-            );
-          };
-
-          return (
-            <DiscoverGridPopover
-              value={value}
-              onPositiveFilterClick={() => createFilter(columnId, '+')}
-              onNegativeFilterClick={() => createFilter(columnId, '-')}
-            />
-          );
-        } else if (indexPattern.fields.getByName(columnId)?.filterable) {
-          return value;
-        }
-        return value;
+    const toolbarVisibility = {
+      showColumnSelector: {
+        allowHide: false,
+        allowReorder: true,
       },
-      [rows, indexPattern, onFilter]
-    );
+      showStyleSelector: false,
+      additionalControls: useDocSelector ? <DiscoverGridToolbarSelection /> : undefined,
+    };
 
     /**
      * Render variables
@@ -266,20 +215,22 @@ export const DiscoverGrid = React.memo(
         return [];
       }
       return [
-        {
-          id: 'checkBox',
-          width: 31,
-          headerCellRender: () => (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('discover.selectColumnHeader', {
-                  defaultMessage: 'Select column',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          rowCellRender: (col: number) => <DiscoverGridSelectButton col={col} rows={rows} />,
-        },
+        useDocSelector
+          ? {
+              id: 'checkBox',
+              width: 31,
+              headerCellRender: () => (
+                <EuiScreenReaderOnly>
+                  <span>
+                    {i18n.translate('discover.selectColumnHeader', {
+                      defaultMessage: 'Select column',
+                    })}
+                  </span>
+                </EuiScreenReaderOnly>
+              ),
+              rowCellRender: (col: number) => <DiscoverGridSelectButton col={col} rows={rows} />,
+            }
+          : null,
         {
           id: 'openDetails',
           width: 31,
@@ -294,8 +245,8 @@ export const DiscoverGrid = React.memo(
           ),
           rowCellRender: ViewButton,
         },
-      ];
-    }, [rows]);
+      ].filter((obj) => !!obj);
+    }, [rows, useDocSelector]);
 
     if (!rowCount || !rows) {
       return (
