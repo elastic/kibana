@@ -637,7 +637,7 @@ export class Authenticator {
     //  4. Request isn't attributed with HTTP Authorization header
     return (
       canRedirectRequest(request) &&
-      !sessionValue &&
+      (!sessionValue || !sessionValue.username) &&
       this.options.config.authc.selector.enabled &&
       HTTPAuthorizationHeader.parseFromRequest(request) == null
     );

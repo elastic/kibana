@@ -10,13 +10,13 @@ import { resolve } from 'path';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
-import { getStateAndNonce } from '../../oidc_api_integration/fixtures/oidc_tools';
+import { getStateAndNonce } from '../../../oidc_api_integration/fixtures/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../kerberos_api_integration/fixtures/kerberos_tools';
-import { getSAMLRequestId, getSAMLResponse } from '../../saml_api_integration/fixtures/saml_tools';
-import { FtrProviderContext } from '../ftr_provider_context';
+} from '../../../kerberos_api_integration/fixtures/kerberos_tools';
+import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const CA_CERT = readFileSync(CA_CERT_PATH);
   const CLIENT_CERT = readFileSync(
-    resolve(__dirname, '../../pki_api_integration/fixtures/first_client.p12')
+    resolve(__dirname, '../../../pki_api_integration/fixtures/first_client.p12')
   );
 
   async function checkSessionCookie(
@@ -97,11 +97,23 @@ export default function ({ getService }: FtrProviderContext) {
       // to fully authenticate user yet.
       const intermediateAuthCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
 
+      // When login page is accessed directly.
       await supertest
         .get('/login')
         .ca(CA_CERT)
         .set('Cookie', intermediateAuthCookie.cookieString())
         .expect(200);
+
+      // When user tries to access any other page in Kibana.
+      const response = await supertest
+        .get('/abc/xyz/handshake?one=two three')
+        .ca(CA_CERT)
+        .set('Cookie', intermediateAuthCookie.cookieString())
+        .expect(302);
+      expect(response.headers['set-cookie']).to.be(undefined);
+      expect(response.headers.location).to.be(
+        '/login?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three'
+      );
     });
 
     describe('SAML', () => {

@@ -14,10 +14,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, '../../test/saml_api_integration/fixtures/idp_metadata.xml');
+  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./tests/saml')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },
     services: {
@@ -26,7 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
-      reportName: 'X-Pack SAML API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (SAML)',
     },
 
     esTestCluster: {
