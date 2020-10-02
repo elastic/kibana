@@ -8,6 +8,7 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
+  ConnectorTypes,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -17,7 +18,7 @@ export const postCaseReq: CasePostRequest = {
   connector: {
     id: 'none',
     name: 'none',
-    type: '.none',
+    type: '.none' as ConnectorTypes,
     fields: null,
   },
 };
