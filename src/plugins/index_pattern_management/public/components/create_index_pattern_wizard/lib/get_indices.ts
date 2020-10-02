@@ -125,6 +125,13 @@ export const getIndicesViaResolve = async ({
       }
     });
 
+/**
+ * Takes two MatchedItem[]s and returns a merged set, with the second set prrioritized over the first based on name
+ *
+ * @param matchedA
+ * @param matchedB
+ */
+
 export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
   const mergedMatchedItems = matchedA.reduce((col, item) => {
     col[item.name] = item;
