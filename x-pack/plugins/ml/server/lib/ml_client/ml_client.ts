@@ -15,6 +15,7 @@ import {
   Datafeed,
   DatafeedStats,
 } from '../../../common/types/anomaly_detection_jobs';
+import { Calendar } from '../../../common/types/calendars';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 
@@ -135,8 +136,16 @@ export function getMlClient(context: RequestHandlerContext, jobsInSpaces: JobsIn
       return mlClient.getCalendarEvents(...p);
     },
     async getCalendars(...p: Parameters<MlClient['getCalendars']>) {
-      // FIX, this contains a list of job ids that will need filtering
-      return mlClient.getCalendars(...p);
+      const { body } = await mlClient.getCalendars<{ calendars: Calendar[] }, any>(...p);
+      // flatten the list of all jobs ids and check which ones are valid
+      const filteredJobs = await jobsInSpaces.filterJobIdsForSpace('anomaly-detector', [
+        ...new Set(body.calendars.map((c) => c.job_ids).flat()),
+      ]);
+      const calendars = body.calendars.map((c) => ({
+        ...c,
+        job_ids: c.job_ids.filter((id) => filteredJobs.includes(id)),
+      }));
+      return { body: { ...body, calendars } };
     },
     async getCategories(...p: Parameters<MlClient['getCategories']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -155,7 +164,6 @@ export function getMlClient(context: RequestHandlerContext, jobsInSpaces: JobsIn
       return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
-      // FIX!!!!!!!!!!!!!
       // this should use DataFrameAnalyticsStats, but needs a refactor !!!!!!!!!!!!!!
       await jobIdsCheck('data-frame-analytics', p);
       const { body } = await mlClient.getDataFrameAnalyticsStats<{
