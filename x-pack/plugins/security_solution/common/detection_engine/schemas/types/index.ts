@@ -33,4 +33,5 @@ export * from './positive_integer';
 export * from './positive_integer_greater_than_zero';
 export * from './references_default_array';
 export * from './risk_score';
+export * from './threat_mapping';
 export * from './uuid';
