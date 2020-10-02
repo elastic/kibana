@@ -71,7 +71,9 @@ const pushToServiceHandler = async ({
     });
 
     incident = {
-      ...params,
+      severity: params.severity,
+      urgency: params.urgency,
+      impact: params.impact,
       short_description: transformedFields.short_description,
       description: transformedFields.description,
     };
