@@ -14,6 +14,7 @@ type ResolverColorNames =
   | 'full'
   | 'graphControls'
   | 'graphControlsBackground'
+  | 'linkColor'
   | 'resolverBackground'
   | 'resolverEdge'
   | 'resolverEdgeText'
@@ -42,6 +43,7 @@ export function useColors(): ColorMap {
       resolverEdgeText: isDarkMode ? theme.euiColorFullShade : theme.euiColorDarkShade,
       triggerBackingFill: `${theme.euiColorDanger}${isDarkMode ? '1F' : '0F'}`,
       pillStroke: theme.euiColorLightShade,
+      linkColor: theme.euiLinkColor,
     };
   }, [isDarkMode, theme]);
 }

@@ -20,6 +20,7 @@ import {
   StyledTime,
   GeneratedText,
   noTimestampRetrievedText,
+  CopyFieldButton,
 } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -156,7 +157,12 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
         namespace: <GeneratedText>{key}</GeneratedText>,
         descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
           title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: <GeneratedText>{String(fieldValue)}</GeneratedText>,
+          description: (
+            <CopyFieldButton
+              textToCopy={String(fieldValue)}
+              content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+            />
+          ),
         })),
       };
       returnValue.push(section);
@@ -178,6 +184,7 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
               </EuiTextColor>
             </EuiTitle>
             <EuiSpacer size="m" />
+
             <StyledDescriptionList
               type="column"
               align="left"
