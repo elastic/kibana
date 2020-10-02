@@ -30,6 +30,7 @@ import { InspectResponse } from '../../../types';
 const ID = 'networkDetailsQuery';
 
 export interface NetworkDetailsArgs {
+  id: string;
   inspect: InspectResponse;
   networkDetails: NetworkDetailsStrategyResponse['networkDetails'];
   refetch: inputsModel.Refetch;
@@ -76,6 +77,7 @@ export const useNetworkDetails = ({
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
+    id,
     inspect: {
       dsl: [],
       response: [],
