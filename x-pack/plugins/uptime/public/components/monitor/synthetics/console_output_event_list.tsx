@@ -7,11 +7,16 @@
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
+import { Ping } from '../../../../common/runtime_types';
 import { JourneyState } from '../../../state/reducers/journey';
 import { ConsoleEvent } from './console_event';
 
 interface Props {
   journey: JourneyState;
+}
+
+function isConsoleStep(step: Ping) {
+  return step.synthetics?.type === 'stderr' || step.synthetics?.type === 'cmd/status';
 }
 
 export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
@@ -33,8 +38,8 @@ export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
     </p>
     <EuiSpacer />
     <EuiCodeBlock>
-      {journey.steps.map((consoleEvent) => (
-        <ConsoleEvent event={consoleEvent} />
+      {journey.steps.filter(isConsoleStep).map((consoleEvent) => (
+        <ConsoleEvent event={consoleEvent} key={consoleEvent.docId + '_console-event-row'} />
       ))}
     </EuiCodeBlock>
   </div>
