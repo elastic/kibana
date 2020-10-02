@@ -39,17 +39,7 @@ export const SpaceColumnHeader = (props: Props) => {
               <span>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeMatrix.globalSpaceName"
-                  defaultMessage="Global"
-                />
-                <br />
-                <SpacesPopoverList
-                  spaces={props.spaces.filter((s) => s.id !== '*')}
-                  buttonText={i18n.translate(
-                    'xpack.security.management.editRole.spacePrivilegeMatrix.showAllSpacesLink',
-                    {
-                      defaultMessage: '(all spaces)',
-                    }
-                  )}
+                  defaultMessage="All Spaces"
                 />
               </span>
             )}

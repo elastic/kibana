@@ -42,17 +42,19 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       ...fieldRequested,
       ...reduceFields(TIMELINE_EVENTS_FIELDS, eventFieldsMap),
     ]);
-    const { activePage, querySize } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
 
     const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
     const hits = response.rawResponse.hits.hits;
-    const edges: TimelineEdges[] = hits.map((hit) =>
+    const edges: TimelineEdges[] = hits.splice(cursorStart, querySize - cursorStart).map((hit) =>
       // @ts-expect-error
       formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit, eventFieldsMap)
     );
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
     return {
       ...response,
@@ -61,7 +63,8 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,
-        totalPages: Math.ceil(totalCount / querySize),
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
     };
   },

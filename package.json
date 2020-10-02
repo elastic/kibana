@@ -230,7 +230,7 @@
     "@babel/parser": "^7.11.2",
     "@babel/types": "^7.11.0",
     "@elastic/apm-rum": "^5.6.1",
-    "@elastic/charts": "21.1.2",
+    "@elastic/charts": "23.0.0",
     "@elastic/ems-client": "7.10.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
