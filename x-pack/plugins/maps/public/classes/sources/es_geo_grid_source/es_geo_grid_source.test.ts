@@ -160,7 +160,8 @@ describe('ESGeoGridSource', () => {
       const { data, meta } = await geogridSource.getGeoJsonWithMeta(
         'foobarLayer',
         vectorSourceRequestMeta,
-        () => {}
+        () => {},
+        () => true
       );
 
       expect(meta && meta.areResultsTrimmed).toEqual(false);
