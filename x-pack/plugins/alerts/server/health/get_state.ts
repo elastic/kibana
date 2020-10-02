@@ -7,7 +7,7 @@
 import { interval, Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { get } from 'lodash';
-import { ServiceStatusLevels } from 'src/core/server';
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
 
