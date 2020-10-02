@@ -16,7 +16,13 @@ import { updateColumnParam, changeColumn } from '../../../state_helpers';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 
 type RangeType = Omit<Range, 'type'>;
-export type RangeTypeLens = RangeType & { label: string };
+// Try to cover all possible serialized states for ranges
+export type RangeTypeLens = (RangeType | { from: Range['from'] | null; to: Range['to'] | null }) & {
+  label: string;
+};
+
+// This is a subset of RangeTypeLens which has both from and to defined
+type FullRangeTypeLens = Extract<RangeTypeLens, NonNullable<RangeType>>;
 
 export type MODES_TYPES = typeof MODES[keyof typeof MODES];
 
@@ -35,10 +41,13 @@ export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
   value: RangeColumnParams[K]
 ) => void;
 
-export const isValidNumber = (value: number | '') =>
-  value !== '' && !isNaN(value) && isFinite(value);
-export const isRangeWithin = (range: RangeTypeLens): boolean => range.from <= range.to;
-const isFullRange = ({ from, to }: RangeType) => isValidNumber(from) && isValidNumber(to);
+// on initialization values can be null (from the Infinity serialization), so handle it correctly
+// or they will be casted to 0 by the editor ( see #78867 )
+export const isValidNumber = (value: number | '' | null): value is number =>
+  value != null && value !== '' && !isNaN(value) && isFinite(value);
+export const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
+const isFullRange = (range: RangeTypeLens): range is FullRangeTypeLens =>
+  isValidNumber(range.from) && isValidNumber(range.to);
 export const isValidRange = (range: RangeTypeLens): boolean => {
   if (isFullRange(range)) {
     return isRangeWithin(range);
