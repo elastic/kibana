@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
+  const find = getService('find');
 
   const USERS_PATH = 'security/users';
   const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
@@ -19,8 +20,9 @@ export default function ({ getService, getPageObjects }) {
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
+
   // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.skip('Management', function () {
+  describe.only('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -142,14 +144,18 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-          await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
+          //await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
           await PageObjects.security.assignRoleToUser('logstash-readonly');
 
           await PageObjects.security.clickSaveEditUser();
 
           await PageObjects.settings.navigateTo();
-          await testSubjects.click('users');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          await PageObjects.security.clickUsersSection();
+          //const roleValue = await testSubjects.setValue('userRowRoles','kibana_dashboard_only_user');
+         //const roleValue = await testSubjects.selectValue('userRowRoles','kibana_dashboard_only_user');
+          await find.clickByPartialLinkText('logstash-readonly');
+          //await PageObjects.settings.clickLinkText('logstash-readonly');
+
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
