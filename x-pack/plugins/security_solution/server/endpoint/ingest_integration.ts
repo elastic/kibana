@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityPluginSetup } from '../../../security/server';
-import { ExternalCallback } from '../../../ingest_manager/server';
+import { ExternalCallback, appContextService } from '../../../ingest_manager/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { NewPackagePolicy } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
@@ -79,8 +78,7 @@ export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager,
   appClientFactory: AppClientFactory,
-  maxTimelineImportExportSize: number,
-  securitySetup?: SecurityPluginSetup
+  maxTimelineImportExportSize: number
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -93,6 +91,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     // prep for detection rules creation
+    const securitySetup = await appContextService.getSecurity();
     const appClient = appClientFactory.create(request);
     const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
 
