@@ -13,7 +13,7 @@ import {
 } from '../../ui_filters/local_ui_filters/config';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 
-export function getUiFiltersES(uiFilters: UIFilters) {
+export function getEsFilter(uiFilters: UIFilters) {
   const { kuery, environment, ...localFilterValues } = uiFilters;
   const mappedFilters = localUIFilterNames
     .filter((name) => name in localFilterValues)
