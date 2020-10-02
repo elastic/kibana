@@ -22,7 +22,6 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
-  const find = getService('find');
 
   /**
    * @function parseStyles
