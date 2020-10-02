@@ -30,7 +30,6 @@ import { InspectResponse } from '../../../types';
 const ID = 'networkDetailsQuery';
 
 export interface NetworkDetailsArgs {
-  id: string;
   inspect: InspectResponse;
   networkDetails: NetworkDetailsStrategyResponse['networkDetails'];
   refetch: inputsModel.Refetch;
@@ -69,6 +68,7 @@ export const useNetworkDetails = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: NetworkQueries.details,
           filterQuery: createFilter(filterQuery),
+          id,
           ip,
         }
       : null
@@ -76,7 +76,6 @@ export const useNetworkDetails = ({
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
-    id,
     inspect: {
       dsl: [],
       response: [],
@@ -147,18 +146,20 @@ export const useNetworkDetails = ({
   useEffect(() => {
     setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        ip,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
+        id,
+        ip,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, filterQuery, skip, ip, docValueFields]);
+  }, [indexNames, filterQuery, skip, ip, docValueFields, id]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

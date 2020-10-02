@@ -35,7 +35,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-const ID = 'uncommonProcessesQuery';
+const ID = 'hostsUncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
@@ -85,6 +85,7 @@ export const useUncommonProcesses = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.uncommonProcesses,
           filterQuery: createFilter(filterQuery),
+          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
@@ -201,7 +202,9 @@ export const useUncommonProcesses = ({
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

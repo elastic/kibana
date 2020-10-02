@@ -164,9 +164,11 @@ export const useNetworkKpiUniquePrivateIps = ({
   useEffect(() => {
     setNetworkKpiUniquePrivateIpsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

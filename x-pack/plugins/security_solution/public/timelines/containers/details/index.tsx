@@ -29,6 +29,8 @@ export interface UseTimelineEventsDetailsProps {
   skip: boolean;
 }
 
+const ID = 'timelineEventsDetails';
+
 export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
@@ -106,6 +108,7 @@ export const useTimelineEventsDetails = ({
         ...(prevRequest ?? {}),
         docValueFields,
         indexName,
+        id: ID,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };

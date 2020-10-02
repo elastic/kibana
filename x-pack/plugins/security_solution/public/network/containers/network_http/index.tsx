@@ -194,7 +194,9 @@ export const useNetworkHttp = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {

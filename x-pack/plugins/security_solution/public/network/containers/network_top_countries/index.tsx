@@ -197,8 +197,10 @@ export const useNetworkTopCountries = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topCountries,
         filterQuery: createFilter(filterQuery),
         flowTarget,
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {

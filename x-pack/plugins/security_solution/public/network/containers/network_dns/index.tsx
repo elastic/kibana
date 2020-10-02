@@ -61,7 +61,6 @@ interface UseNetworkDns {
 export const useNetworkDns = ({
   endDate,
   filterQuery,
-  id = ID,
   indexNames,
   skip,
   startDate,
@@ -80,6 +79,7 @@ export const useNetworkDns = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.dns,
           filterQuery: createFilter(filterQuery),
+          id: ID,
           isPtrIncluded,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -195,7 +195,9 @@ export const useNetworkDns = ({
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         isPtrIncluded,
+        factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {

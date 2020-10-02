@@ -152,9 +152,11 @@ export const useNetworkKpiTlsHandshakes = ({
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

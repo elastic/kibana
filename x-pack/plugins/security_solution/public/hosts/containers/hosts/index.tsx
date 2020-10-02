@@ -33,7 +33,7 @@ import {
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-const ID = 'hostsQuery';
+const ID = 'hostsAllQuery';
 
 type LoadPage = (newActivePage: number) => void;
 export interface HostsArgs {
@@ -83,6 +83,7 @@ export const useAllHost = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.hosts,
           filterQuery: createFilter(filterQuery),
+          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
@@ -197,7 +198,9 @@ export const useAllHost = ({
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.hosts,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

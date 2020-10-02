@@ -145,9 +145,11 @@ export const useHostsKpiHosts = ({
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiHosts,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

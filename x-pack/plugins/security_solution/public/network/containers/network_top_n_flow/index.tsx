@@ -84,6 +84,7 @@ export const useNetworkTopNFlow = ({
           factoryQueryType: NetworkQueries.topNFlow,
           filterQuery: createFilter(filterQuery),
           flowTarget,
+          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
           timerange: {
@@ -195,8 +196,10 @@ export const useNetworkTopNFlow = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
         flowTarget,
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

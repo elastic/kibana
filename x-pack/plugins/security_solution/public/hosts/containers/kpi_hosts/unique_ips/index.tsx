@@ -152,9 +152,11 @@ export const useHostsKpiUniqueIps = ({
   useEffect(() => {
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

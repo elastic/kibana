@@ -28,7 +28,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostDetailsQuery';
+const ID = 'hostsDetailsQuery';
 
 export interface HostDetailsArgs {
   id: string;
@@ -150,9 +150,11 @@ export const useHostDetails = ({
   useEffect(() => {
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.details,
         hostName,
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

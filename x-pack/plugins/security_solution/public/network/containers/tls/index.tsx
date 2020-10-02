@@ -192,8 +192,10 @@ export const useNetworkTls = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.tls,
         filterQuery: createFilter(filterQuery),
         flowTarget,
+        id,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -208,7 +210,19 @@ export const useNetworkTls = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, flowTarget, ip]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    flowTarget,
+    ip,
+    id,
+  ]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

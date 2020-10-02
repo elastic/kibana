@@ -37,7 +37,7 @@ import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
 
-const ID = 'authenticationQuery';
+const ID = 'hostsAuthenticationsQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
@@ -200,7 +200,9 @@ export const useAuthentications = ({
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.authentications,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

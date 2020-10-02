@@ -153,9 +153,11 @@ export const useNetworkKpiNetworkEvents = ({
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.networkEvents,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

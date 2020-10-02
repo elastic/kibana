@@ -153,9 +153,11 @@ export const useNetworkKpiUniqueFlows = ({
   useEffect(() => {
     setNetworkKpiUniqueFlowsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniqueFlows,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

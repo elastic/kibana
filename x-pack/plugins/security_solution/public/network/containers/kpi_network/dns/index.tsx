@@ -148,9 +148,11 @@ export const useNetworkKpiDns = ({
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.dns,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
