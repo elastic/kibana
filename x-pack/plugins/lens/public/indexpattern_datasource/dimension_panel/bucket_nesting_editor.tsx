@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 import { IndexPatternColumn } from '../operations';
