@@ -9,6 +9,7 @@ import { Simulator } from '../../test_utilities/simulator';
 import { pausifyMock } from '../../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
+import { firstRelatedEventID } from '../../mocks/resolver_tree';
 import { urlSearch } from '../../test_utilities/url_search';
 import '../../test_utilities/extend_jest';
 
@@ -21,7 +22,7 @@ describe('Resolver: panel loading and resolution states', () => {
     panelParameters: {
       nodeID: 'origin',
       eventCategory: 'registry',
-      eventID: 'first related event',
+      eventID: firstRelatedEventID,
     },
     panelView: 'eventDetail',
   });
