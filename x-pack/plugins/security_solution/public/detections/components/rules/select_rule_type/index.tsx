@@ -7,17 +7,19 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
   isEqlRule,
   isQueryRule,
+  isThreatMatchRule,
 } from '../../../../../common/detection_engine/utils';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import EqlSearchIcon from './eql_search_icon.svg';
 
 interface SelectRuleTypeProps {
   describedByIds?: string[];
@@ -45,6 +47,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
+  const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
   const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
@@ -84,6 +87,15 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isThresholdRule(ruleType),
     }),
     [isReadOnly, ruleType, setThreshold]
+  );
+
+  const threatMatchSelectableConfig = useMemo(
+    () => ({
+      isDisabled: isReadOnly,
+      onClick: setThreatMatch,
+      isSelected: isThreatMatchRule(ruleType),
+    }),
+    [isReadOnly, ruleType, setThreatMatch]
   );
 
   return (
@@ -133,9 +145,21 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             data-test-subj="eqlRuleType"
             title={i18n.EQL_TYPE_TITLE}
             description={i18n.EQL_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="bullseye" />}
+            icon={<EuiIcon size="l" type={EqlSearchIcon} />}
             isDisabled={eqlSelectableConfig.isDisabled && !eqlSelectableConfig.isSelected}
             selectable={eqlSelectableConfig}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            data-test-subj="threatMatchRuleType"
+            title={i18n.THREAT_MATCH_TYPE_TITLE}
+            description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
+            icon={<EuiIcon size="l" type="list" />}
+            isDisabled={
+              threatMatchSelectableConfig.isDisabled && !threatMatchSelectableConfig.isSelected
+            }
+            selectable={threatMatchSelectableConfig}
           />
         </EuiFlexItem>
       </EuiFlexGrid>
