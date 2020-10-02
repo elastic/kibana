@@ -21,10 +21,9 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
         const client = context.core.savedObjects.client;
 
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const {
-          connector,
-          ...caseConfigureWithoutConnector
-        } = myCaseConfigure.saved_objects[0].attributes;
+
+        const { connector, ...caseConfigureWithoutConnector } =
+          myCaseConfigure.saved_objects[0]?.attributes ?? {};
 
         return response.ok({
           body:
