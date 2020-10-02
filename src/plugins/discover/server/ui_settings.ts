@@ -170,8 +170,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
-      defaultMessage:
-        'Remove columns that not available in the new index pattern.'
+      defaultMessage: 'Remove columns that not available in the new index pattern.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
