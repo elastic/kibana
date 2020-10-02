@@ -148,7 +148,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    'xpack.securitySolution.case.settings.jira.parentIssueSearchLabel',
                     {
                       defaultMessage: 'Parent issue',
                     }

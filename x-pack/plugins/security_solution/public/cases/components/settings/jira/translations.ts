@@ -69,7 +69,7 @@ export const ISSUE_TYPE = i18n.translate(
 );
 
 export const PARENT_ISSUE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+  'xpack.securitySolution.case.settings.jira.parentIssueSearchLabel',
   {
     defaultMessage: 'Parent issue',
   }

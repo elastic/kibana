@@ -69,7 +69,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.urgencySelectFieldLabel',
+          'xpack.securitySolution.components.settings.serviceNow.urgencySelectFieldLabel',
           {
             defaultMessage: 'Urgency',
           }
@@ -92,7 +92,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.severitySelectFieldLabel',
+              'xpack.securitySolution.components.settings.serviceNow.severitySelectFieldLabel',
               {
                 defaultMessage: 'Severity',
               }
@@ -114,7 +114,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.impactSelectFieldLabel',
+              'xpack.securitySolution.components.settings.serviceNow.impactSelectFieldLabel',
               {
                 defaultMessage: 'Impact',
               }

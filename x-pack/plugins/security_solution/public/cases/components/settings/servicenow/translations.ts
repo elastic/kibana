@@ -27,21 +27,21 @@ export const SEVERITY_LOW = i18n.translate(
 );
 
 export const URGENCY = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.urgencySelectFieldLabel',
+  'xpack.securitySolution.components.settings.serviceNow.urgencySelectFieldLabel',
   {
     defaultMessage: 'Urgency',
   }
 );
 
 export const SEVERITY = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.severitySelectFieldLabel',
+  'xpack.securitySolution.components.settings.serviceNow.severitySelectFieldLabel',
   {
     defaultMessage: 'Severity',
   }
 );
 
 export const IMPACT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.impactSelectFieldLabel',
+  'xpack.securitySolution.components.settings.serviceNow.impactSelectFieldLabel',
   {
     defaultMessage: 'Impact',
   }
