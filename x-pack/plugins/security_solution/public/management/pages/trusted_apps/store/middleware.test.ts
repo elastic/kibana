@@ -75,7 +75,7 @@ describe('middleware', () => {
   describe('refreshing list resource state', () => {
     it('refreshes the list when location changes and data gets outdated', async () => {
       const pagination = { index: 2, size: 50 };
-      const location = { page_index: 2, page_size: 50, show: undefined };
+      const location = { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' };
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -110,7 +110,7 @@ describe('middleware', () => {
 
     it('does not refresh the list when location changes and data does not get outdated', async () => {
       const pagination = { index: 2, size: 50 };
-      const location = { page_index: 2, page_size: 50, show: undefined };
+      const location = { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' };
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -136,7 +136,7 @@ describe('middleware', () => {
     it('refreshes the list when data gets outdated with and outdate action', async () => {
       const newNow = 222222;
       const pagination = { index: 0, size: 10 };
-      const location = { page_index: 0, page_size: 10, show: undefined };
+      const location = { page_index: 0, page_size: 10, show: undefined, view_type: 'grid' };
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -196,7 +196,7 @@ describe('middleware', () => {
           freshDataTimestamp: initialNow,
         },
         active: true,
-        location: { page_index: 2, page_size: 50, show: undefined },
+        location: { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' },
       });
 
       const infiniteLoopTest = async () => {
@@ -212,7 +212,7 @@ describe('middleware', () => {
     const entry = createSampleTrustedApp(3);
     const notFoundError = createServerApiError('Not Found');
     const pagination = { index: 0, size: 10 };
-    const location = { page_index: 0, page_size: 10, show: undefined };
+    const location = { page_index: 0, page_size: 10, show: undefined, view_type: 'grid' };
     const getTrustedAppsListResponse = createGetTrustedListAppsResponse(pagination, 500);
     const listView = createLoadedListViewWithPagination(initialNow, pagination, 500);
     const listViewNew = createLoadedListViewWithPagination(newNow, pagination, 500);
