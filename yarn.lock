@@ -1218,10 +1218,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@21.1.2":
-  version "21.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-21.1.2.tgz#da7e9c1025bf730a738b6ac6d7024d97dd2b5aa2"
-  integrity sha512-Uri+Xolgii7/mRSarfXTfA6X2JC76ILIxTPO8RlYdI44gzprJfUO7Aw5s8vVQke3x6Cu39a+9B0s6TY4GAaApQ==
+"@elastic/charts@23.1.0":
+  version "23.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.1.0.tgz#343c3c54a308a0a54a6dd3387854ef143e8a7c7f"
+  integrity sha512-pBXCRSGd8Kzg0r60vjuSoB+ngbEnJQG+kFI7h6BbLFodp3/F1vONVsFvqG58ZBAsCb85/M3s4w0gR7qXNobr3g==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -1229,6 +1229,7 @@
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
     d3-color "^1.4.0"
+    d3-interpolate "^1.4.0"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
     newtype-ts "^0.2.4"
