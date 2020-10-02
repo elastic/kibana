@@ -19,13 +19,10 @@ const log = new ToolingLog({
 log.info(`REPO_ROOT = ${REPO_ROOT}`);
 log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
 
-const INTEGRATION_TEST_ROOT = process.env.WORKSPACE
-  ? process.env.WORKSPACE
-  : `${REPO_ROOT}/../integration-test`;
-log.info(`integrationTestRoot = ${INTEGRATION_TEST_ROOT}`);
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
 
-// const stateFilePath = resolve(integrationTestRoot, '/qa/envvars.sh');
-const stateFilePath = `${INTEGRATION_TEST_ROOT}/qa/envvars.sh`;
+const stateFilePath = resolve(INTEGRATION_TEST_ROOT, 'qa/envvars.sh');
 log.info(`stateFilePath = ${stateFilePath}`);
 
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
