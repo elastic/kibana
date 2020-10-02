@@ -122,8 +122,8 @@ export async function installIndexPatterns(
       return;
     }
 
-    // get all dataset fields from all installed packages
-    const fields = await getAllDatasetFieldsByType(installedPackagesInfo, indexPatternType);
+    // get all data stream fields from all installed packages
+    const fields = await getAllDataStreamFieldsByType(installedPackagesInfo, indexPatternType);
 
     const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
     // create or overwrite the index pattern
@@ -135,23 +135,27 @@ export async function installIndexPatterns(
 }
 
 // loops through all given packages and returns an array
-// of all fields from all datasets matching datasetType
-export const getAllDatasetFieldsByType = async (
+// of all fields from all data streams matching data stream type
+export const getAllDataStreamFieldsByType = async (
   packages: RegistryPackage[],
-  datasetType: IndexPatternType
+  dataStreamType: IndexPatternType
 ): Promise<Fields> => {
-  const datasetsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
-    if (pkg.datasets) {
-      // filter out datasets by datasetType
-      const matchingDatasets = pkg.datasets.filter((dataset) => dataset.type === datasetType);
-      matchingDatasets.forEach((dataset) => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
+  const dataStreamsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
+    if (pkg.data_streams) {
+      // filter out data streams by data stream type
+      const matchingDataStreams = pkg.data_streams.filter(
+        (dataStream) => dataStream.type === dataStreamType
+      );
+      matchingDataStreams.forEach((dataStream) =>
+        acc.push(loadFieldsFromYaml(pkg, dataStream.path))
+      );
     }
     return acc;
   }, []);
 
-  // get all the datasets for each installed package into one array
-  const allDatasetFields: Fields[] = await Promise.all(datasetsPromises);
-  return allDatasetFields.flat();
+  // get all the data stream fields for each installed package into one array
+  const allDataStreamFields: Fields[] = await Promise.all(dataStreamsPromises);
+  return allDataStreamFields.flat();
 };
 
 // creates or updates index pattern
