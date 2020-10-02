@@ -50,13 +50,4 @@ describe('telemetry_core', () => {
   test('fetch', async () => {
     expect(await collector.fetch(callCluster)).toEqual(getCoreUsageDataReturnValue);
   });
-
-  test('formatForBulkUpload', async () => {
-    expect(collector.formatForBulkUpload!(getCoreUsageDataReturnValue)).toStrictEqual({
-      type: 'kibana_stats',
-      payload: {
-        core: getCoreUsageDataReturnValue,
-      },
-    });
-  });
 });

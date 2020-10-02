@@ -90,7 +90,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
-    const getcoreUsageData = () => this.coreUsageData!;
+    const getCoreUsageDataService = () => this.coreUsageData!;
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
@@ -103,6 +103,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       getSavedObjectsClient
     );
     registerCspCollector(usageCollection, coreSetup.http);
-    registerCoreUsageCollector(usageCollection, getcoreUsageData);
+    registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
   }
 }

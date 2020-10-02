@@ -25,7 +25,6 @@ import {
 } from '../../../../../core/server/core_usage_data/types';
 // telemetry_check is unable to check types which are re-exported, it only
 // works when pointed to the typescript file where the type was defined.
-import { KIBANA_STATS_TYPE } from '../../../common/constants';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -117,20 +116,6 @@ export function getCoreUsageCollector(
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();
-    },
-
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
-     */
-    formatForBulkUpload: (result) => {
-      return {
-        type: KIBANA_STATS_TYPE,
-        payload: {
-          core: result,
-        },
-      };
     },
   });
 }

@@ -145,5 +145,5 @@ export interface CoreUsageDataStart {
    * Internal API for collecting Core usage data
    * @internal
    * */
-  getCoreUsageData(): CoreUsageData | null;
+  getCoreUsageData(): CoreUsageData;
 }
