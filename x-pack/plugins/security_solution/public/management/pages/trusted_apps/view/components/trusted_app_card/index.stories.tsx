@@ -30,7 +30,7 @@ storiesOf('TrustedApps|TrustedAppCard', module)
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [
       {
-        field: 'process.executable.text',
+        field: 'process.executable.caseless',
         operator: 'included',
         type: 'match',
         value: '/some/path/on/file/system',
@@ -44,7 +44,7 @@ storiesOf('TrustedApps|TrustedAppCard', module)
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [
       {
-        field: 'process.executable.text',
+        field: 'process.executable.caseless',
         operator: 'included',
         type: 'match',
         value: '/some/path/on/file/system',
