@@ -339,7 +339,7 @@
     "@types/uuid": "^3.4.4",
     "@types/vinyl": "^2.0.4",
     "@types/vinyl-fs": "^2.4.11",
-    "@types/webpack": "^4.41.21",
+    "@types/webpack": "^4.41.3",
     "@types/webpack-env": "^1.15.2",
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^3.10.0",
