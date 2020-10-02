@@ -9,6 +9,7 @@
     "data"
   ],
   "requiredBundles": [
+    "kibanaUtils",
     "kibanaReact",
     "share",
     "charts",
