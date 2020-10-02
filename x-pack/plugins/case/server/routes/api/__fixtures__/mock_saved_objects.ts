@@ -94,6 +94,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         fields: [
           { key: 'issueType', value: 'Task' },
           { key: 'priority', value: 'High' },
+          { key: 'parent', value: null },
         ],
       },
       created_at: '2019-11-25T22:32:17.947Z',
@@ -135,6 +136,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         fields: [
           { key: 'issueType', value: 'Task' },
           { key: 'priority', value: 'High' },
+          { key: 'parent', value: null },
         ],
       },
       created_at: '2019-11-25T22:32:17.947Z',

@@ -75,7 +75,7 @@ describe('POST cases', () => {
           id: '123',
           name: 'Jira',
           type: '.jira',
-          fields: { issueType: 'Task', priority: 'High' },
+          fields: { issueType: 'Task', priority: 'High', parent: null },
         },
       },
     });
@@ -93,7 +93,7 @@ describe('POST cases', () => {
       id: '123',
       name: 'Jira',
       type: '.jira',
-      fields: { issueType: 'Task', priority: 'High' },
+      fields: { issueType: 'Task', priority: 'High', parent: null },
     });
   });
 

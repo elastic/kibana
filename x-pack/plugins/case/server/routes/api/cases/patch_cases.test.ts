@@ -111,7 +111,7 @@ describe('PATCH cases', () => {
           id: '123',
           name: 'My connector',
           type: '.jira',
-          fields: { issueType: 'Task', priority: 'High' },
+          fields: { issueType: 'Task', priority: 'High', parent: null },
         },
         created_at: '2019-11-25T22:32:17.947Z',
         created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
@@ -193,7 +193,7 @@ describe('PATCH cases', () => {
               id: '456',
               name: 'My connector 2',
               type: '.jira',
-              fields: { issueType: 'Bug', priority: 'Low' },
+              fields: { issueType: 'Bug', priority: 'Low', parent: null },
             },
             version: 'WzUsMV0=',
           },
@@ -213,7 +213,7 @@ describe('PATCH cases', () => {
       id: '456',
       name: 'My connector 2',
       type: '.jira',
-      fields: { issueType: 'Bug', priority: 'Low' },
+      fields: { issueType: 'Bug', priority: 'Low', parent: null },
     });
   });
 
