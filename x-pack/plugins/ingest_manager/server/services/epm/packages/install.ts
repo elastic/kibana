@@ -259,7 +259,7 @@ export async function installPackage({
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
+  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.data_streams);
 
   // add the package installation to the saved object.
   // if some installation already exists, just update install info
@@ -304,7 +304,7 @@ export async function installPackage({
 
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified
-  // per dataset and we should then save them
+  // per data stream and we should then save them
   await installILMPolicy(paths, callCluster);
 
   // installs versionized pipelines without removing currently installed ones
