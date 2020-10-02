@@ -116,7 +116,7 @@ Your form should look similar to this:
 [role="screenshot"]
 image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
 
-. To verify that the pipeline gives the expected outcome, click *Add documents*.
+. To test the pipeline to verify that it produces the expected results, click *Add documents*.
 
 . In the *Documents* tab, provide the following sample document for testing:
 +
