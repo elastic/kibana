@@ -104,15 +104,18 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       describedByIds={describedByIds}
       label={field.label}
     >
-      <EuiFlexGrid columns={4}>
+      <EuiFlexGrid columns={3}>
         {querySelectableConfig.isVisible && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="customRuleType"
               title={i18n.QUERY_TYPE_TITLE}
+              titleSize="xs"
               description={i18n.QUERY_TYPE_DESCRIPTION}
-              icon={<EuiIcon size="l" type="search" />}
+              icon={<EuiIcon size="xl" type="search" />}
               selectable={querySelectableConfig}
+              layout="horizontal"
+              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -121,6 +124,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             <EuiCard
               data-test-subj="machineLearningRuleType"
               title={i18n.ML_TYPE_TITLE}
+              titleSize="xs"
               description={
                 <MlCardDescription
                   subscriptionUrl={licensingUrl}
@@ -130,6 +134,8 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="machineLearningApp" />}
               isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
               selectable={mlSelectableConfig}
+              layout="horizontal"
+              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -138,9 +144,12 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             <EuiCard
               data-test-subj="thresholdRuleType"
               title={i18n.THRESHOLD_TYPE_TITLE}
+              titleSize="xs"
               description={i18n.THRESHOLD_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="indexFlush" />}
               selectable={thresholdSelectableConfig}
+              layout="horizontal"
+              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -149,9 +158,12 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             <EuiCard
               data-test-subj="eqlRuleType"
               title={i18n.EQL_TYPE_TITLE}
+              titleSize="xs"
               description={i18n.EQL_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="bullseye" />}
               selectable={eqlSelectableConfig}
+              layout="horizontal"
+              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -160,9 +172,12 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             <EuiCard
               data-test-subj="threatMatchRuleType"
               title={i18n.THREAT_MATCH_TYPE_TITLE}
+              titleSize="xs"
               description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="list" />}
               selectable={threatMatchSelectableConfig}
+              layout="horizontal"
+              textAlign="left"
             />
           </EuiFlexItem>
         )}
