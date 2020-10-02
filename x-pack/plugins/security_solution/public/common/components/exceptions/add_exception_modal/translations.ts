@@ -86,6 +86,6 @@ export const ADD_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
   'xpack.securitySolution.exceptions.addException.sequenceWarning',
   {
     defaultMessage:
-      'This rule is a sequence statement. The exception created will apply to all events in the sequence.',
+      "This rule's query contains an EQL sequence statement. The exception created will apply to all events in the sequence.",
   }
 );
