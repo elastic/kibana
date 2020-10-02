@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject, Subscription } from 'rxjs';
 import { TooltipValue } from '@elastic/charts';
 import { htmlIdGenerator } from '@elastic/eui';
-import { formatHumanReadableDateTime } from '../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';

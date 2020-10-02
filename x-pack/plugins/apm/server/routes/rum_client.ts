@@ -89,8 +89,8 @@ export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
 
     return getPageLoadDistBreakdown({
       setup,
-      minDuration: Number(minPercentile),
-      maxDuration: Number(maxPercentile),
+      minPercentile: Number(minPercentile),
+      maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
     });
@@ -177,12 +177,13 @@ export const rumLongTaskMetrics = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     const {
-      query: { urlQuery },
+      query: { urlQuery, percentile },
     } = context.params;
 
     return getLongTaskMetrics({
       setup,
       urlQuery,
+      percentile: percentile ? Number(percentile) : undefined,
     });
   },
 }));
