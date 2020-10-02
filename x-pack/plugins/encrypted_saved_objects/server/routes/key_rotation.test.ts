@@ -39,7 +39,7 @@ describe('Key rotation routes', () => {
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [rotateRouteConfig, rotateRouteHandler] = router.post.mock.calls.find(
-        ([{ path }]) => path === '/api/encrypted_saved_objects/rotate_key'
+        ([{ path }]) => path === '/api/encrypted_saved_objects/_rotate_key'
       )!;
 
       routeConfig = rotateRouteConfig;
@@ -86,7 +86,7 @@ describe('Key rotation routes', () => {
       const routeParamsMock = routeDefinitionParamsMock.create();
       defineKeyRotationRoutes(routeParamsMock);
       const [, rotateRouteHandler] = routeParamsMock.router.post.mock.calls.find(
-        ([{ path }]) => path === '/api/encrypted_saved_objects/rotate_key'
+        ([{ path }]) => path === '/api/encrypted_saved_objects/_rotate_key'
       )!;
 
       await expect(
@@ -161,7 +161,7 @@ describe('Key rotation routes', () => {
         options: { body: { total: 3, successful: 6, failed: 0 } },
       });
 
-      // And consequent requests resolve properly too.
+      // And subsequent requests resolve properly too.
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
         status: 200,
         payload: { total: 3, successful: 6, failed: 0 },

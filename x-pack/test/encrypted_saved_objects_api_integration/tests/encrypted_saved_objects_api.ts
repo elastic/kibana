@@ -13,6 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const security = getService('security');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
   const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
@@ -539,6 +540,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('key rotation', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
       const savedObjectsEncryptedWithLegacyKeys: Array<[string, string, string[], boolean]> = [
         [SAVED_OBJECT_WITH_SECRET_TYPE, 'cd9272b2-6a15-4295-bb7b-15f6347e267b', ['default'], false],
         [
@@ -568,23 +570,30 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       ];
 
+      const KIBANA_ADMIN_USERNAME = 'admin';
+      const KIBANA_ADMIN_PASSWORD = 'changeme';
       before(async () => {
+        await security.user.create(KIBANA_ADMIN_USERNAME, {
+          password: KIBANA_ADMIN_PASSWORD,
+          roles: ['kibana_admin'],
+          full_name: 'a kibana admin',
+        });
         await esArchiver.load('key_rotation');
       });
 
       after(async () => {
         await esArchiver.unload('key_rotation');
+        await security.user.delete('admin');
       });
 
       it('#get can properly retrieve objects encrypted with the legacy keys', async () => {
         // Hidden objects cannot be retrieved with standard Saved Objects APIs.
-        for (const [type, id, namespaces, hidden] of savedObjectsEncryptedWithLegacyKeys.filter(
+        for (const [type, id, namespaces] of savedObjectsEncryptedWithLegacyKeys.filter(
           ([, , , hiddenSavedObject]) => !hiddenSavedObject
         )) {
-          const url = hidden
-            ? `/api/saved_objects/${type}/${id}`
-            : `/api/saved_objects/${type}/${id}`;
-          const { body: decryptedResponse } = await supertest.get(url).expect(200);
+          const { body: decryptedResponse } = await supertest
+            .get(`/api/saved_objects/${type}/${id}`)
+            .expect(200);
 
           expect(decryptedResponse.namespaces.sort()).to.eql(namespaces);
           expect(decryptedResponse.attributes).to.eql({
@@ -612,10 +621,19 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
+      it('non-super user cannot rotate encryption key', async () => {
+        await supertestWithoutAuth
+          .post('/api/encrypted_saved_objects/_rotate_key')
+          .set('kbn-xsrf', 'xxx')
+          .auth(KIBANA_ADMIN_USERNAME, KIBANA_ADMIN_PASSWORD)
+          .send()
+          .expect(404);
+      });
+
       // Since this test re-encrypts objects it should always go last in this suite.
-      it('saved objects can be properly re-encrypted', async () => {
+      it('encryption key can be properly rotated by the superuser', async () => {
         await supertest
-          .post('/api/encrypted_saved_objects/rotate_key')
+          .post('/api/encrypted_saved_objects/_rotate_key')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200, { total: 6, successful: 6, failed: 0 });

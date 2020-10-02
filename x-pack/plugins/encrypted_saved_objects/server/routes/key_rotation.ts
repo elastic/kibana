@@ -25,7 +25,7 @@ export function defineKeyRotationRoutes({
   let rotationInProgress = false;
   router.post(
     {
-      path: '/api/encrypted_saved_objects/rotate_key',
+      path: '/api/encrypted_saved_objects/_rotate_key',
       validate: {
         query: schema.object({
           batchSize: schema.number({

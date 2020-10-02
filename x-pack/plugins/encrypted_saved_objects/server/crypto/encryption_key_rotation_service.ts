@@ -85,7 +85,7 @@ export class EncryptionKeyRotationService {
 
     const result = { total: 0, successful: 0, failed: 0 };
     if (registeredSavedObjectTypes.length === 0) {
-      this.options.logger.debug(
+      this.options.logger.info(
         type
           ? `Saved Object type "${type}" is not registered, encryption key rotation is not needed.`
           : 'There are no registered Saved Object types that can have encrypted attributes, encryption key rotation is not needed.'
@@ -93,7 +93,7 @@ export class EncryptionKeyRotationService {
       return result;
     }
 
-    this.options.logger.debug(
+    this.options.logger.info(
       `Saved Objects with the following types [${registeredSavedObjectTypes}] will be processed.`
     );
 
@@ -201,7 +201,7 @@ export class EncryptionKeyRotationService {
       }
     }
 
-    this.options.logger.debug(
+    this.options.logger.info(
       `Encryption key rotation is completed. ${result.successful} objects out ouf ${result.total} were successfully re-encrypted with the primary encryption key and ${result.failed} objects failed.`
     );
 
