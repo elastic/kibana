@@ -383,7 +383,6 @@ export class BaseAlert {
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }
-    globalState.push('refreshInterval:(pause:!f,value:10000),time:(from:now-1h,to:now)');
     return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }
