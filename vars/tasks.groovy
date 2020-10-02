@@ -82,7 +82,7 @@ def functionalXpack(Map params = [:]) {
 
   task {
     kibanaPipeline.buildXpack(10)
-
+/*
     if (config.ciGroups) {
       def ciGroups = 1..10
       tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
@@ -102,7 +102,7 @@ def functionalXpack(Map params = [:]) {
 
     if (config.savedObjectsFieldMetrics) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
-    }
+    } */
 
     whenChanged([
       'x-pack/plugins/security_solution/',
