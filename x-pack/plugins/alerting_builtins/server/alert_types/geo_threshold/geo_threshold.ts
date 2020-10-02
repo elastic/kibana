@@ -65,7 +65,12 @@ export function transformResults(
         });
       })
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .sortedUniqBy('entityName')
+      .reduce((accu, el) => {
+        if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
+          accu.push(el);
+        }
+        return accu;
+      }, [])
       .value()
   );
 }
@@ -288,7 +293,12 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     const prevLocationArr = _.chain(currLocationArr)
       .concat(state.prevLocationArr)
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .sortedUniqBy('entityName')
+      .reduce((accu, el) => {
+        if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
+          accu.push(el);
+        }
+        return accu;
+      }, [])
       .value();
 
     return {
