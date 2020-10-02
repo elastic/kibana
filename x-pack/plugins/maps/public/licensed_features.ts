@@ -31,17 +31,16 @@ export const getLicenseId = () => licenseId;
 export const getIsGoldPlus = () => isGoldPlus;
 
 export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) {
-  // eslint-disable-next-line guard-for-in
-  for (const licensedFeature in LICENSED_FEATURES) {
+  for (const licensedFeature of Object.values(LICENSED_FEATURES)) {
     licensingPlugin.featureUsage.register(
-      LICENCED_FEATURES_DETAILS[LICENSED_FEATURES[licensedFeature]].name,
-      LICENCED_FEATURES_DETAILS[LICENSED_FEATURES[licensedFeature]].license
+      LICENCED_FEATURES_DETAILS[licensedFeature].name,
+      LICENCED_FEATURES_DETAILS[licensedFeature].license
     );
   }
 }
 
 let licensingPluginStart: LicensingPluginStart;
-export function setLicensingPluginStart(licensingPlugin) {
+export function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
   licensingPluginStart = licensingPlugin;
   licensingPluginStart.license$.subscribe((license: ILicense) => {
     const gold = license.check(APP_ID, 'gold');
@@ -50,11 +49,13 @@ export function setLicensingPluginStart(licensingPlugin) {
   });
 }
 
-export function notifyLicensedFeatureUsage(feature: LICENSED_FEATURES) {
+export function notifyLicensedFeatureUsage(licensedFeature: LICENSED_FEATURES) {
   if (!licensingPluginStart) {
     // eslint-disable-next-line no-console
     console.error('May not call notifyLicensedFeatureUsage before plugin start');
     return;
   }
-  licensingPluginStart.featureUsage.notifyUsage(LICENCED_FEATURES_DETAILS[feature].name);
+  licensingPluginStart.featureUsage.notifyUsage(
+    LICENCED_FEATURES_DETAILS[LICENSED_FEATURES[licensedFeature]].name
+  );
 }
