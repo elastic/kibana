@@ -1280,7 +1280,7 @@
         ]
       }
     },
-    "/fleet/agents/setup": {
+    "/agents/setup": {
       "get": {
         "summary": "Agents setup - Info",
         "tags": [],
