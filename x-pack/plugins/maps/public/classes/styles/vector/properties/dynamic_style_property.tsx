@@ -397,7 +397,7 @@ export class DynamicStyleProperty<T>
       source: mbSourceId,
       id: undefined,
     };
-    const featureState: Record<string, null | undefined | number | boolean | string> = {};
+    const featureState: Record<string, RawValue> = {};
     const targetMbName = this.getMbPropertyName();
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
